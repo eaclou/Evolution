@@ -2,6 +2,7 @@
 
 public class VegetationManager {
     SimulationManager simManager => SimulationManager.instance;
+    UIManager uiManager => UIManager.instance;
 
     public SettingsManager settingsRef;
     public SimResourceManager resourceManagerRef;
@@ -980,12 +981,12 @@ public class VegetationManager {
         float brushIntensityMult = 1f;
         if(isBrushActive) {  // Set from uiManager
 
-            if (simManager.uiManager.brushesUI.selectedEssenceSlot.kingdomID == 0) {
+            if (uiManager.brushesUI.selectedEssenceSlot.kingdomID == 0) {
                 brushDecomposersOn = 1f;
                 brushIntensityMult = 0.2f;
             }
-            else if (simManager.uiManager.brushesUI.selectedEssenceSlot.kingdomID == 1) {
-                if (simManager.uiManager.brushesUI.selectedEssenceSlot.tierID == 0) {
+            else if (uiManager.brushesUI.selectedEssenceSlot.kingdomID == 1) {
+                if (uiManager.brushesUI.selectedEssenceSlot.tierID == 0) {
                     brushAlgaeOn = 1f;
                     
                     brushIntensityMult = 0.2f;
@@ -994,8 +995,8 @@ public class VegetationManager {
                     //brushPlantsOn = 1f;
                 }
             }
-            else if (simManager.uiManager.brushesUI.selectedEssenceSlot.kingdomID == 4) {
-                if (simManager.uiManager.brushesUI.selectedEssenceSlot.slotID == 0) {  // MINERALS
+            else if (uiManager.brushesUI.selectedEssenceSlot.kingdomID == 4) {
+                if (uiManager.brushesUI.selectedEssenceSlot.slotID == 0) {  // MINERALS
                     brushMineralsOn = 1f;  
                     brushIntensityMult = 0.1f;
                     Debug.Log("// minerals brush on!");

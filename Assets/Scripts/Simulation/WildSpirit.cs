@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 public class WildSpirit : MonoBehaviour {
-    public UIManager uiManagerRef;
+    UIManager uiManagerRef => UIManager.instance;
 
     public GameObject protoSpiritClickColliderGO;
         

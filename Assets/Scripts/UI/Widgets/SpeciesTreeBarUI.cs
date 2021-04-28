@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
 public class SpeciesTreeBarUI : MonoBehaviour {
+    UIManager uiManager => UIManager.instance;
 
     //public AllSpeciesTreePanelUI allSpeciesTreePanelUI;
     public int index;
@@ -14,6 +15,6 @@ public class SpeciesTreeBarUI : MonoBehaviour {
 
     // Updates focusedCandidate in uiManager 
     public void ClickedThisButton() {
-        SimulationManager.instance.uiManager.SetSelectedSpeciesUI(speciesID);        
+        uiManager.SetSelectedSpeciesUI(speciesID);        
     }
 }

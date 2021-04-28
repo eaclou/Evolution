@@ -1,13 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class KnowledgeUI : MonoBehaviour {
     SimulationManager simulationManager => SimulationManager.instance;
     TheRenderKing theRenderKing => TheRenderKing.instance;
-
-    public UIManager uiManagerRef;
+    UIManager uiManager => UIManager.instance;
+    UIManager uiManagerRef => UIManager.instance;
+    
     public bool isUnlocked;
     public bool isOpen;    
     public Image imageKnowledgeButtonMIP;  // superscript button over watcher toolbar Button
@@ -107,7 +106,7 @@ public class KnowledgeUI : MonoBehaviour {
         //animatorKnowledgeUI.SetBool("_IsOpen", true);
     }
 
-    private void UpdateUI(TrophicLayersManager layerManager) {
+    private void UpdateUI() {
         //TrophicSlot slotRef = uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
 
         //panelKnowledgeInfoWorld.SetActive(false);
@@ -359,11 +358,10 @@ public class KnowledgeUI : MonoBehaviour {
     }
 
     public void UpdateKnowledgePanelUI(TrophicLayersManager layerManager) {
-
-
+    
         panelKnowledgeSpiritBase.SetActive(true); // && uiManagerRef.worldSpiritHubUI.isOpen);
         //if(isOpen) {
-        UpdateUI(layerManager);
+        UpdateUI();
         //}        
     }
 
@@ -395,7 +393,7 @@ public class KnowledgeUI : MonoBehaviour {
     public string GetSpeciesDescriptionString(SimulationManager simManager) {
         string str = "";
 
-        TrophicSlot slot = simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot;
+        TrophicSlot slot = uiManager.worldSpiritHubUI.selectedWorldSpiritSlot;
 
         if(slot.kingdomID == 0) {
             str = "Bacterial and Fungal organisms that recycle vital nutrients."; //   \n\nUses: <b><color=#A97860FF>Waste</color></b>, <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#FBC653FF>Nutrients</color></b>";

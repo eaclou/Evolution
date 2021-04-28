@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
 public class TrophicLayersManager {
+    UIManager uiManager => UIManager.instance;
 
     private bool decomposersOn = false;  // first pass -- temporary?
     private bool algaeOn = false;
@@ -57,7 +58,7 @@ public class TrophicLayersManager {
     Color colorDecomposersLayer => lookup.colorDecomposersLayer;
 
 
-	public TrophicLayersManager(UIManager uiManagerRef) {  // constructor
+	public TrophicLayersManager() {  // constructor
         decomposersOn = true;  // first pass -- temporary?
         algaeOn = true;
         plantsOn = true;
@@ -119,8 +120,8 @@ public class TrophicLayersManager {
         //isSelectedTrophicSlot = true;
 
         // SET INITIAL SELECTED!!!!!
-        uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot = kingdomTerrain.trophicTiersList[0].trophicSlots[1];
-        uiManagerRef.brushesUI.selectedEssenceSlot = kingdomTerrain.trophicTiersList[0].trophicSlots[1];
+        uiManager.worldSpiritHubUI.selectedWorldSpiritSlot = kingdomTerrain.trophicTiersList[0].trophicSlots[1];
+        uiManager.brushesUI.selectedEssenceSlot = kingdomTerrain.trophicTiersList[0].trophicSlots[1];
     }
     public void CreateTrophicSlotSpecies(SimulationManager simManagerRef, TrophicSlot addedSlot, Vector2 spawnPos, int timeStep) {
         

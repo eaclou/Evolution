@@ -3,10 +3,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class TheCursorCzar : Singleton<TheCursorCzar> {
-    SimulationManager simulationManager => SimulationManager.instance;
     CameraManager cameraManager => CameraManager.instance;
-
-    public UIManager uiManagerRef;
+    UIManager uiManagerRef => UIManager.instance;
 
     public bool _IsHoverClickableSpirit;
 

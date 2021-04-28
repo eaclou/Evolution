@@ -6,8 +6,8 @@ using UnityEngine.UI;
 public class WatcherUI : MonoBehaviour {
     SimulationManager simulationManager => SimulationManager.instance;
     CameraManager cameraManager => CameraManager.instance;
+    UIManager uiManagerRef => UIManager.instance;
 
-    public UIManager uiManagerRef;
     public bool isUnlocked;
     public bool isOpen;
     public bool isDim;

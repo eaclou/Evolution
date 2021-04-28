@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class WorldSpiritHubUI : MonoBehaviour {
-    public UIManager uiManagerRef;
+    UIManager uiManagerRef => UIManager.instance;
     //public PanelPendingClickPromptUI panelPendingClickPrompt;
 
     public bool isUnlocked;

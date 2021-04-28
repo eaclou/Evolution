@@ -8,7 +8,8 @@ using Random = UnityEngine.Random;
 // The meat of the Game, controls the primary simulation/core logic gameplay Loop
 public class SimulationManager : Singleton<SimulationManager> 
 {
-    public UIManager uiManager;
+    UIManager uiManager => UIManager.instance;
+    
     public QualitySettingData qualitySettings;
 
     public LoadingPanelUI loadingPanel;
@@ -307,6 +308,7 @@ public class SimulationManager : Singleton<SimulationManager>
         Debug.Log("LOADING COMPLETE - Starting WarmUp!");
     }
 
+    // WPP 4/27: delegated
     /*
     private void InitializeGraphData() {
         graphDataGlobalNutrients = new GraphData(uiManager.globalResourcesUI.knowledgeGraphNutrientsMat);  // testing!!!!
@@ -360,7 +362,7 @@ public class SimulationManager : Singleton<SimulationManager>
         globalGraphData.Initialize(uiManager.globalResourcesUI);
 
         settingsManager.Initialize();
-        trophicLayersManager = new TrophicLayersManager(uiManager);
+        trophicLayersManager = new TrophicLayersManager();
         simEventsManager = new SimEventsManager(this);
         simResourceManager = new SimResourceManager();
         //agentsManager = new AgentsManager();
@@ -379,7 +381,7 @@ public class SimulationManager : Singleton<SimulationManager>
     
     private void LoadingInitializePopulationGenomes() {
         masterGenomePool = new MasterGenomePool();
-        masterGenomePool.FirstTimeInitialize(24, settingsManager.mutationSettingsVertebrates, uiManager);   
+        masterGenomePool.FirstTimeInitialize(24, settingsManager.mutationSettingsVertebrates);   
 
         // EGGSACKS:
         eggSackGenomePoolArray = new EggSackGenome[numEggSacks];
@@ -519,8 +521,8 @@ public class SimulationManager : Singleton<SimulationManager>
         statsBodySizesEachGenerationList.Add(Vector4.one * 0.0001f);
         statsNutrientsEachGenerationList.Add(Vector4.one * 0.0001f);
         statsMutationEachGenerationList.Add(0.0001f);
-        */
     //}
+    */
     
     /*private void LoadingLoadGenepoolFiles() {
         

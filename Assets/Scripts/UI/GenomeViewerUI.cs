@@ -4,8 +4,7 @@ using UnityEngine.UI;
 public class GenomeViewerUI : MonoBehaviour {
     SimulationManager simulationManager => SimulationManager.instance;
     CameraManager cameraManager => CameraManager.instance;
-
-    public UIManager uiManagerRef;
+    UIManager uiManagerRef => UIManager.instance;
 
     public Text textFocusedCandidate;
     public Text textGenomeOverviewA;

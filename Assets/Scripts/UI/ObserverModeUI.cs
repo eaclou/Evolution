@@ -4,8 +4,9 @@ using UnityEngine.EventSystems;
 
 public class ObserverModeUI : MonoBehaviour
 {
+    UIManager manager => UIManager.instance;
+
     public new bool enabled;
-    public UIManager manager;
     public GameObject panelObserverMode;
     public WatcherUI watcherUI;
     public DebugPanelUI debugPanelUI;

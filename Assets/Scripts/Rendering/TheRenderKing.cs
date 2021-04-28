@@ -9,6 +9,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     TheCursorCzar theCursorCzar => TheCursorCzar.instance;
     SimulationManager simManager => SimulationManager.instance;
     CameraManager cameraManager => CameraManager.instance;
+    UIManager uiManager => UIManager.instance;
 
     // SET IN INSPECTOR!!!::::
     public EnvironmentFluidManager fluidManager;
@@ -1095,11 +1096,11 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             Vector4 hue = Vector4.one * 0.695f;
             if (simManager.agentsArray[i].candidateRef != null) {
 
-                if (simManager.agentsArray[i].candidateRef.speciesID == simManager.uiManager.focusedCandidate.speciesID) {
+                if (simManager.agentsArray[i].candidateRef.speciesID == uiManager.focusedCandidate.speciesID) {
                     hue = new Vector4(1f, 1f, 0f, 1f);
                     colorInjectionStrokeDataArray[baseIndex + i].scale = Vector2.one * 5f;
                 }
-                if (simManager.agentsArray[i].candidateRef.candidateID == simManager.uiManager.focusedCandidate.candidateID) {
+                if (simManager.agentsArray[i].candidateRef.candidateID == uiManager.focusedCandidate.candidateID) {
                     hue = new Vector4(1f, 1f, 1f, 1f);
                     colorInjectionStrokeDataArray[baseIndex + i].scale = Vector2.one * 10f;
                 }
@@ -1930,7 +1931,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         computeShaderSpiritBrush.SetFloat("_DeltaTime", fluidManager.deltaTime);
         computeShaderSpiritBrush.SetFloat("_InvGridScale", fluidManager.invGridScale);
         computeShaderSpiritBrush.SetFloat("_Time", Time.realtimeSinceStartup);
-        computeShaderSpiritBrush.SetVector("_ParticleColor", simManager.uiManager.worldSpiritHubUI.curIconColor);
+        computeShaderSpiritBrush.SetVector("_ParticleColor", uiManager.worldSpiritHubUI.curIconColor);
         computeShaderSpiritBrush.SetFloat("_ParticleSpawnRadius", (0.515f + isBrushing * 0.075f) * 5.3065f);
         computeShaderSpiritBrush.SetVector("_CursorWorldPosition", new Vector4(theCursorCzar.cursorParticlesWorldPos.x,
                                                                               theCursorCzar.cursorParticlesWorldPos.y,
@@ -2296,7 +2297,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         //GRAB FROM UI???? positions animated there?
 
         simData.biteAnimCycle = 0f; // (Time.realtimeSinceStartup * 1f) % 1f;
-        bool isDead = !simManager.uiManager.focusedCandidate.isBeingEvaluated;
+        bool isDead = !uiManager.focusedCandidate.isBeingEvaluated;
         if (isDead) {
             simData.worldPos = Vector3.one * 128f * 0.034f;
             float angle = Mathf.Cos(0f * 0.67f) * 2f;
@@ -2308,7 +2309,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             simData.embryoPercentage = embryo;
             simData.growthPercentage = 1.5f * 1.5f;
             float decay = 0f;
-            if (simManager.uiManager.focusedCandidate.allEvaluationsComplete) {
+            if (uiManager.focusedCandidate.allEvaluationsComplete) {
                 decay = 0.25f;
             }
             simData.decayPercentage = decay;
@@ -2658,8 +2659,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         //cmdBufferFluidColor.Blit(fluidManager.initialDensityTex, fluidManager._SourceColorRT);
         //cmdBufferFluidColor.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidBackgroundColorMat); // Simple unlit Texture shader -- wysiwyg
 
-        if (simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == 1) {
-            if (simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 1) {
+        if (uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == 1) {
+            if (uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 1) {
 
                 algaeParticleColorInjectMat.SetPass(0);
                 algaeParticleColorInjectMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
@@ -2670,8 +2671,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
             }
         }
-        else if (simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == 2) {
-            if (simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 0) {
+        else if (uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == 2) {
+            if (uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 0) {
 
                 zooplanktonParticleColorInjectMat.SetPass(0);
                 zooplanktonParticleColorInjectMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
@@ -2732,7 +2733,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         // Draw Solid Land boundaries:
 
         // Get brush:
-        CreationBrush brushData = simManager.uiManager.brushesUI.creationBrushesArray[simManager.uiManager.brushesUI.curCreationBrushIndex];
+        CreationBrush brushData = uiManager.brushesUI.creationBrushesArray[uiManager.brushesUI.curCreationBrushIndex];
         float scale = Mathf.Lerp(1f, 25f, Mathf.Clamp01(baronVonWater.camDistNormalized * 1.35f)) * brushData.baseScale;
         float brushIntensity = 1f * brushData.baseAmplitude;
 
@@ -3524,7 +3525,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             plantParticleDisplayMat.SetInt("_HoverParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index));
             //Debug.Log("_SelectedParticleIndex: " + Mathf.RoundToInt(simManager.vegetationManager.selectedPlantParticleIndex).ToString() + ", _HoverParticleIndex: " + Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index).ToString());
             plantParticleDisplayMat.SetFloat("_IsSelected", isSelectedPlant); // isSelected);
-            plantParticleDisplayMat.SetFloat("_IsHover", simManager.uiManager.isPlantParticleHighlight * isHighlight); // isHighlight); // isHover);
+            plantParticleDisplayMat.SetFloat("_IsHover", uiManager.isPlantParticleHighlight * isHighlight); // isHighlight); // isHover);
             plantParticleDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
             plantParticleDisplayMat.SetVector("_FogColor", simManager.fogColor);
             plantParticleDisplayMat.SetVector("_SunDir", sunDirection);
@@ -3610,8 +3611,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             animalParticleDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(simManager.zooplanktonManager.selectedAnimalParticleIndex));
             animalParticleDisplayMat.SetInt("_ClosestParticleID", Mathf.RoundToInt(simManager.zooplanktonManager.closestZooplanktonToCursorIndex));
             animalParticleDisplayMat.SetFloat("_IsSelected", isSelectedZoop);// isSelectedA);
-            animalParticleDisplayMat.SetFloat("_IsHover", simManager.uiManager.isZooplanktonHighlight * isHighlight); // isHighlight); // isHoverA); // isHoverA);
-            animalParticleDisplayMat.SetFloat("_IsHighlight", simManager.uiManager.isZooplanktonHighlight * isHighlight); // isHighlight); // isHighlight);
+            animalParticleDisplayMat.SetFloat("_IsHover", uiManager.isZooplanktonHighlight * isHighlight); // isHighlight); // isHoverA); // isHoverA);
+            animalParticleDisplayMat.SetFloat("_IsHighlight", uiManager.isZooplanktonHighlight * isHighlight); // isHighlight); // isHighlight);
             animalParticleDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             animalParticleDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
             animalParticleDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized); 
@@ -3760,7 +3761,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         baronVonTerrain.computeShaderTerrainGeneration.SetVector("_WorldSpaceCameraPosition", new Vector4(mainRenderCam.transform.position.x, mainRenderCam.transform.position.y, mainRenderCam.transform.position.z, 0f));
 
-        baronVonTerrain.computeShaderTerrainGeneration.SetInt("_ChannelID", simManager.uiManager.brushesUI.selectedBrushLinkedSpiritTerrainLayer); // simManager.trophicLayersManager.selectedTrophicSlotRef.slotID); // 
+        baronVonTerrain.computeShaderTerrainGeneration.SetInt("_ChannelID", uiManager.brushesUI.selectedBrushLinkedSpiritTerrainLayer); // simManager.trophicLayersManager.selectedTrophicSlotRef.slotID); // 
         if (on) {  // Actively brushing this frame
         }
         else {

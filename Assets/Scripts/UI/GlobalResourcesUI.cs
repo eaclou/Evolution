@@ -3,7 +3,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class GlobalResourcesUI : MonoBehaviour {
-    public UIManager uiManagerRef;
+    UIManager uiManagerRef => UIManager.instance;
+    
     public bool isUnlocked;
     public bool isOpen;
     public Text textGlobalMass;

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Playcraft;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,7 +9,7 @@ public enum ToolType {
     Stir
 }
 
-public class UIManager : MonoBehaviour {
+public class UIManager : Singleton<UIManager> {
 
     #region attributes
     SimulationManager simulationManager => SimulationManager.instance;

@@ -19,7 +19,7 @@ public class TreeOfLifeManager {
     public float camScale = 1f;
     public float treeOfLifeScale = 1f;
     
-	public TreeOfLifeManager(GameObject anchorGO, UIManager uiManagerRef) { //, Camera renderCamera) {
+	public TreeOfLifeManager(GameObject anchorGO) { //, Camera renderCamera) {
         treeOfLifeAnchorGO = anchorGO;        
     }
 

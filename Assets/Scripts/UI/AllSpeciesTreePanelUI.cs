@@ -16,7 +16,7 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
 
     SimulationManager simulationManager => SimulationManager.instance;
     MasterGenomePool masterGenomePool => simulationManager.masterGenomePool;
-    UIManager uiManagerRef => simulationManager.uiManager;
+    UIManager uiManagerRef => UIManager.instance;
 
     public void Set(bool value) {
         panelSpeciesTree.SetActive(value);        

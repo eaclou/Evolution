@@ -4,11 +4,9 @@ using UnityEngine.UI;
 
 public class SpeciesOverviewUI : MonoBehaviour {
     SimulationManager simulationManager => SimulationManager.instance;
-    
+    UIManager uiManagerRef => UIManager.instance;
     Lookup lookup => Lookup.instance;
     GameObject genomeIcon => lookup.genomeIcon;
-
-    public UIManager uiManagerRef;
 
     //private bool isFoundingGenomeSelected = false;
     //private bool isRepresentativeGenomeSelected = false;
@@ -214,13 +212,13 @@ public class SpeciesOverviewUI : MonoBehaviour {
         uiManagerRef.panelLeaderboardGenomes.GetComponent<Image>().color = new Color(hue.x, hue.y, hue.z);
         // Current Genepool:
         foreach (Transform child in uiManagerRef.panelLeaderboardGenomes.transform) {
-             GameObject.Destroy(child.gameObject);
+             Destroy(child.gameObject);
         }
         for(int i = 0; i < Mathf.Min(pool.candidateGenomesList.Count, 24); i++) {
             GameObject tempObj = Instantiate(genomeIcon, new Vector3(0, 0, 0), Quaternion.identity);
             tempObj.transform.SetParent(uiManagerRef.panelLeaderboardGenomes.transform, false);
             GenomeButtonPrefabScript buttonScript = tempObj.GetComponent<GenomeButtonPrefabScript>();
-            buttonScript.UpdateButtonPrefab(uiManagerRef, SpeciesOverviewUI.SelectionGroup.Candidates, i);
+            buttonScript.UpdateButtonPrefab(SelectionGroup.Candidates, i);
 
             CandidateAgentData iCand = pool.candidateGenomesList[i];
             UpdateGenomeButton(pool, iCand, buttonScript.GetComponent<Button>());
@@ -230,13 +228,13 @@ public class SpeciesOverviewUI : MonoBehaviour {
     private void RebuildGenomeButtonsLineage(SpeciesGenomePool pool) {
         // Hall of fame genomes (checkpoints .. every 50 years?)
         foreach (Transform child in uiManagerRef.panelHallOfFameGenomes.transform) {
-             GameObject.Destroy(child.gameObject);
+             Destroy(child.gameObject);
         }
         for(int i = 0; i < pool.hallOfFameGenomesList.Count; i++) {
             GameObject tempObj = Instantiate(genomeIcon, new Vector3(0, 0, 0), Quaternion.identity);
             tempObj.transform.SetParent(uiManagerRef.panelHallOfFameGenomes.transform, false);
             GenomeButtonPrefabScript buttonScript = tempObj.GetComponent<GenomeButtonPrefabScript>();
-            buttonScript.UpdateButtonPrefab(uiManagerRef, SpeciesOverviewUI.SelectionGroup.HallOfFame, i);
+            buttonScript.UpdateButtonPrefab(SelectionGroup.HallOfFame, i);
 
             CandidateAgentData iCand = pool.hallOfFameGenomesList[i];
             UpdateGenomeButton(pool, iCand, buttonScript.GetComponent<Button>());

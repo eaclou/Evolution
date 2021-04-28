@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class SimEventComponent : MonoBehaviour {
+    UIManager uiManagerRef => UIManager.instance;
 
     public int index = -1;
     public Text textEventName;
@@ -11,10 +12,7 @@ public class SimEventComponent : MonoBehaviour {
     public Image imageBG;
     public bool isSelected = false;
 
-    public UIManager uiManagerRef;
-
-	public void UpdateSimEventPanel(UIManager uiManager, SimEventData data, int slotIndex) {
-        uiManagerRef = uiManager;
+	public void UpdateSimEventPanel(SimEventData data, int slotIndex) {
         index = slotIndex;
 
         textEventName.text = data.name;

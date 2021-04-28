@@ -4,7 +4,8 @@ using UnityEngine.UI;
 // Rename?
 public class PanelNotificationsUI : MonoBehaviour
 {
-    [SerializeField] UIManager manager;
+    UIManager manager => UIManager.instance;
+    
     [SerializeField] Text text;
     [SerializeField] Image image;
     

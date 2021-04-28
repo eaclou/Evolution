@@ -5,8 +5,8 @@ public class DebugPanelUI : MonoBehaviour {
     SimulationManager simulationManager => SimulationManager.instance;
     TheRenderKing theRenderKing => TheRenderKing.instance;
     CameraManager cameraManager => CameraManager.instance;
-
-    public UIManager uiManagerRef;
+    UIManager uiManagerRef => UIManager.instance;
+    
     public bool isOpen;
     public GameObject panelDebug;
 

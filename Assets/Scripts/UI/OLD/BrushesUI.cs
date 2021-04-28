@@ -4,7 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class BrushesUI : MonoBehaviour {
-    public UIManager uiManagerRef;
+    UIManager uiManagerRef => UIManager.instance;
+    
     public bool isUnlocked;
     public bool isOpen;
     //public bool isBrushSelected;

@@ -4,6 +4,7 @@ using UnityEngine.UI;
 public class GenomeButtonPrefabScript : MonoBehaviour {
     SimulationManager simulationManager => SimulationManager.instance;
     CameraManager cameraManager => CameraManager.instance;
+    UIManager uiManagerRef => UIManager.instance;
 
     public int index = -1;
     private SpeciesOverviewUI.SelectionGroup group;
@@ -12,10 +13,7 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
     public Image imageBG;
     public bool isSelected = false;
 
-    public UIManager uiManagerRef;
-
-	public void UpdateButtonPrefab(UIManager uiManager, SpeciesOverviewUI.SelectionGroup grp, int slotIndex) {
-        uiManagerRef = uiManager;
+	public void UpdateButtonPrefab(SpeciesOverviewUI.SelectionGroup grp, int slotIndex) {
         index = slotIndex;
         group = grp;
 

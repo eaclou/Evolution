@@ -3,7 +3,8 @@ using UnityEngine.UI;
 
 public class BigBangPanelUI : MonoBehaviour
 {
-    public UIManager manager;
+    UIManager manager => UIManager.instance;
+    
     public GameObject panelBigBang;
     //public WorldSpiritHubUI worldSpiritHubUI;
     public Image imageBigBangStrokes01;

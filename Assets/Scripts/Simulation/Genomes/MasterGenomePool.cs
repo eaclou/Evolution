@@ -25,13 +25,14 @@ public class MasterGenomePool {
 
     public List<int> debugRecentlyDeletedCandidateIDsList;
 
-    PanelNotificationsUI panelPendingClickPrompt => SimulationManager.instance.uiManager.panelPendingClickPrompt;
+    UIManager uiManager => UIManager.instance;
+    PanelNotificationsUI panelPendingClickPrompt => uiManager.panelPendingClickPrompt;
    
     public MasterGenomePool() {
         
     }
 
-    public void FirstTimeInitialize(int numAgentGenomes, MutationSettings mutationSettingsRef, UIManager uiManagerRef) {
+    public void FirstTimeInitialize(int numAgentGenomes, MutationSettings mutationSettingsRef) {
         debugRecentlyDeletedCandidateIDsList = new List<int>();
 
         nextCandidateIndex = 0;

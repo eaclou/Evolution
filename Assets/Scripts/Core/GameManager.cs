@@ -9,8 +9,8 @@ public enum GameState {
 
 public class GameManager : Singleton<GameManager> {
     SimulationManager simulationManager => SimulationManager.instance;
-
-    [SerializeField] UIManager uiManager;
+    UIManager uiManager => UIManager.instance;
+    
     [SerializeField] SetTimeScale timeControl;
 
     private GameState currentGameState = GameState.MainMenu;
