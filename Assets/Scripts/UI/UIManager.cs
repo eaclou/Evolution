@@ -99,7 +99,13 @@ public class UIManager : Singleton<UIManager> {
     const string ANIM_FINISHED = "_AnimFinished";
     List<SpeciesGenomePool> speciesPools => genomePool.completeSpeciesPoolsList;
     bool isRebuildTimeStep => simulationManager.simAgeTimeSteps % timeStepsToRebuildGenomeButtons == 1;
-    
+
+
+    // ***EAC -- Reorganize these to their appropriate locations once you have it working:
+    private bool isTopLeftPanelOpen;
+    private bool isSpeciesListOn;
+    private bool isGraphModeOn;
+    private bool isSpeciesOverview;
     
     #endregion
 
@@ -176,6 +182,7 @@ public class UIManager : Singleton<UIManager> {
         //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
         //isAnnouncementTextOn = true;
         //timerAnnouncementTextCounter = 0;
+
     }
     #endregion
 
