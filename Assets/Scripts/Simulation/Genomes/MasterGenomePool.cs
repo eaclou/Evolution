@@ -32,7 +32,7 @@ public class MasterGenomePool {
         
     }
 
-    public void FirstTimeInitialize(int numAgentGenomes, MutationSettings mutationSettingsRef) {
+    public void FirstTimeInitialize(MutationSettings mutationSettingsRef) {
         debugRecentlyDeletedCandidateIDsList = new List<int>();
 
         nextCandidateIndex = 0;
@@ -56,8 +56,7 @@ public class MasterGenomePool {
             newSpecies.FirstTimeInitialize(new CandidateAgentData(seedGenome, i), 0);
             currentlyActiveSpeciesIDList.Add(i);
             completeSpeciesPoolsList.Add(newSpecies);
-        }
-        
+        }        
     }
 
     public void AddNewYearlySpeciesStats(int year) {

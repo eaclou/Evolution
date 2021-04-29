@@ -15,6 +15,7 @@
             <e p="ButtonInputToFloat.cs" t="Include" />
             <e p="DirectionInputToVector2.cs" t="Include" />
             <e p="FloatMath.cs" t="Include" />
+            <e p="Logger.cs" t="Include" />
             <e p="SetTimescale.cs" t="Include" />
           </e>
           <e p="Additive Scenes" t="Include">

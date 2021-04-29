@@ -141,6 +141,7 @@ public class VegetationManager {
         GenerateWorldLayerAlgaeGridGenomeMutationOptions();
         
     }
+    
     public void InitializePlantParticles(int numAgents, ComputeShader computeShader) {
         //float startTime = Time.realtimeSinceStartup;
         //Debug.Log((Time.realtimeSinceStartup - startTime).ToString());
@@ -156,25 +157,25 @@ public class VegetationManager {
         for(int i = 0; i < plantParticlesCBuffer.count; i++) {
             PlantParticleData data = new PlantParticleData();
             data.index = i;            
-            data.worldPos = new Vector2(UnityEngine.Random.Range(0f, SimulationManager._MapSize), UnityEngine.Random.Range(0f, SimulationManager._MapSize));
+            data.worldPos = new Vector2(Random.Range(0f, SimulationManager._MapSize), Random.Range(0f, SimulationManager._MapSize));
 
-            data.radius = UnityEngine.Random.Range(minParticleSize, maxParticleSize);
+            data.radius = Random.Range(minParticleSize, maxParticleSize);
             data.biomass = 0f; // data.radius * data.radius * Mathf.PI * settingsRef.algaeParticleNutrientDensity;
             data.isActive = 0f;
             data.isDecaying = 0f;
-            data.age = UnityEngine.Random.Range(1f, 2f);
-            data.colorA = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
-            data.colorB = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
+            data.age = Random.Range(1f, 2f);
+            data.colorA = new Vector3(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
+            data.colorB = new Vector3(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
             data.health = 0f;
             data.typeID = 0f;
-	        data.rootedness = UnityEngine.Random.Range(0f, 1f);
-	        data.radiusAxisOne = UnityEngine.Random.Range(0f, 1f);
-	        data.radiusAxisTwo = UnityEngine.Random.Range(0f, 1f);
-	        data.leafDensity = UnityEngine.Random.Range(0f, 1f);
-	        data.angleInc = UnityEngine.Random.Range(0f, 1f);
-	        data.leafLength = UnityEngine.Random.Range(0f, 1f);
-	        data.leafWidth = UnityEngine.Random.Range(0f, 1f);
-	        data.leafRoundness = UnityEngine.Random.Range(0f, 1f);
+	        data.rootedness = Random.Range(0f, 1f);
+	        data.radiusAxisOne = Random.Range(0f, 1f);
+	        data.radiusAxisTwo = Random.Range(0f, 1f);
+	        data.leafDensity = Random.Range(0f, 1f);
+	        data.angleInc = Random.Range(0f, 1f);
+	        data.leafLength = Random.Range(0f, 1f);
+	        data.leafWidth = Random.Range(0f, 1f);
+	        data.leafRoundness = Random.Range(0f, 1f);
 	        data.brushTypeX = 0;
 
             plantParticlesArray[i] = data;
@@ -234,12 +235,12 @@ public class VegetationManager {
                 
         plantSlotGenomeCurrent = new WorldLayerPlantGenome();        
         //algaeSlotGenomeCurrent.algaeRepData = algaeParticlesArray[0];
-        plantSlotGenomeCurrent.displayColorPri = UnityEngine.Random.ColorHSV();
+        plantSlotGenomeCurrent.displayColorPri = Random.ColorHSV();
         plantSlotGenomeCurrent.displayColorPri.a = 1f;
         plantSlotGenomeCurrent.name = "Plant Particles!";
         float minRate = 0.5f;
         float maxRate = 1.75f;
-        plantSlotGenomeCurrent.growthRate = Mathf.Lerp(minRate, maxRate, UnityEngine.Random.Range(0f, 1f));
+        plantSlotGenomeCurrent.growthRate = Mathf.Lerp(minRate, maxRate, Random.Range(0f, 1f));
         plantSlotGenomeCurrent.textDescriptionMutation = "Growth Rate: " + plantSlotGenomeCurrent.growthRate.ToString("F2"); // + ", GrowthEfficiency: " + plantSlotGenomeCurrent.plantGrowthEfficiency.ToString("F2") + ", IntakeRate: " + plantSlotGenomeCurrent.plantIntakeRate.ToString("F4");
         
         plantSlotGenomeMutations = new WorldLayerPlantGenome[4];
@@ -253,7 +254,8 @@ public class VegetationManager {
         plantParticlesRepresentativeGenomeCBuffer.SetData(plantParticlesRepresentativeGenomeArray);
         
         GenerateWorldLayerPlantParticleGenomeMutationOptions();
-    }    
+    } 
+       
     public void InitializeResourceGrid(int numAgents, ComputeShader computeShader) {
 
         computeShaderResourceGrid = computeShader;
@@ -327,8 +329,8 @@ public class VegetationManager {
         rdRT2.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
         */
         //theRenderKing.fluidRenderMat.SetTexture("_DebugTex", nutrientMapRT1);
-        
     }
+    
     public void InitializeDecomposersGrid() {
         
         decomposerSlotGenomeCurrent = new WorldLayerDecomposerGenome();
@@ -338,31 +340,27 @@ public class VegetationManager {
 
         float minIntakeRate = tempSharedIntakeRate * 0.95f;
         float maxIntakeRate = tempSharedIntakeRate * 1.042f;
-        float lnLerp = UnityEngine.Random.Range(0f, 1f);
+        float lnLerp = Random.Range(0f, 1f);
         lnLerp *= lnLerp;
         decomposerSlotGenomeCurrent.metabolicRate = Mathf.Lerp(minIntakeRate, maxIntakeRate, lnLerp);
-        decomposerSlotGenomeCurrent.growthEfficiency = UnityEngine.Random.Range(0.9f, 1.1f);
+        decomposerSlotGenomeCurrent.growthEfficiency = Random.Range(0.9f, 1.1f);
         decomposerSlotGenomeCurrent.textDescriptionMutation = "Metabolic Rate: " + (decomposerSlotGenomeCurrent.metabolicRate * 100f).ToString("F2"); 
 
         GenerateWorldLayerDecomposersGenomeMutationOptions();
         
-        
-
-
         int kernelCSInitResourceGrid = computeShaderResourceGrid.FindKernel("CSInitResourceGrid"); 
         //computeShaderResourceGrid.SetTexture(kernelCSUpdateAlgaeGrid, "rdRead", rdRT1);
         computeShaderResourceGrid.SetFloat("_TextureResolution", (float)resourceGridRT1.width);
         //computeShaderResourceGrid.SetTexture(kernelCSInitRD, "rdWrite", rdRT1);
         computeShaderResourceGrid.SetTexture(kernelCSInitResourceGrid, "_ResourceGridWrite", resourceGridRT1);
         computeShaderResourceGrid.Dispatch(kernelCSInitResourceGrid, resourceGridTexResolution / 32, resourceGridTexResolution / 32, 1);
-
     }
 
     private void WorldLayerDecomposerGenomeStuff(ref WorldLayerDecomposerGenome genome, float mutationSizeLerp) {
                 
         float minIntakeRate = tempSharedIntakeRate * 0.1f;
         float maxIntakeRate = tempSharedIntakeRate * 4f;
-        float lnLerp = UnityEngine.Random.Range(0f, 1f);
+        float lnLerp = Random.Range(0f, 1f);
         lnLerp *= lnLerp;
         genome.metabolicRate = Mathf.Lerp(minIntakeRate, maxIntakeRate, lnLerp);
         genome.metabolicRate = Mathf.Lerp(decomposerSlotGenomeCurrent.metabolicRate, genome.metabolicRate, mutationSizeLerp);
@@ -370,8 +368,7 @@ public class VegetationManager {
         genome.name = decomposerSlotGenomeCurrent.name;
         //genome.textDescriptionMutation = "Metabolic Rate: " + (genome.metabolicRate * 100f).ToString("F2"); // + ", GrowthEfficiency: " + mutatedGenome.algaeGrowthEfficiency.ToString("F2") + ", IntakeRate: " + mutatedGenome.algaeIntakeRate.ToString("F4");
             
-        genome.growthEfficiency = UnityEngine.Random.Range(0.1f, 2f);
-        
+        genome.growthEfficiency = Random.Range(0.1f, 2f); 
     }
 
     public void GenerateWorldLayerAlgaeGridGenomeMutationOptions() {
@@ -381,35 +378,36 @@ public class VegetationManager {
             jLerp = 0.3f;
             WorldLayerAlgaeGenome mutatedGenome = new WorldLayerAlgaeGenome();
 
-            Color randColorPri = UnityEngine.Random.ColorHSV();
-            Color randColorSec = UnityEngine.Random.ColorHSV();
+            Color randColorPri = Random.ColorHSV();
+            Color randColorSec = Random.ColorHSV();
             
             Color mutatedColorPri = Color.Lerp(algaeSlotGenomeCurrent.displayColorPri, randColorPri, jLerp);
             Color mutatedColorSec = Color.Lerp(algaeSlotGenomeCurrent.displayColorSec, randColorSec, jLerp);
             mutatedGenome.displayColorPri = mutatedColorPri;
             mutatedGenome.displayColorSec = mutatedColorSec;
-            if(UnityEngine.Random.Range(0f, 1f) < jLerp * 1f) {
-                mutatedGenome.patternRowID = UnityEngine.Random.Range(0, 8);
-                mutatedGenome.patternColumnID = UnityEngine.Random.Range(0, 8);
+            if(Random.Range(0f, 1f) < jLerp * 1f) {
+                mutatedGenome.patternRowID = Random.Range(0, 8);
+                mutatedGenome.patternColumnID = Random.Range(0, 8);
             }
             else {
                 mutatedGenome.patternRowID = algaeSlotGenomeCurrent.patternRowID;
                 mutatedGenome.patternColumnID = algaeSlotGenomeCurrent.patternColumnID;
             }
             
-            mutatedGenome.patternThreshold = Mathf.Lerp(algaeSlotGenomeCurrent.patternThreshold, UnityEngine.Random.Range(0f, 1f), jLerp);
+            mutatedGenome.patternThreshold = Mathf.Lerp(algaeSlotGenomeCurrent.patternThreshold, Random.Range(0f, 1f), jLerp);
             
             float minIntakeRate = tempSharedIntakeRate * 0.1f;
             float maxIntakeRate = tempSharedIntakeRate * 10f; // init around 1?
-            float lnLerp = UnityEngine.Random.Range(0f, 1f);
+            float lnLerp = Random.Range(0f, 1f);
             lnLerp *= lnLerp;
             mutatedGenome.metabolicRate = Mathf.Lerp(minIntakeRate, maxIntakeRate, lnLerp);
             mutatedGenome.metabolicRate = Mathf.Lerp(algaeSlotGenomeCurrent.metabolicRate, mutatedGenome.metabolicRate, jLerp);
-            mutatedGenome.growthEfficiency = UnityEngine.Random.Range(0.1f, 2f);
+            mutatedGenome.growthEfficiency = Random.Range(0.1f, 2f);
             
             algaeSlotGenomeMutations[j] = mutatedGenome;
         }
     }
+    
     public void GenerateWorldLayerPlantParticleGenomeMutationOptions() {
         for(int j = 0; j < plantSlotGenomeMutations.Length; j++) {
             float jLerp = Mathf.Clamp01((float)j / 3f + 0.015f); 
@@ -422,14 +420,14 @@ public class VegetationManager {
 
             float minRate = 0.05f;
             float maxRate = 5f;
-            mutatedGenome.growthRate = Mathf.Lerp(minRate, maxRate, UnityEngine.Random.Range(0f, 1f));
+            mutatedGenome.growthRate = Mathf.Lerp(minRate, maxRate, Random.Range(0f, 1f));
             mutatedGenome.growthRate = Mathf.Lerp(plantSlotGenomeCurrent.growthRate, mutatedGenome.growthRate, jLerp);
 
             mutatedGenome.name = plantSlotGenomeCurrent.name;
             mutatedGenome.textDescriptionMutation = "Growth Rate: " + mutatedGenome.growthRate.ToString("F2");
 
             mutatedGenome.plantRepData = plantSlotGenomeCurrent.plantRepData;
-            mutatedGenome.plantRepData.colorA = Vector3.Lerp(mutatedGenome.plantRepData.colorA, UnityEngine.Random.insideUnitSphere, 0.1f);
+            mutatedGenome.plantRepData.colorA = Vector3.Lerp(mutatedGenome.plantRepData.colorA, Random.insideUnitSphere, 0.1f);
             
             plantSlotGenomeMutations[j] = mutatedGenome;
             Vector3 hue = mutatedGenome.plantRepData.colorA;
@@ -447,23 +445,23 @@ public class VegetationManager {
             jLerp = jLerp * jLerp;
             jLerp = 0.3f;
             WorldLayerDecomposerGenome mutatedGenome = new WorldLayerDecomposerGenome();
-            Color randColorPri = UnityEngine.Random.ColorHSV();
-            Color randColorSec = UnityEngine.Random.ColorHSV();
+            Color randColorPri = Random.ColorHSV();
+            Color randColorSec = Random.ColorHSV();
             
             Color mutatedColorPri = Color.Lerp(decomposerSlotGenomeCurrent.displayColorPri, randColorPri, jLerp);
             Color mutatedColorSec = Color.Lerp(decomposerSlotGenomeCurrent.displayColorSec, randColorSec, jLerp);
             mutatedGenome.displayColorPri = mutatedColorPri;
             mutatedGenome.displayColorSec = mutatedColorSec;
-            if(UnityEngine.Random.Range(0f, 1f) < jLerp * 1f) {
-                mutatedGenome.patternRowID = UnityEngine.Random.Range(0, 8);
-                mutatedGenome.patternColumnID = UnityEngine.Random.Range(0, 8);
+            if (Random.Range(0f, 1f) < jLerp * 1f) {
+                mutatedGenome.patternRowID = Random.Range(0, 8);
+                mutatedGenome.patternColumnID = Random.Range(0, 8);
             }
             else {
                 mutatedGenome.patternRowID = decomposerSlotGenomeCurrent.patternRowID;
                 mutatedGenome.patternColumnID = decomposerSlotGenomeCurrent.patternColumnID;
             }
             
-            mutatedGenome.patternThreshold = Mathf.Lerp(decomposerSlotGenomeCurrent.patternThreshold, UnityEngine.Random.Range(0f, 1f), jLerp);
+            mutatedGenome.patternThreshold = Mathf.Lerp(decomposerSlotGenomeCurrent.patternThreshold, Random.Range(0f, 1f), jLerp);
             WorldLayerDecomposerGenomeStuff(ref mutatedGenome, jLerp);
 
             mutatedGenome.name = decomposerSlotGenomeCurrent.name;
@@ -490,7 +488,9 @@ public class VegetationManager {
         computeShaderAlgaeParticles.Dispatch(kernelCSReviveSelectFoodParticles, indicesArray.Length, 1, 1);
 
         selectRespawnFoodParticleIndicesCBuffer.Release();
-    }*/  // NOT USED ANY MORE????
+    }*/ 
+     
+    // NOT USED ANY MORE????
     /*public void SpawnInitialPlantParticles(float radius, Vector4 spawnCoords) {
         Debug.Log("SpawnInitialAlgaeParticles(float radius, Vector4 spawnCoords) DISABLED!~");
         
@@ -503,6 +503,7 @@ public class VegetationManager {
         computeShaderPlantParticles.Dispatch(kernelCSSpawnInitialAlgaeParticles, 1, 1, 1);
         
     }*/
+    
     public void SimulatePlantParticles(EnvironmentFluidManager fluidManagerRef, TheRenderKing renderKingRef, SimulationStateData simStateDataRef, SimResourceManager resourcesManager) { // Sim
         // Go through foodParticleData and check for inactive
         // determined by current total food -- done!
@@ -524,7 +525,7 @@ public class VegetationManager {
         computeShaderPlantParticles.SetFloat("_SpiritBrushPosNeg", 1f); // renderKingRef.spiritBrushPosNeg);            
         //computeShaderFoodParticles.SetFloat("_RespawnFoodParticles", 1f);
         computeShaderPlantParticles.SetFloat("_Time", Time.realtimeSinceStartup);
-        //float randRoll = UnityEngine.Random.Range(0f, 1f);
+        //float randRoll = Random.Range(0f, 1f);
         
         computeShaderPlantParticles.SetFloat("_IsBrushing", 1f);
 
@@ -563,8 +564,8 @@ public class VegetationManager {
         computeShaderPlantParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesRead", plantParticlesCBufferSwap);
         computeShaderPlantParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesWrite", plantParticlesCBuffer);        
         computeShaderPlantParticles.Dispatch(kernelCSCopyFoodParticlesBuffer, 1, 1, 1);        
-        
     }
+    
     public void EatSelectedFoodParticles(SimulationStateData simStateDataRef) {  // removes gpu particle & sends consumption data back to CPU
         // Use CritterSimData to determine critter mouth locations
 
@@ -597,8 +598,9 @@ public class VegetationManager {
         computeShaderPlantParticles.SetBuffer(kernelCSCopyFoodParticlesBuffer, "foodParticlesWrite", plantParticlesCBuffer);
         computeShaderPlantParticles.Dispatch(kernelCSCopyFoodParticlesBuffer, 1, 1, 1);
     }
+    
     public void FindClosestPlantParticleToCritters(SimulationStateData simStateDataRef) {  // need to send info on closest particle pos/dir/amt back to CPU also
-        
+    
         int kernelCSNewMeasureDistancesInit = computeShaderPlantParticles.FindKernel("CSNewMeasureDistancesInit");
         int kernelCSNewMeasureDistancesMainA = computeShaderPlantParticles.FindKernel("CSNewMeasureDistancesMainA");
 
@@ -629,6 +631,7 @@ public class VegetationManager {
                     closestPlantParticlesDataArray[1].worldPos.ToString() + ", id: " +
                     closestPlantParticlesDataArray[1].index.ToString());*/
     }
+    
     // Keep these two pipelines separate at first while try to debug::::
     private Vector4[] ReduceDistancesArray(Vector4[] inBuffer) {
 
@@ -647,6 +650,7 @@ public class VegetationManager {
 
         return newBuffer;
     }
+    
     public void FindClosestPlantParticleToCursor(float xCoord, float yCoord) {
         
         int kernelCSMeasureInitCursorDistances = computeShaderPlantParticles.FindKernel("CSMeasureInitCursorDistances");        
@@ -794,9 +798,8 @@ public class VegetationManager {
         closestPlantParticlesDataCBuffer.GetData(closestPlantParticlesDataArray);
         */
     }
+    
     public void MeasureTotalPlantParticlesAmount() {  // 
-
-        
         int kernelCSMeasureTotalFoodParticlesAmount = computeShaderPlantParticles.FindKernel("CSMeasureTotalFoodParticlesAmount");
         computeShaderPlantParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesRead", plantParticlesCBuffer);
         computeShaderPlantParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesWrite", plantParticlesMeasure32);         
@@ -823,7 +826,6 @@ public class VegetationManager {
         wasteProducedByAnimalParticlesLastFrame = animalParticleMeasurementTotalsData[0].wasteProduced;
         algaeConsumedByAnimalParticlesLastFrame = animalParticleMeasurementTotalsData[0].algaeConsumed;
         */
-        
     }
            
     // RESOURCE GRID:::::
@@ -843,6 +845,7 @@ public class VegetationManager {
         computeShaderResourceGrid.Dispatch(kernelAdvectResourceGrid, 1, 1, 1);
     }
     */
+    
     /*public void GetResourceGridValuesAtMouthPositions(SimulationStateData simStateDataRef) {
         // Doing it this way to avoid resetting ALL agents whenever ONE is respawned!
         //ComputeBuffer nutrientSamplesCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
@@ -862,6 +865,7 @@ public class VegetationManager {
         
         // Read out sample values::::
     }*/
+    
     /*public void ApplyDiffusionOnResourceGrid(EnvironmentFluidManager fluidManagerRef) {
         int kernelCSUpdateAlgaeGrid = computeShaderResourceGrid.FindKernel("CSUpdateAlgaeGrid");
         computeShaderResourceGrid.SetFloat("_AlgaeGridDiffusion", settingsRef.nutrientDiffusionRate);
@@ -874,6 +878,7 @@ public class VegetationManager {
         //Graphics.Blit(resourceGridRT2, resourceGridRT1);
         
     } */   
+    
     public void MeasureTotalResourceGridAmount() {
 
         ComputeBuffer outputValuesCBuffer = new ComputeBuffer(1, sizeof(float) * 4);  // holds the result of measurement: total sum of pix colors in texture
@@ -960,7 +965,6 @@ public class VegetationManager {
         eatAmountsCBuffer.Release();
     }*/
        
-    
     public void SimResourceGrid(ref EnvironmentFluidManager fluidManagerRef, ref BaronVonTerrain baronTerrainRef) {
         int kernelCSSimRD = computeShaderResourceGrid.FindKernel("CSSimResourceGrid"); 
         computeShaderResourceGrid.SetTexture(kernelCSSimRD, "_AltitudeTex", baronTerrainRef.terrainHeightRT0);        

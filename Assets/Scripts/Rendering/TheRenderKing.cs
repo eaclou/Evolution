@@ -1197,6 +1197,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         computeShaderCritters.Dispatch(kernelCSUpdateCritterGenericStrokes, singleCritterGenericStrokesCBuffer.count, 1, 1);
         singleCritterGenericStrokesCBuffer.Release();
     }
+    
     public void GenerateCritterPortraitStrokesData(AgentGenome genome) { // AgentGenome genome2) {
 
         // Get genomes:
@@ -1873,8 +1874,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             }
 
             sortedBrushStrokesList.Insert(sampleIndex, strokesArray[b]);
-
-
         }
         // Copy sorted list into actual buffer:
         if (sortedBrushStrokesList.Count == strokesArray.Length) {
@@ -3038,13 +3037,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         treeOfLifeSpeciesHeadTipMat.SetFloat("_MouseOn", simManager.uiManager.tolMouseOver);
         cmdBufferTreeOfLifeSpeciesTree.DrawProcedural(Matrix4x4.identity, treeOfLifeSpeciesHeadTipMat, 0, MeshTopology.Triangles, 6, 32);
 
-
         Graphics.ExecuteCommandBuffer(cmdBufferTreeOfLifeSpeciesTree);
         treeOfLifeSpeciesTreeRenderCamera.Render();
         */
-
-
-
 
         // OLD BELOW:::::
         /*UpdateTreeOfLifeData();
@@ -3075,6 +3070,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         TreeOfLifeLeafNodeData[] updateLeafNodeDataArray = new TreeOfLifeLeafNodeData[1];
 
+        // *** WPP: delegate to constructor
         TreeOfLifeLeafNodeData data = new TreeOfLifeLeafNodeData();
         data.speciesID = newSpecies.speciesID;
         data.parentSpeciesID = newSpecies.parentSpeciesID;
@@ -3139,8 +3135,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
             curNumTreeOfLifeStemSegments += newSpecies.depthLevel;  // keep track of start index
         }
-
     }
+    
     public void TreeOfLifeExtinctSpecies(int speciesID) {
         //computeShaderTreeOfLife.SetTexture(kernelCSAddNewSpecies, "velocityRead", fluidManager._VelocityA);
         int[] speciesIDArray = new int[1];
@@ -3177,13 +3173,13 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         updateLeafNodeDataCBuffer.Release();
         //Debug.Log("UPDATE STEM SEGMENTS: " + newSpeciesID.ToString() + ", depth: " + newSpecies.depthLevel.ToString());
     }
+    
     public void TreeOfLifeGetColliderNodePositionData() {
         //simManager.uiManager.treeOfLifeManager.UpdateNodePositionsFromGPU(simManager.uiManager.cameraManager, treeOfLifeSpeciesDataHeadPosArray);     // **** Need to cap this at 32 or it breaks!!!  
     }
 
     private void Render() {
         //Debug.Log("TestRenderCommandBuffer()");
-
 
         if (isDebugRender) {
             mainRenderCam.RemoveAllCommandBuffers();
@@ -3231,9 +3227,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             RenderTargetIdentifier renderTarget = new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget);
             cmdBufferMain.SetRenderTarget(renderTarget);  // Set render Target
 
-
             float minimumFogDensity = 0.3f; // **** move this
-
 
             // TERRAIN MESH:
             //rockMat.SetPass(0);        
@@ -3242,6 +3236,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             terrainMeshOpaqueMat.SetPass(0);
             terrainMeshOpaqueMat.SetTexture("_MainTex", baronVonTerrain.terrainColorRT0);
 
+            // *** WPP: delegate blocks to methods in executing class (e.g. baronVonTerrain)
 
             // STONE STROKES!!!!
             baronVonTerrain.groundStrokesLrgDisplayMat.SetPass(0);
@@ -3265,8 +3260,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             baronVonTerrain.groundStrokesLrgDisplayMat.SetVector("_Color2", baronVonTerrain.sandSlotGenomeCurrent.color);
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesLrgDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.terrainStoneStrokesCBuffer.count);
 
-
-
             // MEDIUM STROKES!!!!
             baronVonTerrain.groundStrokesMedDisplayMat.SetPass(0);
             baronVonTerrain.groundStrokesMedDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -3289,8 +3282,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color2", baronVonTerrain.sandSlotGenomeCurrent.color);
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesMedDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.terrainPebbleStrokesCBuffer.count);
 
-
-
             // SAND STROKES!!!!
             baronVonTerrain.groundStrokesSmlDisplayMat.SetPass(0);
             baronVonTerrain.groundStrokesSmlDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -3312,8 +3303,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             baronVonTerrain.groundStrokesSmlDisplayMat.SetVector("_Color1", baronVonTerrain.pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
             baronVonTerrain.groundStrokesSmlDisplayMat.SetVector("_Color2", baronVonTerrain.sandSlotGenomeCurrent.color);
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.terrainSandStrokesCBuffer.count);
-
-
 
             // -- DETRITUS / WASTE
             baronVonTerrain.wasteBitsDisplayMat.SetPass(0);
@@ -3370,7 +3359,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             }
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.decomposerBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.decomposerBitsCBuffer.count);
 
-
             // FLOATY BITS!
             floatyBitsDisplayMat.SetPass(0);
             //floatyBitsDisplayMat.SetTexture("_FluidColorTex", fluidManager._VelocityPressureDivergenceMain);
@@ -3383,8 +3371,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             floatyBitsDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
             floatyBitsDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, floatyBitsDisplayMat, 0, MeshTopology.Triangles, 6, floatyBitsCBuffer.count);
-
-
 
             //if (simManager.trophicLayersManager.GetAgentsOnOff()) {
                 /*critterUberStrokeShadowMat.SetPass(0);
@@ -3533,9 +3519,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             plantParticleDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, plantParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.vegetationManager.plantParticlesCBuffer.count * 32);
 
-                //}
-            
-
             // STIR STICK!!!!
             /*
             if (simManager.uiManager.curActiveTool == ToolType.Stir) {
@@ -3617,8 +3600,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             animalParticleDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized); 
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
 
-            //}
-
             if (simManager.trophicLayersManager.GetAgentsOnOff()) {
 
                 eggSackStrokeDisplayMat.SetPass(0);
@@ -3675,11 +3656,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 eggCoverDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
                 //eggCoverDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggCoverDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
-
-                //}
-
             }
-
 
             // Nutrients bits:
             baronVonWater.waterNutrientsBitsDisplayMat.SetPass(0);
@@ -3733,7 +3710,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         // Fluid Render Article:
         // http://blog.camposanto.com/post/171934927979/hi-im-matt-wilde-an-old-man-from-the-north-of/amp?__twitter_impression=true
-
     }
 
     public void ClickTestTerrainUpdateMaps(bool on, float _intensity) {  // *** RENAME!!! ***********
@@ -3826,127 +3802,45 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         if (baronVonWater != null) {
             baronVonWater.Cleanup();
         }
-
-        if (cmdBufferMain != null) {
-            cmdBufferMain.Release();
-        }
-        if (cmdBufferDebugVis != null) {
-            cmdBufferDebugVis.Release();
-        }
-
-        if (cmdBufferFluidObstacles != null) {
-            cmdBufferFluidObstacles.Release();
-        }
-        if (cmdBufferFluidColor != null) {
-            cmdBufferFluidColor.Release();
-        }
-        if (cmdBufferResourceSim != null) {
-            cmdBufferResourceSim.Release();
-        }
-
-        if (quadVerticesCBuffer != null) {
-            quadVerticesCBuffer.Release();
-        }
-
-        if (obstacleStrokesCBuffer != null) {
-            obstacleStrokesCBuffer.Release();
-        }
-        if (colorInjectionStrokesCBuffer != null) {
-            colorInjectionStrokesCBuffer.Release();
-        }
-        if (floatyBitsCBuffer != null) {
-            floatyBitsCBuffer.Release();
-        }
-
-        if (spiritBrushQuadDataSpawnCBuffer != null) {
-            spiritBrushQuadDataSpawnCBuffer.Release();
-        }
-        if (spiritBrushQuadDataCBuffer0 != null) {
-            spiritBrushQuadDataCBuffer0.Release();
-        }
-        if (spiritBrushQuadDataCBuffer1 != null) {
-            spiritBrushQuadDataCBuffer1.Release();
-        }
-
-        if(cursorParticlesCBuffer0 != null) {
-            cursorParticlesCBuffer0.Release();
-        }
-        if(cursorParticlesCBuffer1 != null) {
-            cursorParticlesCBuffer1.Release();
-        }
-
-        if (critterSkinStrokesCBuffer != null) {
-            critterSkinStrokesCBuffer.Release();
-        }
-        if (critterGenericStrokesCBuffer != null) {
-            critterGenericStrokesCBuffer.Release();
-        }
-
-        if (gizmoCursorPosCBuffer != null) {
-            gizmoCursorPosCBuffer.Release();
-        }
-        if (gizmoFeedToolPosCBuffer != null) {
-            gizmoFeedToolPosCBuffer.Release();
-        }
+        cmdBufferMain?.Release();
+        cmdBufferDebugVis?.Release();
+        cmdBufferFluidObstacles?.Release();
+        cmdBufferFluidColor?.Release();
+        cmdBufferResourceSim?.Release();
+        quadVerticesCBuffer?.Release();
+        obstacleStrokesCBuffer?.Release();
+        colorInjectionStrokesCBuffer?.Release();
+        floatyBitsCBuffer?.Release();
+        spiritBrushQuadDataSpawnCBuffer?.Release();
+        spiritBrushQuadDataCBuffer0?.Release();
+        spiritBrushQuadDataCBuffer1?.Release();
+        cursorParticlesCBuffer0?.Release();
+        cursorParticlesCBuffer1?.Release();
+        critterSkinStrokesCBuffer?.Release();
+        critterGenericStrokesCBuffer?.Release();
+        gizmoCursorPosCBuffer?.Release();
+        gizmoFeedToolPosCBuffer?.Release();
 
         // TREE OF LIFE:
-        if (testTreeOfLifePositionCBuffer != null) {
-            testTreeOfLifePositionCBuffer.Release();
-        }
-        if (treeOfLifeEventLineDataCBuffer != null) {
-            treeOfLifeEventLineDataCBuffer.Release();
-        }
-        if (treeOfLifeWorldStatsValuesCBuffer != null) {
-            treeOfLifeWorldStatsValuesCBuffer.Release();
-        }
-        if (treeOfLifeSpeciesSegmentsCBuffer != null) {
-            treeOfLifeSpeciesSegmentsCBuffer.Release();
-        }
-        if (treeOfLifeSpeciesDataKeyCBuffer != null) {
-            treeOfLifeSpeciesDataKeyCBuffer.Release();
-        }
-        if (treeOfLifeSpeciesDataHeadPosCBuffer != null) {
-            treeOfLifeSpeciesDataHeadPosCBuffer.Release();
-        }
+        testTreeOfLifePositionCBuffer?.Release();
+        treeOfLifeEventLineDataCBuffer?.Release();
+        treeOfLifeWorldStatsValuesCBuffer?.Release();
+        treeOfLifeSpeciesSegmentsCBuffer?.Release();
+        treeOfLifeSpeciesDataKeyCBuffer?.Release();
+        treeOfLifeSpeciesDataHeadPosCBuffer?.Release();
+        
         // OLD TOL:
-        if (treeOfLifeLeafNodeDataCBuffer != null) {
-            treeOfLifeLeafNodeDataCBuffer.Release();
-        }
-        if (treeOfLifeNodeColliderDataCBufferA != null) {
-            treeOfLifeNodeColliderDataCBufferA.Release();
-        }
-        if (treeOfLifeNodeColliderDataCBufferB != null) {
-            treeOfLifeNodeColliderDataCBufferB.Release();
-        }
-        if (treeOfLifeStemSegmentDataCBuffer != null) {
-            treeOfLifeStemSegmentDataCBuffer.Release();
-        }
-
-        if (toolbarCritterPortraitStrokesCBuffer != null) {
-            toolbarCritterPortraitStrokesCBuffer.Release();
-        }
-
-        if (treeOfLifeStemSegmentVerticesCBuffer != null) {
-            treeOfLifeStemSegmentVerticesCBuffer.Release();
-        }
-        if (treeOfLifeBasicStrokeDataCBuffer != null) {
-            treeOfLifeBasicStrokeDataCBuffer.Release();
-        }
-        if (treeOfLifePortraitBorderDataCBuffer != null) {
-            treeOfLifePortraitBorderDataCBuffer.Release();
-        }
-        if (treeOflifePortraitDataCBuffer != null) {
-            treeOflifePortraitDataCBuffer.Release();
-        }
-        if (treeOfLifePortraitEyeDataCBuffer != null) {
-            treeOfLifePortraitEyeDataCBuffer.Release();
-        }
-        if (toolbarPortraitCritterInitDataCBuffer != null) {
-            toolbarPortraitCritterInitDataCBuffer.Release();
-        }
-        if (toolbarPortraitCritterSimDataCBuffer != null) {
-            toolbarPortraitCritterSimDataCBuffer.Release();
-        }
-
+        treeOfLifeLeafNodeDataCBuffer?.Release();
+        treeOfLifeNodeColliderDataCBufferA?.Release();
+        treeOfLifeNodeColliderDataCBufferB?.Release();
+        treeOfLifeStemSegmentDataCBuffer?.Release();
+        toolbarCritterPortraitStrokesCBuffer?.Release();
+        treeOfLifeStemSegmentVerticesCBuffer?.Release();
+        treeOfLifeBasicStrokeDataCBuffer?.Release();
+        treeOfLifePortraitBorderDataCBuffer?.Release();
+        treeOflifePortraitDataCBuffer?.Release();
+        treeOfLifePortraitEyeDataCBuffer?.Release();
+        toolbarPortraitCritterInitDataCBuffer?.Release();
+        toolbarPortraitCritterSimDataCBuffer?.Release();
     }
 }

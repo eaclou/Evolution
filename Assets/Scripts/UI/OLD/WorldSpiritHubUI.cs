@@ -352,12 +352,12 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //animTerrainShake.StartPlayback();
         //animTerrainShake.Play();
 
-        Debug.Log("OpenWorldTreeSelect " + isOpen.ToString());
+        Debug.Log("OpenWorldTreeSelect " + isOpen);
     }
     
     //*********************************************
     public void ClickButtonWorldSpiritHubOther(int index) {
-        Debug.Log("ClickButtonPaletteOther: " + index.ToString());
+        Debug.Log("ClickButtonPaletteOther: " + index);
 
         TrophicSlot slot = simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[index];
         //uiManagerRef.gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;

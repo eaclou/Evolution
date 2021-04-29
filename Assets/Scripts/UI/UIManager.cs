@@ -159,7 +159,7 @@ public class UIManager : Singleton<UIManager> {
         panelLoading.SetActive(false);
         panelPlaying.SetActive(true);
 
-        Debug.Log("EnterPlayingUI() " + Time.timeScale.ToString());
+        Debug.Log("EnterPlayingUI() " + Time.timeScale);
         //Animation Big Bang here
         simulationManager._BigBangOn = true;
         //worldSpiritHubUI.OpenWorldTreeSelect();
@@ -224,8 +224,7 @@ public class UIManager : Singleton<UIManager> {
             if(isRebuildTimeStep) {
                 speciesOverviewUI.RebuildGenomeButtons();  
             }
-        }
-        
+        } 
     }
     
     public void InitialUnlocks() {

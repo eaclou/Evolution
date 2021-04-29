@@ -12,6 +12,7 @@ public class SimulationManager : Singleton<SimulationManager>
     TheRenderKing theRenderKing => TheRenderKing.instance;
     CameraManager cameraManager => CameraManager.instance;
     AudioManager audioManager => AudioManager.instance;
+    TheCursorCzar theCursorCzar => TheCursorCzar.instance;
     
     public QualitySettingData qualitySettings;
     public LoadingPanelUI loadingPanel;
@@ -163,8 +164,6 @@ public class SimulationManager : Singleton<SimulationManager>
     public GraphData graphDataVertebrateGenome3;
     */
         
-    TheCursorCzar theCursorCzar => TheCursorCzar.instance;
-
     #region loading   // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& LOADING LOADING LOADING &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     
     public void LoadingWarmupComplete()
@@ -188,8 +187,8 @@ public class SimulationManager : Singleton<SimulationManager>
         loadingPanel.SetCursorActive(false);
         loadingPanel.Refresh("", 0);
 
-        LoadingInitializeCoreSimulationState();  // creates arrays and stuff for the (hopefully)only time
-        Debug.Log("LoadingInitializeCoreSimulationState: " + (Time.realtimeSinceStartup - startTime).ToString());
+        LoadingInitializeCoreSimulationState();  // creates arrays and stuff for the (hopefully) only time
+        Logger.Log("LoadingInitializeCoreSimulationState: " + (Time.realtimeSinceStartup - startTime), debugLogStartup);
                 
         // Fitness Stuffs:::
         startTime = Time.realtimeSinceStartup;
@@ -197,7 +196,7 @@ public class SimulationManager : Singleton<SimulationManager>
         statsHistory = new StatsHistory(simResourceManager, settingsManager, environmentFluidManager);
         statsHistory.Initialize();
         
-        Debug.Log("LoadingSetUpFitnessStorage: " + (Time.realtimeSinceStartup - startTime).ToString());
+        Logger.Log("LoadingSetUpFitnessStorage: " + (Time.realtimeSinceStartup - startTime), debugLogStartup);
         yield return null;
         startTime = Time.realtimeSinceStartup;
         //uiManager.textLoadingTooltips.text = "LoadingInstantiateEggSacks()";
@@ -206,13 +205,13 @@ public class SimulationManager : Singleton<SimulationManager>
 
         loadingPanel.Refresh("( Reticulating Splines )", 1);
         
-        Debug.Log("LoadingInstantiateEggSacks: " + (Time.realtimeSinceStartup - startTime).ToString());
+        Logger.Log("LoadingInstantiateEggSacks: " + (Time.realtimeSinceStartup - startTime), debugLogStartup);
         yield return null;
         // ******  Combine this with ^ ^ ^ function ??? **************
         startTime = Time.realtimeSinceStartup;
         //uiManager.textLoadingTooltips.text = "LoadingInitializeEggSacksFirstTime()";
         LoadingInitializeEggSacksFirstTime();
-        Debug.Log("LoadingInitializeEggSacksFirstTime: " + (Time.realtimeSinceStartup - startTime).ToString());
+        Logger.Log("LoadingInitializeEggSacksFirstTime: " + (Time.realtimeSinceStartup - startTime), debugLogStartup);
         yield return null;
         startTime = Time.realtimeSinceStartup;
         // Can I create Egg Sacks and then immediately sapwn agents on them
@@ -220,20 +219,14 @@ public class SimulationManager : Singleton<SimulationManager>
         //uiManager.textLoadingTooltips.text = "LoadingInstantiateAgents()";
         //LoadingInstantiateAgents();  // Fills the AgentsArray, Instantiates Agent Objects (MonoBehaviors + GameObjects)
         // TEMP BREAKOUT!!!
-        // Instantiate AI Agents
-        agentsArray = new Agent[numAgents];
-        for (int i = 0; i < agentsArray.Length; i++) {
-            GameObject agentGO = new GameObject("Agent" + i.ToString());
-            Agent newAgent = agentGO.AddComponent<Agent>();
-            //newAgent.speciesIndex = Mathf.FloorToInt((float)i / (float)numAgents * (float)numSpecies);
-            newAgent.FirstTimeInitialize(settingsManager); // agentGenomePoolArray[i]);
-            agentsArray[i] = newAgent; // Add to stored list of current Agents 
-            yield return null;
-        }
+        
+        // WPP: delegated to sub-coroutine
+        yield return InstantiateAgentArrayOverTime();
+
         // *** This is being replaced by a different mechanism for spawning Agents:
         //LoadingInitializeAgentsFromGenomes(); // This was "RespawnAgents()" --  Used to actually place the Agent in the game in a random spot and set the Agent's atributes ffrom its genome
-        Debug.Log("LoadingInstantiateAgents: " + (Time.realtimeSinceStartup - startTime).ToString());
-        Debug.Log("End Total up to LoadingInstantiateAgents: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
+        Logger.Log("LoadingInstantiateAgents: " + (Time.realtimeSinceStartup - startTime), debugLogStartup);
+        Logger.Log("End Total up to LoadingInstantiateAgents: " + (Time.realtimeSinceStartup - masterStartTime), debugLogStartup);
         yield return null;
         
         // Load pre-saved genomes:
@@ -243,7 +236,7 @@ public class SimulationManager : Singleton<SimulationManager>
         // **** How to handle sharing simulation data between different Managers???
         // Once Agents, Food, etc. are established, Initialize the Fluid:
         LoadingInitializeFluidSim();
-        Debug.Log("End Total up to LoadingInitializeFluidSim: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
+        Logger.Log("End Total up to LoadingInitializeFluidSim: " + (Time.realtimeSinceStartup - masterStartTime), debugLogStartup);
 
         yield return null;
         startTime = Time.realtimeSinceStartup;
@@ -251,8 +244,8 @@ public class SimulationManager : Singleton<SimulationManager>
         //uiManager.textLoadingTooltips.text = "LoadingInitializeFoodParticles()";
         LoadingInitializeAlgaeGrid();
         LoadingInitializePlantParticles();
-        Debug.Log("LoadingInitializeFoodParticles: " + (Time.realtimeSinceStartup - startTime).ToString());
-        Debug.Log("End Total up to LoadingInitializeFoodParticles: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
+        Logger.Log("LoadingInitializeFoodParticles: " + (Time.realtimeSinceStartup - startTime), debugLogStartup);
+        Logger.Log("End Total up to LoadingInitializeFoodParticles: " + (Time.realtimeSinceStartup - masterStartTime), debugLogStartup);
         yield return null;
         //uiManager.textLoadingTooltips.text = "LoadingInitializeAnimalParticles()";
         LoadingInitializeAnimalParticles();
@@ -272,20 +265,20 @@ public class SimulationManager : Singleton<SimulationManager>
         //masterGenomePool.completeSpeciesPoolsList[0].isFlaggedForExtinction = true;
         //masterGenomePool.ExtinctifySpecies(this, masterGenomePool.currentlyActiveSpeciesIDList[0]);
                 
-        Debug.Log("End Total up to GentlyRouseTheRenderMonarchHisHighnessLordOfPixels: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
+        Logger.Log("End Total up to GentlyRouseTheRenderMonarchHisHighnessLordOfPixels: " + (Time.realtimeSinceStartup - masterStartTime), debugLogStartup);
 
         yield return null;
         startTime = Time.realtimeSinceStartup;
         //uiManager.textLoadingTooltips.text = "LoadingInitializeFoodGrid()";
         LoadingInitializeResourceGrid();
-        Debug.Log("LoadingInitializeFoodGrid: " + (Time.realtimeSinceStartup - startTime).ToString());
-        Debug.Log("End Total up to LoadingInitializeFoodGrid: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
+        Logger.Log("LoadingInitializeFoodGrid: " + (Time.realtimeSinceStartup - startTime), debugLogStartup);
+        Logger.Log("End Total up to LoadingInitializeFoodGrid: " + (Time.realtimeSinceStartup - masterStartTime), debugLogStartup);
         yield return null;
 
         //uiManager.textLoadingTooltips.text = "LoadingHookUpFluidAndRenderKing()";        
         LoadingHookUpFluidAndRenderKing();  // fluid needs refs to RK's obstacle/color cameras' RenderTextures!
         
-        Debug.Log("End Total up to LoadingHookUpFluidAndRenderKing: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
+        Logger.Log("End Total up to LoadingHookUpFluidAndRenderKing: " + (Time.realtimeSinceStartup - masterStartTime), debugLogStartup);
         yield return null;
         
         //uiManager.textLoadingTooltips.text = "LoadingInitializeGridCells()";
@@ -297,14 +290,14 @@ public class SimulationManager : Singleton<SimulationManager>
         loadingPanel.Refresh("", 3);
         
         //yield return new WaitForSeconds(5f); // TEMP!!!
-        Debug.Log("End Total: " + (Time.realtimeSinceStartup - masterStartTime).ToString());
+        Logger.Log("End Total: " + (Time.realtimeSinceStartup - masterStartTime), debugLogStartup);
         environmentFluidManager.UpdateSimulationClimate();
         
         loadingComplete = true;
         loadingPanel.SetCursorActive(true);
         loadingPanel.BeginWarmUp();
                 
-        Debug.Log("LOADING COMPLETE - Starting WarmUp!");
+        Logger.Log("LOADING COMPLETE - Starting WarmUp!", debugLogStartup);
     }
 
     // WPP 4/27: delegated
@@ -371,7 +364,7 @@ public class SimulationManager : Singleton<SimulationManager>
         LoadingInitializePopulationGenomes();  // **** Maybe change this up ? ** depending on time of first Agent Creation?
 
         if(isQuickStart) {
-            Debug.Log("QUICK START! Loading Pre-Trained Genomes!");
+            Logger.Log("QUICK START! Loading Pre-Trained Genomes!", debugLogStartup);
             LoadTrainingData();
         }
 
@@ -380,16 +373,15 @@ public class SimulationManager : Singleton<SimulationManager>
     
     private void LoadingInitializePopulationGenomes() {
         masterGenomePool = new MasterGenomePool();
-        masterGenomePool.FirstTimeInitialize(24, settingsManager.mutationSettingsVertebrates);   
+        // WPP: first argument (set to magic 24) not used by receiver
+        masterGenomePool.FirstTimeInitialize(settingsManager.mutationSettingsVertebrates);   
 
         // EGGSACKS:
         eggSackGenomePoolArray = new EggSackGenome[numEggSacks];
 
         for(int i = 0; i < eggSackGenomePoolArray.Length; i++) {
             EggSackGenome eggSackGenome = new EggSackGenome(i);
-
             eggSackGenome.InitializeAsRandomGenome();
-
             eggSackGenomePoolArray[i] = eggSackGenome;
         }
     }
@@ -402,16 +394,28 @@ public class SimulationManager : Singleton<SimulationManager>
         theRenderKing.InitializeRiseAndShine();
     }
     
-    // Instantiate AI Agents
-    private void LoadingInstantiateAgents() {
+    private void InstantiateAgentArrayImmediate() {
+        agentsArray = new Agent[numAgents];
+        for (int i = 0; i < agentsArray.Length; i++)
+            InstantiateAgent(i);          
+    }
+    
+    private IEnumerator InstantiateAgentArrayOverTime() {
         agentsArray = new Agent[numAgents];
         for (int i = 0; i < agentsArray.Length; i++) {
-            GameObject agentGO = new GameObject("Agent" + i.ToString());
-            Agent newAgent = agentGO.AddComponent<Agent>();
-            //newAgent.speciesIndex = Mathf.FloorToInt((float)i / (float)numAgents * (float)numSpecies);
-            newAgent.FirstTimeInitialize(settingsManager); // agentGenomePoolArray[i]);
-            agentsArray[i] = newAgent; // Add to stored list of current Agents            
+            InstantiateAgent(i);
+            yield return null;     
         }
+    }    
+    
+    // WPP: extracted from InstantiateAgentImmediate/OverTime
+    void InstantiateAgent(int index)
+    {
+        GameObject agentGO = new GameObject("Agent " + index);
+        Agent newAgent = agentGO.AddComponent<Agent>();
+        //newAgent.speciesIndex = Mathf.FloorToInt((float)i / (float)numAgents * (float)numSpecies);
+        newAgent.FirstTimeInitialize(settingsManager); // agentGenomePoolArray[i]);
+        agentsArray[index] = newAgent;        
     }
     
     private void LoadingInitializeAlgaeGrid() {
@@ -425,7 +429,6 @@ public class SimulationManager : Singleton<SimulationManager>
     private void LoadingInitializeResourceGrid() {        
         vegetationManager.InitializeResourceGrid(numAgents, computeShaderResourceGrid); 
         vegetationManager.InitializeDecomposersGrid();
-        
     }
     
     private void LoadingInitializeAnimalParticles() {
@@ -433,12 +436,11 @@ public class SimulationManager : Singleton<SimulationManager>
     }
     
     private void LoadingInstantiateEggSacks() {
-        // FOOODDDD!!!!
-        eggSackArray = new EggSack[numEggSacks]; // create array
+        eggSackArray = new EggSack[numEggSacks];
         
         //Debug.Log("SpawnFood!");
         for (int i = 0; i < eggSackArray.Length; i++) {
-            GameObject eggSackGO = new GameObject("EggSack" + i.ToString()); // Instantiate(Resources.Load("Prefabs/FoodPrefab")) as GameObject;
+            GameObject eggSackGO = new GameObject("EggSack" + i); // Instantiate(Resources.Load("Prefabs/FoodPrefab")) as GameObject;
             //eggSackGO.name = "EggSack" + i.ToString();
             EggSack newEggSack = eggSackGO.AddComponent<EggSack>();
             newEggSack.speciesIndex = masterGenomePool.currentlyActiveSpeciesIDList[0]; // Mathf.FloorToInt((float)i / (float)numEggSacks * (float)numSpecies);
@@ -449,8 +451,7 @@ public class SimulationManager : Singleton<SimulationManager>
     
     // Skip pregnancy, Instantiate EggSacks that begin as 'GrowingIndependent' ?
     private void LoadingInitializeEggSacksFirstTime() {  
-        foreach (var eggSack in eggSackArray)
-        {
+        foreach (var eggSack in eggSackArray) {
             eggSack.isDepleted = true;
             eggSack.curLifeStage = EggSack.EggLifeStage.Null;
         }
@@ -1478,9 +1479,10 @@ public class SimulationManager : Singleton<SimulationManager>
     }
     
     private void SpawnAgentImmaculate(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex, Vector2 spawnPos2D) {
-        //Debug.Log("SpawnAgentImmaculate!i= " + agentIndex.ToString() + ", spawnWorldPos: " + spawnPos2D.ToString());
-            
-        agentsArray[agentIndex].InitializeSpawnAgentImmaculate(settingsManager, agentIndex, sourceCandidate, new Vector3(spawnPos2D.x, spawnPos2D.y, 0f), _GlobalWaterLevel); // Spawn that genome in dead Agent's body and revive it!
+        //Debug.Log("SpawnAgentImmaculate! i= " + agentIndex.ToString() + ", spawnWorldPos: " + spawnPos2D.ToString());    
+        
+        // Spawn that genome in dead Agent's body and revive it!
+        agentsArray[agentIndex].InitializeSpawnAgentImmaculate(settingsManager, agentIndex, sourceCandidate, new Vector3(spawnPos2D.x, spawnPos2D.y, 0f), _GlobalWaterLevel); 
         theRenderKing.UpdateCritterGenericStrokesData(agentsArray[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);
         numAgentsBorn++;
     }
@@ -2286,4 +2288,6 @@ public class SimulationManager : Singleton<SimulationManager>
 
     #endregion
 
+    [Header("Debug")]
+    [SerializeField] bool debugLogStartup;
 }

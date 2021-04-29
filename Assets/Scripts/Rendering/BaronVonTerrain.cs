@@ -647,23 +647,20 @@ public class BaronVonTerrain : RenderBaron {
         computeShaderTerrainGeneration.SetTexture(kernelCSAlignGroundStrokesMed, "AltitudeRead", terrainHeightDataRT);
         computeShaderTerrainGeneration.SetFloat("_BrushAlignment", 1f);
         computeShaderTerrainGeneration.SetBuffer(kernelCSAlignGroundStrokesSml, "terrainFrameBufferStrokesCBuffer", terrainSandStrokesCBuffer);        
-        computeShaderTerrainGeneration.Dispatch(kernelCSAlignGroundStrokesSml, terrainSandStrokesCBuffer.count, 1, 1);
-        
+        computeShaderTerrainGeneration.Dispatch(kernelCSAlignGroundStrokesSml, terrainSandStrokesCBuffer.count, 1, 1);   
     }
 
     public override void Tick(RenderTexture maskTex) {
         SimTerrainBits(maskTex);
-
     }
 
     public void IncrementWorldRadius(float radius) {
-        Debug.Log("WorldRadius = " + _WorldRadius.ToString());
+        Debug.Log("WorldRadius = " + _WorldRadius);
         _WorldRadius += radius;
     }
 
     private void SimTerrainBits(RenderTexture maskTex)
     {
-        
         int kernelSimGroundBits = computeShaderTerrainGeneration.FindKernel("CSSimDecomposerBitsData");
         computeShaderTerrainGeneration.SetBuffer(kernelSimGroundBits, "groundBitsCBuffer", decomposerBitsCBuffer);
         computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "AltitudeRead", terrainHeightDataRT);
