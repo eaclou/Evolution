@@ -111,21 +111,21 @@ public class UIManager : Singleton<UIManager> {
 
     public void SetFocusedCandidateGenome(CandidateAgentData candidate) {
         focusedCandidate = candidate;
-        SetSelectedSpeciesUI(focusedCandidate.speciesID);
+        
         theRenderKing.InitializeCreaturePortrait(focusedCandidate.candidateGenome);
         Debug.Log("SetFocusedCandidateGenome --> theRenderKing.InitializeCreaturePortrait(focusedCandidate.candidateGenome);");
-        //globalResourcesUI.SetFocusedGenome(simulationManager.curSimYear, focusedCandidate.candidateGenome);
+        
         speciesOverviewUI.RebuildGenomeButtons();
         genomeViewerUI.CreateBrainGenomeTexture(focusedCandidate.candidateGenome);
+
+        SetSelectedSpeciesUI(focusedCandidate.speciesID);
     }
     
     public void SetSelectedSpeciesUI(int id) {
         SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[id];
         selectedSpeciesID = id;
-        //SetFocusedCandidateGenome(pool.representativeCandidate);
-
-        allSpeciesTreePanelUI.UpdateSpeciesListBars();
-        // attach to this parent object
+        //allSpeciesTreePanelUI.UpdateSpeciesListBarsOLD();
+        
     }
 
     public void BeginAnnouncement()
@@ -136,103 +136,6 @@ public class UIManager : Singleton<UIManager> {
 
     #region Initialization Functions:::
     
-    public void TransitionToNewGameState(GameState gameState) {
-        mainMenu.gameObject.SetActive(gameState == GameState.MainMenu);
-    
-        // * Remove: replace with delegation
-        switch (gameState) {
-            case GameState.MainMenu: break;
-            case GameState.Loading:
-                EnterLoadingUI();
-                break;
-            case GameState.Playing:
-                //canvasMain.renderMode = RenderMode.ScreenSpaceCamera;
-                //firstTimeStartup = false;
-                EnterPlayingUI();
-                break;
-            default:
-                Debug.LogError("No Enum Type Found! (" + gameState.ToString() + ")");
-                break;
-        }
-    }
-        
-    private void EnterLoadingUI() {
-        panelLoading.SetActive(true);
-        panelPlaying.SetActive(false);
-    }
-    
-    private void EnterPlayingUI() {   //// ******* this happens everytime quit to menu and resume.... *** needs to change!!! ***
-        panelLoading.SetActive(false);
-        panelPlaying.SetActive(true);
-
-        Debug.Log("EnterPlayingUI() " + Time.timeScale);
-        //Animation Big Bang here
-        simulationManager._BigBangOn = true;
-        //worldSpiritHubUI.OpenWorldTreeSelect();
-
-        SimEventData newEventData = new SimEventData();
-        newEventData.name = "New Simulation Start!";
-        newEventData.category = SimEventData.SimEventCategories.NPE;
-        newEventData.timeStepActivated = 0;
-        simulationManager.simEventsManager.completeEventHistoryList.Add(newEventData);
-
-        panelPendingClickPrompt.Narrate("... And Then There Was Not Nothing ...", new Color(0.75f, 0.75f, 0.75f));
-        //panelPendingClickPrompt.GetComponentInChildren<Text>().text = "... And Then There Was Not Nothing ...";// "Welcome! This Pond is devoid of life...\nIt's up to you to change that!";
-        //panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.75f, 0.75f, 0.75f);
-        //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
-        //isAnnouncementTextOn = true;
-        //timerAnnouncementTextCounter = 0;
-
-    }
-    #endregion
-
-    #region UPDATE UI PANELS FUNCTIONS!!! :::
-    void Update() {                                        // ***EC CLEAN THIS CRAP UP
-        if(!simulationManager.loadingComplete) return;
-        bigBangPanelUI.Tick(); ////UpdateBigBangPanel();
-        if(simulationManager._BigBangOn) return;
-        
-        observerModeUI.Tick(); //UpdateObserverModeUI();  // <== this is the big one *******  
-        // ^^^  Need to Clean this up and replace with better approach ***********************        
-        theCursorCzar.UpdateCursorCzar();  // this will assume a larger role
-        brushesUI.UpdateBrushesUI();        
-        globalResourcesUI.UpdateGlobalResourcesPanelUpdate();
- 
-        clockPanelUI.Tick(); // //UpdateClockPanelUI();
-
-        SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID]; // ***EC Move into genomeViewerUI.Tick()
-        if(focusedCandidate != null && focusedCandidate.candidateGenome != null) {
-            genomeViewerUI.UpdateUI(pool, focusedCandidate);
-            creatureBrainActivityUI.Tick();
-            creaturePaperDollUI.Tick();
-            creaturePortraitUI.Tick();
-            creatureLifeEventsLogUI.Tick(focusedCandidate);
-
-            if(simulationManager.simAgeTimeSteps % 67 == 1) {
-                speciesOverviewUI.RebuildGenomeButtons();  
-            }
-        }
-        
-        minimapUI.Tick();
-
-        debugPanelUI.UpdateDebugUI();
-              
-        //UpdatePausedUI(); 
-
-    }
-
-    public void SetFocus()
-    {
-        pool = speciesPools[selectedSpeciesID];
-        
-        if(focusedCandidate != null && focusedCandidate.candidateGenome != null) {
-            genomeViewerUI.UpdateUI(pool, focusedCandidate);
-
-            if(isRebuildTimeStep) {
-                speciesOverviewUI.RebuildGenomeButtons();  
-            }
-        } 
-    }
     
     public void InitialUnlocks() {
         Debug.Log("InitialUnlocks WATER UNLOCKED!!! " + unlockCooldownCounter.ToString()); // + ", " + BigBangPanelUI.bigBangFramesCounter.ToString());
@@ -326,7 +229,109 @@ public class UIManager : Singleton<UIManager> {
         // SPAWNS!!!! 
         simulationManager.AttemptToBrushSpawnAgent(brushesUI.selectedEssenceSlot.linkedSpeciesID);
 
-        worldSpiritHubUI.ClickButtonWorldSpiritHubAgent(0);   
+        worldSpiritHubUI.ClickButtonWorldSpiritHubAgent(0);
+
+        allSpeciesTreePanelUI.InitializeSpeciesListBars();
+    }
+    
+    public void TransitionToNewGameState(GameState gameState) {
+        mainMenu.gameObject.SetActive(gameState == GameState.MainMenu);
+    
+        // * Remove: replace with delegation
+        switch (gameState) {
+            case GameState.MainMenu: break;
+            case GameState.Loading:
+                EnterLoadingUI();
+                break;
+            case GameState.Playing:
+                //canvasMain.renderMode = RenderMode.ScreenSpaceCamera;
+                //firstTimeStartup = false;
+                EnterPlayingUI();
+                break;
+            default:
+                Debug.LogError("No Enum Type Found! (" + gameState.ToString() + ")");
+                break;
+        }
+    }
+        
+    private void EnterLoadingUI() {
+        panelLoading.SetActive(true);
+        panelPlaying.SetActive(false);
+    }
+    
+    private void EnterPlayingUI() {   //// ******* this happens everytime quit to menu and resume.... *** needs to change!!! ***
+        panelLoading.SetActive(false);
+        panelPlaying.SetActive(true);
+
+        Debug.Log("EnterPlayingUI() " + Time.timeScale);
+        //Animation Big Bang here
+        simulationManager._BigBangOn = true;
+        //worldSpiritHubUI.OpenWorldTreeSelect();
+
+        SimEventData newEventData = new SimEventData();
+        newEventData.name = "New Simulation Start!";
+        newEventData.category = SimEventData.SimEventCategories.NPE;
+        newEventData.timeStepActivated = 0;
+        simulationManager.simEventsManager.completeEventHistoryList.Add(newEventData);
+
+        panelPendingClickPrompt.Narrate("... And Then There Was Not Nothing ...", new Color(0.75f, 0.75f, 0.75f));
+        //panelPendingClickPrompt.GetComponentInChildren<Text>().text = "... And Then There Was Not Nothing ...";// "Welcome! This Pond is devoid of life...\nIt's up to you to change that!";
+        //panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.75f, 0.75f, 0.75f);
+        //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
+        //isAnnouncementTextOn = true;
+        //timerAnnouncementTextCounter = 0;
+
+    }
+    #endregion
+
+    #region UPDATE UI PANELS FUNCTIONS!!! :::
+    void Update() {                                        // ***EC CLEAN THIS CRAP UP
+        if(!simulationManager.loadingComplete) return;
+        bigBangPanelUI.Tick(); ////UpdateBigBangPanel();
+        if(simulationManager._BigBangOn) return;
+        
+        observerModeUI.Tick(); //UpdateObserverModeUI();  // <== this is the big one *******  
+        // ^^^  Need to Clean this up and replace with better approach ***********************        
+        theCursorCzar.UpdateCursorCzar();  // this will assume a larger role
+        brushesUI.UpdateBrushesUI();        
+        globalResourcesUI.UpdateGlobalResourcesPanelUpdate();
+ 
+        clockPanelUI.Tick(); // //UpdateClockPanelUI();
+
+        SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID]; // ***EC Move into genomeViewerUI.Tick()
+        if(focusedCandidate != null && focusedCandidate.candidateGenome != null) {
+            genomeViewerUI.UpdateUI(pool, focusedCandidate);
+            creatureBrainActivityUI.Tick();
+            creaturePaperDollUI.Tick();
+            creaturePortraitUI.Tick();
+            creatureLifeEventsLogUI.Tick(focusedCandidate);
+
+            if(simulationManager.simAgeTimeSteps % 67 == 1) {
+                speciesOverviewUI.RebuildGenomeButtons();  
+            }
+        }
+
+        allSpeciesTreePanelUI.UpdateUI();
+        
+        minimapUI.Tick();
+
+        debugPanelUI.UpdateDebugUI();
+              
+        //UpdatePausedUI(); 
+
+    }
+
+    public void SetFocus()
+    {
+        pool = speciesPools[selectedSpeciesID];
+        
+        if(focusedCandidate != null && focusedCandidate.candidateGenome != null) {
+            genomeViewerUI.UpdateUI(pool, focusedCandidate);
+
+            if(isRebuildTimeStep) {
+                speciesOverviewUI.RebuildGenomeButtons();  
+            }
+        } 
     }
     
     /*

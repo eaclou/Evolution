@@ -11,31 +11,103 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
     public Text textSpeciationTree;    
     public Text textStatsBody;
 
-    public GameObject treeAnchorUI;
+    public GameObject anchorGO;
+    [SerializeField]
+    private int panelSidePixelCount = 256;
     public GameObject prefabSpeciesBar;
+
+    private List<SpeciesTreeBarUI> speciesIconsList;  // keeping track of spawned buttons
 
     SimulationManager simulationManager => SimulationManager.instance;
     MasterGenomePool masterGenomePool => simulationManager.masterGenomePool;
     UIManager uiManagerRef => UIManager.instance;
+
+    public void Awake() {
+        speciesIconsList = new List<SpeciesTreeBarUI>();
+    }
+    
 
     public void Set(bool value) {
         panelSpeciesTree.SetActive(value);        
     }
 
     public void UpdateUI() {
-        
-        textSelectedSpeciesTitle.text = "SPECIES #" + uiManagerRef.selectedSpeciesID.ToString() + ":  " + masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].foundingCandidate.candidateGenome.bodyGenome.coreGenome.name;
-        SpeciesGenomePool pool = masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
-        Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-        imageSelectedSpeciesBG.color = new Color(hue.x, hue.y, hue.z);
-        textSelectedSpeciesTitle.color = Color.white; // new Color(hue.x, hue.y, hue.z);
 
-        if(simulationManager.simAgeTimeSteps % 77 == 7) {
-            UpdateSpeciesListBars();
+        //*** update positions of buttons, etc.
+        
+        for(int i = 0; i < speciesIconsList.Count; i++) {
+            SpeciesTreeBarUI icon = speciesIconsList[i];
+            icon.SetTargetPosition(new Vector3(32f * (float)i, (float)panelSidePixelCount -64f * (float)i, 0f));
+            icon.UpdateButtonDisplay();
+        }
+
+    }
+
+    public void InitializeSpeciesListBars() {
+        Debug.Log("InitializeSpeciesListBarsInitializeSpeciesListBarsInitializeSpeciesListBars");
+        int numSpecies = masterGenomePool.completeSpeciesPoolsList.Count;
+
+        foreach (Transform child in anchorGO.transform) { // clear all GO's
+            Destroy(child.gameObject);
+        }
+
+        for (int s = 0; s < numSpecies; s++) {
+            int speciesID = s;
+            int parentSpeciesID = masterGenomePool.completeSpeciesPoolsList[speciesID].parentSpeciesID;
+
+            AgentGenome templateGenome = masterGenomePool.completeSpeciesPoolsList[speciesID].leaderboardGenomesList[0].candidateGenome; //.bodyGenome.coreGenome.name;
+            Color color = new Color(templateGenome.bodyGenome.appearanceGenome.huePrimary.x, templateGenome.bodyGenome.appearanceGenome.huePrimary.y, templateGenome.bodyGenome.appearanceGenome.huePrimary.z);
+
+            GameObject obj = Instantiate(prefabSpeciesBar, new Vector3(0f, 0f, 0f), Quaternion.identity);
+            obj.transform.SetParent(anchorGO.transform, false);
+            obj.transform.localPosition = Vector3.zero;
+
+            if (uiManagerRef.selectedSpeciesID == speciesID) {
+                obj.transform.localScale = new Vector3(1.25f, 1.25f, 1f);
+            }
+            else {
+                obj.transform.localScale = new Vector3(1f, 1f, 1f);
+            }
+            obj.GetComponent<Image>().color = color;
+
+            string labelText = "";
+            labelText += "[" + speciesID.ToString() + "] " + masterGenomePool.completeSpeciesPoolsList[speciesID].foundingCandidate.candidateGenome.bodyGenome.coreGenome.name;
+
+            int savedParentSpeciesID = parentSpeciesID;
+            string lineageTxt = "";
+            for (int i = 0; i < 4; i++) {
+
+                if (savedParentSpeciesID >= 0) {
+                    //get parent pool:
+                    SpeciesGenomePool parentPool = masterGenomePool.completeSpeciesPoolsList[savedParentSpeciesID];
+                    lineageTxt += " <- " + parentPool.speciesID.ToString();
+
+                    savedParentSpeciesID = parentPool.parentSpeciesID;
+                }
+                else {
+                    //lineageTxt += "*";
+                    break;
+                }
+            }
+            labelText += lineageTxt;
+            if (speciesID == uiManagerRef.selectedSpeciesID) {
+                labelText += " *****";
+            }
+            obj.GetComponentInChildren<Text>().text = labelText;
+            SpeciesTreeBarUI buttonScript = obj.GetComponent<SpeciesTreeBarUI>();
+            speciesIconsList.Add(buttonScript);
+
+            buttonScript.Initialize(s, masterGenomePool.completeSpeciesPoolsList[speciesID]);
+            
+            //buttonScript.UpdateButtonDisplay();
         }
     }
-    
-    public void UpdateSpeciesListBars() {
+
+    public void AddNewSpeciesToPanel(SpeciesGenomePool pool) {
+
+    }
+    /*
+    public void UpdateSpeciesListBarsOLD() {
         // ****************************************************
         // ***** Add tab for Extinct species:
         if(isShowingExtinct) {
@@ -47,28 +119,22 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
                 }
             }
 
-            foreach (Transform child in treeAnchorUI.transform) {
+            foreach (Transform child in anchorGO.transform) {
                     GameObject.Destroy(child.gameObject);
             }
             for (int s = 0; s < extinctSpeciesIDList.Count; s++) {
                 int speciesID = extinctSpeciesIDList[s];
 
                 SpeciesGenomePool sourcePool = masterGenomePool.completeSpeciesPoolsList[speciesID];
-                //int parentSpeciesID = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].parentSpeciesID;
-
+             
                 AgentGenome templateGenome = sourcePool.leaderboardGenomesList[0].candidateGenome; //.bodyGenome.coreGenome.name;
                 Color color = new Color(templateGenome.bodyGenome.appearanceGenome.huePrimary.x, templateGenome.bodyGenome.appearanceGenome.huePrimary.y, templateGenome.bodyGenome.appearanceGenome.huePrimary.z);
 
                 GameObject obj = Instantiate(prefabSpeciesBar, new Vector3(0, 0, 0), Quaternion.identity);
-                obj.transform.SetParent(treeAnchorUI.transform, false);
+                obj.transform.SetParent(anchorGO.transform, false);
 
-                //int stepCreated = sourcePool.timeStepCreated;
-                //int stepExtinct = sourcePool.timeStepExtinct;
-
-                //float barStart01 = (float)stepCreated / (float)stepExtinct; // **** Only shrink sub Image<> !!! not whole button!!!
-                //float barEnd01 = 1f;
                 if(uiManagerRef.selectedSpeciesID == speciesID) {
-                    obj.transform.localScale = new Vector3(1.05f, 1.35f, 1f);
+                    obj.transform.localScale = new Vector3(1.25f, 1.25f, 1f);
                 }
                 else {
                     obj.transform.localScale = Vector3.one;
@@ -92,23 +158,10 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
         else {  // EXTANT!!! ***
             int numActiveSpecies = masterGenomePool.currentlyActiveSpeciesIDList.Count;
 
-            foreach (Transform child in treeAnchorUI.transform) {
+            foreach (Transform child in anchorGO.transform) {
                 Destroy(child.gameObject);
             }
-            /*List<int> speciesTreeIDList = new List<int>();
-            int topID = uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[0];
-            speciesTreeIDList.Add(topID);
-            int[] speciesTreeIDArray = new int[numActiveSpecies];
-            speciesTreeIDArray[0] = uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[0];
-            // create ordered list of species by hierarchy:
-            for (int s = 0; s < numActiveSpecies; s++) {
-                //check list for parent
-                int speciesID = uiManagerRef.gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[s];
-                int parentSpeciesID = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].parentSpeciesID;
-
-            }
-            //int pointerID = 0;
-            */
+            
             for (int s = 0; s < numActiveSpecies; s++) {
                 int speciesID = masterGenomePool.currentlyActiveSpeciesIDList[s];
                 int parentSpeciesID = masterGenomePool.completeSpeciesPoolsList[speciesID].parentSpeciesID;
@@ -117,13 +170,8 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
                 Color color = new Color(templateGenome.bodyGenome.appearanceGenome.huePrimary.x, templateGenome.bodyGenome.appearanceGenome.huePrimary.y, templateGenome.bodyGenome.appearanceGenome.huePrimary.z);
 
                 GameObject obj = Instantiate(prefabSpeciesBar, new Vector3(0, 0, 0), Quaternion.identity);
-                obj.transform.SetParent(treeAnchorUI.transform, false);
+                obj.transform.SetParent(anchorGO.transform, false);
 
-                //int stepCreated = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[speciesID].timeStepCreated;
-                //int stepExtinct = uiManagerRef.gameManager.simulationManager.simAgeTimeSteps;
-
-                //float barStart01 = (float)stepCreated / (float)stepExtinct;
-                //float barEnd01 = 1f;
                 if(uiManagerRef.selectedSpeciesID == speciesID) {
                     obj.transform.localScale = new Vector3(1.06f, 1.42f, 1f);
                 }
@@ -140,14 +188,14 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
                 for(int i = 0; i < 64; i++) {
                 
                     if (savedParentSpeciesID >= 0) {
-                        //get parent pool:
+                        
                         SpeciesGenomePool parentPool = masterGenomePool.completeSpeciesPoolsList[savedParentSpeciesID];
                         lineageTxt += " <- " + parentPool.speciesID.ToString();
 
                         savedParentSpeciesID = parentPool.parentSpeciesID;
                     }
                     else {
-                        //lineageTxt += "*";
+                        
                         break;
                     }
                 }
@@ -161,7 +209,7 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
             }
         }
     }
-
+    */
     public void ClickButtonToggleExtinct() {
         isShowingExtinct = !isShowingExtinct;
         if(isShowingExtinct) { // was extinct, switch to current:

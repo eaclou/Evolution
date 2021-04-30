@@ -338,6 +338,8 @@ public class SpeciesOverviewUI : MonoBehaviour {
     }    
 
     public void UpdateUI(SpeciesGenomePool pool) {
+
+
         UpdateLeaderboardGenomesUI(pool);
     }
     
