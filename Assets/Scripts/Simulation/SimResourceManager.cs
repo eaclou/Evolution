@@ -94,4 +94,12 @@ public class SimResourceManager {
         //oxygenUsedByAgentsLastFrame
         curTotalMass = curGlobalNutrients + curGlobalDetritus + curGlobalDecomposers + curGlobalAlgaeReservoir;
     }
+    
+    public void SetGlobalBiomassVolumes(float totalEggSackVolume, float totalCarrionVolume, float totalAgentBiomass, float weightedAvgLerpVal)
+    {
+        //Debug.Log("ProcessAgentScores eggVol: " + foodManager.curGlobalEggSackVolume.ToString() + ", carrion: " + foodManager.curGlobalCarrionVolume.ToString());
+        curGlobalEggSackVolume = Mathf.Lerp(curGlobalEggSackVolume, totalEggSackVolume, weightedAvgLerpVal);
+        curGlobalCarrionVolume = Mathf.Lerp(curGlobalCarrionVolume, totalCarrionVolume, weightedAvgLerpVal);
+        curGlobalAgentBiomass = Mathf.Lerp(curGlobalAgentBiomass, totalAgentBiomass, weightedAvgLerpVal);
+    }
 }

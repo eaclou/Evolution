@@ -12,7 +12,6 @@ public class CandidateAgentData {
     public bool isBeingEvaluated = false;
 
 
-
     // stats:
     public struct PerformanceData {
 	    public float totalFoodEatenPlant;
@@ -28,7 +27,11 @@ public class CandidateAgentData {
         public float totalTimesPregnant;
         public float totalTicksRested;
         public float totalTicksAlive;
+        
+        // * WPP: corpse included twice = error?
+        public float totalEaten => totalFoodEatenCorpse + totalFoodEatenEgg + totalFoodEatenCorpse + totalFoodEatenPlant + totalFoodEatenZoop;
     }
+    
     public PerformanceData performanceData;
 
     public struct CandidateEventData {

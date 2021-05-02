@@ -177,6 +177,8 @@ public class Agent : MonoBehaviour {
     IAgentAbility defend;
     IAgentAbility feed;
     Cooldown cooldown;
+    
+    public float totalEaten => candidateRef.performanceData.totalFoodEatenCorpse + candidateRef.performanceData.totalFoodEatenEgg + candidateRef.performanceData.totalFoodEatenCorpse + candidateRef.performanceData.totalFoodEatenPlant + candidateRef.performanceData.totalFoodEatenZoop;
 
     //public float overflowFoodAmount = 0f;
         

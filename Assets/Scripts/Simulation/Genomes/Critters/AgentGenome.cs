@@ -1,8 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 
-[System.Serializable]
+[Serializable]
 public class AgentGenome {
 
     //public int index = -1;  // *** THIS IS NOW MEANINGLESS??
@@ -14,7 +13,6 @@ public class AgentGenome {
     // Constructor
     public AgentGenome() {
         //this.index = index;
-
         bodyGenome = new BodyGenome();  // empty constructors:
         brainGenome = new BrainGenome();
     }
@@ -31,19 +29,19 @@ public class AgentGenome {
 
     public void PrintBrainGenome() {
         string neuronText = "";
-        neuronText += (brainGenome.bodyNeuronList.Count + brainGenome.hiddenNeuronList.Count).ToString() + " Neurons (" + brainGenome.hiddenNeuronList.Count.ToString() + ")\n";
+        neuronText += (brainGenome.bodyNeuronList.Count + brainGenome.hiddenNeuronList.Count) + " Neurons (" + brainGenome.hiddenNeuronList.Count + ")\n";
         for (int i = 0; i < brainGenome.bodyNeuronList.Count; i++) {
-            neuronText += brainGenome.bodyNeuronList[i].neuronType.ToString() + " (" + brainGenome.bodyNeuronList[i].nid.moduleID.ToString() + "," + brainGenome.bodyNeuronList[i].nid.neuronID.ToString() + ")\n";
+            neuronText += brainGenome.bodyNeuronList[i].neuronType + " (" + brainGenome.bodyNeuronList[i].nid.moduleID + "," + brainGenome.bodyNeuronList[i].nid.neuronID + ")\n";
         }
         for (int i = 0; i < brainGenome.hiddenNeuronList.Count; i++) {
-            neuronText += brainGenome.hiddenNeuronList[i].neuronType.ToString() + " (" + brainGenome.hiddenNeuronList[i].nid.moduleID.ToString() + "," + brainGenome.hiddenNeuronList[i].nid.neuronID.ToString() + ")\n";
+            neuronText += brainGenome.hiddenNeuronList[i].neuronType + " (" + brainGenome.hiddenNeuronList[i].nid.moduleID + "," + brainGenome.hiddenNeuronList[i].nid.neuronID + ")\n";
         }
         Debug.Log(neuronText);
-        string linkText = brainGenome.linkList.Count.ToString() + "Axons\n";
+        string linkText = brainGenome.linkList.Count + "Axons\n";
         linkText += "";
         for (int i = 0; i < brainGenome.linkList.Count; i++) {
-            linkText += "(" + brainGenome.linkList[i].fromModuleID.ToString() + "," + brainGenome.linkList[i].fromNeuronID.ToString() + ") ==> (" +
-                        brainGenome.linkList[i].toModuleID.ToString() + "," + brainGenome.linkList[i].toNeuronID.ToString() + ") " + brainGenome.linkList[i].weight.ToString() + "\n";
+            linkText += "(" + brainGenome.linkList[i].fromModuleID + "," + brainGenome.linkList[i].fromNeuronID + ") ==> (" +
+                        brainGenome.linkList[i].toModuleID + "," + brainGenome.linkList[i].toNeuronID + ") " + brainGenome.linkList[i].weight + "\n";
         }
         Debug.Log(linkText);
     }

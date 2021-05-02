@@ -5,6 +5,23 @@ namespace Playcraft
 {
     public static class VectorMath
     {
+        /// 3 random values between 0 - 1
+        public static Vector3 RandomPercent3()
+        {
+            return new Vector3(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
+        }
+        
+        /// Pass in a range, get a Vector2 where X and Y are random values within that range
+        public static Vector2 RandomVector2(Vector2 minMax) 
+        { 
+            return RandomVector2(minMax.x, minMax.y); 
+        }
+        
+        public static Vector2 RandomVector2(float min, float max)
+        {
+            return new Vector2(Random.Range(min, max), Random.Range(min, max));
+        }
+    
         public static Vector3 EqualVector3(float size)
         {
             return new Vector3(size, size, size);

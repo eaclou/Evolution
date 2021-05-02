@@ -63,9 +63,7 @@ public class SpeciesGenomePool {
         parentSpeciesID = parentID;
         mutationSettingsRef = settings;
         timeStepCreated = timeStep;
-        timeStepExtinct = 2000000000;
-
-        
+        timeStepExtinct = 2000000000;  
     }
 
     private void InitShared() {
@@ -88,7 +86,7 @@ public class SpeciesGenomePool {
 
         InitShared();
         depthLevel = depth;
-        Vector3 newHue = UnityEngine.Random.insideUnitSphere;
+        Vector3 newHue = Random.insideUnitSphere;
 
         string newName = "";
         string[] lettersArray = new string[26];
@@ -183,6 +181,7 @@ public class SpeciesGenomePool {
 
         RecalculateAverageCandidate();
     }
+    
     private void RecalculateAverageCandidate() {
         
         //calculate avg candidate:
@@ -236,15 +235,15 @@ public class SpeciesGenomePool {
             avgCandidateData.performanceData.totalTimesPregnant += leaderboardGenomesList[i].performanceData.totalTimesPregnant * norm;   
         }
     }
+    
     public void AddNewYearlyStats(int year) {
         
         CreateNewAverageCandidate(); // ***EC figure this out???
         
         avgCandidateDataYearList.Add(avgCandidateData); // = new List<CandidateAgentData>(); // INCLUDES PerformanceData on CandidateData
 
-        Debug.Log("AddNewYearlyStats " + avgCandidateData.performanceData.totalTicksAlive.ToString());
+        Debug.Log("AddNewYearlyStats " + avgCandidateData.performanceData.totalTicksAlive);
     }
-    
 
     public CandidateAgentData GetNextAvailableCandidate() {
 
@@ -306,7 +305,6 @@ public class SpeciesGenomePool {
                 Debug.LogError("META-ERROR NO INDEX FOUND! ");
             }
             
-
             // Find it:
             masterGenomePool.GlobalFindCandidateID(candidateData.candidateID); // temp debug
         }
@@ -324,7 +322,6 @@ public class SpeciesGenomePool {
         candidateGenomesList.Add(newCandidateData);
     }
 
-    
     public AgentGenome GetGenomeFromFitnessLottery() {
         int numCandidates = leaderboardGenomesList.Count;
         float[] rankedFitnessScoresArray = new float[numCandidates];
@@ -366,7 +363,7 @@ public class SpeciesGenomePool {
         int selectedIndex = 0;
         
         // generate random lottery value between 0f and totalFitness:
-        float lotteryValue = UnityEngine.Random.Range(0f, totalFitness);
+        float lotteryValue = Random.Range(0f, totalFitness);
         float currentValue = 0f;
         for (int i = 0; i < numCandidates; i++) {
             if (lotteryValue >= currentValue && lotteryValue < (currentValue + rankedFitnessScoresArray[i])) {
@@ -415,6 +412,35 @@ public class SpeciesGenomePool {
         childGenome.generationCount = parentGenome.generationCount + 1;
 
         return childGenome;
+    }
+    
+    public void UpdateLongestLife(Agent agent)
+    {
+        if(agent.ageCounter <= recordLongestLife) 
+            return;
+
+        recordLongestLife = agent.ageCounter;
+        recordHolderLongestLife = agent.candidateRef;
+
+        if(numAgentsEvaluated > maxLeaderboardGenomePoolSize) {
+            hallOfFameGenomesList.Add(agent.candidateRef);
+        }
+        //Debug.Log("it works! " + speciesPool.recordLongestLife.ToString() + ", candidate: " + agentRef.candidateRef.candidateID.ToString() + ", species: " + agentRef.candidateRef.speciesID.ToString());
+    }
+    
+    public void UpdateMostEaten(Agent agent)
+    {
+        float totalEaten = agent.totalEaten;
+        
+        if (totalEaten <= recordMostEaten) 
+            return;
+
+        recordMostEaten = totalEaten;
+        recordHolderMostEaten = agent.candidateRef;
+
+        if(numAgentsEvaluated > maxLeaderboardGenomePoolSize) {
+            hallOfFameGenomesList.Add(agent.candidateRef);
+        }
     }
 
     /*

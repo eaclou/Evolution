@@ -47,13 +47,8 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Scripts/Core/GameOptions.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/ZooplanktonManager.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/NarrationSO.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/FeatSO.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/CauseOfDeathSO.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/CandidateAgentData.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Abilities/IAgentAbility.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/Quality of Life/Unity Extension/MonoSim.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Abilities/AttackOverTime.cs" />
@@ -62,8 +57,6 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Abilities/Cooldown.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Abilities/Feed.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Abilities/AbilityProcess.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimResourceManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/StatsHistory.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/GraphData.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/GlobalGraphData.cs" />
@@ -96,8 +89,15 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/MasterGenomePool.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/VegetationManager.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/Quality of Life/Statics/VectorMath.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/AgentGenome.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/EggSackGenome.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimResourceManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/CandidateAgentData.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/SpeciesGenomePool.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1owaWgGpM80xkcfA3szn5iw9YkG" />

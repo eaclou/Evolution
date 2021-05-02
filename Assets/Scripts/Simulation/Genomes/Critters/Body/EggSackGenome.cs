@@ -1,13 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Playcraft;
 using UnityEngine;
 
-public class EggSackGenome {  // is this even needed anymore??? *****
-
-    public int index = -1;
+// is this even needed anymore??? *****
+public class EggSackGenome {  
+    public int index = -1;  // * WPP: assigned but not used 
 
     public Vector2 fullSize = new Vector2(2f, 2f);
 
+    // * WPP: never used
     public float foodProportionR = 1f;
     public float foodProportionG = 1f;
     public float foodProportionB = 1f;
@@ -23,6 +23,12 @@ public class EggSackGenome {  // is this even needed anymore??? *****
     public float stemWidth;
     public Vector2 leafScale;
     public Vector2 fruitScale;
+    
+    const int TEXTURE_COUNT = 8;
+    Vector2 fullSizeRange = new Vector2(.25f, 4.5f);
+    Vector2 leafScaleRange = new Vector2(0.15f, 0.25f);
+    Vector2 fruitScaleRange = new Vector2(0.06f, 0.15f);
+    Vector2 stemWidthRange = new Vector2(.4f, .99f);
 
     public Vector2 randomSeed; // ??
     
@@ -30,22 +36,24 @@ public class EggSackGenome {  // is this even needed anymore??? *****
         this.index = index;
     }
 
+    // WPP 5/1/21: Delegated nontrivial randomization math to statics, 
+    // exposed values, and applied constant.
     public void InitializeAsRandomGenome() {
-
-        fullSize = new Vector2(UnityEngine.Random.Range(0.25f, 4.5f), UnityEngine.Random.Range(0.25f, 4.5f));
+    
+        fullSize = VectorMath.RandomVector2(fullSizeRange);
         
-        fruitHue = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
-        leafHue = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
-        stemHue = new Vector3(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
+        fruitHue = VectorMath.RandomPercent3();
+        leafHue = VectorMath.RandomPercent3();
+        stemHue = VectorMath.RandomPercent3();
 
-        stemBrushType = UnityEngine.Random.Range(0, 8); // 8 texture types
-        leafBrushType = UnityEngine.Random.Range(0, 8);
-        fruitBrushType = UnityEngine.Random.Range(0, 8);
+        stemBrushType = Random.Range(0, TEXTURE_COUNT);
+        leafBrushType = Random.Range(0, TEXTURE_COUNT);
+        fruitBrushType = Random.Range(0, TEXTURE_COUNT);
 
-        stemWidth = UnityEngine.Random.Range(0.4f, 0.99f);
+        stemWidth = Random.Range(stemWidthRange.x, stemWidthRange.y);
 
-        leafScale = new Vector2(UnityEngine.Random.Range(0.15f, 0.25f), UnityEngine.Random.Range(0.15f, 0.25f));
-        fruitScale = new Vector2(UnityEngine.Random.Range(0.06f, 0.15f), UnityEngine.Random.Range(0.06f, 0.15f));
+        leafScale = VectorMath.RandomVector2(leafScaleRange);
+        fruitScale = VectorMath.RandomVector2(fruitScaleRange);
     }
 
     public void SetToMutatedCopyOfParentGenome(EggSackGenome parentFoodGenome, MutationSettings settings) {
@@ -55,6 +63,7 @@ public class EggSackGenome {  // is this even needed anymore??? *****
         if(fullSize.y < fullSize.x) {
             fullSize.y = fullSize.x;
         }
+        
         // Set equal to parent at first, then check for possible mutation of that value:        
         fruitHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentFoodGenome.fruitHue, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 0f, 1f);
         leafHue = UtilityMutationFunctions.GetMutatedVector3Additive(parentFoodGenome.leafHue, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 0f, 1f);
