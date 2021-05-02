@@ -238,11 +238,10 @@ public class SpeciesGenomePool {
     
     public void AddNewYearlyStats(int year) {
         
-        CreateNewAverageCandidate(); // ***EC figure this out???
-        
+        CreateNewAverageCandidate(); // ***EC figure this out???        
         avgCandidateDataYearList.Add(avgCandidateData); // = new List<CandidateAgentData>(); // INCLUDES PerformanceData on CandidateData
 
-        Debug.Log("AddNewYearlyStats " + avgCandidateData.performanceData.totalTicksAlive);
+        //Debug.Log("AddNewYearlyStats " + avgCandidateData.performanceData.totalTicksAlive);
     }
 
     public CandidateAgentData GetNextAvailableCandidate() {

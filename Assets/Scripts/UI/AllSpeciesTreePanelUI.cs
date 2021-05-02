@@ -37,12 +37,59 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
         
         for(int i = 0; i < speciesIconsList.Count; i++) {
             SpeciesTreeBarUI icon = speciesIconsList[i];
-            icon.SetTargetPosition(new Vector3(32f * (float)i, (float)panelSidePixelCount -64f * (float)i, 0f));
-            icon.UpdateButtonDisplay();
+            //icon.SetTargetPosition(new Vector3(32f * (float)i, (float)panelSidePixelCount -64f * (float)i, 0f));
+            bool isSelected = false;
+            if (icon.speciesID == uiManagerRef.selectedSpeciesID) {
+                isSelected = true;
+            }
+            icon.UpdateButtonDisplay(panelSidePixelCount, isSelected);
+
+            
         }
 
     }
+    public void UpdateSpeciesButtonTargetCoords() {
+        if(speciesIconsList[0].linkedPool.avgCandidateDataYearList.Count < 1) {
+            return;
+        }
+        float bestScore = 0f;
+        for (int s = 0; s < speciesIconsList.Count; s++) {
+            SpeciesGenomePool pool = speciesIconsList[s].linkedPool;
+            float valStat = (float)pool.avgCandidateDataYearList[pool.avgCandidateDataYearList.Count - 1].performanceData.totalTicksAlive;
 
+            if(valStat > bestScore) {
+                bestScore = valStat;
+            }
+        }
+
+        // SORT
+        for (int s = 0; s < speciesIconsList.Count; s++) {
+            SpeciesGenomePool pool = speciesIconsList[s].linkedPool;
+            float valStat = (float)pool.avgCandidateDataYearList[pool.avgCandidateDataYearList.Count - 1].performanceData.totalTicksAlive;
+            speciesIconsList[s].SetTargetCoords(new Vector2(1f, Mathf.Clamp01(valStat / bestScore)));
+        }
+    }
+    private void CreateSpeciesButton(SpeciesGenomePool pool) {
+        
+            AgentGenome templateGenome = masterGenomePool.completeSpeciesPoolsList[pool.speciesID].leaderboardGenomesList[0].candidateGenome; //.bodyGenome.coreGenome.name;
+            Color color = new Color(templateGenome.bodyGenome.appearanceGenome.huePrimary.x, templateGenome.bodyGenome.appearanceGenome.huePrimary.y, templateGenome.bodyGenome.appearanceGenome.huePrimary.z);
+
+            GameObject obj = Instantiate(prefabSpeciesBar, new Vector3(0f, 0f, 0f), Quaternion.identity);
+            obj.transform.SetParent(anchorGO.transform, false);
+            obj.transform.localPosition = Vector3.zero;
+            obj.transform.localScale = new Vector3(1f, 1f, 1f);
+            obj.GetComponent<Image>().color = color;
+          
+            string labelText = "";
+            labelText += "[" + pool.speciesID.ToString() + "] " + masterGenomePool.completeSpeciesPoolsList[pool.speciesID].foundingCandidate.candidateGenome.bodyGenome.coreGenome.name;
+
+            obj.GetComponentInChildren<Text>().text = labelText;
+            SpeciesTreeBarUI buttonScript = obj.GetComponent<SpeciesTreeBarUI>();
+            speciesIconsList.Add(buttonScript);
+
+            buttonScript.Initialize(speciesIconsList.Count - 1, masterGenomePool.completeSpeciesPoolsList[pool.speciesID]);
+            
+    }
     public void InitializeSpeciesListBars() {
         Debug.Log("InitializeSpeciesListBarsInitializeSpeciesListBarsInitializeSpeciesListBars");
         int numSpecies = masterGenomePool.completeSpeciesPoolsList.Count;
@@ -55,56 +102,15 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
             int speciesID = s;
             int parentSpeciesID = masterGenomePool.completeSpeciesPoolsList[speciesID].parentSpeciesID;
 
-            AgentGenome templateGenome = masterGenomePool.completeSpeciesPoolsList[speciesID].leaderboardGenomesList[0].candidateGenome; //.bodyGenome.coreGenome.name;
-            Color color = new Color(templateGenome.bodyGenome.appearanceGenome.huePrimary.x, templateGenome.bodyGenome.appearanceGenome.huePrimary.y, templateGenome.bodyGenome.appearanceGenome.huePrimary.z);
-
-            GameObject obj = Instantiate(prefabSpeciesBar, new Vector3(0f, 0f, 0f), Quaternion.identity);
-            obj.transform.SetParent(anchorGO.transform, false);
-            obj.transform.localPosition = Vector3.zero;
-
-            if (uiManagerRef.selectedSpeciesID == speciesID) {
-                obj.transform.localScale = new Vector3(1.25f, 1.25f, 1f);
-            }
-            else {
-                obj.transform.localScale = new Vector3(1f, 1f, 1f);
-            }
-            obj.GetComponent<Image>().color = color;
-
-            string labelText = "";
-            labelText += "[" + speciesID.ToString() + "] " + masterGenomePool.completeSpeciesPoolsList[speciesID].foundingCandidate.candidateGenome.bodyGenome.coreGenome.name;
-
-            int savedParentSpeciesID = parentSpeciesID;
-            string lineageTxt = "";
-            for (int i = 0; i < 4; i++) {
-
-                if (savedParentSpeciesID >= 0) {
-                    //get parent pool:
-                    SpeciesGenomePool parentPool = masterGenomePool.completeSpeciesPoolsList[savedParentSpeciesID];
-                    lineageTxt += " <- " + parentPool.speciesID.ToString();
-
-                    savedParentSpeciesID = parentPool.parentSpeciesID;
-                }
-                else {
-                    //lineageTxt += "*";
-                    break;
-                }
-            }
-            labelText += lineageTxt;
-            if (speciesID == uiManagerRef.selectedSpeciesID) {
-                labelText += " *****";
-            }
-            obj.GetComponentInChildren<Text>().text = labelText;
-            SpeciesTreeBarUI buttonScript = obj.GetComponent<SpeciesTreeBarUI>();
-            speciesIconsList.Add(buttonScript);
-
-            buttonScript.Initialize(s, masterGenomePool.completeSpeciesPoolsList[speciesID]);
+            CreateSpeciesButton(masterGenomePool.completeSpeciesPoolsList[speciesID]);
             
-            //buttonScript.UpdateButtonDisplay();
         }
     }
 
     public void AddNewSpeciesToPanel(SpeciesGenomePool pool) {
+        Debug.Log("AddNewSpeciesToPanelUI: " + pool.speciesID);
 
+        CreateSpeciesButton(pool);
     }
     /*
     public void UpdateSpeciesListBarsOLD() {

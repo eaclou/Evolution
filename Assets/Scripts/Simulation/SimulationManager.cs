@@ -739,6 +739,8 @@ public class SimulationManager : Singleton<SimulationManager>
         if(simAgeTimeSteps % 80 == 10) {
             uiManager.speciesGraphPanelUI.UpdateSpeciesTreeDataTextures(curSimYear);
 
+            uiManager.allSpeciesTreePanelUI.UpdateSpeciesButtonTargetCoords();
+
             // WPP 4/27: delegated
             /*
             graphDataGlobalNutrients.AddNewEntry(simResourceManager.curGlobalNutrients);
@@ -1787,7 +1789,9 @@ public class SimulationManager : Singleton<SimulationManager>
         
         if(newSpecies.depthLevel > masterGenomePool.currentHighestDepth) {
             masterGenomePool.currentHighestDepth = newSpecies.depthLevel;
-        }        
+        }
+
+        uiManager.allSpeciesTreePanelUI.AddNewSpeciesToPanel(newSpecies);
     }
     
     private StartPositionGenome GetInitialAgentSpawnPosition(int speciesIndex)

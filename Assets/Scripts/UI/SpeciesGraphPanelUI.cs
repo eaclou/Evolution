@@ -246,7 +246,7 @@ public class SpeciesGraphPanelUI : MonoBehaviour
                             valStat = speciesPool.avgDamageTakenPerYearList[t];
                         }
                         */
-                        if(years > 32) {
+                        if(years > 16) {
                             float time01 = (float)t / (float)years;
 
                             if(time01 < 0.05f) {
