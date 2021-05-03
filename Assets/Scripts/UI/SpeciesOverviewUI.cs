@@ -66,6 +66,10 @@ public class SpeciesOverviewUI : MonoBehaviour {
         RebuildGenomeButtons();
     }
 
+    public void RefreshPanelUI() {
+        RebuildGenomeButtons();
+
+    }
     public void RebuildGenomeButtons() { // **** CHANGE to properly pooled, only create as needed, etc. ****
         
         SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];

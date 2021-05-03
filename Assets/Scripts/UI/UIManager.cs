@@ -124,8 +124,8 @@ public class UIManager : Singleton<UIManager> {
     public void SetSelectedSpeciesUI(int id) {
         SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[id];
         selectedSpeciesID = id;
-        //allSpeciesTreePanelUI.UpdateSpeciesListBarsOLD();
-        
+        allSpeciesTreePanelUI.RefreshPanelUI();
+        speciesOverviewUI.RebuildGenomeButtons();
     }
 
     public void BeginAnnouncement()

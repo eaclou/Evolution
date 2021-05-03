@@ -29,8 +29,9 @@ public class SpeciesTreeBarUI : MonoBehaviour {
         targetCoords = newCoords;
     }
     public void UpdateButtonDisplay(int panelPixelSize, bool isSelected) {
-        gameObject.transform.localPosition = targetCoords * (float)panelPixelSize;
+        
 
+        gameObject.transform.localPosition = new Vector3(targetCoords.x * (float)panelPixelSize, targetCoords.y * (float)panelPixelSize, 0f);
         if(isSelected) {
             gameObject.transform.localScale = new Vector3(1.25f, 1.25f, 1f);
         }

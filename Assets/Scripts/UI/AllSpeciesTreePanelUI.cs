@@ -10,6 +10,7 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
     public Image imageSelectedSpeciesBG;
     public Text textSpeciationTree;    
     public Text textStatsBody;
+    public Text textTitle;
 
     public GameObject anchorGO;
     [SerializeField]
@@ -22,6 +23,8 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
     MasterGenomePool masterGenomePool => simulationManager.masterGenomePool;
     UIManager uiManagerRef => UIManager.instance;
 
+    private int curPanelMode = 0;  // 0 == lineage, 1 == graph
+
     public void Awake() {
         speciesIconsList = new List<SpeciesTreeBarUI>();
     }
@@ -32,7 +35,7 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
     }
 
     public void UpdateUI() {
-
+        textTitle.text = "mode: " + curPanelMode;
         //*** update positions of buttons, etc.
         
         for(int i = 0; i < speciesIconsList.Count; i++) {
@@ -48,8 +51,15 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
         }
 
     }
-    public void UpdateSpeciesButtonTargetCoords() {
-        if(speciesIconsList[0].linkedPool.avgCandidateDataYearList.Count < 1) {
+    private void UpdateSpeciesButtonsLineageMode() {        
+        for (int s = 0; s < speciesIconsList.Count; s++) {            
+            float yCoord = (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);            
+            speciesIconsList[s].SetTargetCoords(new Vector2(1f, yCoord));
+        }
+    }
+    private void UpdateSpeciesButtonsGraphMode() {
+        if (speciesIconsList[0].linkedPool.avgCandidateDataYearList.Count < 1) {
+            UpdateSpeciesButtonsDefault();
             return;
         }
         float bestScore = 0f;
@@ -66,8 +76,40 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
         for (int s = 0; s < speciesIconsList.Count; s++) {
             SpeciesGenomePool pool = speciesIconsList[s].linkedPool;
             float valStat = (float)pool.avgCandidateDataYearList[pool.avgCandidateDataYearList.Count - 1].performanceData.totalTicksAlive;
-            speciesIconsList[s].SetTargetCoords(new Vector2(1f, Mathf.Clamp01(valStat / bestScore)));
+
+            float xCoord = 1f;
+            if (pool.isExtinct) {
+                xCoord = (float)pool.yearCreated / Mathf.Max(1f, (float)simulationManager.curSimYear);
+            }
+
+            speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, Mathf.Clamp01(valStat / bestScore)));
         }
+    }
+    private void UpdateSpeciesButtonsDefault() {
+        for (int s = 0; s < speciesIconsList.Count; s++) {        // simple list, evenly spaced    
+            float yCoord = (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);            
+            speciesIconsList[s].SetTargetCoords(new Vector2(1f, yCoord));
+        }
+    }
+
+    public void RefreshPanelUI() {
+        UpdateSpeciesButtonTargetCoords();
+        textSelectedSpeciesTitle.text = "Selected Species: #" + uiManagerRef.selectedSpeciesID;
+
+        Vector3 hue = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+        imageSelectedSpeciesBG.color = new Color(hue.x, hue.y, hue.z);
+    }
+    public void UpdateSpeciesButtonTargetCoords() {
+
+        if(curPanelMode == 0) {
+            UpdateSpeciesButtonsLineageMode();
+        }
+        else {
+            UpdateSpeciesButtonsGraphMode();
+        }
+
+
+        
     }
     private void CreateSpeciesButton(SpeciesGenomePool pool) {
         
@@ -234,5 +276,17 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
             int defaultSpeciesID = masterGenomePool.currentlyActiveSpeciesIDList[0];
             //SetSelectedSpeciesUI(defaultSpeciesID);   
         }  
+    }
+
+    public void ClickButtonGraphModeToggle() {
+        if(curPanelMode == 0) {
+            curPanelMode = 1;
+        }
+        else {
+            curPanelMode = 0;
+        }
+        Debug.Log("AllSpeciesTree Panel MODE: " + curPanelMode);
+
+        UpdateSpeciesButtonTargetCoords();
     }
 }
