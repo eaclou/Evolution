@@ -76,40 +76,6 @@ public class SimulationManager : Singleton<SimulationManager>
     public int numAgentsDied = 0;
 
     public StatsHistory statsHistory;
-// WPP 4/27: delegated to StatsHistory    
-/*    
-        // 0 == decay nutrients  .x
-        // 1 == plant food  .y
-        // 2 == eggs food  .z
-        // 3 = corpse food  .w
-        // 4 = brain mutation freq
-        // 5 = brain mutation amp
-        // 6 = brain size bias
-        // 7 = body proportion freq
-        // 8 = body proportion amp
-        // 9 = body sensor mutation rate
-        // 10 = water current / storminess
-        
-    public List<Vector4> statsNutrientsEachGenerationList;
-    public List<float> statsHistoryBrainMutationFreqList;
-    public List<float> statsHistoryBrainMutationAmpList;
-    public List<float> statsHistoryBrainSizeBiasList;
-    public List<float> statsHistoryBodyMutationFreqList;
-    public List<float> statsHistoryBodyMutationAmpList;
-    public List<float> statsHistoryBodySensorVarianceList;
-    public List<float> statsHistoryWaterCurrentsList;
-
-    public List<float> statsHistoryOxygenList;
-    public List<float> statsHistoryNutrientsList;
-    public List<float> statsHistoryDetritusList;
-    public List<float> statsHistoryDecomposersList;
-    public List<float> statsHistoryAlgaeSingleList;
-    public List<float> statsHistoryAlgaeParticleList;
-    public List<float> statsHistoryZooplanktonList;
-    public List<float> statsHistoryLivingAgentsList;
-    public List<float> statsHistoryDeadAgentsList;
-    public List<float> statsHistoryEggSacksList;
-*/
 
     public int curApproxGen = 1;
 
@@ -133,36 +99,6 @@ public class SimulationManager : Singleton<SimulationManager>
     //private int recentlyAddedSpeciesTimeCounter = 0;
 
     GlobalGraphData globalGraphData = new GlobalGraphData();
-    // WPP 4/27/21: delegated to GlobalGraphData
-    /*
-    public GraphData graphDataGlobalNutrients;
-    public GraphData graphDataGlobalWaste;
-    public GraphData graphDataGlobalDecomposers;
-    public GraphData graphDataGlobalAlgae;
-    public GraphData graphDataGlobalPlants;
-    public GraphData graphDataGlobalZooplankton;
-    public GraphData graphDataGlobalVertebrates;
-
-    public GraphData graphDataVertebrateLifespan0;
-    public GraphData graphDataVertebratePopulation0;
-    public GraphData graphDataVertebrateFoodEaten0;
-    public GraphData graphDataVertebrateGenome0;
-
-    public GraphData graphDataVertebrateLifespan1;
-    public GraphData graphDataVertebratePopulation1;
-    public GraphData graphDataVertebrateFoodEaten1;
-    public GraphData graphDataVertebrateGenome1;
-
-    public GraphData graphDataVertebrateLifespan2;
-    public GraphData graphDataVertebratePopulation2;
-    public GraphData graphDataVertebrateFoodEaten2;
-    public GraphData graphDataVertebrateGenome2;
-
-    public GraphData graphDataVertebrateLifespan3;
-    public GraphData graphDataVertebratePopulation3;
-    public GraphData graphDataVertebrateFoodEaten3;
-    public GraphData graphDataVertebrateGenome3;
-    */
         
     #region loading   // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& LOADING LOADING LOADING &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     
@@ -220,7 +156,6 @@ public class SimulationManager : Singleton<SimulationManager>
         //LoadingInstantiateAgents();  // Fills the AgentsArray, Instantiates Agent Objects (MonoBehaviors + GameObjects)
         // TEMP BREAKOUT!!!
         
-        // WPP: delegated to sub-coroutine
         yield return InstantiateAgentArrayOverTime();
 
         // *** This is being replaced by a different mechanism for spawning Agents:
@@ -299,39 +234,6 @@ public class SimulationManager : Singleton<SimulationManager>
                 
         Logger.Log("LOADING COMPLETE - Starting WarmUp!", debugLogStartup);
     }
-
-    // WPP 4/27: delegated
-    /*
-    private void InitializeGraphData() {
-        graphDataGlobalNutrients = new GraphData(uiManager.globalResourcesUI.knowledgeGraphNutrientsMat);  // testing!!!!
-        graphDataGlobalWaste = new GraphData(uiManager.globalResourcesUI.knowledgeGraphDetritusMat);  // testing!!!!
-        graphDataGlobalDecomposers = new GraphData(uiManager.globalResourcesUI.knowledgeGraphDecomposersMat);  // testing!!!!
-        graphDataGlobalAlgae = new GraphData(uiManager.globalResourcesUI.knowledgeGraphAlgaeMat);  // testing!!!!
-        graphDataGlobalPlants = new GraphData(uiManager.globalResourcesUI.knowledgeGraphPlantsMat);  // testing!!!!
-        graphDataGlobalZooplankton = new GraphData(uiManager.globalResourcesUI.knowledgeGraphZooplanktonMat);  // testing!!!!
-        graphDataGlobalVertebrates = new GraphData(uiManager.globalResourcesUI.knowledgeGraphVertebratesMat);  // testing!!!!
-        
-        //graphDataVertebrateLifespan0 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateLifespanMat0);
-        //graphDataVertebratePopulation0 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebratePopulationMat0);
-        //graphDataVertebrateFoodEaten0 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateFoodEatenMat0);
-        //graphDataVertebrateGenome0 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateGenomeMat0);
-
-        //graphDataVertebrateLifespan1 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateLifespanMat1);
-        //graphDataVertebratePopulation1 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebratePopulationMat1);
-        //graphDataVertebrateFoodEaten1 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateFoodEatenMat1);
-        //graphDataVertebrateGenome1 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateGenomeMat1);
-
-        //graphDataVertebrateLifespan2 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateLifespanMat2);
-        //graphDataVertebratePopulation2 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebratePopulationMat2);
-        //graphDataVertebrateFoodEaten2 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateFoodEatenMat2);
-        //graphDataVertebrateGenome2 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateGenomeMat2);
-
-        //graphDataVertebrateLifespan3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateLifespanMat3);
-        //graphDataVertebratePopulation3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebratePopulationMat3);
-        //graphDataVertebrateFoodEaten3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateFoodEatenMat3);
-        //graphDataVertebrateGenome3 = new GraphData(uiManager.knowledgeUI.knowledgeGraphVertebrateGenomeMat3);
-    }
-    */
     
     public void LogFeat(FeatSO value)
     {
@@ -373,7 +275,6 @@ public class SimulationManager : Singleton<SimulationManager>
     
     private void LoadingInitializePopulationGenomes() {
         masterGenomePool = new MasterGenomePool();
-        // WPP: first argument (set to magic 24) not used by receiver
         masterGenomePool.FirstTimeInitialize(settingsManager.mutationSettingsVertebrates);   
 
         // EGGSACKS:
@@ -408,7 +309,6 @@ public class SimulationManager : Singleton<SimulationManager>
         }
     }    
     
-    // WPP: extracted from InstantiateAgentImmediate/OverTime
     void InstantiateAgent(int index)
     {
         GameObject agentGO = new GameObject("Agent " + index);
@@ -483,47 +383,8 @@ public class SimulationManager : Singleton<SimulationManager>
                 mapGridCellArray[x][y] = new MapGridCell(cellBottomLeft, cellTopRight);
             }
         }
-    }
-    
-    // WPP 4/27: delegated
-    /*
-    private void LoadingSetUpFitnessStorage() {
-        statsNutrientsEachGenerationList = new List<Vector4>{Vector4.one * 0.0001f};
-        statsHistoryBrainMutationFreqList = new List<float>{0f};
-        statsHistoryBrainMutationAmpList = new List<float>{0f};
-        statsHistoryBrainSizeBiasList = new List<float>{0f};
-        statsHistoryBodyMutationFreqList = new List<float>{0f};
-        statsHistoryBodyMutationAmpList = new List<float>{0f};
-        statsHistoryBodySensorVarianceList = new List<float>{0f};
-        statsHistoryWaterCurrentsList = new List<float>{0f};
-
-        statsHistoryOxygenList = new List<float>{0f};
-        statsHistoryNutrientsList = new List<float>{0f};
-        statsHistoryDetritusList = new List<float>{0f};
-        statsHistoryDecomposersList = new List<float>{0f};
-        statsHistoryAlgaeSingleList = new List<float>{0f};
-        statsHistoryAlgaeParticleList = new List<float>{0f};
-        statsHistoryZooplanktonList = new List<float>{0f};
-        statsHistoryLivingAgentsList = new List<float>{0f};
-        statsHistoryDeadAgentsList = new List<float>{0f};
-        statsHistoryEggSacksList = new List<float>{0f};
-        
-        /*
-        statsLifespanEachGenerationList = new List<Vector4>(); // 
-        statsFoodEatenEachGenerationList = new List<Vector4>();
-        statsPredationEachGenerationList = new List<Vector4>();
-        statsBodySizesEachGenerationList = new List<Vector4>(); // 
-        statsNutrientsEachGenerationList = new List<Vector4>();
-        statsMutationEachGenerationList = new List<float>();
-        statsLifespanEachGenerationList.Add(Vector4.one * 0.0001f);
-        statsFoodEatenEachGenerationList.Add(Vector4.one * 0.0001f);
-        statsPredationEachGenerationList.Add(Vector4.one * 0.0001f);
-        statsBodySizesEachGenerationList.Add(Vector4.one * 0.0001f);
-        statsNutrientsEachGenerationList.Add(Vector4.one * 0.0001f);
-        statsMutationEachGenerationList.Add(0.0001f);
-    //}
-    */
-    
+    }   
+ 
     /*private void LoadingLoadGenepoolFiles() {
         
         Debug.Log("LOAD LoadingLoadGenepoolFiles!");
@@ -740,16 +601,6 @@ public class SimulationManager : Singleton<SimulationManager>
             uiManager.speciesGraphPanelUI.UpdateSpeciesTreeDataTextures(curSimYear);
 
             uiManager.allSpeciesTreePanelUI.UpdateSpeciesButtonTargetCoords();
-
-            // WPP 4/27: delegated
-            /*
-            graphDataGlobalNutrients.AddNewEntry(simResourceManager.curGlobalNutrients);
-            graphDataGlobalWaste.AddNewEntry(simResourceManager.curGlobalDetritus);
-            graphDataGlobalDecomposers.AddNewEntry(simResourceManager.curGlobalDecomposers);
-            graphDataGlobalAlgae.AddNewEntry(simResourceManager.curGlobalAlgaeReservoir);
-            graphDataGlobalPlants.AddNewEntry(simResourceManager.curGlobalPlantParticles);
-            graphDataGlobalZooplankton.AddNewEntry(simResourceManager.curGlobalAnimalParticles);
-            */
             
             int speciesID0 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].linkedSpeciesID;
             int speciesID1 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].linkedSpeciesID;
@@ -1155,7 +1006,6 @@ public class SimulationManager : Singleton<SimulationManager>
     {
         Debug.Log("AttemptToKillAgent loc: " + clickPos + " ,,, species: " + speciesID + ", brushRadius: " + brushRadius);  
 
-        // WPP: applied early exit and foreach
         foreach (var agent in agentsArray) 
         {            
             if (agent.curLifeStage != Agent.AgentLifeStage.Mature ||
@@ -1203,15 +1053,6 @@ public class SimulationManager : Singleton<SimulationManager>
             
             Vector4 altitudeSample = uiManager.SampleTexture(theRenderKing.baronVonTerrain.terrainHeightDataRT, spawnWorldPos / _MapSize);
 
-            // WPP: delegated to function, use simple assignment
-            /*bool isValidSpawnLoc = true;
-            if(altitudeSample.x > _GlobalWaterLevel) {
-                isValidSpawnLoc = false;
-            }
-            if(altitudeSample.w < 0.1f) {
-                isValidSpawnLoc = false;
-            }*/
-
             if(IsValidSpawnLoc(altitudeSample)) {
                 SpawnAgentImmaculate(candidateData, a, speciesIndex, spawnWorldPos);
                 candidateData.isBeingEvaluated = true;
@@ -1253,17 +1094,6 @@ public class SimulationManager : Singleton<SimulationManager>
         
         List<int> validEggSackIndicesList = GetValidEggSackIndices(speciesIndex);
         
-        // WPP: delegated to method
-        /*for(int i = 0; i < numEggSacks; i++) {  
-            // if EggSack belongs to the right species
-            if (eggSackArray[i].curLifeStage == EggSack.EggLifeStage.Mature && 
-            // egg sack is at proper stage of development
-            eggSackArray[i].lifeStageTransitionTimeStepCounter < eggSackArray[i]._MatureDurationTimeSteps &&
-            eggSackArray[i].speciesIndex == speciesIndex) {
-                validEggSackIndicesList.Add(i);                        
-            }
-        }*/
-        
         // **** BROKEN BY SPECIATION UPDATE!!! *****
         if(validEggSackIndicesList.Count > 0) {  
             int randIndex = Random.Range(0, validEggSackIndicesList.Count);
@@ -1293,15 +1123,6 @@ public class SimulationManager : Singleton<SimulationManager>
 
             Vector2 spawnWorldPos = new Vector2(randWorldPos.x, randWorldPos.y);
             Vector4 altitudeSample = uiManager.SampleTexture(theRenderKing.baronVonTerrain.terrainHeightDataRT, spawnWorldPos / _MapSize);
-              
-            // WPP: delegated to function
-            /*bool isValidSpawnLoc = true;
-            if(altitudeSample.x > _GlobalWaterLevel) {
-                isValidSpawnLoc = false;
-            }
-            if(altitudeSample.w < 0.1f) {
-                isValidSpawnLoc = false;
-            }*/
 
             if (IsValidSpawnLoc(altitudeSample)) {
                 SpawnAgentImmaculate(candidateData, agentIndex, speciesIndex, spawnWorldPos);
@@ -1363,31 +1184,10 @@ public class SimulationManager : Singleton<SimulationManager>
         //simEventsManager.ExecuteEvent(this, eventData);
     }
     
-    // WPP: delegated checks to SpeciesGenomePool
     public void UpdateRecords(Agent agent) {
         SpeciesGenomePool speciesPool = masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex];
         speciesPool.UpdateLongestLife(agent);
         speciesPool.UpdateMostEaten(agent);
-        /*if(agentRef.ageCounter > speciesPool.recordLongestLife) {
-            speciesPool.recordLongestLife = agentRef.ageCounter;
-            speciesPool.recordHolderLongestLife = agentRef.candidateRef;
-
-            if(speciesPool.numAgentsEvaluated > 24) {
-                speciesPool.hallOfFameGenomesList.Add(agentRef.candidateRef);
-            }
-            //Debug.Log("it works! " + speciesPool.recordLongestLife.ToString() + ", candidate: " + agentRef.candidateRef.candidateID.ToString() + ", species: " + agentRef.candidateRef.speciesID.ToString());
-        }*/
-        
-        /*float totalEaten = (agentRef.candidateRef.performanceData.totalFoodEatenCorpse + agentRef.candidateRef.performanceData.totalFoodEatenEgg + agentRef.candidateRef.performanceData.totalFoodEatenCorpse + agentRef.candidateRef.performanceData.totalFoodEatenPlant + agentRef.candidateRef.performanceData.totalFoodEatenZoop);
-        
-        if(totalEaten > speciesPool.recordMostEaten) {
-            speciesPool.recordMostEaten = totalEaten;
-            speciesPool.recordHolderMostEaten = agentRef.candidateRef;
-
-            if(speciesPool.numAgentsEvaluated > 24) {
-                speciesPool.hallOfFameGenomesList.Add(agentRef.candidateRef);
-            }
-        }*/
     }
     
     // *** Confirm these are set up alright       
@@ -1629,27 +1429,8 @@ public class SimulationManager : Singleton<SimulationManager>
         float totalAgentBiomass = livingAndDeadMass.x;
         float totalCarrionVolume = livingAndDeadMass.y;
         
-        // WPP: delegated to function (see above)
-        /*for(int i = 0; i < eggSackArray.Length; i++) {
-            if(eggSackArray[i].curLifeStage != EggSack.EggLifeStage.Null) {
-                totalEggSackVolume += eggSackArray[i].currentBiomass;
-            }
-        }
-        
-        for(int i = 0; i < agentsArray.Length; i++) {
-            if(agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
-                totalCarrionVolume += agentsArray[i].currentBiomass;   
-            }
-            if(agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg || agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
-                totalAgentBiomass += agentsArray[i].currentBiomass;
-            }
-        }*/
 
-        // WPP: delegated to simResourceManager
         simResourceManager.SetGlobalBiomassVolumes(totalEggSackVolume, totalCarrionVolume, totalAgentBiomass, weightedAvgLerpVal);
-        //simResourceManager.curGlobalEggSackVolume = Mathf.Lerp(simResourceManager.curGlobalEggSackVolume, totalEggSackVolume, weightedAvgLerpVal);
-        //simResourceManager.curGlobalCarrionVolume = Mathf.Lerp(simResourceManager.curGlobalCarrionVolume, totalCarrionVolume, weightedAvgLerpVal);
-        //simResourceManager.curGlobalAgentBiomass = Mathf.Lerp(simResourceManager.curGlobalAgentBiomass, totalAgentBiomass, weightedAvgLerpVal);
                 
         float approxGen = (float)numAgentsBorn / (float)(numAgents - 1);
         if (approxGen > curApproxGen) {
@@ -1700,62 +1481,9 @@ public class SimulationManager : Singleton<SimulationManager>
         environmentFluidManager.UpdateSimulationClimate();
     }
     
-    // WPP 4/27/21
-    /*
-    private void AddNewHistoricalDataEntry() {
-        // add new entries to historical data lists: 
-        //Debug.Log("eggVol: " + simResourceManager.curGlobalEggSackVolume.ToString() + ", carrion: " + simResourceManager.curGlobalCarrionVolume.ToString());
-        statsNutrientsEachGenerationList.Add(new Vector4(simResourceManager.curGlobalAlgaeReservoir, simResourceManager.curGlobalPlantParticles, simResourceManager.curGlobalEggSackVolume, simResourceManager.curGlobalCarrionVolume));
-        // Still used?
-        statsHistoryBrainMutationFreqList.Add((float)settingsManager.curTierBrainMutationFrequency);
-        statsHistoryBrainMutationAmpList.Add((float)settingsManager.curTierBrainMutationAmplitude);
-        statsHistoryBrainSizeBiasList.Add((float)settingsManager.curTierBrainMutationNewLink);
-        statsHistoryBodyMutationFreqList.Add((float)settingsManager.curTierBodyMutationFrequency);
-        statsHistoryBodyMutationAmpList.Add((float)settingsManager.curTierBodyMutationAmplitude);
-        statsHistoryBodySensorVarianceList.Add((float)settingsManager.curTierBodyMutationModules);
-        statsHistoryWaterCurrentsList.Add((float)environmentFluidManager.curTierWaterCurrents);
-
-        statsHistoryOxygenList.Add(simResourceManager.curGlobalOxygen);
-        statsHistoryNutrientsList.Add(simResourceManager.curGlobalNutrients);
-        statsHistoryDetritusList.Add(simResourceManager.curGlobalDetritus);
-        statsHistoryDecomposersList.Add(simResourceManager.curGlobalDecomposers);
-        statsHistoryAlgaeSingleList.Add(simResourceManager.curGlobalAlgaeReservoir);
-        statsHistoryAlgaeParticleList.Add(simResourceManager.curGlobalPlantParticles);
-        statsHistoryZooplanktonList.Add(simResourceManager.curGlobalAnimalParticles);
-        statsHistoryLivingAgentsList.Add(simResourceManager.curGlobalAgentBiomass);
-        statsHistoryDeadAgentsList.Add(simResourceManager.curGlobalCarrionVolume);
-        statsHistoryEggSacksList.Add(simResourceManager.curGlobalEggSackVolume);
-    }
-    */
-    
     private void AddNewSpeciesDataEntry(int year) {
         masterGenomePool.AddNewYearlySpeciesStats(year);
     }
-    
-    // WPP 4/27: delegated, never called
-    /*
-    private void RefreshLatestHistoricalDataEntry() {
-        statsNutrientsEachGenerationList[statsNutrientsEachGenerationList.Count - 1] = new Vector4(simResourceManager.curGlobalAlgaeReservoir, simResourceManager.curGlobalPlantParticles, simResourceManager.curGlobalEggSackVolume, simResourceManager.curGlobalCarrionVolume);
-        statsHistoryBrainMutationFreqList[statsHistoryBrainMutationFreqList.Count - 1] = settingsManager.curTierBrainMutationFrequency;
-        statsHistoryBrainMutationAmpList[statsHistoryBrainMutationAmpList.Count - 1] = settingsManager.curTierBrainMutationAmplitude;
-        statsHistoryBrainSizeBiasList[statsHistoryBrainSizeBiasList.Count - 1] = settingsManager.curTierBrainMutationNewLink;
-        statsHistoryBodyMutationFreqList[statsHistoryBodyMutationFreqList.Count - 1] = settingsManager.curTierBodyMutationFrequency;
-        statsHistoryBodyMutationAmpList[statsHistoryBodyMutationAmpList.Count - 1] = settingsManager.curTierBodyMutationAmplitude;
-        statsHistoryBodySensorVarianceList[statsHistoryBodySensorVarianceList.Count - 1] = settingsManager.curTierBodyMutationModules;
-        statsHistoryWaterCurrentsList[statsHistoryWaterCurrentsList.Count - 1] = environmentFluidManager.curTierWaterCurrents;
-
-        statsHistoryOxygenList[statsHistoryOxygenList.Count - 1] = simResourceManager.curGlobalOxygen;
-        statsHistoryNutrientsList[statsHistoryOxygenList.Count - 1] = simResourceManager.curGlobalNutrients;
-        statsHistoryDetritusList[statsHistoryOxygenList.Count - 1] = simResourceManager.curGlobalDetritus;
-        statsHistoryDecomposersList[statsHistoryOxygenList.Count - 1] = simResourceManager.curGlobalDecomposers;
-        statsHistoryAlgaeSingleList[statsHistoryOxygenList.Count - 1] = simResourceManager.curGlobalAlgaeReservoir;
-        statsHistoryAlgaeParticleList[statsHistoryOxygenList.Count - 1] = simResourceManager.curGlobalPlantParticles;
-        statsHistoryZooplanktonList[statsHistoryOxygenList.Count - 1] = simResourceManager.curGlobalAnimalParticles;
-        statsHistoryLivingAgentsList[statsHistoryOxygenList.Count - 1] = simResourceManager.curGlobalAgentBiomass;
-        statsHistoryDeadAgentsList[statsHistoryOxygenList.Count - 1] = simResourceManager.curGlobalCarrionVolume;
-        statsHistoryEggSacksList[statsHistoryOxygenList.Count - 1] = simResourceManager.curGlobalEggSackVolume;
-    }
-    */
     
     private void RefreshLatestSpeciesDataEntry() { 
         foreach (var list in masterGenomePool.completeSpeciesPoolsList) {

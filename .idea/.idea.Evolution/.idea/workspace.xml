@@ -94,9 +94,9 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/AgentGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/EggSackGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimResourceManager.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/CandidateAgentData.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/SpeciesGenomePool.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
     </changedPaths>
   </component>
@@ -160,6 +160,7 @@
       <workItem from="1618956152983" duration="3605000" />
       <workItem from="1619553773804" duration="4556000" />
       <workItem from="1619645796732" duration="6668000" />
+      <workItem from="1620075484607" duration="1512000" />
     </task>
     <servers />
   </component>

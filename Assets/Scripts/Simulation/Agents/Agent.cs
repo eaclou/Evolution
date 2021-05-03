@@ -178,6 +178,7 @@ public class Agent : MonoBehaviour {
     IAgentAbility feed;
     Cooldown cooldown;
     
+    // *** WPP: delegate to performanceData
     public float totalEaten => candidateRef.performanceData.totalFoodEatenCorpse + candidateRef.performanceData.totalFoodEatenEgg + candidateRef.performanceData.totalFoodEatenCorpse + candidateRef.performanceData.totalFoodEatenPlant + candidateRef.performanceData.totalFoodEatenZoop;
 
     //public float overflowFoodAmount = 0f;
