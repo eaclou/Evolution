@@ -195,58 +195,7 @@ public class SpeciesGraphPanelUI : MonoBehaviour
                             //Debug.Log("valStat: " + valStat.ToString());
                         }
                         
-                        //= speciesPool
-                        // I know there's a better way to do this:
-                        /*if(a == 0) {
-                            valStat = speciesPool.avgPerformanceDataYearList[t].totalTicksAlive; //.avgLifespanPerYearList[t];
-                        }
-                        else if(a == 1) {
-                            valStat = speciesPool.avgFoodEatenEggPerYearList[t];
-                        }
-                        else if(a == 2) {
-                            valStat = speciesPool.avgFoodEatenPlantPerYearList[t];
-                        }
-                        else if(a == 3) {
-                            valStat = speciesPool.avgFoodEatenZoopPerYearList[t];// + speciesPool.avgFoodEatenCreaturePerYearList[t] + speciesPool.avgFoodEatenEggPerYearList[t];
-                        }
-                        else if(a == 4) {
-                            valStat = speciesPool.avgBodySizePerYearList[t];
-                        }
-                        else if(a == 5) {
-                            valStat = speciesPool.avgSpecAttackPerYearList[t];
-                        }
-                        else if(a == 6) {
-                            valStat = speciesPool.avgSpecDefendPerYearList[t];
-                        }
-                        else if(a == 7) {
-                            valStat = speciesPool.avgSpecSpeedPerYearList[t];
-                        }
-                        else if(a == 8) {
-                            valStat = speciesPool.avgSpecUtilityPerYearList[t];
-                        }
-                        else if(a == 9) {
-                            valStat = speciesPool.avgFoodSpecDecayPerYearList[t];
-                        }
-                        else if(a == 10) {
-                            valStat = speciesPool.avgFoodSpecPlantPerYearList[t];
-                        }
-                        else if(a == 11) {
-                            valStat = speciesPool.avgFoodSpecMeatPerYearList[t];
-                        }
-                        else if(a == 12) {
-                            valStat = speciesPool.avgNumNeuronsPerYearList[t];
-                        }
-                        else if(a == 13) {
-                            valStat = speciesPool.avgNumAxonsPerYearList[t];
-                        }
-                        else if(a == 14) {
-                            valStat = speciesPool.avgDamageDealtPerYearList[t];
-                        }
-                        else if(a == 15) {
-                            valStat = speciesPool.avgDamageTakenPerYearList[t];
-                        }
-                        */
-                        if(years > 16) {
+                        if(years > 15) {
                             float time01 = (float)t / (float)years;
 
                             if(time01 < 0.05f) {
@@ -273,22 +222,8 @@ public class SpeciesGraphPanelUI : MonoBehaviour
         for (int b = 0; b < statsTreeOfLifeSpeciesTexArray.Length; b++) {
             statsTreeOfLifeSpeciesTexArray[b].Apply();
         }
-        //int selectedSpeciesID = treeOfLifeManager.selectedID;
-
-        RefreshGraphMaterial();
         
-        //speciesGraphMat.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[selectedSpeciesStatsIndex]);
-        //speciesGraphMat.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
-        //speciesGraphMat.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[selectedSpeciesStatsIndex].width);
-        //speciesGraphMat.SetInt("_SelectedSpeciesID", selectedSpeciesIndex);
-        /*
-        uniform float _MinValue;
-			uniform float _MaxValue;
-
-			uniform int _SelectedSpeciesID;
-			uniform int _NumDisplayed;
-			uniform float _NumEntries;
-    */
+        RefreshGraphMaterial();        
     }
 
     private void RefreshGraphMaterial() {
@@ -376,10 +311,6 @@ public class SpeciesGraphPanelUI : MonoBehaviour
                 speciesGraphMatRight.SetFloat("_MaximumValue", maxValuesStatArray[7]);
                 speciesGraphMatRight.SetFloat("_MinimumValue", minValuesStatArray[7]);
 
-                //textGraphStatsLeft.text = "ATTACK\n" + pool.avgSpecAttack.ToString();
-                //textGraphStatsCenter.text = "DEFENSE\n" + pool.avgSpecDefend.ToString();
-                //textGraphStatsRight.text = "SPEED\n" + pool.avgSpecSpeed.ToString();
-
                 textGraphCategory.text = "SPECIALIZATIONS";
                 break;
             case GraphCategory.Eaten:
@@ -403,11 +334,6 @@ public class SpeciesGraphPanelUI : MonoBehaviour
                 speciesGraphMatRight.SetInt("_SelectedSpeciesID", uiManager.selectedSpeciesID);
                 speciesGraphMatRight.SetFloat("_MaximumValue", maxValuesStatArray[3]);
                 speciesGraphMatRight.SetFloat("_MinimumValue", minValuesStatArray[3]);
-
-
-                //textGraphStatsLeft.text ="EGGS\n" + pool.avgFoodEatenEgg.ToString();
-                //textGraphStatsCenter.text = "PLANTS\n" + pool.avgFoodEatenPlant.ToString();
-                //textGraphStatsRight.text = "MICROBES\n" + pool.avgFoodEatenZoop.ToString();
 
                 textGraphCategory.text = "FOOD CONSUMED";
                 break;
@@ -433,10 +359,6 @@ public class SpeciesGraphPanelUI : MonoBehaviour
                 speciesGraphMatRight.SetFloat("_MaximumValue", maxValuesStatArray[9]);
                 speciesGraphMatRight.SetFloat("_MinimumValue", minValuesStatArray[9]);
 
-                //textGraphStatsLeft.text = "HERBIVORE\n" + pool.avgFoodSpecPlant.ToString();
-                //textGraphStatsCenter.text = "CARNIVORE\n" + pool.avgFoodSpecMeat.ToString();
-                //textGraphStatsRight.text = "SCAVENGER\n" + pool.avgFoodSpecDecay.ToString();
-
                 textGraphCategory.text = "DIGESTION BONUSES";
                 break;
             default:
@@ -447,8 +369,6 @@ public class SpeciesGraphPanelUI : MonoBehaviour
         speciesGraphImage.gameObject.SetActive(false);
         speciesGraphImage.gameObject.SetActive(true);
 
-        //graphPanelGO.gameObject.SetActive(false);
-        //graphPanelGO.gameObject.SetActive(true);
     }
 
     public void Set(bool value) {

@@ -171,11 +171,17 @@ public class SpeciesOverviewUI : MonoBehaviour {
             // *********** WRITE IT DOWN!!! **************
 
             if(iCand.candidateID == uiManagerRef.focusedCandidate.candidateID) {
-                buttonScript.GetComponent<Image>().color = Color.white;
+                buttonScript.GetComponent<Image>().color = Color.white * 1f;
+                ColorBlock block = buttonScript.GetComponent<Button>().colors;
+                block.colorMultiplier = 2f;
+                buttonScript.GetComponent<Button>().colors = block;
                 buttonScript.gameObject.transform.localScale = Vector3.one * 1.3f;
                 statusStr = "\n(SELECTED)";
             }
             else {
+                ColorBlock block = buttonScript.GetComponent<Button>().colors;
+                block.colorMultiplier = 1f;
+                buttonScript.GetComponent<Button>().colors = block;
                 if(matchingAgent.curLifeStage == Agent.AgentLifeStage.Dead) {
                     buttonScript.gameObject.transform.localScale = Vector3.one * 0.9f;
                     buttonScript.GetComponent<Image>().color = Color.red;
@@ -202,7 +208,8 @@ public class SpeciesOverviewUI : MonoBehaviour {
                 statusStr = "\n(Fossil)";
             }
             else {
-                buttonScript.GetComponent<Image>().color = Color.gray;
+                buttonScript.gameObject.SetActive(false);
+                buttonScript.GetComponent<Image>().color = Color.black;
                 statusStr = "\n(Unborn)";
             }
         }        

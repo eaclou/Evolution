@@ -18,7 +18,10 @@ public class MinimapUI : MonoBehaviour
     
 
     public void Tick() {
-        if (!isOpen) return;
+        groupMinimap.SetActive(isOpen);
+        if (!isOpen) {            
+            return;
+        }
 
         
         uiKnowledgeMapViewerMat.SetTexture("_AltitudeTex", theRenderKing.baronVonTerrain.terrainHeightDataRT);

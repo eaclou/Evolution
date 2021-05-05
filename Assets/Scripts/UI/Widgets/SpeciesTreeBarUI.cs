@@ -18,7 +18,7 @@ public class SpeciesTreeBarUI : MonoBehaviour {
 
         targetCoords = Vector2.zero;
 
-        Debug.Log("NEW BUTTON! " + index + ", " + pool.speciesID);
+        //Debug.Log("NEW BUTTON! " + index + ", " + pool.speciesID);
     }
 
     // Updates focusedCandidate in uiManager 
@@ -33,7 +33,7 @@ public class SpeciesTreeBarUI : MonoBehaviour {
 
         gameObject.transform.localPosition = new Vector3(targetCoords.x * (float)panelPixelSize, targetCoords.y * (float)panelPixelSize, 0f);
         if(isSelected) {
-            gameObject.transform.localScale = new Vector3(1.25f, 1.25f, 1f);
+            gameObject.transform.localScale = new Vector3(1.5f, 1.5f, 1f);
         }
         else {
             gameObject.transform.localScale = Vector3.one;
