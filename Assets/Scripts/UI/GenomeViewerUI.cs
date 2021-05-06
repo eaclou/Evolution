@@ -14,16 +14,20 @@ public class GenomeViewerUI : MonoBehaviour {
 
     public GameObject panelGenomeSensors;
     
-    public InteractiveImage plantFoodSensor;
-    public InteractiveImage eggsFoodSensor;
-    public InteractiveImage meatFoodSensor;
-    public InteractiveImage corpseFoodSensor;
-    public InteractiveImage microbeFoodSensor;
-    public InteractiveImage friendSensor;
-    public InteractiveImage foeSensor;
-    public InteractiveImage wallSensor;
-    public InteractiveImage waterSensor;
-    public InteractiveImage commSensor;
+    [SerializeField] Sensor plantFoodSensor;
+    [SerializeField] Sensor eggsFoodSensor;
+    [SerializeField] Sensor meatFoodSensor;
+    [SerializeField] Sensor corpseFoodSensor;
+    [SerializeField] Sensor microbeFoodSensor;
+    [SerializeField] Sensor friendSensor;
+    [SerializeField] Sensor foeSensor;
+    [SerializeField] Sensor wallSensor;
+    [SerializeField] Sensor waterSensor;
+    [SerializeField] Sensor commSensor;
+    
+    [SerializeField] Tab genomeTab;
+    [SerializeField] Tab historyTab;
+    [SerializeField] Tab performanceTab;
     
     // WPP 5/6/21: replaced with InteractiveImage    
     //public Image imageSensorFoodPlant;
@@ -91,13 +95,14 @@ public class GenomeViewerUI : MonoBehaviour {
     public Text textEatenEggs;
     public Text textEatenCorpse;
 
-    public GameObject panelGenomeTab;
-    public GameObject panelPerformanceTab;
-    public GameObject panelHistoryTab;    
+    // WPP 5/6/21: moved to nested Tab class
+    //public GameObject panelGenomeTab;
+    //public GameObject panelPerformanceTab;
+    //public GameObject panelHistoryTab;    
     
-    public Button buttonGenomeTab;
-    public Button buttonPerformanceTab;
-    public Button buttonHistoryTab;
+    //public Button buttonGenomeTab;
+    //public Button buttonPerformanceTab;
+    //public Button buttonHistoryTab;
     // Real-Time panel handled in center bottom with creature portrait and brain info
     
     public bool isGenomeTabActive = true;
@@ -164,13 +169,16 @@ public class GenomeViewerUI : MonoBehaviour {
         panelGenomeAbilities.SetActive(false);
         panelGenomeSensors.SetActive(true);
 
-        // * WPP: use nested class pattern to eliminate GetComponent calls
-        panelGenomeTab.SetActive(isGenomeTabActive);
-        buttonGenomeTab.GetComponentInChildren<Image>().color = isGenomeTabActive ? Color.white : Color.gray;
-        panelPerformanceTab.SetActive(isPerformanceTabActive);
-        buttonPerformanceTab.GetComponentInChildren<Image>().color = isPerformanceTabActive ? Color.white : Color.gray;
-        panelHistoryTab.SetActive(isHistoryTabActive);
-        buttonHistoryTab.GetComponentInChildren<Image>().color = isHistoryTabActive ? Color.white : Color.gray;
+        // WPP 5/6/21: delegated to Tab nested class
+        genomeTab.SetActive(isGenomeTabActive);
+        performanceTab.SetActive(isPerformanceTabActive);
+        historyTab.SetActive(isHistoryTabActive);
+        //panelGenomeTab.SetActive(isGenomeTabActive);
+        //buttonGenomeTab.GetComponentInChildren<Image>().color = isGenomeTabActive ? Color.white : Color.gray;
+        //panelPerformanceTab.SetActive(isPerformanceTabActive);
+        //buttonPerformanceTab.GetComponentInChildren<Image>().color = isPerformanceTabActive ? Color.white : Color.gray;
+        //panelHistoryTab.SetActive(isHistoryTabActive);
+        //buttonHistoryTab.GetComponentInChildren<Image>().color = isHistoryTabActive ? Color.white : Color.gray;
         
         //panel
         imageDeadDim.gameObject.SetActive(false);
@@ -188,8 +196,8 @@ public class GenomeViewerUI : MonoBehaviour {
         textGenomeOverviewB.text = "Size: " + (100f * candidate.candidateGenome.bodyGenome.coreGenome.creatureBaseLength).ToString("F0") + ", Aspect 1:" + (1f / candidate.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio).ToString("F0");
         textGenomeOverviewC.text = "Brain Size: " + candidate.candidateGenome.brainGenome.bodyNeuronList.Count + "--" + candidate.candidateGenome.brainGenome.linkList.Count;
                   
-        UpdateDigestSpecUI(candidate.candidateGenome);
-        UpdateSpecializationsUI(candidate.candidateGenome);
+        UpdateDigestSpecUI(candidate.candidateGenome.bodyGenome.coreGenome);
+        UpdateSpecializationsUI(candidate.candidateGenome.bodyGenome.coreGenome);
 
         UpdatePerformanceBehaviors(pool, candidate); // ******
         UpdateSensorsUI(candidate.candidateGenome);      
@@ -255,7 +263,7 @@ public class GenomeViewerUI : MonoBehaviour {
     CritterModuleEnvironmentSensorsGenome _environment;
     CritterModuleCommunicationGenome _communication;
     
-    // WPP: Replaced repeating logic with InteractiveImage
+    // WPP 5/6/21: Replaced repeating logic with Sensor nested class
     private void UpdateSensorsUI(AgentGenome genome) {
         if (genome.bodyGenome.foodGenome == null) return;
         
@@ -363,27 +371,27 @@ public class GenomeViewerUI : MonoBehaviour {
         imageSensorContact.color = Color.white;         
     }
     
-    // * WPP: only pass the coreGenome if that is all that is used
-    private void UpdateDigestSpecUI(AgentGenome genome) {
-        textDigestPlant.text = (genome.bodyGenome.coreGenome.dietSpecializationPlant * 100f).ToString("F0");
-        textDigestMeat.text = (genome.bodyGenome.coreGenome.dietSpecializationMeat * 100f).ToString("F0");
-        textDigestDecay.text = (genome.bodyGenome.coreGenome.dietSpecializationDecay * 100f).ToString("F0");
+    // WPP 5/6/21: Only pass coreGenome since it is the only part being used
+    private void UpdateDigestSpecUI(CritterModuleCoreGenome coreGenome) {
+        textDigestPlant.text = (coreGenome.dietSpecializationPlant * 100f).ToString("F0");
+        textDigestMeat.text = (coreGenome.dietSpecializationMeat * 100f).ToString("F0");
+        textDigestDecay.text = (coreGenome.dietSpecializationDecay * 100f).ToString("F0");
 
-        imageDigestPlant.transform.localScale = new Vector3(1f, genome.bodyGenome.coreGenome.dietSpecializationPlant, 1f);
-        imageDigestMeat.transform.localScale = new Vector3(1f, genome.bodyGenome.coreGenome.dietSpecializationMeat, 1f);
-        imageDigestDecay.transform.localScale = new Vector3(1f, genome.bodyGenome.coreGenome.dietSpecializationDecay, 1f);
+        imageDigestPlant.transform.localScale = new Vector3(1f, coreGenome.dietSpecializationPlant, 1f);
+        imageDigestMeat.transform.localScale = new Vector3(1f, coreGenome.dietSpecializationMeat, 1f);
+        imageDigestDecay.transform.localScale = new Vector3(1f, coreGenome.dietSpecializationDecay, 1f);
     }
     
-    private void UpdateSpecializationsUI(AgentGenome genome) {
-        textSpecAttack.text = (genome.bodyGenome.coreGenome.talentSpecializationAttack * 100f).ToString("F0");
-        textSpecDefense.text = (genome.bodyGenome.coreGenome.talentSpecializationDefense * 100f).ToString("F0");
-        textSpecSpeed.text = (genome.bodyGenome.coreGenome.talentSpecializationSpeed * 100f).ToString("F0");
-        textSpecEnergy.text = (genome.bodyGenome.coreGenome.talentSpecializationUtility * 100f).ToString("F0");
+    private void UpdateSpecializationsUI(CritterModuleCoreGenome coreGenome) {
+        textSpecAttack.text = (coreGenome.talentSpecializationAttack * 100f).ToString("F0");
+        textSpecDefense.text = (coreGenome.talentSpecializationDefense * 100f).ToString("F0");
+        textSpecSpeed.text = (coreGenome.talentSpecializationSpeed * 100f).ToString("F0");
+        textSpecEnergy.text = (coreGenome.talentSpecializationUtility * 100f).ToString("F0");
 
-        imageSpecAttack.transform.localScale = new Vector3(1f, genome.bodyGenome.coreGenome.talentSpecializationAttack, 1f);
-        imageSpecDefense.transform.localScale = new Vector3(1f, genome.bodyGenome.coreGenome.talentSpecializationDefense, 1f);
-        imageSpecSpeed.transform.localScale = new Vector3(1f, genome.bodyGenome.coreGenome.talentSpecializationSpeed, 1f);
-        imageSpecEnergy.transform.localScale = new Vector3(1f, genome.bodyGenome.coreGenome.talentSpecializationUtility, 1f);
+        imageSpecAttack.transform.localScale = new Vector3(1f, coreGenome.talentSpecializationAttack, 1f);
+        imageSpecDefense.transform.localScale = new Vector3(1f, coreGenome.talentSpecializationDefense, 1f);
+        imageSpecSpeed.transform.localScale = new Vector3(1f, coreGenome.talentSpecializationSpeed, 1f);
+        imageSpecEnergy.transform.localScale = new Vector3(1f, coreGenome.talentSpecializationUtility, 1f);
     }
 	
     public void UpdatePerformanceBehaviors(SpeciesGenomePool pool, CandidateAgentData candidate) {
@@ -407,6 +415,7 @@ public class GenomeViewerUI : MonoBehaviour {
         textEatenEggs.text = candidate.performanceData.totalFoodEatenEgg.ToString("F2");
         textEatenCorpse.text = candidate.performanceData.totalFoodEatenCorpse.ToString("F2");
 
+        // * WPP: apply getter to CandidateAgentData for easier access
         float totalEaten = candidate.performanceData.totalFoodEatenPlant + candidate.performanceData.totalFoodEatenZoop + candidate.performanceData.totalFoodEatenCreature + candidate.performanceData.totalFoodEatenEgg + candidate.performanceData.totalFoodEatenCorpse + 0.001f;
         imageEatenPlants.transform.localScale = new Vector3(1f, candidate.performanceData.totalFoodEatenPlant / totalEaten, 1f);
         imageEatenMicrobes.transform.localScale = new Vector3(1f, candidate.performanceData.totalFoodEatenZoop / totalEaten, 1f);
@@ -517,10 +526,10 @@ public class GenomeViewerUI : MonoBehaviour {
     }
     
     [Serializable] 
-    public class InteractiveImage
+    public class Sensor
     {
-        public Image image;
-        public GenomeButtonTooltipSource tooltip;
+        [SerializeField] Image image;
+        [SerializeField] GenomeButtonTooltipSource tooltip;
         
         public void SetSensorEnabled(bool value) 
         { 
@@ -528,6 +537,19 @@ public class GenomeViewerUI : MonoBehaviour {
             
             // * Expose values in central location (lookup?)
             image.color = value ? Color.white : Color.gray * 0.75f;     
+        }
+    }
+    
+    [Serializable]
+    public class Tab
+    {
+        [SerializeField] GameObject panel;
+        [SerializeField] Image image;
+        
+        public void SetActive(bool value)
+        {
+            panel.SetActive(value);
+            image.color = value ? Color.white : Color.gray;
         }
     }
 }
