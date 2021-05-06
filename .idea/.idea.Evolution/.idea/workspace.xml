@@ -47,7 +47,6 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/CauseOfDeathSO.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Abilities/IAgentAbility.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/Quality of Life/Unity Extension/MonoSim.cs" />
@@ -66,7 +65,6 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/AllSpeciesTreePanelUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/BigBangPanelUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/DebugPanelUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/GenomeViewerUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/GlobalResourcesUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/PanelNotificationsUI.cs" />
@@ -98,6 +96,8 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/SpeciesGenomePool.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePaperDollUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/GenomeViewerUI.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1owaWgGpM80xkcfA3szn5iw9YkG" />
@@ -160,7 +160,8 @@
       <workItem from="1618956152983" duration="3605000" />
       <workItem from="1619553773804" duration="4556000" />
       <workItem from="1619645796732" duration="6668000" />
-      <workItem from="1620075484607" duration="1512000" />
+      <workItem from="1620075484607" duration="3346000" />
+      <workItem from="1620287348342" duration="4032000" />
     </task>
     <servers />
   </component>

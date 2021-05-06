@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class GenomeViewerUI : MonoBehaviour {
@@ -12,18 +13,32 @@ public class GenomeViewerUI : MonoBehaviour {
     public Text textGenomeOverviewC;
 
     public GameObject panelGenomeSensors;
-    public Image imageSensorFoodPlant;
-    public Image imageSensorFoodMicrobe;
-    public Image imageSensorFoodEggs;
-    public Image imageSensorFoodMeat;
-    public Image imageSensorFoodCorpse;
-    public Image imageSensorFriend;
-    public Image imageSensorFoe;
-    public Image imageSensorWalls;
-    public Image imageSensorWater;
+    
+    public InteractiveImage plantFoodSensor;
+    public InteractiveImage eggsFoodSensor;
+    public InteractiveImage meatFoodSensor;
+    public InteractiveImage corpseFoodSensor;
+    public InteractiveImage microbeFoodSensor;
+    public InteractiveImage friendSensor;
+    public InteractiveImage foeSensor;
+    public InteractiveImage wallSensor;
+    public InteractiveImage waterSensor;
+    public InteractiveImage commSensor;
+    
+    // WPP 5/6/21: replaced with InteractiveImage    
+    //public Image imageSensorFoodPlant;
+    //public Image imageSensorFoodMicrobe;
+    //public Image imageSensorFoodEggs;
+    //public Image imageSensorFoodMeat;
+    //public Image imageSensorFoodCorpse;
+    //public Image imageSensorFriend;
+    //public Image imageSensorFoe;
+    //public Image imageSensorWalls;
+    //public Image imageSensorWater;
+    //public Image imageSensorComms;
+    
     public Image imageSensorInternals;
     public Image imageSensorContact;
-    public Image imageSensorComms;
 
     public Image imagePortraitTitleBG;
 
@@ -109,112 +124,100 @@ public class GenomeViewerUI : MonoBehaviour {
         brainGenomeTex.wrapMode = TextureWrapMode.Clamp;
         brainGenomeMat.SetTexture("_MainTex", brainGenomeTex);
 	}
+	
+	// WPP 5/6/21: applied early exit, broke out SetTitleString function
     public void UpdateUI(SpeciesGenomePool pool, CandidateAgentData candidate) {
-        if(candidate != null && candidate.candidateGenome != null) {
+        if (candidate == null || candidate.candidateGenome == null)
+            return;
+            
+        SetTitleString(candidate);
 
-            string titleString = "<size=18>Critter</size> " + candidate.candidateID.ToString() + "<size=18>";
-            if(candidate.isBeingEvaluated) {
-                titleString += "\n(following)";
+        Vector3 hue = Vector3.one * 0.75f;
+        Vector3 hueB = Vector3.one * 0.25f;
+        /*
+        //CandidateAgentData avgCandidate;
+        if(pool.avgCandidateDataYearList.Count > 1) {
+            int yearIndex = Mathf.RoundToInt(Mathf.Lerp(0f, (float)pool.avgCandidateDataYearList.Count - 1f, uiManagerRef.speciesOverviewUI.sliderLineageGenomes.value));
+            candidate = pool.avgCandidateDataYearList[yearIndex];
+        }
+        else {
+            candidate = pool.avgCandidateData;
+        }
+        */
+        
+        hue = candidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+        hueB = candidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
+        
+        //Vector3 hue = pool.avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+        imagePortraitTitleBG.color = new Color(hue.x, hue.y, hue.z);
+        textFocusedCandidate.color = new Color(hueB.x, hueB.y, hueB.z);
+        //+ ", " + candidate.numCompletedEvaluations.ToString() + ", " + candidate.speciesID.ToString() + ", " + candidate.isBeingEvaluated.ToString() + ", " + candidate.candidateGenome.bodyGenome.coreGenome.name;
+
+        if(toggleAutofollow.isOn) {  
+
+        }
+
+        panelPerformanceBehavior.SetActive(true);
+        panelEaten.SetActive(true);
+        //panelGenomeSpecializations.SetActive(false);
+        //panelGenomeDigestion.SetActive(false);
+        panelGenomeAbilities.SetActive(false);
+        panelGenomeSensors.SetActive(true);
+
+        // * WPP: use nested class pattern to eliminate GetComponent calls
+        panelGenomeTab.SetActive(isGenomeTabActive);
+        buttonGenomeTab.GetComponentInChildren<Image>().color = isGenomeTabActive ? Color.white : Color.gray;
+        panelPerformanceTab.SetActive(isPerformanceTabActive);
+        buttonPerformanceTab.GetComponentInChildren<Image>().color = isPerformanceTabActive ? Color.white : Color.gray;
+        panelHistoryTab.SetActive(isHistoryTabActive);
+        buttonHistoryTab.GetComponentInChildren<Image>().color = isHistoryTabActive ? Color.white : Color.gray;
+        
+        //panel
+        imageDeadDim.gameObject.SetActive(false);
+        float lifespan = candidate.performanceData.totalTicksAlive;
+        textGenomeOverviewA.text = "Lifespan: " + (lifespan * 0.1f).ToString("F0") + ", Gen: " + candidate.candidateGenome.generationCount;
+
+        if(candidate.isBeingEvaluated) {
+            lifespan = simulationManager.agentsArray[cameraManager.targetAgentIndex].ageCounter;
+            textGenomeOverviewA.text = "Age: " + (lifespan * 0.1f).ToString("F0") + ", Gen: " + candidate.candidateGenome.generationCount;
+        }
+        if(simulationManager.agentsArray[cameraManager.targetAgentIndex].curLifeStage == Agent.AgentLifeStage.Dead) {
+            imageDeadDim.gameObject.SetActive(true);
+        }
+
+        textGenomeOverviewB.text = "Size: " + (100f * candidate.candidateGenome.bodyGenome.coreGenome.creatureBaseLength).ToString("F0") + ", Aspect 1:" + (1f / candidate.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio).ToString("F0");
+        textGenomeOverviewC.text = "Brain Size: " + candidate.candidateGenome.brainGenome.bodyNeuronList.Count + "--" + candidate.candidateGenome.brainGenome.linkList.Count;
+                  
+        UpdateDigestSpecUI(candidate.candidateGenome);
+        UpdateSpecializationsUI(candidate.candidateGenome);
+
+        UpdatePerformanceBehaviors(pool, candidate); // ******
+        UpdateSensorsUI(candidate.candidateGenome);      
+    }
+    
+    void SetTitleString(CandidateAgentData candidate)
+    {
+        string titleString = "<size=18>Critter</size> " + candidate.candidateID + "<size=18>";
+        if(candidate.isBeingEvaluated) {
+            titleString += "\n(following)";
+        }
+        else {
+            if(candidate.numCompletedEvaluations > 0) {
+                titleString += "\nFossil";
             }
             else {
-                if(candidate.numCompletedEvaluations > 0) {
-                    titleString += "\nFossil";
-                }
-                else {
-                    titleString += "\nUnborn";
-                }
+                titleString += "\nUnborn";
             }
-            titleString += "</size>";
-            textFocusedCandidate.text = titleString;
-
-            Vector3 hue = Vector3.one * 0.75f;
-            Vector3 hueB = Vector3.one * 0.25f;
-            /*
-            //CandidateAgentData avgCandidate;
-            if(pool.avgCandidateDataYearList.Count > 1) {
-                int yearIndex = Mathf.RoundToInt(Mathf.Lerp(0f, (float)pool.avgCandidateDataYearList.Count - 1f, uiManagerRef.speciesOverviewUI.sliderLineageGenomes.value));
-                candidate = pool.avgCandidateDataYearList[yearIndex];
-            }
-            else {
-                candidate = pool.avgCandidateData;
-            }
-            */
-            if(candidate != null) {
-                hue = candidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-                hueB = candidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
-
-            }
-            /*else {
-                Debug.LogError("candData");
-            }
-            */
-            //Vector3 hue = pool.avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-            imagePortraitTitleBG.color = new Color(hue.x, hue.y, hue.z);
-            textFocusedCandidate.color = new Color(hueB.x, hueB.y, hueB.z);
-            //+ ", " + candidate.numCompletedEvaluations.ToString() + ", " + candidate.speciesID.ToString() + ", " + candidate.isBeingEvaluated.ToString() + ", " + candidate.candidateGenome.bodyGenome.coreGenome.name;
-
-            if(toggleAutofollow.isOn) {  // **********
-
-            }
-
-            panelPerformanceBehavior.SetActive(true);
-            panelEaten.SetActive(true);
-            //panelGenomeSpecializations.SetActive(false);
-            //panelGenomeDigestion.SetActive(false);
-            panelGenomeAbilities.SetActive(false);
-            panelGenomeSensors.SetActive(true);
-
-            panelGenomeTab.SetActive(isGenomeTabActive);
-            buttonGenomeTab.GetComponentInChildren<Image>().color = isGenomeTabActive ? Color.white : Color.gray;
-            panelPerformanceTab.SetActive(isPerformanceTabActive);
-            buttonPerformanceTab.GetComponentInChildren<Image>().color = isPerformanceTabActive ? Color.white : Color.gray;
-            panelHistoryTab.SetActive(isHistoryTabActive);
-            buttonHistoryTab.GetComponentInChildren<Image>().color = isHistoryTabActive ? Color.white : Color.gray;
-            
-            //panel
-            imageDeadDim.gameObject.SetActive(false);
-            float lifespan = (float)candidate.performanceData.totalTicksAlive;
-            textGenomeOverviewA.text = "Lifespan: " + (lifespan * 0.1f).ToString("F0") + ", Gen: " + candidate.candidateGenome.generationCount.ToString();
-
-            if(candidate.isBeingEvaluated) {
-                
-                lifespan = simulationManager.agentsArray[cameraManager.targetAgentIndex].ageCounter;
-                textGenomeOverviewA.text = "Age: " + (lifespan * 0.1f).ToString("F0") + ", Gen: " + candidate.candidateGenome.generationCount.ToString();
-            }
-            if(simulationManager.agentsArray[cameraManager.targetAgentIndex].curLifeStage == Agent.AgentLifeStage.Dead) {
-                imageDeadDim.gameObject.SetActive(true);
-            }
-
-            textGenomeOverviewB.text = "Size: " + (100f * candidate.candidateGenome.bodyGenome.coreGenome.creatureBaseLength).ToString("F0") + ", Aspect 1:" + (1f / candidate.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio).ToString("F0");
-            textGenomeOverviewC.text = "Brain Size: " + candidate.candidateGenome.brainGenome.bodyNeuronList.Count.ToString() + "--" + candidate.candidateGenome.brainGenome.linkList.Count.ToString();
-            
-            //if(isFrontPageOn) {
-              
-            UpdateDigestSpecUI(pool, candidate.candidateGenome);
-            UpdateSpecializationsUI(pool, candidate.candidateGenome);
-
-            UpdatePerformanceBehaviors(pool, candidate); // ******
-            UpdateSensorsUI(pool, candidate.candidateGenome);
-                //UpdateAbilitiesUI(pool, candidate.candidateGenome);
-
-                //panelGenomeAbilities.SetActive(true);
-                //panelGenomeSensors.SetActive(true);
-
-                //isHistoryPanelOn = false;  // ** unneeded
-            //}
-            //else {
-                //isHistoryPanelOn = true;
-            //}
-        }        
+        }
+        titleString += "</size>";
+        textFocusedCandidate.text = titleString;
     }
     
     public void CreateBrainGenomeTexture(AgentGenome genome) {
-
         int width = 256;
         brainGenomeTex.Resize(width, 1); // pool.leaderboardGenomesList.Count);
 
         for(int x = 0; x < width; x++) {
-
             int xIndex = x;// i % brainGenomeTex.width;
             int yIndex = 0; // i; // Mathf.FloorToInt(i / brainGenomeTex.width);
                               
@@ -236,7 +239,6 @@ public class GenomeViewerUI : MonoBehaviour {
             }
             else {
                 testColor = Color.black; // CLEAR
-                    
                 //break;
             }
                 
@@ -247,14 +249,39 @@ public class GenomeViewerUI : MonoBehaviour {
         brainGenomeTex.Apply();
     }    
     
-    private void UpdateSensorsUI(SpeciesGenomePool pool, AgentGenome genome) {
+    CritterModuleFoodSensorsGenome _food;
+    CritterModuleFriendSensorsGenome _friend;
+    CritterModuleThreatSensorsGenome _threat;
+    CritterModuleEnvironmentSensorsGenome _environment;
+    CritterModuleCommunicationGenome _communication;
+    
+    // WPP: Replaced repeating logic with InteractiveImage
+    private void UpdateSensorsUI(AgentGenome genome) {
         if (genome.bodyGenome.foodGenome == null) return;
-
-
+        
+        // Cache references for quick access
+        _food = genome.bodyGenome.foodGenome;
+        _friend = genome.bodyGenome.friendGenome;
+        _threat = genome.bodyGenome.threatGenome;
+        _environment = genome.bodyGenome.environmentalGenome;
+        _communication = genome.bodyGenome.communicationGenome;
+        
+        plantFoodSensor.SetSensorEnabled(_food.useNutrients || _food.useStats);
+        microbeFoodSensor.SetSensorEnabled(_food.usePos);
+        eggsFoodSensor.SetSensorEnabled(_food.useEggs);
+        meatFoodSensor.SetSensorEnabled(_food.useVel);
+        corpseFoodSensor.SetSensorEnabled(_food.useCorpse);
+        friendSensor.SetSensorEnabled(_friend.usePos || _friend.useVel || _friend.useDir);
+        foeSensor.SetSensorEnabled(_threat.usePos || _threat.useVel || _threat.useDir);
+        waterSensor.SetSensorEnabled(_environment.useWaterStats);
+        wallSensor.SetSensorEnabled(_environment.useCardinals || _environment.useDiagonals);
+        commSensor.SetSensorEnabled(_communication.useComms);
+        
+        /*
         imageSensorComms.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.communicationGenome.useComms;
         imageSensorWater.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.environmentalGenome.useWaterStats;
-        imageSensorWalls.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = (genome.bodyGenome.environmentalGenome.useCardinals || genome.bodyGenome.environmentalGenome.useDiagonals);
-        imageSensorFoodPlant.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.foodGenome.useNutrients || genome.bodyGenome.foodGenome.useStats;
+        imageSensorWalls.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.environmentalGenome.useCardinals || genome.bodyGenome.environmentalGenome.useDiagonals;
+        imageSensorFoodPlant.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = foodGenome.useNutrients || foodGenome.useStats;
         imageSensorFoodMicrobe.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.foodGenome.usePos;  // ********* THESE ARE WRONG ^ ^ ^
         imageSensorFoodMeat.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.foodGenome.useVel;
         imageSensorFoodEggs.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.foodGenome.useEggs;
@@ -282,35 +309,36 @@ public class GenomeViewerUI : MonoBehaviour {
         else {
             imageSensorWalls.color = Color.gray * 0.75f;
         }
-        if (genome.bodyGenome.foodGenome.useNutrients || genome.bodyGenome.foodGenome.useStats) {
+                        
+        if (foodGenome.useNutrients || foodGenome.useStats) {
             imageSensorFoodPlant.color = Color.white;
         }
         else {
             imageSensorFoodPlant.color = Color.gray * 0.75f;
         }
 
-        if (genome.bodyGenome.foodGenome.usePos) {
+        if (foodGenome.usePos) {
             imageSensorFoodMicrobe.color = Color.white;
         }
         else {
             imageSensorFoodMicrobe.color = Color.gray * 0.75f;
         }
 
-        if (genome.bodyGenome.foodGenome.useVel) {
+        if (foodGenome.useVel) {
             imageSensorFoodMeat.color = Color.white;
         }
         else {
             imageSensorFoodMeat.color = Color.gray * 0.75f;
         }
 
-        if (genome.bodyGenome.foodGenome.useEggs) {
+        if (foodGenome.useEggs) {
             imageSensorFoodEggs.color = Color.white;
         }
         else {
             imageSensorFoodEggs.color = Color.gray * 0.75f;
         }
 
-        if (genome.bodyGenome.foodGenome.useCorpse) {
+        if (foodGenome.useCorpse) {
             imageSensorFoodCorpse.color = Color.white;
         }
         else {
@@ -329,15 +357,14 @@ public class GenomeViewerUI : MonoBehaviour {
         else {
             imageSensorFoe.color = Color.gray * 0.75f;
         }
+        */
 
         imageSensorInternals.color = Color.white;        
-        imageSensorContact.color = Color.white;        
-        
+        imageSensorContact.color = Color.white;         
     }
-    private void UpdateAbilitiesUI(SpeciesGenomePool pool, AgentGenome genome) {
-
-    }
-    private void UpdateDigestSpecUI(SpeciesGenomePool pool, AgentGenome genome) {
+    
+    // * WPP: only pass the coreGenome if that is all that is used
+    private void UpdateDigestSpecUI(AgentGenome genome) {
         textDigestPlant.text = (genome.bodyGenome.coreGenome.dietSpecializationPlant * 100f).ToString("F0");
         textDigestMeat.text = (genome.bodyGenome.coreGenome.dietSpecializationMeat * 100f).ToString("F0");
         textDigestDecay.text = (genome.bodyGenome.coreGenome.dietSpecializationDecay * 100f).ToString("F0");
@@ -345,9 +372,9 @@ public class GenomeViewerUI : MonoBehaviour {
         imageDigestPlant.transform.localScale = new Vector3(1f, genome.bodyGenome.coreGenome.dietSpecializationPlant, 1f);
         imageDigestMeat.transform.localScale = new Vector3(1f, genome.bodyGenome.coreGenome.dietSpecializationMeat, 1f);
         imageDigestDecay.transform.localScale = new Vector3(1f, genome.bodyGenome.coreGenome.dietSpecializationDecay, 1f);
-        
     }
-    private void UpdateSpecializationsUI(SpeciesGenomePool pool, AgentGenome genome) {
+    
+    private void UpdateSpecializationsUI(AgentGenome genome) {
         textSpecAttack.text = (genome.bodyGenome.coreGenome.talentSpecializationAttack * 100f).ToString("F0");
         textSpecDefense.text = (genome.bodyGenome.coreGenome.talentSpecializationDefense * 100f).ToString("F0");
         textSpecSpeed.text = (genome.bodyGenome.coreGenome.talentSpecializationSpeed * 100f).ToString("F0");
@@ -386,8 +413,6 @@ public class GenomeViewerUI : MonoBehaviour {
         imageEatenAnimals.transform.localScale = new Vector3(1f, candidate.performanceData.totalFoodEatenCreature / totalEaten, 1f);
         imageEatenEggs.transform.localScale = new Vector3(1f, candidate.performanceData.totalFoodEatenEgg / totalEaten, 1f);
         imageEatenCorpse.transform.localScale = new Vector3(1f, candidate.performanceData.totalFoodEatenCorpse / totalEaten, 1f);
-
-        //}
         //textBehaviorAttack.text = candidate.evaluationScoresList[0].ToString();
         
         /*
@@ -419,6 +444,8 @@ public class GenomeViewerUI : MonoBehaviour {
     */
     }
     
+    #region Button Clicks
+    
     public void ClickButtonNext() {
         int curSpeciesID = uiManagerRef.selectedSpeciesID;
 
@@ -431,40 +458,47 @@ public class GenomeViewerUI : MonoBehaviour {
         //uiManagerRef.globalResourcesUI.SetSelectedSpeciesUI(curSpeciesID);  // *** These should be combined??
         uiManagerRef.SetFocusedCandidateGenome(simulationManager.masterGenomePool.completeSpeciesPoolsList[curSpeciesID].representativeCandidate);
     }
+    
     public void ClickButtonPrev() {
         //uiManagerRef.speciesOverviewUI.CycleHallOfFame();
         uiManagerRef.speciesOverviewUI.CycleCurrentGenome();
     }
+    
     public void ClickButtonGenomeTab() {
         isGenomeTabActive = true;
         isPerformanceTabActive = false;
-        isHistoryTabActive = false;
-        
+        isHistoryTabActive = false; 
     }
+    
     public void ClickButtonPerformanceTab() {
         isGenomeTabActive = false;
         isPerformanceTabActive = true;
         isHistoryTabActive = false;
-        
     }
+    
     public void ClickButtonHistoryTab() {
         isGenomeTabActive = false;
         isPerformanceTabActive = false;
         isHistoryTabActive = true;
-        
     }
+    
     public void ClickButtonPerformance() {
         ClearPanelBools();
         isPerformancePanelON = true;
     }
+    
     public void ClickButtonSpecializations() {
         ClearPanelBools();
         isSpecializationPanelOn = true;
     }
+    
     public void ClickButtonBrain() {
         ClearPanelBools();
         isBrainPanelOn = true;
     }
+    
+    #endregion
+    
     private void ClearPanelBools() {
         isPerformancePanelON = false;
         isSpecializationPanelOn = false;
@@ -472,14 +506,28 @@ public class GenomeViewerUI : MonoBehaviour {
         isBrainPanelOn = false;
         //isFrontPageOn = false;
     }
+    
     public void EnterTooltipObject(GenomeButtonTooltipSource tip) {
         isTooltipHover = true;
         tooltipString = tip.tooltipString;
     }
+    
     public void ExitTooltipObject() {
         isTooltipHover = false;
-        
     }
     
-	
+    [Serializable] 
+    public class InteractiveImage
+    {
+        public Image image;
+        public GenomeButtonTooltipSource tooltip;
+        
+        public void SetSensorEnabled(bool value) 
+        { 
+            tooltip.isSensorEnabled = value;
+            
+            // * Expose values in central location (lookup?)
+            image.color = value ? Color.white : Color.gray * 0.75f;     
+        }
+    }
 }

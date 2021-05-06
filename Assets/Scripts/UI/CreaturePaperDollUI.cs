@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class CreaturePaperDollUI : MonoBehaviour
@@ -10,6 +8,7 @@ public class CreaturePaperDollUI : MonoBehaviour
 
     public WidgetAgentStatus widgetAgentStatus;
 
+    #region Unused variables
     public Text textStomachContents;
     public Text textEnergy;
     public Text textHealth;
@@ -31,19 +30,16 @@ public class CreaturePaperDollUI : MonoBehaviour
     //public Text textNewInspectLog;
     public Text textVertebrateLifestage;
     public Text textVertebrateStatus;
+    #endregion
 
     public void Tick() {
-
-        //int critterIndex = cameraManager.targetAgentIndex;
-        Agent agent = simulationManager.agentsArray[cameraManager.targetAgentIndex]; // simulationManager.agentsArray[critterIndex];
-
-        if (agent.coreModule != null) {
-            
-            widgetAgentStatus.UpdateBars(agent.coreModule.health,
-                                            agent.coreModule.energy,
-                                            agent.coreModule.stomachContentsPercent,
-                                            agent.currentBiomass,
-                                            agent.coreModule.stamina[0]);   
-        }        
+        Agent agent = simulationManager.agentsArray[cameraManager.targetAgentIndex];
+        if (agent.coreModule == null) return;
+        
+        widgetAgentStatus.UpdateBars(agent.coreModule.health,
+                                     agent.coreModule.energy,
+                                     agent.coreModule.stomachContentsPercent,
+                                     agent.currentBiomass,
+                                     agent.coreModule.stamina[0]);           
     }
 }
