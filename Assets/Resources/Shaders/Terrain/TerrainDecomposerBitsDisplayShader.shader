@@ -251,7 +251,7 @@
 				finalColor.rgb = lerp(finalColor.rgb, data.waterFogColor.rgb, fogAmount);
 				finalColor.rgb += lerp(float3(0,0,0), reflectionColor.xyz, reflectionColor.w);
 								
-				finalColor.rgb += data.spiritBrushTex.y;
+				finalColor.rgb += data.spiritBrushTex.y * 0.025;
 				
 				finalColor.a *= tex2D(_MainTex, i.quadUV).a * i.color.a;
 				return finalColor;

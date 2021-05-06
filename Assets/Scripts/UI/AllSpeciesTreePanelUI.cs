@@ -54,7 +54,7 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
     private void UpdateSpeciesButtonsLineageMode() {        
         for (int s = 0; s < speciesIconsList.Count; s++) {            
             float yCoord = (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);            
-            speciesIconsList[s].SetTargetCoords(new Vector2(1f, yCoord));
+            speciesIconsList[s].SetTargetCoords(new Vector2(1f, 1f - yCoord));
         }
     }
     private void UpdateSpeciesButtonsGraphMode() {
@@ -79,7 +79,7 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
 
             float xCoord = 1f;
             if (pool.isExtinct) {
-                xCoord = (float)pool.yearCreated / Mathf.Max(1f, (float)simulationManager.curSimYear);
+                xCoord = (float)pool.timeStepExtinct / Mathf.Max(1f, (float)simulationManager.simAgeTimeSteps);
             }
 
             speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, Mathf.Clamp01(valStat / bestScore)));

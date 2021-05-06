@@ -221,7 +221,7 @@
 				finalColor.rgb += shoreFoam;
 				finalColor.rgb = lerp(finalColor.rgb, data.waterFogColor.rgb, fogAmount);
 				finalColor.rgb += lerp(float3(0,0,0), reflectionColor.xyz, reflectionColor.w);
-				finalColor.rgb += data.spiritBrushTex.y;
+				finalColor.rgb += data.spiritBrushTex.y * 0.025;
 				//float4 outColor = MasterLightingModel(data);
 				finalColor = lerp(finalColor, float4(0.09,0.09,0.14,1), 1.0 - saturate(altitudeTex.w * 100));
 				

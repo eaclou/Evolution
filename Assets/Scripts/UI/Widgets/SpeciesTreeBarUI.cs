@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class SpeciesTreeBarUI : MonoBehaviour {
     UIManager uiManager => UIManager.instance;
@@ -37,6 +38,18 @@ public class SpeciesTreeBarUI : MonoBehaviour {
         }
         else {
             gameObject.transform.localScale = Vector3.one;
-        }            
+        }  
+        
+        if(linkedPool.isExtinct) {
+            gameObject.GetComponentInChildren<Text>().color = Color.gray * 0.5f;
+        }
+        else {
+            if (linkedPool.isFlaggedForExtinction) {
+                gameObject.GetComponentInChildren<Text>().color = Color.gray;
+            }
+            else {
+                gameObject.GetComponentInChildren<Text>().color = Color.white;
+            }            
+        }        
     }
 }

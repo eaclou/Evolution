@@ -771,7 +771,7 @@ public class Agent : MonoBehaviour {
             RegisterAgentEvent(Time.frameCount, "Pregnant! " + starterMass, 0.5f);
         }
         else {
-            Debug.LogError("Something went wrong!! " + " curMass: " + currentBiomass + ", reqMass: " + starterMass.ToString() + ", curProp: " + curProportion.ToString() );
+            //Debug.LogError("Something went wrong!! " + " curMass: " + currentBiomass + ", reqMass: " + starterMass.ToString() + ", curProp: " + curProportion.ToString() );
         }
     }
     

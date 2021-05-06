@@ -1327,7 +1327,8 @@ public class SimulationManager : Singleton<SimulationManager>
             if(agentsArray[i].speciesIndex == eggSackArray[eggSackIndex].speciesIndex &&
                agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature &&
                !agentsArray[i].isPregnantAndCarryingEggs &&
-               agentsArray[i].pregnancyRefactoryTimeStepCounter > agentsArray[i].pregnancyRefactoryDuration) 
+               agentsArray[i].pregnancyRefactoryTimeStepCounter > agentsArray[i].pregnancyRefactoryDuration &&
+               agentsArray[i].childEggSackRef) 
             {
                 //if(agentsArray[i].pregnancyRefactoryTimeStepCounter > agentsArray[i].pregnancyRefactoryDuration) 
 
@@ -1349,17 +1350,20 @@ public class SimulationManager : Singleton<SimulationManager>
                 // At Least ONE fertile Agent available:
                 int randParentAgentIndex = suitableParentAgentsList[Random.Range(0, totalSuitableParentAgents)];
 
+                //Debug.Log("BeginPregnancy! Egg[" + eggSackIndex.ToString() + "]  Agent[" + randParentAgentIndex.ToString() + "]");
+                if(agentsArray[randParentAgentIndex].childEggSackRef && agentsArray[randParentAgentIndex].isPregnantAndCarryingEggs) 
+                {
+                    Debug.Log("DOUBLE PREGNANT!! egg[" + agentsArray[randParentAgentIndex].childEggSackRef.index.ToString() + "]  Agent[" + randParentAgentIndex.ToString() + "]");
+
+                }
+
                 // RespawnFood
                 // *** REFACTOR -- Need to sync egg and agent genomes to match each other
                 EggSackGenome newEggSackGenome = new EggSackGenome(eggSackIndex);
                 newEggSackGenome.SetToMutatedCopyOfParentGenome(eggSackGenomePoolArray[eggSackIndex], settingsManager.mutationSettingsVertebrates);
                 eggSackGenomePoolArray[eggSackIndex] = newEggSackGenome;
 
-                //Debug.Log("BeginPregnancy! Egg[" + eggSackIndex.ToString() + "]  Agent[" + randParentAgentIndex.ToString() + "]");
-                if(agentsArray[randParentAgentIndex].childEggSackRef && agentsArray[randParentAgentIndex].isPregnantAndCarryingEggs) 
-                {
-                    Debug.Log("DOUBLE PREGNANT!! egg[" + agentsArray[randParentAgentIndex].childEggSackRef.index.ToString() + "]  Agent[" + randParentAgentIndex.ToString() + "]");
-                }
+                
 
                 // Transfer Energy from ParentAgent to childEggSack!!! ******
 
