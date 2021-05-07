@@ -21,25 +21,15 @@ public class CandidateAgentData {
         public float totalFoodEatenCreature;
         public float totalDamageDealt;
         public float totalDamageTaken;
-        public float totalTicksRested;
-        public float totalTicksAlive;
-        public float totalTimesPregnant;
-        
         public float totalTimesDashed;
         public float totalTimesDefended;
         public float totalTimesAttacked;
-        public float totalTimesActed => totalTimesAttacked + totalTimesDashed + totalTimesDefended;
-        public float attackActionPercent => totalTimesAttacked / (totalTimesActed + .01f);
-        public float defendActionPercent => totalTimesDefended / (totalTimesActed + .01f);
-        public float dashActionPercent => totalTimesDashed / (totalTimesActed + .01f);
+        public float totalTimesPregnant;
+        public float totalTicksRested;
+        public float totalTicksAlive;
         
-        // WPP 5/6/21: corpse included twice -> replaced with creature
-        public float totalEaten => totalFoodEatenCreature + totalFoodEatenCorpse + totalFoodEatenEgg + totalFoodEatenPlant + totalFoodEatenZoop;
-        public float percentPlantEaten => totalFoodEatenPlant / (totalEaten + .01f);
-        public float percentEggEaten => totalFoodEatenEgg / (totalEaten + .01f);
-        public float percentCorpseEaten => totalFoodEatenCorpse / (totalEaten + .01f);
-        public float percentZooplantonEaten => totalFoodEatenZoop / (totalEaten + .01f);
-        public float percentCreatureEaten => totalFoodEatenCreature / (totalEaten + .01f);
+        // * WPP: corpse included twice = error?
+        public float totalEaten => totalFoodEatenCorpse + totalFoodEatenEgg + totalFoodEatenCorpse + totalFoodEatenPlant + totalFoodEatenZoop;
     }
     
     public PerformanceData performanceData;

@@ -24,14 +24,6 @@ public class SimulationManager : Singleton<SimulationManager>
     public ComputeShader computeShaderPlantParticles;  // algae particles
     public ComputeShader computeShaderAnimalParticles; // animal particles
     public MasterGenomePool masterGenomePool;           // agents
-    
-    public int speciesPoolCount => masterGenomePool.completeSpeciesPoolsList.Count;
-    
-    public CandidateAgentData GetRepresentativeCandidate(int speciesIndex)
-    {
-        return masterGenomePool.completeSpeciesPoolsList[speciesIndex].representativeCandidate;
-    }
-    
 
     public TrophicLayersManager trophicLayersManager;
     public VegetationManager vegetationManager;
@@ -69,10 +61,7 @@ public class SimulationManager : Singleton<SimulationManager>
         set => numAgents = value;
     }
     
-    public Agent[] agentsArray;
-    
-    public Agent agentInFocus => agentsArray[cameraManager.targetAgentIndex];
-    public bool agentInFocusIsDead => agentInFocus.curLifeStage == Agent.AgentLifeStage.Dead;   
+    public Agent[] agentsArray;    
     
     public EggSackGenome[] eggSackGenomePoolArray;
     

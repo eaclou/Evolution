@@ -108,17 +108,6 @@ public class UIManager : Singleton<UIManager> {
     private bool isSpeciesOverview;
     
     #endregion
-    
-    public void CycleFocusedCandidateGenome()
-    {    
-        var id = PondHelpers.CycleInt(selectedSpeciesID, simulationManager.speciesPoolCount);
-        SetFocusedCandidateGenome(id);
-    }
-    
-    public void SetFocusedCandidateGenome(int speciesID)
-    {
-        SetFocusedCandidateGenome(simulationManager.GetRepresentativeCandidate(speciesID));
-    }
 
     public void SetFocusedCandidateGenome(CandidateAgentData candidate) {
         focusedCandidate = candidate;
