@@ -44,6 +44,7 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
             bool isSelected = false;
             if (icon.speciesID == uiManagerRef.selectedSpeciesID) {
                 isSelected = true;
+                icon.gameObject.transform.SetAsLastSibling();
             }
             icon.UpdateButtonDisplay(panelSidePixelCount, isSelected);
 
@@ -53,8 +54,12 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
     }
     private void UpdateSpeciesButtonsLineageMode() {        
         for (int s = 0; s < speciesIconsList.Count; s++) {            
-            float yCoord = (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);            
-            speciesIconsList[s].SetTargetCoords(new Vector2(1f, 1f - yCoord));
+            float yCoord = (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);  
+            float xCoord = 1f;
+            if (speciesIconsList[s].linkedPool.isExtinct) {
+                xCoord = (float)speciesIconsList[s].linkedPool.timeStepExtinct / Mathf.Max(1f, (float)simulationManager.simAgeTimeSteps);
+            }
+            speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, 1f - yCoord));
         }
     }
     private void UpdateSpeciesButtonsGraphMode() {
@@ -82,7 +87,11 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
                 xCoord = (float)pool.timeStepExtinct / Mathf.Max(1f, (float)simulationManager.simAgeTimeSteps);
             }
 
+            if(bestScore == 0f) {
+                bestScore = 1f;
+            }
             speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, Mathf.Clamp01(valStat / bestScore)));
+            
         }
     }
     private void UpdateSpeciesButtonsDefault() {
@@ -123,7 +132,7 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
             obj.GetComponent<Image>().color = color;
           
             string labelText = "";
-            labelText += "[" + pool.speciesID.ToString() + "] " + masterGenomePool.completeSpeciesPoolsList[pool.speciesID].foundingCandidate.candidateGenome.bodyGenome.coreGenome.name;
+            labelText += "[" + pool.speciesID.ToString() + "]";// " + masterGenomePool.completeSpeciesPoolsList[pool.speciesID].foundingCandidate.candidateGenome.bodyGenome.coreGenome.name;
 
             obj.GetComponentInChildren<Text>().text = labelText;
             SpeciesTreeBarUI buttonScript = obj.GetComponent<SpeciesTreeBarUI>();
