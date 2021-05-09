@@ -108,6 +108,18 @@ public class UIManager : Singleton<UIManager> {
     private bool isSpeciesOverview;
     
     #endregion
+    
+    public void CycleFocusedCandidateGenome()
+    {
+        int curSpeciesID = selectedSpeciesID + 1;
+
+        if(curSpeciesID >= simulationManager.masterGenomePool.speciesPoolCount) {
+            curSpeciesID = 0;
+        }
+    
+        var candidate = simulationManager.masterGenomePool.completeSpeciesPoolsList[curSpeciesID].representativeCandidate;
+        SetFocusedCandidateGenome(candidate);
+    }
 
     public void SetFocusedCandidateGenome(CandidateAgentData candidate) {
         focusedCandidate = candidate;

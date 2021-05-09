@@ -29,7 +29,17 @@ public class CandidateAgentData {
         public float totalTicksAlive;
         
         // * WPP: corpse included twice = error?
-        public float totalEaten => totalFoodEatenCorpse + totalFoodEatenEgg + totalFoodEatenCorpse + totalFoodEatenPlant + totalFoodEatenZoop;
+        public float totalEaten => totalFoodEatenCorpse + totalFoodEatenEgg + totalFoodEatenCreature + totalFoodEatenPlant + totalFoodEatenZoop;
+        public float corpseEatenPercent => totalFoodEatenCorpse / (totalEaten + .01f);
+        public float eggEatenPercent => totalFoodEatenEgg / (totalEaten + .01f);
+        public float creatureEatenPercent => totalFoodEatenCreature / (totalEaten + .01f);
+        public float plantEatenPercent => totalFoodEatenPlant / (totalEaten + .01f);
+        public float zooplanktonEatenPercent => totalFoodEatenZoop / (totalEaten + .01f);
+        
+        public float timesActed => totalTimesAttacked + totalTimesDefended + totalTimesDashed;
+        public float attackActionPercent => totalTimesAttacked / (timesActed + .01f);
+        public float defendActionPercent => totalTimesDefended / (timesActed + .01f);
+        public float dashActionPercent => totalTimesDashed / (timesActed + .01f);
     }
     
     public PerformanceData performanceData;

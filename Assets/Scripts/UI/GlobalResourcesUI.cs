@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class GlobalResourcesUI : MonoBehaviour {
-    UIManager uiManagerRef => UIManager.instance;
+    SimulationManager simulationManager => SimulationManager.instance;
+    SimResourceManager resourcesRef => simulationManager.simResourceManager;
     
     public bool isUnlocked;
     public bool isOpen;
@@ -29,42 +29,25 @@ public class GlobalResourcesUI : MonoBehaviour {
     public Material knowledgeGraphZooplanktonMat;
     public Material knowledgeGraphVertebratesMat;
         
-
-    SimulationManager simulationManager => SimulationManager.instance;
-    MasterGenomePool masterGenomePool => simulationManager.masterGenomePool;
-        
-
-
-    void Start() {
-        
-      
-                 
-	}
-	    
     
     public void ClickToolButton() {
         Debug.Log("Click globalResourcesUI toggle button)");
         isOpen = !isOpen;
     }
 
-    private void UpdateUI() {
-        SpeciesGenomePool pool = masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
-        
-        textGlobalMass.text = "Global Biomass: " + simulationManager.simResourceManager.curTotalMass.ToString("F0");
-        SimResourceManager resourcesRef = simulationManager.simResourceManager;
+    private void UpdateUI() {        
+        textGlobalMass.text = "Global Biomass: " + resourcesRef.curTotalMass.ToString("F0");
         //textMeterOxygen.text = resourcesRef.curGlobalOxygen.ToString("F0");
         textMeterNutrients.text = resourcesRef.curGlobalNutrients.ToString("F0");
         textMeterDetritus.text = resourcesRef.curGlobalDetritus.ToString("F0");
         textMeterDecomposers.text = resourcesRef.curGlobalDecomposers.ToString("F0");
-        textMeterAlgae.text = (resourcesRef.curGlobalAlgaeReservoir).ToString("F0");
-        textMeterPlants.text = (resourcesRef.curGlobalPlantParticles).ToString("F0");
-        textMeterZooplankton.text = (resourcesRef.curGlobalAnimalParticles).ToString("F0");
-        textMeterAnimals.text = (resourcesRef.curGlobalAgentBiomass).ToString("F2");
-
+        textMeterAlgae.text = resourcesRef.curGlobalAlgaeReservoir.ToString("F0");
+        textMeterPlants.text = resourcesRef.curGlobalPlantParticles.ToString("F0");
+        textMeterZooplankton.text = resourcesRef.curGlobalAnimalParticles.ToString("F0");
+        textMeterAnimals.text = resourcesRef.curGlobalAgentBiomass.ToString("F2");
     }
 
     public void UpdateGlobalResourcesPanelUpdate() {
-
         isOpen = true;
         panelGlobalResourcesMain.SetActive(isOpen);
         UpdateUI();

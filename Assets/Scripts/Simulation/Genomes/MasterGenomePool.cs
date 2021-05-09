@@ -1,10 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
 public class MasterGenomePool {
-
     //public TreeOfLifeManager treeOfLifeManager;
 
     public static int nextCandidateIndex = 0;
@@ -27,10 +25,10 @@ public class MasterGenomePool {
 
     UIManager uiManager => UIManager.instance;
     PanelNotificationsUI panelPendingClickPrompt => uiManager.panelPendingClickPrompt;
+    public SpeciesGenomePool selectedPool => completeSpeciesPoolsList[uiManager.selectedSpeciesID];
+    public int speciesPoolCount => completeSpeciesPoolsList.Count;   
    
-    public MasterGenomePool() {
-        
-    }
+    public MasterGenomePool() { }
 
     public void FirstTimeInitialize(MutationSettings mutationSettingsRef) {
         debugRecentlyDeletedCandidateIDsList = new List<int>();

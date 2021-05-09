@@ -199,7 +199,7 @@ public class GenomeViewerUI : MonoBehaviour {
         UpdateDigestSpecUI(candidate.candidateGenome.bodyGenome.coreGenome);
         UpdateSpecializationsUI(candidate.candidateGenome.bodyGenome.coreGenome);
 
-        UpdatePerformanceBehaviors(pool, candidate); // ******
+        UpdatePerformanceBehaviors(candidate.performanceData); // ******
         UpdateSensorsUI(candidate.candidateGenome);      
     }
     
@@ -394,34 +394,32 @@ public class GenomeViewerUI : MonoBehaviour {
         imageSpecEnergy.transform.localScale = new Vector3(1f, coreGenome.talentSpecializationUtility, 1f);
     }
 	
-    public void UpdatePerformanceBehaviors(SpeciesGenomePool pool, CandidateAgentData candidate) {
+	// WPP: delegated calculations to PerformanceData
+    public void UpdatePerformanceBehaviors(CandidateAgentData.PerformanceData data) {
         //if(candidate.performanceData != null) {
-        textBehaviorAttack.text = candidate.performanceData.totalTimesAttacked.ToString("F0");
-        textBehaviorDefend.text = candidate.performanceData.totalTimesDefended.ToString("F0");
-        textBehaviorDash.text = candidate.performanceData.totalTimesDashed.ToString("F0");
-        textBehaviorRest.text = (candidate.performanceData.totalTicksRested * 0.01f).ToString("F0");
-        textBehaviorFeed.text = candidate.performanceData.totalTimesPregnant.ToString("F0");
+        textBehaviorAttack.text = data.totalTimesAttacked.ToString("F0");
+        textBehaviorDefend.text = data.totalTimesDefended.ToString("F0");
+        textBehaviorDash.text = data.totalTimesDashed.ToString("F0");
+        textBehaviorRest.text = (data.totalTicksRested * 0.01f).ToString("F0");
+        textBehaviorFeed.text = data.totalTimesPregnant.ToString("F0");
+                
+        imageBehaviorAttack.transform.localScale = new Vector3(1f, data.attackActionPercent, 1f);
+        imageBehaviorDefend.transform.localScale = new Vector3(1f, data.defendActionPercent, 1f);
+        imageBehaviorDash.transform.localScale = new Vector3(1f, data.dashActionPercent, 1f);
+        imageBehaviorRest.transform.localScale = new Vector3(1f, Mathf.Clamp01(data.totalTicksRested / 600f), 1f);
+        imageBehaviorFeed.transform.localScale = new Vector3(1f, Mathf.Clamp01(data.totalTimesPregnant / 4f), 1f);
         
-        float totalTimesActed = candidate.performanceData.totalTimesAttacked + candidate.performanceData.totalTimesDefended + candidate.performanceData.totalTimesDashed + 0.001f; // <-- prevent divide by 0
-        imageBehaviorAttack.transform.localScale = new Vector3(1f, candidate.performanceData.totalTimesAttacked / totalTimesActed, 1f);
-        imageBehaviorDefend.transform.localScale = new Vector3(1f, candidate.performanceData.totalTimesDefended / totalTimesActed, 1f);
-        imageBehaviorDash.transform.localScale = new Vector3(1f, candidate.performanceData.totalTimesDashed / totalTimesActed, 1f);
-        imageBehaviorRest.transform.localScale = new Vector3(1f, Mathf.Clamp01(candidate.performanceData.totalTicksRested / 600f), 1f);
-        imageBehaviorFeed.transform.localScale = new Vector3(1f, Mathf.Clamp01(candidate.performanceData.totalTimesPregnant / 4f), 1f);
-        
-        textEatenPlants.text = candidate.performanceData.totalFoodEatenPlant.ToString("F2");
-        textEatenMicrobes.text = candidate.performanceData.totalFoodEatenZoop.ToString("F2");
-        textEatenAnimals.text = candidate.performanceData.totalFoodEatenCreature.ToString("F2");
-        textEatenEggs.text = candidate.performanceData.totalFoodEatenEgg.ToString("F2");
-        textEatenCorpse.text = candidate.performanceData.totalFoodEatenCorpse.ToString("F2");
+        textEatenPlants.text = data.totalFoodEatenPlant.ToString("F2");
+        textEatenMicrobes.text = data.totalFoodEatenZoop.ToString("F2");
+        textEatenAnimals.text = data.totalFoodEatenCreature.ToString("F2");
+        textEatenEggs.text = data.totalFoodEatenEgg.ToString("F2");
+        textEatenCorpse.text = data.totalFoodEatenCorpse.ToString("F2");
 
-        // * WPP: apply getter to CandidateAgentData for easier access
-        float totalEaten = candidate.performanceData.totalFoodEatenPlant + candidate.performanceData.totalFoodEatenZoop + candidate.performanceData.totalFoodEatenCreature + candidate.performanceData.totalFoodEatenEgg + candidate.performanceData.totalFoodEatenCorpse + 0.001f;
-        imageEatenPlants.transform.localScale = new Vector3(1f, candidate.performanceData.totalFoodEatenPlant / totalEaten, 1f);
-        imageEatenMicrobes.transform.localScale = new Vector3(1f, candidate.performanceData.totalFoodEatenZoop / totalEaten, 1f);
-        imageEatenAnimals.transform.localScale = new Vector3(1f, candidate.performanceData.totalFoodEatenCreature / totalEaten, 1f);
-        imageEatenEggs.transform.localScale = new Vector3(1f, candidate.performanceData.totalFoodEatenEgg / totalEaten, 1f);
-        imageEatenCorpse.transform.localScale = new Vector3(1f, candidate.performanceData.totalFoodEatenCorpse / totalEaten, 1f);
+        imageEatenPlants.transform.localScale = new Vector3(1f, data.plantEatenPercent, 1f);
+        imageEatenMicrobes.transform.localScale = new Vector3(1f, data.zooplanktonEatenPercent, 1f);
+        imageEatenAnimals.transform.localScale = new Vector3(1f, data.creatureEatenPercent, 1f);
+        imageEatenEggs.transform.localScale = new Vector3(1f, data.eggEatenPercent, 1f);
+        imageEatenCorpse.transform.localScale = new Vector3(1f, data.corpseEatenPercent, 1f);
         //textBehaviorAttack.text = candidate.evaluationScoresList[0].ToString();
         
         /*
@@ -455,8 +453,10 @@ public class GenomeViewerUI : MonoBehaviour {
     
     #region Button Clicks
     
+    // WPP: moved to UIManager
     public void ClickButtonNext() {
-        int curSpeciesID = uiManagerRef.selectedSpeciesID;
+        uiManagerRef.CycleFocusedCandidateGenome();
+        /*int curSpeciesID = uiManagerRef.selectedSpeciesID;
 
         if(curSpeciesID >= simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1) {
             curSpeciesID = 0;
@@ -465,7 +465,7 @@ public class GenomeViewerUI : MonoBehaviour {
             curSpeciesID += 1;
         }
         //uiManagerRef.globalResourcesUI.SetSelectedSpeciesUI(curSpeciesID);  // *** These should be combined??
-        uiManagerRef.SetFocusedCandidateGenome(simulationManager.masterGenomePool.completeSpeciesPoolsList[curSpeciesID].representativeCandidate);
+        uiManagerRef.SetFocusedCandidateGenome(simulationManager.masterGenomePool.completeSpeciesPoolsList[curSpeciesID].representativeCandidate);*/
     }
     
     public void ClickButtonPrev() {
