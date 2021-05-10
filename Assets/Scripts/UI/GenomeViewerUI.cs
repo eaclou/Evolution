@@ -4,9 +4,10 @@ using UnityEngine.UI;
 
 public class GenomeViewerUI : MonoBehaviour {
     SimulationManager simulationManager => SimulationManager.instance;
-    CameraManager cameraManager => CameraManager.instance;
-    UIManager uiManagerRef => UIManager.instance;
+    UIManager uiManager => UIManager.instance;
 
+    public SpeciesOverviewUI speciesOverviewUI;
+    
     public Text textFocusedCandidate;
     public Text textGenomeOverviewA;
     public Text textGenomeOverviewB;
@@ -47,13 +48,21 @@ public class GenomeViewerUI : MonoBehaviour {
     public Image imagePortraitTitleBG;
 
     public GameObject panelGenomeAbilities;
+    
+    // WPP 5/9/21: not used -> delete?
     public Image imageAbilityFeed;
     public Image imageAbilityAttack;
     public Image imageAbilityDefend;
     public Image imageAbilityDash;
     public Image imageAbilityRest;
-
     public GameObject panelGenomeSpecializations;
+    public GameObject panelGenomeDigestion;
+    
+    public bool isPerformancePanelON;
+    public bool isSpecializationPanelOn;    
+    public bool isBrainPanelOn;
+    public Toggle toggleAutofollow;
+
     public Image imageSpecAttack;
     public Image imageSpecDefense;
     public Image imageSpecSpeed;
@@ -63,7 +72,6 @@ public class GenomeViewerUI : MonoBehaviour {
     public Text textSpecSpeed;
     public Text textSpecEnergy;
 
-    public GameObject panelGenomeDigestion;
     public Image imageDigestPlant;
     public Image imageDigestMeat;
     public Image imageDigestDecay;    
@@ -110,16 +118,11 @@ public class GenomeViewerUI : MonoBehaviour {
     public bool isHistoryTabActive = false;
 
     public GameObject imageDeadDim;
-    public Toggle toggleAutofollow;
 
     public bool isTooltipHover = true;
     public string tooltipString;
 
-    public bool isPerformancePanelON;
-    public bool isSpecializationPanelOn;    
-    public bool isBrainPanelOn;
-
-    private Texture2D brainGenomeTex; //Barcode
+    private Texture2D brainGenomeTex; // Barcode
     public Material brainGenomeMat;
 
     void Start () {
@@ -134,6 +137,8 @@ public class GenomeViewerUI : MonoBehaviour {
     public void UpdateUI(SpeciesGenomePool pool, CandidateAgentData candidate) {
         if (candidate == null || candidate.candidateGenome == null)
             return;
+            
+        CacheReferences(candidate);
             
         SetTitleString(candidate);
 
@@ -150,17 +155,12 @@ public class GenomeViewerUI : MonoBehaviour {
         }
         */
         
-        hue = candidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-        hueB = candidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
+        hue = appearance.huePrimary;
+        hueB = appearance.hueSecondary;
         
         //Vector3 hue = pool.avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
         imagePortraitTitleBG.color = new Color(hue.x, hue.y, hue.z);
         textFocusedCandidate.color = new Color(hueB.x, hueB.y, hueB.z);
-        //+ ", " + candidate.numCompletedEvaluations.ToString() + ", " + candidate.speciesID.ToString() + ", " + candidate.isBeingEvaluated.ToString() + ", " + candidate.candidateGenome.bodyGenome.coreGenome.name;
-
-        if(toggleAutofollow.isOn) {  
-
-        }
 
         panelPerformanceBehavior.SetActive(true);
         panelEaten.SetActive(true);
@@ -180,27 +180,28 @@ public class GenomeViewerUI : MonoBehaviour {
         //panelHistoryTab.SetActive(isHistoryTabActive);
         //buttonHistoryTab.GetComponentInChildren<Image>().color = isHistoryTabActive ? Color.white : Color.gray;
         
-        //panel
         imageDeadDim.gameObject.SetActive(false);
-        float lifespan = candidate.performanceData.totalTicksAlive;
-        textGenomeOverviewA.text = "Lifespan: " + (lifespan * 0.1f).ToString("F0") + ", Gen: " + candidate.candidateGenome.generationCount;
+        float lifespan = performance.totalTicksAlive;
+        textGenomeOverviewA.text = "Lifespan: " + (lifespan * 0.1f).ToString("F0") + ", Gen: " + genome.generationCount;
 
         if(candidate.isBeingEvaluated) {
-            lifespan = simulationManager.agentsArray[cameraManager.targetAgentIndex].ageCounter;
-            textGenomeOverviewA.text = "Age: " + (lifespan * 0.1f).ToString("F0") + ", Gen: " + candidate.candidateGenome.generationCount;
+            // [WPP: peek reference to target agent for note]
+            lifespan = simulationManager.targetAgentAge;
+            textGenomeOverviewA.text = "Age: " + (lifespan * 0.1f).ToString("F0") + ", Gen: " + genome.generationCount;
         }
-        if(simulationManager.agentsArray[cameraManager.targetAgentIndex].curLifeStage == Agent.AgentLifeStage.Dead) {
+        if (simulationManager.targetAgentIsDead) {   // WPP: same as above
+        //if(simulationManager.agentsArray[cameraManager.targetAgentIndex].curLifeStage == Agent.AgentLifeStage.Dead) {
             imageDeadDim.gameObject.SetActive(true);
         }
 
-        textGenomeOverviewB.text = "Size: " + (100f * candidate.candidateGenome.bodyGenome.coreGenome.creatureBaseLength).ToString("F0") + ", Aspect 1:" + (1f / candidate.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio).ToString("F0");
-        textGenomeOverviewC.text = "Brain Size: " + candidate.candidateGenome.brainGenome.bodyNeuronList.Count + "--" + candidate.candidateGenome.brainGenome.linkList.Count;
+        textGenomeOverviewB.text = "Size: " + (100f * core.creatureBaseLength).ToString("F0") + ", Aspect 1:" + (1f / core.creatureAspectRatio).ToString("F0");
+        textGenomeOverviewC.text = "Brain Size: " + brain.bodyNeuronList.Count + "--" + brain.linkList.Count;
                   
-        UpdateDigestSpecUI(candidate.candidateGenome.bodyGenome.coreGenome);
-        UpdateSpecializationsUI(candidate.candidateGenome.bodyGenome.coreGenome);
+        UpdateDigestSpecUI(core);
+        UpdateSpecializationsUI(core);
 
-        UpdatePerformanceBehaviors(candidate.performanceData); // ******
-        UpdateSensorsUI(candidate.candidateGenome);      
+        UpdatePerformanceBehaviors(performance); 
+        UpdateSensorsUI(genome);      
     }
     
     void SetTitleString(CandidateAgentData candidate)
@@ -253,37 +254,55 @@ public class GenomeViewerUI : MonoBehaviour {
             brainGenomeTex.SetPixel(xIndex, yIndex, testColor);
         }
         
-        
         brainGenomeTex.Apply();
-    }    
+    } 
     
-    CritterModuleFoodSensorsGenome _food;
-    CritterModuleFriendSensorsGenome _friend;
-    CritterModuleThreatSensorsGenome _threat;
-    CritterModuleEnvironmentSensorsGenome _environment;
-    CritterModuleCommunicationGenome _communication;
+    // WPP: quick access without GC
+    #region Reference Caching   
+    
+    AgentGenome genome;
+    BodyGenome body;
+    BrainGenome brain;
+    CritterModuleAppearanceGenome appearance;
+    CritterModuleFoodSensorsGenome food;
+    CritterModuleFriendSensorsGenome friend;
+    CritterModuleThreatSensorsGenome threat;
+    CritterModuleEnvironmentSensorsGenome environment;
+    CritterModuleCommunicationGenome communication;
+    CandidateAgentData.PerformanceData performance;
+    CritterModuleCoreGenome core;
+    
+    void CacheReferences(CandidateAgentData agent)
+    {
+        performance = agent.performanceData;
+        genome = agent.candidateGenome;
+        brain = genome.brainGenome;
+        body = genome.bodyGenome;
+        core = body.coreGenome;
+        appearance = body.appearanceGenome;
+        food = body.foodGenome;
+        friend = body.friendGenome;
+        threat = body.threatGenome;
+        environment = body.environmentalGenome;
+        communication = body.communicationGenome;
+    }
+    
+    #endregion
     
     // WPP 5/6/21: Replaced repeating logic with Sensor nested class
     private void UpdateSensorsUI(AgentGenome genome) {
         if (genome.bodyGenome.foodGenome == null) return;
-        
-        // Cache references for quick access
-        _food = genome.bodyGenome.foodGenome;
-        _friend = genome.bodyGenome.friendGenome;
-        _threat = genome.bodyGenome.threatGenome;
-        _environment = genome.bodyGenome.environmentalGenome;
-        _communication = genome.bodyGenome.communicationGenome;
-        
-        plantFoodSensor.SetSensorEnabled(_food.useNutrients || _food.useStats);
-        microbeFoodSensor.SetSensorEnabled(_food.usePos);
-        eggsFoodSensor.SetSensorEnabled(_food.useEggs);
-        meatFoodSensor.SetSensorEnabled(_food.useVel);
-        corpseFoodSensor.SetSensorEnabled(_food.useCorpse);
-        friendSensor.SetSensorEnabled(_friend.usePos || _friend.useVel || _friend.useDir);
-        foeSensor.SetSensorEnabled(_threat.usePos || _threat.useVel || _threat.useDir);
-        waterSensor.SetSensorEnabled(_environment.useWaterStats);
-        wallSensor.SetSensorEnabled(_environment.useCardinals || _environment.useDiagonals);
-        commSensor.SetSensorEnabled(_communication.useComms);
+                
+        plantFoodSensor.SetSensorEnabled(food.useNutrients || food.useStats);
+        microbeFoodSensor.SetSensorEnabled(food.usePos);
+        eggsFoodSensor.SetSensorEnabled(food.useEggs);
+        meatFoodSensor.SetSensorEnabled(food.useVel);
+        corpseFoodSensor.SetSensorEnabled(food.useCorpse);
+        friendSensor.SetSensorEnabled(friend.usePos || friend.useVel || friend.useDir);
+        foeSensor.SetSensorEnabled(threat.usePos || threat.useVel || threat.useDir);
+        waterSensor.SetSensorEnabled(environment.useWaterStats);
+        wallSensor.SetSensorEnabled(environment.useCardinals || environment.useDiagonals);
+        commSensor.SetSensorEnabled(communication.useComms);
         
         /*
         imageSensorComms.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.communicationGenome.useComms;
@@ -455,7 +474,7 @@ public class GenomeViewerUI : MonoBehaviour {
     
     // WPP: moved to UIManager
     public void ClickButtonNext() {
-        uiManagerRef.CycleFocusedCandidateGenome();
+        uiManager.CycleFocusedCandidateGenome();
         /*int curSpeciesID = uiManagerRef.selectedSpeciesID;
 
         if(curSpeciesID >= simulationManager.masterGenomePool.completeSpeciesPoolsList.Count - 1) {
@@ -469,8 +488,8 @@ public class GenomeViewerUI : MonoBehaviour {
     }
     
     public void ClickButtonPrev() {
-        //uiManagerRef.speciesOverviewUI.CycleHallOfFame();
-        uiManagerRef.speciesOverviewUI.CycleCurrentGenome();
+        //speciesOverviewUI.CycleHallOfFame();
+        speciesOverviewUI.CycleCurrentGenome();
     }
     
     public void ClickButtonGenomeTab() {

@@ -61,8 +61,8 @@ public class SimulationManager : Singleton<SimulationManager>
         set => numAgents = value;
     }
     
-    public Agent[] agentsArray;    
-    
+    public Agent[] agentsArray;
+        
     public EggSackGenome[] eggSackGenomePoolArray;
     
     public EggSack[] eggSackArray;
@@ -409,7 +409,12 @@ public class SimulationManager : Singleton<SimulationManager>
 
     #region Every Frame  //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& EVERY FRAME &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-    Agent targetAgent => cameraManager.targetAgent;
+    // * WPP: different methods of calculating same concept -> pick one and stick with it
+    public Agent targetAgent => cameraManager.targetAgent;
+    public Agent targetAgentFromArray => agentsArray[cameraManager.targetAgentIndex];
+    
+    public bool targetAgentIsDead => targetAgentFromArray.curLifeStage == Agent.AgentLifeStage.Dead;
+    public int targetAgentAge => targetAgentFromArray.ageCounter;
 
     // ***WPP: break into sections -> comments (minimum) or functions (better)
     public void TickSimulation() {
