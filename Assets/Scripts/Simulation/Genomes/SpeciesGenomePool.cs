@@ -198,7 +198,7 @@ public class SpeciesGenomePool {
         avgCandidateData.candidateGenome.bodyGenome.coreGenome.bodyLength = 0f;
         avgCandidateData.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio = 0f;
 
-        avgCandidateData.performanceData = new CandidateAgentData.PerformanceData();  // clear // ***EC better spot for this??
+        avgCandidateData.performanceData = new PerformanceData();  // clear // ***EC better spot for this??
         //Debug.Log("avgPerformanceData " + avgPerformanceData.totalTicksAlive.ToString());
         //avgCandidateData.performanceData = avgPerformanceData;
         

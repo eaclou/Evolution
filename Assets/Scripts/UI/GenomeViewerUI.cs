@@ -15,22 +15,13 @@ public class GenomeViewerUI : MonoBehaviour {
 
     public GameObject panelGenomeSensors;
     
-    [SerializeField] Sensor plantFoodSensor;
-    [SerializeField] Sensor eggsFoodSensor;
-    [SerializeField] Sensor meatFoodSensor;
-    [SerializeField] Sensor corpseFoodSensor;
-    [SerializeField] Sensor microbeFoodSensor;
-    [SerializeField] Sensor friendSensor;
-    [SerializeField] Sensor foeSensor;
-    [SerializeField] Sensor wallSensor;
-    [SerializeField] Sensor waterSensor;
-    [SerializeField] Sensor commSensor;
     
     [SerializeField] Tab genomeTab;
     [SerializeField] Tab historyTab;
     [SerializeField] Tab performanceTab;
     
-    // WPP 5/6/21: replaced with InteractiveImage    
+    // WPP 5/9/21: delegated  
+    [SerializeField] SensorsPanel sensorsPanel;  
     //public Image imageSensorFoodPlant;
     //public Image imageSensorFoodMicrobe;
     //public Image imageSensorFoodEggs;
@@ -41,9 +32,8 @@ public class GenomeViewerUI : MonoBehaviour {
     //public Image imageSensorWalls;
     //public Image imageSensorWater;
     //public Image imageSensorComms;
-    
-    public Image imageSensorInternals;
-    public Image imageSensorContact;
+    //public Image imageSensorInternals;
+    //public Image imageSensorContact;
 
     public Image imagePortraitTitleBG;
 
@@ -63,50 +53,60 @@ public class GenomeViewerUI : MonoBehaviour {
     public bool isBrainPanelOn;
     public Toggle toggleAutofollow;
 
-    public Image imageSpecAttack;
-    public Image imageSpecDefense;
-    public Image imageSpecSpeed;
-    public Image imageSpecEnergy;
-    public Text textSpecAttack;
-    public Text textSpecDefense;
-    public Text textSpecSpeed;
-    public Text textSpecEnergy;
+    // WPP: 5/9/21: delegated
+    public SpecializationPanel specializationPanel;
+    //public Image imageSpecAttack;
+    //public Image imageSpecDefense;
+    //public Image imageSpecSpeed;
+    //public Image imageSpecEnergy;
+    //public Text textSpecAttack;
+    //public Text textSpecDefense;
+    //public Text textSpecSpeed;
+    //public Text textSpecEnergy;
 
-    public Image imageDigestPlant;
-    public Image imageDigestMeat;
-    public Image imageDigestDecay;    
-    public Text textDigestPlant;
-    public Text textDigestMeat;
-    public Text textDigestDecay;
+    // WPP 5/9/21: delegated
+    [SerializeField] DigestionPanel digestionPanel;
+    //public Image imageDigestPlant;
+    //public Image imageDigestMeat;
+    //public Image imageDigestDecay;    
+    //public Text textDigestPlant;
+    //public Text textDigestMeat;
+    //public Text textDigestDecay;
 
     public GameObject panelPerformanceBehavior;
-    public Image imageBehaviorFeed;
-    public Image imageBehaviorAttack;
-    public Image imageBehaviorDefend;
-    public Image imageBehaviorDash;
-    public Image imageBehaviorRest;
-    public Text textBehaviorFeed;
-    public Text textBehaviorAttack;
-    public Text textBehaviorDefend;
-    public Text textBehaviorDash;
-    public Text textBehaviorRest;
+    
+    // WPP 5/9/21: delegated to BehaviorPanel
+    [SerializeField] BehaviorPanel behaviorPanel;
+    //public Image imageBehaviorFeed;
+    //public Image imageBehaviorAttack;
+    //public Image imageBehaviorDefend;
+    //public Image imageBehaviorDash;
+    //public Image imageBehaviorRest;
+    //public Text textBehaviorFeed;
+    //public Text textBehaviorAttack;
+    //public Text textBehaviorDefend;
+    //public Text textBehaviorDash;
+    //public Text textBehaviorRest;
 
     public GameObject panelEaten;
-    public Image imageEatenPlants;
-    public Image imageEatenMicrobes;
-    public Image imageEatenAnimals;
-    public Image imageEatenEggs;
-    public Image imageEatenCorpse;
-    public Text textEatenPlants;
-    public Text textEatenMicrobes;
-    public Text textEatenAnimals;
-    public Text textEatenEggs;
-    public Text textEatenCorpse;
+    
+    // WPP 5/9/21: delegated
+    [SerializeField] FoodEatenPanel foodEatenPanel;
+    //public Image imageEatenPlants;
+    //public Image imageEatenMicrobes;
+    //public Image imageEatenAnimals;
+    //public Image imageEatenEggs;
+    //public Image imageEatenCorpse;
+    //public Text textEatenPlants;
+    //public Text textEatenMicrobes;
+    //public Text textEatenAnimals;
+    //public Text textEatenEggs;
+    //public Text textEatenCorpse;
 
     // WPP 5/6/21: moved to nested Tab class
     //public GameObject panelGenomeTab;
     //public GameObject panelPerformanceTab;
-    //public GameObject panelHistoryTab;    
+    //public GameObject panelHistoryTab;
     
     //public Button buttonGenomeTab;
     //public Button buttonPerformanceTab;
@@ -170,6 +170,7 @@ public class GenomeViewerUI : MonoBehaviour {
         panelGenomeSensors.SetActive(true);
 
         // WPP 5/6/21: delegated to Tab nested class
+        // * delegate to components (organize scattered references first)
         genomeTab.SetActive(isGenomeTabActive);
         performanceTab.SetActive(isPerformanceTabActive);
         historyTab.SetActive(isHistoryTabActive);
@@ -185,7 +186,7 @@ public class GenomeViewerUI : MonoBehaviour {
         textGenomeOverviewA.text = "Lifespan: " + (lifespan * 0.1f).ToString("F0") + ", Gen: " + genome.generationCount;
 
         if(candidate.isBeingEvaluated) {
-            // [WPP: peek reference to target agent for note]
+            // [WPP: peek reference to target agent for defect note]
             lifespan = simulationManager.targetAgentAge;
             textGenomeOverviewA.text = "Age: " + (lifespan * 0.1f).ToString("F0") + ", Gen: " + genome.generationCount;
         }
@@ -197,11 +198,17 @@ public class GenomeViewerUI : MonoBehaviour {
         textGenomeOverviewB.text = "Size: " + (100f * core.creatureBaseLength).ToString("F0") + ", Aspect 1:" + (1f / core.creatureAspectRatio).ToString("F0");
         textGenomeOverviewC.text = "Brain Size: " + brain.bodyNeuronList.Count + "--" + brain.linkList.Count;
                   
-        UpdateDigestSpecUI(core);
-        UpdateSpecializationsUI(core);
-
-        UpdatePerformanceBehaviors(performance); 
-        UpdateSensorsUI(genome);      
+        // WPP 5/9/21: delegated
+        //UpdateSpecializationsUI(core);
+        //UpdateDigestSpecUI(core);
+        //UpdatePerformanceBehaviors(performance);
+        //UpdateSensorsUI(genome); 
+ 
+        digestionPanel.Refresh(core);
+        specializationPanel.Refresh(core);
+        behaviorPanel.Refresh(performance);
+        foodEatenPanel.Refresh(performance);        
+        sensorsPanel.Refresh(genome);     
     }
     
     void SetTitleString(CandidateAgentData candidate)
@@ -222,6 +229,7 @@ public class GenomeViewerUI : MonoBehaviour {
         textFocusedCandidate.text = titleString;
     }
     
+    // * WPP: simplify
     public void CreateBrainGenomeTexture(AgentGenome genome) {
         int width = 256;
         brainGenomeTex.Resize(width, 1); // pool.leaderboardGenomesList.Count);
@@ -233,7 +241,6 @@ public class GenomeViewerUI : MonoBehaviour {
             Color testColor;
 
             if (genome.brainGenome.linkList.Count > x) {
-
                 float weightVal = genome.brainGenome.linkList[x].weight;
                 testColor = new Color(weightVal * 0.5f + 0.5f, weightVal * 0.5f + 0.5f, weightVal * 0.5f + 0.5f);
                 if(weightVal < -0.25f) {
@@ -248,7 +255,6 @@ public class GenomeViewerUI : MonoBehaviour {
             }
             else {
                 testColor = Color.black; // CLEAR
-                //break;
             }
                 
             brainGenomeTex.SetPixel(xIndex, yIndex, testColor);
@@ -264,12 +270,7 @@ public class GenomeViewerUI : MonoBehaviour {
     BodyGenome body;
     BrainGenome brain;
     CritterModuleAppearanceGenome appearance;
-    CritterModuleFoodSensorsGenome food;
-    CritterModuleFriendSensorsGenome friend;
-    CritterModuleThreatSensorsGenome threat;
-    CritterModuleEnvironmentSensorsGenome environment;
-    CritterModuleCommunicationGenome communication;
-    CandidateAgentData.PerformanceData performance;
+    PerformanceData performance;
     CritterModuleCoreGenome core;
     
     void CacheReferences(CandidateAgentData agent)
@@ -280,20 +281,18 @@ public class GenomeViewerUI : MonoBehaviour {
         body = genome.bodyGenome;
         core = body.coreGenome;
         appearance = body.appearanceGenome;
-        food = body.foodGenome;
-        friend = body.friendGenome;
-        threat = body.threatGenome;
-        environment = body.environmentalGenome;
-        communication = body.communicationGenome;
     }
     
     #endregion
     
+    #region Delegated Away
+    
     // WPP 5/6/21: Replaced repeating logic with Sensor nested class
-    private void UpdateSensorsUI(AgentGenome genome) {
-        if (genome.bodyGenome.foodGenome == null) return;
+    // 5/9/21: delegated to SensorsPanel
+    //private void UpdateSensorsUI(AgentGenome genome) {
+    //    if (genome.bodyGenome.foodGenome == null) return;
                 
-        plantFoodSensor.SetSensorEnabled(food.useNutrients || food.useStats);
+        /*plantFoodSensor.SetSensorEnabled(food.useNutrients || food.useStats);
         microbeFoodSensor.SetSensorEnabled(food.usePos);
         eggsFoodSensor.SetSensorEnabled(food.useEggs);
         meatFoodSensor.SetSensorEnabled(food.useVel);
@@ -302,7 +301,7 @@ public class GenomeViewerUI : MonoBehaviour {
         foeSensor.SetSensorEnabled(threat.usePos || threat.useVel || threat.useDir);
         waterSensor.SetSensorEnabled(environment.useWaterStats);
         wallSensor.SetSensorEnabled(environment.useCardinals || environment.useDiagonals);
-        commSensor.SetSensorEnabled(communication.useComms);
+        commSensor.SetSensorEnabled(communication.useComms);*/
         
         /*
         imageSensorComms.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.communicationGenome.useComms;
@@ -386,11 +385,12 @@ public class GenomeViewerUI : MonoBehaviour {
         }
         */
 
-        imageSensorInternals.color = Color.white;        
-        imageSensorContact.color = Color.white;         
-    }
+        //imageSensorInternals.color = Color.white;        
+        //imageSensorContact.color = Color.white;         
+    //}
     
-    // WPP 5/6/21: Only pass coreGenome since it is the only part being used
+    // WPP 5/9/21: delegated to DigestionPanel
+    /*
     private void UpdateDigestSpecUI(CritterModuleCoreGenome coreGenome) {
         textDigestPlant.text = (coreGenome.dietSpecializationPlant * 100f).ToString("F0");
         textDigestMeat.text = (coreGenome.dietSpecializationMeat * 100f).ToString("F0");
@@ -399,8 +399,10 @@ public class GenomeViewerUI : MonoBehaviour {
         imageDigestPlant.transform.localScale = new Vector3(1f, coreGenome.dietSpecializationPlant, 1f);
         imageDigestMeat.transform.localScale = new Vector3(1f, coreGenome.dietSpecializationMeat, 1f);
         imageDigestDecay.transform.localScale = new Vector3(1f, coreGenome.dietSpecializationDecay, 1f);
-    }
+    }*/
     
+    // WPP 5/9/21: delegated to SpecializationPanel
+    /*
     private void UpdateSpecializationsUI(CritterModuleCoreGenome coreGenome) {
         textSpecAttack.text = (coreGenome.talentSpecializationAttack * 100f).ToString("F0");
         textSpecDefense.text = (coreGenome.talentSpecializationDefense * 100f).ToString("F0");
@@ -412,10 +414,14 @@ public class GenomeViewerUI : MonoBehaviour {
         imageSpecSpeed.transform.localScale = new Vector3(1f, coreGenome.talentSpecializationSpeed, 1f);
         imageSpecEnergy.transform.localScale = new Vector3(1f, coreGenome.talentSpecializationUtility, 1f);
     }
+    */
 	
-	// WPP: delegated calculations to PerformanceData
-    public void UpdatePerformanceBehaviors(CandidateAgentData.PerformanceData data) {
+	// WPP 5/9/21: delegated calculations to PerformanceData
+	// + delegated to BehaviorPanel, FoodEatenPanel
+	/*
+    public void UpdatePerformanceBehaviors(PerformanceData data) {
         //if(candidate.performanceData != null) {
+        
         textBehaviorAttack.text = data.totalTimesAttacked.ToString("F0");
         textBehaviorDefend.text = data.totalTimesDefended.ToString("F0");
         textBehaviorDash.text = data.totalTimesDashed.ToString("F0");
@@ -441,34 +447,36 @@ public class GenomeViewerUI : MonoBehaviour {
         imageEatenCorpse.transform.localScale = new Vector3(1f, data.corpseEatenPercent, 1f);
         //textBehaviorAttack.text = candidate.evaluationScoresList[0].ToString();
         
-        /*
-        textBehaviorAttack.text = pool.avgPerformanceData.totalTimesAttacked.ToString("F0");
-        textBehaviorDefend.text = pool.avgPerformanceData.totalTimesDefended.ToString("F0");
-        textBehaviorDash.text = pool.avgPerformanceData.totalTimesDashed.ToString("F0");
-        textBehaviorRest.text = (pool.avgPerformanceData.totalTicksRested * 0.01f).ToString("F0");
-        textBehaviorFeed.text = pool.avgPerformanceData.totalTimesPregnant.ToString("F0");
+        // Previously commented-out
+        //textBehaviorAttack.text = pool.avgPerformanceData.totalTimesAttacked.ToString("F0");
+        //textBehaviorDefend.text = pool.avgPerformanceData.totalTimesDefended.ToString("F0");
+        //textBehaviorDash.text = pool.avgPerformanceData.totalTimesDashed.ToString("F0");
+        //textBehaviorRest.text = (pool.avgPerformanceData.totalTicksRested * 0.01f).ToString("F0");
+        //textBehaviorFeed.text = pool.avgPerformanceData.totalTimesPregnant.ToString("F0");
         
-        float totalTimesActed = pool.avgPerformanceData.totalTimesAttacked + pool.avgPerformanceData.totalTimesDefended + pool.avgPerformanceData.totalTimesDashed + 0.001f; // <-- prevent divide by 0
-        imageBehaviorAttack.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalTimesAttacked / totalTimesActed, 1f);
-        imageBehaviorDefend.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalTimesDefended / totalTimesActed, 1f);
-        imageBehaviorDash.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalTimesDashed / totalTimesActed, 1f);
-        imageBehaviorRest.transform.localScale = new Vector3(1f, Mathf.Clamp01(pool.avgPerformanceData.totalTicksRested / 600f), 1f);
-        imageBehaviorFeed.transform.localScale = new Vector3(1f, Mathf.Clamp01(pool.avgPerformanceData.totalTimesPregnant / 4f), 1f);
+        //float totalTimesActed = pool.avgPerformanceData.totalTimesAttacked + pool.avgPerformanceData.totalTimesDefended + pool.avgPerformanceData.totalTimesDashed + 0.001f; // <-- prevent divide by 0
+        //imageBehaviorAttack.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalTimesAttacked / totalTimesActed, 1f);
+        //imageBehaviorDefend.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalTimesDefended / totalTimesActed, 1f);
+        //imageBehaviorDash.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalTimesDashed / totalTimesActed, 1f);
+        //imageBehaviorRest.transform.localScale = new Vector3(1f, Mathf.Clamp01(pool.avgPerformanceData.totalTicksRested / 600f), 1f);
+        //imageBehaviorFeed.transform.localScale = new Vector3(1f, Mathf.Clamp01(pool.avgPerformanceData.totalTimesPregnant / 4f), 1f);
         
-        textEatenPlants.text = pool.avgPerformanceData.totalFoodEatenPlant.ToString("F2");
-        textEatenMicrobes.text = pool.avgPerformanceData.totalFoodEatenZoop.ToString("F2");
-        textEatenAnimals.text = pool.avgPerformanceData.totalFoodEatenCreature.ToString("F2");
-        textEatenEggs.text = pool.avgPerformanceData.totalFoodEatenEgg.ToString("F2");
-        textEatenCorpse.text = pool.avgPerformanceData.totalFoodEatenCorpse.ToString("F2");
+        //textEatenPlants.text = pool.avgPerformanceData.totalFoodEatenPlant.ToString("F2");
+        //textEatenMicrobes.text = pool.avgPerformanceData.totalFoodEatenZoop.ToString("F2");
+        //textEatenAnimals.text = pool.avgPerformanceData.totalFoodEatenCreature.ToString("F2");
+        //textEatenEggs.text = pool.avgPerformanceData.totalFoodEatenEgg.ToString("F2");
+        //textEatenCorpse.text = pool.avgPerformanceData.totalFoodEatenCorpse.ToString("F2");
 
-        float totalEaten = pool.avgPerformanceData.totalFoodEatenPlant + pool.avgPerformanceData.totalFoodEatenZoop + pool.avgPerformanceData.totalFoodEatenCreature + pool.avgPerformanceData.totalFoodEatenEgg + pool.avgPerformanceData.totalFoodEatenCorpse + 0.001f;
-        imageEatenPlants.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalFoodEatenPlant / totalEaten, 1f);
-        imageEatenMicrobes.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalFoodEatenZoop / totalEaten, 1f);
-        imageEatenAnimals.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalFoodEatenCreature / totalEaten, 1f);
-        imageEatenEggs.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalFoodEatenEgg / totalEaten, 1f);
-        imageEatenCorpse.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalFoodEatenCorpse / totalEaten, 1f);
-    */
+        //float totalEaten = pool.avgPerformanceData.totalFoodEatenPlant + pool.avgPerformanceData.totalFoodEatenZoop + pool.avgPerformanceData.totalFoodEatenCreature + pool.avgPerformanceData.totalFoodEatenEgg + pool.avgPerformanceData.totalFoodEatenCorpse + 0.001f;
+        //imageEatenPlants.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalFoodEatenPlant / totalEaten, 1f);
+        //imageEatenMicrobes.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalFoodEatenZoop / totalEaten, 1f);
+        //imageEatenAnimals.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalFoodEatenCreature / totalEaten, 1f);
+        //imageEatenEggs.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalFoodEatenEgg / totalEaten, 1f);
+        //imageEatenCorpse.transform.localScale = new Vector3(1f, pool.avgPerformanceData.totalFoodEatenCorpse / totalEaten, 1f);
     }
+    */
+    
+    #endregion
     
     #region Button Clicks
     
@@ -542,21 +550,6 @@ public class GenomeViewerUI : MonoBehaviour {
     
     public void ExitTooltipObject() {
         isTooltipHover = false;
-    }
-    
-    [Serializable] 
-    public class Sensor
-    {
-        [SerializeField] Image image;
-        [SerializeField] GenomeButtonTooltipSource tooltip;
-        
-        public void SetSensorEnabled(bool value) 
-        { 
-            tooltip.isSensorEnabled = value;
-            
-            // * Expose values in central location (lookup?)
-            image.color = value ? Color.white : Color.gray * 0.75f;     
-        }
     }
     
     [Serializable]

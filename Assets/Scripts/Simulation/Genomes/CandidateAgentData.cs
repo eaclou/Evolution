@@ -1,5 +1,36 @@
 ﻿using System.Collections.Generic;
 
+// WPP 5/9/21: De-nested because referenced outside CandidateAgentData
+// stats:
+public struct PerformanceData {
+    public float totalFoodEatenPlant;
+    public float totalFoodEatenZoop;
+    public float totalFoodEatenEgg;
+    public float totalFoodEatenCorpse;
+    public float totalFoodEatenCreature;
+    public float totalDamageDealt;
+    public float totalDamageTaken;
+    public float totalTimesDashed;
+    public float totalTimesDefended;
+    public float totalTimesAttacked;
+    public float totalTimesPregnant;
+    public float totalTicksRested;
+    public float totalTicksAlive;
+        
+    // * WPP: corpse included twice = error?
+    public float totalEaten => totalFoodEatenCorpse + totalFoodEatenEgg + totalFoodEatenCreature + totalFoodEatenPlant + totalFoodEatenZoop;
+    public float corpseEatenPercent => totalFoodEatenCorpse / (totalEaten + .01f);
+    public float eggEatenPercent => totalFoodEatenEgg / (totalEaten + .01f);
+    public float creatureEatenPercent => totalFoodEatenCreature / (totalEaten + .01f);
+    public float plantEatenPercent => totalFoodEatenPlant / (totalEaten + .01f);
+    public float zooplanktonEatenPercent => totalFoodEatenZoop / (totalEaten + .01f);
+        
+    public float timesActed => totalTimesAttacked + totalTimesDefended + totalTimesDashed;
+    public float attackActionPercent => totalTimesAttacked / (timesActed + .01f);
+    public float defendActionPercent => totalTimesDefended / (timesActed + .01f);
+    public float dashActionPercent => totalTimesDashed / (timesActed + .01f);
+}
+
 [System.Serializable]
 public class CandidateAgentData {
 
@@ -10,37 +41,6 @@ public class CandidateAgentData {
     //public List<float> evaluationScoresList;  // fitness scores of agents with this genome
     public bool allEvaluationsComplete = false;
     public bool isBeingEvaluated = false;
-
-
-    // stats:
-    public struct PerformanceData {
-	    public float totalFoodEatenPlant;
-        public float totalFoodEatenZoop;
-        public float totalFoodEatenEgg;
-        public float totalFoodEatenCorpse;
-        public float totalFoodEatenCreature;
-        public float totalDamageDealt;
-        public float totalDamageTaken;
-        public float totalTimesDashed;
-        public float totalTimesDefended;
-        public float totalTimesAttacked;
-        public float totalTimesPregnant;
-        public float totalTicksRested;
-        public float totalTicksAlive;
-        
-        // * WPP: corpse included twice = error?
-        public float totalEaten => totalFoodEatenCorpse + totalFoodEatenEgg + totalFoodEatenCreature + totalFoodEatenPlant + totalFoodEatenZoop;
-        public float corpseEatenPercent => totalFoodEatenCorpse / (totalEaten + .01f);
-        public float eggEatenPercent => totalFoodEatenEgg / (totalEaten + .01f);
-        public float creatureEatenPercent => totalFoodEatenCreature / (totalEaten + .01f);
-        public float plantEatenPercent => totalFoodEatenPlant / (totalEaten + .01f);
-        public float zooplanktonEatenPercent => totalFoodEatenZoop / (totalEaten + .01f);
-        
-        public float timesActed => totalTimesAttacked + totalTimesDefended + totalTimesDashed;
-        public float attackActionPercent => totalTimesAttacked / (timesActed + .01f);
-        public float defendActionPercent => totalTimesDefended / (timesActed + .01f);
-        public float dashActionPercent => totalTimesDashed / (timesActed + .01f);
-    }
     
     public PerformanceData performanceData;
 
