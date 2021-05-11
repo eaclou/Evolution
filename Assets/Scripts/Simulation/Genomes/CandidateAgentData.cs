@@ -16,6 +16,9 @@ public struct PerformanceData {
     public float totalTimesPregnant;
     public float totalTicksRested;
     public float totalTicksAlive;
+
+    public float timeStepHatched;
+    public float timeStepDied;
         
     // * WPP: corpse included twice = error?
     public float totalEaten => totalFoodEatenCorpse + totalFoodEatenEgg + totalFoodEatenCreature + totalFoodEatenPlant + totalFoodEatenZoop;
@@ -29,6 +32,7 @@ public struct PerformanceData {
     public float attackActionPercent => totalTimesAttacked / (timesActed + .01f);
     public float defendActionPercent => totalTimesDefended / (timesActed + .01f);
     public float dashActionPercent => totalTimesDashed / (timesActed + .01f);
+
 }
 
 [System.Serializable]

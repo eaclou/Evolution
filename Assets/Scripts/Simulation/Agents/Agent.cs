@@ -389,6 +389,7 @@ public class Agent : MonoBehaviour {
 
         masterFitnessScore = totalExperience; // update this???
         candidateRef.performanceData.totalTicksAlive = ageCounter;
+        candidateRef.performanceData.timeStepDied = SimulationManager.instance.simAgeTimeSteps;
         biomassAtDeath = currentBiomass;
         mouthRef.Disable();
     }
@@ -711,7 +712,9 @@ public class Agent : MonoBehaviour {
         
         mouthRef.Enable();
         //isCooldown = false;
-        RegisterAgentEvent(Time.frameCount, "Was Born!", 1f);        
+        RegisterAgentEvent(Time.frameCount, "Was Born!", 1f);
+
+        candidateRef.performanceData.timeStepHatched = SimulationManager.instance.simAgeTimeSteps;
     }
     
     private void TickMature(SimulationManager simManager) {

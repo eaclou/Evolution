@@ -35,9 +35,12 @@ public class SpeciesTreeBarUI : MonoBehaviour {
         gameObject.transform.localPosition = new Vector3(targetCoords.x * (float)panelPixelSize, targetCoords.y * (float)panelPixelSize, 0f);
         if(isSelected) {
             gameObject.transform.localScale = new Vector3(1.25f, 1.25f, 1f);
+            gameObject.GetComponent<Image>().color = Color.white;
         }
         else {
             gameObject.transform.localScale = Vector3.one;
+            Color color = new Color(linkedPool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary.x, linkedPool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary.y, linkedPool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary.z);
+            gameObject.GetComponent<Image>().color = color;
         }  
         
         if(linkedPool.isExtinct) {

@@ -30,7 +30,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     public Camera slotPortraitRenderCamera;
     public Camera resourceSimRenderCamera;
     public Camera worldTreeRenderCamera;
-    
+
     public bool isDebugRender = false;
 
     private CommandBuffer cmdBufferMain;
@@ -78,14 +78,14 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
     public Material eggSackStrokeDisplayMat;
     public Material eggSackShadowDisplayMat;
-  
+
     public Material debugAgentResourcesMat;
     public Material algaeParticleDisplayMat;
     public Material plantParticleDisplayMat;
     public Material plantParticleShadowDisplayMat;
     public Material animalParticleDisplayMat;
     public Material animalParticleShadowDisplayMat;
-   
+
     public Material eggCoverDisplayMat;
     public Material critterDebugGenericStrokeMat;
     public Material critterUberStrokeShadowMat;
@@ -142,10 +142,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     public bool isBrushing = false;
 
     private ComputeBuffer quadVerticesCBuffer;  // quad mesh
-   
+
     private int numCurveRibbonQuads = 4;
     private ComputeBuffer curveRibbonVerticesCBuffer;  // short ribbon mesh
-    
+
     private int numStrokesPerCritterSkin = 128;
     private ComputeBuffer critterSkinStrokesCBuffer;
     //private int numStrokesPerCritterBody = 1024;       
@@ -163,7 +163,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     public ComputeBuffer toolbarPortraitCritterInitDataCBuffer;
     public ComputeBuffer toolbarPortraitCritterSimDataCBuffer;
     private ComputeBuffer toolbarCritterPortraitStrokesCBuffer;
-    
+
     private int numFloatyBits = 1024 * 4;
     private ComputeBuffer floatyBitsCBuffer;
 
@@ -256,19 +256,22 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private ComputeBuffer treeOfLifeNodeColliderDataCBufferB;
     private TreeOfLifeLeafNodeData[] treeOfLifeLeafNodeDataArray;
     private ComputeBuffer treeOfLifeLeafNodeDataCBuffer;
-    //private TreeOfLifeStemSegmentStruct[] treeOfLifeStemSegmentDataArray;
     private ComputeBuffer treeOfLifeStemSegmentDataCBuffer;
     private int curNumTreeOfLifeStemSegments = 0;
 
     public ComputeBuffer treeOfLifeBasicStrokeDataCBuffer;
-    public ComputeBuffer treeOfLifePortraitBorderDataCBuffer;
+    public ComputeBuffer treeOfLifePortraitBorderDataCBuffer; //***EAC rename or replace!!!
     public ComputeBuffer treeOflifePortraitDataCBuffer;
     public ComputeBuffer treeOfLifePortraitEyeDataCBuffer;
 
     public ComputeBuffer worldTreeLineDataCBuffer;
-    private int tempNumWorldTreePoints = 1024;
+    private int worldTreeNumPointsPerLine = 64;
+    private int worldTreeNumClockOrbitLines = 8;
+    private int worldTreeNumSpeciesLines = 32;
+    private int worldTreeNumCreatureLines = 16;
+    private int numDataPoints => worldTreeNumPointsPerLine * (worldTreeNumClockOrbitLines * worldTreeNumSpeciesLines * worldTreeNumCreatureLines);
 
-    public struct TreeOfLifeEventLineData {
+    public struct TreeOfLifeEventLineData { //***EAC deprecate!
         public int timeStepActivated;
         public float eventCategory;  // minor major extreme 0, 0.5, 1.0
         public float isActive;
@@ -354,7 +357,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public float randomSeed;
         public float followLerp;
     }
-    
+
     public struct CritterUberStrokeData {
         public int parentIndex;  // which Critter is this attached to?	
         public int neighborIndex;
@@ -375,7 +378,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public float passiveFollow;  // only look at neighborPos/restDistance for positioning
         public float thresholdValue;  // evenly distributed random 0-1 for decay
     }
-    
+
     public struct CurveStrokeData {
         public int parentIndex;
         public Vector3 hue;
@@ -388,7 +391,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public float strength;
         public int brushType;
     }
-    
+
     public struct WaterSplineData {   // 2 ints, 17 floats
         public int index;
         public Vector2 p0;
@@ -403,18 +406,18 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public float age;  // to allow for fade-in and fade-out
         public int brushType;  // brush texture mask
     }
-    
+
     public struct TrailStrokeData {
         public Vector2 worldPos;
     }
-    
+
     public struct TrailDotData {  // for Ripples (temp)
         public int parentIndex;
         public Vector2 coords01;
         public float age;
         public float initAlpha;
     }
-    
+
     public struct BasicStrokeData {  // fluidSim Render -- Obstacles + ColorInjection
         public Vector2 worldPos;
         public Vector2 localDir;
@@ -422,7 +425,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public Vector4 color;
     }
 
-    public struct WorldTreeLineData {
+    public struct WorldTreeLineData { // NEW - use this one! "*worldTree*"
         public Vector3 worldPos;
         public Vector4 color;
     }
@@ -430,14 +433,13 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private int debugFrameCounter = 0;
 
     public bool isToolbarCritterPortraitEnabled = false;
-    
+
 
     private void Awake() {
         fluidObstaclesRenderCamera.enabled = false;
         fluidColorRenderCamera.enabled = false;
         spiritBrushRenderCamera.enabled = false;
-        //treeOfLifeSpeciesTreeRenderCamera.enabled = false;  // only render when the King commands it!!!
-        //treeOfLifeRenderCamera.enabled = false;
+
         slotPortraitRenderCamera.enabled = false;
         resourceSimRenderCamera.enabled = false;
 
@@ -445,11 +447,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     }
     // Use this for initialization:
     public void InitializeRiseAndShine() {
-
-        //this.simManager = simManager;
-
-        // temp bodyWidthsTexture:
-        //critterBodyWidthsTex = new Texture2D(16, simManager._NumAgents, TextureFormat.RGBAFloat, false, true);
 
         InitializeBuffers();
         InitializeMaterials();
@@ -572,14 +569,14 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         //spiritBrushQuadDataSpawnCBuffer.Release();
     }
-    
+
     private void InitializeCurveRibbonMeshBuffer() {
-        
+
         float rowSize = 1f / (float)numCurveRibbonQuads;
 
         curveRibbonVerticesCBuffer = new ComputeBuffer(6 * numCurveRibbonQuads, sizeof(float) * 3);
         Vector3[] verticesArray = new Vector3[curveRibbonVerticesCBuffer.count];
-        for(int i = 0; i < numCurveRibbonQuads; i++) {
+        for (int i = 0; i < numCurveRibbonQuads; i++) {
             int baseIndex = i * 6;
 
             float startCoord = (float)i;
@@ -589,7 +586,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             verticesArray[baseIndex + 2] = new Vector3(-0.5f, endCoord * rowSize);
             verticesArray[baseIndex + 3] = new Vector3(-0.5f, endCoord * rowSize);
             verticesArray[baseIndex + 4] = new Vector3(-0.5f, startCoord * rowSize);
-            verticesArray[baseIndex + 5] = new Vector3(0.5f, startCoord * rowSize); 
+            verticesArray[baseIndex + 5] = new Vector3(0.5f, startCoord * rowSize);
         }
 
         curveRibbonVerticesCBuffer.SetData(verticesArray);
@@ -616,7 +613,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         waterSplineVerticesCBuffer.SetData(verticesArray);
     }*/
-    
+
     private void InitializeQuadMeshBuffer() {
         quadVerticesCBuffer = new ComputeBuffer(6, sizeof(float) * 3);
         quadVerticesCBuffer.SetData(new[] {
@@ -910,19 +907,117 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         // Decorations:
     }
-    private void InitializeWorldTreeBuffers() {  //***EAC first pass:
-        int tempNumWorldTreePoints = 64;
-        Vector2[] posArray = new Vector2[tempNumWorldTreePoints];
-        worldTreeLineDataCBuffer = new ComputeBuffer(tempNumWorldTreePoints, sizeof(float) * 2);
-        for (int i = 0; i < posArray.Length; i++) {
-            float xCoord = (float)i / (float)tempNumWorldTreePoints;
-            Vector2 data = new Vector2(xCoord, Mathf.Sin(xCoord * 32f) * 0.5f + 0.5f); // (UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), 1f, 0f);
-            
-            posArray[i] = data;
+    private void InitializeWorldTreeBuffers() {
+        
+        WorldTreeLineData[] dataArray = new WorldTreeLineData[numDataPoints];
+        worldTreeLineDataCBuffer?.Release();
+        worldTreeLineDataCBuffer = new ComputeBuffer(numDataPoints, sizeof(float) * 7);
+        
+        //ORBIT LINES:        
+        float orbitalPeriodBase = 32f;
+        float animTimeScale = 1f;        
+        for(int line = 0; line < worldTreeNumClockOrbitLines; line++) { //***EAC  can cut out the extra positioning logic after migrating to GPU
+            for (int i = 0; i < worldTreeNumPointsPerLine; i++) {
+                int index = line * worldTreeNumPointsPerLine + i;
 
+                WorldTreeLineData data = new WorldTreeLineData();
+
+                float lineID = line + 1f;
+                float orbitalPeriod = orbitalPeriodBase * Mathf.Exp(lineID);
+
+                float xCoord = (float)(i % worldTreeNumPointsPerLine) / (float)worldTreeNumPointsPerLine;
+                float yCoord = Mathf.Cos(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
+
+                xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
+                yCoord = yCoord * 0.2f + 0.8f;
+
+                data.worldPos = new Vector3(xCoord, yCoord, 0f);
+                float lerp = Mathf.Clamp01(lineID * 0.11215f);
+                data.color = Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
+
+                dataArray[index] = data;
+
+            }
         }
-        worldTreeLineDataCBuffer.SetData(posArray);
-    }
+
+        // SPECIES LINES:
+        for(int line = 0; line < worldTreeNumSpeciesLines; line++) {
+            for (int i = 0; i < worldTreeNumPointsPerLine; i++) {
+                int index = (line + worldTreeNumClockOrbitLines) * worldTreeNumPointsPerLine + i;
+
+                if(line >= simManager.masterGenomePool.completeSpeciesPoolsList.Count) {
+
+                }
+                else {
+                    SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[line];
+
+                    WorldTreeLineData data = new WorldTreeLineData();
+                  
+                    int graphDataYearIndex = 0;
+                    if(pool.avgCandidateDataYearList.Count == 0) {
+
+                    }
+                    else {
+                        float xCoord = (float)(i % worldTreeNumPointsPerLine) / (float)worldTreeNumPointsPerLine;
+
+                        graphDataYearIndex = Mathf.FloorToInt((float)pool.avgCandidateDataYearList.Count * xCoord);
+                        float val = (float)pool.avgCandidateDataYearList[graphDataYearIndex].performanceData.totalTicksAlive / uiManager.speciesGraphPanelUI.maxValuesStatArray[0];
+                        float yCoord = val; // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
+
+                        xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
+                        yCoord = yCoord * 0.67f + 0.1f;
+
+                        data.worldPos = new Vector3(xCoord, yCoord, 0f);
+                        Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+                        data.color = new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
+
+
+                    }
+                    
+                    dataArray[index] = data;
+                }
+            }
+        }
+        
+        // CREATURE LINES:::
+        for(int line = 0; line < worldTreeNumCreatureLines; line++) {
+            for (int i = 0; i < worldTreeNumPointsPerLine; i++) {
+                int index = (line + worldTreeNumClockOrbitLines + worldTreeNumSpeciesLines) * worldTreeNumPointsPerLine + i;
+                SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[0]]; //***EAC ...
+
+                if(line >= pool.candidateGenomesList.Count) {
+
+                }
+                else {                    
+                    WorldTreeLineData data = new WorldTreeLineData();
+                                        
+                    if(pool.avgCandidateDataYearList.Count == 0) {
+
+                    }
+                    else {
+                        float xCoord = (float)(i) / (float)worldTreeNumPointsPerLine;                        
+                        float yCoord = (float)line / (float)(Mathf.Max(pool.candidateGenomesList.Count - 1, 1)); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
+
+                        xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
+                        yCoord = yCoord * 0.67f + 0.1f;
+
+                        data.worldPos = new Vector3(xCoord, yCoord, 0f);
+                        Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+                        data.color = new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
+
+
+                    }
+                    
+                    dataArray[index] = data;
+                }
+            }
+        }
+        
+
+        worldTreeLineDataCBuffer.SetData(dataArray);
+
+    }  //***EAC first pass:
+     
 
     private void InitializeMaterials() {
 
@@ -2064,12 +2159,11 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         computeShaderCritters.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderCritters.Dispatch(kernelCSSimulateCritterPortraitStrokes, toolbarCritterPortraitStrokesCBuffer.count / 16, 1, 1);
     }
-    private void SimWorldTree() {
-        int numPointsPerLine = 128;
-        int numClockOrbitLines = 8;
-        int numSpeciesLines = 32;
+    private void SimWorldTreeGPU() {
 
-        int numDataPoints = numPointsPerLine * (numClockOrbitLines * numSpeciesLines);
+    }
+    private void SimWorldTreeCPU() {
+        //int numDataPoints = worldTreeNumPointsPerLine * (worldTreeNumClockOrbitLines * worldTreeNumSpeciesLines);
 
         WorldTreeLineData[] dataArray = new WorldTreeLineData[numDataPoints];
         worldTreeLineDataCBuffer?.Release();
@@ -2077,27 +2171,25 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         
         //ORBIT LINES:        
         float orbitalPeriodBase = 32f;
-        float animTimeScale = 1f;
-        
-        for(int line = 0; line < numClockOrbitLines; line++) {
-            for (int i = 0; i < numPointsPerLine; i++) {
-                int index = line * numPointsPerLine + i;
+        float animTimeScale = 1f;        
+        for(int line = 0; line < worldTreeNumClockOrbitLines; line++) { //***EAC  can cut out the extra positioning logic after migrating to GPU
+            for (int i = 0; i < worldTreeNumPointsPerLine; i++) {
+                int index = line * worldTreeNumPointsPerLine + i;
 
                 WorldTreeLineData data = new WorldTreeLineData();
 
                 float lineID = line + 1f;
                 float orbitalPeriod = orbitalPeriodBase * Mathf.Exp(lineID);
 
-                float xCoord = (float)(i % numPointsPerLine) / (float)numPointsPerLine;
-                float yCoord = Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
+                float xCoord = (float)(i % worldTreeNumPointsPerLine) / (float)worldTreeNumPointsPerLine;
+                float yCoord = Mathf.Cos(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
 
                 xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
                 yCoord = yCoord * 0.2f + 0.8f;
 
                 data.worldPos = new Vector3(xCoord, yCoord, 0f);
                 float lerp = Mathf.Clamp01(lineID * 0.11215f);
-                data.color = Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
-
+                data.color = Color.HSVToRGB(lerp, 1f - lerp * 0.1f, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
 
                 dataArray[index] = data;
 
@@ -2105,9 +2197,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         }
 
         // SPECIES LINES:
-        for(int line = 0; line < numSpeciesLines; line++) {
-            for (int i = 0; i < numPointsPerLine; i++) {
-                int index = (line + numClockOrbitLines) * numPointsPerLine + i;
+        for(int line = 0; line < worldTreeNumSpeciesLines; line++) {
+            for (int i = 0; i < worldTreeNumPointsPerLine; i++) {
+                int index = (line + worldTreeNumClockOrbitLines) * worldTreeNumPointsPerLine + i;
 
                 if(line >= simManager.masterGenomePool.completeSpeciesPoolsList.Count) {
 
@@ -2120,38 +2212,112 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                     float lineID = line + 0f;
                     float orbitalPeriod = orbitalPeriodBase * Mathf.Exp(lineID);
 
-                    
-                    int graphDataYearIndex = 0;
-                    if(pool.avgCandidateDataYearList.Count == 0) {
+                    if(uiManager.allSpeciesTreePanelUI.GetPanelMode() == 0) {
+                        // LINEAGE:
+                        float xCoord = (float)i / (float)worldTreeNumPointsPerLine;
+                        float yCoord = 1f - ((float)pool.speciesID / (float)Mathf.Max(simManager.masterGenomePool.completeSpeciesPoolsList.Count - 1, 1)); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
 
-                    }
-                    else {
-                        float xCoord = (float)(i % numPointsPerLine) / (float)numPointsPerLine;
+                        float lerp = Mathf.Clamp01(lineID * 0.11215f);
+                        Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
 
-                        graphDataYearIndex = Mathf.FloorToInt((float)pool.avgCandidateDataYearList.Count * xCoord);
-                        float val = (float)pool.avgCandidateDataYearList[graphDataYearIndex].performanceData.totalTicksAlive / uiManager.speciesGraphPanelUI.maxValuesStatArray[0];
-                        float yCoord = val; // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
+                        float xStart = (float)pool.timeStepCreated / (float)simManager.simAgeTimeSteps;
+                        float xEnd = 1f;
+                        if(pool.isExtinct) {
+                            xEnd = (float)pool.timeStepExtinct / (float)simManager.simAgeTimeSteps;
+                        }
+
+                        if(xStart > xCoord || xEnd < xCoord) {
+                            hue = Vector3.zero;
+                        }
+                                                
+                        data.color = new Color(hue.x, hue.y, hue.z); // Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
 
                         xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
                         yCoord = yCoord * 0.67f + 0.1f;
 
                         data.worldPos = new Vector3(xCoord, yCoord, 0f);
-                        float lerp = Mathf.Clamp01(lineID * 0.11215f);
-                        Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-                        data.color = new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
-
-
                     }
-                    //xCoord * pool.avgCandidateDataYearList
+                    else {
+                        int graphDataYearIndex = 0;
+                        if(pool.avgCandidateDataYearList.Count == 0) {
+
+                        }
+                        else {
+
+                            float xCoord = (float)(i % worldTreeNumPointsPerLine) / (float)worldTreeNumPointsPerLine;
+
+                            graphDataYearIndex = Mathf.FloorToInt((float)pool.avgCandidateDataYearList.Count * xCoord);
+                            float val = (float)pool.avgCandidateDataYearList[graphDataYearIndex].performanceData.totalTicksAlive / uiManager.speciesGraphPanelUI.maxValuesStatArray[0];
+                            float yCoord = val; // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
+
+                            xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
+                            yCoord = yCoord * 0.67f + 0.1f;
+
+                            data.worldPos = new Vector3(xCoord, yCoord, 0f);
+                            float lerp = Mathf.Clamp01(lineID * 0.11215f);
+                            Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+
+
+
+                            data.color = new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
+
+
+                        }
+                    }
+                    
+                    
+                    
+                    dataArray[index] = data;
+                }
+            }
+        }
+
+        
+        // CREATURE LINES:::
+        for(int line = 0; line < worldTreeNumCreatureLines; line++) {
+            for (int i = 0; i < worldTreeNumPointsPerLine; i++) {
+                int index = (line + worldTreeNumClockOrbitLines + worldTreeNumSpeciesLines) * worldTreeNumPointsPerLine + i;
+                SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[0]]; //***EAC ...
+
+                if(line >= pool.candidateGenomesList.Count) {
+
+                }
+                else {                    
+                    WorldTreeLineData data = new WorldTreeLineData();
+                    CandidateAgentData cand = pool.candidateGenomesList[line];
+
+                    float xCoord = (float)(i) / (float)worldTreeNumPointsPerLine;                        
+                    float yCoord = 1f - (float)line / (float)(Mathf.Max(pool.candidateGenomesList.Count - 1, 1)); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
+
+                    Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary * 2f;
+
+                    float xStart = (float)pool.candidateGenomesList[line].performanceData.timeStepHatched / (float)simManager.simAgeTimeSteps;
+                    float xEnd = 1f;
+                    if(pool.isExtinct) {
+                        xEnd = (float)cand.performanceData.timeStepDied / (float)simManager.simAgeTimeSteps;
+                    }
+
+                    if(xStart > xCoord || xEnd < xCoord) {
+                        hue = Vector3.zero;
+                    }
+                    if(!cand.isBeingEvaluated && cand.numCompletedEvaluations == 0) {
+                        hue = Vector3.zero;
+                    }
+
+                    data.color = new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
+                    xCoord = xCoord * 0.9f + 0.1f;  // rescaling --> make this more robust
+                    yCoord = yCoord * 0.67f + 0.1f;
+                    data.worldPos = new Vector3(xCoord, yCoord, 0f);                     
                     
                     dataArray[index] = data;
                 }
                 
-
             }
         }
         
         worldTreeLineDataCBuffer.SetData(dataArray);
+
+        
     }
     /*public void UpdateTreeOfLifeEventLineData(List<SimEventData> eventDataList) {
 
@@ -2512,7 +2678,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         SimCritterGenericStrokes();
 
         // WORLDTREE
-        SimWorldTree();
+        SimWorldTreeCPU();
 
 
         baronVonWater.altitudeMapRef = baronVonTerrain.terrainHeightDataRT;
