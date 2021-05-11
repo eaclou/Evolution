@@ -2066,38 +2066,91 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     }
     private void SimWorldTree() {
         int numPointsPerLine = 128;
-        WorldTreeLineData[] dataArray = new WorldTreeLineData[tempNumWorldTreePoints];
+        int numClockOrbitLines = 8;
+        int numSpeciesLines = 32;
+
+        int numDataPoints = numPointsPerLine * (numClockOrbitLines * numSpeciesLines);
+
+        WorldTreeLineData[] dataArray = new WorldTreeLineData[numDataPoints];
         worldTreeLineDataCBuffer?.Release();
-        worldTreeLineDataCBuffer = new ComputeBuffer(tempNumWorldTreePoints, sizeof(float) * 7);
-        //for(int line = 0; line < 4; line++) {
-
-        //}
+        worldTreeLineDataCBuffer = new ComputeBuffer(numDataPoints, sizeof(float) * 7);
+        
+        //ORBIT LINES:        
         float orbitalPeriodBase = 32f;
-        float animTimeScale = 5f;
+        float animTimeScale = 1f;
+        
+        for(int line = 0; line < numClockOrbitLines; line++) {
+            for (int i = 0; i < numPointsPerLine; i++) {
+                int index = line * numPointsPerLine + i;
 
-        int startTimeStep = 0;
+                WorldTreeLineData data = new WorldTreeLineData();
 
-        for (int i = 0; i < dataArray.Length; i++) {
-            WorldTreeLineData data = new WorldTreeLineData();
+                float lineID = line + 1f;
+                float orbitalPeriod = orbitalPeriodBase * Mathf.Exp(lineID);
 
-            startTimeStep = simManager.simAgeTimeSteps / 8;
+                float xCoord = (float)(i % numPointsPerLine) / (float)numPointsPerLine;
+                float yCoord = Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
 
-            float lineID = Mathf.Floor((float)i / (float)numPointsPerLine) + 1f;
-            float orbitalPeriod = orbitalPeriodBase * Mathf.Exp(lineID);
+                xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
+                yCoord = yCoord * 0.2f + 0.8f;
 
-            float xCoord = (float)(i % numPointsPerLine) / (float)numPointsPerLine;
-            float yCoord = Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps - startTimeStep) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
+                data.worldPos = new Vector3(xCoord, yCoord, 0f);
+                float lerp = Mathf.Clamp01(lineID * 0.11215f);
+                data.color = Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
 
-            xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
-            yCoord = yCoord * 0.2f + 0.8f;
 
-            data.worldPos = new Vector3(xCoord, yCoord, 0f);
-            float lerp = Mathf.Clamp01(lineID * 0.11215f);
-            data.color = Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
+                dataArray[index] = data;
 
-            dataArray[i] = data;
-
+            }
         }
+
+        // SPECIES LINES:
+        for(int line = 0; line < numSpeciesLines; line++) {
+            for (int i = 0; i < numPointsPerLine; i++) {
+                int index = (line + numClockOrbitLines) * numPointsPerLine + i;
+
+                if(line >= simManager.masterGenomePool.completeSpeciesPoolsList.Count) {
+
+                }
+                else {
+                    SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[line];
+
+                    WorldTreeLineData data = new WorldTreeLineData();
+
+                    float lineID = line + 0f;
+                    float orbitalPeriod = orbitalPeriodBase * Mathf.Exp(lineID);
+
+                    
+                    int graphDataYearIndex = 0;
+                    if(pool.avgCandidateDataYearList.Count == 0) {
+
+                    }
+                    else {
+                        float xCoord = (float)(i % numPointsPerLine) / (float)numPointsPerLine;
+
+                        graphDataYearIndex = Mathf.FloorToInt((float)pool.avgCandidateDataYearList.Count * xCoord);
+                        float val = (float)pool.avgCandidateDataYearList[graphDataYearIndex].performanceData.totalTicksAlive / uiManager.speciesGraphPanelUI.maxValuesStatArray[0];
+                        float yCoord = val; // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
+
+                        xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
+                        yCoord = yCoord * 0.67f + 0.1f;
+
+                        data.worldPos = new Vector3(xCoord, yCoord, 0f);
+                        float lerp = Mathf.Clamp01(lineID * 0.11215f);
+                        Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+                        data.color = new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
+
+
+                    }
+                    //xCoord * pool.avgCandidateDataYearList
+                    
+                    dataArray[index] = data;
+                }
+                
+
+            }
+        }
+        
         worldTreeLineDataCBuffer.SetData(dataArray);
     }
     /*public void UpdateTreeOfLifeEventLineData(List<SimEventData> eventDataList) {
