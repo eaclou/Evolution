@@ -14,7 +14,7 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
 
     public GameObject anchorGO;
     [SerializeField]
-    private int panelSidePixelCount = 256;
+    private int panelSidePixelCount = 360; //***EAC better way to do this
     public GameObject prefabSpeciesBar;
 
     private List<SpeciesTreeBarUI> speciesIconsList;  // keeping track of spawned buttons
@@ -40,7 +40,7 @@ public class AllSpeciesTreePanelUI : MonoBehaviour
         
         for(int i = 0; i < speciesIconsList.Count; i++) {
             SpeciesTreeBarUI icon = speciesIconsList[i];
-            //icon.SetTargetPosition(new Vector3(32f * (float)i, (float)panelSidePixelCount -64f * (float)i, 0f));
+            
             bool isSelected = false;
             if (icon.speciesID == uiManagerRef.selectedSpeciesID) {
                 isSelected = true;

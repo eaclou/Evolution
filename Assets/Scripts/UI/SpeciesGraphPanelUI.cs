@@ -366,8 +366,8 @@ public class SpeciesGraphPanelUI : MonoBehaviour
         }
 
         speciesGraphImage.material = speciesGraphMatLeft;
-        speciesGraphImage.gameObject.SetActive(false);
-        speciesGraphImage.gameObject.SetActive(true);
+        //speciesGraphImage.gameObject.SetActive(false);
+        //speciesGraphImage.gameObject.SetActive(true);
 
     }
 
