@@ -655,6 +655,9 @@
               <e p="UIBasicRenderTextureShader.shader" t="Include" />
               <e p="UIBasicTextureShader.shader" t="Include" />
               <e p="UIDebugTextureViewer.shader" t="Include" />
+              <e p="WorldTree" t="Include">
+                <e p="WorldTreeLineDataShader.shader" t="Include" />
+              </e>
             </e>
             <e p="Water" t="Include">
               <e p="WaterNutrientsBitsDisplayShader.shader" t="Include" />
@@ -820,15 +823,21 @@
           </e>
           <e p="UI" t="Include">
             <e p="AllSpeciesTreePanelUI.cs" t="Include" />
+            <e p="BehaviorPanel.cs" t="Include" />
             <e p="BigBangPanelUI.cs" t="Include" />
+            <e p="BrainGenomeImage.cs" t="Include" />
             <e p="ClockPanelUI.cs" t="Include" />
             <e p="CreatureBrainActivityUI.cs" t="Include" />
             <e p="CreatureLifeEventsLogUI.cs" t="Include" />
             <e p="CreaturePaperDollUI.cs" t="Include" />
+            <e p="CreaturePortraitPanel.cs" t="Include" />
             <e p="CreaturePortraitUI.cs" t="Include" />
             <e p="DebugPanelUI.cs" t="Include" />
+            <e p="DigestionPanel.cs" t="Include" />
             <e p="FeatSO.cs" t="Include" />
+            <e p="FoodEatenPanel.cs" t="Include" />
             <e p="GenomeBrainWiringUI.cs" t="Include" />
+            <e p="GenomeOverviewPanel.cs" t="Include" />
             <e p="GenomeSensorsEffectorsUI.cs" t="Include" />
             <e p="GenomeSpecializationsUI.cs" t="Include" />
             <e p="GenomeViewerUI.cs" t="Include" />
@@ -855,8 +864,11 @@
               <e p="WorldSpiritHubUI.cs" t="Include" />
             </e>
             <e p="PanelNotificationsUI.cs" t="Include" />
+            <e p="SensorsPanel.cs" t="Include" />
+            <e p="SpecializationPanel.cs" t="Include" />
             <e p="SpeciesGraphPanelUI.cs" t="Include" />
             <e p="SpeciesOverviewUI.cs" t="Include" />
+            <e p="StatUI.cs" t="Include" />
             <e p="TheCursorCzar.cs" t="Include" />
             <e p="UIManager.cs" t="Include" />
             <e p="Widgets" t="Include">

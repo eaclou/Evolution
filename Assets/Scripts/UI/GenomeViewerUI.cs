@@ -8,13 +8,15 @@ public class GenomeViewerUI : MonoBehaviour {
 
     public SpeciesOverviewUI speciesOverviewUI;
     
-    public Text textFocusedCandidate;
-    public Text textGenomeOverviewA;
-    public Text textGenomeOverviewB;
-    public Text textGenomeOverviewC;
+    // WPP 5/10/21: delegated to panels
+    public CreaturePortraitPanel portrait;
+    //public Text textFocusedCandidate;
+    public GenomeOverviewPanel genomeOverview;
+    //public Text textGenomeOverviewA;
+    //public Text textGenomeOverviewB;
+    //public Text textGenomeOverviewC;
 
     public GameObject panelGenomeSensors;
-    
     
     [SerializeField] Tab genomeTab;
     [SerializeField] Tab historyTab;
@@ -35,7 +37,7 @@ public class GenomeViewerUI : MonoBehaviour {
     //public Image imageSensorInternals;
     //public Image imageSensorContact;
 
-    public Image imagePortraitTitleBG;
+    //public Image imagePortraitTitleBG;
 
     public GameObject panelGenomeAbilities;
     
@@ -122,28 +124,42 @@ public class GenomeViewerUI : MonoBehaviour {
     public bool isTooltipHover = true;
     public string tooltipString;
 
-    private Texture2D brainGenomeTex; // Barcode
-    public Material brainGenomeMat;
+    // WPP: delegated to BrainGenomeImage
+    //private Texture2D brainGenomeTex; // Barcode
+    //public Material brainGenomeMat;
 
     void Start () {
 		isTooltipHover = false;
-        brainGenomeTex = new Texture2D(16, 16, TextureFormat.RGBA32, false);
-        brainGenomeTex.filterMode = FilterMode.Point;
-        brainGenomeTex.wrapMode = TextureWrapMode.Clamp;
-        brainGenomeMat.SetTexture("_MainTex", brainGenomeTex);
+        //brainGenomeTex = new Texture2D(16, 16, TextureFormat.RGBA32, false);
+        //brainGenomeTex.filterMode = FilterMode.Point;
+        //brainGenomeTex.wrapMode = TextureWrapMode.Clamp;
+        //brainGenomeMat.SetTexture("_MainTex", brainGenomeTex);
 	}
+	
+    // WPP: quick access without GC    
+    AgentGenome genome;
+    BodyGenome body;
+    PerformanceData performance;
+    CritterModuleCoreGenome core;
 	
 	// WPP 5/6/21: applied early exit, broke out SetTitleString function
     public void UpdateUI(SpeciesGenomePool pool, CandidateAgentData candidate) {
         if (candidate == null || candidate.candidateGenome == null)
             return;
             
-        CacheReferences(candidate);
+        performance = candidate.performanceData;
+        genome = candidate.candidateGenome;
+        body = genome.bodyGenome;
+        core = body.coreGenome;
+        
+        // WPP: hue assigned then reassigned?
+        //Vector3 hue = Vector3.one * 0.75f;
+        //Vector3 hueB = Vector3.one * 0.25f;
+        //hue = appearance.huePrimary;
+        //hueB = appearance.hueSecondary;
             
-        SetTitleString(candidate);
+        portrait.SetTitleText(candidate);
 
-        Vector3 hue = Vector3.one * 0.75f;
-        Vector3 hueB = Vector3.one * 0.25f;
         /*
         //CandidateAgentData avgCandidate;
         if(pool.avgCandidateDataYearList.Count > 1) {
@@ -155,17 +171,16 @@ public class GenomeViewerUI : MonoBehaviour {
         }
         */
         
-        hue = appearance.huePrimary;
-        hueB = appearance.hueSecondary;
-        
         //Vector3 hue = pool.avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-        imagePortraitTitleBG.color = new Color(hue.x, hue.y, hue.z);
-        textFocusedCandidate.color = new Color(hueB.x, hueB.y, hueB.z);
+        //imagePortraitTitleBG.color = new Color(hue.x, hue.y, hue.z);
+        //textFocusedCandidate.color = new Color(hueB.x, hueB.y, hueB.z);
 
         panelPerformanceBehavior.SetActive(true);
         panelEaten.SetActive(true);
         //panelGenomeSpecializations.SetActive(false);
         //panelGenomeDigestion.SetActive(false);
+        
+        // * WPP: only usage, may as well set in editor
         panelGenomeAbilities.SetActive(false);
         panelGenomeSensors.SetActive(true);
 
@@ -181,8 +196,16 @@ public class GenomeViewerUI : MonoBehaviour {
         //panelHistoryTab.SetActive(isHistoryTabActive);
         //buttonHistoryTab.GetComponentInChildren<Image>().color = isHistoryTabActive ? Color.white : Color.gray;
         
-        imageDeadDim.gameObject.SetActive(false);
+        // WPP 5/10/21: conditional implied in value (+ value accessed via getter logic)
+        imageDeadDim.SetActive(simulationManager.targetAgentIsDead);
+        //imageDeadDim.gameObject.SetActive(false);
+        
+        genomeOverview.Refresh(candidate);
+        
+        // WPP 5/10/21: delegated to GenomeOverviewPanel
+        /*
         float lifespan = performance.totalTicksAlive;
+        
         textGenomeOverviewA.text = "Lifespan: " + (lifespan * 0.1f).ToString("F0") + ", Gen: " + genome.generationCount;
 
         if(candidate.isBeingEvaluated) {
@@ -190,13 +213,14 @@ public class GenomeViewerUI : MonoBehaviour {
             lifespan = simulationManager.targetAgentAge;
             textGenomeOverviewA.text = "Age: " + (lifespan * 0.1f).ToString("F0") + ", Gen: " + genome.generationCount;
         }
-        if (simulationManager.targetAgentIsDead) {   // WPP: same as above
+        //if (simulationManager.targetAgentIsDead) {   
         //if(simulationManager.agentsArray[cameraManager.targetAgentIndex].curLifeStage == Agent.AgentLifeStage.Dead) {
-            imageDeadDim.gameObject.SetActive(true);
-        }
+        //    imageDeadDim.gameObject.SetActive(true);
+        //}
 
         textGenomeOverviewB.text = "Size: " + (100f * core.creatureBaseLength).ToString("F0") + ", Aspect 1:" + (1f / core.creatureAspectRatio).ToString("F0");
         textGenomeOverviewC.text = "Brain Size: " + brain.bodyNeuronList.Count + "--" + brain.linkList.Count;
+        */  
                   
         // WPP 5/9/21: delegated
         //UpdateSpecializationsUI(core);
@@ -211,6 +235,10 @@ public class GenomeViewerUI : MonoBehaviour {
         sensorsPanel.Refresh(genome);     
     }
     
+    #region Delegated Away
+    
+    // WPP 5/10/21: moved to CreaturePortraitPanel
+    /*
     void SetTitleString(CandidateAgentData candidate)
     {
         string titleString = "<size=18>Critter</size> " + candidate.candidateID + "<size=18>";
@@ -228,9 +256,10 @@ public class GenomeViewerUI : MonoBehaviour {
         titleString += "</size>";
         textFocusedCandidate.text = titleString;
     }
+    */
     
-    // * WPP: simplify
-    public void CreateBrainGenomeTexture(AgentGenome genome) {
+    // WPP 5/10/21: delegated to BrainGenomeImage
+    /*public void CreateBrainGenomeTexture(AgentGenome genome) {
         int width = 256;
         brainGenomeTex.Resize(width, 1); // pool.leaderboardGenomesList.Count);
 
@@ -261,32 +290,8 @@ public class GenomeViewerUI : MonoBehaviour {
         }
         
         brainGenomeTex.Apply();
-    } 
-    
-    // WPP: quick access without GC
-    #region Reference Caching   
-    
-    AgentGenome genome;
-    BodyGenome body;
-    BrainGenome brain;
-    CritterModuleAppearanceGenome appearance;
-    PerformanceData performance;
-    CritterModuleCoreGenome core;
-    
-    void CacheReferences(CandidateAgentData agent)
-    {
-        performance = agent.performanceData;
-        genome = agent.candidateGenome;
-        brain = genome.brainGenome;
-        body = genome.bodyGenome;
-        core = body.coreGenome;
-        appearance = body.appearanceGenome;
-    }
-    
-    #endregion
-    
-    #region Delegated Away
-    
+    }*/
+            
     // WPP 5/6/21: Replaced repeating logic with Sensor nested class
     // 5/9/21: delegated to SensorsPanel
     //private void UpdateSensorsUI(AgentGenome genome) {
@@ -480,7 +485,7 @@ public class GenomeViewerUI : MonoBehaviour {
     
     #region Button Clicks
     
-    // WPP: moved to UIManager
+    // WPP: logic moved to UIManager
     public void ClickButtonNext() {
         uiManager.CycleFocusedCandidateGenome();
         /*int curSpeciesID = uiManagerRef.selectedSpeciesID;
@@ -495,6 +500,7 @@ public class GenomeViewerUI : MonoBehaviour {
         uiManagerRef.SetFocusedCandidateGenome(simulationManager.masterGenomePool.completeSpeciesPoolsList[curSpeciesID].representativeCandidate);*/
     }
     
+    // * WPP: should be a similar process to ClickButtonNext
     public void ClickButtonPrev() {
         //speciesOverviewUI.CycleHallOfFame();
         speciesOverviewUI.CycleCurrentGenome();

@@ -21,6 +21,7 @@ public class UIManager : Singleton<UIManager> {
     public SpeciesOverviewUI speciesOverviewUI;
     public SpeciesGraphPanelUI speciesGraphPanelUI;
     public GenomeViewerUI genomeViewerUI;
+    public BrainGenomeImage brainGenomeImage;
     public AllSpeciesTreePanelUI allSpeciesTreePanelUI;
     public BigBangPanelUI bigBangPanelUI;
     public ClockPanelUI clockPanelUI;
@@ -128,7 +129,7 @@ public class UIManager : Singleton<UIManager> {
         Debug.Log("SetFocusedCandidateGenome --> theRenderKing.InitializeCreaturePortrait(focusedCandidate.candidateGenome);");
         
         speciesOverviewUI.RebuildGenomeButtons();
-        genomeViewerUI.CreateBrainGenomeTexture(focusedCandidate.candidateGenome);
+        brainGenomeImage.SetTexture(focusedCandidate.candidateGenome.brainGenome);
 
         SetSelectedSpeciesUI(focusedCandidate.speciesID);
     }
