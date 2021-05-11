@@ -25,9 +25,13 @@
 			//#include "Assets/Resources/Shaders/Inc/StructsTreeOfLife.cginc"
 			//#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 
+			struct WorldTreeLineData {
+				float3 worldPos;
+				float4 color;
+			};
 			StructuredBuffer<float3> quadVerticesCBuffer;
 			// Change to 2x texture2D's ((1)time series data + (2)key) for data input?
-			StructuredBuffer<float2> worldTreeLineDataCBuffer;
+			StructuredBuffer<WorldTreeLineData> worldTreeLineDataCBuffer;
 						
 			struct v2f
 			{
@@ -84,11 +88,11 @@
 				
 				float3 worldPosition = float3(vertexCoord, 0) * _IsOn;								
 				*/
-				float2 dataCoords = worldTreeLineDataCBuffer[inst];
-				float3 worldPosition = float3(dataCoords,0) + quadData * 0.02;
+				WorldTreeLineData data = worldTreeLineDataCBuffer[inst];
+				float3 worldPosition = data.worldPos + quadData * 0.0067;
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
-				o.color = float4(1,0,0.25,1); // tex2Dlod(_KeyTex, float4(0,((float)_SelectedWorldStatsID + 0.5) / 32.0,0,0));
+				o.color = data.color; // tex2Dlod(_KeyTex, float4(0,((float)_SelectedWorldStatsID + 0.5) / 32.0,0,0));
 
 				//float distToMouse = 1.0 - saturate(abs(vertexCoord.x - _MouseCoordX) * 15);
 				//o.color.xyz = lerp(o.color.xyz, float3(1, 1, 1), _MouseOn * distToMouse * 1);

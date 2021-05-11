@@ -422,6 +422,11 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public Vector4 color;
     }
 
+    public struct WorldTreeLineData {
+        public Vector3 worldPos;
+        public Vector4 color;
+    }
+
     private int debugFrameCounter = 0;
 
     public bool isToolbarCritterPortraitEnabled = false;
@@ -2061,18 +2066,39 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     }
     private void SimWorldTree() {
         int numPointsPerLine = 128;
-        Vector2[] posArray = new Vector2[tempNumWorldTreePoints];
-        worldTreeLineDataCBuffer = new ComputeBuffer(tempNumWorldTreePoints, sizeof(float) * 2);
-        for (int i = 0; i < posArray.Length; i++) {
-            float xCoord = (float)(i % numPointsPerLine) / (float)numPointsPerLine;
+        WorldTreeLineData[] dataArray = new WorldTreeLineData[tempNumWorldTreePoints];
+        worldTreeLineDataCBuffer?.Release();
+        worldTreeLineDataCBuffer = new ComputeBuffer(tempNumWorldTreePoints, sizeof(float) * 7);
+        //for(int line = 0; line < 4; line++) {
 
-            float lineID = Mathf.Floor((float)i / (float)numPointsPerLine);
-            Vector2 data = new Vector2(xCoord, Mathf.Sin(xCoord * 32f + Time.realtimeSinceStartup * 7.19f / (lineID + 0.9f) ) * 0.04f * (float)lineID + 0.5f); // (UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), 1f, 0f);
-            
-            posArray[i] = data;
+        //}
+        float orbitalPeriodBase = 32f;
+        float animTimeScale = 5f;
+
+        int startTimeStep = 0;
+
+        for (int i = 0; i < dataArray.Length; i++) {
+            WorldTreeLineData data = new WorldTreeLineData();
+
+            startTimeStep = simManager.simAgeTimeSteps / 8;
+
+            float lineID = Mathf.Floor((float)i / (float)numPointsPerLine) + 1f;
+            float orbitalPeriod = orbitalPeriodBase * Mathf.Exp(lineID);
+
+            float xCoord = (float)(i % numPointsPerLine) / (float)numPointsPerLine;
+            float yCoord = Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps - startTimeStep) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
+
+            xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
+            yCoord = yCoord * 0.2f + 0.8f;
+
+            data.worldPos = new Vector3(xCoord, yCoord, 0f);
+            float lerp = Mathf.Clamp01(lineID * 0.11215f);
+            data.color = Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
+
+            dataArray[i] = data;
 
         }
-        worldTreeLineDataCBuffer.SetData(posArray);
+        worldTreeLineDataCBuffer.SetData(dataArray);
     }
     /*public void UpdateTreeOfLifeEventLineData(List<SimEventData> eventDataList) {
 
