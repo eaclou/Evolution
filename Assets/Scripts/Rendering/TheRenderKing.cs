@@ -2162,15 +2162,19 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private void SimWorldTreeGPU() {
 
     }
-    private void SimWorldTreeCPU() {
-        //int numDataPoints = worldTreeNumPointsPerLine * (worldTreeNumClockOrbitLines * worldTreeNumSpeciesLines);
-
+    private void SimWorldTreeCPU() { //***EAC destined to be replaced by GPU ^ ^ ^
+        
         WorldTreeLineData[] dataArray = new WorldTreeLineData[numDataPoints];
         worldTreeLineDataCBuffer?.Release();
         worldTreeLineDataCBuffer = new ComputeBuffer(numDataPoints, sizeof(float) * 7);
+
+        //**** TEMP!!! TESTING!!!
+        float cursorCoordsX = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().x) / 360f);
+        float cursorCoordsY = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().y - 720f) / 360f);                
+        //**** !!!!!!
         
         //ORBIT LINES:        
-        float orbitalPeriodBase = 32f;
+        float orbitalPeriodBase = 16f;
         float animTimeScale = 1f;        
         for(int line = 0; line < worldTreeNumClockOrbitLines; line++) { //***EAC  can cut out the extra positioning logic after migrating to GPU
             for (int i = 0; i < worldTreeNumPointsPerLine; i++) {
@@ -2178,18 +2182,22 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
                 WorldTreeLineData data = new WorldTreeLineData();
 
-                float lineID = line + 1f;
-                float orbitalPeriod = orbitalPeriodBase * Mathf.Exp(lineID);
+                float lineID = line + 0.45f;
+                float orbitalPeriod = orbitalPeriodBase * Mathf.Pow(3.4f, lineID);
 
                 float xCoord = (float)(i % worldTreeNumPointsPerLine) / (float)worldTreeNumPointsPerLine;
-                float yCoord = Mathf.Cos(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
-
+                float yCoord = Mathf.Cos(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.11f * (float)lineID + 0.5f;
+                
                 xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
                 yCoord = yCoord * 0.2f + 0.8f;
-
+                
                 data.worldPos = new Vector3(xCoord, yCoord, 0f);
                 float lerp = Mathf.Clamp01(lineID * 0.11215f);
                 data.color = Color.HSVToRGB(lerp, 1f - lerp * 0.1f, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
+
+                if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
+                    data.color = Color.white;
+                }
 
                 dataArray[index] = data;
 
@@ -2234,7 +2242,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
                         xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
                         yCoord = yCoord * 0.67f + 0.1f;
-
+                        if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
+                            data.color = Color.white;
+                        }
                         data.worldPos = new Vector3(xCoord, yCoord, 0f);
                     }
                     else {
@@ -2257,22 +2267,19 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                             float lerp = Mathf.Clamp01(lineID * 0.11215f);
                             Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
 
-
-
                             data.color = new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
 
-
+                            if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
+                                data.color = Color.white;
+                            }
                         }
                     }
-                    
-                    
                     
                     dataArray[index] = data;
                 }
             }
         }
-
-        
+                
         // CREATURE LINES:::
         for(int line = 0; line < worldTreeNumCreatureLines; line++) {
             for (int i = 0; i < worldTreeNumPointsPerLine; i++) {
@@ -2293,22 +2300,28 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
                     float xStart = (float)pool.candidateGenomesList[line].performanceData.timeStepHatched / (float)simManager.simAgeTimeSteps;
                     float xEnd = 1f;
-                    if(pool.isExtinct) {
+                    if(pool.isExtinct || cand.performanceData.timeStepDied > 1) {
                         xEnd = (float)cand.performanceData.timeStepDied / (float)simManager.simAgeTimeSteps;
                     }
-
+                    
                     if(xStart > xCoord || xEnd < xCoord) {
                         hue = Vector3.zero;
                     }
                     if(!cand.isBeingEvaluated && cand.numCompletedEvaluations == 0) {
                         hue = Vector3.zero;
+                    }   
+                    if(cand.performanceData.timeStepHatched <= 1) {
+                        hue = Vector3.zero;
                     }
+                    
 
                     data.color = new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
-                    xCoord = xCoord * 0.9f + 0.1f;  // rescaling --> make this more robust
+                    xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
                     yCoord = yCoord * 0.67f + 0.1f;
                     data.worldPos = new Vector3(xCoord, yCoord, 0f);                     
-                    
+                    if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
+                        data.color = Color.white;
+                    }
                     dataArray[index] = data;
                 }
                 

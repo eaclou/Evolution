@@ -9,22 +9,16 @@ public class TheCursorCzar : Singleton<TheCursorCzar> {
     public bool _IsHoverClickableSpirit;
 
     public GameObject mouseRaycastWaterPlane;
-    //private Vector3 prevMousePositionOnWaterPlane;
+
     public Vector3 curMousePositionOnWaterPlane;
 
     public Text textTooltip;
     public GameObject panelTooltip;
 
-    public float stirStickDepth = 0f;
-
     public Vector2 smoothedMouseVel;
-    private Vector2 prevMousePos;
-
-    public Vector2 smoothedCtrlCursorVel;
-    private Vector2 prevCtrlCursorPos;
-    private Vector3 prevCtrlCursorPositionOnWaterPlane;
-    public Vector3 curCtrlCursorPositionOnWaterPlane;
-    //private bool rightTriggerOn = false;
+    private Vector2 instantMouseVel;
+    public Vector2 curMousePixelPos;
+    private Vector2 prevMousePixelPos;
 
     public bool stirGizmoVisible = false;
 
@@ -45,6 +39,9 @@ public class TheCursorCzar : Singleton<TheCursorCzar> {
     
     TheRenderKing theRenderKing => TheRenderKing.instance;
 
+    public Vector2 GetCursorPixelCoords() {
+        return curMousePixelPos;
+    }
     private void MouseRaycastWaterPlane(Vector3 screenPos) {
 
         mouseRaycastWaterPlane.SetActive(true);
@@ -61,7 +58,6 @@ public class TheCursorCzar : Singleton<TheCursorCzar> {
         Physics.Raycast(ray, out hit, layerMask);
 
         if (hit.collider != null) {
-            //prevMousePositionOnWaterPlane = curMousePositionOnWaterPlane;
             curMousePositionOnWaterPlane = hit.point;            
 
             cursorParticlesWorldPos = hit.point - ray.direction * 5f;
@@ -141,8 +137,7 @@ public class TheCursorCzar : Singleton<TheCursorCzar> {
         else {
             Cursor.SetCursor(cursorTexWorld, Vector2.zero, CursorMode.Auto);
         }*/
-        
-
+       
         // &&&&&&&&&&&&&&&&& MOUSE: &&&&&&&&&&&&&&&
         leftClickThisFrame = Input.GetMouseButtonDown(0);
         rightClickThisFrame = Input.GetMouseButtonDown(1);
@@ -153,11 +148,9 @@ public class TheCursorCzar : Singleton<TheCursorCzar> {
         if (letGoThisFrameLeft) {
             isDraggingMouseLeft = false;
             isDraggingSpeciesNode = false;
-            //gameManager.simulationManager.isBrushingAgents = false;
         }
         if (letGoThisFrameRight) {
             isDraggingMouseRight = false;
-            //gameManager.simulationManager.isBrushingAgents = false;
         }
     
         // check for player clicking on an animal in the world
@@ -173,12 +166,12 @@ public class TheCursorCzar : Singleton<TheCursorCzar> {
         stirGizmoVisible = false;
 
         //-----------------------------------------------------------------------------------------
-        Vector2 curMousePos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
-        Vector2 instantMouseVel = curMousePos - prevMousePos;
+        curMousePixelPos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
+        instantMouseVel = curMousePixelPos - prevMousePixelPos;
         smoothedMouseVel = Vector2.Lerp(smoothedMouseVel, instantMouseVel, 0.16f);
-        prevMousePos = curMousePos;
+        prevMousePixelPos = curMousePixelPos;
 
-        Vector3 newTooltipPosition = new Vector3(Mathf.Clamp(curMousePos.x, 0f, 1780f), Mathf.Clamp(curMousePos.y, 0f, 1000f), 0f); // *** BAD! requires 1920x1080 res ***
+        Vector3 newTooltipPosition = new Vector3(Mathf.Clamp(curMousePixelPos.x, 0f, 1780f), Mathf.Clamp(curMousePixelPos.y, 0f, 1000f), 0f); // *** BAD! requires 1920x1080 res ***
         panelTooltip.transform.position = newTooltipPosition;
 	}
 }

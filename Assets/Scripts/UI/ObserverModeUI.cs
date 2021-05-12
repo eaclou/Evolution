@@ -191,10 +191,10 @@ public class ObserverModeUI : MonoBehaviour
                 }
 
                 if(isActing > 0.5f) {
-                    theCursorCzar.stirStickDepth = Mathf.Lerp(theCursorCzar.stirStickDepth, 1f, 0.2f);
+                    //theCursorCzar.stirStickDepth = Mathf.Lerp(theCursorCzar.stirStickDepth, 1f, 0.2f);
                 }
                 else {
-                    theCursorCzar.stirStickDepth = Mathf.Lerp(theCursorCzar.stirStickDepth, -4f, 0.2f);
+                    //theCursorCzar.stirStickDepth = Mathf.Lerp(theCursorCzar.stirStickDepth, -4f, 0.2f);
                 }
                 theRenderKing.isStirring = theCursorCzar.isDraggingMouseLeft;
                 theRenderKing.gizmoStirToolMat.SetFloat(STIRRING, isActing);

@@ -45,6 +45,7 @@ public class SpeciesTreeBarUI : MonoBehaviour {
         
         if(linkedPool.isExtinct) {
             gameObject.GetComponentInChildren<Text>().color = Color.gray * 0.05f;
+            gameObject.transform.localScale = Vector3.one * 0.5f;
         }
         else {
             if (linkedPool.isFlaggedForExtinction) {
