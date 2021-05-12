@@ -21,14 +21,10 @@ public class BrainGenomeImage : MonoBehaviour
     // * WPP: expose values in editor
     public void SetTexture(BrainGenome brain) 
     {
-        texture.Resize(WIDTH, 1); // pool.leaderboardGenomesList.Count);
+        texture.Resize(WIDTH, 1);
 
         for(int x = 0; x < WIDTH; x++) 
-        {
-            // WPP: values not changed before use
-            //int xIndex = x; // i % brainGenomeTex.width;
-            //int yIndex = 0; // i; // Mathf.FloorToInt(i / brainGenomeTex.width);
-                              
+        {                              
             Color testColor;
 
             if (brain.linkList.Count > x) 
@@ -54,7 +50,6 @@ public class BrainGenomeImage : MonoBehaviour
                 testColor = Color.black; // CLEAR
             }
                 
-            // WPP: previously xIndex, yIndex, testColor
             texture.SetPixel(x, 0, testColor);
         }
         
