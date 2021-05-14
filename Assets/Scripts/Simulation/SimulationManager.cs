@@ -605,7 +605,7 @@ public class SimulationManager : Singleton<SimulationManager>
         if(simAgeTimeSteps % 80 == 10) {
             uiManager.speciesGraphPanelUI.UpdateSpeciesTreeDataTextures(curSimYear);
 
-            uiManager.allSpeciesTreePanelUI.UpdateSpeciesButtonTargetCoords();
+            uiManager.worldTreePanelUI.UpdateSpeciesIconsTargetCoords();
             
             int speciesID0 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].linkedSpeciesID;
             int speciesID1 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].linkedSpeciesID;
@@ -1528,7 +1528,7 @@ public class SimulationManager : Singleton<SimulationManager>
             masterGenomePool.currentHighestDepth = newSpecies.depthLevel;
         }
 
-        uiManager.allSpeciesTreePanelUI.AddNewSpeciesToPanel(newSpecies);
+        uiManager.worldTreePanelUI.AddNewSpeciesToPanel(newSpecies);
     }
     
     private StartPositionGenome GetInitialAgentSpawnPosition(int speciesIndex)

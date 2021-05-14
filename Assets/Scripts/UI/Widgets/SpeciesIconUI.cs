@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class SpeciesTreeBarUI : MonoBehaviour {
+public class SpeciesIconUI : MonoBehaviour {
     UIManager uiManager => UIManager.instance;
 
     //public AllSpeciesTreePanelUI allSpeciesTreePanelUI;
@@ -23,15 +23,14 @@ public class SpeciesTreeBarUI : MonoBehaviour {
     }
 
     // Updates focusedCandidate in uiManager 
-    public void ClickedThisButton() {
+    public void Clicked() {
         uiManager.SetSelectedSpeciesUI(speciesID);        
     }
     public void SetTargetCoords(Vector2 newCoords) {
         targetCoords = newCoords;
     }
-    public void UpdateButtonDisplay(int panelPixelSize, bool isSelected) {
+    public void UpdateIconDisplay(int panelPixelSize, bool isSelected) {
         
-
         gameObject.transform.localPosition = new Vector3(targetCoords.x * (float)panelPixelSize, targetCoords.y * (float)panelPixelSize, 0f);
         if(isSelected) {
             gameObject.transform.localScale = new Vector3(1.25f, 1.25f, 1f);

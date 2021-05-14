@@ -2220,7 +2220,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                     float lineID = line + 0f;
                     float orbitalPeriod = orbitalPeriodBase * Mathf.Exp(lineID);
 
-                    if(uiManager.allSpeciesTreePanelUI.GetPanelMode() == 0) {
+                    if(uiManager.worldTreePanelUI.GetPanelMode() == 0) {
                         // LINEAGE:
                         float xCoord = (float)i / (float)worldTreeNumPointsPerLine;
                         float yCoord = 1f - ((float)pool.speciesID / (float)Mathf.Max(simManager.masterGenomePool.completeSpeciesPoolsList.Count - 1, 1)); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
@@ -3928,6 +3928,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         cmdBufferResourceSim?.Release();
         cmdBufferWorldTree?.Release();
         quadVerticesCBuffer?.Release();
+        curveRibbonVerticesCBuffer?.Release();
         obstacleStrokesCBuffer?.Release();
         colorInjectionStrokesCBuffer?.Release();
         floatyBitsCBuffer?.Release();

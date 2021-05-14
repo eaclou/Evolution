@@ -18,28 +18,23 @@ public class UIManager : Singleton<UIManager> {
     TheRenderKing theRenderKing => TheRenderKing.instance;
     TheCursorCzar theCursorCzar => TheCursorCzar.instance;
 
-    public SpeciesOverviewUI speciesOverviewUI;
-    public SpeciesGraphPanelUI speciesGraphPanelUI;
+    public SpeciesOverviewUI speciesOverviewUI;  //***EAC to be phased-out --> incorporated into WorldTreePanel
+    public SpeciesGraphPanelUI speciesGraphPanelUI;  //***EAC to be phased-out --> incorporated into WorldTreePanel
     public GenomeViewerUI genomeViewerUI;
     public BrainGenomeImage brainGenomeImage;
-    public AllSpeciesTreePanelUI allSpeciesTreePanelUI;
+    public WorldTreePanelUI worldTreePanelUI;
     public BigBangPanelUI bigBangPanelUI;
     public ClockPanelUI clockPanelUI;
     public ObserverModeUI observerModeUI;
     public DebugPanelUI debugPanelUI;
-    public WorldSpiritHubUI worldSpiritHubUI; // ***EC remove after cannibalizing this! (tied into initialization atm)
+    public WorldSpiritHubUI worldSpiritHubUI; // ***EAC remove after cannibalizing this! (tied into initialization atm)
     public BrushesUI brushesUI;
     public GlobalResourcesUI globalResourcesUI;
     public CreatureBrainActivityUI creatureBrainActivityUI;
     public CreaturePaperDollUI creaturePaperDollUI;
     public CreatureLifeEventsLogUI creatureLifeEventsLogUI;
     public MinimapUI minimapUI;
-    //public WatcherUI watcherUI;    
-    //public KnowledgeUI knowledgeUI;
-    //public MutationUI mutationUI;    
-    //public ClockUI clockUI;
-    //public WildSpirit wildSpirit;
-    //public FeatsUI featsUI;    
+      
         
     public GameOptionsManager gameOptionsManager;    
     
@@ -57,10 +52,10 @@ public class UIManager : Singleton<UIManager> {
     public bool updateTerrainAltitude;  // WPP: assigned but not used
     public float terrainUpdateMagnitude;// WPP: assigned but not used
     
-    public ToolType curActiveTool;  // ******** move to phase out this approach
+    public ToolType curActiveTool;  // ***EAC move to phase out this approach
     
     // announcements:
-    public PanelNotificationsUI panelPendingClickPrompt;
+    public PanelNotificationsUI panelNotificationsUI;
     private bool announceAlgaeCollapsePossible = false;
     private bool announceAlgaeCollapseOccurred = false;
     public int timerAnnouncementTextCounter = 0;// WPP: assigned but not used
@@ -102,10 +97,10 @@ public class UIManager : Singleton<UIManager> {
 
 
     // ***EAC -- Reorganize these to their appropriate locations once you have it working:
-    private bool isTopLeftPanelOpen;
-    private bool isSpeciesListOn;
-    private bool isGraphModeOn;
-    private bool isSpeciesOverview;
+    //private bool isTopLeftPanelOpen;
+    //private bool isSpeciesListOn;
+    //private bool isGraphModeOn;
+    //private bool isSpeciesOverview;
     
     #endregion
     
@@ -137,7 +132,7 @@ public class UIManager : Singleton<UIManager> {
     public void SetSelectedSpeciesUI(int id) {
         SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[id];
         selectedSpeciesID = id;
-        allSpeciesTreePanelUI.RefreshPanelUI();
+        worldTreePanelUI.RefreshPanelUI();
         speciesOverviewUI.RebuildGenomeButtons();
     }
 
@@ -244,7 +239,7 @@ public class UIManager : Singleton<UIManager> {
 
         worldSpiritHubUI.ClickButtonWorldSpiritHubAgent(0);
 
-        allSpeciesTreePanelUI.InitializeSpeciesListBars();
+        worldTreePanelUI.InitializeSpeciesIcons();
     }
     
     public void TransitionToNewGameState(GameState gameState) {
@@ -287,7 +282,7 @@ public class UIManager : Singleton<UIManager> {
         newEventData.timeStepActivated = 0;
         simulationManager.simEventsManager.completeEventHistoryList.Add(newEventData);
 
-        panelPendingClickPrompt.Narrate("... And Then There Was Not Nothing ...", new Color(0.75f, 0.75f, 0.75f));
+        panelNotificationsUI.Narrate("... And Then There Was Not Nothing ...", new Color(0.75f, 0.75f, 0.75f));
         //panelPendingClickPrompt.GetComponentInChildren<Text>().text = "... And Then There Was Not Nothing ...";// "Welcome! This Pond is devoid of life...\nIt's up to you to change that!";
         //panelPendingClickPrompt.GetComponentInChildren<Text>().color = new Color(0.75f, 0.75f, 0.75f);
         //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
@@ -323,7 +318,7 @@ public class UIManager : Singleton<UIManager> {
             }
         }
 
-        allSpeciesTreePanelUI.UpdateUI();
+        worldTreePanelUI.UpdateUI();
         
         minimapUI.Tick();
 
@@ -607,7 +602,7 @@ public class UIManager : Singleton<UIManager> {
                     announceAlgaeCollapsePossible = false;
                     announceAlgaeCollapseOccurred = true;
 
-                    panelPendingClickPrompt.Narrate("<color=#DDDDDDFF>Algae Died from lack of Nutrients!</color>\nAdd Decomposers to recycle waste", colorDecomposersLayer);
+                    panelNotificationsUI.Narrate("<color=#DDDDDDFF>Algae Died from lack of Nutrients!</color>\nAdd Decomposers to recycle waste", colorDecomposersLayer);
                     isAnnouncementTextOn = true;
                 }
             }
@@ -768,12 +763,12 @@ public class UIManager : Singleton<UIManager> {
 
     // *** WPP: convert to NarrationSO
     public void AnnounceBrushAppear() {
-        panelPendingClickPrompt.Narrate("A Minor Creation Spirit Appeared!", new Color(1f, 1f, 1f));
+        panelNotificationsUI.Narrate("A Minor Creation Spirit Appeared!", new Color(1f, 1f, 1f));
         // map opens!
     }
 
     public void AnnounceUnlockBrushes() {
-        panelPendingClickPrompt.Narrate("Creation Spirit Captured!", new Color(1f, 1f, 1f));  
+        panelNotificationsUI.Narrate("Creation Spirit Captured!", new Color(1f, 1f, 1f));  
         
         Feat feat = new Feat("Brush", FeatType.WorldExpand, Time.frameCount, Color.white, "blah blah blah blah!");
         simulationManager.LogFeat(feat);
@@ -782,7 +777,7 @@ public class UIManager : Singleton<UIManager> {
     
     public void Narrate(NarrationSO value) 
     { 
-        panelPendingClickPrompt.Narrate(value); 
+        panelNotificationsUI.Narrate(value); 
         
         foreach (var feat in value.feats)
             simulationManager.LogFeat(feat);
