@@ -11,8 +11,7 @@ public class Lookup : ScriptableObject
 	[RuntimeInitializeOnLoadMethod]
 	private static void Initialize() { instance = (Lookup)Resources.Load("Lookup"); }
 	#endregion
-
-
+	
 	#region Global Resource References
 	
     [Header("Spirit Icons")]
@@ -47,6 +46,16 @@ public class Lookup : ScriptableObject
     public Color colorZooplanktonLayer;
     public Color colorVertebratesLayer;
     
+    [Header("Materials")]
+	public Material knowledgeGraphOxygenMat;
+	public Material knowledgeGraphNutrientsMat;
+	public Material knowledgeGraphDetritusMat;
+	public Material knowledgeGraphDecomposersMat;
+	public Material knowledgeGraphAlgaeMat;
+	public Material knowledgeGraphPlantsMat;
+	public Material knowledgeGraphZooplanktonMat;
+	public Material knowledgeGraphVertebratesMat;
+    
     [Header("Prefabs")]
     public GameObject genomeIcon;
     
@@ -67,11 +76,9 @@ public class Lookup : ScriptableObject
     }
     
 	#endregion
-
-
+	
 	#region Resource Lookups
-	
-	
+
 	[SerializeField] CauseOfDeathData[] causesOfDeath;
 
 	public CauseOfDeathSO GetCauseOfDeath(CauseOfDeathId id)

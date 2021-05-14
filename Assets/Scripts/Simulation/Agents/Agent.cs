@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Agent : MonoBehaviour {
     Lookup lookup => Lookup.instance;
@@ -206,6 +205,7 @@ public class Agent : MonoBehaviour {
     
     public bool isDead => curLifeStage == AgentLifeStage.Dead;
     public bool isEgg => curLifeStage == AgentLifeStage.Egg;
+    public bool isMature => curLifeStage == AgentLifeStage.Mature;
 
     public float GetDecayPercentage() {
         if (biomassAtDeath == 0f) {
@@ -1336,5 +1336,20 @@ public class Agent : MonoBehaviour {
 
         brain = new Brain(genome.brainGenome, this);   
         isInert = false;
+    }
+
+    // For setting activity material property
+    public int GetActivityID()
+    {
+        if (!isMature) return 0;
+        if (isCooldown) return 7;
+        if (isResting) return 5;
+        if (isDefending) return 4;
+        if (isDashing) return 3;
+        if (isAttacking) return 2;
+        if (isFeeding) return 1;
+        if (isPregnantAndCarryingEggs) return 6;
+
+        return 0;
     }
 }

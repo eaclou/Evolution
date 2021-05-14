@@ -1,10 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class BrushesUI : MonoBehaviour {
     UIManager uiManagerRef => UIManager.instance;
+    WorldSpiritHubUI worldSpiritHubUI => uiManagerRef.worldSpiritHubUI;
     
     public bool isUnlocked;
     public bool isOpen;
@@ -50,10 +49,12 @@ public class BrushesUI : MonoBehaviour {
     
 
     public int selectedBrushLinkedSpiritOtherLayer = 0;
+    public int selectedBrushLinkedSpiritTerrainLayer = 0;
+
+    // * WPP: references not used
     public Button buttonBrushLinkedSpiritOther0;  // Minerals
     public Button buttonBrushLinkedSpiritOther1;  // Water
     public Button buttonBrushLinkedSpiritOther2;  // Air
-    public int selectedBrushLinkedSpiritTerrainLayer = 0;
     public Button buttonBrushLinkedSpiritTerrain0;
     public Button buttonBrushLinkedSpiritTerrain1;
     public Button buttonBrushLinkedSpiritTerrain2;
@@ -87,6 +88,7 @@ public class BrushesUI : MonoBehaviour {
     //public int selectedSpeciesStatsIndex;
     
     SimulationManager simulationManager => SimulationManager.instance;
+    TrophicLayersManager trophicLayersManager => simulationManager.trophicLayersManager;
     TheCursorCzar theCursorCzar => TheCursorCzar.instance;
     TheRenderKing theRenderKing => TheRenderKing.instance;
     
@@ -201,10 +203,10 @@ public class BrushesUI : MonoBehaviour {
 
     public void UpdateBrushesUI() {
         // TEMPORARY!!!!!::::::
-        selectedEssenceSlot = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;
-        selectedBrushLinkedSpiritOtherLayer = uiManagerRef.worldSpiritHubUI.selectedToolbarOtherLayer;
-        selectedBrushLinkedSpiritTerrainLayer = uiManagerRef.worldSpiritHubUI.selectedToolbarTerrainLayer;
-        selectedBrushVertebrateSpeciesID = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritVertebrateSpeciesID;
+        selectedEssenceSlot = worldSpiritHubUI.selectedWorldSpiritSlot;
+        selectedBrushLinkedSpiritOtherLayer = worldSpiritHubUI.selectedToolbarOtherLayer;
+        selectedBrushLinkedSpiritTerrainLayer = worldSpiritHubUI.selectedToolbarTerrainLayer;
+        selectedBrushVertebrateSpeciesID = worldSpiritHubUI.selectedWorldSpiritVertebrateSpeciesID;
         
         //animatorBrushesUI.SetBool("MinPanel", !isOpen);
         bool isDim = false;
@@ -228,6 +230,7 @@ public class BrushesUI : MonoBehaviour {
         }        
     }
     private void UpdateUI() {
+        // * WPP: use nested class pattern to avoid GetComponent in main loop
         buttonBrushStir.GetComponent<Image>().color = buttonDisabledColor;
         buttonBrushStir.gameObject.transform.localScale = Vector3.one;
         buttonBrushAdd.GetComponent<Image>().color = buttonDisabledColor;
@@ -239,16 +242,10 @@ public class BrushesUI : MonoBehaviour {
         buttonBrushExtra3.GetComponent<Image>().color = buttonDisabledColor;
         buttonBrushExtra3.gameObject.transform.localScale = Vector3.one;
         
-        //TrophicLayersManager layerManager = uiManagerRef.gameManager.simulationManager.trophicLayersManager;
-
         UpdateCurSelectedColor();
-
         
         curIconColor = new Color(curIconColor.r * 0.35f, curIconColor.g * 0.35f, curIconColor.b * 0.35f);
-        
-        
         imageColorBar.color = curIconColor;
-                
 
         //imageIsBrushing.gameObject.SetActive(uiManagerRef.isBrushModeON_snoopingOFF);
         //imageIsBrushing.sprite = curIconSprite;
@@ -260,6 +257,7 @@ public class BrushesUI : MonoBehaviour {
                 break;            
             case ToolType.Add:
                 if(curCreationBrushIndex == 0) {
+                    // * WPP: use nested class pattern to avoid GetComponent in main loop
                     buttonBrushAdd.GetComponent<Image>().color = buttonActiveColor;
                     buttonBrushAdd.gameObject.transform.localScale = Vector3.one * 1.33f;
 
@@ -302,7 +300,6 @@ public class BrushesUI : MonoBehaviour {
                     buttonBrushExtra2.gameObject.transform.localScale = Vector3.one;
                     buttonBrushAdd.GetComponent<Image>().color = buttonDisabledColor;
                     buttonBrushAdd.gameObject.transform.localScale = Vector3.one;
-
                 }
                 break;            
             case ToolType.Stir:
@@ -351,9 +348,9 @@ public class BrushesUI : MonoBehaviour {
         imageSelectedBrushThumbnail.color = curIconColor;                
         imageBrushLinkedSpiritThumbnail.color = curIconColor;
         imageBrushLinkedSpiritThumbnail.sprite = curIconSprite;
-
     }
     
+    // * WPP: collapse conditionals with nested struct (or more global lookup)
     private void UpdateCurSelectedColor() {  
         string str = "";
         //selected layer ui identifying color:
@@ -440,9 +437,8 @@ public class BrushesUI : MonoBehaviour {
 
         textSelectedBrushDescription.text = str;
     }
+    
     private void UpdateBrushPaletteUI() {
-        TrophicLayersManager layerManager = simulationManager.trophicLayersManager;  
-        
         Color iconColor = Color.white;
         /*
         bool isSelectedDecomposers = false;
@@ -566,6 +562,7 @@ public class BrushesUI : MonoBehaviour {
         */
     }
 	
+    // * WPP: reduce conditional nesting
     public void ApplyCreationBrush() {
         toolbarInfluencePoints -= 0.002f;
 
@@ -575,7 +572,7 @@ public class BrushesUI : MonoBehaviour {
         }
         uiManagerRef.updateTerrainAltitude = false;                
         // IF TERRAIN SELECTED::::
-        if (true) { //uiManagerRef.gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot) {
+        if (true) { //trophicLayersManager.isSelectedTrophicSlot) {
             // DECOMPOSERS::::
             if(selectedEssenceSlot.kingdomID == 0) {
                 simulationManager.vegetationManager.isBrushActive = true;
@@ -701,22 +698,23 @@ public class BrushesUI : MonoBehaviour {
             //animatorBrushesUI.SetBool("MinPanel", true);
         }
     }
+    
     public void SetTargetFromWorldTree() {
         selectedEssenceSlot = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;
 
         EnterCreationBrushMode();
         isOpen = true;
         isPaletteOpen = false;
-
     }
+    
     /*public void ClickBrushPaletteOpen() {
         isPaletteOpen = !isPaletteOpen;
         uiManagerRef.curActiveTool = UIManager.ToolType.Add;
         uiManagerRef.isBrushModeON_snoopingOFF = true;
         EnterCreationBrushMode();
     }*/
+    
     public void ClickToolButtonStir() {
-        
         uiManagerRef.curActiveTool = ToolType.Stir;
               
         //uiManagerRef.watcherUI.StopFollowingAgent();
@@ -727,6 +725,7 @@ public class BrushesUI : MonoBehaviour {
         //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
               
     }
+    
     public void ClickToolButtonAdd() {  
         Debug.Log("ClickToolButtonAdd(0)");
         curCreationBrushIndex = 0;
@@ -734,6 +733,7 @@ public class BrushesUI : MonoBehaviour {
         
         //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
     }
+    
     public void ClickToolButtonExtra1() {
         Debug.Log("ClickToolButtonExtra1()");
         curCreationBrushIndex = 1;
@@ -745,6 +745,7 @@ public class BrushesUI : MonoBehaviour {
 
         //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
     }
+    
     public void ClickToolButtonExtra2() {
         Debug.Log("ClickToolButtonExtra2()");
         curCreationBrushIndex = 2;
@@ -756,6 +757,7 @@ public class BrushesUI : MonoBehaviour {
 
         //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
     }
+    
     public void ClickToolButtonExtra3() {
         Debug.Log("ClickToolButtonExtra3()");
         curCreationBrushIndex = 3;
@@ -767,6 +769,7 @@ public class BrushesUI : MonoBehaviour {
 
         //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
     }
+    
     private void EnterCreationBrushMode() {
         uiManagerRef.curActiveTool = ToolType.Add;
         //uiManagerRef.watcherUI.StopFollowingAgent();
@@ -777,12 +780,12 @@ public class BrushesUI : MonoBehaviour {
     
     //*********************************************
     public void ClickButtonBrushPaletteOther(int index) {
-        Debug.Log("ClickButtonPaletteOther: " + index.ToString());
+        Debug.Log("ClickButtonPaletteOther: " + index);
 
-        TrophicSlot slot = simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[index];
+        TrophicSlot slot = trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[index];
         selectedEssenceSlot = slot;
-        //uiManagerRef.gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
-        //uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
+        //trophicLayersManager.isSelectedTrophicSlot = true;
+        //trophicLayersManager.selectedTrophicSlotRef = slot;
         
         //
         selectedBrushVertebrateSpeciesID = slot.linkedSpeciesID; // update this next ***
@@ -793,15 +796,15 @@ public class BrushesUI : MonoBehaviour {
         isPaletteOpen = false;
         EnterCreationBrushMode();
     }
+    
     public void ClickButtonBrushPaletteTerrain(int index) {
-        Debug.Log("ClickButtonPaletteTerrain: " + index.ToString());
+        Debug.Log("ClickButtonPaletteTerrain: " + index);
 
-        TrophicSlot slot = simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[index];
-        //uiManagerRef.gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
-        //old: //uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef = slot;
+        TrophicSlot slot = trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[index];
+        //trophicLayersManager.isSelectedTrophicSlot = true;
+        //old: //trophicLayersManager.selectedTrophicSlotRef = slot;
         selectedEssenceSlot = slot;
-
-
+        
         //selectedBrushVertebrateSpeciesID = slot.linkedSpeciesID; // update this next
 
         selectedBrushLinkedSpiritTerrainLayer = index;
@@ -810,32 +813,37 @@ public class BrushesUI : MonoBehaviour {
         isPaletteOpen = false;
         EnterCreationBrushMode();
     }
+    
     public void ClickButtonBrushPaletteDecomposers() {
-        TrophicSlot slot = simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
+        TrophicSlot slot = trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
         selectedEssenceSlot = slot; 
         isPaletteOpen = false;
         EnterCreationBrushMode();
     }
+    
     public void ClickButtonBrushPaletteAlgae() {  // shouldn't be able to click if LOCKED (interactive = false)
-        TrophicSlot slot = simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
+        TrophicSlot slot = trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
         selectedEssenceSlot = slot;    
         isPaletteOpen = false;
         EnterCreationBrushMode();
     }
+    
     public void ClickButtonBrushPalettePlants(int slotID) {
-        TrophicSlot slot = simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[slotID];
+        TrophicSlot slot = trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[slotID];
         selectedEssenceSlot = slot;      
         isPaletteOpen = false;
         EnterCreationBrushMode();
     }
+    
     public void ClickButtonBrushPaletteZooplankton() {
-        TrophicSlot slot = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];        
+        TrophicSlot slot = trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];        
         selectedEssenceSlot = slot;  
         isPaletteOpen = false;
         EnterCreationBrushMode();
     }
+    
     public void ClickButtonBrushPaletteAgent(int index) {
-        TrophicSlot slot = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[index];
+        TrophicSlot slot = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[index];
         selectedEssenceSlot = slot;
        
         selectedBrushVertebrateSpeciesID = slot.linkedSpeciesID; // update this next

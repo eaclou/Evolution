@@ -32,7 +32,6 @@ public class UIManager : Singleton<UIManager> {
     public GlobalResourcesUI globalResourcesUI;
     public CreatureBrainActivityUI creatureBrainActivityUI;
     public CreaturePaperDollUI creaturePaperDollUI;
-    public CreaturePortraitUI creaturePortraitUI;
     public CreatureLifeEventsLogUI creatureLifeEventsLogUI;
     public MinimapUI minimapUI;
     //public WatcherUI watcherUI;    
@@ -133,6 +132,7 @@ public class UIManager : Singleton<UIManager> {
 
         SetSelectedSpeciesUI(focusedCandidate.speciesID);
     }
+    
     
     public void SetSelectedSpeciesUI(int id) {
         SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[id];
@@ -316,7 +316,6 @@ public class UIManager : Singleton<UIManager> {
             genomeViewerUI.UpdateUI(pool, focusedCandidate);
             creatureBrainActivityUI.Tick();
             creaturePaperDollUI.Tick();
-            creaturePortraitUI.Tick();
             creatureLifeEventsLogUI.Tick(focusedCandidate);
 
             if(simulationManager.simAgeTimeSteps % 67 == 1) {

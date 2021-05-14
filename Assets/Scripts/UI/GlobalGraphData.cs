@@ -1,6 +1,8 @@
 ﻿
 public class GlobalGraphData
 {
+    Lookup lookup => Lookup.instance;
+    
     GraphData nutrients;
     GraphData waste;
     GraphData decomposers;
@@ -33,15 +35,15 @@ public class GlobalGraphData
     */
     
     // testing!!!!
-    public void Initialize(GlobalResourcesUI resourcesUI) 
+    public void Initialize()
     {
-        nutrients = new GraphData(resourcesUI.knowledgeGraphNutrientsMat);  
-        waste = new GraphData(resourcesUI.knowledgeGraphDetritusMat); 
-        decomposers = new GraphData(resourcesUI.knowledgeGraphDecomposersMat); 
-        algae = new GraphData(resourcesUI.knowledgeGraphAlgaeMat); 
-        plants = new GraphData(resourcesUI.knowledgeGraphPlantsMat);  
-        zooplankton = new GraphData(resourcesUI.knowledgeGraphZooplanktonMat); 
-        vertebrates = new GraphData(resourcesUI.knowledgeGraphVertebratesMat);  
+        nutrients = new GraphData(lookup.knowledgeGraphNutrientsMat);  
+        waste = new GraphData(lookup.knowledgeGraphDetritusMat); 
+        decomposers = new GraphData(lookup.knowledgeGraphDecomposersMat); 
+        algae = new GraphData(lookup.knowledgeGraphAlgaeMat); 
+        plants = new GraphData(lookup.knowledgeGraphPlantsMat);  
+        zooplankton = new GraphData(lookup.knowledgeGraphZooplanktonMat); 
+        vertebrates = new GraphData(lookup.knowledgeGraphVertebratesMat);
         
         /*
         graphDataVertebrateLifespan0 = new GraphData(ui.knowledgeUI.knowledgeGraphVertebrateLifespanMat0);
@@ -74,7 +76,6 @@ public class GlobalGraphData
         algae.AddNewEntry(resources.curGlobalAlgaeReservoir);
         plants.AddNewEntry(resources.curGlobalPlantParticles);
         zooplankton.AddNewEntry(resources.curGlobalAnimalParticles);
-        
         vertebrates.AddNewEntry(totalAgentBiomass);
     }
 }

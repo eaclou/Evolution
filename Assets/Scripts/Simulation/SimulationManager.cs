@@ -253,7 +253,7 @@ public class SimulationManager : Singleton<SimulationManager>
         LogFeat(feat);
 
         // allocate memory and initialize data structures, classes, arrays, etc.
-        globalGraphData.Initialize(uiManager.globalResourcesUI);
+        globalGraphData.Initialize();
 
         settingsManager.Initialize();
         trophicLayersManager = new TrophicLayersManager();

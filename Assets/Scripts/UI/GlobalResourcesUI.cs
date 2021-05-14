@@ -19,15 +19,16 @@ public class GlobalResourcesUI : MonoBehaviour {
     public Text textMeterPlants;
     public Text textMeterZooplankton;
     public Text textMeterAnimals;
-
-    public Material knowledgeGraphOxygenMat;
+    
+    // WPP: moved to Lookup
+    /*public Material knowledgeGraphOxygenMat;
     public Material knowledgeGraphNutrientsMat;
     public Material knowledgeGraphDetritusMat;
     public Material knowledgeGraphDecomposersMat;
     public Material knowledgeGraphAlgaeMat;
     public Material knowledgeGraphPlantsMat;
     public Material knowledgeGraphZooplanktonMat;
-    public Material knowledgeGraphVertebratesMat;
+    public Material knowledgeGraphVertebratesMat;*/
         
     
     public void ClickToolButton() {

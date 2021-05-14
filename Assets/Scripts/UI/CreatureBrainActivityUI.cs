@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
 
 public class CreatureBrainActivityUI : MonoBehaviour
 {
@@ -16,20 +13,22 @@ public class CreatureBrainActivityUI : MonoBehaviour
 
     private int callTickCounter = 90;
 
+    private int critterIndex;
+    private Agent agent;
+
     public void Tick() {
 
-        int critterIndex = cameraManager.targetAgentIndex;
-        Agent agent = simulationManager.agentsArray[critterIndex];
+        critterIndex = cameraManager.targetAgentIndex;
+        agent = simulationManager.agentsArray[critterIndex];
 
-        if (agent.coreModule != null) {
-
-            
-            int curActivityID = 0;
-            if (agent.curLifeStage == Agent.AgentLifeStage.Dead) {
-                
-                //curActivityID = 7;
+        if (agent.coreModule != null)
+        {
+            // WPP: ID selection moved to Agent
+            int curActivityID = agent.GetActivityID();
+            /*if (agent.isDead) {
+            //curActivityID = 7;
             }
-            if (agent.curLifeStage == Agent.AgentLifeStage.Mature) {
+            if (agent.isMature) {
 
                 // curActivity
                 if (agent.isPregnantAndCarryingEggs) {
@@ -50,11 +49,10 @@ public class CreatureBrainActivityUI : MonoBehaviour
                 if (agent.isResting) {
                     curActivityID = 5;
                 }
-
                 if (agent.isCooldown) {
                     curActivityID = 7;
                 }
-            }
+            }*/
             
             newInspectAgentCurActivityMat.SetInt("_CurActivityID", curActivityID);
             newInspectAgentThrottleMat.SetFloat("_ThrottleX", Mathf.Clamp01(agent.smoothedThrottle.x));
@@ -70,14 +68,11 @@ public class CreatureBrainActivityUI : MonoBehaviour
                                             agent.coreModule.mouthAttackEffector[0],
                                             agent.communicationModule.outComm0[0], agent.isCooldown);
 
-            if(agent.communicationModule.outComm3[0] > 0.25f) {
-                callTickCounter = Mathf.Min(200, callTickCounter++);
-                            
-            }
-            else {
-                callTickCounter = Mathf.Max(0, callTickCounter--);
-            }
-               
+            // * WPP: what concept does this condition represent? -> convert to getter in Agent
+            callTickCounter = agent.communicationModule.outComm3[0] > 0.25f ? 
+                Mathf.Min(200, callTickCounter++) : 
+                Mathf.Max(0, callTickCounter--);
+            
             agentBehaviorOneHot.UpdateExtras(agent);
         }        
     }

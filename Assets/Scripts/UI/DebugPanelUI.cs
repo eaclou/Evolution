@@ -2,10 +2,19 @@
 using UnityEngine.UI;
 
 public class DebugPanelUI : MonoBehaviour {
-    SimulationManager simulationManager => SimulationManager.instance;
+    SimulationManager simulation => SimulationManager.instance;
+    SimResourceManager simResourceManager => simulation.simResourceManager;
+    SettingsEnvironment environmentSettings => simulation.settingsManager.environmentSettings;
+    VegetationManager vegetationManager => simulation.vegetationManager;
+    ZooplanktonManager zooplanktonManager => simulation.zooplanktonManager;
+    MasterGenomePool masterGenomePool => simulation.masterGenomePool;
+    
     TheRenderKing theRenderKing => TheRenderKing.instance;
+    TheCursorCzar theCursorCzar => TheCursorCzar.instance;
     CameraManager cameraManager => CameraManager.instance;
-    UIManager uiManagerRef => UIManager.instance;
+    Agent agent => cameraManager.targetAgent;
+    UIManager uiManager => UIManager.instance;
+    
     
     public bool isOpen;
     public GameObject panelDebug;
@@ -46,111 +55,126 @@ public class DebugPanelUI : MonoBehaviour {
     //public Button buttonToggleDebug;
 
     private RenderTexture[] debugTextureViewerArray;
+    
+    int agentIndex;
+    CandidateAgentData candidate;
+    AgentGenome candidateGenome;
+    CritterModuleCore coreModule;
+    Brain brain;
+    BodyGenome bodyGenome;
+    BrainGenome brainGenome;
+    CritterModuleCoreGenome coreGenome;
+    CritterModuleFood foodModule;
+    CritterModuleMovement movementModule;
+    CritterModuleFoodSensorsGenome foodGenome;
 
-    TheCursorCzar theCursorCzar => TheCursorCzar.instance;
-	
+    // * WPP: break code sections into methods, call from here
     private void UpdateUI() {
-        // DISABLED!!!! -- Need to establish good method for grabbing data from SimulationManager!
-        SimulationManager simManager = simulationManager;
-
-        Agent agentRef = cameraManager.targetAgent;  
-
-        // WPP: exit early if no target agent
-        if (!agentRef) return;
+        if (!agent) return;
      
-        int agentIndex = agentRef.index;
+        agentIndex = agent.index;
+        candidate = agent.candidateRef;
+        coreModule = agent.coreModule;
+        brain = agent.brain;
+        candidateGenome = candidate.candidateGenome;
+        brainGenome = candidateGenome.brainGenome;
+        bodyGenome = candidateGenome.bodyGenome;
+        coreGenome = bodyGenome.coreGenome;
+        foodModule = agent.foodModule;
+        movementModule = agent.movementModule;
+        foodGenome = bodyGenome.foodGenome;
 
-        if (!agentRef.isInert) {
+
+        if (!agent.isInert) {
             // DebugTxt1 : use this for selected creature stats:
             int curCount = 0;
             int maxCount = 1;
-            if (agentRef.curLifeStage == Agent.AgentLifeStage.Egg) {
-                curCount = agentRef.lifeStageTransitionTimeStepCounter;
-                maxCount = agentRef._GestationDurationTimeSteps;
+            if (agent.isEgg) {
+                curCount = agent.lifeStageTransitionTimeStepCounter;
+                maxCount = agent._GestationDurationTimeSteps;
             }
-            if (agentRef.curLifeStage == Agent.AgentLifeStage.Mature) {
-                curCount = agentRef.ageCounter;
-                maxCount = agentRef.maxAgeTimeSteps;
+            if (agent.isMature) {
+                curCount = agent.ageCounter;
+                maxCount = agent.maxAgeTimeSteps;
             }
-            if (agentRef.curLifeStage == Agent.AgentLifeStage.Dead) {
-                curCount = agentRef.lifeStageTransitionTimeStepCounter;
+            if (agent.isDead) {
+                curCount = agent.lifeStageTransitionTimeStepCounter;
                 maxCount = curCount; // agentRef._DecayDurationTimeSteps;
             }
             int progressPercent = Mathf.RoundToInt((float)curCount / (float)maxCount * 100f);
-            string lifeStageProgressTxt = " " + agentRef.curLifeStage.ToString() + " " + curCount.ToString() + "/" + maxCount.ToString() + "  " + progressPercent.ToString() + "% ";
+            string lifeStageProgressTxt = " " + agent.curLifeStage + " " + curCount + "/" + maxCount + "  " + progressPercent + "% ";
 
             // &&&& INDIVIDUAL AGENT: &&&&
             string debugTxtAgent = "";            
-            debugTxtAgent += "CRITTER# [" + agentIndex.ToString() + "]     SPECIES# [" + agentRef.speciesIndex.ToString() + "]\n\n";
+            debugTxtAgent += "CRITTER# [" + agentIndex + "]     SPECIES# [" + agent.speciesIndex + "]\n\n";
             // Init Attributes:
             // Body:
-            debugTxtAgent += "Base Size: " + agentRef.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength.ToString("F2") + ",  Aspect: " + agentRef.candidateRef.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio.ToString("F2") + "\n"; 
-            debugTxtAgent += "Fullsize Dimensions: ( " + agentRef.fullSizeBoundingBox.x.ToString("F2") + ", " + agentRef.fullSizeBoundingBox.y.ToString("F2") + ", " + agentRef.fullSizeBoundingBox.z.ToString("F2") + " )\n";
-            debugTxtAgent += "BONUS - Damage: " + agentRef.coreModule.damageBonus.ToString("F2") + ", Speed: " + agentRef.coreModule.speedBonus.ToString("F2") + ", Health: " + agentRef.coreModule.healthBonus.ToString("F2") + ", Energy: " + agentRef.coreModule.energyBonus.ToString("F2") + "\n";
-            debugTxtAgent += "DIET - Decay: " + agentRef.coreModule.digestEfficiencyDecay.ToString("F2") + ", Plant: " + agentRef.coreModule.digestEfficiencyPlant.ToString("F2") + ", Meat: " + agentRef.coreModule.digestEfficiencyMeat.ToString("F2") + "\n";
+            debugTxtAgent += "Base Size: " + coreGenome.creatureBaseLength.ToString("F2") + ",  Aspect: " + coreGenome.creatureAspectRatio.ToString("F2") + "\n"; 
+            debugTxtAgent += "Fullsize Dimensions: ( " + agent.fullSizeBoundingBox.x.ToString("F2") + ", " + agent.fullSizeBoundingBox.y.ToString("F2") + ", " + agent.fullSizeBoundingBox.z.ToString("F2") + " )\n";
+            debugTxtAgent += "BONUS - Damage: " + coreModule.damageBonus.ToString("F2") + ", Speed: " + coreModule.speedBonus.ToString("F2") + ", Health: " + coreModule.healthBonus.ToString("F2") + ", Energy: " + coreModule.energyBonus.ToString("F2") + "\n";
+            debugTxtAgent += "DIET - Decay: " + coreModule.digestEfficiencyDecay.ToString("F2") + ", Plant: " + coreModule.digestEfficiencyPlant.ToString("F2") + ", Meat: " + coreModule.digestEfficiencyMeat.ToString("F2") + "\n";
             //string mouthType = "Active";
             //if (agentRef.mouthRef.isPassive) { mouthType = "Passive"; }
             //debugTxtAgent += "Mouth: [" + mouthType + "]\n";
-            debugTxtAgent += "# Neurons: " + agentRef.brain.neuronList.Count.ToString() + ", # Axons: " + agentRef.brain.axonList.Count.ToString() + "\n";
-            debugTxtAgent += "# In/Out Nodes: " + agentRef.candidateRef.candidateGenome.brainGenome.bodyNeuronList.Count.ToString() + ", # Hidden Nodes: " + agentRef.candidateRef.candidateGenome.brainGenome.hiddenNeuronList.Count.ToString() + ", # Links: " + agentRef.candidateRef.candidateGenome.brainGenome.linkList.Count.ToString() + "\n";
+            debugTxtAgent += "# Neurons: " + brain.neuronList.Count + ", # Axons: " + brain.axonList.Count + "\n";
+            debugTxtAgent += "# In/Out Nodes: " + brainGenome.bodyNeuronList.Count + ", # Hidden Nodes: " + brainGenome.hiddenNeuronList.Count + ", # Links: " + brainGenome.linkList.Count + "\n";
 
             debugTxtAgent += "\nSENSORS:\n";
-            debugTxtAgent += "Comms= " + agentRef.candidateRef.candidateGenome.bodyGenome.communicationGenome.useComms.ToString() + "\n";
-            debugTxtAgent += "Enviro: WaterStats: " + agentRef.candidateRef.candidateGenome.bodyGenome.environmentalGenome.useWaterStats.ToString() + ", Cardinals= " + agentRef.candidateRef.candidateGenome.bodyGenome.environmentalGenome.useCardinals.ToString() + ", Diagonals= " + agentRef.candidateRef.candidateGenome.bodyGenome.environmentalGenome.useDiagonals.ToString() + "\n";
-            CritterModuleFoodSensorsGenome foodGenome = agentRef.candidateRef.candidateGenome.bodyGenome.foodGenome;
-            debugTxtAgent += "Food: Nutrients= " + foodGenome.useNutrients.ToString() + ", Pos= " + foodGenome.usePos.ToString() + ",  Dir= " + foodGenome.useDir.ToString() + ",  Stats= " + foodGenome.useStats.ToString() + ", useEggs: " + foodGenome.useEggs.ToString() + ", useCorpse: " + foodGenome.useCorpse.ToString() + "\n";
-            debugTxtAgent += "Friend: Pos= " + agentRef.candidateRef.candidateGenome.bodyGenome.friendGenome.usePos.ToString() + ",  Dir= " + agentRef.candidateRef.candidateGenome.bodyGenome.friendGenome.useDir.ToString() + ",  Vel= " + agentRef.candidateRef.candidateGenome.bodyGenome.friendGenome.useVel.ToString() + "\n";
-            debugTxtAgent += "Threat: Pos= " + agentRef.candidateRef.candidateGenome.bodyGenome.threatGenome.usePos.ToString() + ",  Dir= " + agentRef.candidateRef.candidateGenome.bodyGenome.threatGenome.useDir.ToString() + ",  Vel= " + agentRef.candidateRef.candidateGenome.bodyGenome.threatGenome.useVel.ToString() + ",  Stats= " + agentRef.candidateRef.candidateGenome.bodyGenome.threatGenome.useStats.ToString() + "\n";
+            debugTxtAgent += "Comms= " + bodyGenome.communicationGenome.useComms + "\n";
+            debugTxtAgent += "Enviro: WaterStats: " + bodyGenome.environmentalGenome.useWaterStats + ", Cardinals= " + agent.candidateRef.candidateGenome.bodyGenome.environmentalGenome.useCardinals + ", Diagonals= " + bodyGenome.environmentalGenome.useDiagonals + "\n";
+            debugTxtAgent += "Food: Nutrients= " + foodGenome.useNutrients + ", Pos= " + foodGenome.usePos + ",  Dir= " + foodGenome.useDir + ",  Stats= " + foodGenome.useStats + ", useEggs: " + foodGenome.useEggs + ", useCorpse: " + foodGenome.useCorpse + "\n";
+            debugTxtAgent += "Friend: Pos= " + bodyGenome.friendGenome.usePos + ",  Dir= " + bodyGenome.friendGenome.useDir + ",  Vel= " + bodyGenome.friendGenome.useVel + "\n";
+            debugTxtAgent += "Threat: Pos= " + bodyGenome.threatGenome.usePos + ",  Dir= " + bodyGenome.threatGenome.useDir + ",  Vel= " + bodyGenome.threatGenome.useVel + ",  Stats= " + bodyGenome.threatGenome.useStats + "\n";
             // Realtime Values:
             debugTxtAgent += "\nREALTIME DATA:";
             //debugTxtAgent += "\nExp: " + agentRef.totalExperience.ToString("F2") + ",  fitnessScore: " + agentRef.masterFitnessScore.ToString("F2") + ", LVL: " + agentRef.curLevel.ToString();
-            debugTxtAgent += "\n(" + lifeStageProgressTxt + ") Growth: " + (agentRef.sizePercentage * 100f).ToString("F0") + "%, Age: " + agentRef.ageCounter.ToString() + " Frames\n\n";
+            debugTxtAgent += "\n(" + lifeStageProgressTxt + ") Growth: " + (agent.sizePercentage * 100f).ToString("F0") + "%, Age: " + agent.ageCounter + " Frames\n\n";
                         
-            debugTxtAgent += "Nearest Food: [" + agentRef.foodModule.nearestFoodParticleIndex.ToString() +
-                        "] Amount: " + agentRef.foodModule.nearestFoodParticleAmount.ToString("F4") +
-                        "\nPos: ( " + agentRef.foodModule.nearestFoodParticlePos.x.ToString("F2") +
-                        ", " + agentRef.foodModule.nearestFoodParticlePos.y.ToString("F2") +
-                        " ), Dir: ( " + agentRef.foodModule.foodPlantDirX[0].ToString("F2") +
-                        ", " + agentRef.foodModule.foodPlantDirY[0].ToString("F2") + " )" +
+            debugTxtAgent += "Nearest Food: [" + foodModule.nearestFoodParticleIndex +
+                        "] Amount: " + foodModule.nearestFoodParticleAmount.ToString("F4") +
+                        "\nPos: ( " + foodModule.nearestFoodParticlePos.x.ToString("F2") +
+                        ", " + foodModule.nearestFoodParticlePos.y.ToString("F2") +
+                        " ), Dir: ( " + foodModule.foodPlantDirX[0].ToString("F2") +
+                        ", " + foodModule.foodPlantDirY[0].ToString("F2") + " )" +
                         "\n";
-            debugTxtAgent += "\nNutrients: " + agentRef.foodModule.nutrientDensity[0].ToString("F4") + ", Stamina: " + agentRef.coreModule.stamina[0].ToString("F3") + "\n";
-            debugTxtAgent += "Gradient Dir: (" + agentRef.foodModule.nutrientGradX[0].ToString("F2") + ", " + agentRef.foodModule.nutrientGradY[0].ToString("F2") + ")\n";
+            debugTxtAgent += "\nNutrients: " + foodModule.nutrientDensity[0].ToString("F4") + ", Stamina: " + coreModule.stamina[0].ToString("F3") + "\n";
+            debugTxtAgent += "Gradient Dir: (" + foodModule.nutrientGradX[0].ToString("F2") + ", " + foodModule.nutrientGradY[0].ToString("F2") + ")\n";
             //debugTxtAgent += "Total Food Eaten -- Decay: n/a, Plant: " + agentRef.totalFoodEatenPlant.ToString("F2") + ", Meat: " + agentRef.totalFoodEatenZoop.ToString("F2") + "\nFood Stored: " + agentRef.coreModule.foodStored[0].ToString() + ", Corpse Food Amount: " + agentRef.currentBiomass.ToString("F3") + "\n";
 
             //debugTxtAgent += "\nFullSize: " + agentRef.fullSizeBoundingBox.ToString() + ", Volume: " + agentRef.fullSizeBodyVolume.ToString() + "\n";
             //debugTxtAgent += "( " + (agentRef.sizePercentage * 100f).ToString("F0") + "% )\n";
 
-            debugTxtAgent += "\nCurVel: " + agentRef.curVel.ToString("F3") + ", CurAccel: " + agentRef.curAccel.ToString("F3") + ", AvgVel: " + agentRef.avgVel.ToString("F3") + "\n";
+            debugTxtAgent += "\nCurVel: " + agent.curVel.ToString("F3") + ", CurAccel: " + agent.curAccel.ToString("F3") + ", AvgVel: " + agent.avgVel.ToString("F3") + "\n";
 
-            debugTxtAgent += "\nWater Depth: " + agentRef.waterDepth.ToString("F3") + ", Vel: " + (agentRef.avgFluidVel * 10f).ToString("F3") + "\n";
-            debugTxtAgent += "Throttle: [ " + agentRef.movementModule.throttleX[0].ToString("F3") + ", " + agentRef.movementModule.throttleY[0].ToString("F3") + " ]\n";
-            debugTxtAgent += "FeedEffector: " + agentRef.coreModule.mouthFeedEffector[0].ToString("F2") + "\n";
-            debugTxtAgent += "AttackEffector: " + agentRef.coreModule.mouthAttackEffector[0].ToString("F2") + "\n";
-            debugTxtAgent += "DefendEffector: " + agentRef.coreModule.defendEffector[0].ToString("F2") + "\n";
-            debugTxtAgent += "DashEffector: " + agentRef.coreModule.dashEffector[0].ToString("F2") + "\n";
-            debugTxtAgent += "HealEffector: " + agentRef.coreModule.healEffector[0].ToString("F2") + "\n";
+            debugTxtAgent += "\nWater Depth: " + agent.waterDepth.ToString("F3") + ", Vel: " + (agent.avgFluidVel * 10f).ToString("F3") + "\n";
+            debugTxtAgent += "Throttle: [ " + movementModule.throttleX[0].ToString("F3") + ", " + movementModule.throttleY[0].ToString("F3") + " ]\n";
+            debugTxtAgent += "FeedEffector: " + coreModule.mouthFeedEffector[0].ToString("F2") + "\n";
+            debugTxtAgent += "AttackEffector: " + coreModule.mouthAttackEffector[0].ToString("F2") + "\n";
+            debugTxtAgent += "DefendEffector: " + coreModule.defendEffector[0].ToString("F2") + "\n";
+            debugTxtAgent += "DashEffector: " + coreModule.dashEffector[0].ToString("F2") + "\n";
+            debugTxtAgent += "HealEffector: " + coreModule.healEffector[0].ToString("F2") + "\n";
             
             //+++++++++++++++++++++++++++++++++++++ CRITTER: ++++++++++++++++++++++++++++++++++++++++++++
             string debugTxtGlobalSim = "";
-            debugTxtGlobalSim += "\n\nNumChildrenBorn: " + simManager.numAgentsBorn.ToString() + ", numDied: " + simManager.numAgentsDied.ToString() + ", ~Gen: " + ((float)simManager.numAgentsBorn / (float)simManager._NumAgents).ToString();
-            debugTxtGlobalSim += "\nSimulation Age: " + simManager.simAgeTimeSteps.ToString();
-            debugTxtGlobalSim += "\nYear " + simManager.curSimYear.ToString() + "\n\n";
-            int numActiveSpecies = simManager.masterGenomePool.currentlyActiveSpeciesIDList.Count;
-            debugTxtGlobalSim += numActiveSpecies.ToString() + " Active Species:\n";
+            debugTxtGlobalSim += "\n\nNumChildrenBorn: " + simulation.numAgentsBorn + ", numDied: " + simulation.numAgentsDied + ", ~Gen: " + ((float)simulation.numAgentsBorn / (float)simulation._NumAgents);
+            debugTxtGlobalSim += "\nSimulation Age: " + simulation.simAgeTimeSteps;
+            debugTxtGlobalSim += "\nYear " + simulation.curSimYear + "\n\n";
+            int numActiveSpecies = masterGenomePool.currentlyActiveSpeciesIDList.Count;
+            debugTxtGlobalSim += numActiveSpecies + " Active Species:\n";
             for (int s = 0; s < numActiveSpecies; s++) {
-                int speciesID = simManager.masterGenomePool.currentlyActiveSpeciesIDList[s];
+                int speciesID = masterGenomePool.currentlyActiveSpeciesIDList[s];
                 //int parentSpeciesID = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].parentSpeciesID;
-                int numCandidates = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].candidateGenomesList.Count;
-                int numLeaders = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].leaderboardGenomesList.Count;
+                int numCandidates = masterGenomePool.completeSpeciesPoolsList[speciesID].candidateGenomesList.Count;
+                int numLeaders = masterGenomePool.completeSpeciesPoolsList[speciesID].leaderboardGenomesList.Count;
                 //int numBorn = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].numAgentsEvaluated;
                 int speciesPopSize = 0;
                 //float avgFitness = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgPerformanceData.totalTicksAlive;
-                for (int a = 0; a < simManager._NumAgents; a++) {
-                    if (simManager.agentsArray[a].speciesIndex == speciesID) {
+                for (int a = 0; a < simulation._NumAgents; a++) {
+                    if (simulation.agentsArray[a].speciesIndex == speciesID) {
                         speciesPopSize++;
                     }
                 }
-                if(simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].isFlaggedForExtinction) {
+                if(masterGenomePool.completeSpeciesPoolsList[speciesID].isFlaggedForExtinction) {
                     debugTxtGlobalSim += "xxx ";
                 }
                 /*debugTxtGlobalSim += "Species[" + speciesID.ToString() + "] p(" + parentSpeciesID.ToString() + "), size: " + speciesPopSize.ToString() + ", #cands: " + numCandidates.ToString() + ", numEvals: " + numBorn.ToString() + 
@@ -176,40 +200,38 @@ public class DebugPanelUI : MonoBehaviour {
             }*/
             
             textDebugTrainingInfo1.text = debugTxtAgent;
-            
             textDebugTrainingInfo3.text = debugTxtGlobalSim;
-            
         } 
         
         string debugTxtResources = "";
         debugTxtResources += "GLOBAL RESOURCES:\n";
-        debugTxtResources += "\nSunlight: " + simManager.settingsManager.environmentSettings._BaseSolarEnergy.ToString();
-        debugTxtResources += "\nOxygen: " + simManager.simResourceManager.curGlobalOxygen.ToString();
-        debugTxtResources += "\n     + " + simManager.simResourceManager.oxygenProducedByAlgaeReservoirLastFrame.ToString() + " ( algae reservoir )";
-        debugTxtResources += "\n     + " + simManager.simResourceManager.oxygenProducedByPlantParticlesLastFrame.ToString() + " ( algae particles )";
-        debugTxtResources += "\n     - " + simManager.simResourceManager.oxygenUsedByDecomposersLastFrame.ToString() + " ( decomposers )";
-        debugTxtResources += "\n     - " + simManager.simResourceManager.oxygenUsedByAnimalParticlesLastFrame.ToString() + " ( zooplankton )";
-        debugTxtResources += "\n     - " + simManager.simResourceManager.oxygenUsedByAgentsLastFrame.ToString() + " ( agents )";
-        debugTxtResources += "\nNutrients: " + simManager.simResourceManager.curGlobalNutrients.ToString();
-        debugTxtResources += "\n     + " + simManager.simResourceManager.nutrientsProducedByDecomposersLastFrame.ToString() + " ( decomposers )";
-        debugTxtResources += "\n     - " + simManager.simResourceManager.nutrientsUsedByAlgaeReservoirLastFrame.ToString() + " ( algae reservoir )";
-        debugTxtResources += "\n     - " + simManager.simResourceManager.nutrientsUsedByPlantParticlesLastFrame.ToString() + " ( algae particles )";
-        debugTxtResources += "\nDetritus: " + simManager.simResourceManager.curGlobalDetritus.ToString();
-        debugTxtResources += "\n     + " + simManager.simResourceManager.wasteProducedByAlgaeReservoirLastFrame.ToString() + " ( algae reservoir )";
-        debugTxtResources += "\n     + " + simManager.simResourceManager.wasteProducedByPlantParticlesLastFrame.ToString() + " ( algae particles )";
-        debugTxtResources += "\n     + " + simManager.simResourceManager.wasteProducedByAnimalParticlesLastFrame.ToString() + " ( zooplankton )";
-        debugTxtResources += "\n     + " + simManager.simResourceManager.wasteProducedByAgentsLastFrame.ToString() + " ( agents )";
-        debugTxtResources += "\n     - " + simManager.simResourceManager.detritusRemovedByDecomposersLastFrame.ToString() + " ( decomposers )";
-        debugTxtResources += "\nDecomposers: " + simManager.simResourceManager.curGlobalDecomposers.ToString();
-        debugTxtResources += "\nAlgae (Reservoir): " + simManager.simResourceManager.curGlobalAlgaeReservoir.ToString();
-        debugTxtResources += "\nAlgae (Particles): " + simManager.simResourceManager.curGlobalPlantParticles.ToString();
-        debugTxtResources += "\nZooplankton: " + simManager.simResourceManager.curGlobalAnimalParticles.ToString();
-        debugTxtResources += "\nLive Agents: " + simManager.simResourceManager.curGlobalAgentBiomass.ToString();
-        debugTxtResources += "\nDead Agents: " + simManager.simResourceManager.curGlobalCarrionVolume.ToString();
-        debugTxtResources += "\nEggSacks: " + simManager.simResourceManager.curGlobalEggSackVolume.ToString();
-        debugTxtResources += "\nGlobal Mass: " + simManager.simResourceManager.curTotalMass.ToString();
-        Vector4 resourceGridSample = uiManagerRef.SampleTexture(simManager.vegetationManager.resourceGridRT1, theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize);
-        Vector4 simTansferSample = uiManagerRef.SampleTexture(simManager.vegetationManager.resourceSimTransferRT, theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 100f;
+        debugTxtResources += "\nSunlight: " + environmentSettings._BaseSolarEnergy;
+        debugTxtResources += "\nOxygen: " + simResourceManager.curGlobalOxygen;
+        debugTxtResources += "\n     + " + simResourceManager.oxygenProducedByAlgaeReservoirLastFrame + " ( algae reservoir )";
+        debugTxtResources += "\n     + " + simResourceManager.oxygenProducedByPlantParticlesLastFrame + " ( algae particles )";
+        debugTxtResources += "\n     - " + simResourceManager.oxygenUsedByDecomposersLastFrame + " ( decomposers )";
+        debugTxtResources += "\n     - " + simResourceManager.oxygenUsedByAnimalParticlesLastFrame + " ( zooplankton )";
+        debugTxtResources += "\n     - " + simResourceManager.oxygenUsedByAgentsLastFrame + " ( agents )";
+        debugTxtResources += "\nNutrients: " + simResourceManager.curGlobalNutrients;
+        debugTxtResources += "\n     + " + simResourceManager.nutrientsProducedByDecomposersLastFrame + " ( decomposers )";
+        debugTxtResources += "\n     - " + simResourceManager.nutrientsUsedByAlgaeReservoirLastFrame + " ( algae reservoir )";
+        debugTxtResources += "\n     - " + simResourceManager.nutrientsUsedByPlantParticlesLastFrame + " ( algae particles )";
+        debugTxtResources += "\nDetritus: " + simResourceManager.curGlobalDetritus;
+        debugTxtResources += "\n     + " + simResourceManager.wasteProducedByAlgaeReservoirLastFrame + " ( algae reservoir )";
+        debugTxtResources += "\n     + " + simResourceManager.wasteProducedByPlantParticlesLastFrame + " ( algae particles )";
+        debugTxtResources += "\n     + " + simResourceManager.wasteProducedByAnimalParticlesLastFrame + " ( zooplankton )";
+        debugTxtResources += "\n     + " + simResourceManager.wasteProducedByAgentsLastFrame + " ( agents )";
+        debugTxtResources += "\n     - " + simResourceManager.detritusRemovedByDecomposersLastFrame + " ( decomposers )";
+        debugTxtResources += "\nDecomposers: " + simResourceManager.curGlobalDecomposers;
+        debugTxtResources += "\nAlgae (Reservoir): " + simResourceManager.curGlobalAlgaeReservoir;
+        debugTxtResources += "\nAlgae (Particles): " + simResourceManager.curGlobalPlantParticles;
+        debugTxtResources += "\nZooplankton: " + simResourceManager.curGlobalAnimalParticles;
+        debugTxtResources += "\nLive Agents: " + simResourceManager.curGlobalAgentBiomass;
+        debugTxtResources += "\nDead Agents: " + simResourceManager.curGlobalCarrionVolume;
+        debugTxtResources += "\nEggSacks: " + simResourceManager.curGlobalEggSackVolume;
+        debugTxtResources += "\nGlobal Mass: " + simResourceManager.curTotalMass;
+        Vector4 resourceGridSample = uiManager.SampleTexture(vegetationManager.resourceGridRT1, theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize);
+        Vector4 simTansferSample = uiManager.SampleTexture(vegetationManager.resourceSimTransferRT, theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 100f;
         //Debug.Log("curMousePositionOnWaterPlane: " + curMousePositionOnWaterPlane.ToString());
         debugTxtResources += "\nresourceGridSample: (" + resourceGridSample.x.ToString("F4") + ", " + resourceGridSample.y.ToString("F4") + ", " + resourceGridSample.z.ToString("F4") + ", " + resourceGridSample.w.ToString("F4") + ")";
         debugTxtResources += "\nsimTansferSample: (" + simTansferSample.x.ToString("F4") + ", " + simTansferSample.y.ToString("F4") + ", " + simTansferSample.z.ToString("F4") + ", " + simTansferSample.w.ToString("F4") + ")";
@@ -219,6 +241,7 @@ public class DebugPanelUI : MonoBehaviour {
         if(debugTextureViewerArray == null) {
             CreateDebugRenderViewerArray();
         }
+        
         debugTextureViewerMat.SetPass(0);
         debugTextureViewerMat.SetVector("_Zoom", _Zoom);
         debugTextureViewerMat.SetFloat("_Amplitude", _Amplitude);
@@ -227,7 +250,7 @@ public class DebugPanelUI : MonoBehaviour {
         debugTextureViewerMat.SetFloat("_IsChannelSolo", (float)_IsChannelSolo);
         debugTextureViewerMat.SetFloat("_Gamma", _Gamma);        
         //debugTextureViewerMat.
-        if(debugTextureViewerArray[_DebugTextureIndex] != null) {
+        if(debugTextureViewerArray[_DebugTextureIndex]) {
             debugTextureViewerMat.SetTexture("_MainTex", debugTextureViewerArray[_DebugTextureIndex]);
             int channelID = 4;
             string[] channelLabelTxt = new string[5];            
@@ -241,6 +264,7 @@ public class DebugPanelUI : MonoBehaviour {
             }
             textDebugTextureName.text = debugTextureViewerArray[_DebugTextureIndex].name + channelLabelTxt[channelID];
         }
+        
         textDebugTextureZoomX.text = _Zoom.x.ToString();
         textDebugTextureZoomY.text = _Zoom.y.ToString();
         textDebugTextureAmplitude.text = _Amplitude.ToString();
@@ -254,8 +278,7 @@ public class DebugPanelUI : MonoBehaviour {
             UpdateUI();
         }        
     }    
-
-
+    
     private void CreateDebugRenderViewerArray() {
         debugTextureViewerArray = new RenderTexture[13];
         debugTextureViewerArray[0] = theRenderKing.baronVonTerrain.terrainHeightDataRT;
@@ -282,13 +305,13 @@ public class DebugPanelUI : MonoBehaviour {
         debugTextureViewerArray[7] = theRenderKing.fluidManager._ObstaclesRT;
         debugTextureViewerArray[7].name = "Solid Obstacles Render";
 
-        debugTextureViewerArray[8] = simulationManager.vegetationManager.critterNearestPlants32;
+        debugTextureViewerArray[8] = vegetationManager.critterNearestPlants32;
         debugTextureViewerArray[8].name = "critterNearestPlants32";        
         
-        debugTextureViewerArray[9] = simulationManager.zooplanktonManager.critterNearestZooplankton32;
+        debugTextureViewerArray[9] = zooplanktonManager.critterNearestZooplankton32;
         debugTextureViewerArray[9].name = "critterNearestZooplankton32";
 
-        debugTextureViewerArray[10] = simulationManager.vegetationManager.resourceGridRT1;
+        debugTextureViewerArray[10] = vegetationManager.resourceGridRT1;
         debugTextureViewerArray[10].name = "Resources Grid";
 
         
@@ -302,9 +325,10 @@ public class DebugPanelUI : MonoBehaviour {
         //debugTextureViewerArray[3].name = "Water DensityA";
         //}        
         
-        debugTextureViewerArray[12] = simulationManager.vegetationManager.resourceSimTransferRT;
+        debugTextureViewerArray[12] = simulation.vegetationManager.resourceSimTransferRT;
         debugTextureViewerArray[12].name = "Resource Sim Transfer";
     }
+    
     public void ClickDebugTexturePrev() {
         if(debugTextureViewerArray == null) {
             CreateDebugRenderViewerArray();
@@ -314,10 +338,12 @@ public class DebugPanelUI : MonoBehaviour {
         if(_DebugTextureIndex < 0) {
             _DebugTextureIndex = debugTextureViewerArray.Length - 1;
         }
+        
         imageDebugTexture.enabled = false;
         imageDebugTexture.enabled = true;
         debugTextureViewerMat.SetTexture("_MainTex", debugTextureViewerArray[_DebugTextureIndex]);
     }
+    
     public void ClickDebugTextureNext() {
         if(debugTextureViewerArray == null) {
             CreateDebugRenderViewerArray();
@@ -327,37 +353,39 @@ public class DebugPanelUI : MonoBehaviour {
         if(_DebugTextureIndex > debugTextureViewerArray.Length - 1) {
             _DebugTextureIndex = 0;
         }
+        
         imageDebugTexture.enabled = false;
         imageDebugTexture.enabled = true;
         debugTextureViewerMat.SetTexture("_MainTex", debugTextureViewerArray[_DebugTextureIndex]);
     }
+    
     public void SliderDebugTextureZoomX(float val) {
         _Zoom.x = val;
     }
+    
     public void SliderDebugTextureZoomY(float val) {
         _Zoom.y = val;
     }
+    
     public void SliderDebugTextureAmplitude(float val) {
         _Amplitude = val;
     }
+    
     public void SliderDebugTextureChannelSoloIndex(float val) {
         _ChannelSoloIndex = Mathf.RoundToInt(val);
         debugTextureViewerMat.SetInt("_ChannelSoloIndex", _ChannelSoloIndex);
         imageDebugTexture.enabled = false;
         imageDebugTexture.enabled = true;
     }
+    
     public void ToggleDebugTextureIsSolo(bool val) {
-        if(_IsChannelSolo > 0.5f) {
-            _IsChannelSolo = 0f;
-        }
-        else {
-            _IsChannelSolo = 1f;
-        }
+        _IsChannelSolo = _IsChannelSolo > 0.5f ? 0f : 1f;
+
         debugTextureViewerMat.SetFloat("_IsChannelSolo", (float)_IsChannelSolo);
         imageDebugTexture.enabled = false;
         imageDebugTexture.enabled = true;
-
     }
+    
     public void SliderDebugTextureGamma(float val) {
         _Gamma = val;
     }
@@ -366,5 +394,4 @@ public class DebugPanelUI : MonoBehaviour {
         isOpen = !isOpen;
         panelDebug.SetActive(isOpen);
     }
-
 }
