@@ -23,10 +23,14 @@ public class WorldTreePanelUI : MonoBehaviour
     MasterGenomePool masterGenomePool => simulationManager.masterGenomePool;
     UIManager uiManagerRef => UIManager.instance;
 
+
+
     private int curPanelMode = 0;  // 0 == lineage, 1 == graph
     public int GetPanelMode() {
         return curPanelMode;
     }
+
+
     public void Awake() {
         speciesIconsList = new List<SpeciesIconUI>();
     }
