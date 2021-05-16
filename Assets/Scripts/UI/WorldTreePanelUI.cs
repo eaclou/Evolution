@@ -23,7 +23,9 @@ public class WorldTreePanelUI : MonoBehaviour
     MasterGenomePool masterGenomePool => simulationManager.masterGenomePool;
     UIManager uiManagerRef => UIManager.instance;
 
+    private int focusLevel = 0;  // ***TEMP!!!   0==species, 1==creatures, 2==selectedCreature
 
+    private float timelineStart = 0f;
 
     private int curPanelMode = 0;  // 0 == lineage, 1 == graph
     public int GetPanelMode() {
@@ -40,8 +42,26 @@ public class WorldTreePanelUI : MonoBehaviour
         panelSpeciesTree.SetActive(value);        
     }
 
+    public void SetFocusLevel(int focusLvl) {
+        focusLevel = focusLvl;
+    }
+    public int GetFocusLevel() {
+        return focusLevel;
+    }
+    public void ToggleFocusLevel() {
+        if(focusLevel == 0) {
+            focusLevel = 1;
+        }
+        else if(focusLevel == 1) {
+            focusLevel = 0;
+        }
+        else {
+            focusLevel = 0;
+        }        
+    }
+
     public void UpdateUI() { //***EAC UpdateUI() AND RefreshUI() ?????? 
-        textTitle.text = "mode: " + curPanelMode;
+        textTitle.text = "mode: " + curPanelMode + ", focus: " + focusLevel;
         //*** update positions of buttons, etc.
         
         for(int i = 0; i < speciesIconsList.Count; i++) {
@@ -61,6 +81,13 @@ public class WorldTreePanelUI : MonoBehaviour
             float xCoord = 1f;
             if (speciesIconsList[s].linkedPool.isExtinct) {
                 xCoord = (float)speciesIconsList[s].linkedPool.timeStepExtinct / Mathf.Max(1f, (float)simulationManager.simAgeTimeSteps);
+            }
+
+            if(focusLevel == 0) {
+
+            }
+            else {
+                xCoord = 0f;
             }
             speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, 1f - yCoord));
         }
@@ -89,7 +116,12 @@ public class WorldTreePanelUI : MonoBehaviour
             if (pool.isExtinct) {
                 xCoord = (float)pool.timeStepExtinct / Mathf.Max(1f, (float)simulationManager.simAgeTimeSteps);
             }
+            if(focusLevel == 0) {
 
+            }
+            else {
+                xCoord = 0f;
+            }
             if(bestScore == 0f) {
                 bestScore = 1f;
             }
@@ -99,8 +131,15 @@ public class WorldTreePanelUI : MonoBehaviour
     }
     private void UpdateSpeciesIconsDefault() {
         for (int s = 0; s < speciesIconsList.Count; s++) {        // simple list, evenly spaced    
+            float xCoord = 1f;
+            if(focusLevel == 0) {
+
+            }
+            else {
+                xCoord = 0f;
+            }
             float yCoord = (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);            
-            speciesIconsList[s].SetTargetCoords(new Vector2(1f, yCoord));
+            speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
         }
     }
 

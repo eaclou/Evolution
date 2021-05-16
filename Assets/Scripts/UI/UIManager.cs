@@ -130,7 +130,15 @@ public class UIManager : Singleton<UIManager> {
     
     
     public void SetSelectedSpeciesUI(int id) {
-        SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[id];
+        //SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[id];
+        if(id == selectedSpeciesID) {
+            // already selected -->
+            
+            worldTreePanelUI.ToggleFocusLevel(); // species overview vs world overview
+        }
+        else {
+
+        }
         selectedSpeciesID = id;
         worldTreePanelUI.RefreshPanelUI();
         speciesOverviewUI.RebuildGenomeButtons();
