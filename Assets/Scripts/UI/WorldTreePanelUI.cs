@@ -25,7 +25,7 @@ public class WorldTreePanelUI : MonoBehaviour
 
     private int focusLevel = 0;  // ***TEMP!!!   0==species, 1==creatures, 2==selectedCreature
 
-    private float timelineStart = 0f;
+    public float timelineStartTimeStep = 0f;
 
     private int curPanelMode = 0;  // 0 == lineage, 1 == graph
     public int GetPanelMode() {
@@ -61,7 +61,7 @@ public class WorldTreePanelUI : MonoBehaviour
     }
 
     public void UpdateUI() { //***EAC UpdateUI() AND RefreshUI() ?????? 
-        textTitle.text = "mode: " + curPanelMode + ", focus: " + focusLevel;
+        textTitle.text = "mode: " + curPanelMode + ", focus: " + focusLevel + ", " + timelineStartTimeStep.ToString("F0");
         //*** update positions of buttons, etc.
         
         for(int i = 0; i < speciesIconsList.Count; i++) {
@@ -74,6 +74,17 @@ public class WorldTreePanelUI : MonoBehaviour
             }
             icon.UpdateIconDisplay(256, isSelected);
         }
+
+        float targetStartTimeStep = 0f;
+        if(focusLevel == 0) {
+
+        }
+        else {
+            
+            targetStartTimeStep = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].candidateGenomesList[0].performanceData.timeStepHatched; //***EAC better less naive way to calculate this
+            
+        }
+        timelineStartTimeStep = Mathf.Lerp(timelineStartTimeStep, targetStartTimeStep, 0.25f);
     }
     private void UpdateSpeciesIconsLineageMode() {        
         for (int s = 0; s < speciesIconsList.Count; s++) {            

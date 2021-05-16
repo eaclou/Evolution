@@ -11,6 +11,7 @@ public class SpeciesIconUI : MonoBehaviour {
     public SpeciesGenomePool linkedPool;
 
     public Vector2 targetCoords; // UI canvas
+    private Vector2 currentCoords;
 
     public void Initialize(int index, SpeciesGenomePool pool) {        
         this.index = index;
@@ -30,10 +31,13 @@ public class SpeciesIconUI : MonoBehaviour {
         targetCoords = newCoords;
     }
     public void UpdateIconDisplay(int panelPixelSize, bool isSelected) {
-        
-        gameObject.transform.localPosition = new Vector3(targetCoords.x * (float)panelPixelSize, targetCoords.y * (float)panelPixelSize, 0f);
-        if(isSelected) {
-            gameObject.transform.localScale = new Vector3(1.25f, 1.25f, 1f);
+        // POSITION
+        currentCoords = Vector2.Lerp(currentCoords, targetCoords, 0.25f);
+        gameObject.transform.localPosition = new Vector3(currentCoords.x * (float)panelPixelSize, currentCoords.y * (float)panelPixelSize, 0f);
+
+        // APPEARANCE
+        if (isSelected) {
+            gameObject.transform.localScale = new Vector3(1.2f, 1.2f, 1f);
             gameObject.GetComponent<Image>().color = Color.white;
         }
         else {

@@ -940,7 +940,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
                 float xCoord = (float)(i % worldTreeNumPointsPerLine) / (float)worldTreeNumPointsPerLine;
                 //float timeStepStart = 0f;
-                float time01 = xCoord * 0.5f + 0.5f; // Mathf.Lerp(timeStepStart, (float)simManager.simAgeTimeSteps, xCoord);
+                float timelineRange = Mathf.Max(1f, simManager.simAgeTimeSteps - uiManager.worldTreePanelUI.timelineStartTimeStep);
+
+                float time01 = Mathf.Lerp(uiManager.worldTreePanelUI.timelineStartTimeStep, simManager.simAgeTimeSteps, xCoord) / timelineRange; // Mathf.Lerp(timeStepStart, (float)simManager.simAgeTimeSteps, xCoord);
                 if(uiManager.worldTreePanelUI.GetFocusLevel() == 0) {
                     time01 = xCoord;
                 }
@@ -995,13 +997,15 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                         float lerp = Mathf.Clamp01(lineID * 0.11215f);
                         Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
 
-                        float xStart = (float)pool.timeStepCreated / (float)simManager.simAgeTimeSteps;
-                        float xEnd = 1f;
+                        int timeStepStart = Mathf.RoundToInt(uiManager.worldTreePanelUI.timelineStartTimeStep);
+
+                        float xStart01 = (float)(pool.timeStepCreated - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
+                        float xEnd01 = 1f;
                         if(pool.isExtinct) {
-                            xEnd = (float)pool.timeStepExtinct / (float)simManager.simAgeTimeSteps;
+                            xEnd01 = (float)(pool.timeStepExtinct - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
                         }
 
-                        if(xStart > xCoord || xEnd < xCoord) {
+                        if(xStart01 > xCoord || xEnd01 < xCoord) {
                             hue = Vector3.zero;
                         }
                                                 
@@ -1073,11 +1077,11 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                     Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary * 2f;
 
 
-
-                    float xStart = (float)pool.candidateGenomesList[line].performanceData.timeStepHatched / (float)simManager.simAgeTimeSteps;
+                    int timeStepStart = Mathf.RoundToInt(uiManager.worldTreePanelUI.timelineStartTimeStep);
+                    float xStart = (float)(pool.candidateGenomesList[line].performanceData.timeStepHatched - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
                     float xEnd = 1f;
                     if(pool.isExtinct || cand.performanceData.timeStepDied > 1) {
-                        xEnd = (float)cand.performanceData.timeStepDied / (float)simManager.simAgeTimeSteps;
+                        xEnd = (float)(cand.performanceData.timeStepDied - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
                     }
                     
                     if(xStart > xCoord || xEnd < xCoord) {
