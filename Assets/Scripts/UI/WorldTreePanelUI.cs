@@ -6,7 +6,7 @@ public class WorldTreePanelUI : MonoBehaviour
 {
     [SerializeField] GameObject panelSpeciesTree;
     public bool isShowingExtinct = false;
-    public Text textSelectedSpeciesTitle;
+    //public Text textSelectedSpeciesTitle;
     public Image imageSelectedSpeciesBG;
     public Text textSpeciationTree;    
     public Text textStatsBody;
@@ -156,7 +156,7 @@ public class WorldTreePanelUI : MonoBehaviour
 
     public void RefreshPanelUI() {
         UpdateSpeciesIconsTargetCoords();
-        textSelectedSpeciesTitle.text = "Selected Species: #" + uiManagerRef.selectedSpeciesID;
+        //textSelectedSpeciesTitle.text = "Selected Species: #" + uiManagerRef.selectedSpeciesID;
 
         Vector3 hue = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
         imageSelectedSpeciesBG.color = new Color(hue.x, hue.y, hue.z);
@@ -169,9 +169,6 @@ public class WorldTreePanelUI : MonoBehaviour
         else {
             UpdateSpeciesIconsGraphMode();
         }
-
-
-        
     }
     private void CreateSpeciesIcon(SpeciesGenomePool pool) {
         

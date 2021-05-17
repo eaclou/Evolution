@@ -1008,7 +1008,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                         if(xStart01 > xCoord || xEnd01 < xCoord) {
                             hue = Vector3.zero;
                         }
-                                                
+                        if(pool.speciesID == uiManager.selectedSpeciesID) {
+                            hue = Vector3.one;
+                        }                        
                         data.color = new Color(hue.x, hue.y, hue.z); // Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
 
                         xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
@@ -1044,7 +1046,20 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                             data.worldPos = new Vector3(xCoord, yCoord, 0f);
                             float lerp = Mathf.Clamp01(lineID * 0.11215f);
                             Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+                            int timeStepStart = Mathf.RoundToInt(uiManager.worldTreePanelUI.timelineStartTimeStep);
 
+                            float xStart01 = (float)(pool.timeStepCreated - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
+                            float xEnd01 = 1f;
+                            if(pool.isExtinct) {
+                                xEnd01 = (float)(pool.timeStepExtinct - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
+                            }
+
+                            if(xStart01 > xCoord || xEnd01 < xCoord) {
+                                hue = Vector3.zero;
+                            }
+                            if(pool.speciesID == uiManager.selectedSpeciesID) {
+                                hue = Vector3.one;
+                            }
                             data.color = new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
 
                             if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
@@ -1098,7 +1113,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                     }
 
                     if(cand.candidateID == uiManager.focusedCandidate.candidateID) {
-                        hue *= 4.56f;
+                        hue = Vector3.one;
                     }
 
                     data.color = new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
