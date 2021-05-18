@@ -93,8 +93,16 @@ public class ObserverModeUI : MonoBehaviour
                 textTooltip.color = Color.cyan;
             }
             else {
-                panelTooltip.SetActive(false);
-            }   
+                if(theCursorCzar.GetCursorPixelCoords().x <= 360 && theCursorCzar.GetCursorPixelCoords().y > 720) {
+                    textTooltip.text = "Year " + (((float)simulationManager.simAgeTimeSteps / 2048f) * theCursorCzar.GetCursorPixelCoords().x / 360f).ToString("F0");
+                    textTooltip.color = Color.yellow;
+                    panelTooltip.SetActive(true);
+                }
+                else {
+                    panelTooltip.SetActive(false);
+                }
+                
+            }  
         }
         else {
             //Debug.Log(vegetationManager.ToString());
@@ -163,6 +171,14 @@ public class ObserverModeUI : MonoBehaviour
                 panelTooltip.SetActive(false);
             }
             else {
+                panelTooltip.SetActive(true);
+            }
+
+            //float cursorCoordsX = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().x) / 360f);
+            //float cursorCoordsY = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().y - 720f) / 360f);  
+            if(theCursorCzar.GetCursorPixelCoords().x <= 360 && theCursorCzar.GetCursorPixelCoords().y > 720) {
+                textTooltip.text = "TimeStep #" + ((float)simulationManager.simAgeTimeSteps * theCursorCzar.GetCursorPixelCoords().x / 360f).ToString("F0");
+                textTooltip.color = Color.yellow;
                 panelTooltip.SetActive(true);
             }
             

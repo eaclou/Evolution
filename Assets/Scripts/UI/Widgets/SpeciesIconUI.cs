@@ -32,7 +32,8 @@ public class SpeciesIconUI : MonoBehaviour {
     }
     public void UpdateIconDisplay(int panelPixelSize, bool isSelected) {
         // POSITION
-        currentCoords = Vector2.Lerp(currentCoords, targetCoords, 0.25f);
+        currentCoords = Vector2.Lerp(currentCoords, targetCoords, 0.75f);
+
         gameObject.transform.localPosition = new Vector3(currentCoords.x * (float)panelPixelSize, currentCoords.y * (float)panelPixelSize, 0f);
 
         // APPEARANCE
@@ -57,6 +58,7 @@ public class SpeciesIconUI : MonoBehaviour {
             else {
                 gameObject.GetComponentInChildren<Text>().color = Color.white;
             }            
-        }        
+        } 
+        
     }
 }

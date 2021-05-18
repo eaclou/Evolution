@@ -10,14 +10,14 @@ public class CreatureIconUI : MonoBehaviour
     UIManager uiManagerRef => UIManager.instance;
 
     public int index = -1;
-    private SpeciesOverviewUI.SelectionGroup group;
+    //private SpeciesOverviewUI.SelectionGroup group;
     
     public Image imageBG;
     public bool isSelected = false;
 
-	public void UpdateButtonPrefab(SpeciesOverviewUI.SelectionGroup grp, int slotIndex) {
+	public void UpdateButtonPrefab(int slotIndex) {
         index = slotIndex;
-        group = grp;
+        //group = grp;
     }
 
     public void Clicked() {

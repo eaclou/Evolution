@@ -272,7 +272,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private int worldTreeBufferCount => worldTreeNumPointsPerLine * (worldTreeNumSpeciesLines * worldTreeNumCreatureLines);
     public ComputeBuffer clockOrbitLineDataCBuffer;
     private int clockOrbitNumPointsPerLine = 64;
-    private int numClockOrbitLines = 8;
+    private int numClockOrbitLines = 6;
     private int clockOrbitBufferCount => numClockOrbitLines * clockOrbitNumPointsPerLine;
 
     public struct TreeOfLifeEventLineData { //***EAC deprecate!
@@ -927,37 +927,51 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         clockOrbitLineDataCBuffer = new ComputeBuffer(clockOrbitBufferCount, sizeof(float) * 7);
         
         //ORBIT LINES:        
-        float orbitalPeriodBase = 32f;
-        float animTimeScale = 1f;        
+        float orbitalPeriodBase = 24f;
+        //float animTimeScale = 1f;        
         for(int line = 0; line < numClockOrbitLines; line++) { //***EAC  can cut out the extra positioning logic after migrating to GPU
             for (int i = 0; i < clockOrbitNumPointsPerLine; i++) {
                 int index = line * clockOrbitNumPointsPerLine + i;
 
                 ClockOrbitLineData data = new ClockOrbitLineData();
 
-                float lineID = line + 1f;
+                float lineID = line + 1.5f;
                 float orbitalPeriod = orbitalPeriodBase * Mathf.Exp(lineID);
 
                 float xCoord = (float)(i % worldTreeNumPointsPerLine) / (float)worldTreeNumPointsPerLine;
                 //float timeStepStart = 0f;
                 float timelineRange = Mathf.Max(1f, simManager.simAgeTimeSteps - uiManager.worldTreePanelUI.timelineStartTimeStep);
-
+                /*
                 float time01 = Mathf.Lerp(uiManager.worldTreePanelUI.timelineStartTimeStep, simManager.simAgeTimeSteps, xCoord) / timelineRange; // Mathf.Lerp(timeStepStart, (float)simManager.simAgeTimeSteps, xCoord);
                 if(uiManager.worldTreePanelUI.GetFocusLevel() == 0) {
                     time01 = xCoord;
                 }
                 else {
                     //time01 = Mathf.Lerp(timeStepStart, (float)simManager.simAgeTimeSteps, xCoord);
-                }
-                float yCoord = Mathf.Cos(time01 / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
+                }*/
+
+                float timeInput = Mathf.Lerp(uiManager.worldTreePanelUI.timelineStartTimeStep, simManager.simAgeTimeSteps, xCoord);
+                float yCoord = Mathf.Cos(timeInput / orbitalPeriod) * 0.05f * (float)lineID + 0.5f;
+                //float yCoord = Mathf.Cos(time01 / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
 
                 xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
                 yCoord = yCoord * 0.2f + 0.8f;
 
                 data.worldPos = new Vector3(xCoord, yCoord, 0f);
                 float lerp = Mathf.Clamp01(lineID * 0.11215f);
-                data.color = Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
 
+                data.color = Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
+                float frequencyMatch = (orbitalPeriod / timelineRange) * 16.28f;
+                if(frequencyMatch > 0.6f && frequencyMatch < 1.4f) {
+                    data.color *= 1.25f; 
+                }
+                else {
+                    data.color *= 0.8f;
+                }
+
+                if(Mathf.Abs(xCoord - cursorCoordsX) < 0.005f) {
+                    data.color = Color.white;
+                }
                 clockOrbitLineDataArray[index] = data;
             }
         }
@@ -1102,6 +1116,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                     if(xStart > xCoord || xEnd < xCoord) {
                         hue = Vector3.zero;
                     }
+                    else if(cand.candidateID == uiManager.focusedCandidate.candidateID) {
+                        hue = Vector3.one;
+                    }
                     if(!cand.isBeingEvaluated && cand.numCompletedEvaluations == 0) {
                         hue = Vector3.zero;
                     }   
@@ -1112,9 +1129,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                         hue *= 0.35f;                        
                     }
 
-                    if(cand.candidateID == uiManager.focusedCandidate.candidateID) {
-                        hue = Vector3.one;
-                    }
+                    
 
                     data.color = new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
                     xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust

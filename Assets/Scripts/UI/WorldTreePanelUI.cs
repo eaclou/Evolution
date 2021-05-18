@@ -72,7 +72,7 @@ public class WorldTreePanelUI : MonoBehaviour
                 isSelected = true;
                 icon.gameObject.transform.SetAsLastSibling();
             }
-            icon.UpdateIconDisplay(256, isSelected);
+            icon.UpdateIconDisplay(360, isSelected);
         }
 
         float targetStartTimeStep = 0f;
@@ -80,27 +80,38 @@ public class WorldTreePanelUI : MonoBehaviour
 
         }
         else {
+            if(simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].candidateGenomesList.Count > 0) {
+                targetStartTimeStep = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].candidateGenomesList[0].performanceData.timeStepHatched; //***EAC better less naive way to calculate this
             
-            targetStartTimeStep = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].candidateGenomesList[0].performanceData.timeStepHatched; //***EAC better less naive way to calculate this
+            }
             
         }
-        timelineStartTimeStep = Mathf.Lerp(timelineStartTimeStep, targetStartTimeStep, 0.25f);
+        timelineStartTimeStep = Mathf.Lerp(timelineStartTimeStep, targetStartTimeStep, 0.125f);
     }
     private void UpdateSpeciesIconsLineageMode() {        
         for (int s = 0; s < speciesIconsList.Count; s++) {            
-            float yCoord = (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);  
+            float yCoord = 1f - (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);  
             float xCoord = 1f;
             if (speciesIconsList[s].linkedPool.isExtinct) {
                 xCoord = (float)speciesIconsList[s].linkedPool.timeStepExtinct / Mathf.Max(1f, (float)simulationManager.simAgeTimeSteps);
             }
 
+            float indent = 0.05f;
             if(focusLevel == 0) {
 
             }
             else {
                 xCoord = 0f;
+                if(speciesIconsList[s].linkedPool.speciesID == uiManagerRef.selectedSpeciesID) {
+                    indent = 0.1f;
+                }
             }
-            speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, 1f - yCoord));
+
+            
+            
+            xCoord = xCoord * 0.8f + indent;
+            yCoord = yCoord * 0.67f + 0.1f;
+            speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
         }
     }
     private void UpdateSpeciesIconsGraphMode() {
@@ -136,6 +147,8 @@ public class WorldTreePanelUI : MonoBehaviour
             if(bestScore == 0f) {
                 bestScore = 1f;
             }
+            xCoord = xCoord * 0.8f + 0.1f;
+            //yCoord = yCoord * 0.67f + 0.1f;
             speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, Mathf.Clamp01(valStat / bestScore)));
             
         }
@@ -149,7 +162,9 @@ public class WorldTreePanelUI : MonoBehaviour
             else {
                 xCoord = 0f;
             }
-            float yCoord = (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);            
+            float yCoord = (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);      
+            xCoord = xCoord * 0.8f + 0.1f;
+            yCoord = yCoord * 0.67f + 0.1f;
             speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
         }
     }
@@ -189,6 +204,8 @@ public class WorldTreePanelUI : MonoBehaviour
             speciesIconsList.Add(iconScript);
 
             iconScript.Initialize(speciesIconsList.Count - 1, masterGenomePool.completeSpeciesPoolsList[pool.speciesID]);
+
+            
             
     }
     public void InitializeSpeciesIcons() {

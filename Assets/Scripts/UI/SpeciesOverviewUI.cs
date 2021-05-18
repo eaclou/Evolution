@@ -75,9 +75,9 @@ public class SpeciesOverviewUI : MonoBehaviour {
         SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
 
         Vector3 hueA = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-        imageLineageA.color = new Color(hueA.x, hueA.y, hueA.z);
+        imageLineageA.color = new Color(Mathf.Max(0.2f, hueA.x), Mathf.Max(0.2f, hueA.y), Mathf.Max(0.2f, hueA.z));
         Vector3 hueB = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
-        imageLineageB.color = new Color(hueB.x, hueB.y, hueB.z);
+        imageLineageB.color = new Color(Mathf.Max(0.2f, hueB.x), Mathf.Max(0.2f, hueB.y), Mathf.Max(0.2f, hueB.z));
 
         // Update Species Panel UI:
         textSpeciesLineage.gameObject.SetActive(true);
@@ -215,12 +215,12 @@ public class SpeciesOverviewUI : MonoBehaviour {
         }        
 
         GenomeButtonTooltipSource tooltip = buttonScript.GetComponent<GenomeButtonTooltipSource>();
-        tooltip.genomeViewerUIRef = uiManagerRef.genomeViewerUI;
-        tooltip.tooltipString = pool.speciesID.ToString() + "-" + iCand.candidateID.ToString() + statusStr;
+        //tooltip.genomeViewerUIRef = uiManagerRef.genomeViewerUI;
+        tooltip.tooltipString ="Creature #" + iCand.candidateID.ToString() + statusStr;
         //uiManagerRef.speciesOverviewUI.leaderboardGenomeButtonsList.Add(buttonScript);
     }
     private void RebuildGenomeButtonsCurrent(SpeciesGenomePool pool) {
-         Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;            
+        Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;            
         uiManagerRef.panelLeaderboardGenomes.GetComponent<Image>().color = new Color(hue.x, hue.y, hue.z);
         // Current Genepool:
         foreach (Transform child in uiManagerRef.panelLeaderboardGenomes.transform) {

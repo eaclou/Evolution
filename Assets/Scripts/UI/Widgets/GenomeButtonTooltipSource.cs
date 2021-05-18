@@ -6,15 +6,15 @@ public class GenomeButtonTooltipSource : MonoBehaviour {
 
     
     public string tooltipString;
-    public GenomeViewerUI genomeViewerUIRef;
+    //public GenomeViewerUI genomeViewerUIRef;
     public bool isSensorEnabled;
 
     public void OnHoverStart() {
-        genomeViewerUIRef.EnterTooltipObject(this);
+        UIManager.instance.genomeViewerUI.EnterTooltipObject(this);
         
     }
     public void OnHoverExit() {
-        genomeViewerUIRef.ExitTooltipObject();
+        UIManager.instance.genomeViewerUI.EnterTooltipObject(this);
     }
 	// Use this for initialization
 	void Start () {
