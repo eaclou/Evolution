@@ -991,24 +991,21 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 }
                 else {
                     SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[line];
-
                     WorldTreeLineData data = new WorldTreeLineData();
-
-                    float lineID = line + 0f;
-                    float orbitalPeriod = orbitalPeriodBase * Mathf.Exp(lineID);
 
                     if(uiManager.worldTreePanelUI.GetPanelMode() == 0) {
                         // LINEAGE:
                         float xCoord = (float)i / (float)worldTreeNumPointsPerLine;
                         float yCoord = 1f - ((float)pool.speciesID / (float)Mathf.Max(simManager.masterGenomePool.completeSpeciesPoolsList.Count - 1, 1)); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
-                        if(uiManager.worldTreePanelUI.GetFocusLevel() == 0) { // Top-Level View -- all species
+                        float zCoord = 0f;
+                        if (uiManager.worldTreePanelUI.GetFocusLevel() == 0) { // Top-Level View -- all species
                                 
                         }
                         else {
                             xCoord = 0f; //***EAC TEMPORARY!!!! should be animated or just hidden
                             yCoord = 0f;
                         }
-                        float lerp = Mathf.Clamp01(lineID * 0.11215f);
+                        
                         Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
 
                         int timeStepStart = Mathf.RoundToInt(uiManager.worldTreePanelUI.timelineStartTimeStep);
@@ -1024,6 +1021,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                         }
                         if(pool.speciesID == uiManager.selectedSpeciesID) {
                             hue = Vector3.one;
+                            zCoord = -0.1f;
                         }                        
                         data.color = new Color(hue.x, hue.y, hue.z); // Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
 
@@ -1032,7 +1030,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                         if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
                             data.color = Color.white;
                         }
-                        data.worldPos = new Vector3(xCoord, yCoord, 0f);
+                        data.worldPos = new Vector3(xCoord, yCoord, zCoord);
                     }
                     else {
                         int graphDataYearIndex = 0;
@@ -1046,10 +1044,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                             graphDataYearIndex = Mathf.FloorToInt((float)pool.avgCandidateDataYearList.Count * xCoord);
                             float val = (float)pool.avgCandidateDataYearList[graphDataYearIndex].performanceData.totalTicksAlive / uiManager.speciesGraphPanelUI.maxValuesStatArray[0];
                             float yCoord = val; // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
-
-                            xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
-                            yCoord = yCoord * 0.67f + 0.1f;
-
+                            float zCoord = 0f;
                             if(uiManager.worldTreePanelUI.GetFocusLevel() == 0) { // Top-Level View -- all species
                                 
                             }
@@ -1057,8 +1052,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                                 xCoord = 0f; //***EAC TEMPORARY!!!! should be animated or just hidden
                                 yCoord = 0f;
                             }
-                            data.worldPos = new Vector3(xCoord, yCoord, 0f);
-                            float lerp = Mathf.Clamp01(lineID * 0.11215f);
                             Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
                             int timeStepStart = Mathf.RoundToInt(uiManager.worldTreePanelUI.timelineStartTimeStep);
 
@@ -1068,12 +1061,21 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                                 xEnd01 = (float)(pool.timeStepExtinct - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
                             }
 
+                            if(pool.speciesID == uiManager.selectedSpeciesID) {
+                                hue = Vector3.one;
+                                zCoord = -0.1f;
+                            }
                             if(xStart01 > xCoord || xEnd01 < xCoord) {
                                 hue = Vector3.zero;
                             }
-                            if(pool.speciesID == uiManager.selectedSpeciesID) {
-                                hue = Vector3.one;
-                            }
+                            
+                            
+                            xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
+                            yCoord = yCoord * 0.67f + 0.1f;
+
+                            data.worldPos = new Vector3(xCoord, yCoord, zCoord);
+                            
+                            
                             data.color = new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
 
                             if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {

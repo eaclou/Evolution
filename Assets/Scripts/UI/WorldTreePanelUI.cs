@@ -147,9 +147,10 @@ public class WorldTreePanelUI : MonoBehaviour
             if(bestScore == 0f) {
                 bestScore = 1f;
             }
+            float yCoord = Mathf.Clamp01(valStat / bestScore);
             xCoord = xCoord * 0.8f + 0.1f;
-            //yCoord = yCoord * 0.67f + 0.1f;
-            speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, Mathf.Clamp01(valStat / bestScore)));
+            yCoord = yCoord * 0.67f + 0.1f;
+            speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
             
         }
     }
@@ -204,9 +205,7 @@ public class WorldTreePanelUI : MonoBehaviour
             speciesIconsList.Add(iconScript);
 
             iconScript.Initialize(speciesIconsList.Count - 1, masterGenomePool.completeSpeciesPoolsList[pool.speciesID]);
-
-            
-            
+ 
     }
     public void InitializeSpeciesIcons() {
         Debug.Log("InitializeSpeciesListBarsInitializeSpeciesListBarsInitializeSpeciesListBars");

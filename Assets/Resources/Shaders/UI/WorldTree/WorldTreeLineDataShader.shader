@@ -10,10 +10,10 @@
 	{
 		//Tags { "RenderType"="Opaque" }
 		//LOD 100
-		Tags{ "RenderType" = "Transparent" }
-		//ZWrite Off
+		Tags{ "RenderType" = "Opaque" }
+		ZWrite On
 		//Cull Off
-		Blend SrcAlpha OneMinusSrcAlpha
+		//Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{
