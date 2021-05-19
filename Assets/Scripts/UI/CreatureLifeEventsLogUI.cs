@@ -4,9 +4,17 @@ using UnityEngine.UI;
 public class CreatureLifeEventsLogUI : MonoBehaviour
 {
     public Text textEventsLog;
-
+    
+    // WPP: exposed magic values
+    [SerializeField] Color goodColor;
+    [SerializeField] Color dimGoodColor;
+    [SerializeField] Color badColor;
+    [SerializeField] Color dimBadColor;
+    [SerializeField] [Range(0f, 1f)] float dimThreshold = 0.5f;
+    [SerializeField] [Range(0f, 1f)] float goodThreshold = 0.5f;
+    
+    // * WPP: use getter for AgentData plus RepeatWhileEnabled to remove UIManager dependency
     public void Tick(CandidateAgentData agentData) {
-
         if (agentData.candidateEventDataList == null)
             return;
                          
@@ -15,34 +23,27 @@ public class CreatureLifeEventsLogUI : MonoBehaviour
         int startIndex = Mathf.Max(0, agentData.candidateEventDataList.Count - maxEventsToDisplay);                   
         string eventString = "";
         for(int q = agentData.candidateEventDataList.Count - 1; q >= startIndex; q--) {
-            eventString += "\n[" + agentData.candidateEventDataList[q].eventFrame.ToString() + "] " + agentData.candidateEventDataList[q].eventText;
+            eventString += "\n[" + agentData.candidateEventDataList[q].eventFrame + "] " + agentData.candidateEventDataList[q].eventText;
         }                
 
-        string eventsLog = "Event Log! Candidate#[" + agentData.candidateID.ToString() + "]";                    
+        string eventsLog = "Event Log! Candidate#[" + agentData.candidateID + "]";                    
         // Agent Event Log:
         int maxEventsToDisplayLog = 12;
         //int numEventsLog = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplayLog);
         int startIndexLog = Mathf.Max(0, agentData.candidateEventDataList.Count - maxEventsToDisplayLog);                   
         string eventLogString = "";
+        
         for(int q = agentData.candidateEventDataList.Count - 1; q >= startIndexLog; q--) {
-            float dimAmount = Mathf.Clamp01((float)(agentData.candidateEventDataList.Count - q - 1) * 0.55f);
+            float dimAmount = Mathf.Clamp01((agentData.candidateEventDataList.Count - q - 1) * 0.55f);
             //Color displayColor = Color.Lerp(Color.red, Color.green, agent.agentEventDataList[q].goodness);
-            string goodColorStr = "#00FF00FF";
-            if(dimAmount > 0.5f) {
-                goodColorStr = "#007700FF";
-            }
-            string badColorStr = "#FF0000FF";
-            if(dimAmount > 0.5f) {
-                badColorStr = "#770000FF";
-            }
-            if(agentData.candidateEventDataList[q].goodness > 0.5f) {
-                eventLogString += "<color=" + goodColorStr + ">";
-            }
-            else {
-                eventLogString += "<color=" + badColorStr + ">";
-            }
-                            
-            eventLogString += "\n[" + agentData.candidateEventDataList[q].eventFrame.ToString() + "] " + agentData.candidateEventDataList[q].eventText;
+            
+            // WPP 5/18/21: condense with ternary expressions and temp bool
+            // + delegated logic to EventColorString method
+            bool isDim = dimAmount > dimThreshold;
+            bool isGood = agentData.candidateEventDataList[q].goodness > goodThreshold;
+            eventLogString += EventColorString(isDim, isGood);
+            
+            eventLogString += "\n[" + agentData.candidateEventDataList[q].eventFrame + "] " + agentData.candidateEventDataList[q].eventText;
             eventLogString += "</color>";
         }
         
@@ -50,4 +51,26 @@ public class CreatureLifeEventsLogUI : MonoBehaviour
         textEventsLog.text = eventsLog;       
     }
     
+    string EventColorString(bool isDim, bool isGood)
+    {
+        string goodColorStr = isDim ? ColorString(dimGoodColor) : ColorString(goodColor);
+        //if(dimAmount > 0.5f) {
+        //    goodColorStr = "#007700FF";
+        //}
+        string badColorStr = isDim ? ColorString(dimBadColor) : ColorString(badColor);
+        //if(dimAmount > 0.5f) {
+        //    badColorStr = "#770000FF";
+        //}
+            
+        return isGood ? goodColorStr : badColorStr;
+        //eventLogString += "<color=" + colorString + ">";
+        //if(agentData.candidateEventDataList[q].goodness > 0.5f) {
+        //    eventLogString += "<color=" + goodColorStr + ">";
+        //}
+        //else {
+        //    eventLogString += "<color=" + badColorStr + ">";
+        //}
+    }
+    
+    string ColorString(Color color) { return "<color=#" + ColorUtility.ToHtmlStringRGBA(color) + ">"; }
 }
