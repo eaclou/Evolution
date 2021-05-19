@@ -2,14 +2,15 @@
 using UnityEngine.UI;
 
 public class GlobalResourcesUI : MonoBehaviour {
-    SimulationManager simulationManager => SimulationManager.instance;
-    SimResourceManager resourcesRef => simulationManager.simResourceManager;
-    
+    SimulationManager simulation => SimulationManager.instance;
+    SimResourceManager resourcesRef => simulation.simResourceManager;
+    bool initialized => simulation != null && simulation.simResourceManager != null;
+
     public bool isUnlocked;
     public bool isOpen;
     public Text textGlobalMass;
 
-    public GameObject panelGlobalResourcesMain;
+    public GameObject panel;
       
     public Text textMeterOxygen;
     public Text textMeterNutrients;
@@ -19,24 +20,14 @@ public class GlobalResourcesUI : MonoBehaviour {
     public Text textMeterPlants;
     public Text textMeterZooplankton;
     public Text textMeterAnimals;
-    
-    // WPP: moved to Lookup
-    /*public Material knowledgeGraphOxygenMat;
-    public Material knowledgeGraphNutrientsMat;
-    public Material knowledgeGraphDetritusMat;
-    public Material knowledgeGraphDecomposersMat;
-    public Material knowledgeGraphAlgaeMat;
-    public Material knowledgeGraphPlantsMat;
-    public Material knowledgeGraphZooplanktonMat;
-    public Material knowledgeGraphVertebratesMat;*/
-        
-    
+
+
     public void ClickToolButton() {
-        Debug.Log("Click globalResourcesUI toggle button)");
-        isOpen = !isOpen;
+        isOpen = !isOpen && isUnlocked;
+        Refresh();
     }
 
-    private void UpdateUI() {        
+    private void SetResourceText() {
         textGlobalMass.text = "Global Biomass: " + resourcesRef.curTotalMass.ToString("F0");
         //textMeterOxygen.text = resourcesRef.curGlobalOxygen.ToString("F0");
         textMeterNutrients.text = resourcesRef.curGlobalNutrients.ToString("F0");
@@ -48,9 +39,9 @@ public class GlobalResourcesUI : MonoBehaviour {
         textMeterAnimals.text = resourcesRef.curGlobalAgentBiomass.ToString("F2");
     }
 
-    public void UpdateGlobalResourcesPanelUpdate() {
-        isOpen = true;
-        panelGlobalResourcesMain.SetActive(isOpen);
-        UpdateUI();
+    public void Refresh() {
+        if (!initialized) return;
+        panel.SetActive(isOpen);
+        SetResourceText();
     }   
 }

@@ -310,7 +310,7 @@ public class UIManager : Singleton<UIManager> {
         // ^^^  Need to Clean this up and replace with better approach ***********************        
         theCursorCzar.UpdateCursorCzar();  // this will assume a larger role
         brushesUI.UpdateBrushesUI();        
-        globalResourcesUI.UpdateGlobalResourcesPanelUpdate();
+        //globalResourcesUI.UpdateGlobalResourcesPanelUpdate();
  
         clockPanelUI.Tick(); // //UpdateClockPanelUI();
 
