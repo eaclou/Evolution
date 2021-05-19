@@ -2,13 +2,15 @@
 
 public class FoodEatenPanel : MonoBehaviour
 {
+    PerformanceData data => UIManager.instance.focusedCandidate.performanceData;
+    
     [SerializeField] StatUI plants;
     [SerializeField] StatUI microbes;
     [SerializeField] StatUI animals;
     [SerializeField] StatUI eggs;
     [SerializeField] StatUI corpse;
 
-    public void Refresh(PerformanceData data)
+    public void Refresh()
     {
         plants.RefreshDisplay(data.totalFoodEatenPlant, data.plantEatenPercent, true);
         microbes.RefreshDisplay(data.totalFoodEatenZoop, data.zooplanktonEatenPercent, true);

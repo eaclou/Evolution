@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 public class SensorsPanel : MonoBehaviour
 {
+    AgentGenome genome => UIManager.instance.focusedCandidate.candidateGenome;
+    
     [SerializeField] Image internals;
     [SerializeField] Image contact;
     
@@ -25,9 +27,9 @@ public class SensorsPanel : MonoBehaviour
     CritterModuleEnvironmentSensorsGenome environment;
     CritterModuleCommunicationGenome communication;
 
-    public void Refresh(AgentGenome genome) {
+    public void Refresh() {
         if (genome.bodyGenome.foodGenome == null) return;
-                
+        
         body = genome.bodyGenome;
         food = body.foodGenome;
         friend = body.friendGenome;

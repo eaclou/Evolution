@@ -196,7 +196,7 @@ public class UIManager : Singleton<UIManager> {
                              
         trophicLayersManager.kingdomAnimals.trophicTiersList[1].unlocked = true;
         trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.On;                
-        Debug.Log("CREATURE A UNLOCKED!!! " + unlockCooldownCounter.ToString());
+        Debug.Log("CREATURE A UNLOCKED!!! " + unlockCooldownCounter);
                 
         unlockedAnnouncementSlotRef = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0];                
         worldSpiritHubUI.ClickWorldCreateNewSpecies(trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0]);
@@ -214,7 +214,7 @@ public class UIManager : Singleton<UIManager> {
                 
         TrophicSlot pebblesSlot = trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[2];
         pebblesSlot.status = TrophicSlot.SlotStatus.On;
-        Debug.Log("PEBBLES SPIRIT UNLOCKED!!! " + unlockCooldownCounter.ToString());
+        Debug.Log("PEBBLES SPIRIT UNLOCKED!!! " + unlockCooldownCounter);
                 
         unlockedAnnouncementSlotRef = pebblesSlot;
             
@@ -226,7 +226,7 @@ public class UIManager : Singleton<UIManager> {
 
         TrophicSlot airSlot = trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[2];
         airSlot.status = TrophicSlot.SlotStatus.On;
-        Debug.Log("AIR SPIRIT UNLOCKED!!! " + unlockCooldownCounter.ToString());
+        Debug.Log("AIR SPIRIT UNLOCKED!!! " + unlockCooldownCounter);
         //AnnounceUnlockAir();
         isUnlockCooldown = true;
         unlockedAnnouncementSlotRef = airSlot;
@@ -316,7 +316,7 @@ public class UIManager : Singleton<UIManager> {
 
         SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID]; // ***EC Move into genomeViewerUI.Tick()
         if(focusedCandidate != null && focusedCandidate.candidateGenome != null) {
-            genomeViewerUI.UpdateUI(pool, focusedCandidate);
+            genomeViewerUI.UpdateUI();
             creatureBrainActivityUI.Tick();
             creaturePaperDollUI.Tick();
             creatureLifeEventsLogUI.Tick(focusedCandidate);
@@ -341,7 +341,7 @@ public class UIManager : Singleton<UIManager> {
         pool = speciesPools[selectedSpeciesID];
         
         if(focusedCandidate != null && focusedCandidate.candidateGenome != null) {
-            genomeViewerUI.UpdateUI(pool, focusedCandidate);
+            genomeViewerUI.UpdateUI();
 
             if(isRebuildTimeStep) {
                 speciesOverviewUI.RebuildGenomeButtons();  

@@ -7,26 +7,16 @@ public class GenomeViewerUI : MonoBehaviour {
     UIManager uiManager => UIManager.instance;
 
     public SpeciesOverviewUI speciesOverviewUI;
-    
-    public CreaturePortraitPanel portrait;
-    public GenomeOverviewPanel genomeOverview;
-
     public GameObject panelGenomeSensors;
     
     [SerializeField] Tab genomeTab;
     [SerializeField] Tab historyTab;
     [SerializeField] Tab performanceTab;
-    
-    [SerializeField] SensorsPanel sensorsPanel; 
-    [SerializeField] DigestionPanel digestionPanel;
-    [SerializeField] BehaviorPanel behaviorPanel; 
 
     public GameObject panelGenomeAbilities;
-    public SpecializationPanel specializationPanel;
     public GameObject panelPerformanceBehavior;
     public GameObject panelEaten;
     
-    [SerializeField] FoodEatenPanel foodEatenPanel;
     
     public bool isGenomeTabActive = true;
     public bool isPerformanceTabActive = false;
@@ -40,43 +30,20 @@ public class GenomeViewerUI : MonoBehaviour {
     void Start () {
 		isTooltipHover = false;
 	}
-	
-    AgentGenome genome;
-    BodyGenome body;
-    PerformanceData performance;
-    CritterModuleCoreGenome core;
-	
-    public void UpdateUI(SpeciesGenomePool pool, CandidateAgentData candidate) {
-        if (candidate == null || candidate.candidateGenome == null)
-            return;
-            
-        performance = candidate.performanceData;
-        genome = candidate.candidateGenome;
-        body = genome.bodyGenome;
-        core = body.coreGenome;
-            
-        portrait.SetTitleText(candidate);
-
-        panelPerformanceBehavior.SetActive(true);
-        panelEaten.SetActive(true);
-
+    
+    public void UpdateUI() {
         // * WPP: only usage, may as well set in editor
         // relates to future use items
         panelGenomeAbilities.SetActive(false);
         panelGenomeSensors.SetActive(true);
+        panelPerformanceBehavior.SetActive(true);
+        panelEaten.SetActive(true);
 
         // * WPP delegate to components (organize scattered references first)
         genomeTab.SetActive(isGenomeTabActive);
         performanceTab.SetActive(isPerformanceTabActive);
         historyTab.SetActive(isHistoryTabActive);
         imageDeadDim.SetActive(simulationManager.targetAgentIsDead);
-        
-        genomeOverview.Refresh(candidate);
-        digestionPanel.Refresh(core);
-        specializationPanel.Refresh(core);
-        behaviorPanel.Refresh(performance);
-        foodEatenPanel.Refresh(performance);        
-        sensorsPanel.Refresh(genome);     
     }
     
     #region Button Clicks

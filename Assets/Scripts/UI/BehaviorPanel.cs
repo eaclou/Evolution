@@ -2,13 +2,15 @@
 
 public class BehaviorPanel : MonoBehaviour
 {
+    PerformanceData data => UIManager.instance.focusedCandidate.performanceData;
+    
     [SerializeField] StatUI attack;
     [SerializeField] StatUI defend;
     [SerializeField] StatUI dash;
     [SerializeField] StatUI rest;
     [SerializeField] StatUI feed;
 
-    public void Refresh(PerformanceData data)
+    public void Refresh()
     {
         attack.RefreshDisplay(data.totalTimesAttacked, data.attackActionPercent);
         defend.RefreshDisplay(data.totalTimesDefended, data.defendActionPercent);

@@ -3,6 +3,8 @@ using UnityEngine.UI;
 
 public class CreaturePortraitPanel : MonoBehaviour
 {
+    CandidateAgentData candidate => UIManager.instance.focusedCandidate;
+    
     [SerializeField] Text candidateName;
     [SerializeField] Image background;
     
@@ -12,7 +14,7 @@ public class CreaturePortraitPanel : MonoBehaviour
     string title;
     Vector3 hue;
 
-    public void SetTitleText(CandidateAgentData candidate)
+    public void SetTitleText()
     {
         title = "<size=18>Critter</size> " + candidate.candidateID + "<size=18>";
         

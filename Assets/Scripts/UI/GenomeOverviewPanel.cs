@@ -4,6 +4,7 @@ using UnityEngine.UI;
 public class GenomeOverviewPanel : MonoBehaviour
 {
     SimulationManager simulation => SimulationManager.instance;
+    CandidateAgentData agent => UIManager.instance.focusedCandidate;
 
     // WPP: use descriptive names instead of A,B,C
     public Text bodySize;
@@ -14,7 +15,7 @@ public class GenomeOverviewPanel : MonoBehaviour
     BrainGenome brain;
     CritterModuleCoreGenome core;
 
-    public void Refresh(CandidateAgentData agent)
+    public void Refresh()
     {
         genome = agent.candidateGenome;
         brain = genome.brainGenome;
