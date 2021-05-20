@@ -9,8 +9,12 @@ public class WorldTreePanelUI : MonoBehaviour
     //public Text textSelectedSpeciesTitle;
     public Image imageSelectedSpeciesBG;
     public Text textSpeciationTree;    
-    public Text textStatsBody;
+    //public Text textStatsBody;
     public Text textTitle;
+    public Image imageClockPlanet;
+
+    [SerializeField]
+    Material clockPlanetMatA;
 
     public GameObject anchorGO;
     public GameObject prefabSpeciesIcon;
@@ -19,6 +23,7 @@ public class WorldTreePanelUI : MonoBehaviour
     private List<SpeciesIconUI> speciesIconsList;  // keeping track of spawned buttons
     private List<CreatureIconUI> creatureIconsList;
 
+    TheCursorCzar theCursorCzar => TheCursorCzar.instance;
     SimulationManager simulationManager => SimulationManager.instance;
     MasterGenomePool masterGenomePool => simulationManager.masterGenomePool;
     UIManager uiManagerRef => UIManager.instance;
@@ -32,12 +37,16 @@ public class WorldTreePanelUI : MonoBehaviour
         return curPanelMode;
     }
 
+    private float marginLeft = 0.1f;
+    private float marginRight = 0.1f;
+    private float marginBottom = 0.1f;
+    private float graphHeight = 0.3f;
+    private float orbitsHeight = 0.2f;
 
     public void Awake() {
         speciesIconsList = new List<SpeciesIconUI>();
     }
     
-
     public void Set(bool value) {
         panelSpeciesTree.SetActive(value);        
     }
@@ -63,7 +72,20 @@ public class WorldTreePanelUI : MonoBehaviour
     public void UpdateUI() { //***EAC UpdateUI() AND RefreshUI() ?????? 
         textTitle.text = "mode: " + curPanelMode + ", focus: " + focusLevel + ", " + timelineStartTimeStep.ToString("F0");
         //*** update positions of buttons, etc.
+        //**** TEMP!!! TESTING!!!
+
+        float cursorCoordsX = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().x) / 360f);
+        float cursorCoordsY = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().y - 720f) / 360f);                
+        //**** !!!!!!
+        if(imageClockPlanet) {
+            imageClockPlanet.rectTransform.localPosition = new Vector3(Mathf.Min(360f, theCursorCzar.GetCursorPixelCoords().x), 330f, 0f);
+            float curFrame = ((simulationManager.simAgeTimeSteps * cursorCoordsX) / 2048f * 16f);
+            clockPlanetMatA.SetFloat("_CurFrame", curFrame);
+            clockPlanetMatA.SetFloat("_NumRows", 4f);
+            clockPlanetMatA.SetFloat("_NumColumns", 4f);
+        }
         
+
         for(int i = 0; i < speciesIconsList.Count; i++) {
             SpeciesIconUI icon = speciesIconsList[i];
             
@@ -212,7 +234,13 @@ public class WorldTreePanelUI : MonoBehaviour
         int numSpecies = masterGenomePool.completeSpeciesPoolsList.Count;
 
         foreach (Transform child in anchorGO.transform) { // clear all GO's
-            Destroy(child.gameObject);
+            if(child.GetComponent<SpeciesIconUI>()) {
+                Destroy(child.gameObject);
+            }
+            else {
+
+            }
+            
         }
 
         for (int s = 0; s < numSpecies; s++) {
