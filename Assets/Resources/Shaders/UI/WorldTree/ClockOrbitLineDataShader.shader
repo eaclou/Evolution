@@ -11,9 +11,9 @@
 		//Tags { "RenderType"="Opaque" }
 		//LOD 100
 		Tags{ "RenderType" = "Transparent" }
-		//ZWrite Off
-		//Cull Off
-		Blend SrcAlpha OneMinusSrcAlpha
+		ZWrite Off
+		Cull Off
+		Blend SrcAlpha One //  OneMinusSrcAlpha
 
 		Pass
 		{
@@ -54,14 +54,31 @@
 			uniform float _MouseCoordY;
 			uniform float _MouseOn;
 
+			uniform float _CurFrame;
+			uniform float _NumRows;
+			uniform float _NumColumns;
+
 
 			v2f vert (uint id : SV_VertexID, uint inst : SV_InstanceID)
 			{
 				v2f o;
 
 				float3 quadData = quadVerticesCBuffer[id];
-				o.uv = quadData.xy + 0.5;
+				//o.uv = quadData.xy + 0.5;
+
+				float rows = _NumRows;
+				float cols = _NumColumns;
+				float frame = floor(inst) % (rows * cols);
 				
+				float2 newUV = quadData.xy + 0.5;
+				newUV.x = newUV.x / cols;
+				newUV.y = newUV.y / rows;				
+				float column = (float)(frame % cols);
+				float row = (float)floor((frame) / cols);
+				newUV.x += column * (1.0 / cols);
+				newUV.y += row * (1.0 / rows);
+				
+				o.uv = newUV;
 				
 				/*
 				// calculate positions in computeShader?				
@@ -89,7 +106,7 @@
 				float3 worldPosition = float3(vertexCoord, 0) * _IsOn;								
 				*/
 				ClockOrbitLineData data = clockOrbitLineDataCBuffer[inst];
-				float3 worldPosition = data.worldPos + quadData * 0.01;
+				float3 worldPosition = data.worldPos + quadData * 0.05;
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.color = data.color; // tex2Dlod(_KeyTex, float4(0,((float)_SelectedWorldStatsID + 0.5) / 32.0,0,0));
@@ -102,7 +119,9 @@
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				return i.color;
+				float4 col = tex2D(_BrushTex, i.uv);
+				col.a = 1;
+				return col * i.color;
 
 				//old:
 				//float fade = (1.0 - i.uv.x);

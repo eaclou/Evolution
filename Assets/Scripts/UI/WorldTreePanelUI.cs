@@ -79,6 +79,7 @@ public class WorldTreePanelUI : MonoBehaviour
         //**** !!!!!!
         if(imageClockPlanet) {
             imageClockPlanet.rectTransform.localPosition = new Vector3(Mathf.Min(360f, theCursorCzar.GetCursorPixelCoords().x), 330f, 0f);
+            imageClockPlanet.rectTransform.localEulerAngles = new Vector3(0f, 0f, simulationManager.simAgeTimeSteps * 0.043f);
             float curFrame = ((simulationManager.simAgeTimeSteps * cursorCoordsX) / 2048f * 16f);
             clockPlanetMatA.SetFloat("_CurFrame", curFrame);
             clockPlanetMatA.SetFloat("_NumRows", 4f);

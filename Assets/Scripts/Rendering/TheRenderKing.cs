@@ -271,8 +271,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private int worldTreeNumCreatureLines = 16;
     private int worldTreeBufferCount => worldTreeNumPointsPerLine * (worldTreeNumSpeciesLines * worldTreeNumCreatureLines);
     public ComputeBuffer clockOrbitLineDataCBuffer;
-    private int clockOrbitNumPointsPerLine = 64;
-    private int numClockOrbitLines = 6;
+    private int clockOrbitNumPointsPerLine = 16;
+    private int numClockOrbitLines = 2;
     private int clockOrbitBufferCount => numClockOrbitLines * clockOrbitNumPointsPerLine;
 
     public struct TreeOfLifeEventLineData { //***EAC deprecate!
@@ -938,7 +938,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 float lineID = line + 1.5f;
                 float orbitalPeriod = orbitalPeriodBase * Mathf.Exp(lineID);
 
-                float xCoord = (float)(i % worldTreeNumPointsPerLine) / (float)worldTreeNumPointsPerLine;
+                float xCoord = (float)(i % clockOrbitNumPointsPerLine) / (float)clockOrbitNumPointsPerLine;
                 //float timeStepStart = 0f;
                 float timelineRange = Mathf.Max(1f, simManager.simAgeTimeSteps - uiManager.worldTreePanelUI.timelineStartTimeStep);
                 /*
@@ -951,7 +951,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 }*/
 
                 float timeInput = Mathf.Lerp(uiManager.worldTreePanelUI.timelineStartTimeStep, simManager.simAgeTimeSteps, xCoord);
-                float yCoord = Mathf.Cos(timeInput / orbitalPeriod) * 0.05f * (float)lineID + 0.5f;
+                float yCoord = Mathf.Cos(timeInput / orbitalPeriod) * 0.15f * (float)lineID + 0.5f;
                 //float yCoord = Mathf.Cos(time01 / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
 
                 xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
@@ -3206,6 +3206,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         clockOrbitLineDataMat.SetPass(0);
         clockOrbitLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         clockOrbitLineDataMat.SetBuffer("clockOrbitLineDataCBuffer", clockOrbitLineDataCBuffer);
+        float curFrame = (simManager.simAgeTimeSteps);
+        clockOrbitLineDataMat.SetFloat("_CurFrame", curFrame);
+        clockOrbitLineDataMat.SetFloat("_NumRows", 4f);
+        clockOrbitLineDataMat.SetFloat("_NumColumns", 4f);
         cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, clockOrbitLineDataMat, 0, MeshTopology.Triangles, 6, clockOrbitLineDataCBuffer.count);
 
         Graphics.ExecuteCommandBuffer(cmdBufferWorldTree);
