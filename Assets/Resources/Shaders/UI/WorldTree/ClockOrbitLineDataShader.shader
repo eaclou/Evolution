@@ -13,7 +13,7 @@
 		Tags{ "RenderType" = "Transparent" }
 		ZWrite Off
 		Cull Off
-		Blend SrcAlpha One //  OneMinusSrcAlpha
+		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{
@@ -120,8 +120,8 @@
 			fixed4 frag (v2f i) : SV_Target
 			{
 				float4 col = tex2D(_BrushTex, i.uv);
-				col.a = 1;
-				return col * i.color;
+				
+				return col;// * i.color;
 
 				//old:
 				//float fade = (1.0 - i.uv.x);

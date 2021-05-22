@@ -272,7 +272,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private int worldTreeBufferCount => worldTreeNumPointsPerLine * (worldTreeNumSpeciesLines * worldTreeNumCreatureLines);
     public ComputeBuffer clockOrbitLineDataCBuffer;
     private int clockOrbitNumPointsPerLine = 16;
-    private int numClockOrbitLines = 2;
+    private int numClockOrbitLines = 1;
+    private int maxNumClockEarthStamps = 1024;    
     private int clockOrbitBufferCount => numClockOrbitLines * clockOrbitNumPointsPerLine;
 
     public struct TreeOfLifeEventLineData { //***EAC deprecate!
@@ -494,6 +495,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         InitializeSpiritBrushQuadBuffer();
 
         InitializeWorldTreeBuffers();
+        uiManager.clockPanelUI.InitializeClockBuffers();
 
         // INIT:: ugly :(
         if (toolbarPortraitCritterInitDataCBuffer != null) {
@@ -2303,6 +2305,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
     }
     private void SimWorldTreeCPU() { //***EAC destined to be replaced by GPU ^ ^ ^
+        uiManager.clockPanelUI.UpdateEarthStampData();
+        uiManager.clockPanelUI.UpdateMoonStampData();
+        uiManager.clockPanelUI.UpdateSunStampData();
         InitializeWorldTreeBuffers();
         /*
         WorldTreeLineData[] dataArray = new WorldTreeLineData[numDataPoints]; 
@@ -3202,16 +3207,53 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         worldTreeLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         worldTreeLineDataMat.SetBuffer("worldTreeLineDataCBuffer", worldTreeLineDataCBuffer);
         cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, worldTreeLineDataMat, 0, MeshTopology.Triangles, 6, worldTreeLineDataCBuffer.count);
-
+        /*
         clockOrbitLineDataMat.SetPass(0);
         clockOrbitLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        clockOrbitLineDataMat.SetBuffer("clockOrbitLineDataCBuffer", clockOrbitLineDataCBuffer);
+        clockOrbitLineDataMat.SetBuffer("clockOrbitLineDataCBuffer", uiManager.clockPanelUI.clockEarthStampDataCBuffer);
         float curFrame = (simManager.simAgeTimeSteps);
         clockOrbitLineDataMat.SetFloat("_CurFrame", curFrame);
         clockOrbitLineDataMat.SetFloat("_NumRows", 4f);
         clockOrbitLineDataMat.SetFloat("_NumColumns", 4f);
-        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, clockOrbitLineDataMat, 0, MeshTopology.Triangles, 6, clockOrbitLineDataCBuffer.count);
+        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, clockOrbitLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.clockPanelUI.clockEarthStampDataCBuffer.count);
+        */
+        float curFrame = (simManager.simAgeTimeSteps);
 
+        uiManager.clockPanelUI.clockEarthStampMat.SetPass(0);
+        uiManager.clockPanelUI.clockEarthStampMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        uiManager.clockPanelUI.clockEarthStampMat.SetBuffer("clockOrbitLineDataCBuffer", uiManager.clockPanelUI.clockEarthStampDataCBuffer);        
+        uiManager.clockPanelUI.clockEarthStampMat.SetFloat("_CurFrame", curFrame);
+        uiManager.clockPanelUI.clockEarthStampMat.SetFloat("_NumRows", 4f);
+        uiManager.clockPanelUI.clockEarthStampMat.SetFloat("_NumColumns", 4f);
+        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, uiManager.clockPanelUI.clockEarthStampMat, 0, MeshTopology.Triangles, 6, uiManager.clockPanelUI.clockEarthStampDataCBuffer.count);
+
+        uiManager.clockPanelUI.clockMoonStampMat.SetPass(0);
+        uiManager.clockPanelUI.clockMoonStampMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        uiManager.clockPanelUI.clockMoonStampMat.SetBuffer("clockOrbitLineDataCBuffer", uiManager.clockPanelUI.clockMoonStampDataCBuffer);        
+        uiManager.clockPanelUI.clockMoonStampMat.SetFloat("_CurFrame", curFrame);
+        uiManager.clockPanelUI.clockMoonStampMat.SetFloat("_NumRows", 4f);
+        uiManager.clockPanelUI.clockMoonStampMat.SetFloat("_NumColumns", 4f);
+        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, uiManager.clockPanelUI.clockMoonStampMat, 0, MeshTopology.Triangles, 6, uiManager.clockPanelUI.clockMoonStampDataCBuffer.count);
+
+        uiManager.clockPanelUI.clockSunStampMat.SetPass(0);
+        uiManager.clockPanelUI.clockSunStampMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        uiManager.clockPanelUI.clockSunStampMat.SetBuffer("clockOrbitLineDataCBuffer", uiManager.clockPanelUI.clockSunStampDataCBuffer);        
+        uiManager.clockPanelUI.clockSunStampMat.SetFloat("_CurFrame", curFrame);
+        uiManager.clockPanelUI.clockSunStampMat.SetFloat("_NumRows", 4f);
+        uiManager.clockPanelUI.clockSunStampMat.SetFloat("_NumColumns", 4f);
+        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, uiManager.clockPanelUI.clockSunStampMat, 0, MeshTopology.Triangles, 6, uiManager.clockPanelUI.clockSunStampDataCBuffer.count);
+
+        /*
+        clockOrbitLineDataMat.SetPass(0);
+        clockOrbitLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        clockOrbitLineDataMat.SetBuffer("clockOrbitLineDataCBuffer", uiManager.clockPanelUI.clockMoonStampDataCBuffer);
+        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, clockOrbitLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.clockPanelUI.clockMoonStampDataCBuffer.count);
+
+        clockOrbitLineDataMat.SetPass(0);
+        clockOrbitLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        clockOrbitLineDataMat.SetBuffer("clockOrbitLineDataCBuffer", uiManager.clockPanelUI.clockSunStampDataCBuffer);
+        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, clockOrbitLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.clockPanelUI.clockSunStampDataCBuffer.count);
+        */
         Graphics.ExecuteCommandBuffer(cmdBufferWorldTree);
         worldTreeRenderCamera.Render();
         
