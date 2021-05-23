@@ -115,6 +115,8 @@ public class UIManager : Singleton<UIManager> {
         var candidate = simulationManager.masterGenomePool.completeSpeciesPoolsList[curSpeciesID].representativeCandidate;
         SetFocusedCandidateGenome(candidate);
     }
+    
+    public void ResetCurrentFocusedCandidateGenome() { SetFocusedCandidateGenome(focusedCandidate); }
 
     public void SetFocusedCandidateGenome(CandidateAgentData candidate) {
         focusedCandidate = candidate;
@@ -128,6 +130,7 @@ public class UIManager : Singleton<UIManager> {
         SetSelectedSpeciesUI(focusedCandidate.speciesID);
     }
     
+    public bool IsFocus(CandidateAgentData candidate) { return candidate.candidateID == focusedCandidate.candidateID; }
     
     public void SetSelectedSpeciesUI(int id) {
         //SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[id];

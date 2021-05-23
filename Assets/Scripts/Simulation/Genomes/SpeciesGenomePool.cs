@@ -52,11 +52,12 @@ public class SpeciesGenomePool {
     public CandidateAgentData avgCandidateData;
 
     //public float avgLifespan = 0f;
-    
-
     public bool isFlaggedForExtinction = false;
     public bool isExtinct = false;
-	
+    
+    public CritterModuleAppearanceGenome appearanceGenome => 
+        foundingCandidate.candidateGenome.bodyGenome.appearanceGenome;
+
     public SpeciesGenomePool(int ID, int parentID, int year, int timeStep, MutationSettings settings) {
         yearCreated = year;
         speciesID = ID;
@@ -76,7 +77,6 @@ public class SpeciesGenomePool {
 
         avgCandidateDataYearList = new List<CandidateAgentData>(); 
         CreateNewAverageCandidate(); // avgCandidateData = new CandidateAgentData();
-        
     }
     
     public void FirstTimeInitialize(CandidateAgentData foundingGenome, int depth) {

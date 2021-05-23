@@ -92,6 +92,32 @@ public class SimulationManager : Singleton<SimulationManager>
     private int numStepsInSimYear = 2048;
     private int simAgeYearCounter = 0;
     public int curSimYear = 0;
+    
+    public SpeciesGenomePool GetSelectedGenomePool()
+    {
+        return GetGenomePoolBySpeciesID(uiManager.selectedSpeciesID);
+    }
+    
+    public SpeciesGenomePool GetGenomePoolBySpeciesID(int id)
+    {
+        return masterGenomePool.completeSpeciesPoolsList[id];
+    }
+    
+    public Agent GetAgent(CandidateAgentData candidate) { return GetAgent(candidate.candidateID); }
+    
+    public Agent GetAgent(int candidateID)
+    {
+        foreach (var agent in agentsArray)
+        {
+            if(agent.candidateRef == null)
+                continue;
+
+            if(candidateID == agent.candidateRef.candidateID)
+                return agent;
+        }
+        
+        return null;
+    }
 
     //public bool recentlyAddedSpeciesOn = false;// = true;
     //private Vector2 recentlyAddedSpeciesWorldPos; // = new Vector2(spawnPos.x, spawnPos.y);
@@ -415,6 +441,18 @@ public class SimulationManager : Singleton<SimulationManager>
     
     public bool targetAgentIsDead => targetAgentFromArray.curLifeStage == Agent.AgentLifeStage.Dead;
     public int targetAgentAge => targetAgentFromArray.ageCounter;
+    
+    public int GetIndexOfFocusedAgent()
+    {
+        for (int i = 0; i < agentsArray.Length; i++)
+            if (IsAgentUIFocus(i))
+                return i;
+        
+        return -1;
+    }
+    
+    public bool IsAgentUIFocus(int index) { return GetAgentID(index) == uiManager.focusedCandidate.candidateID; }
+    public int GetAgentID(int agentIndex) { return agentsArray[agentIndex].candidateRef.candidateID; }
 
     // ***WPP: break into sections -> comments (minimum) or functions (better)
     public void TickSimulation() {
