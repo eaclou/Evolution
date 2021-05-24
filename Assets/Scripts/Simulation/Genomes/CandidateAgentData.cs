@@ -75,7 +75,7 @@ public class CandidateAgentData {
         candidateGenome = genome;
         numCompletedEvaluations = 0;
         //evaluationScoresList = new List<float>();
-        allEvaluationsComplete = false;
+        allEvaluationsComplete = false;     // * WPP: always false
         isBeingEvaluated = false;
 
         candidateEventDataList = new List<CandidateEventData>();
