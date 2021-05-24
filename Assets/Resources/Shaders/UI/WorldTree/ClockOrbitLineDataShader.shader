@@ -27,7 +27,10 @@
 
 			struct ClockOrbitLineData {
 				float3 worldPos;
+				float radius;
 				float4 color;
+				float animPhase;
+				float rotateZ;
 			};
 			StructuredBuffer<float3> quadVerticesCBuffer;
 			// Change to 2x texture2D's ((1)time series data + (2)key) for data input?
@@ -62,13 +65,18 @@
 			v2f vert (uint id : SV_VertexID, uint inst : SV_InstanceID)
 			{
 				v2f o;
-
+				ClockOrbitLineData data = clockOrbitLineDataCBuffer[inst];
 				float3 quadData = quadVerticesCBuffer[id];
+				
+				float angle = data.rotateZ * 0.001;// + 3.14159 * 0.5;
+				float2 forward = float2(cos(angle),sin(angle));
+				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
+				float2 rotatedPoint = float2(quadData.x * right + quadData.y * forward);
 				//o.uv = quadData.xy + 0.5;
 
 				float rows = _NumRows;
 				float cols = _NumColumns;
-				float frame = floor(inst) % (rows * cols);
+				float frame = floor(data.animPhase * 16);// floor(inst) % (rows * cols);
 				
 				float2 newUV = quadData.xy + 0.5;
 				newUV.x = newUV.x / cols;
@@ -78,36 +86,10 @@
 				newUV.x += column * (1.0 / cols);
 				newUV.y += row * (1.0 / rows);
 				
+				float ballRadius = data.radius;
+				float3 worldPosition = data.worldPos + float3(rotatedPoint.x, rotatedPoint.y, 0) * ballRadius;
+
 				o.uv = newUV;
-				
-				/*
-				// calculate positions in computeShader?				
-				float ownScore = treeOfLifeWorldStatsValuesCBuffer[inst];
-				float nextScore = treeOfLifeWorldStatsValuesCBuffer[min(inst + 1, 63)];
-
-				float instFloat = (float)inst;
-
-				float2 ownSubCoords = float2(instFloat / 64.0 - 0.0015, ownScore);
-				float2 nextSubCoords = float2(saturate((instFloat + 1.0) / 64.0 + 0.0015), nextScore);
-
-				float2 thisToNextVec = nextSubCoords - ownSubCoords;
-				
-				float2 forward = normalize(thisToNextVec);
-				float2 right = float2(forward.y, -forward.x);
-
-				float2 billboardVertexOffset = right * quadData.x * 0.01;
-
-				float lerpVal = o.uv.y;
-				
-				float2 vertexCoord = lerp(ownSubCoords, nextSubCoords, lerpVal);
-				vertexCoord += billboardVertexOffset;
-				vertexCoord.y = lerp(vertexCoord.y + 0.02, _GraphCoordStatsStart, o.uv.x);
-				
-				float3 worldPosition = float3(vertexCoord, 0) * _IsOn;								
-				*/
-				ClockOrbitLineData data = clockOrbitLineDataCBuffer[inst];
-				float3 worldPosition = data.worldPos + quadData * 0.05;
-
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.color = data.color; // tex2Dlod(_KeyTex, float4(0,((float)_SelectedWorldStatsID + 0.5) / 32.0,0,0));
 
