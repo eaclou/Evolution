@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 // * WPP: remove from name "Script" (redundant) and "Prefab" (misleading)
@@ -18,16 +17,10 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
     //public Text textEventCost;
     public Image backgroundImage;
     public GenomeButtonTooltipSource tooltip;
-    //public bool isSelected = false;
+    public bool isSelected = false;
     
-    [SerializeField] BackgroundState selectedState;
-    [SerializeField] BackgroundState[] lifeStageStates;
-    [SerializeField] BackgroundState fossilState;
-    [SerializeField] BackgroundState unbornState;
     
-    //public Color testColor; void OnValidate() { testColor = Color.gray; }
-
-    public void UpdateButtonPrefab(SpeciesOverviewUI.SelectionGroup grp, int slotIndex) {
+	public void UpdateButtonPrefab(SpeciesOverviewUI.SelectionGroup grp, int slotIndex) {
         index = slotIndex;
         group = grp;
 
@@ -73,7 +66,7 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
             cameraManager.isFollowingAgent = true;
         }*/
     }
-
+    
     void FindCorrespondingAgent()
     {
         var agentIndex = simulationManager.GetIndexOfFocusedAgent();
@@ -86,58 +79,123 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
         cameraManager.isFollowingAgent = true; 
     }
     
-    // WPP: common logic applied via nested struct
+    // * WPP: Refactor repeating logic (color/scale/etc setting) into method
+    //  and expose values with nested class
     public void SetDisplay(CandidateAgentData candidate)
     {
         string statusStr = "";
 
         if (candidate.isBeingEvaluated) 
         {
+            // WPP 5/22/21: Simplified, moved to SimulationManager
+            /* // find Agent:
+            int matchingAgentIndex = -1;
+            Agent matchingAgent = null;
+            
+            for(int a = 0; a < simulationManager.agentsArray.Length; a++) 
+            {
+                Agent agent = simulationManager.agentsArray[a];
+
+                if(agent.candidateRef == null)
+                    continue;
+
+                if(iCand.candidateID == agent.candidateRef.candidateID) 
+                {
+                    matchingAgentIndex = a;
+                    matchingAgent = simulationManager.agentsArray[matchingAgentIndex];
+                    break;
+                }
+            }*/
             Agent matchingAgent = simulationManager.GetAgent(candidate);
-            bool isFocus = uiManager.IsFocus(candidate);
             
-            ColorBlock block = button.colors;
-            block.colorMultiplier = isFocus ? 2f : 1f;
-            button.colors = block;
-            
-            statusStr = isFocus ? SetBackground(selectedState) : SetBackgroundByLifeStage(matchingAgent);
+            // *********** WRITE IT DOWN!!! **************
+            // WPP 5/22/21: moved check to UIManager 
+            //if(iCand.candidateID == uiManagerRef.focusedCandidate.candidateID) 
+            if (uiManager.IsFocus(candidate))
+            {
+                backgroundImage.color = Color.white * 1f;
+                ColorBlock block = button.colors;
+                block.colorMultiplier = 2f;
+                button.colors = block;
+                gameObject.transform.localScale = Vector3.one * 1.3f;
+                statusStr = "\n(SELECTED)";
+            }
+            else 
+            {
+                ColorBlock block = button.colors;
+                block.colorMultiplier = 1f;
+                button.colors = block;
+                
+                // WPP 5/22/21: delegated to GenomeButtonPrefabScript
+                if (matchingAgent.isDead)
+                {
+                    gameObject.transform.localScale = Vector3.one * 0.9f;
+                    backgroundImage.color = Color.red;
+                    statusStr = "\n(DEAD!)";
+                }
+                else if(matchingAgent.isEgg) 
+                {
+                    gameObject.transform.localScale = Vector3.one * 1f;
+                    backgroundImage.color = Color.yellow;
+                    statusStr = "\n(EGG!)";
+                }
+                else 
+                {  
+                    gameObject.transform.localScale = Vector3.one * 1f;
+                    backgroundImage.color = Color.green;
+                    statusStr = "\n(ALIVE!)";
+                }
+                
+                //buttonScript.GetComponent<Image>().color = Color.white;
+                //statusStr = "\n(Under Evaluation)";
+            }
         }
         else 
         {
-            var background = candidate.allEvaluationsComplete ? fossilState : unbornState;
-            statusStr = SetBackground(background);
-
-            if(!candidate.allEvaluationsComplete)
+            gameObject.transform.localScale = Vector3.one;
+            if(candidate.allEvaluationsComplete) 
+            {
+                backgroundImage.color = Color.gray;
+                statusStr = "\n(Fossil)";
+            }
+            else 
+            {
                 gameObject.SetActive(false);
+                backgroundImage.color = Color.black;
+                statusStr = "\n(Unborn)";
+            }
         }        
 
         //tooltip.genomeViewerUIRef = uiManagerRef.genomeViewerUI;
-        tooltip.tooltipString ="Creature #" + candidate.candidateID + "\n" + statusStr;
+        tooltip.tooltipString ="Creature #" + candidate.candidateID + statusStr;
         //uiManagerRef.speciesOverviewUI.leaderboardGenomeButtonsList.Add(buttonScript);
     }
-    
-    string SetBackgroundByLifeStage(Agent agent)
-    {
-        foreach (var state in lifeStageStates)
-            if (state.lifeStage == agent.curLifeStage)
-                return SetBackground(state);
-        
-        return "";
-    }
-    
-    string SetBackground(BackgroundState state)
-    {
-        gameObject.transform.localScale = Vector3.one * state.scale;
-        backgroundImage.color = state.color;
-        return state.status;        
-    }
 
-    [Serializable]
-    public struct BackgroundState
+    // WPP: work-in-progress, delete if not used when refactor complete
+    /*public string SetDisplay(Agent agent)
     {
-        public Agent.AgentLifeStage lifeStage;
-        public float scale;
-        public Color color;
-        public string status;
-    }
+        string status;
+    
+        // WPP 5/22/21: simplified checks with Agent getters
+        if (agent.isDead)
+        {
+            gameObject.transform.localScale = Vector3.one * 0.9f;
+            backgroundImage.color = Color.red;
+            status = "\n(DEAD!)";
+        }
+        else if(agent.isEgg) 
+        {
+            gameObject.transform.localScale = Vector3.one * 1f;
+            backgroundImage.color = Color.yellow;
+            status = "\n(EGG!)";
+        }
+        else 
+        {  
+            gameObject.transform.localScale = Vector3.one * 1f;
+            backgroundImage.color = Color.green;
+            status = "\n(ALIVE!)";
+        }
+        
+        return status;
+    }*/
 }
