@@ -441,6 +441,24 @@ public class SpeciesGenomePool {
             hallOfFameGenomesList.Add(agent.candidateRef);
         }
     }
+    
+    public LinkGenome GetLeaderboardLinkGenome(int index, int linkedListIndex)
+    {
+        AgentGenome genome = GetLeaderboardGenome(index);
+
+        if (genome.brainGenome.linkList.Count > linkedListIndex)
+            return null;
+            
+        return genome.brainGenome.linkList[linkedListIndex];
+    }
+    
+    public AgentGenome GetLeaderboardGenome(int index)
+    {
+        if (index >= leaderboardGenomesList.Count)
+            return null;
+        
+        return leaderboardGenomesList[index].candidateGenome;        
+    }
 
     /*
     public AgentGenome GetNewMutatedGenome() {
