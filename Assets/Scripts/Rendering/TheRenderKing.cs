@@ -3257,7 +3257,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         Graphics.ExecuteCommandBuffer(cmdBufferWorldTree);
         worldTreeRenderCamera.Render();
         
-        
 
         // TREE OF LIFE:
 

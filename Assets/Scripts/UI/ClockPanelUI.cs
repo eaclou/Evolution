@@ -64,6 +64,18 @@ public class ClockPanelUI : MonoBehaviour
 	
     }
 
+    public Vector2 GetMoonDir() {
+        float worldPosX = ((float)simulation.simAgeTimeSteps * earthSpeed) + Mathf.Cos(clockMoonRPM * (float)simulation.simAgeTimeSteps + Mathf.PI * 0.5f) * clockMoonOrbitRadius;
+        float worldPosY = Mathf.Sin(clockMoonRPM * (float)simulation.simAgeTimeSteps + Mathf.PI * 0.5f) * clockMoonOrbitRadius;
+
+        return new Vector2(worldPosX, worldPosY).normalized;
+    }
+    public Vector2 GetSunDir() {
+        float worldPosX = (float)simulation.simAgeTimeSteps * earthSpeed + Mathf.Cos(clockSunRPM * (float)simulation.simAgeTimeSteps + Mathf.PI * 0.5f) * clockSunOrbitRadius;
+        float worldPosY = Mathf.Sin(clockSunRPM * (float)simulation.simAgeTimeSteps + Mathf.PI * 0.5f) * clockSunOrbitRadius;
+        return new Vector2(worldPosX, worldPosY).normalized;
+    }
+
     public void InitializeClockBuffers() {
         // 'Earth Stamps
         ClockStampData[] clockEarthStampDataArray = new ClockStampData[maxNumClockEarthStamps];

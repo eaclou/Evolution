@@ -12,9 +12,15 @@ public class WorldTreePanelUI : MonoBehaviour
     //public Text textStatsBody;
     public Text textTitle;
     public Image imageClockPlanet;
+    public Image imageClockMoon;
+    public Image imageClockSun;
 
     [SerializeField]
     Material clockPlanetMatA;
+    [SerializeField]
+    Material clockMoonMatA;
+    [SerializeField]
+    Material clockSunMatA;
 
     public GameObject anchorGO;
     public GameObject prefabSpeciesIcon;
@@ -76,14 +82,35 @@ public class WorldTreePanelUI : MonoBehaviour
 
         float cursorCoordsX = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().x) / 360f);
         float cursorCoordsY = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().y - 720f) / 360f);                
-        //**** !!!!!!
-        if(imageClockPlanet) {
-            imageClockPlanet.rectTransform.localPosition = new Vector3(Mathf.Min(360f, theCursorCzar.GetCursorPixelCoords().x), 330f, 0f);
+        
+        //**** PLANET!!!!!!
+        if(imageClockPlanet) {            
+            imageClockPlanet.rectTransform.localPosition = new Vector3(Mathf.Min(360f, theCursorCzar.GetCursorPixelCoords().x), 180f, 0f);
             //imageClockPlanet.rectTransform.localEulerAngles = new Vector3(0f, 0f, simulationManager.simAgeTimeSteps * 0.043f);
             float curFrame = ((simulationManager.simAgeTimeSteps * cursorCoordsX) / 2048f * 16f);
             clockPlanetMatA.SetFloat("_CurFrame", curFrame);
             clockPlanetMatA.SetFloat("_NumRows", 4f);
             clockPlanetMatA.SetFloat("_NumColumns", 4f);
+        }
+        // MOON:
+        if(imageClockMoon) {
+            Vector2 moonDir = uiManagerRef.clockPanelUI.GetMoonDir();
+            imageClockMoon.rectTransform.localPosition = new Vector3(Mathf.Min(360f, theCursorCzar.GetCursorPixelCoords().x) + moonDir.x * 30f, 180f + moonDir.y * 30f, 0f);
+            //imageClockPlanet.rectTransform.localEulerAngles = new Vector3(0f, 0f, simulationManager.simAgeTimeSteps * 0.043f);
+            float curFrame = ((simulationManager.simAgeTimeSteps * cursorCoordsX) / 2048f * 16f);
+            clockMoonMatA.SetFloat("_CurFrame", curFrame);
+            clockMoonMatA.SetFloat("_NumRows", 4f);
+            clockMoonMatA.SetFloat("_NumColumns", 4f);
+        }
+        // SUN:
+        if(imageClockSun) {
+            Vector2 sunDir = uiManagerRef.clockPanelUI.GetSunDir();
+            imageClockSun.rectTransform.localPosition = new Vector3(Mathf.Min(360f, theCursorCzar.GetCursorPixelCoords().x) + sunDir.x * 60f, 180f + sunDir.y * 60f, 0f);
+            //imageClockPlanet.rectTransform.localEulerAngles = new Vector3(0f, 0f, simulationManager.simAgeTimeSteps * 0.043f);
+            float curFrame = ((simulationManager.simAgeTimeSteps * cursorCoordsX) / 2048f * 16f);
+            clockSunMatA.SetFloat("_CurFrame", curFrame);
+            clockSunMatA.SetFloat("_NumRows", 4f);
+            clockSunMatA.SetFloat("_NumColumns", 4f);
         }
         
 
@@ -111,6 +138,7 @@ public class WorldTreePanelUI : MonoBehaviour
         }
         timelineStartTimeStep = Mathf.Lerp(timelineStartTimeStep, targetStartTimeStep, 0.125f);
     }
+    
     private void UpdateSpeciesIconsLineageMode() {        
         for (int s = 0; s < speciesIconsList.Count; s++) {            
             float yCoord = 1f - (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);  
