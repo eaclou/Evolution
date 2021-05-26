@@ -11,6 +11,8 @@ public class LinkGenome {
     public int toNeuronID;
     public float weight;  // multiplier on signal
     public bool enabled;
+    
+    public float normalizedWeight => weight * 0.5f + 0.5f;
 
     public LinkGenome() {
 

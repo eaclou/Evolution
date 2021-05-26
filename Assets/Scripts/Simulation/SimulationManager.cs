@@ -93,13 +93,11 @@ public class SimulationManager : Singleton<SimulationManager>
     private int simAgeYearCounter = 0;
     public int curSimYear = 0;
     
-    public SpeciesGenomePool GetSelectedGenomePool()
-    {
+    public SpeciesGenomePool GetSelectedGenomePool() {
         return GetGenomePoolBySpeciesID(uiManager.selectedSpeciesID);
     }
     
-    public SpeciesGenomePool GetGenomePoolBySpeciesID(int id)
-    {
+    public SpeciesGenomePool GetGenomePoolBySpeciesID(int id) {
         return masterGenomePool.completeSpeciesPoolsList[id];
     }
     

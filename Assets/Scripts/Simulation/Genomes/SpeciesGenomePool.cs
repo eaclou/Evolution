@@ -459,6 +459,19 @@ public class SpeciesGenomePool {
         
         return leaderboardGenomesList[index].candidateGenome;        
     }
+    
+    public CandidateAgentData GetFocusedCandidate(SelectionGroup group, int index) {
+        switch (group) {
+            case SelectionGroup.Founder: return foundingCandidate;
+            case SelectionGroup.Representative: return representativeCandidate;
+            case SelectionGroup.LongestLived: return longestLivedCandidate;
+            case SelectionGroup.MostEaten: return mostEatenCandidate;
+            case SelectionGroup.HallOfFame: return hallOfFameGenomesList[index];
+            case SelectionGroup.Leaderboard: return leaderboardGenomesList[index];
+            case SelectionGroup.Candidates: return candidateGenomesList[index];
+            default: Debug.LogError("Invalid selection group: " + group); return null;
+        }
+    }
 
     /*
     public AgentGenome GetNewMutatedGenome() {

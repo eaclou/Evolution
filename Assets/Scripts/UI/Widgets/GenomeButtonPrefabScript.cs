@@ -2,23 +2,17 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-// * WPP: remove from name "Script" (redundant) and "Prefab" (misleading)
 public class GenomeButtonPrefabScript : MonoBehaviour {
     SimulationManager simulationManager => SimulationManager.instance;
     CameraManager cameraManager => CameraManager.instance;
     UIManager uiManager => UIManager.instance;
 
     public int index = -1;
-    private SpeciesOverviewUI.SelectionGroup group;
+    private SelectionGroup group;
     
     public Button button;
-    
-    // * WPP: not used, remove
-    //public Text textEventName;
-    //public Text textEventCost;
     public Image backgroundImage;
     public GenomeButtonTooltipSource tooltip;
-    //public bool isSelected = false;
     
     [SerializeField] BackgroundState selectedState;
     [SerializeField] BackgroundState[] lifeStageStates;
@@ -27,51 +21,19 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
     
     //public Color testColor; void OnValidate() { testColor = Color.gray; }
 
-    public void UpdateButtonPrefab(SpeciesOverviewUI.SelectionGroup grp, int slotIndex) {
+    public void UpdateButtonPrefab(SelectionGroup grp, int slotIndex) {
         index = slotIndex;
         group = grp;
-
-        //textEventName.text = data.name;
-        //textEventCost.text = "$" + data.cost.ToString();
-
-        //if(isSelected) {
-            //bgColor *= 2f;
-        //    imageBG.color = new Color(0.3f, 1f, 1f);
-        //}
-        //else {
-        //    imageBG.color = new Color(0.3f, 0.3f, 0.3f);
-        //}
-        //imageBG.color = bgColor;
     }
 
     public void ClickedThisButton() {
         // updates focusedCandidate in uiManager
         uiManager.speciesOverviewUI.ChangeSelectedGenome(group, index);  
         
-        // WPP: early exit
         if(!uiManager.focusedCandidate.isBeingEvaluated) 
             return;
 
-        // WPP: use method for self-commenting
         FindCorrespondingAgent();
-
-        // WPP: moved to simulationManager
-        /*
-         //bool isFound = false;
-         //int agentIndex = -1;
-         for(int i = 0; i < simulationManager.agentsArray.Length; i++) {
-            if(simulationManager.agentsArray[agentIndex].candidateRef.candidateID == uiManager.focusedCandidate.candidateID) {
-                isFound = true;
-                agentIndex = i;
-                break;
-            }
-        }
-        
-        if(isFound) {
-            cameraManager.SetTargetAgent(simulationManager.agentsArray[agentIndex], agentIndex);
-            uiManagerRef.SetFocusedCandidateGenome(uiManagerRef.focusedCandidate); //.StartFollowingAgent();
-            cameraManager.isFollowingAgent = true;
-        }*/
     }
 
     void FindCorrespondingAgent()
@@ -81,12 +43,11 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
         
         cameraManager.SetTargetAgent(simulationManager.agentsArray[agentIndex], agentIndex);
         
-        // WPP: renamed to clarify intent
-        uiManager.ResetCurrentFocusedCandidateGenome(); //.StartFollowingAgent();
+        uiManager.ResetCurrentFocusedCandidateGenome();
         cameraManager.isFollowingAgent = true; 
     }
     
-    // WPP: common logic applied via nested struct
+    // * Consider Refactor: move life stage to candidate    
     public void SetDisplay(CandidateAgentData candidate)
     {
         string statusStr = "";

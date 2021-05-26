@@ -43,7 +43,7 @@ public class CandidateAgentData {
     public AgentGenome candidateGenome;
     public int numCompletedEvaluations = 0;
     //public List<float> evaluationScoresList;  // fitness scores of agents with this genome
-    public bool allEvaluationsComplete = false;
+    public bool allEvaluationsComplete = false; // * WPP: always false
     public bool isBeingEvaluated = false;
     
     public PerformanceData performanceData;
@@ -75,7 +75,7 @@ public class CandidateAgentData {
         candidateGenome = genome;
         numCompletedEvaluations = 0;
         //evaluationScoresList = new List<float>();
-        allEvaluationsComplete = false;     // * WPP: always false
+        allEvaluationsComplete = false;  
         isBeingEvaluated = false;
 
         candidateEventDataList = new List<CandidateEventData>();

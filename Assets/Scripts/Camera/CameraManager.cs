@@ -2,6 +2,7 @@
 using UnityEngine;
 
 public class CameraManager : Singleton<CameraManager> {
+    SimulationManager simulation => SimulationManager.instance;
 
     public Vector3 curCameraFocusPivotPos;
     public Vector3 curCameraPos;
@@ -49,28 +50,20 @@ public class CameraManager : Singleton<CameraManager> {
     }
 
     private void InitializeCamera() {
-        cameraRef = this.GetComponent<Camera>();
+        cameraRef = GetComponent<Camera>();
         curCameraFocusPivotPos = new Vector3(128f, 128f, 1f);
     }
 
     private void Update() {
-       
         UpdateCam();
     }
 
     private void UpdateCam() {
-        
-
         // Calculate where the focus pivot should be:
-        if (targetAgentTransform != null && isFollowingAgent)
+        if (targetAgentTransform && isFollowingAgent)
         {
             curCameraFocusPivotPos = targetAgentTransform.position;
             curCameraFocusPivotPos.z = -SimulationManager._GlobalWaterLevel * SimulationManager._MaxAltitude; // *** for now this is where creatures are for now          
-            
-            
-        }
-        else {
-            
         }
 
         if(isFollowingPlantParticle) {
@@ -114,9 +107,9 @@ public class CameraManager : Singleton<CameraManager> {
         masterTargetDistance = Mathf.Min(masterTargetDistance, maxDistance);
         masterTargetDistance = Mathf.Max(masterTargetDistance, minDistance);        
 
-        curCameraPos = Vector3.Lerp(this.transform.position, masterTargetCamPosition, masterLerpSpeed * Time.deltaTime);
-        this.transform.position = curCameraPos;
-        this.transform.localEulerAngles = new Vector3(curTiltAngleDegrees, 0f, 0f);
+        curCameraPos = Vector3.Lerp(transform.position, masterTargetCamPosition, masterLerpSpeed * Time.deltaTime);
+        transform.position = curCameraPos;
+        transform.localEulerAngles = new Vector3(curTiltAngleDegrees, 0f, 0f);
 
         // store info for next frame:
         //prevCameraPos = curCameraPos;
@@ -134,9 +127,9 @@ public class CameraManager : Singleton<CameraManager> {
         worldSpaceTopRight = new Vector4(topRight.x, topRight.y, topRight.z, 0f);
         Vector3 botRight = cameraRef.ViewportToWorldPoint(new Vector3(1f,0f,10f)); //cameraRef.ScreenToWorldPoint( new Vector3(cameraRef.pixelHeight, 0f, worldSpaceCornersDistance));
         worldSpaceBottomRight = new Vector4(botRight.x, botRight.y, botRight.z, 0f);
-        Vector3 camRight = this.gameObject.transform.right;
+        Vector3 camRight = gameObject.transform.right;
         worldSpaceCameraRightDir = new Vector4(camRight.x, camRight.y, camRight.z, 0f);
-        Vector3 camUp = this.gameObject.transform.up;
+        Vector3 camUp = gameObject.transform.up;
         worldSpaceCameraUpDir = new Vector4(camUp.x, camUp.y, camUp.z, 0f);
 
         //debugMarker.transform.position = topLeft;
@@ -195,7 +188,11 @@ public class CameraManager : Singleton<CameraManager> {
         //masterTargetDistance = Mathf.Min(masterTargetDistance, maxDistance);
         //masterTargetDistance = Mathf.Max(masterTargetDistance, minDistance);
     }
-
+    
+    public void SetTargetAgent() {
+        SetTargetAgent(simulation.agentsArray[targetAgentIndex], targetAgentIndex);
+    }
+    
     public void SetTargetAgent(Agent agent, int index) {
         //Debug.Log("SetTarget! " + index.ToString());
         targetAgent = agent;

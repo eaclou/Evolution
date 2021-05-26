@@ -5,7 +5,6 @@ public class CreatureLifeEventsLogUI : MonoBehaviour
 {
     public Text textEventsLog;
     
-    // WPP: exposed magic values
     [SerializeField] Color goodColor;
     [SerializeField] Color dimGoodColor;
     [SerializeField] Color badColor;
@@ -35,10 +34,7 @@ public class CreatureLifeEventsLogUI : MonoBehaviour
         
         for(int q = agentData.candidateEventDataList.Count - 1; q >= startIndexLog; q--) {
             float dimAmount = Mathf.Clamp01((agentData.candidateEventDataList.Count - q - 1) * 0.55f);
-            //Color displayColor = Color.Lerp(Color.red, Color.green, agent.agentEventDataList[q].goodness);
             
-            // WPP 5/18/21: condense with ternary expressions and temp bool
-            // + delegated logic to EventColorString method
             bool isDim = dimAmount > dimThreshold;
             bool isGood = agentData.candidateEventDataList[q].goodness > goodThreshold;
             eventLogString += EventColorString(isDim, isGood);
@@ -54,22 +50,8 @@ public class CreatureLifeEventsLogUI : MonoBehaviour
     string EventColorString(bool isDim, bool isGood)
     {
         string goodColorStr = isDim ? ColorString(dimGoodColor) : ColorString(goodColor);
-        //if(dimAmount > 0.5f) {
-        //    goodColorStr = "#007700FF";
-        //}
         string badColorStr = isDim ? ColorString(dimBadColor) : ColorString(badColor);
-        //if(dimAmount > 0.5f) {
-        //    badColorStr = "#770000FF";
-        //}
-            
         return isGood ? goodColorStr : badColorStr;
-        //eventLogString += "<color=" + colorString + ">";
-        //if(agentData.candidateEventDataList[q].goodness > 0.5f) {
-        //    eventLogString += "<color=" + goodColorStr + ">";
-        //}
-        //else {
-        //    eventLogString += "<color=" + badColorStr + ">";
-        //}
     }
     
     string ColorString(Color color) { return "<color=#" + ColorUtility.ToHtmlStringRGBA(color) + ">"; }

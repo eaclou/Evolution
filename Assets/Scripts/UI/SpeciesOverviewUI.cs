@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,28 +20,31 @@ public class SpeciesOverviewUI : MonoBehaviour {
     //private int selectedLeaderboardGenomeIndex = 0;
     //private bool isCandidateGenomesSelected = false;
     private int selectedCandidateGenomeIndex = 0;
-
-    public GameObject panelCurrentGenepool;
-    public GameObject panelLineageGenomes;
+    
     public GameObject panelGenomeViewer;
     public Image imageLineageA;
     public Image imageLineageB;
-
-    public Slider sliderLineageGenomes;
-
-    // * WPP: references null in editor, intent unclear
-    public Button selectedButton;
-    public Button buttonFoundingGenome;
-    public Button buttonRepresentativeGenome;
-    public Button buttonLongestLivedGenome;
-    public Button buttonMostEatenGenome;
     
+    [SerializeField] SelectionGroup defaultSelectionGroup = SelectionGroup.Founder;
+    [SerializeField] SelectionGroupData[] selectionGroups;
+    SelectionGroupData selectedButtonData;
+    
+    // WPP 5/25: Buttons delegated to nested class
+    //public Button selectedButton;
+    //public Button buttonFoundingGenome;
+    //public Button buttonRepresentativeGenome;
+    //public Button buttonLongestLivedGenome;
+    //public Button buttonMostEatenGenome;
+    
+    // * WPP: references null in editor, not used
     public List<GenomeButtonPrefabScript> hallOfFameButtonsList;
     public List<GenomeButtonPrefabScript> leaderboardGenomeButtonsList;
     public List<GenomeButtonPrefabScript> candidateGenomeButtonsList;
-
     public Text textHallOfFameTitle;
     public Text textCurrentGenepoolTitle;
+    public GameObject panelCurrentGenepool;
+    public GameObject panelLineageGenomes;
+    public Slider sliderLineageGenomes;
 
     public Text textSpeciesLineage;
     
@@ -52,15 +56,6 @@ public class SpeciesOverviewUI : MonoBehaviour {
     Color CLEAR => Color.black;
 
     //private SelectionGroup selectionGroup = SelectionGroup.Founder;
-    public enum SelectionGroup {
-        Founder,
-        Representative,
-        LongestLived,
-        MostEaten,
-        HallOfFame,
-        Leaderboard,
-        Candidates
-    }
 
     public void ClickButtonToggleLineage() {
         isShowingLineage = !isShowingLineage;
@@ -74,10 +69,9 @@ public class SpeciesOverviewUI : MonoBehaviour {
     // **** CHANGE to properly pooled, only create as needed, etc. ****
     public void RebuildGenomeButtons() 
     {
-        // WPP: shortened references with getters
-        SpeciesGenomePool pool = simulationManager.GetSelectedGenomePool(); //masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
+        SpeciesGenomePool pool = simulationManager.GetSelectedGenomePool(); 
 
-        Vector3 hueA = pool.appearanceGenome.huePrimary; //foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+        Vector3 hueA = pool.appearanceGenome.huePrimary; 
         imageLineageA.color = new Color(Mathf.Max(0.2f, hueA.x), Mathf.Max(0.2f, hueA.y), Mathf.Max(0.2f, hueA.z));
         Vector3 hueB = pool.appearanceGenome.hueSecondary;
         imageLineageB.color = new Color(Mathf.Max(0.2f, hueB.x), Mathf.Max(0.2f, hueB.y), Mathf.Max(0.2f, hueB.z));
@@ -90,32 +84,22 @@ public class SpeciesOverviewUI : MonoBehaviour {
         
         for(int i = 0; i < 64; i++) 
         {
-            // WPP: inverted logic to remove nesting
             if (parentSpeciesID < 0)
             {
                 lineageTxt += "*";
                 break;
             }
-        
-            //if (parentSpeciesID >= 0) 
-            //{
-            
-            SpeciesGenomePool parentPool = simulationManager.GetGenomePoolBySpeciesID(parentSpeciesID); //masterGenomePool.completeSpeciesPoolsList[parentSpeciesID];
+
+            SpeciesGenomePool parentPool = simulationManager.GetGenomePoolBySpeciesID(parentSpeciesID);
             lineageTxt += " <- " + parentPool.speciesID;
 
             savedSpeciesID = parentPool.speciesID;
             parentSpeciesID = parentPool.parentSpeciesID;
-            
-            //}
-            //else 
-            //{
-            //    lineageTxt += "*";
-            //    break;
-            //}
         }
         
         textSpeciesLineage.text = lineageTxt;
 
+        // * WPP: remove obsolete comments
         //panelCurrentGenepool.SetActive(!isShowingLineage);
         //panelLineageGenomes.SetActive(isShowingLineage);
         //if(isShowingLineage) {
@@ -154,97 +138,6 @@ public class SpeciesOverviewUI : MonoBehaviour {
             uiManagerRef.speciesOverviewUI.leaderboardGenomeButtonsList.Add(buttonScript);
         }*/
     }
-    
-    // WPP: moved to GenomeButtonPrefabScript
-    /*private void UpdateGenomeButton(CandidateAgentData candidate, GenomeButtonPrefabScript genomeButton) {
-        genomeButton.SetDisplay(candidate);
-        string statusStr = "";
-
-        if (iCand.isBeingEvaluated) 
-        {
-            // WPP 5/22/21: Simplified, moved to SimulationManager
-            
-            // find Agent:
-            int matchingAgentIndex = -1;
-            Agent matchingAgent = null;
-            
-            for(int a = 0; a < simulationManager.agentsArray.Length; a++) 
-            {
-                Agent agent = simulationManager.agentsArray[a];
-
-                if(agent.candidateRef == null)
-                    continue;
-
-                if(iCand.candidateID == agent.candidateRef.candidateID) 
-                {
-                    matchingAgentIndex = a;
-                    matchingAgent = simulationManager.agentsArray[matchingAgentIndex];
-                    break;
-                }
-            }
-            Agent matchingAgent = simulationManager.GetAgent(iCand);
-            
-            // *********** WRITE IT DOWN!!! **************
-            if (uiManager.IsFocus(iCand))
-            {
-                genomeButton.backgroundImage.color = Color.white * 1f;
-                ColorBlock block = genomeButton.button.colors;
-                block.colorMultiplier = 2f;
-                genomeButton.button.colors = block;
-                genomeButton.gameObject.transform.localScale = Vector3.one * 1.3f;
-                statusStr = "\n(SELECTED)";
-            }
-            else 
-            {
-                ColorBlock block = genomeButton.button.colors;
-                block.colorMultiplier = 1f;
-                genomeButton.button.colors = block;
-                
-                statusStr = genomeButton.SetDisplay(matchingAgent);
-                if (matchingAgent.isDead)
-                {
-                    genomeButton.gameObject.transform.localScale = Vector3.one * 0.9f;
-                    genomeButton.backgroundImage.color = Color.red;
-                    statusStr = "\n(DEAD!)";
-                }
-                else if(matchingAgent.isEgg) 
-                {
-                    genomeButton.gameObject.transform.localScale = Vector3.one * 1f;
-                    genomeButton.backgroundImage.color = Color.yellow;
-                    statusStr = "\n(EGG!)";
-                }
-                else 
-                {  
-                    genomeButton.gameObject.transform.localScale = Vector3.one * 1f;
-                    genomeButton.backgroundImage.color = Color.green;
-                    statusStr = "\n(ALIVE!)";
-                }
-                
-                //buttonScript.GetComponent<Image>().color = Color.white;
-                //statusStr = "\n(Under Evaluation)";
-            }
-        }
-        else 
-        {
-            genomeButton.gameObject.transform.localScale = Vector3.one;
-            if(iCand.allEvaluationsComplete) 
-            {
-                genomeButton.backgroundImage.color = Color.gray;
-                statusStr = "\n(Fossil)";
-            }
-            else 
-            {
-                genomeButton.gameObject.SetActive(false);
-                genomeButton.backgroundImage.color = Color.black;
-                statusStr = "\n(Unborn)";
-            }
-        }        
-
-        //tooltip.genomeViewerUIRef = uiManagerRef.genomeViewerUI;
-        genomeButton.tooltip.tooltipString ="Creature #" + iCand.candidateID + statusStr;
-        //uiManagerRef.speciesOverviewUI.leaderboardGenomeButtonsList.Add(buttonScript);
-        
-    }*/
 
     private void RebuildGenomeButtonsCurrent(SpeciesGenomePool pool) {
         Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;            
@@ -287,16 +180,13 @@ public class SpeciesOverviewUI : MonoBehaviour {
     }
 
     // * WPP: remove obsolete comments
-    // * consider switching to interface pattern if switch statement gets more complex,
-    // needs continual maintenance, or has additional uses
     public void ChangeSelectedGenome(SelectionGroup group, int index) {
-        //selectionGroup = group;                
-
-        if(selectedButton != null) 
-        {
-            selectedButton.GetComponent<Image>().color = Color.yellow;
-        }
+        //selectionGroup = group;    
         
+        if(selectedButtonData != null && selectedButtonData.image != null) {
+            selectedButtonData.image.color = Color.yellow;
+        }            
+
         //clear all selections
        // isFoundingGenomeSelected = false;
        // isRepresentativeGenomeSelected = false;
@@ -304,68 +194,82 @@ public class SpeciesOverviewUI : MonoBehaviour {
        // isMostEatenGenomeSelected = false;
        // isHallOfFameSelected = false;    
         //isLeaderboardGenomesSelected = false;    
-        //isCandidateGenomesSelected = false;    
-
-        SpeciesGenomePool spool = simulationManager.GetSelectedGenomePool();
+        //isCandidateGenomesSelected = false;
         
-        switch (group) 
-        {
-            case SelectionGroup.Founder:
+        SpeciesGenomePool pool = simulationManager.GetSelectedGenomePool();
+        uiManager.SetFocusedCandidateGenome(pool, group, index);
+        selectedButtonData = GetSelectionGroupData(group);
+
+        // WPP: using nested struct to set the button and avoid GetComponent<Image>
+        // + moved focus selection to UIManager
+        // + moved special case operation to if statement
+        
+        //switch (group) 
+        //{
+            //case SelectionGroup.Founder:
                 //isFoundingGenomeSelected = true;
-                selectedButton = buttonFoundingGenome;
-                uiManager.SetFocusedCandidateGenome(spool.foundingCandidate);
-                break;
-            case SelectionGroup.Representative:
+                //selectedButton = buttonFoundingGenome;
+                //uiManager.SetFocusedCandidateGenome(spool.foundingCandidate);
+            //    break;
+            //case SelectionGroup.Representative:
                // isRepresentativeGenomeSelected = true;
-                selectedButton = buttonRepresentativeGenome;
-                uiManager.SetFocusedCandidateGenome(spool.representativeCandidate); // maybe weird if used as species-wide average? 
-                break;
-            case SelectionGroup.LongestLived:
+                //selectedButton = buttonRepresentativeGenome;
+                //uiManager.SetFocusedCandidateGenome(spool.representativeCandidate); // maybe weird if used as species-wide average? 
+            //    break;
+            //case SelectionGroup.LongestLived:
                // isLongestLivedGenomeSelected = true;
-                selectedButton = buttonLongestLivedGenome;
-                uiManager.SetFocusedCandidateGenome(spool.longestLivedCandidate);
-                break;
-            case SelectionGroup.MostEaten:
+                //selectedButton = buttonLongestLivedGenome;
+                //uiManager.SetFocusedCandidateGenome(spool.longestLivedCandidate);
+            //    break;
+            //case SelectionGroup.MostEaten:
                 //isMostEatenGenomeSelected = true;
-                selectedButton = buttonMostEatenGenome;
-                uiManager.SetFocusedCandidateGenome(spool.mostEatenCandidate);
-                break;
-            case SelectionGroup.HallOfFame:
+                //selectedButton = buttonMostEatenGenome;
+                //uiManager.SetFocusedCandidateGenome(spool.mostEatenCandidate);
+            //    break;
+            //case SelectionGroup.HallOfFame:
                 //isHallOfFameSelected = true;
-                selectedHallOfFameIndex = index;
-                if(selectedHallOfFameIndex >= spool.hallOfFameGenomesList.Count) 
-                {
-                    selectedHallOfFameIndex = 0;
-                }
-                //selectedButton = hallOfFameButtonsList[index].GetComponent<Button>();
                 
-                uiManager.SetFocusedCandidateGenome(spool.hallOfFameGenomesList[index]);
+                // WPP: variable set by never used
+                //selectedHallOfFameIndex = index;
+                //if(selectedHallOfFameIndex >= pool.hallOfFameGenomesList.Count) {
+                //    selectedHallOfFameIndex = 0;
+                //}
+                
+                //selectedButton = hallOfFameButtonsList[index].GetComponent<Button>();
+                //uiManager.SetFocusedCandidateGenome(spool.hallOfFameGenomesList[index]);
                 //Debug.Log("ChangeSelectedGenome: " + group + ", HallOfFame, #" + index);
-                break;
-            case SelectionGroup.Leaderboard:
+                //break;
+            //case SelectionGroup.Leaderboard:
                 //isLeaderboardGenomesSelected = true;
                 //selectedLeaderboardGenomeIndex = index;
                 //SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.globalResourcesUI.selectedSpeciesIndex];
-                uiManager.SetFocusedCandidateGenome(spool.leaderboardGenomesList[index]);
+                //uiManager.SetFocusedCandidateGenome(spool.leaderboardGenomesList[index]);
                 //Debug.Log("ChangeSelectedGenome: " + group + ", #" + index);
                 //selectedButton = leaderboardGenomeButtonsList[index].GetComponent<Button>();
-                break;
-            case SelectionGroup.Candidates:
+            //    break;
+            //case SelectionGroup.Candidates:
                 //isCandidateGenomesSelected = true;
-                selectedCandidateGenomeIndex = index;
-                if(selectedCandidateGenomeIndex >= spool.candidateGenomesList.Count) 
-                {
-                    selectedCandidateGenomeIndex = 0;
-                }
-                cameraManager.SetTargetAgent(simulationManager.agentsArray[cameraManager.targetAgentIndex], cameraManager.targetAgentIndex);
-                uiManager.SetFocusedCandidateGenome(spool.candidateGenomesList[index]);
+                
+                // WPP: variable set by never used
+                //selectedCandidateGenomeIndex = index;
+                //if(selectedCandidateGenomeIndex >= pool.candidateGenomesList.Count) {
+                //    selectedCandidateGenomeIndex = 0;
+                //}
+                
+                //cameraManager.SetTargetAgent(simulationManager.agentsArray[cameraManager.targetAgentIndex], cameraManager.targetAgentIndex);
+                //uiManager.SetFocusedCandidateGenome(spool.candidateGenomesList[index]);
                 //Debug.Log("ChangeSelectedGenome: " + group + ", #" + index);
                 //selectedButton = candidateGenomeButtonsList[index].GetComponent<Button>();
-                break;
-        }
+                //break;
+        //}
+        
+        // WPP 5/25: special case extracted from switch, added overload to cameraManager to cut down on arguments
+        if (group == SelectionGroup.Candidates)
+            cameraManager.SetTargetAgent();
 
-        if(selectedButton != null) {
-            selectedButton.GetComponent<Image>().color = Color.white;
+        // * WPP 5/25: what is purpose of this? (also set to yellow earlier in method under same conditions)
+        if(selectedButtonData != null && selectedButtonData.image != null) {
+            selectedButtonData.image.color = Color.white;
         }
 
         //uiManagerRef.ClickButtonOpenGenome();
@@ -378,18 +282,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
     
     public void CycleCurrentGenome() {
         ChangeSelectedGenome(SelectionGroup.Candidates, selectedCandidateGenomeIndex + 1); 
-    }    
-
-    // WPP 5/24: empty method, not called
-    /*
-    public void UpdateUI(SpeciesGenomePool pool) {
-        UpdateLeaderboardGenomesUI(pool);
     }
-    
-    private void UpdateLeaderboardGenomesUI(SpeciesGenomePool pool) {
-
-    }
-    */
 
     public void CreateSpeciesLeaderboardGenomeTexture() {
         int width = 32;
@@ -401,56 +294,8 @@ public class SpeciesOverviewUI : MonoBehaviour {
         {
             for(int y = 0; y < height; y++) 
             {
-                // WPP 5/24: redundant variables
-                //int xIndex = x; 
-                //int yIndex = y;            
-                
-                // WPP: moved conditionals to SpeciesGenomePool
-                // + set color in separate function and named variables
-                
-                //Color testColor;
-
-                //if(x < pool.leaderboardGenomesList.Count) 
-                //{
-                //    AgentGenome genome = pool.leaderboardGenomesList[x].candidateGenome;
-                //    if (genome.brainGenome.linkList.Count > y) 
-                //    {
-                //      float weightVal = genome.brainGenome.linkList[y].weight;
-                
-                    /*float weight = linkGenome.weight;
-                    testColor = new Color(weight * 0.5f + 0.5f, weight * 0.5f + 0.5f, weight * 0.5f + 0.5f);
-                    
-                    if(weight < -0.25f) 
-                    {
-                        testColor = Color.Lerp(testColor, Color.black, 0.15f);
-                    }
-                    else if(weight > 0.25f) 
-                    {
-                        testColor = Color.Lerp(testColor, Color.white, 0.15f);
-                    }
-                    else 
-                    {
-                        testColor = Color.Lerp(testColor, Color.gray, 0.15f);
-                    }
-        
-                    }
-                    else 
-                    {
-                        testColor = CLEAR;
-                    }
-                }
-                else 
-                {
-                    testColor = CLEAR;
-                }*/
-
                 LinkGenome linkGenome = pool.GetLeaderboardLinkGenome(x, y);
-                Color testColor = linkGenome == null ? CLEAR : GetBlendedColor(linkGenome.weight);
-                
-                // * WPP Consider:
-                // testColor = linkGenome == null ? CLEAR : Color.Lerp(negativeColor, positiveColor, linkGenome.weight * .5f + 0.5f);
-                // ...and also adding getter: linkGenome.normalizedWeight
-                
+                Color testColor = linkGenome == null ? CLEAR : Color.Lerp(negativeColor, positiveColor, linkGenome.normalizedWeight);
                 speciesPoolGenomeTex.SetPixel(x, y, testColor);
             }
         }
@@ -464,37 +309,40 @@ public class SpeciesOverviewUI : MonoBehaviour {
 
     [SerializeField] Color negativeColor = Color.black;
     [SerializeField] Color positiveColor = Color.white;
-    
-    // * Unnecessary if logic simplified
-    [SerializeField] Color neutralColor = Color.gray;
-    [SerializeField] [Range(0, 1)] float baseColorMultiplier = 0.5f;
-    [SerializeField] [Range(0, 1)] float baseColorOffset = 0.5f;
-    [SerializeField] [Range(0, 1)] float blendThreshold = 0.25f;
-    [SerializeField] [Range(0, 1)] float blendStrength = 0.15f;
 
-    // WPP: exposed magic numbers
-    // WPP: shifted weight calculation to avoid repetition
-    // * consider generalizing and moving to static class
-    Color GetBlendedColor(float weight)
-    {
-        weight = weight * baseColorMultiplier + baseColorOffset;
-        Color color = new Color(weight, weight, weight);
-                    
-        if(weight < -blendThreshold) {
-            return Color.Lerp(color, negativeColor, blendStrength);
-        }
-        if(weight > blendThreshold) {
-            return Color.Lerp(color, positiveColor, blendStrength);
-        }
-        return Color.Lerp(color, neutralColor, blendStrength);
-    }
-
-	void Start () {
-        selectedButton = buttonFoundingGenome; // default
+    void Start () {
+        selectedButtonData = GetSelectionGroupData(defaultSelectionGroup);
         
         speciesPoolGenomeTex = new Texture2D(16, 16, TextureFormat.RGBA32, false);
         speciesPoolGenomeTex.filterMode = FilterMode.Point;
         speciesPoolGenomeTex.wrapMode = TextureWrapMode.Clamp;
         speciesPoolGenomeMat.SetTexture("_MainTex", speciesPoolGenomeTex);
 	}
+	
+	SelectionGroupData GetSelectionGroupData(SelectionGroup id)
+	{
+	    foreach (var group in selectionGroups)
+	        if (group.id == id)
+	            return group;
+        
+        return null;
+	}
+	
+	[Serializable]
+	public class SelectionGroupData
+	{
+	    public SelectionGroup id;
+	    public Button button;
+	    public Image image;
+	}
+}
+
+public enum SelectionGroup {
+    Founder,
+    Representative,
+    LongestLived,
+    MostEaten,
+    HallOfFame,
+    Leaderboard,
+    Candidates
 }

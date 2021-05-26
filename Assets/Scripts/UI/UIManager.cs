@@ -117,6 +117,11 @@ public class UIManager : Singleton<UIManager> {
     }
     
     public void ResetCurrentFocusedCandidateGenome() { SetFocusedCandidateGenome(focusedCandidate); }
+    
+    public void SetFocusedCandidateGenome(SpeciesGenomePool selectedPool, SelectionGroup group, int index) {
+        var candidate = selectedPool.GetFocusedCandidate(group, index);
+        SetFocusedCandidateGenome(candidate);
+    }
 
     public void SetFocusedCandidateGenome(CandidateAgentData candidate) {
         focusedCandidate = candidate;
