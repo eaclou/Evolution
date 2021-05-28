@@ -34,6 +34,8 @@ public class SpeciesOverviewUI : MonoBehaviour {
     [SerializeField] SelectionGroupData[] selectionGroups;
     SelectionGroupData selectedButtonData;
     
+    [SerializeField] [Range(0, 1)] float hueMin = 0.2f;
+    
     // WPP 5/25: Buttons delegated to nested class
     //public Button selectedButton;
     //public Button buttonFoundingGenome;
@@ -76,13 +78,16 @@ public class SpeciesOverviewUI : MonoBehaviour {
     {
         SpeciesGenomePool pool = simulationManager.GetSelectedGenomePool(); 
 
-        Vector3 hueA = pool.appearanceGenome.huePrimary; 
+        // WPP 5/28: moved to SetLineageColors
+        /*Vector3 hueA = pool.appearanceGenome.huePrimary; 
         imageLineageA.color = new Color(Mathf.Max(0.2f, hueA.x), Mathf.Max(0.2f, hueA.y), Mathf.Max(0.2f, hueA.z));
         Vector3 hueB = pool.appearanceGenome.hueSecondary;
-        imageLineageB.color = new Color(Mathf.Max(0.2f, hueB.x), Mathf.Max(0.2f, hueB.y), Mathf.Max(0.2f, hueB.z));
+        imageLineageB.color = new Color(Mathf.Max(0.2f, hueB.x), Mathf.Max(0.2f, hueB.y), Mathf.Max(0.2f, hueB.z));*/
+        SetLineageColors(pool.appearanceGenome);
+        
+        // WPP 5/28: moved to GetLineageText
+        /* textSpeciesLineage.gameObject.SetActive(true);
 
-        // Update Species Panel UI:
-        textSpeciesLineage.gameObject.SetActive(true);
         int savedSpeciesID = pool.speciesID;
         int parentSpeciesID = pool.parentSpeciesID;
         string lineageTxt = savedSpeciesID.ToString();
@@ -102,7 +107,10 @@ public class SpeciesOverviewUI : MonoBehaviour {
             parentSpeciesID = parentPool.parentSpeciesID;
         }
         
-        textSpeciesLineage.text = lineageTxt;
+        textSpeciesLineage.text = lineageTxt;*/
+        
+        textSpeciesLineage.gameObject.SetActive(true);
+        textSpeciesLineage.text = GetLineageText(pool);
 
         // * WPP: remove obsolete comments
         //panelCurrentGenepool.SetActive(!isShowingLineage);
@@ -144,6 +152,40 @@ public class SpeciesOverviewUI : MonoBehaviour {
         }*/
     }
     
+    // WPP: delegated repeat logic, exposed hueMin
+    private void SetLineageColors(CritterModuleAppearanceGenome appearance) {
+        imageLineageA.color = ColorFloor(appearance.huePrimary, hueMin);
+        imageLineageB.color = ColorFloor(appearance.hueSecondary, hueMin);
+    }
+    
+    // * Consider moving to static class if generally useful
+    private Color ColorFloor(Vector3 hue, float min) {
+        return new Color(Mathf.Max(min, hue.x),  Mathf.Max(min, hue.y), Mathf.Max(min, hue.z));
+    }
+    
+    private string GetLineageText(SpeciesGenomePool pool) {
+        int savedSpeciesID = pool.speciesID;
+        int parentSpeciesID = pool.parentSpeciesID;
+        string lineage = savedSpeciesID.ToString();
+        
+        for(int i = 0; i < 64; i++) 
+        {
+            if (parentSpeciesID < 0)
+            {
+                lineage += "*";
+                break;
+            }
+
+            SpeciesGenomePool parentPool = simulationManager.GetGenomePoolBySpeciesID(parentSpeciesID);
+            lineage += " <- " + parentPool.speciesID;
+
+            savedSpeciesID = parentPool.speciesID;
+            parentSpeciesID = parentPool.parentSpeciesID;
+        }
+        
+        return lineage;
+    }
+
     private void GenerateButtonList()
     {
         foreach (Transform child in genomeLeaderboard.transform) {

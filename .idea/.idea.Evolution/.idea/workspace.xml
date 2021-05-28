@@ -3,12 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="e5216a40-1993-4f7b-88ca-3d6aa0d75e16" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/UI/Graphs/GraphSpeciesStatsCenter.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/UI/Graphs/GraphSpeciesStatsCenter.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/UI/Graphs/GraphSpeciesStatsLeft.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/UI/Graphs/GraphSpeciesStatsLeft.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/UI/Graphs/GraphSpeciesStatsRight.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/UI/Graphs/GraphSpeciesStatsRight.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesOverviewUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesOverviewUI.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -194,7 +189,7 @@
       <workItem from="1621811083341" duration="3938000" />
       <workItem from="1621923306431" duration="5020000" />
       <workItem from="1621979562238" duration="7936000" />
-      <workItem from="1622184369588" duration="2606000" />
+      <workItem from="1622184369588" duration="3416000" />
     </task>
     <servers />
   </component>
