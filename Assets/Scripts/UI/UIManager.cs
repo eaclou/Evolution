@@ -70,8 +70,7 @@ public class UIManager : Singleton<UIManager> {
 
     //public GameObject prefabGenomeIcon;
     public GameObject panelHallOfFameGenomes;
-    public GameObject panelLeaderboardGenomes;
-    
+
     //public float loadingProgress = 0f;
 
     private int[] displaySpeciesIndicesArray;
