@@ -44,7 +44,7 @@
 			uniform float _NumColumns;
 			
 			float2 GetUV(float2 uvStart, float frame, float rows, float cols) {
-				frame = floor(frame) % (rows * cols);
+				frame = 0; // floor(frame) % (rows * cols);
 				
 				float2 newUV = uvStart;
 				newUV.x = newUV.x / cols;
@@ -79,7 +79,7 @@
 				fixed4 col1 = tex2D(_MainTex, i.uv1);
 				//col.rgb = lerp(_TintPri.rgb, _TintSec.rgb, i.uv.y);
 				
-				return lerp(col0, col1, frac(_CurFrame));
+				return lerp(col0, col1, frac(_CurFrame)) * 2;
 			}
 			ENDCG
 		}

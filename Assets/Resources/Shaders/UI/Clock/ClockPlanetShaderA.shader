@@ -44,7 +44,7 @@
 			uniform float _NumColumns;
 			
 			float2 GetUV(float2 uvStart, float frame, float rows, float cols) {
-				frame = floor(frame) % (rows * cols);
+				frame = 4;// floor(frame) % (rows * cols);
 				
 				float2 newUV = uvStart;
 				newUV.x = newUV.x / cols;

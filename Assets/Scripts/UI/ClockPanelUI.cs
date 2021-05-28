@@ -9,6 +9,8 @@ public class ClockPanelUI : MonoBehaviour
 	public Image imageClockHandB;
     public Image imageClockHandC;
 
+    public Image imageClockFaceGroup;
+
     public Material clockEarthStampMat;
     public Material clockMoonStampMat;
     public Material clockSunStampMat;
@@ -63,17 +65,23 @@ public class ClockPanelUI : MonoBehaviour
         imageClockHandC.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, (float)numTicks * angVelC);
 	
     }
-
-    public Vector2 GetMoonDir() {
-        float worldPosX = ((float)simulation.simAgeTimeSteps * earthSpeed) + Mathf.Cos(clockMoonRPM * (float)simulation.simAgeTimeSteps + Mathf.PI * 0.5f) * clockMoonOrbitRadius;
-        float worldPosY = Mathf.Sin(clockMoonRPM * (float)simulation.simAgeTimeSteps + Mathf.PI * 0.5f) * clockMoonOrbitRadius;
-
-        return new Vector2(worldPosX, worldPosY).normalized;
+    public float GetMoonOrbitPhase(float timeStep) {
+        float phase = clockMoonRPM * timeStep + Mathf.PI * 0.5f;
+        return phase;
     }
-    public Vector2 GetSunDir() {
-        float worldPosX = (float)simulation.simAgeTimeSteps * earthSpeed + Mathf.Cos(clockSunRPM * (float)simulation.simAgeTimeSteps + Mathf.PI * 0.5f) * clockSunOrbitRadius;
-        float worldPosY = Mathf.Sin(clockSunRPM * (float)simulation.simAgeTimeSteps + Mathf.PI * 0.5f) * clockSunOrbitRadius;
-        return new Vector2(worldPosX, worldPosY).normalized;
+    public Vector2 GetMoonDir(float timeStep) {        
+        float localPosX = Mathf.Cos(clockMoonRPM * timeStep + Mathf.PI * 0.5f);
+        float localPosY = Mathf.Sin(clockMoonRPM * timeStep + Mathf.PI * 0.5f);
+        return new Vector2(localPosX, localPosY).normalized;
+    }
+    public float GetSunOrbitPhase(float timeStep) {
+        float phase = clockSunRPM * timeStep + Mathf.PI * 0.5f;
+        return phase;
+    }
+    public Vector2 GetSunDir(float timeStep) {        
+        float localPosX = Mathf.Cos(GetSunOrbitPhase(timeStep));
+        float localPosY = Mathf.Sin(GetSunOrbitPhase(timeStep));
+        return new Vector2(localPosX, localPosY).normalized;
     }
 
     public void InitializeClockBuffers() {

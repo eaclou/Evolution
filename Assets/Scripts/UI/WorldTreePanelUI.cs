@@ -82,21 +82,26 @@ public class WorldTreePanelUI : MonoBehaviour
 
         float cursorCoordsX = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().x) / 360f);
         float cursorCoordsY = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().y - 720f) / 360f);                
+        float curTimeStep = simulationManager.simAgeTimeSteps;
+        float sunOrbitPhase = uiManagerRef.clockPanelUI.GetSunOrbitPhase(simulationManager.simAgeTimeSteps);
+
+        uiManagerRef.clockPanelUI.imageClockFaceGroup.rectTransform.localPosition = new Vector3(Mathf.Min(360f, theCursorCzar.GetCursorPixelCoords().x), 180f, 0f);
+
         
         //**** PLANET!!!!!!
         if(imageClockPlanet) {            
-            imageClockPlanet.rectTransform.localPosition = new Vector3(Mathf.Min(360f, theCursorCzar.GetCursorPixelCoords().x), 180f, 0f);
-            //imageClockPlanet.rectTransform.localEulerAngles = new Vector3(0f, 0f, simulationManager.simAgeTimeSteps * 0.043f);
+            imageClockPlanet.rectTransform.localPosition = Vector3.zero;            
+            imageClockPlanet.rectTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * sunOrbitPhase);
             float curFrame = ((simulationManager.simAgeTimeSteps * cursorCoordsX) / 2048f * 16f);
             clockPlanetMatA.SetFloat("_CurFrame", curFrame);
             clockPlanetMatA.SetFloat("_NumRows", 4f);
             clockPlanetMatA.SetFloat("_NumColumns", 4f);
         }
         // MOON:
-        if(imageClockMoon) {
-            Vector2 moonDir = uiManagerRef.clockPanelUI.GetMoonDir();
-            imageClockMoon.rectTransform.localPosition = new Vector3(Mathf.Min(360f, theCursorCzar.GetCursorPixelCoords().x) + moonDir.x * 30f, 180f + moonDir.y * 30f, 0f);
-            //imageClockPlanet.rectTransform.localEulerAngles = new Vector3(0f, 0f, simulationManager.simAgeTimeSteps * 0.043f);
+        if(imageClockMoon) {            
+            Vector2 moonDir = uiManagerRef.clockPanelUI.GetMoonDir(curTimeStep);
+            imageClockMoon.rectTransform.localPosition = new Vector3(moonDir.x * 30f, moonDir.y * 30f, 0f);
+            imageClockMoon.rectTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * sunOrbitPhase);
             float curFrame = ((simulationManager.simAgeTimeSteps * cursorCoordsX) / 2048f * 16f);
             clockMoonMatA.SetFloat("_CurFrame", curFrame);
             clockMoonMatA.SetFloat("_NumRows", 4f);
@@ -104,9 +109,8 @@ public class WorldTreePanelUI : MonoBehaviour
         }
         // SUN:
         if(imageClockSun) {
-            Vector2 sunDir = uiManagerRef.clockPanelUI.GetSunDir();
-            imageClockSun.rectTransform.localPosition = new Vector3(Mathf.Min(360f, theCursorCzar.GetCursorPixelCoords().x) + sunDir.x * 60f, 180f + sunDir.y * 60f, 0f);
-            //imageClockPlanet.rectTransform.localEulerAngles = new Vector3(0f, 0f, simulationManager.simAgeTimeSteps * 0.043f);
+            Vector2 sunDir = uiManagerRef.clockPanelUI.GetSunDir(curTimeStep);
+            imageClockSun.rectTransform.localPosition = new Vector3(sunDir.x * 60f, sunDir.y * 60f, 0f);            
             float curFrame = ((simulationManager.simAgeTimeSteps * cursorCoordsX) / 2048f * 16f);
             clockSunMatA.SetFloat("_CurFrame", curFrame);
             clockSunMatA.SetFloat("_NumRows", 4f);
