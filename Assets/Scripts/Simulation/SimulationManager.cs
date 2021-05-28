@@ -89,10 +89,12 @@ public class SimulationManager : Singleton<SimulationManager>
     private int numAgentEvaluationsPerGenome = 1;
 
     public int simAgeTimeSteps = 0;
-    private int numStepsInSimYear = 2048;
+    private int numStepsInSimYear = 10000;
     private int simAgeYearCounter = 0;
     public int curSimYear = 0;
-    
+    public int GetNumTimeStepsPerYear() {
+        return numStepsInSimYear;
+    }
     public SpeciesGenomePool GetSelectedGenomePool() {
         return GetGenomePoolBySpeciesID(uiManager.selectedSpeciesID);
     }

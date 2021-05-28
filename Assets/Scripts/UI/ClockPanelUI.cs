@@ -2,31 +2,55 @@
 using UnityEngine.UI;
 
 public class ClockPanelUI : MonoBehaviour
-{
-    public Text textCurYear;
+{ 
+    [SerializeField]
+    GameObject clockFaceGroup;
 
-    public Image imageClockHandA;
-	public Image imageClockHandB;
-    public Image imageClockHandC;
+    [SerializeField]
+    Text textCurYear;
 
-    public Image imageClockFaceGroup;
+    [SerializeField]
+    Image imageClockHandA;
+    [SerializeField]
+	Image imageClockHandB;
+    [SerializeField]
+    Image imageClockHandC;
+    [SerializeField]
+    Image imageClockPlanet;
+    [SerializeField]
+    Image imageClockMoon;
+    [SerializeField]
+    Image imageClockSun;
 
-    public Material clockEarthStampMat;
-    public Material clockMoonStampMat;
+    [SerializeField]
+    Material clockPlanetMatA;
+    [SerializeField]
+    Material clockMoonMatA;
+    [SerializeField]
+    Material clockSunMatA;
+    
+    public Material clockEarthStampMat;    
+    public Material clockMoonStampMat;    
     public Material clockSunStampMat;
     
     SimulationManager simulation => SimulationManager.instance;
+    TheCursorCzar theCursorCzar => TheCursorCzar.instance;
+
+    private float cursorTimeStep;
 
     public ComputeBuffer clockEarthStampDataCBuffer;    
     private int maxNumClockEarthStamps = 1024;
-    private int numTicksPerEarthStamp = 30;
+    [SerializeField]
+    int numTicksPerEarthStamp = 60;
     private float earthSpeed = 1f;
     public ComputeBuffer clockMoonStampDataCBuffer;    
     private int maxNumClockMoonStamps = 1024;
-    private int numTicksPerMoonStamp = 120;
+    [SerializeField]
+    int numTicksPerMoonStamp = 120;
     public ComputeBuffer clockSunStampDataCBuffer;    
     private int maxNumClockSunStamps = 1024;
-    private int numTicksPerSunStamp = 2000;
+    [SerializeField]
+    int numTicksPerSunStamp = 1024;
 
     [SerializeField]
     float clockRadiusEarth;
@@ -51,11 +75,22 @@ public class ClockPanelUI : MonoBehaviour
         public Vector4 color;
         public float animPhase; // which frame of the flipbook
         public float rotateZ;
+        public float timeStep;
+    }
+    public int GetClockStampDataBufferStride() {
+        return sizeof(float) * 11;
+    }
+
+    private Season currentSeason;
+    private enum Season {
+        Summer,
+        Autumn,
+        Winter,
+        Spring
     }
 
     public void Tick() {
-        textCurYear.text = (simulation.curSimYear + 1).ToString();
-
+        
         int numTicks = simulation.simAgeTimeSteps;
         float angVelA = -2.25f;
         float angVelB = -0.25f;
@@ -63,6 +98,41 @@ public class ClockPanelUI : MonoBehaviour
         imageClockHandA.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, (float)numTicks * angVelA);
         imageClockHandB.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, (float)numTicks * angVelB);
         imageClockHandC.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, (float)numTicks * angVelC);
+
+        float cursorCoordsX = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().x) / 360f);
+        float cursorCoordsY = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().y - 720f) / 360f);                
+        float curTimeStep = simulation.simAgeTimeSteps;
+        
+        cursorTimeStep = Mathf.RoundToInt(curTimeStep * cursorCoordsX);
+
+        float sunOrbitPhase = GetSunOrbitPhase(cursorTimeStep);
+
+        int cursorYear = Mathf.FloorToInt(cursorTimeStep / (float)simulation.GetNumTimeStepsPerYear());
+        int seasonInt = Mathf.FloorToInt(cursorTimeStep / (float)simulation.GetNumTimeStepsPerYear() * 4f) % 4;
+        currentSeason = (Season)seasonInt;
+        textCurYear.text = (cursorYear + 1).ToString() + "\n" + currentSeason.ToString();
+        
+        clockFaceGroup.transform.localPosition = new Vector3(Mathf.Min(360f, theCursorCzar.GetCursorPixelCoords().x), 300f, 0f);
+                
+        //**** PLANET!!!!!!
+        if(imageClockPlanet) {            
+            imageClockPlanet.rectTransform.localPosition = Vector3.zero;            
+            imageClockPlanet.rectTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * sunOrbitPhase);
+            
+        }
+        // MOON:
+        if(imageClockMoon) {            
+            Vector2 moonDir = GetMoonDir(cursorTimeStep);
+            imageClockMoon.rectTransform.localPosition = new Vector3(moonDir.x * 16f, moonDir.y * 16f, 0f);
+            imageClockMoon.rectTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * sunOrbitPhase);
+            
+        }
+        // SUN:
+        if(imageClockSun) {
+            Vector2 sunDir = GetSunDir(cursorTimeStep);
+            imageClockSun.rectTransform.localPosition = new Vector3(sunDir.x * 32f, sunDir.y * 32f, 0f);
+            
+        }
 	
     }
     public float GetMoonOrbitPhase(float timeStep) {
@@ -88,7 +158,7 @@ public class ClockPanelUI : MonoBehaviour
         // 'Earth Stamps
         ClockStampData[] clockEarthStampDataArray = new ClockStampData[maxNumClockEarthStamps];
         clockEarthStampDataCBuffer?.Release();
-        clockEarthStampDataCBuffer = new ComputeBuffer(maxNumClockEarthStamps, sizeof(float) * 10);
+        clockEarthStampDataCBuffer = new ComputeBuffer(maxNumClockEarthStamps, GetClockStampDataBufferStride());
         for (int i = 0; i < clockEarthStampDataArray.Length; i++) {                
             ClockStampData data = new ClockStampData();
             clockEarthStampDataArray[i] = data;
@@ -98,7 +168,7 @@ public class ClockPanelUI : MonoBehaviour
         // 'Moon Stamps
         ClockStampData[] clockMoonStampDataArray = new ClockStampData[maxNumClockMoonStamps];
         clockMoonStampDataCBuffer?.Release();
-        clockMoonStampDataCBuffer = new ComputeBuffer(maxNumClockMoonStamps, sizeof(float) * 10);
+        clockMoonStampDataCBuffer = new ComputeBuffer(maxNumClockMoonStamps, GetClockStampDataBufferStride());
         for (int i = 0; i < clockMoonStampDataArray.Length; i++) {                
             ClockStampData data = new ClockStampData();
             clockMoonStampDataArray[i] = data;
@@ -108,12 +178,22 @@ public class ClockPanelUI : MonoBehaviour
         // 'Sun Stamps
         ClockStampData[] clockSunStampDataArray = new ClockStampData[maxNumClockSunStamps];
         clockSunStampDataCBuffer?.Release();
-        clockSunStampDataCBuffer = new ComputeBuffer(maxNumClockSunStamps, sizeof(float) * 10);
+        clockSunStampDataCBuffer = new ComputeBuffer(maxNumClockSunStamps, GetClockStampDataBufferStride());
         for (int i = 0; i < clockSunStampDataArray.Length; i++) {                
             ClockStampData data = new ClockStampData();
             clockSunStampDataArray[i] = data;
         }
         clockSunStampDataCBuffer.SetData(clockSunStampDataArray);
+
+        clockPlanetMatA.SetFloat("_NumRows", 4f);
+        clockPlanetMatA.SetFloat("_NumColumns", 4f);
+
+        //clockMoonMatA.SetFloat("_CurFrame", curFrame);
+        clockMoonMatA.SetFloat("_NumRows", 4f);
+        clockMoonMatA.SetFloat("_NumColumns", 4f);
+        //clockSunMatA.SetFloat("_CurFrame", curFrame);
+        clockSunMatA.SetFloat("_NumRows", 4f);
+        clockSunMatA.SetFloat("_NumColumns", 4f);
     }
 
     public void UpdateEarthStampData() {        
@@ -133,16 +213,18 @@ public class ClockPanelUI : MonoBehaviour
             //xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
             //yCoord = yCoord * 0.2f + 0.8f;
 
-            data.pos = new Vector3(xCoord, yCoord + 0.5f, 0f);
+            data.pos = new Vector3(xCoord, yCoord + 0.8333f, 0f);
             data.radius = clockRadiusEarth / (totalDistanceTraveled * clockZoomSpeed);
             // add scale info
             data.color = Color.white;
             data.animPhase = 0.25f;
             //float xDir = Mathf.Cos(clockSunRPM * (float)(i * numTicksPerSunStamp) + Mathf.PI * 0.5f);
             //float yDir = Mathf.Sin(clockSunRPM * (float)(i * numTicksPerSunStamp) + Mathf.PI * 0.5f);
-            float angle = clockSunRPM * (float)(i * numTicksPerSunStamp) + Mathf.PI * 0.5f;
+            float timeStep = xCoord * (float)simulation.simAgeTimeSteps;
+            float angle = GetSunOrbitPhase(timeStep); // clockSunRPM * (float)(i * numTicksPerSunStamp) + Mathf.PI * 0.5f;
             
-            data.rotateZ = angle;
+            data.rotateZ = angle + Mathf.PI / 2f;
+            data.timeStep = cursorTimeStep;
 
             clockEarthStampDataArray[i] = data;
         }
@@ -168,11 +250,14 @@ public class ClockPanelUI : MonoBehaviour
             //yCoord = yCoord * 0.2f + 0.8f;
             //yCoord = 0.5f; //TEMP!!!
 
-            data.pos = new Vector3(xCoord, yCoord + 0.5f, 0f);
+            data.pos = new Vector3(xCoord, yCoord + 0.8333f, 0f);
             data.radius = clockRadiusMoon / (totalDistanceTraveled * clockZoomSpeed);
             data.color = Color.white;
             data.animPhase = 0.75f;
-            data.rotateZ = 90f;
+            float timeStep = xCoord * (float)simulation.simAgeTimeSteps;
+            float angle = GetSunOrbitPhase(timeStep);
+            data.rotateZ = angle + Mathf.PI / 2f;
+            data.timeStep = timeStep;
 
             clockMoonStampDataArray[i] = data;
         }
@@ -198,11 +283,13 @@ public class ClockPanelUI : MonoBehaviour
             //xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
             //yCoord = yCoord * 0.2f + 0.8f;
 
-            data.pos = new Vector3(xCoord, yCoord + 0.5f, 0f);
+            data.pos = new Vector3(xCoord, yCoord + 0.8333f, 0f);
             data.radius = clockRadiusSun / (totalDistanceTraveled * clockZoomSpeed);
             data.color = Color.white;
+            float timeStep = xCoord * (float)simulation.simAgeTimeSteps;            
             data.animPhase = 0f;
             data.rotateZ = 0f;
+            data.timeStep = timeStep;
 
             clockSunStampDataArray[i] = data;
         }

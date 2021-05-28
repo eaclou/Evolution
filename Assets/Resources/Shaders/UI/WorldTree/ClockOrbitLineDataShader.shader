@@ -31,6 +31,7 @@
 				float4 color;
 				float animPhase;
 				float rotateZ;
+				float timeStep;
 			};
 			StructuredBuffer<float3> quadVerticesCBuffer;
 			// Change to 2x texture2D's ((1)time series data + (2)key) for data input?
@@ -68,7 +69,7 @@
 				ClockOrbitLineData data = clockOrbitLineDataCBuffer[inst];
 				float3 quadData = quadVerticesCBuffer[id];
 				
-				float angle = data.rotateZ * 0.001;// + 3.14159 * 0.5;
+				float angle = data.rotateZ;// + 3.14159 * 0.5;
 				float2 forward = float2(cos(angle),sin(angle));
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float2 rotatedPoint = float2(quadData.x * right + quadData.y * forward);

@@ -8,19 +8,10 @@ public class WorldTreePanelUI : MonoBehaviour
     public bool isShowingExtinct = false;
     //public Text textSelectedSpeciesTitle;
     public Image imageSelectedSpeciesBG;
-    public Text textSpeciationTree;    
+    //public Text textSpeciationTree;    
     //public Text textStatsBody;
     public Text textTitle;
-    public Image imageClockPlanet;
-    public Image imageClockMoon;
-    public Image imageClockSun;
-
-    [SerializeField]
-    Material clockPlanetMatA;
-    [SerializeField]
-    Material clockMoonMatA;
-    [SerializeField]
-    Material clockSunMatA;
+    
 
     public GameObject anchorGO;
     public GameObject prefabSpeciesIcon;
@@ -42,13 +33,7 @@ public class WorldTreePanelUI : MonoBehaviour
     public int GetPanelMode() {
         return curPanelMode;
     }
-
-    private float marginLeft = 0.1f;
-    private float marginRight = 0.1f;
-    private float marginBottom = 0.1f;
-    private float graphHeight = 0.3f;
-    private float orbitsHeight = 0.2f;
-
+    
     public void Awake() {
         speciesIconsList = new List<SpeciesIconUI>();
     }
@@ -79,44 +64,6 @@ public class WorldTreePanelUI : MonoBehaviour
         textTitle.text = "mode: " + curPanelMode + ", focus: " + focusLevel + ", " + timelineStartTimeStep.ToString("F0");
         //*** update positions of buttons, etc.
         //**** TEMP!!! TESTING!!!
-
-        float cursorCoordsX = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().x) / 360f);
-        float cursorCoordsY = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().y - 720f) / 360f);                
-        float curTimeStep = simulationManager.simAgeTimeSteps;
-        float sunOrbitPhase = uiManagerRef.clockPanelUI.GetSunOrbitPhase(simulationManager.simAgeTimeSteps);
-
-        uiManagerRef.clockPanelUI.imageClockFaceGroup.rectTransform.localPosition = new Vector3(Mathf.Min(360f, theCursorCzar.GetCursorPixelCoords().x), 180f, 0f);
-
-        
-        //**** PLANET!!!!!!
-        if(imageClockPlanet) {            
-            imageClockPlanet.rectTransform.localPosition = Vector3.zero;            
-            imageClockPlanet.rectTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * sunOrbitPhase);
-            float curFrame = ((simulationManager.simAgeTimeSteps * cursorCoordsX) / 2048f * 16f);
-            clockPlanetMatA.SetFloat("_CurFrame", curFrame);
-            clockPlanetMatA.SetFloat("_NumRows", 4f);
-            clockPlanetMatA.SetFloat("_NumColumns", 4f);
-        }
-        // MOON:
-        if(imageClockMoon) {            
-            Vector2 moonDir = uiManagerRef.clockPanelUI.GetMoonDir(curTimeStep);
-            imageClockMoon.rectTransform.localPosition = new Vector3(moonDir.x * 30f, moonDir.y * 30f, 0f);
-            imageClockMoon.rectTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * sunOrbitPhase);
-            float curFrame = ((simulationManager.simAgeTimeSteps * cursorCoordsX) / 2048f * 16f);
-            clockMoonMatA.SetFloat("_CurFrame", curFrame);
-            clockMoonMatA.SetFloat("_NumRows", 4f);
-            clockMoonMatA.SetFloat("_NumColumns", 4f);
-        }
-        // SUN:
-        if(imageClockSun) {
-            Vector2 sunDir = uiManagerRef.clockPanelUI.GetSunDir(curTimeStep);
-            imageClockSun.rectTransform.localPosition = new Vector3(sunDir.x * 60f, sunDir.y * 60f, 0f);            
-            float curFrame = ((simulationManager.simAgeTimeSteps * cursorCoordsX) / 2048f * 16f);
-            clockSunMatA.SetFloat("_CurFrame", curFrame);
-            clockSunMatA.SetFloat("_NumRows", 4f);
-            clockSunMatA.SetFloat("_NumColumns", 4f);
-        }
-        
 
         for(int i = 0; i < speciesIconsList.Count; i++) {
             SpeciesIconUI icon = speciesIconsList[i];

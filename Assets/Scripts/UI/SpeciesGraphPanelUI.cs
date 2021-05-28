@@ -223,7 +223,7 @@ public class SpeciesGraphPanelUI : MonoBehaviour
             statsTreeOfLifeSpeciesTexArray[b].Apply();
         }
         
-        RefreshGraphMaterial();        
+        //RefreshGraphMaterial();        
     }
 
     private void RefreshGraphMaterial() {
@@ -365,7 +365,7 @@ public class SpeciesGraphPanelUI : MonoBehaviour
                 break;
         }
 
-        speciesGraphImage.material = speciesGraphMatLeft;
+        //speciesGraphImage.material = speciesGraphMatLeft;
         //speciesGraphImage.gameObject.SetActive(false);
         //speciesGraphImage.gameObject.SetActive(true);
 

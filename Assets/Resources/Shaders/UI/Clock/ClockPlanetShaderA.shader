@@ -78,8 +78,9 @@
 				fixed4 col0 = tex2D(_MainTex, i.uv0);
 				fixed4 col1 = tex2D(_MainTex, i.uv1);
 				//col.rgb = lerp(_TintPri.rgb, _TintSec.rgb, i.uv.y);
-				
-				return lerp(col0, col1, frac(_CurFrame));
+				fixed4 finalCol = lerp(col0, col1, frac(_CurFrame));
+				finalCol.rgb = lerp(finalCol.rgb, float3(0, 0.61, 0.95), 0.2);
+				return finalCol;
 			}
 			ENDCG
 		}

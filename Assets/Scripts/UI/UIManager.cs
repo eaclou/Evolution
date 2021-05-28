@@ -319,7 +319,7 @@ public class UIManager : Singleton<UIManager> {
         brushesUI.UpdateBrushesUI();        
         //globalResourcesUI.UpdateGlobalResourcesPanelUpdate();
  
-        clockPanelUI.Tick(); // //UpdateClockPanelUI();
+        
 
         SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID]; // ***EC Move into genomeViewerUI.Tick()
         if(focusedCandidate != null && focusedCandidate.candidateGenome != null) {
@@ -334,6 +334,7 @@ public class UIManager : Singleton<UIManager> {
         }
 
         worldTreePanelUI.UpdateUI();
+        clockPanelUI.Tick(); // //UpdateClockPanelUI();
         
         minimapUI.Tick();
 

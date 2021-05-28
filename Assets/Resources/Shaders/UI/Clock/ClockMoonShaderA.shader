@@ -73,13 +73,11 @@
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				//return float4(i.uv0, 0, 1);
 				// sample the texture
 				fixed4 col0 = tex2D(_MainTex, i.uv0);
 				fixed4 col1 = tex2D(_MainTex, i.uv1);
-				//col.rgb = lerp(_TintPri.rgb, _TintSec.rgb, i.uv.y);
-				
-				return lerp(col0, col1, frac(_CurFrame));
+				fixed4 finalCol = lerp(col0, col1, frac(_CurFrame)) * 1.2;
+				return finalCol;
 			}
 			ENDCG
 		}
