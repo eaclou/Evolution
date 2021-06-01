@@ -109,8 +109,6 @@ public class WorldTreePanelUI : MonoBehaviour
                 }
             }
 
-            
-            
             xCoord = xCoord * 0.8f + indent;
             yCoord = yCoord * 0.67f + 0.1f;
             speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));

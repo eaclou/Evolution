@@ -209,22 +209,15 @@ public class ClockPanelUI : MonoBehaviour
 
             float xCoord = stampWorldPosX / totalDistanceTraveled;
             float yCoord = stampWorldPosY / totalDistanceTraveled;
-
-            //xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
-            //yCoord = yCoord * 0.2f + 0.8f;
-
+            
+            float timeStep = xCoord * (float)simulation.simAgeTimeSteps;
+            
             data.pos = new Vector3(xCoord, yCoord + 0.8333f, 0f);
             data.radius = clockRadiusEarth / (totalDistanceTraveled * clockZoomSpeed);
-            // add scale info
             data.color = Color.white;
             data.animPhase = 0.25f;
-            //float xDir = Mathf.Cos(clockSunRPM * (float)(i * numTicksPerSunStamp) + Mathf.PI * 0.5f);
-            //float yDir = Mathf.Sin(clockSunRPM * (float)(i * numTicksPerSunStamp) + Mathf.PI * 0.5f);
-            float timeStep = xCoord * (float)simulation.simAgeTimeSteps;
-            float angle = GetSunOrbitPhase(timeStep); // clockSunRPM * (float)(i * numTicksPerSunStamp) + Mathf.PI * 0.5f;
-            
-            data.rotateZ = angle + Mathf.PI / 2f;
-            data.timeStep = cursorTimeStep;
+            data.rotateZ =  GetSunOrbitPhase(timeStep) + Mathf.PI / 2f;
+            data.timeStep = timeStep; // cursorTimeStep;
 
             clockEarthStampDataArray[i] = data;
         }
@@ -245,11 +238,7 @@ public class ClockPanelUI : MonoBehaviour
             
             float xCoord = stampWorldPosX / totalDistanceTraveled;
             float yCoord = stampWorldPosY / totalDistanceTraveled;
-
-            //xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
-            //yCoord = yCoord * 0.2f + 0.8f;
-            //yCoord = 0.5f; //TEMP!!!
-
+                        
             data.pos = new Vector3(xCoord, yCoord + 0.8333f, 0f);
             data.radius = clockRadiusMoon / (totalDistanceTraveled * clockZoomSpeed);
             data.color = Color.white;
@@ -278,11 +267,7 @@ public class ClockPanelUI : MonoBehaviour
 
             float xCoord = stampWorldPosX / totalDistanceTraveled;
             float yCoord = stampWorldPosY / totalDistanceTraveled;
-            //yCoord = 1f; //TEMP!!!
-
-            //xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
-            //yCoord = yCoord * 0.2f + 0.8f;
-
+            
             data.pos = new Vector3(xCoord, yCoord + 0.8333f, 0f);
             data.radius = clockRadiusSun / (totalDistanceTraveled * clockZoomSpeed);
             data.color = Color.white;

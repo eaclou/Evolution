@@ -137,10 +137,8 @@ public class UIManager : Singleton<UIManager> {
     public bool IsFocus(CandidateAgentData candidate) { return candidate.candidateID == focusedCandidate.candidateID; }
     
     public void SetSelectedSpeciesUI(int id) {
-        //SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[id];
         if(id == selectedSpeciesID) {
             // already selected -->
-            
             worldTreePanelUI.ToggleFocusLevel(); // species overview vs world overview
         }
         else {
@@ -310,17 +308,14 @@ public class UIManager : Singleton<UIManager> {
     #region UPDATE UI PANELS FUNCTIONS!!! :::
     void Update() {                                        // ***EC CLEAN THIS CRAP UP
         if(!simulationManager.loadingComplete) return;
-        bigBangPanelUI.Tick(); ////UpdateBigBangPanel();
+        bigBangPanelUI.Tick();
         if(simulationManager._BigBangOn) return;
         
-        observerModeUI.Tick(); //UpdateObserverModeUI();  // <== this is the big one *******  
+        observerModeUI.Tick();  // <== this is the big one *******  
         // ^^^  Need to Clean this up and replace with better approach ***********************        
         theCursorCzar.UpdateCursorCzar();  // this will assume a larger role
         brushesUI.UpdateBrushesUI();        
-        //globalResourcesUI.UpdateGlobalResourcesPanelUpdate();
- 
         
-
         SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID]; // ***EC Move into genomeViewerUI.Tick()
         if(focusedCandidate != null && focusedCandidate.candidateGenome != null) {
             genomeViewerUI.UpdateUI();
@@ -328,20 +323,18 @@ public class UIManager : Singleton<UIManager> {
             creaturePaperDollUI.Tick();
             creatureLifeEventsLogUI.Tick(focusedCandidate);
 
-            if(simulationManager.simAgeTimeSteps % 67 == 1) {
+            if(simulationManager.simAgeTimeSteps % 67 == 1) { //***EAC still needed?
                 speciesOverviewUI.RebuildGenomeButtons();  
             }
         }
 
         worldTreePanelUI.UpdateUI();
-        clockPanelUI.Tick(); // //UpdateClockPanelUI();
+        clockPanelUI.Tick();
         
         minimapUI.Tick();
 
         debugPanelUI.UpdateDebugUI();
-              
-        //UpdatePausedUI(); 
-
+        
     }
 
     public void SetFocus()

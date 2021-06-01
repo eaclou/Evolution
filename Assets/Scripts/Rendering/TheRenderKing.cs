@@ -272,8 +272,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private int worldTreeBufferCount => worldTreeNumPointsPerLine * (worldTreeNumSpeciesLines * worldTreeNumCreatureLines);
     public ComputeBuffer clockOrbitLineDataCBuffer;
     private int clockOrbitNumPointsPerLine = 16;
-    private int numClockOrbitLines = 1;
-    private int maxNumClockEarthStamps = 1024;    
+    private int numClockOrbitLines = 1;  
     private int clockOrbitBufferCount => numClockOrbitLines * clockOrbitNumPointsPerLine;
 
     public struct TreeOfLifeEventLineData { //***EAC deprecate!
