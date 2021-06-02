@@ -316,7 +316,6 @@ public class UIManager : Singleton<UIManager> {
         theCursorCzar.UpdateCursorCzar();  // this will assume a larger role
         brushesUI.UpdateBrushesUI();        
         
-        SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[selectedSpeciesID]; // ***EC Move into genomeViewerUI.Tick()
         if(focusedCandidate != null && focusedCandidate.candidateGenome != null) {
             genomeViewerUI.UpdateUI();
             creatureBrainActivityUI.Tick();
@@ -330,11 +329,8 @@ public class UIManager : Singleton<UIManager> {
 
         worldTreePanelUI.UpdateUI();
         clockPanelUI.Tick();
-        
         minimapUI.Tick();
-
         debugPanelUI.UpdateDebugUI();
-        
     }
 
     public void SetFocus()
