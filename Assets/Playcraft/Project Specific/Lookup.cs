@@ -91,12 +91,32 @@ public class Lookup : ScriptableObject
         return causesOfDeath[0].value;
     }
     
+    [SerializeField] KnowledgeMapSO[] knowledgeMaps;
     
+    public KnowledgeMapSO GetKnowledgeMapData(KnowledgeMapId id)
+    {
+	    foreach (var map in knowledgeMaps)
+            if (map.id == id)
+                return map;
+        
+        Debug.LogError("Invalid map state " + id);        
+        return knowledgeMaps[0];
+    }
+    
+    public KnowledgeMapId GetKnowledgeMapId(KnowledgeMapSO data)
+    {
+		foreach (var map in knowledgeMaps)
+			if (map == data)
+				return map.id;
+				
+	    Debug.Log("Invalid map state " + data.name);
+	    return KnowledgeMapId.Undefined;
+    }
+	
 	#endregion
 }
 
 #region Resource Lookup Containers
-
 
 [Serializable]
 public struct CauseOfDeathData
@@ -104,12 +124,5 @@ public struct CauseOfDeathData
 	public CauseOfDeathId id;
 	public CauseOfDeathSO value;
 }
-
-
-#endregion
-
-#region Resource Identifier Enums
-
-//public enum ResolutionId { Low, Medium, High, Max }
 
 #endregion

@@ -121,7 +121,6 @@ public class WorldSpiritHubUI : MonoBehaviour {
 
     public void PlayBigBangSpawnAnim() {
         Debug.Log("Play Anim!!!!!!");
-
         //animatorTest01.SetTrigger(animTestTriggerHash);
     }
 
@@ -302,11 +301,9 @@ public class WorldSpiritHubUI : MonoBehaviour {
         imageSelectedEssence.sprite = curIconSprite;
         imageColorBar.color = curIconColor;
         //imageBitBG.color = curIconColor;
-
     }
+    
     public void UpdateWorldSpiritHubUI() {
-        
-
         animatorWorldHubUI.SetBool("_IsOpen", isOpen);
 
         bool animFinished = animatorWorldHubUI.GetBool("_AnimFinished");
@@ -329,21 +326,24 @@ public class WorldSpiritHubUI : MonoBehaviour {
         isOpen = false;
         animatorWorldHubUI.SetBool("_IsOpen", false);
         //panelWorldHubExpand.SetActive(false);
-        Debug.Log("ClickToolButton) " + isOpen.ToString());
+        Debug.Log("ClickToolButton) " + isOpen);
     }
+    
     public void SetTargetFromBrushesUI() {
         selectedWorldSpiritSlot = uiManagerRef.brushesUI.selectedEssenceSlot;
         //uiManagerRef.panelFocus = PanelFocus.WorldHub;
-        this.isOpen = true;
+        isOpen = true;
         //animatorWorldHubUI.SetBool("_IsOpen", true);
         //isPaletteOpen = true;
     }
+    
     public void SetTargetFromWatcherUI() {
         //selectedWorldSpiritSlot = uiManagerRef.watcherUI.watcherSelectedTrophicSlotRef;
         //uiManagerRef.panelFocus = PanelFocus.WorldHub;
-        this.isOpen = true;
+        isOpen = true;
         //animatorWorldHubUI.SetBool("_IsOpen", true);
     }
+    
     public void OpenWorldTreeSelect() {
         isOpen = true;
         //uiManagerRef.panelFocus = PanelFocus.WorldHub;
@@ -369,9 +369,8 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
         //isBrushSelected = false;
     }
+    
     public void ClickButtonWorldSpiritHubTerrain(int index) {
-        
-
         Debug.Log("ClickButtonPaletteTerrain: " + index.ToString());
 
         TrophicSlot slot = simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[index];
@@ -383,6 +382,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
         //isBrushSelected = false;
     }
+    
     public void ClickButtonWorldSpiritHubDecomposers() {
         TrophicSlot slot = simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
 
@@ -395,6 +395,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
         //isBrushSelected = false;
     }
+    
     public void ClickButtonWorldSpiritHubAlgae() {  // shouldn't be able to click if LOCKED (interactive = false)
         TrophicSlot slot = simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
         selectedWorldSpiritSlot = slot;
@@ -405,6 +406,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         }
         //uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
     }
+    
     public void ClickButtonWorldSpiritHubPlants(int slotID) {
         TrophicSlot slot = simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[slotID];
         selectedWorldSpiritSlot = slot;
@@ -415,6 +417,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         }
         //uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
     }
+    
     public void ClickButtonWorldSpiritHubZooplankton() {
         TrophicSlot slot = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];        
         selectedWorldSpiritSlot = slot;
@@ -427,6 +430,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //curActiveTool = ToolType.None;
         //isBrushSelected = false;
     }
+    
     public void ClickButtonWorldSpiritHubAgent(int index) {
         TrophicSlot slot = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[index];
         selectedWorldSpiritSlot = slot;
@@ -446,10 +450,9 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
     }
 
-    
     public void ClickWorldCreateNewSpecies(TrophicSlot slot) {
         // questionable code, possibly un-needed:
-        simulationManager.trophicLayersManager.CreateTrophicSlotSpecies(simulationManager, slot, cameraManager.curCameraFocusPivotPos, simulationManager.simAgeTimeSteps);
+        simulationManager.trophicLayersManager.CreateTrophicSlotSpecies(slot, cameraManager.curCameraFocusPivotPos, simulationManager.simAgeTimeSteps);
                 
         theRenderKing.baronVonWater.StartCursorClick(cameraManager.curCameraFocusPivotPos);
         
@@ -484,7 +487,6 @@ public class WorldSpiritHubUI : MonoBehaviour {
                     //panelPendingClickPrompt.GetComponentInChildren<Text>().text = "These creatures start with randomly-generated brains\n and must evolve successful behavior\nthrough survival of the fittest";
                     uiManagerRef.isAnnouncementTextOn = false;  // *** hacky...
                 }
-                
             }
             else {
                 //panelPendingClickPrompt.Narrate("A new species of Zooplankton added!", colorVertebratesLayer);
@@ -492,8 +494,6 @@ public class WorldSpiritHubUI : MonoBehaviour {
         }
 
         //curToolbarWingPanelSelectID = 1;
-
-        
         //timerAnnouncementTextCounter = 0;
         //recentlyCreatedSpecies = true;
         //recentlyCreatedSpeciesTimeStepCounter = 0;

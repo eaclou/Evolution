@@ -33,7 +33,7 @@ public class UIManager : Singleton<UIManager> {
     public CreatureBrainActivityUI creatureBrainActivityUI;
     public CreaturePaperDollUI creaturePaperDollUI;
     public CreatureLifeEventsLogUI creatureLifeEventsLogUI;
-    public MinimapUI minimapUI;
+    public MinimapPanel minimapUI;
       
         
     public GameOptionsManager gameOptionsManager;    
