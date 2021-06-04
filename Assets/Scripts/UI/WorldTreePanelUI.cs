@@ -6,12 +6,8 @@ public class WorldTreePanelUI : MonoBehaviour
 {
     [SerializeField] GameObject panelSpeciesTree;
     public bool isShowingExtinct = false;
-    //public Text textSelectedSpeciesTitle;
-    public Image imageSelectedSpeciesBG;
-    //public Text textSpeciationTree;    
-    //public Text textStatsBody;
-    public Text textTitle;
-    
+    public Image imageSelectedSpeciesBG;    
+    public Text textTitle;    
 
     public GameObject anchorGO;
     public GameObject prefabSpeciesIcon;
