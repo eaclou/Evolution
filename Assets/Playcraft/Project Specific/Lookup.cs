@@ -102,18 +102,8 @@ public class Lookup : ScriptableObject
         Debug.LogError("Invalid map state " + id);        
         return knowledgeMaps[0];
     }
-    
-    public KnowledgeMapId GetKnowledgeMapId(KnowledgeMapSO data)
-    {
-		foreach (var map in knowledgeMaps)
-			if (map == data)
-				return map.id;
-				
-	    Debug.Log("Invalid map state " + data.name);
-	    return KnowledgeMapId.Undefined;
-    }
-	
-	#endregion
+
+    #endregion
 }
 
 #region Resource Lookup Containers

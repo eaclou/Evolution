@@ -36,12 +36,6 @@ public class SpeciesOverviewUI : MonoBehaviour {
     
     [SerializeField] [Range(0, 1)] float hueMin = 0.2f;
     
-    // WPP 5/25: Buttons delegated to nested class
-    //public Button selectedButton;
-    //public Button buttonFoundingGenome;
-    //public Button buttonRepresentativeGenome;
-    //public Button buttonLongestLivedGenome;
-    //public Button buttonMostEatenGenome;
     
     // * WPP: references null in editor, not used
     public List<GenomeButtonPrefabScript> hallOfFameButtonsList;
@@ -73,42 +67,12 @@ public class SpeciesOverviewUI : MonoBehaviour {
         RebuildGenomeButtons();
     }
     
-    // **** CHANGE to properly pooled, only create as needed, etc. ****
     public void RebuildGenomeButtons() 
     {
         SpeciesGenomePool pool = simulationManager.GetSelectedGenomePool(); 
-
-        // WPP 5/28: moved to SetLineageColors
-        /*Vector3 hueA = pool.appearanceGenome.huePrimary; 
-        imageLineageA.color = new Color(Mathf.Max(0.2f, hueA.x), Mathf.Max(0.2f, hueA.y), Mathf.Max(0.2f, hueA.z));
-        Vector3 hueB = pool.appearanceGenome.hueSecondary;
-        imageLineageB.color = new Color(Mathf.Max(0.2f, hueB.x), Mathf.Max(0.2f, hueB.y), Mathf.Max(0.2f, hueB.z));*/
+        
         SetLineageColors(pool.appearanceGenome);
-        
-        // WPP 5/28: moved to GetLineageText
-        /* textSpeciesLineage.gameObject.SetActive(true);
 
-        int savedSpeciesID = pool.speciesID;
-        int parentSpeciesID = pool.parentSpeciesID;
-        string lineageTxt = savedSpeciesID.ToString();
-        
-        for(int i = 0; i < 64; i++) 
-        {
-            if (parentSpeciesID < 0)
-            {
-                lineageTxt += "*";
-                break;
-            }
-
-            SpeciesGenomePool parentPool = simulationManager.GetGenomePoolBySpeciesID(parentSpeciesID);
-            lineageTxt += " <- " + parentPool.speciesID;
-
-            savedSpeciesID = parentPool.speciesID;
-            parentSpeciesID = parentPool.parentSpeciesID;
-        }
-        
-        textSpeciesLineage.text = lineageTxt;*/
-        
         textSpeciesLineage.gameObject.SetActive(true);
         textSpeciesLineage.text = GetLineageText(pool);
 
@@ -152,7 +116,6 @@ public class SpeciesOverviewUI : MonoBehaviour {
         }*/
     }
     
-    // WPP: delegated repeat logic, exposed hueMin
     private void SetLineageColors(CritterModuleAppearanceGenome appearance) {
         imageLineageA.color = ColorFloor(appearance.huePrimary, hueMin);
         imageLineageB.color = ColorFloor(appearance.hueSecondary, hueMin);
@@ -204,45 +167,11 @@ public class SpeciesOverviewUI : MonoBehaviour {
     private void RebuildGenomeButtonsCurrent(SpeciesGenomePool pool) {
         Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;            
         genomeLeaderboard.color = new Color(hue.x, hue.y, hue.z);
-        
-        // WPP 5/28: moved to UpdateButtons, applied pooling
-        /*foreach (Transform child in genomeLeaderboard.transform) {
-             Destroy(child.gameObject);
-        }
-        
-        for(int i = 0; i < Mathf.Min(pool.candidateGenomesList.Count, MAX_BUTTONS); i++) {
-            GameObject tempObj = Instantiate(genomeIcon, Vector3.zero, Quaternion.identity);
-            tempObj.transform.SetParent(genomeLeaderboard.transform, false);
-            
-            GenomeButtonPrefabScript buttonScript = tempObj.GetComponent<GenomeButtonPrefabScript>();
-            buttonScript.UpdateButtonPrefab(SelectionGroup.Candidates, i);
-
-            CandidateAgentData candidate = pool.candidateGenomesList[i];
-            buttonScript.SetDisplay(candidate);
-        }*/
-        
         UpdateButtons(pool.candidateGenomesList, SelectionGroup.Candidates);
     }
     
     // Hall of fame genomes (checkpoints .. every 50 years?)
     private void RebuildGenomeButtonsLineage(SpeciesGenomePool pool) {
-        // WPP 5/28: moved to UpdateButtons, applied pooling
-        /*foreach (Transform child in uiManager.panelHallOfFameGenomes.transform) {
-             Destroy(child.gameObject);
-        }
-        
-        for(int i = 0; i < pool.hallOfFameGenomesList.Count; i++) {
-            GameObject tempObj = Instantiate(genomeIcon, Vector3.zero, Quaternion.identity);
-            tempObj.transform.SetParent(uiManager.panelHallOfFameGenomes.transform, false);
-            
-            GenomeButtonPrefabScript genomeButton = tempObj.GetComponent<GenomeButtonPrefabScript>();
-            genomeButton.UpdateButtonPrefab(SelectionGroup.HallOfFame, i);
-
-            CandidateAgentData candidate = pool.hallOfFameGenomesList[i];
-            genomeButton.SetDisplay(candidate);
-            //uiManagerRef.speciesOverviewUI.hallOfFameButtonsList.Add(buttonScript);
-        }*/
-        
         UpdateButtons(pool.hallOfFameGenomesList, SelectionGroup.HallOfFame);
     }
     
@@ -258,101 +187,18 @@ public class SpeciesOverviewUI : MonoBehaviour {
         } 
     }
 
-    // * WPP: remove obsolete comments
     public void ChangeSelectedGenome(SelectionGroup group, int index) {
-        //selectionGroup = group;    
-        
-        if(selectedButtonData != null && selectedButtonData.image != null) {
-            selectedButtonData.image.color = Color.yellow;
-        }            
-
-        //clear all selections
-       // isFoundingGenomeSelected = false;
-       // isRepresentativeGenomeSelected = false;
-       // isLongestLivedGenomeSelected = false;
-       // isMostEatenGenomeSelected = false;
-       // isHallOfFameSelected = false;    
-        //isLeaderboardGenomesSelected = false;    
-        //isCandidateGenomesSelected = false;
-        
         SpeciesGenomePool pool = simulationManager.GetSelectedGenomePool();
         uiManager.SetFocusedCandidateGenome(pool, group, index);
         selectedButtonData = GetSelectionGroupData(group);
 
-        #region Removed
-        // WPP: using nested struct to set the button and avoid GetComponent<Image>
-        // + moved focus selection to UIManager
-        // + moved special case operation to if statement
-        //switch (group) 
-        //{
-            //case SelectionGroup.Founder:
-                //isFoundingGenomeSelected = true;
-                //selectedButton = buttonFoundingGenome;
-                //uiManager.SetFocusedCandidateGenome(spool.foundingCandidate);
-            //    break;
-            //case SelectionGroup.Representative:
-               // isRepresentativeGenomeSelected = true;
-                //selectedButton = buttonRepresentativeGenome;
-                //uiManager.SetFocusedCandidateGenome(spool.representativeCandidate); // maybe weird if used as species-wide average? 
-            //    break;
-            //case SelectionGroup.LongestLived:
-               // isLongestLivedGenomeSelected = true;
-                //selectedButton = buttonLongestLivedGenome;
-                //uiManager.SetFocusedCandidateGenome(spool.longestLivedCandidate);
-            //    break;
-            //case SelectionGroup.MostEaten:
-                //isMostEatenGenomeSelected = true;
-                //selectedButton = buttonMostEatenGenome;
-                //uiManager.SetFocusedCandidateGenome(spool.mostEatenCandidate);
-            //    break;
-            //case SelectionGroup.HallOfFame:
-                //isHallOfFameSelected = true;
-                
-                // WPP: variable set by never used
-                //selectedHallOfFameIndex = index;
-                //if(selectedHallOfFameIndex >= pool.hallOfFameGenomesList.Count) {
-                //    selectedHallOfFameIndex = 0;
-                //}
-                
-                //selectedButton = hallOfFameButtonsList[index].GetComponent<Button>();
-                //uiManager.SetFocusedCandidateGenome(spool.hallOfFameGenomesList[index]);
-                //Debug.Log("ChangeSelectedGenome: " + group + ", HallOfFame, #" + index);
-                //break;
-            //case SelectionGroup.Leaderboard:
-                //isLeaderboardGenomesSelected = true;
-                //selectedLeaderboardGenomeIndex = index;
-                //SpeciesGenomePool pool = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.globalResourcesUI.selectedSpeciesIndex];
-                //uiManager.SetFocusedCandidateGenome(spool.leaderboardGenomesList[index]);
-                //Debug.Log("ChangeSelectedGenome: " + group + ", #" + index);
-                //selectedButton = leaderboardGenomeButtonsList[index].GetComponent<Button>();
-            //    break;
-            //case SelectionGroup.Candidates:
-                //isCandidateGenomesSelected = true;
-                
-                // WPP: variable set by never used
-                //selectedCandidateGenomeIndex = index;
-                //if(selectedCandidateGenomeIndex >= pool.candidateGenomesList.Count) {
-                //    selectedCandidateGenomeIndex = 0;
-                //}
-                
-                //cameraManager.SetTargetAgent(simulationManager.agentsArray[cameraManager.targetAgentIndex], cameraManager.targetAgentIndex);
-                //uiManager.SetFocusedCandidateGenome(spool.candidateGenomesList[index]);
-                //Debug.Log("ChangeSelectedGenome: " + group + ", #" + index);
-                //selectedButton = candidateGenomeButtonsList[index].GetComponent<Button>();
-                //break;
-        //}
-        #endregion
-        
-        // WPP 5/25: special case extracted from switch, added overload to cameraManager to cut down on arguments
         if (group == SelectionGroup.Candidates)
             cameraManager.SetTargetAgent();
 
-        // * WPP 5/25: what is purpose of this? (also set to yellow earlier in method under same conditions)
         if(selectedButtonData != null && selectedButtonData.image != null) {
             selectedButtonData.image.color = Color.white;
         }
 
-        //uiManagerRef.ClickButtonOpenGenome();
         panelGenomeViewer.SetActive(true);
     }
 

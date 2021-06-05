@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-// WPP: moved to panel in scene, renamed
 public class MinimapPanel : MonoBehaviour
 {
     SimulationManager simulationManager => SimulationManager.instance;
@@ -18,11 +17,7 @@ public class MinimapPanel : MonoBehaviour
 
     private TrophicSlot selectedTrophicSlot = new TrophicSlot();
     
-    #region Set Material
-
     public void Tick() {
-        // WPP: set active on state change instead of per tick
-        //groupMinimap.SetActive(isOpen);
         if (!isOpen) {            
             return;
         }
@@ -30,166 +25,11 @@ public class MinimapPanel : MonoBehaviour
         uiKnowledgeMapViewerMat.SetTexture("_AltitudeTex", theRenderKing.baronVonTerrain.terrainHeightDataRT);
         uiKnowledgeMapViewerMat.SetTexture("_ResourceGridTex", simulationManager.vegetationManager.resourceGridRT1);
         uiKnowledgeMapViewerMat.SetFloat("_WaterLevel", SimulationManager._GlobalWaterLevel);
-
-        // WPP: eliminated repetition & exposed values via nested class
-        /*if (selectedTrophicSlot.kingdomID == 0) {
-            // DECOMPOSERS
-            textTitle.text = "DECOMPOSERS";               
-            imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-            uiKnowledgeMapViewerMat.SetTexture("_MainTex", simulationManager.vegetationManager.resourceGridRT1);
-            uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
-            uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
-            uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
-            uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 2);
-            uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
-            uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);
-        }
-        else if (selectedTrophicSlot.kingdomID == 1) {
-            if (selectedTrophicSlot.tierID == 0) {  // ALGAE
-                textTitle.text = "ALGAE";      
-                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", simulationManager.vegetationManager.resourceGridRT1);
-                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
-                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
-                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
-                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 3);
-                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
-                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);
-            }
-            else {  // PLANT PARTICLES
-                textTitle.text = "PLANTS";      
-                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", simulationManager.environmentFluidManager._SourceColorRT);
-                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
-                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
-                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
-                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 0);
-                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 0f);
-                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f); 
-            }
-        }
-        else if (selectedTrophicSlot.kingdomID == 2) {
-            if (selectedTrophicSlot.tierID == 0) { // ZOOPLANKTON
-                textTitle.text = "MICROBES";      
-                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", simulationManager.environmentFluidManager._SourceColorRT);
-                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
-                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
-                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
-                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 0);
-                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 0f);
-                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f); 
-            }
-            else {  // VERTEBRATES
-                textTitle.text = "ANIMALS";
-                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", simulationManager.environmentFluidManager._SourceColorRT);
-                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
-                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
-                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
-                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 3);
-                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
-                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f); 
-            }
-
-        }
-        else if (selectedTrophicSlot.kingdomID == 3) {
-            //panelKnowledgeInfoWorld.SetActive(true);
-            if (selectedTrophicSlot.slotID == 0) {
-                // WORLD 
-                textTitle.text = "WORLD";      
-                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", theRenderKing.baronVonTerrain.terrainHeightDataRT);
-                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
-                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 0.7f);
-                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
-                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 0);
-                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
-                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);  
-            }
-            else if (selectedTrophicSlot.slotID == 1) {
-                // STONE
-                textTitle.text = "STONE";      
-                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", theRenderKing.baronVonTerrain.terrainHeightDataRT);
-                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
-                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
-                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
-                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 0);
-                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
-                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);
-            }
-            else if (selectedTrophicSlot.slotID == 2) {
-                // PEBBLES
-                textTitle.text = "PEBBLES";      
-                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", theRenderKing.baronVonTerrain.terrainHeightDataRT);
-                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
-                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
-                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
-                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 1);
-                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
-                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);
-            }
-            else {
-                // SAND
-                textTitle.text = "SAND";      
-                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", theRenderKing.baronVonTerrain.terrainHeightDataRT);
-                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
-                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
-                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
-                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 2);
-                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
-                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);
-            }
-        }
-        else if (selectedTrophicSlot.kingdomID == 4) {
-            //panelKnowledgeInfoWorld.SetActive(true);
-            
-            if (selectedTrophicSlot.slotID == 0) {
-                // Minerals
-                textTitle.text = "NUTRIENTS";      
-                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", simulationManager.vegetationManager.resourceGridRT1);
-                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
-                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
-                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
-                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 0);
-                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
-                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f); 
-            }
-            else if (selectedTrophicSlot.slotID == 1) {
-                // Water
-                textTitle.text = "WATER";      
-                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", theRenderKing.baronVonWater.waterSurfaceDataRT0);
-                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
-                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
-                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
-                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 0);
-                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
-                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);  
-            }
-            else if (selectedTrophicSlot.slotID == 2) {
-                // AIR
-                textTitle.text = "WIND";      
-                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", theRenderKing.baronVonWater.waterSurfaceDataRT0);
-                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
-                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 0.5f);
-                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
-                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 0);
-                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
-                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);  
-            }
-        }*/
         
         var state = GetStateID(selectedTrophicSlot);
         SetKnowledgeMapViewer(state);
     }
     
-    // * WPP: store KnowledgeMapState in the trophic slot directly and/or expose mapping
     KnowledgeMapId GetStateID(TrophicSlot slot)
     {
         switch (slot.kingdomID)
@@ -236,6 +76,7 @@ public class MinimapPanel : MonoBehaviour
             case KnowledgeMapId.Nutrients: return simulationManager.vegetationManager.resourceGridRT1;
             case KnowledgeMapId.Water: return theRenderKing.baronVonWater.waterSurfaceDataRT0;
             case KnowledgeMapId.Wind: return theRenderKing.baronVonWater.waterSurfaceDataRT0;
+            case KnowledgeMapId.Detritus: return simulationManager.vegetationManager.resourceGridRT1;
             default: return null;
         }        
     }
@@ -255,19 +96,6 @@ public class MinimapPanel : MonoBehaviour
         uiKnowledgeMapViewerMat.SetFloat("_Gamma", data.gamma);         
     }
     
-    #endregion
-    
-    #region Button Clicks
-    
-    // WPP: condensed to SetPanelOpen
-    /*public void ClickButtonOpenPanel() {
-        SetPanelOpen(true);
-    }
-    
-    public void ClickButtonClosePanel() {
-        SetPanelOpen(false);
-    }*/
-    
     public void SetPanelOpen(bool value)
     {
         isOpen = value;
@@ -278,40 +106,4 @@ public class MinimapPanel : MonoBehaviour
     {
         selectedTrophicSlot = trophicLayers.GetSlot(data);
     }
-    
-    // WPP: condensed to SelectTrophicSlot
-    /*
-    public void ClickButtonLayerOther(int index) {
-        selectedTrophicSlot = trophicLayers.kingdomOther.trophicTiersList[0].trophicSlots[index];        
-        //selectedToolbarOtherLayer = index;        
-    }
-    
-    public void ClickButtonLayerTerrain(int index) {
-        selectedTrophicSlot = trophicLayers.kingdomTerrain.trophicTiersList[0].trophicSlots[index];
-    }
-    
-    public void ClickButtonLayerDecomposers() {
-        selectedTrophicSlot = trophicLayers.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
-    }
-    
-    public void ClickButtonLayerAlgae() {
-        selectedTrophicSlot = trophicLayers.kingdomPlants.trophicTiersList[0].trophicSlots[0];
-    }
-    
-    public void ClickButtonLayerPlants(int slotID) {
-        selectedTrophicSlot = trophicLayers.kingdomPlants.trophicTiersList[1].trophicSlots[slotID];
-    }
-    
-    public void ClickButtonLayerZooplankton() {
-        selectedTrophicSlot = trophicLayers.kingdomAnimals.trophicTiersList[0].trophicSlots[0];        
-    }
-    
-    public void ClickButtonLaterAgents(int index) {
-        TrophicSlot slot = trophicLayers.kingdomAnimals.trophicTiersList[1].trophicSlots[index];
-        selectedTrophicSlot = slot;
-        //selectedWorldSpiritVertebrateSpeciesID = slot.linkedSpeciesID; // update this next               
-    }
-    */
-    
-    #endregion
 }

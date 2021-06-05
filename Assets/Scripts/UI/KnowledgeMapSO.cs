@@ -30,6 +30,7 @@ public enum KnowledgeMapId
     Nutrients, 
     Water, 
     Wind, 
+    Detritus,
 }
 
 public enum KingdomId

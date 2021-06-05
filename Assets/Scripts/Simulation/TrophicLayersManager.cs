@@ -125,8 +125,6 @@ public class TrophicLayersManager {
         uiManager.brushesUI.selectedEssenceSlot = kingdomTerrain.trophicTiersList[0].trophicSlots[1];
     }
     
-    // * WPP: verify values
-    // + Use consistent naming: Nutrients/Minerals/Detritus, Microbes/Zooplankton, Wind/Air
     public TrophicSlot GetSlot(KnowledgeMapSO mapData)
     {
         return GetKingdom(mapData.kingdom).trophicTiersList[mapData.listIndex].trophicSlots[mapData.slotIndex];
