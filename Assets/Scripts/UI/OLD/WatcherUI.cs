@@ -1,12 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class WatcherUI : MonoBehaviour {
     SimulationManager simulationManager => SimulationManager.instance;
     CameraManager cameraManager => CameraManager.instance;
     UIManager uiManagerRef => UIManager.instance;
+    TrophicLayersManager trophicLayersManager => simulationManager.trophicLayersManager;
 
     public bool isUnlocked;
     public bool isOpen;
@@ -18,9 +17,6 @@ public class WatcherUI : MonoBehaviour {
     public AudioSource audioSource03;
     
     //private int callTickCooldownCounter = 0;
-
-    
-    
 
     //public Image imageWatcherButtonMIP;  // superscript button over watcher toolbar Button
     //public Image imageWatcherCurTargetLayer; // in watcher panel
@@ -39,8 +35,6 @@ public class WatcherUI : MonoBehaviour {
     //public Image imageIsSnooping;
     //public Image imageWatcherInactiveOverlay;
     //public Text textIsSnooping;
-
-    
 
     public GameObject followCreaturePanel;
     public GameObject panelFollowStatus;
@@ -78,7 +72,6 @@ public class WatcherUI : MonoBehaviour {
     
     
 
-
 	// Use this for initialization
 	void Start () {
         //isSnoopingModeON = false;
@@ -97,9 +90,7 @@ public class WatcherUI : MonoBehaviour {
         isFollowHistoryPanelOn = !isFollowHistoryPanelOn;
     }
     	
-    private void UpdateUI(TrophicLayersManager layerManager) {
-
-        
+    private void UpdateUI() {
         panelWatcherExpand.SetActive(false);            
         
         
@@ -223,10 +214,10 @@ public class WatcherUI : MonoBehaviour {
         
     }
 
-	public void UpdateWatcherPanelUI(TrophicLayersManager layerManager) {
+	public void UpdateWatcherPanelUI() {
         //animatorWatcherUI.SetBool("_IsOpen", isOpen);
 
-        UpdateUI(layerManager);
+        UpdateUI();
 
         if(cameraManager.isFollowingAgent) {  // only active when following a selected critter -- make sure it only contains:
             // FollowTitle, FollowStatus, FollowBrain
@@ -245,13 +236,10 @@ public class WatcherUI : MonoBehaviour {
             followCreaturePanel.SetActive(false);
         }
 
-        
-
         panelWatcherSpiritMain.SetActive(true); // isOpen);
-        
     }
     /*
-    TrophicSlot slotRefWatcher = uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
+    TrophicSlot slotRefWatcher = trophicLayersManager.selectedTrophicSlotRef;
         if(slotRefWatcher != null) {
             if(isWatcherTargetLayerLocked) {
                 slotRefWatcher = watcherLockedTrophicSlotRef;
@@ -346,62 +334,52 @@ public class WatcherUI : MonoBehaviour {
     public void ClickWatcherCycleTargetPrev() {
         TrophicSlot slotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot; // ************* TEMP!!!!!!!!!
 
-        if(slotRef.kingdomID == 1) {
-            if(slotRef.tierID == 0) {
-
-            }
-            else {
-                VegetationManager veggieRef = simulationManager.vegetationManager;
-                veggieRef.selectedPlantParticleIndex--;
-                if(veggieRef.selectedPlantParticleIndex < 0) {
-                    veggieRef.selectedPlantParticleIndex = veggieRef.plantParticlesCBuffer.count - 1;
-                    veggieRef.isPlantParticleSelected = true; // ???
-                }
+        if(slotRef.id == KnowledgeMapId.Plants) {
+            VegetationManager veggieRef = simulationManager.vegetationManager;
+            veggieRef.selectedPlantParticleIndex--;
+            
+            if(veggieRef.selectedPlantParticleIndex < 0) {
+                veggieRef.selectedPlantParticleIndex = veggieRef.plantParticlesCBuffer.count - 1;
+                veggieRef.isPlantParticleSelected = true; // ???
             }
         }
-        else if(slotRef.kingdomID == 2) {
-            if (slotRef.tierID == 0) {
-                ZooplanktonManager zoopRef = simulationManager.zooplanktonManager;
-                zoopRef.selectedAnimalParticleIndex--;
-                if (zoopRef.selectedAnimalParticleIndex < 0) {
-                    zoopRef.selectedAnimalParticleIndex = zoopRef.animalParticlesCBuffer.count - 1;
-                    zoopRef.isAnimalParticleSelected = true; // ???
-                }
+        else if (slotRef.id == KnowledgeMapId.Microbes) {
+            ZooplanktonManager zoopRef = simulationManager.zooplanktonManager;
+            zoopRef.selectedAnimalParticleIndex--;
+            
+            if (zoopRef.selectedAnimalParticleIndex < 0) {
+                zoopRef.selectedAnimalParticleIndex = zoopRef.animalParticlesCBuffer.count - 1;
+                zoopRef.isAnimalParticleSelected = true; // ???
             }
-            else {
-                ClickPrevAgent();
-            }
-        }        
+        }
+        else if (slotRef.id == KnowledgeMapId.Animals) {
+            ClickPrevAgent();
+        }
     }
     
     public void ClickWatcherCycleTargetNext() {
         TrophicSlot slotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;  // ************* TEMP!!!!!!!!!
 
-        if(slotRef.kingdomID == 1) {
-            if(slotRef.tierID == 0) {
-            }
-            else {
-                VegetationManager veggieRef = simulationManager.vegetationManager;
-                veggieRef.selectedPlantParticleIndex++;
-                if(veggieRef.selectedPlantParticleIndex > veggieRef.plantParticlesCBuffer.count - 1) {
-                    veggieRef.selectedPlantParticleIndex = 0;
-                    veggieRef.isPlantParticleSelected = true; // ???
-                }
+        if(slotRef.id == KnowledgeMapId.Plants) {
+            VegetationManager veggieRef = simulationManager.vegetationManager;
+            veggieRef.selectedPlantParticleIndex++;
+            
+            if(veggieRef.selectedPlantParticleIndex > veggieRef.plantParticlesCBuffer.count - 1) {
+                veggieRef.selectedPlantParticleIndex = 0;
+                veggieRef.isPlantParticleSelected = true; // ???
             }
         }
-        else if(slotRef.kingdomID == 2) {
-            if (slotRef.tierID == 0) {
-                ZooplanktonManager zoopRef = simulationManager.zooplanktonManager;
-                zoopRef.selectedAnimalParticleIndex++;
-                if (zoopRef.selectedAnimalParticleIndex > zoopRef.animalParticlesCBuffer.count - 1) {
-                    zoopRef.selectedAnimalParticleIndex = 0;
-                    zoopRef.isAnimalParticleSelected = true; // ???
-                }
+        else if (slotRef.id == KnowledgeMapId.Microbes) {
+            ZooplanktonManager zoopRef = simulationManager.zooplanktonManager;
+            zoopRef.selectedAnimalParticleIndex++;
+            if (zoopRef.selectedAnimalParticleIndex > zoopRef.animalParticlesCBuffer.count - 1) {
+                zoopRef.selectedAnimalParticleIndex = 0;
+                zoopRef.isAnimalParticleSelected = true; // ???
             }
-            else {
-                ClickNextAgent();
-            }
-        } 
+        }
+        else if (slotRef.id == KnowledgeMapId.Animals) {
+            ClickNextAgent();
+        }
     }
     
     public void ClickPrevAgent() {
@@ -432,8 +410,8 @@ public class WatcherUI : MonoBehaviour {
     public void StartFollowingPlantParticle() {
         cameraManager.isFollowingPlantParticle = true;
         cameraManager.isFollowingAnimalParticle = false; 
-        watcherSelectedTrophicSlotRef = simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[0];
-        //uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef =   
+        watcherSelectedTrophicSlotRef = trophicLayersManager.GetSlot(KnowledgeMapId.Plants); //.kingdomPlants.trophicTiersList[1].trophicSlots[0];
+        //trophicLayersManager.selectedTrophicSlotRef =   
     }
     
     public void StopFollowingAnimalParticle() {
@@ -443,6 +421,6 @@ public class WatcherUI : MonoBehaviour {
     public void StartFollowingAnimalParticle() {
         cameraManager.isFollowingAnimalParticle = true;  
         cameraManager.isFollowingPlantParticle = false;
-        watcherSelectedTrophicSlotRef = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];
+        watcherSelectedTrophicSlotRef = trophicLayersManager.GetSlot(KnowledgeMapId.Microbes); //kingdomAnimals.trophicTiersList[0].trophicSlots[0];
     }
 }

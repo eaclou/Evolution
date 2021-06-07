@@ -984,28 +984,20 @@ public class VegetationManager {
         float brushAlgaeOn = 0f;
         float brushMineralsOn = 0f;
         float brushIntensityMult = 1f;
+        
         if(isBrushActive) {  // Set from uiManager
-
             if (uiManager.brushesUI.selectedEssenceSlot.kingdomID == 0) {
                 brushDecomposersOn = 1f;
                 brushIntensityMult = 0.2f;
             }
-            else if (uiManager.brushesUI.selectedEssenceSlot.kingdomID == 1) {
-                if (uiManager.brushesUI.selectedEssenceSlot.tierID == 0) {
-                    brushAlgaeOn = 1f;
-                    
-                    brushIntensityMult = 0.2f;
-                }
-                else {
-                    //brushPlantsOn = 1f;
-                }
+            else if (uiManager.brushesUI.selectedEssenceSlot.id == KnowledgeMapId.Algae) {
+                brushAlgaeOn = 1f;
+                brushIntensityMult = 0.2f;
             }
-            else if (uiManager.brushesUI.selectedEssenceSlot.kingdomID == 4) {
-                if (uiManager.brushesUI.selectedEssenceSlot.slotID == 0) {  // MINERALS
-                    brushMineralsOn = 1f;  
-                    brushIntensityMult = 0.1f;
-                    Debug.Log("// minerals brush on!");
-                }
+            else if (uiManager.brushesUI.selectedEssenceSlot.id == KnowledgeMapId.Nutrients) {
+                brushMineralsOn = 1f;  
+                brushIntensityMult = 0.1f;
+                Debug.Log("// minerals brush on!");
             }
         }
         computeShaderResourceGrid.SetFloat("_SpiritBrushIntensity", brushIntensityMult); // *** INVESTIGATE THIS -- not used/needed?

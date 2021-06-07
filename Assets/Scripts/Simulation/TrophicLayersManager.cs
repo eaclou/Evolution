@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class TrophicLayersManager {
     UIManager uiManager => UIManager.instance;
@@ -17,11 +18,14 @@ public class TrophicLayersManager {
 
     //private bool _IsUnlocked
 
+    // WPP
+    /*
     public TrophicKingdom kingdomDecomposers;
     public TrophicKingdom kingdomPlants;
     public TrophicKingdom kingdomAnimals;
     public TrophicKingdom kingdomTerrain;
     public TrophicKingdom kingdomOther;
+    */
 
     public Vector2 decomposerOriginPos;
     public Vector2 algaeOriginPos;
@@ -34,7 +38,9 @@ public class TrophicLayersManager {
     private int timeStepsLayerGrowthDuration = 1200;
     
     Lookup lookup => Lookup.instance;
-    Sprite spiritWorldIcon => lookup.spiritWorldIcon;
+    
+    // WPP: now stored in SOs
+    /*Sprite spiritWorldIcon => lookup.spiritWorldIcon;
     Sprite spiritStoneIcon => lookup.spiritStoneIcon;
     Sprite spiritAlgaeIcon => lookup.spiritAlgaeIcon;
     Sprite spiritPlantIcon => lookup.spiritPlantIcon;
@@ -55,8 +61,13 @@ public class TrophicLayersManager {
     Color colorPlantsLayer => lookup.colorPlantsLayer;
     Color colorZooplanktonLayer => lookup.colorZooplanktonLayer;
     Color colorAlgaeLayer => lookup.colorAlgaeLayer;
-    Color colorDecomposersLayer => lookup.colorDecomposersLayer;
-
+    Color colorDecomposersLayer => lookup.colorDecomposersLayer;*/
+    
+    List<TrophicSlot> allTrophicSlots = new List<TrophicSlot>();
+    public List<TrophicSlot> animalSlots = new List<TrophicSlot>();
+    
+    public TrophicSlot selectedSlot;
+    
 
     // * WPP: remove magic numbers
 	public TrophicLayersManager() {  // constructor
@@ -66,66 +77,102 @@ public class TrophicLayersManager {
         zooplanktonOn = true;
         agentsOn = true;
         //terrainOn = false;
+        
+        foreach (var element in lookup.knowledgeMaps)
+        {
+            for (int i = 0; i < element.startingSlotCount; i++)
+            {
+                var slot = new TrophicSlot(element);
+                allTrophicSlots.Add(slot);
+                
+                if (slot.id == KnowledgeMapId.Animals)
+                    animalSlots.Add(slot);
+            }
+        }
 
+        // WPP
         // DECOMPOSERS::::  // hacky manual initialization for now!!!!
-        kingdomDecomposers = new TrophicKingdom();
+        /*kingdomDecomposers = new TrophicKingdom();
         kingdomDecomposers.name = "Decomposers";
         TrophicTier decomposersTier0 = new TrophicTier();
-        decomposersTier0.trophicSlots[0].Initialize("Decomposers", TrophicSlot.SlotStatus.On, 0, 0, 0, spiritDecomposerIcon, colorDecomposersLayer);
+        decomposersTier0.trophicSlots[0].Initialize("Decomposers", TrophicSlotStatus.On, 0, 0, 0, spiritDecomposerIcon, colorDecomposersLayer);
         kingdomDecomposers.trophicTiersList.Add(decomposersTier0);
 
         // PLANTS::::
         kingdomPlants = new TrophicKingdom();
         kingdomPlants.name = "Plants";
         TrophicTier plantsTier0 = new TrophicTier();  // simple algae
-        plantsTier0.trophicSlots[0].Initialize("Algae", TrophicSlot.SlotStatus.On, 1, 0, 0, spiritAlgaeIcon, colorAlgaeLayer);        
+        plantsTier0.trophicSlots[0].Initialize("Algae", TrophicSlotStatus.On, 1, 0, 0, spiritAlgaeIcon, colorAlgaeLayer);        
         kingdomPlants.trophicTiersList.Add(plantsTier0);
         TrophicTier plantsTier1 = new TrophicTier();  // bigger plants
-        plantsTier1.trophicSlots[0].Initialize("Floating Plants", TrophicSlot.SlotStatus.Locked, 1, 1, 0, spiritPlantIcon, colorPlantsLayer);
-        plantsTier1.trophicSlots[1].Initialize("Submerged Plants", TrophicSlot.SlotStatus.Locked, 1, 1, 1, spiritPlantIcon, colorPlantsLayer);
+        plantsTier1.trophicSlots[0].Initialize("Floating Plants", TrophicSlotStatus.Locked, 1, 1, 0, spiritPlantIcon, colorPlantsLayer);
+        plantsTier1.trophicSlots[1].Initialize("Submerged Plants", TrophicSlotStatus.Locked, 1, 1, 1, spiritPlantIcon, colorPlantsLayer);
         kingdomPlants.trophicTiersList.Add(plantsTier1);
-
+        
         // ANIMALS:::::
         kingdomAnimals = new TrophicKingdom();
         kingdomAnimals.name = "Animals";
         TrophicTier animalsTier0 = new TrophicTier();  // Zooplankton
-        animalsTier0.trophicSlots[0].Initialize("Zooplankton", TrophicSlot.SlotStatus.Locked, 2, 0, 0, spiritZooplanktonIcon, colorZooplanktonLayer);
+        animalsTier0.trophicSlots[0].Initialize("Zooplankton", TrophicSlotStatus.Locked, 2, 0, 0, spiritZooplanktonIcon, colorZooplanktonLayer);
         kingdomAnimals.trophicTiersList.Add(animalsTier0);
         TrophicTier animalsTier1 = new TrophicTier();  // full Agents
-        animalsTier1.trophicSlots[0].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 0, spiritVertebrateIcon, colorVertebratesLayer);
-        animalsTier1.trophicSlots[1].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 1, spiritVertebrateIcon, colorVertebratesLayer);
-        animalsTier1.trophicSlots[2].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 2, spiritVertebrateIcon, colorVertebratesLayer);
-        animalsTier1.trophicSlots[3].Initialize("Vertebrate", TrophicSlot.SlotStatus.Locked, 2, 1, 3, spiritVertebrateIcon, colorVertebratesLayer);
+        animalsTier1.trophicSlots[0].Initialize("Vertebrate", TrophicSlotStatus.Locked, 2, 1, 0, spiritVertebrateIcon, colorVertebratesLayer);
+        animalsTier1.trophicSlots[1].Initialize("Vertebrate", TrophicSlotStatus.Locked, 2, 1, 1, spiritVertebrateIcon, colorVertebratesLayer);
+        animalsTier1.trophicSlots[2].Initialize("Vertebrate", TrophicSlotStatus.Locked, 2, 1, 2, spiritVertebrateIcon, colorVertebratesLayer);
+        animalsTier1.trophicSlots[3].Initialize("Vertebrate", TrophicSlotStatus.Locked, 2, 1, 3, spiritVertebrateIcon, colorVertebratesLayer);
         kingdomAnimals.trophicTiersList.Add(animalsTier1);
+
 
         // TERRAIN !!!!::::::
         kingdomTerrain = new TrophicKingdom();
         kingdomTerrain.name = "Terrain";
         TrophicTier terrainTier0 = new TrophicTier();
-        terrainTier0.trophicSlots[0].Initialize("World", TrophicSlot.SlotStatus.On, 3, 0, 0, spiritWorldIcon, colorWorldLayer);
-        terrainTier0.trophicSlots[1].Initialize("*World*", TrophicSlot.SlotStatus.On, 3, 0, 1, spiritStoneIcon, colorTerrainLayer);
-        terrainTier0.trophicSlots[2].Initialize("Pebbles", TrophicSlot.SlotStatus.Locked, 3, 0, 2, spiritPebblesIcon, colorTerrainLayer);
-        terrainTier0.trophicSlots[3].Initialize("Sand", TrophicSlot.SlotStatus.Locked, 3, 0, 3, spiritSandIcon, colorTerrainLayer);
+        terrainTier0.trophicSlots[0].Initialize("World", TrophicSlotStatus.On, 3, 0, 0, spiritWorldIcon, colorWorldLayer);
+        terrainTier0.trophicSlots[1].Initialize("*World*", TrophicSlotStatus.On, 3, 0, 1, spiritStoneIcon, colorTerrainLayer);
+        terrainTier0.trophicSlots[2].Initialize("Pebbles", TrophicSlotStatus.Locked, 3, 0, 2, spiritPebblesIcon, colorTerrainLayer);
+        terrainTier0.trophicSlots[3].Initialize("Sand", TrophicSlotStatus.Locked, 3, 0, 3, spiritSandIcon, colorTerrainLayer);
         kingdomTerrain.trophicTiersList.Add(terrainTier0);
 
         // OTHER!!!!!%%%
         kingdomOther = new TrophicKingdom();
         kingdomOther.name = "Other";
         TrophicTier otherTier0 = new TrophicTier();
-        otherTier0.trophicSlots[0].Initialize("Minerals", TrophicSlot.SlotStatus.Locked, 4, 0, 0, spiritMineralsIcon, colorMineralLayer);
-        otherTier0.trophicSlots[1].Initialize("Water", TrophicSlot.SlotStatus.On, 4, 0, 1, spiritWaterIcon, colorWaterLayer);
-        otherTier0.trophicSlots[2].Initialize("Air", TrophicSlot.SlotStatus.Locked, 4, 0, 2, spiritAirIcon, colorAirLayer);
-        kingdomOther.trophicTiersList.Add(otherTier0);
+        otherTier0.trophicSlots[0].Initialize("Minerals", TrophicSlotStatus.Locked, 4, 0, 0, spiritMineralsIcon, colorMineralLayer);
+        otherTier0.trophicSlots[1].Initialize("Water", TrophicSlotStatus.On, 4, 0, 1, spiritWaterIcon, colorWaterLayer);
+        otherTier0.trophicSlots[2].Initialize("Air", TrophicSlotStatus.Locked, 4, 0, 2, spiritAirIcon, colorAirLayer);
+        kingdomOther.trophicTiersList.Add(otherTier0);*/
                 
         //selectedTrophicSlotRef = terrainTier0.trophicSlots[0];        
         //isSelectedTrophicSlot = true;
 
-        // SET INITIAL SELECTED!!!!!
-        uiManager.worldSpiritHubUI.selectedWorldSpiritSlot = kingdomTerrain.trophicTiersList[0].trophicSlots[1];
-        uiManager.brushesUI.selectedEssenceSlot = kingdomTerrain.trophicTiersList[0].trophicSlots[1];
+        // WPP
+        SetSlot(KnowledgeMapId.Water);
+        uiManager.worldSpiritHubUI.selectedWorldSpiritSlot = selectedSlot; //kingdomTerrain.trophicTiersList[0].trophicSlots[1];
+        uiManager.brushesUI.selectedEssenceSlot = selectedSlot; //kingdomTerrain.trophicTiersList[0].trophicSlots[1];
+    }
+
+    public void SetSlot(KnowledgeMapId id) { SetSlot(lookup.GetTrophicSlotData(id)); }
+    
+    public void SetSlot(TrophicLayerSO data)
+    {
+        foreach (var slot in allTrophicSlots)
+            if (slot.data.id == data.id)
+                selectedSlot = slot;
     }
     
-    public TrophicSlot GetSlot(KnowledgeMapSO mapData)
+    public TrophicSlot GetSlot(TrophicLayerSO data) { return GetSlot(data.id); }
+    
+    public TrophicSlot GetSlot(KnowledgeMapId id)
+    {
+        foreach (var slot in allTrophicSlots)
+            if (slot.data.id == id)
+                return slot;
+        
+        Debug.LogError("Invalid slot " + id);
+        return null;
+    }
+    
+    /*public TrophicSlot GetSlot(TrophicLayerSO mapData)
     {
         return GetKingdom(mapData.kingdom).trophicTiersList[mapData.listIndex].trophicSlots[mapData.slotIndex];
     }
@@ -141,15 +188,25 @@ public class TrophicLayersManager {
             case KingdomId.Other: return kingdomOther;
             default: Debug.LogError("Invalid kingdom " + id); return null;
         }
-    }
+    }*/
 
     public void CreateTrophicSlotSpecies(TrophicSlot addedSlot, Vector2 spawnPos, int timeStep) {
         
         // reset things, figure out which slot was created:
         //isSelectedTrophicSlot = false;
-        addedSlot.status = TrophicSlot.SlotStatus.On;
+        addedSlot.status = TrophicSlotStatus.On;
+        
+        switch (addedSlot.data.id)
+        {
+            case KnowledgeMapId.Decomposers: TurnOnDecomposers(spawnPos, timeStep); break;
+            case KnowledgeMapId.Algae: TurnOnAlgae(spawnPos, timeStep); break;
+            case KnowledgeMapId.Plants: TurnOnPlants(spawnPos, timeStep); break;
+            case KnowledgeMapId.Microbes: TurnOnZooplankton(spawnPos, timeStep); break;
+            case KnowledgeMapId.Animals: TurnOnAgents(); break;
+        }
 
-        if (addedSlot.kingdomID == 0) { // decomposers:
+        // WPP
+        /*if (addedSlot.kingdomID == 0) { // decomposers:
             TurnOnDecomposers(spawnPos, timeStep);
         }
         if (addedSlot.kingdomID == 1) { // plants!:
@@ -174,41 +231,51 @@ public class TrophicLayersManager {
             if(addedSlot.tierID == 1) {
                 TurnOnAgents();
             }
-        }
+        }*/
+    }
+    
+    public void SetSlotStatus(KnowledgeMapId id, TrophicSlotStatus value)
+    {
+        GetSlot(id).status = value;
     }
 
     public void CheatUnlockAll() {
+        foreach (var slot in allTrophicSlots)
+            if (slot.status == TrophicSlotStatus.Locked)
+                slot.status = TrophicSlotStatus.On;
+        
+        // WPP
         // ALGAE
-        if(kingdomPlants.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {            
-            kingdomPlants.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
+        /*if(kingdomPlants.trophicTiersList[0].trophicSlots[0].status == TrophicSlotStatus.Locked) {            
+            kingdomPlants.trophicTiersList[0].trophicSlots[0].status = TrophicSlotStatus.On;
         }
-        if(kingdomPlants.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {            
-            kingdomPlants.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.On;
+        if(kingdomPlants.trophicTiersList[1].trophicSlots[0].status == TrophicSlotStatus.Locked) {            
+            kingdomPlants.trophicTiersList[1].trophicSlots[0].status = TrophicSlotStatus.On;
         }
         
         //check for unlocks:
-        if(kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {            
-                kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;  
+        if(kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status == TrophicSlotStatus.Locked) {            
+                kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status = TrophicSlotStatus.On;  
         }
         
-        if(kingdomAnimals.trophicTiersList[0].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) {            
-            kingdomAnimals.trophicTiersList[0].trophicSlots[0].status = TrophicSlot.SlotStatus.On;                
+        if(kingdomAnimals.trophicTiersList[0].trophicSlots[0].status == TrophicSlotStatus.Locked) {            
+            kingdomAnimals.trophicTiersList[0].trophicSlots[0].status = TrophicSlotStatus.On;                
         }
 
-        if(kingdomAnimals.trophicTiersList[1].trophicSlots[0].status == TrophicSlot.SlotStatus.Locked) { 
+        if(kingdomAnimals.trophicTiersList[1].trophicSlots[0].status == TrophicSlotStatus.Locked) { 
             kingdomAnimals.trophicTiersList[1].unlocked = true;
-            kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.On; 
+            kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlotStatus.On; 
         }
 
-        if(kingdomAnimals.trophicTiersList[1].trophicSlots[1].status == TrophicSlot.SlotStatus.Locked) {                         
-            kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlot.SlotStatus.On;                
+        if(kingdomAnimals.trophicTiersList[1].trophicSlots[1].status == TrophicSlotStatus.Locked) {                         
+            kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlotStatus.On;                
         }
-        if(kingdomAnimals.trophicTiersList[1].trophicSlots[2].status == TrophicSlot.SlotStatus.Locked) {                       
-            kingdomAnimals.trophicTiersList[1].trophicSlots[2].status = TrophicSlot.SlotStatus.On;                
+        if(kingdomAnimals.trophicTiersList[1].trophicSlots[2].status == TrophicSlotStatus.Locked) {                       
+            kingdomAnimals.trophicTiersList[1].trophicSlots[2].status = TrophicSlotStatus.On;                
         }
-        if(kingdomAnimals.trophicTiersList[1].trophicSlots[3].status == TrophicSlot.SlotStatus.Locked) {                     
-            kingdomAnimals.trophicTiersList[1].trophicSlots[3].status = TrophicSlot.SlotStatus.On;                
-        }
+        if(kingdomAnimals.trophicTiersList[1].trophicSlots[3].status == TrophicSlotStatus.Locked) {                     
+            kingdomAnimals.trophicTiersList[1].trophicSlots[3].status = TrophicSlotStatus.On;                
+        }*/
     }
     
     /*public void ResetSelectedAgentSlots() {

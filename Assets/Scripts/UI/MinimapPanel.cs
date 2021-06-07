@@ -6,7 +6,7 @@ public class MinimapPanel : MonoBehaviour
     SimulationManager simulationManager => SimulationManager.instance;
     TrophicLayersManager trophicLayers => simulationManager.trophicLayersManager;
     TheRenderKing theRenderKing => TheRenderKing.instance;
-    Lookup lookup => Lookup.instance;
+    //Lookup lookup => Lookup.instance;
     
 
     public bool isOpen = true;  
@@ -15,7 +15,7 @@ public class MinimapPanel : MonoBehaviour
     public Material uiKnowledgeMapViewerMat;
     public GameObject groupMinimap;
 
-    private TrophicSlot selectedTrophicSlot = new TrophicSlot();
+    private TrophicSlot selectedTrophicSlot => trophicLayers.selectedSlot;
     
     public void Tick() {
         if (!isOpen) {            
@@ -26,11 +26,12 @@ public class MinimapPanel : MonoBehaviour
         uiKnowledgeMapViewerMat.SetTexture("_ResourceGridTex", simulationManager.vegetationManager.resourceGridRT1);
         uiKnowledgeMapViewerMat.SetFloat("_WaterLevel", SimulationManager._GlobalWaterLevel);
         
-        var state = GetStateID(selectedTrophicSlot);
-        SetKnowledgeMapViewer(state);
+        //var state = GetStateID(selectedTrophicSlot);
+        //SetKnowledgeMapViewer(state);
+        SetKnowledgeMapViewer(selectedTrophicSlot.data);
     }
     
-    KnowledgeMapId GetStateID(TrophicSlot slot)
+    /*KnowledgeMapId GetStateID(TrophicSlot slot)
     {
         switch (slot.kingdomID)
         {
@@ -55,9 +56,9 @@ public class MinimapPanel : MonoBehaviour
                 }
             default: return KnowledgeMapId.Undefined;
         }
-    }
+    }*/
     
-    void SetKnowledgeMapViewer(KnowledgeMapId id) { SetKnowledgeMapViewer(id, GetRenderTexture(id)); }
+    void SetKnowledgeMapViewer(TrophicLayerSO data) { SetKnowledgeMapViewer(data, GetRenderTexture(data.id)); }
     
     // * WPP: if possible, store RenderTextures in KnowledgeMapData fields
     RenderTexture GetRenderTexture(KnowledgeMapId id)
@@ -81,9 +82,9 @@ public class MinimapPanel : MonoBehaviour
         }        
     }
     
-    void SetKnowledgeMapViewer(KnowledgeMapId id, RenderTexture renderTexture)
+    void SetKnowledgeMapViewer(TrophicLayerSO data, RenderTexture renderTexture)
     {
-        var data = lookup.GetKnowledgeMapData(id);
+        //var data = lookup.GetKnowledgeMapData(id);
     
         textTitle.text = data.title;      
         imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
@@ -102,8 +103,5 @@ public class MinimapPanel : MonoBehaviour
         groupMinimap.SetActive(value);
     }
     
-    public void SelectTrophicSlot(KnowledgeMapSO data)
-    {
-        selectedTrophicSlot = trophicLayers.GetSlot(data);
-    }
+    public void SelectTrophicSlot(TrophicLayerSO data) { trophicLayers.SetSlot(data); }
 }

@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
+﻿/*
 public class TrophicTier {
 
     public bool unlocked = false;
@@ -14,3 +11,4 @@ public class TrophicTier {
         }
     }
 }
+*/

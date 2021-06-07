@@ -9,6 +9,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     SimulationManager simManager => SimulationManager.instance;
     CameraManager cameraManager => CameraManager.instance;
     UIManager uiManager => UIManager.instance;
+    WorldSpiritHubUI worldSpiritHubUI => uiManager.worldSpiritHubUI;
+    TrophicSlot selectedWorldSpiritSlot => worldSpiritHubUI.selectedWorldSpiritSlot;
 
     // SET IN INSPECTOR!!!::::
     public EnvironmentFluidManager fluidManager;
@@ -2553,6 +2555,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         GenerateCritterPortraitStrokesData(genome);
         // ^^ skin stroke data
     }
+    
     private void SetToolbarPortraitCritterInitData(AgentGenome genome) {
 
         // Get genomes:
@@ -2729,8 +2732,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         }
         toolbarPortraitCritterInitDataCBuffer = new ComputeBuffer(6, SimulationStateData.GetCritterInitDataSize());
         toolbarPortraitCritterInitDataCBuffer.SetData(toolbarPortraitCritterInitDataArray);
-
     }
+    
     private void SetToolbarPortraitCritterSimData() {
 
         SimulationStateData.CritterSimData[] toolbarPortraitCritterSimDataArray = new SimulationStateData.CritterSimData[6];
@@ -2879,9 +2882,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         baronVonTerrain.computeShaderTerrainGeneration.Dispatch(kernelSimWasteBits, baronVonTerrain.wasteBitsCBuffer.count / 1024, 1, 1);
 
         baronVonWater.Tick(null);  // <-- SimWaterCurves/Chains/Water surface
-
-
-
     }
 
     public void RenderSimulationCameras() { // **** revisit
@@ -2926,34 +2926,30 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         //cmdBufferFluidColor.Blit(fluidManager.initialDensityTex, fluidManager._SourceColorRT);
         //cmdBufferFluidColor.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidBackgroundColorMat); // Simple unlit Texture shader -- wysiwyg
 
-        if (uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == 1) {
-            if (uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 1) {
-
-                algaeParticleColorInjectMat.SetPass(0);
-                algaeParticleColorInjectMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
-                algaeParticleColorInjectMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-                algaeParticleColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-                algaeParticleColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, algaeParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.plantParticlesCBuffer.count);
-
-            }
+        // WPP: nested check unnecessary with direct SO-based identifier
+        //if (uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == KingdomId.Plants) {
+       //     if (uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 1) {
+       if (selectedWorldSpiritSlot.id == KnowledgeMapId.Plants) {
+            algaeParticleColorInjectMat.SetPass(0);
+            algaeParticleColorInjectMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
+            algaeParticleColorInjectMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            algaeParticleColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+            algaeParticleColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, algaeParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.plantParticlesCBuffer.count);
         }
-        else if (uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == 2) {
-            if (uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 0) {
-
+        //    }
+        //}
+        //else if (uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == KingdomId.Animals) {
+        //    if (uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 0) {
+        if (selectedWorldSpiritSlot.id == KnowledgeMapId.Microbes) {
                 zooplanktonParticleColorInjectMat.SetPass(0);
                 zooplanktonParticleColorInjectMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
                 zooplanktonParticleColorInjectMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
                 zooplanktonParticleColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
                 zooplanktonParticleColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
                 cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, zooplanktonParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.zooplanktonManager.animalParticlesCBuffer.count);
-
-            }
-            else {   // Vertebrates:
-
-
-            }
         }
+        //}
 
         PopulateColorInjectionBuffer(); // update data for colorInjection objects before rendering                    
         // Creatures + EggSacks:
@@ -2964,8 +2960,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         //why are they always rendering white??
         // Render Agent/Food/Pred colors here!!!
         // just use their display renders?
-
-
+        
 
         Graphics.ExecuteCommandBuffer(cmdBufferFluidColor);
         fluidColorRenderCamera.Render();
@@ -2985,11 +2980,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             playerBrushColorInjectMat.SetVector("_BrushColor", new Vector4(0.7f, 0.8f, 1f, Mathf.Clamp(simManager.uiManager.smoothedMouseVel.magnitude * 0.5f, 0f, 10f)));
             cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, playerBrushColorInjectMat, 0, MeshTopology.Triangles, 6, 1);        
         }*/
-
-
-
-
-
+        
         // SPIRIT BRUSH TEST!
         cmdBufferSpiritBrush.Clear(); // needed since camera clear flag is set to none
         cmdBufferSpiritBrush.SetRenderTarget(spiritBrushRT);

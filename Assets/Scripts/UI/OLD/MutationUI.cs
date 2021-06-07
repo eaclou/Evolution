@@ -117,36 +117,28 @@ public class MutationUI : MonoBehaviour {
         imageMutationPanelCurPortrait.gameObject.SetActive(true);
         imageMutationPanelNewPortrait.gameObject.SetActive(true);
 
-        if(slotRef.kingdomID == 0) { // DECOMPOSERS
-            UpdateDecomposerUI(layerManager);
-            
+        if(slotRef.kingdomID == KingdomId.Decomposers) { 
+            UpdateDecomposerUI();
         }
-        else if(slotRef.kingdomID == 1) { // PLANTS
-            if(slotRef.tierID == 0) {
-                UpdateAlgaeUI(layerManager);
-                
-            }
-            else {  // PLANTS:
-                UpdatePlantsUI();
-                
-            }            
+        else if (slotRef.id == KnowledgeMapId.Algae)
+            UpdateAlgaeUI(layerManager);
+        else if (slotRef.id == KnowledgeMapId.Plants)
+            UpdatePlantsUI();
+        else if(slotRef.id == KnowledgeMapId.Microbes) { 
+            UpdateZooplanktonUI();                
         }
-        else if(slotRef.kingdomID == 2) { // ANIMALS
-            if(slotRef.tierID == 0) {  // Zooplankton
-                UpdateZooplanktonUI();                
-            }
-            else { // vertebrates
-                imageMutationPanelThumbnailA.gameObject.SetActive(false);
-                imageMutationPanelThumbnailB.gameObject.SetActive(false);
-                imageMutationPanelThumbnailC.gameObject.SetActive(false);
-                imageMutationPanelThumbnailD.gameObject.SetActive(false);
-            }
+        else if (slotRef.id == KnowledgeMapId.Animals) { 
+            imageMutationPanelThumbnailA.gameObject.SetActive(false);
+            imageMutationPanelThumbnailB.gameObject.SetActive(false);
+            imageMutationPanelThumbnailC.gameObject.SetActive(false);
+            imageMutationPanelThumbnailD.gameObject.SetActive(false);
         }
-        else if(slotRef.kingdomID == 3) { // Terrain
+        else if(slotRef.kingdomID == KingdomId.Terrain) { 
             UpdateTerrainUI(slotRef);
         }
     }
-    private void UpdateDecomposerUI(TrophicLayersManager layerManager) {
+    
+    private void UpdateDecomposerUI() {
         
         Color uiColor = vegetationManager.decomposerSlotGenomeMutations[0].displayColorPri;
         uiColor.a = 1f;
@@ -221,6 +213,7 @@ public class MutationUI : MonoBehaviour {
         mutationThumbnailDecomposersMatD.SetFloat("_PatternThreshold", vegetationManager.decomposerSlotGenomeMutations[3].patternThreshold);
 
     }
+    
     private void UpdateAlgaeUI(TrophicLayersManager layerManager) {
         
         textMutationParameters.text = "Metabolic Rate:\nEfficiency:";
@@ -278,8 +271,8 @@ public class MutationUI : MonoBehaviour {
         mutationThumbnailDecomposersMatD.SetFloat("_PatternThreshold", vegetationManager.algaeSlotGenomeMutations[3].patternThreshold);
 
     }
+    
     private string GetStringDelta(float delta) {
-        
         string strang = "";
         string strColorStart = "<color=#999999FF> (";
         string strColorEnd = ")</color>";
@@ -294,97 +287,97 @@ public class MutationUI : MonoBehaviour {
 
         return strang;
     }
+    
     private void UpdateTerrainUI(TrophicSlot slotRef) {
-        if (slotRef.tierID == 0) { // needed?
-            Color colorOptionA = Color.white;
-            Color colorOptionB = Color.white;
-            Color colorOptionC = Color.white;
-            Color colorOptionD = Color.white;
-            Color colorCur = Color.white;
-            Color colorNew = Color.white;
-            int selectedIndex = selectedToolbarMutationID;
-            if(selectedIndex < 0) {
-                selectedIndex = 0;
-                panelNewMutationPreview.SetActive(false);
-            }
-            else {
-                panelNewMutationPreview.SetActive(true);
-            }
-            if(slotRef.slotID == 0) {
-                colorOptionA = baronVonTerrain.bedrockSlotGenomeMutations[0].color;
-                colorOptionB = baronVonTerrain.bedrockSlotGenomeMutations[1].color;
-                colorOptionC = baronVonTerrain.bedrockSlotGenomeMutations[2].color;
-                colorOptionD = baronVonTerrain.bedrockSlotGenomeMutations[3].color;
-                // *** make these Text objects into an array:
-                
-                colorCur = baronVonTerrain.bedrockSlotGenomeCurrent.color;
-                colorNew = baronVonTerrain.bedrockSlotGenomeMutations[selectedIndex].color;
-                textMutationPanelCur.text = baronVonTerrain.bedrockSlotGenomeCurrent.name; // "Properties: " + gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeCurrent.elevationChange.ToString();
-                textMutationPanelNew.text = baronVonTerrain.bedrockSlotGenomeMutations[selectedIndex].textDescriptionMutation;
-            }
-            else if(slotRef.slotID == 1) {
-                colorOptionA = baronVonTerrain.stoneSlotGenomeMutations[0].color;
-                colorOptionB = baronVonTerrain.stoneSlotGenomeMutations[1].color;
-                colorOptionC = baronVonTerrain.stoneSlotGenomeMutations[2].color;
-                colorOptionD = baronVonTerrain.stoneSlotGenomeMutations[3].color;
-                colorCur = baronVonTerrain.stoneSlotGenomeCurrent.color;
-                colorNew = baronVonTerrain.stoneSlotGenomeMutations[selectedIndex].color;
-                textMutationPanelCur.text = baronVonTerrain.stoneSlotGenomeCurrent.name; // "Properties: " + gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeCurrent.elevationChange.ToString();
-                textMutationPanelNew.text = baronVonTerrain.stoneSlotGenomeMutations[selectedIndex].textDescriptionMutation;
-            }
-            else if(slotRef.slotID == 2) {
-                colorOptionA = baronVonTerrain.pebblesSlotGenomeMutations[0].color;
-                colorOptionB = baronVonTerrain.pebblesSlotGenomeMutations[1].color;
-                colorOptionC = baronVonTerrain.pebblesSlotGenomeMutations[2].color;
-                colorOptionD = baronVonTerrain.pebblesSlotGenomeMutations[3].color;
-                colorCur = baronVonTerrain.pebblesSlotGenomeCurrent.color;
-                colorNew = baronVonTerrain.pebblesSlotGenomeMutations[selectedIndex].color;
-                textMutationPanelCur.text = baronVonTerrain.pebblesSlotGenomeCurrent.name; // "Properties: " + gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeCurrent.elevationChange.ToString();
-                textMutationPanelNew.text = baronVonTerrain.pebblesSlotGenomeMutations[selectedIndex].textDescriptionMutation;
-            }
-            else {
-                colorOptionA = baronVonTerrain.sandSlotGenomeMutations[0].color;
-                colorOptionB = baronVonTerrain.sandSlotGenomeMutations[1].color;
-                colorOptionC = baronVonTerrain.sandSlotGenomeMutations[2].color;
-                colorOptionD = baronVonTerrain.sandSlotGenomeMutations[3].color;
-                colorCur = baronVonTerrain.sandSlotGenomeCurrent.color;    
-                colorNew = baronVonTerrain.sandSlotGenomeMutations[selectedIndex].color;
-                textMutationPanelCur.text = baronVonTerrain.sandSlotGenomeCurrent.name; // "Properties: " + gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeCurrent.elevationChange.ToString();
-                textMutationPanelNew.text = baronVonTerrain.sandSlotGenomeMutations[selectedIndex].textDescriptionMutation;
-            }
-            // **** v v v Make these into arrays during cleanup
-            colorOptionA.a = 1f;
-            colorOptionB.a = 1f;
-            colorOptionC.a = 1f;
-            colorOptionD.a = 1f;
-            colorCur.a = 1f;
-            imageMutationPanelThumbnailA.color = Color.white;//colorOptionA;
-            imageMutationPanelThumbnailB.color = Color.white;//colorOptionB;
-            imageMutationPanelThumbnailC.color = Color.white;//colorOptionC;
-            imageMutationPanelThumbnailD.color = Color.white;//colorOptionD;
-
-            imageMutationPanelCurPortrait.color = Color.white;//colorCur;
-
-            //Cur Mat
-            mutationThumbnailDecomposersMatCur.SetVector("_TintPri", colorCur);
-            mutationThumbnailDecomposersMatCur.SetVector("_TintSec", colorCur);
-            // New:
-            mutationThumbnailDecomposersMatNew.SetVector("_TintPri", colorNew);
-            mutationThumbnailDecomposersMatNew.SetVector("_TintSec", colorNew);
-        
-            mutationThumbnailDecomposersMatA.SetVector("_TintPri", colorOptionA);
-            mutationThumbnailDecomposersMatA.SetVector("_TintSec", colorOptionA);
-            //B:
-            mutationThumbnailDecomposersMatB.SetVector("_TintPri", colorOptionB);
-            mutationThumbnailDecomposersMatB.SetVector("_TintSec", colorOptionB);
-            //C;
-            mutationThumbnailDecomposersMatC.SetVector("_TintPri", colorOptionC);
-            mutationThumbnailDecomposersMatC.SetVector("_TintSec", colorOptionC);
-            //D:
-            mutationThumbnailDecomposersMatD.SetVector("_TintPri", colorOptionD);
-            mutationThumbnailDecomposersMatD.SetVector("_TintSec", colorOptionD);
+        Color colorOptionA = Color.white;
+        Color colorOptionB = Color.white;
+        Color colorOptionC = Color.white;
+        Color colorOptionD = Color.white;
+        Color colorCur = Color.white;
+        Color colorNew = Color.white;
+        int selectedIndex = selectedToolbarMutationID;
+        if(selectedIndex < 0) {
+            selectedIndex = 0;
+            panelNewMutationPreview.SetActive(false);
         }
+        else {
+            panelNewMutationPreview.SetActive(true);
+        }
+        if(slotRef.layerIndex == 0) {
+            colorOptionA = baronVonTerrain.bedrockSlotGenomeMutations[0].color;
+            colorOptionB = baronVonTerrain.bedrockSlotGenomeMutations[1].color;
+            colorOptionC = baronVonTerrain.bedrockSlotGenomeMutations[2].color;
+            colorOptionD = baronVonTerrain.bedrockSlotGenomeMutations[3].color;
+            // *** make these Text objects into an array:
+            
+            colorCur = baronVonTerrain.bedrockSlotGenomeCurrent.color;
+            colorNew = baronVonTerrain.bedrockSlotGenomeMutations[selectedIndex].color;
+            textMutationPanelCur.text = baronVonTerrain.bedrockSlotGenomeCurrent.name; // "Properties: " + gameManager.theRenderKing.baronVonTerrain.bedrockSlotGenomeCurrent.elevationChange.ToString();
+            textMutationPanelNew.text = baronVonTerrain.bedrockSlotGenomeMutations[selectedIndex].textDescriptionMutation;
+        }
+        else if(slotRef.layerIndex == 1) {
+            colorOptionA = baronVonTerrain.stoneSlotGenomeMutations[0].color;
+            colorOptionB = baronVonTerrain.stoneSlotGenomeMutations[1].color;
+            colorOptionC = baronVonTerrain.stoneSlotGenomeMutations[2].color;
+            colorOptionD = baronVonTerrain.stoneSlotGenomeMutations[3].color;
+            colorCur = baronVonTerrain.stoneSlotGenomeCurrent.color;
+            colorNew = baronVonTerrain.stoneSlotGenomeMutations[selectedIndex].color;
+            textMutationPanelCur.text = baronVonTerrain.stoneSlotGenomeCurrent.name; // "Properties: " + gameManager.theRenderKing.baronVonTerrain.stoneSlotGenomeCurrent.elevationChange.ToString();
+            textMutationPanelNew.text = baronVonTerrain.stoneSlotGenomeMutations[selectedIndex].textDescriptionMutation;
+        }
+        else if(slotRef.layerIndex == 2) {
+            colorOptionA = baronVonTerrain.pebblesSlotGenomeMutations[0].color;
+            colorOptionB = baronVonTerrain.pebblesSlotGenomeMutations[1].color;
+            colorOptionC = baronVonTerrain.pebblesSlotGenomeMutations[2].color;
+            colorOptionD = baronVonTerrain.pebblesSlotGenomeMutations[3].color;
+            colorCur = baronVonTerrain.pebblesSlotGenomeCurrent.color;
+            colorNew = baronVonTerrain.pebblesSlotGenomeMutations[selectedIndex].color;
+            textMutationPanelCur.text = baronVonTerrain.pebblesSlotGenomeCurrent.name; // "Properties: " + gameManager.theRenderKing.baronVonTerrain.pebblesSlotGenomeCurrent.elevationChange.ToString();
+            textMutationPanelNew.text = baronVonTerrain.pebblesSlotGenomeMutations[selectedIndex].textDescriptionMutation;
+        }
+        else {
+            colorOptionA = baronVonTerrain.sandSlotGenomeMutations[0].color;
+            colorOptionB = baronVonTerrain.sandSlotGenomeMutations[1].color;
+            colorOptionC = baronVonTerrain.sandSlotGenomeMutations[2].color;
+            colorOptionD = baronVonTerrain.sandSlotGenomeMutations[3].color;
+            colorCur = baronVonTerrain.sandSlotGenomeCurrent.color;    
+            colorNew = baronVonTerrain.sandSlotGenomeMutations[selectedIndex].color;
+            textMutationPanelCur.text = baronVonTerrain.sandSlotGenomeCurrent.name; // "Properties: " + gameManager.theRenderKing.baronVonTerrain.sandSlotGenomeCurrent.elevationChange.ToString();
+            textMutationPanelNew.text = baronVonTerrain.sandSlotGenomeMutations[selectedIndex].textDescriptionMutation;
+        }
+        // **** v v v Make these into arrays during cleanup
+        colorOptionA.a = 1f;
+        colorOptionB.a = 1f;
+        colorOptionC.a = 1f;
+        colorOptionD.a = 1f;
+        colorCur.a = 1f;
+        imageMutationPanelThumbnailA.color = Color.white;//colorOptionA;
+        imageMutationPanelThumbnailB.color = Color.white;//colorOptionB;
+        imageMutationPanelThumbnailC.color = Color.white;//colorOptionC;
+        imageMutationPanelThumbnailD.color = Color.white;//colorOptionD;
+
+        imageMutationPanelCurPortrait.color = Color.white;//colorCur;
+
+        //Cur Mat
+        mutationThumbnailDecomposersMatCur.SetVector("_TintPri", colorCur);
+        mutationThumbnailDecomposersMatCur.SetVector("_TintSec", colorCur);
+        // New:
+        mutationThumbnailDecomposersMatNew.SetVector("_TintPri", colorNew);
+        mutationThumbnailDecomposersMatNew.SetVector("_TintSec", colorNew);
+    
+        mutationThumbnailDecomposersMatA.SetVector("_TintPri", colorOptionA);
+        mutationThumbnailDecomposersMatA.SetVector("_TintSec", colorOptionA);
+        //B:
+        mutationThumbnailDecomposersMatB.SetVector("_TintPri", colorOptionB);
+        mutationThumbnailDecomposersMatB.SetVector("_TintSec", colorOptionB);
+        //C;
+        mutationThumbnailDecomposersMatC.SetVector("_TintPri", colorOptionC);
+        mutationThumbnailDecomposersMatC.SetVector("_TintSec", colorOptionC);
+        //D:
+        mutationThumbnailDecomposersMatD.SetVector("_TintPri", colorOptionD);
+        mutationThumbnailDecomposersMatD.SetVector("_TintSec", colorOptionD);
     }
+    
     private void UpdateZooplanktonUI() {
 
         Color uiColor = zooplanktonManager.zooplanktonSlotGenomeMutations[0].representativeData.color;
@@ -434,10 +427,8 @@ public class MutationUI : MonoBehaviour {
                                     strDeltaAgingRate + "\n" +
                                     zooplanktonManager.zooplanktonSlotGenomeMutations[selectedToolbarMutationID].attractForce01.ToString("F2") +
                                     strDeltaAttract;
-
-
-
     }
+    
     private void UpdatePlantsUI() {
         Color uiColor = vegetationManager.plantSlotGenomeMutations[0].displayColorPri; // new Color(hue.x, hue.y, hue.z);
         //uiColor.a = 1f;
@@ -466,12 +457,8 @@ public class MutationUI : MonoBehaviour {
 
         textMutationPanelNew.text = vegetationManager.plantSlotGenomeMutations[selectedToolbarMutationID].growthRate.ToString("F2") +
                                     strDeltaGrowthRate;
-
-   
-        
     }
     
-
     public void UpdateMutationPanelUI(TrophicLayersManager layerManager) {
         panelMutationSpirit.SetActive(isOpen);
         if(isOpen) {
@@ -499,8 +486,6 @@ public class MutationUI : MonoBehaviour {
 
     public void OpenMutationPanel() {
         isOpen = true;
-
-        
     }
     
     public void ClickToolButton() {
@@ -510,88 +495,84 @@ public class MutationUI : MonoBehaviour {
             animatorMutationUI.SetBool("_IsSelectedA", true);
         }
     }
+    
     public void ClickMutationConfirm() {
         animatorMutationUI.SetTrigger("_TriggerMutate");
         
 
         TrophicSlot slotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;
-        if(slotRef.kingdomID == 0) {  // Decomposers
+        if(slotRef.kingdomID == KingdomId.Decomposers) {  
             vegetationManager.decomposerSlotGenomeCurrent = vegetationManager.decomposerSlotGenomeMutations[selectedToolbarMutationID];
             //gameManager.simulationManager.vegetationManager.WorldLayerDecomposerGenomeStuff(ref decomposerSlotGenomeCurrent, 0f);
             vegetationManager.GenerateWorldLayerDecomposersGenomeMutationOptions();
         }
-        else if(slotRef.kingdomID == 1) {  // Plants
-            if (slotRef.tierID == 0) {
-                vegetationManager.algaeSlotGenomeCurrent = simulationManager.vegetationManager.algaeSlotGenomeMutations[selectedToolbarMutationID];
-                vegetationManager.GenerateWorldLayerAlgaeGridGenomeMutationOptions();
-            }
-            else {
-                // OLD //gameManager.simulationManager.vegetationManager.plantSlotGenomeCurrent = gameManager.simulationManager.vegetationManager.plantSlotGenomeMutations[selectedToolbarMutationID];
-                vegetationManager.plantSlotGenomeCurrent.plantRepData = vegetationManager.plantSlotGenomeMutations[selectedToolbarMutationID].plantRepData;
-                vegetationManager.plantSlotGenomeCurrent.textDescriptionMutation = vegetationManager.plantSlotGenomeMutations[selectedToolbarMutationID].textDescriptionMutation;
-                vegetationManager.plantSlotGenomeCurrent.growthRate = vegetationManager.plantSlotGenomeMutations[selectedToolbarMutationID].growthRate;
-                vegetationManager.ProcessPlantSlotMutation();
-                vegetationManager.GenerateWorldLayerPlantParticleGenomeMutationOptions();
-            }
+        else if (slotRef.id == KnowledgeMapId.Algae) { 
+            vegetationManager.algaeSlotGenomeCurrent = simulationManager.vegetationManager.algaeSlotGenomeMutations[selectedToolbarMutationID];
+            vegetationManager.GenerateWorldLayerAlgaeGridGenomeMutationOptions();
+        }
+        else if (slotRef.id == KnowledgeMapId.Plants) {
+            vegetationManager.plantSlotGenomeCurrent.plantRepData = vegetationManager.plantSlotGenomeMutations[selectedToolbarMutationID].plantRepData;
+            vegetationManager.plantSlotGenomeCurrent.textDescriptionMutation = vegetationManager.plantSlotGenomeMutations[selectedToolbarMutationID].textDescriptionMutation;
+            vegetationManager.plantSlotGenomeCurrent.growthRate = vegetationManager.plantSlotGenomeMutations[selectedToolbarMutationID].growthRate;
+            vegetationManager.ProcessPlantSlotMutation();
+            vegetationManager.GenerateWorldLayerPlantParticleGenomeMutationOptions();
+        }
+        //gameManager.simulationManager.vegetationManager.ProcessSlotMutation();
+        //algaeRepData = gameManager.simulationManager.vegetationManager.algaeSlotGenomeCurrent.algaeRepData;
+        else if(slotRef.id == KnowledgeMapId.Microbes) { 
+            zooplanktonManager.zooplanktonSlotGenomeCurrent = zooplanktonManager.zooplanktonSlotGenomeMutations[selectedToolbarMutationID];
+            zooplanktonManager.GenerateWorldLayerZooplanktonGenomeMutationOptions();
+            zooplanktonManager.ProcessSlotMutation();
+        }
+        /*
+        else if (vertebrates) { 
+            // *** REFERENCE ISSUE!!!!!
             
-            //gameManager.simulationManager.vegetationManager.ProcessSlotMutation();
-            //algaeRepData = gameManager.simulationManager.vegetationManager.algaeSlotGenomeCurrent.algaeRepData;
-        }
-        else if(slotRef.kingdomID == 2) {  // Animals
-            if(slotRef.tierID == 0) { // zooplankton
-                zooplanktonManager.zooplanktonSlotGenomeCurrent = zooplanktonManager.zooplanktonSlotGenomeMutations[selectedToolbarMutationID];
-                zooplanktonManager.GenerateWorldLayerZooplanktonGenomeMutationOptions();
-                zooplanktonManager.ProcessSlotMutation();
-            }
-            else { // vertebrates
-                // *** REFERENCE ISSUE!!!!!
-                /*
-                AgentGenome parentGenome = uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotRef.slotID][selectedToolbarMutationID].representativeGenome;
-                //generate "mutated" genome copy with 0 mutationSize ??? workaround:::::  ***********
-                uiManagerRef.gameManager.simulationManager.settingsManager.mutationSettingsVertebrates.mutationStrengthSlot = 0f;
+            AgentGenome parentGenome = uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotRef.slotID][selectedToolbarMutationID].representativeGenome;
+            //generate "mutated" genome copy with 0 mutationSize ??? workaround:::::  ***********
+            uiManagerRef.gameManager.simulationManager.settingsManager.mutationSettingsVertebrates.mutationStrengthSlot = 0f;
 
-                //vertebrateSlotsGenomesCurrentArray[slotID].representativeGenome  // **** Use this genome as basis?
-                AgentGenome mutatedGenome = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[0].Mutate(parentGenome, true, true);  // does speciesPoolIndex matter?
+            //vertebrateSlotsGenomesCurrentArray[slotID].representativeGenome  // **** Use this genome as basis?
+            AgentGenome mutatedGenome = uiManagerRef.gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[0].Mutate(parentGenome, true, true);  // does speciesPoolIndex matter?
 
-                uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotRef.slotID].representativeGenome = mutatedGenome;
-                uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotRef.slotID].name = uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotRef.slotID][selectedToolbarMutationID].name;
-                //gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotRef.slotID][selectedToolbarMutationID];
-                //gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotRef.slotID].representativeGenome.bodyGenome.appearanceGenome.huePrimary = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotRef.slotID][selectedToolbarMutationID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+            uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotRef.slotID].representativeGenome = mutatedGenome;
+            uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotRef.slotID].name = uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotRef.slotID][selectedToolbarMutationID].name;
+            //gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotRef.slotID][selectedToolbarMutationID];
+            //gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotRef.slotID].representativeGenome.bodyGenome.appearanceGenome.huePrimary = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[slotRef.slotID][selectedToolbarMutationID].representativeGenome.bodyGenome.appearanceGenome.huePrimary;
 
-                Debug.Log("CONFIR<M  " + uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotRef.slotID].representativeGenome.bodyGenome.appearanceGenome.huePrimary.ToString());
-                //gameManager.simulationManager.masterGenomePool.
-                //gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[slotRef.linkedSpeciesID].representativeGenome = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotRef.slotID].representativeGenome;
+            Debug.Log("CONFIR<M  " + uiManagerRef.gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotRef.slotID].representativeGenome.bodyGenome.appearanceGenome.huePrimary.ToString());
+            //gameManager.simulationManager.masterGenomePool.
+            //gameManager.simulationManager.masterGenomePool.completeSpeciesPoolsList[slotRef.linkedSpeciesID].representativeGenome = gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[slotRef.slotID].representativeGenome;
 
-                uiManagerRef.gameManager.simulationManager.masterGenomePool.GenerateWorldLayerVertebrateGenomeMutationOptions(slotRef.slotID, slotRef.linkedSpeciesID);
-                uiManagerRef.gameManager.simulationManager.masterGenomePool.ProcessSlotMutation(slotRef.slotID, selectedToolbarMutationID, slotRef.linkedSpeciesID);
+            uiManagerRef.gameManager.simulationManager.masterGenomePool.GenerateWorldLayerVertebrateGenomeMutationOptions(slotRef.slotID, slotRef.linkedSpeciesID);
+            uiManagerRef.gameManager.simulationManager.masterGenomePool.ProcessSlotMutation(slotRef.slotID, selectedToolbarMutationID, slotRef.linkedSpeciesID);
 
-                uiManagerRef.InitToolbarPortraitCritterData(slotRef);
-                */
-            }
-        }
-        else if(slotRef.kingdomID == 3) { // Terrain
-            if(slotRef.slotID == 0) {
+            uiManagerRef.InitToolbarPortraitCritterData(slotRef);  
+        }*/
+        else if(slotRef.kingdomID == KingdomId.Terrain) { 
+            if(slotRef.layerIndex == 0) {
                 baronVonTerrain.bedrockSlotGenomeCurrent = baronVonTerrain.bedrockSlotGenomeMutations[selectedToolbarMutationID];
             }
-            else if(slotRef.slotID == 1) {
+            else if(slotRef.layerIndex == 1) {
                 baronVonTerrain.stoneSlotGenomeCurrent = baronVonTerrain.stoneSlotGenomeMutations[selectedToolbarMutationID];
             }
-            else if(slotRef.slotID == 2) {
+            else if(slotRef.layerIndex == 2) {
                 baronVonTerrain.pebblesSlotGenomeCurrent = baronVonTerrain.pebblesSlotGenomeMutations[selectedToolbarMutationID];
             }
-            else if(slotRef.slotID == 3) { // world?
+            else if(slotRef.layerIndex == 3) { // World
                 baronVonTerrain.sandSlotGenomeCurrent = baronVonTerrain.sandSlotGenomeMutations[selectedToolbarMutationID];
             }
 
             // if terrain:
-            baronVonTerrain.GenerateTerrainSlotGenomeMutationOptions(slotRef.slotID);
+            baronVonTerrain.GenerateTerrainSlotGenomeMutationOptions(slotRef.layerIndex);
             //gameManager.theRenderKing.ClickTestTerrainUpdateMaps(false, 0.05f); // refresh color
         }
-        Debug.Log("MUTATION!!! kingdom(" + slotRef.kingdomID.ToString() + ")");
+        Debug.Log("MUTATION!!! kingdom(" + slotRef.kingdomID + ")");
         //selectedToolbarMutationID = 0; // Reset?? figure out what you want to do here
     }
+    
     public void ClickMutationOption(int id) { // **** Need better smarter way to detect selected slot and point to corresponding data
-        Debug.Log("ClickMutationOption(" + id.ToString() + ")");
+        Debug.Log("ClickMutationOption(" + id + ")");
         //uiManagerRef.InitToolbarPortraitCritterData(uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot);
         selectedToolbarMutationID = id;
 
@@ -613,5 +594,4 @@ public class MutationUI : MonoBehaviour {
             animatorMutationUI.SetBool("_IsSelectedD", true);
         }
     }
-
 }

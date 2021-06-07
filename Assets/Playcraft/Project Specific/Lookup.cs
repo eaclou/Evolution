@@ -91,9 +91,9 @@ public class Lookup : ScriptableObject
         return causesOfDeath[0].value;
     }
     
-    [SerializeField] KnowledgeMapSO[] knowledgeMaps;
+    public TrophicLayerSO[] knowledgeMaps;
     
-    public KnowledgeMapSO GetKnowledgeMapData(KnowledgeMapId id)
+    public TrophicLayerSO GetTrophicSlotData(KnowledgeMapId id)
     {
 	    foreach (var map in knowledgeMaps)
             if (map.id == id)

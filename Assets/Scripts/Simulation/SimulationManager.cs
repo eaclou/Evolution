@@ -454,7 +454,7 @@ public class SimulationManager : Singleton<SimulationManager>
     public bool IsAgentUIFocus(int index) { return GetAgentID(index) == uiManager.focusedCandidate.candidateID; }
     public int GetAgentID(int agentIndex) { return agentsArray[agentIndex].candidateRef.candidateID; }
 
-    // ***WPP: break into sections -> comments (minimum) or functions (better)
+    // * WPP: break into sections -> comments (minimum) or functions (better)
     public void TickSimulation() {
         simAgeTimeSteps++;
         simAgeYearCounter++;
@@ -625,7 +625,6 @@ public class SimulationManager : Singleton<SimulationManager>
         }
         vegetationManager.ApplyDiffusionOnAlgaeGrid(environmentFluidManager);
         */
-        
     }
     
     private void TickSparseEvents() {
@@ -645,16 +644,24 @@ public class SimulationManager : Singleton<SimulationManager>
 
             uiManager.worldTreePanelUI.UpdateSpeciesIconsTargetCoords();
             
-            int speciesID0 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].linkedSpeciesID;
+            // WPP: use animalSlots list index
+            // * eliminate repetition by iterating through array
+            /*int speciesID0 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].linkedSpeciesID;
             int speciesID1 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].linkedSpeciesID;
             int speciesID2 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[2].linkedSpeciesID;
-            int speciesID3 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[3].linkedSpeciesID;
+            int speciesID3 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[3].linkedSpeciesID;*/
             
+            int speciesID0 = trophicLayersManager.animalSlots[0].linkedSpeciesID;
+            int speciesID1 = trophicLayersManager.animalSlots[1].linkedSpeciesID;
+            int speciesID2 = trophicLayersManager.animalSlots[2].linkedSpeciesID;
+            int speciesID3 = trophicLayersManager.animalSlots[3].linkedSpeciesID;
+
             float totalAgentBiomass = 0f;
             float totalSpeciesPopulation0 = 0f;
             float totalSpeciesPopulation1 = 0f;
             float totalSpeciesPopulation2 = 0f;
             float totalSpeciesPopulation3 = 0f;
+            
             for(int a = 0; a < _NumAgents; a++) {
                 if(agentsArray[a].curLifeStage != Agent.AgentLifeStage.AwaitingRespawn) {
                     totalAgentBiomass += agentsArray[a].currentBiomass;
@@ -687,18 +694,14 @@ public class SimulationManager : Singleton<SimulationManager>
                 graphDataVertebrateFoodEaten0.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID0].avgPerformanceData.totalFoodEatenZoop + masterGenomePool.completeSpeciesPoolsList[speciesID0].avgPerformanceData.totalFoodEatenPlant + masterGenomePool.completeSpeciesPoolsList[speciesID0].avgPerformanceData.totalFoodEatenEgg + masterGenomePool.completeSpeciesPoolsList[speciesID0].avgPerformanceData.totalFoodEatenCorpse + masterGenomePool.completeSpeciesPoolsList[speciesID0].avgPerformanceData.totalFoodEatenCreature);
                 //graphDataVertebrateGenome0.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID0].avgBodySize);
             }*/
-            
         }
 
         if(simAgeTimeSteps % 79 == 3) {
             UpdateSimulationClimate();
-
             //RefreshLatestHistoricalDataEntry();
             RefreshLatestSpeciesDataEntry();
             //uiManager.UpdateSpeciesTreeDataTextures(curSimYear); // shouldn't lengthen!
-            
             //uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
-            
             //theRenderKing.UpdateTreeOfLifeEventLineData(simEventsManager.completeEventHistoryList);
         }
     }
@@ -1034,7 +1037,7 @@ public class SimulationManager : Singleton<SimulationManager>
 
                 if (agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
                     //Debug.Log("AttemptToSpawnAgent(" + a.ToString() + ")");
-                    int randomTableIndex = UnityEngine.Random.Range(0, masterGenomePool.currentlyActiveSpeciesIDList.Count);
+                    int randomTableIndex =Random.Range(0, masterGenomePool.currentlyActiveSpeciesIDList.Count);
                     int speciesIndex = masterGenomePool.currentlyActiveSpeciesIDList[randomTableIndex];
                     CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
 

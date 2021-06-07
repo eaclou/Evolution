@@ -85,10 +85,12 @@ public class WorldSpiritHubUI : MonoBehaviour {
     public int currencyB = 0;
     
     SimulationManager simulationManager => SimulationManager.instance;
+    TrophicLayersManager trophicLayersManager => simulationManager.trophicLayersManager;
     TheRenderKing theRenderKing => TheRenderKing.instance;
     CameraManager cameraManager => CameraManager.instance;
-    
-    Lookup lookup => Lookup.instance;
+
+    // WPP: redundant with TrophicSlotSO
+    /*Lookup lookup => Lookup.instance;
     Sprite spiritWorldIcon => lookup.spiritWorldIcon;
     Sprite spiritStoneIcon => lookup.spiritStoneIcon;
     Sprite spiritAlgaeIcon => lookup.spiritAlgaeIcon;
@@ -110,12 +112,12 @@ public class WorldSpiritHubUI : MonoBehaviour {
     Color colorAlgaeLayer => lookup.colorAlgaeLayer;
     Color colorPlantsLayer => lookup.colorPlantsLayer;
     Color colorZooplanktonLayer => lookup.colorZooplanktonLayer;
-    Color colorDecomposersLayer => lookup.colorDecomposersLayer;
+    Color colorDecomposersLayer => lookup.colorDecomposersLayer;*/
 
 
 	// Use this for initialization
 	void Start () {
-        isUnlocked = true; // false;
+        isUnlocked = true; 
         //isFocused = true;
 	}
 
@@ -125,7 +127,6 @@ public class WorldSpiritHubUI : MonoBehaviour {
     }
 
     private void UpdateUI() {
-        TrophicLayersManager layerManager = simulationManager.trophicLayersManager;
         /*
         bool isSelectedDecomposers = false;
         bool isSelectedAlgae = false;
@@ -356,39 +357,35 @@ public class WorldSpiritHubUI : MonoBehaviour {
     }
     
     //*********************************************
-    public void ClickButtonWorldSpiritHubOther(int index) {
-        Debug.Log("ClickButtonPaletteOther: " + index);
-
-        TrophicSlot slot = simulationManager.trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[index];
-        //uiManagerRef.gameManager.simulationManager.trophicLayersManager.isSelectedTrophicSlot = true;
+    public void ClickButtonWorldSpiritHubOther(TrophicLayerSO data) {
+        TrophicSlot slot = trophicLayersManager.GetSlot(data);
+        //trophicLayersManager.isSelectedTrophicSlot = true;
         selectedWorldSpiritSlot = slot;
         
         //selectedWorldSpiritVertebrateSpeciesID = slot.linkedSpeciesID; // update this next ***
         
-        selectedToolbarOtherLayer = index;
+        selectedToolbarOtherLayer = data.layerIndex;
         //uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
         //isBrushSelected = false;
     }
     
-    public void ClickButtonWorldSpiritHubTerrain(int index) {
-        Debug.Log("ClickButtonPaletteTerrain: " + index.ToString());
-
-        TrophicSlot slot = simulationManager.trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[index];
+    public void ClickButtonWorldSpiritHubTerrain(TrophicLayerSO data) {
+        TrophicSlot slot = trophicLayersManager.GetSlot(data);
         selectedWorldSpiritSlot = slot;
         
         //selectedWorldSpiritVertebrateSpeciesID = slot.linkedSpeciesID; // update this next
 
-        selectedToolbarTerrainLayer = index;
+        selectedToolbarTerrainLayer = data.layerIndex;
         //uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
         //isBrushSelected = false;
     }
     
-    public void ClickButtonWorldSpiritHubDecomposers() {
-        TrophicSlot slot = simulationManager.trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
+    public void ClickButtonWorldSpiritHubDecomposers(TrophicLayerSO data) {
+        TrophicSlot slot = trophicLayersManager.GetSlot(data);
 
         selectedWorldSpiritSlot = slot;
         
-        if(slot.status == TrophicSlot.SlotStatus.Unlocked) {
+        if(slot.status == TrophicSlotStatus.Unlocked) {
             ClickWorldCreateNewSpecies(slot);
             //ClickToolbarCreateNewSpecies();
         }
@@ -396,33 +393,34 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //isBrushSelected = false;
     }
     
-    public void ClickButtonWorldSpiritHubAlgae() {  // shouldn't be able to click if LOCKED (interactive = false)
-        TrophicSlot slot = simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
+    // Not interactable if locked
+    public void ClickButtonWorldSpiritHubAlgae(TrophicLayerSO data) {  
+        TrophicSlot slot = trophicLayersManager.GetSlot(data);
         selectedWorldSpiritSlot = slot;
         
-        if(slot.status == TrophicSlot.SlotStatus.Unlocked) {
+        if(slot.status == TrophicSlotStatus.Unlocked) {
             ClickWorldCreateNewSpecies(slot);
             //ClickToolbarCreateNewSpecies();
         }
         //uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
     }
     
-    public void ClickButtonWorldSpiritHubPlants(int slotID) {
-        TrophicSlot slot = simulationManager.trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[slotID];
+    public void ClickButtonWorldSpiritHubPlants(TrophicLayerSO data) {
+        TrophicSlot slot = trophicLayersManager.GetSlot(data);
         selectedWorldSpiritSlot = slot;
         
-        if(slot.status == TrophicSlot.SlotStatus.Unlocked) {
+        if(slot.status == TrophicSlotStatus.Unlocked) {
             ClickWorldCreateNewSpecies(slot);
             //ClickToolbarCreateNewSpecies();
         }
         //uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
     }
     
-    public void ClickButtonWorldSpiritHubZooplankton() {
-        TrophicSlot slot = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];        
+    public void ClickButtonWorldSpiritHubZooplankton(TrophicLayerSO data) {
+        TrophicSlot slot = trophicLayersManager.GetSlot(data);
         selectedWorldSpiritSlot = slot;
         
-        if(slot.status == TrophicSlot.SlotStatus.Unlocked) {
+        if(slot.status == TrophicSlotStatus.Unlocked) {
             //ClickToolbarCreateNewSpecies();
             ClickWorldCreateNewSpecies(slot);
         }
@@ -431,66 +429,63 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //isBrushSelected = false;
     }
     
-    public void ClickButtonWorldSpiritHubAgent(int index) {
-        TrophicSlot slot = simulationManager.trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[index];
+    public void ClickButtonWorldSpiritHubAgent(TrophicLayerSO data) {
+        TrophicSlot slot = trophicLayersManager.GetSlot(data);
         selectedWorldSpiritSlot = slot;
         //isToolbarDetailPanelOn = true;
 
         selectedWorldSpiritVertebrateSpeciesID = slot.linkedSpeciesID; // update this next
 
-        if(slot.status == TrophicSlot.SlotStatus.Unlocked) {
-            //ClickToolbarCreateNewSpecies();  // UNLOCKING!!!! ********************************************* need to address at some point!!!! ***************
+        if(slot.status == TrophicSlotStatus.Unlocked) {
+            //ClickToolbarCreateNewSpecies();  // UNLOCKING!!!! *** need to address at some point!!!! ***
             ClickWorldCreateNewSpecies(slot);
-
         }
         
-        if(selectedWorldSpiritSlot.status != TrophicSlot.SlotStatus.Unlocked) {
-            //InitToolbarPortraitCritterData(gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef); // ***
+        if(selectedWorldSpiritSlot.status != TrophicSlotStatus.Unlocked) {
+            //InitToolbarPortraitCritterData(trophicLayersManager.selectedTrophicSlotRef); // ***
         }
         //uiManagerRef.panelFocus = UIManager.PanelFocus.WorldHub;
     }
 
     public void ClickWorldCreateNewSpecies(TrophicSlot slot) {
         // questionable code, possibly un-needed:
-        simulationManager.trophicLayersManager.CreateTrophicSlotSpecies(slot, cameraManager.curCameraFocusPivotPos, simulationManager.simAgeTimeSteps);
+        trophicLayersManager.CreateTrophicSlotSpecies(slot, cameraManager.curCameraFocusPivotPos, simulationManager.simAgeTimeSteps);
                 
         theRenderKing.baronVonWater.StartCursorClick(cameraManager.curCameraFocusPivotPos);
         
         //isAnnouncementTextOn = true;
 
-        if(slot.kingdomID == 0) {
+        if (slot.kingdomID == KingdomId.Decomposers) {
             //panelPendingClickPrompt.Narrate("A new species of D3composer added!", colorDecomposersLayer);
             //panelPendingClickPrompt.GetComponentInChildren<Text>().text = "A new species of DEcomposer added!";
             //uiManagerRef.panelPendingClickPrompt.GetComponentInChildren<Text>().color = uiManagerRef.colorDecomposersLayer;
             //panelPendingClickPrompt.GetComponent<Image>().raycastTarget = false;
         }
-        else if(slot.kingdomID == 1) {
-            if(slot.tierID == 0) {
+        /*else if (slot.kingdomID == KingdomId.Plants) {
+            if (slot.tierID == 0) {
                 //panelPendingClickPrompt.Narrate("A new species of Algae added!", colorAlgaeLayer);                
             }
             else {   /// BIG PLANTS:
                 //panelPendingClickPrompt.Narrate("A new species of PLANT added!", colorPlantsLayer);               
             }
             
+        }*/
+        else if(slot.id == KnowledgeMapId.Animals) { 
+            //if(createSpecies) {
+            // v v v Actually creates new speciesPool here:::
+            //TrophicSlot slot = trophicLayersManager.selectedTrophicSlotRef;
+            slot.speciesName = "Vertebrate " + (slot.slotID + 1);
+                        
+            selectedWorldSpiritVertebrateSpeciesID = slot.linkedSpeciesID; // ???
+            //InitToolbarPortraitCritterData(slot);                
+            
+            if(slot.slotID == 0) {
+                //panelPendingClickPrompt.GetComponentInChildren<Text>().text = "These creatures start with randomly-generated brains\n and must evolve successful behavior\nthrough survival of the fittest";
+                uiManagerRef.isAnnouncementTextOn = false;  // *** hacky...
+            }
         }
-        else if(slot.kingdomID == 2) { // ANIMALS
-            if(slot.tierID == 1) {
-                //if(createSpecies) {
-                // v v v Actually creates new speciesPool here:::
-                //TrophicSlot slot = uiManagerRef.gameManager.simulationManager.trophicLayersManager.selectedTrophicSlotRef;
-                slot.speciesName = "Vertebrate " + (slot.slotID + 1).ToString();
-                            
-                selectedWorldSpiritVertebrateSpeciesID = slot.linkedSpeciesID; // ???
-                //InitToolbarPortraitCritterData(slot);                
-                
-                if(slot.slotID == 0) {
-                    //panelPendingClickPrompt.GetComponentInChildren<Text>().text = "These creatures start with randomly-generated brains\n and must evolve successful behavior\nthrough survival of the fittest";
-                    uiManagerRef.isAnnouncementTextOn = false;  // *** hacky...
-                }
-            }
-            else {
-                //panelPendingClickPrompt.Narrate("A new species of Zooplankton added!", colorVertebratesLayer);
-            }
+        else if (slot.id == KnowledgeMapId.Microbes) {
+            //panelPendingClickPrompt.Narrate("A new species of Zooplankton added!", colorVertebratesLayer);
         }
 
         //curToolbarWingPanelSelectID = 1;

@@ -93,7 +93,14 @@ public class BrushesUI : MonoBehaviour {
     TheRenderKing theRenderKing => TheRenderKing.instance;
     
     Lookup lookup => Lookup.instance;
-    Sprite spiritWorldIcon => lookup.spiritWorldIcon;
+    Sprite spiritBrushStirIcon;
+    Sprite spiritBrushCreationIcon;
+    Color buttonActiveColor => lookup.buttonActiveColor;
+    Color buttonDisabledColor => lookup.buttonDisabledColor;
+    Color colorSpiritBrushLight => lookup.colorSpiritBrushLight;
+    Color colorSpiritBrushDark => lookup.colorSpiritBrushDark;
+    
+    /*Sprite spiritWorldIcon => lookup.spiritWorldIcon;
     Sprite spiritStoneIcon => lookup.spiritStoneIcon;
     Sprite spiritAlgaeIcon => lookup.spiritAlgaeIcon;
     Sprite spiritPlantIcon => lookup.spiritPlantIcon;
@@ -105,12 +112,6 @@ public class BrushesUI : MonoBehaviour {
     Sprite spiritMineralsIcon => lookup.spiritMineralsIcon;
     Sprite spiritWaterIcon => lookup.spiritWaterIcon;
     Sprite spiritAirIcon => lookup.spiritAirIcon;
-    Sprite spiritBrushStirIcon;
-    Sprite spiritBrushCreationIcon;
-    Color buttonActiveColor => lookup.buttonActiveColor;
-    Color buttonDisabledColor => lookup.buttonDisabledColor;
-    Color colorSpiritBrushLight => lookup.colorSpiritBrushLight;
-    Color colorSpiritBrushDark => lookup.colorSpiritBrushDark;
     Color colorVertebratesLayer => lookup.colorVertebratesLayer;
     Color colorWorldLayer => lookup.colorWorldLayer;
     Color colorTerrainLayer => lookup.colorTerrainLayer; 
@@ -120,7 +121,7 @@ public class BrushesUI : MonoBehaviour {
     Color colorDecomposersLayer => lookup.colorDecomposersLayer;
     Color colorAlgaeLayer => lookup.colorAlgaeLayer;
     Color colorPlantsLayer => lookup.colorPlantsLayer;
-    Color colorZooplanktonLayer => lookup.colorZooplanktonLayer;
+    Color colorZooplanktonLayer => lookup.colorZooplanktonLayer;*/
 
 
     private string GetSpiritBrushSummary(TrophicLayersManager layerManager) {
@@ -350,34 +351,34 @@ public class BrushesUI : MonoBehaviour {
         imageBrushLinkedSpiritThumbnail.sprite = curIconSprite;
     }
     
-    // * WPP: collapse conditionals with nested struct (or more global lookup)
+    // WPP: pull data from SO
     private void UpdateCurSelectedColor() {  
-        string str = "";
+        /*string str = "";
         //selected layer ui identifying color:
-        if (selectedEssenceSlot.kingdomID == 0) {
-            curIconColor = colorDecomposersLayer;
+        if (selectedEssenceSlot.kingdomID == KingdomId.Decomposers) {
+            curIconColor = selectedEssenceSlot.color; //colorDecomposersLayer;
             curIconSprite = spiritDecomposerIcon;
             str = "Creates Decomposers";
         }
-        else if (selectedEssenceSlot.kingdomID == 1) {
-            if (selectedEssenceSlot.tierID == 0) {
-                curIconColor = colorAlgaeLayer;
-                curIconSprite = spiritAlgaeIcon;
-                str = "Creates a bloom of Algae";
-            }
-            else {
-                curIconColor = colorPlantsLayer;
-                curIconSprite = spiritPlantIcon;
-                str = "Creates floating plant seedlings";
-            }
+        else if (selectedEssenceSlot.id == KnowledgeMapId.Algae) {
+            //if (selectedEssenceSlot.tierID == 0) {
+            curIconColor = colorAlgaeLayer;
+            curIconSprite = spiritAlgaeIcon;
+            str = "Creates a bloom of Algae";
         }
-        else if (selectedEssenceSlot.kingdomID == 2) {
-            if (selectedEssenceSlot.tierID == 0) {
-                curIconColor = colorZooplanktonLayer;
-                curIconSprite = spiritZooplanktonIcon;
-                str = "Creates simple tiny creatures";
-            }
-            else {
+        else if (selectedEssenceSlot.id == KnowledgeMapId.Plants) {
+            curIconColor = colorPlantsLayer;
+            curIconSprite = spiritPlantIcon;
+            str = "Creates floating plant seedlings";
+        }
+        //}
+        else if (selectedEssenceSlot.id == KnowledgeMapId.Microbes) {
+        //    if (selectedEssenceSlot.tierID == 0) {
+            curIconColor = colorZooplanktonLayer;
+            curIconSprite = spiritZooplanktonIcon;
+            str = "Creates simple tiny creatures";
+        }
+        else if (selectedEssenceSlot.id == KnowledgeMapId.Animals) {
                 curIconColor = colorVertebratesLayer;
                 curIconSprite = spiritVertebrateIcon;
                 str = "Hatches Vertebrates";
@@ -393,9 +394,9 @@ public class BrushesUI : MonoBehaviour {
                 else {
                     //isSelectedVertebrate3 = true;
                 }
-            }
+            //}
         }
-        else if (selectedEssenceSlot.kingdomID == 3) {                
+        else if (selectedEssenceSlot.kingdomID == KingdomId.Terrain) {                
             if (selectedEssenceSlot.slotID == 0) {
                 curIconSprite = spiritWorldIcon;                    
                 curIconColor = colorWorldLayer;
@@ -417,7 +418,7 @@ public class BrushesUI : MonoBehaviour {
                 str = "Blankets the terrain with sand";
             }
         }
-        else if (selectedEssenceSlot.kingdomID == 4) {
+        else if (selectedEssenceSlot.kingdomID == KingdomId.Other) {
             if (selectedEssenceSlot.slotID == 0) {
                 curIconColor = colorMineralLayer;
                 curIconSprite = spiritMineralsIcon;
@@ -433,9 +434,11 @@ public class BrushesUI : MonoBehaviour {
                 curIconSprite = spiritAirIcon;
                 str = "Increases wind strength";
             }
-        }
+        }*/
 
-        textSelectedBrushDescription.text = str;
+        curIconColor = selectedEssenceSlot.color;
+        curIconSprite = selectedEssenceSlot.icon;
+        textSelectedBrushDescription.text = selectedEssenceSlot.data.brushDescription;
     }
     
     private void UpdateBrushPaletteUI() {
@@ -571,72 +574,59 @@ public class BrushesUI : MonoBehaviour {
             theRenderKing.baronVonWater.RequestNewWaterRipple(new Vector2(theCursorCzar.curMousePositionOnWaterPlane.x / SimulationManager._MapSize, theCursorCzar.curMousePositionOnWaterPlane.y / SimulationManager._MapSize));
         }
         uiManagerRef.updateTerrainAltitude = false;                
-        // IF TERRAIN SELECTED::::
+
         if (true) { //trophicLayersManager.isSelectedTrophicSlot) {
-            // DECOMPOSERS::::
-            if(selectedEssenceSlot.kingdomID == 0) {
+            if(selectedEssenceSlot.kingdomID == KingdomId.Decomposers) {
                 simulationManager.vegetationManager.isBrushActive = true;
-            }// PLANTS:
-            else if(selectedEssenceSlot.kingdomID == 1) {
-                if(selectedEssenceSlot.tierID == 0) {
-                    simulationManager.vegetationManager.isBrushActive = true;
-                }
-                else {
-                    simulationManager.vegetationManager.isBrushActive = true;            
-                }                                
-            }  // ANIMALS::::                            
-            else if(selectedEssenceSlot.kingdomID == 2) {
-                if (selectedEssenceSlot.tierID == 0) {  
-                    // zooplankton?
-                }
-                else {// AGENTS                                
-                    int speciesIndex = selectedEssenceSlot.linkedSpeciesID;
-                    if (theCursorCzar.isDraggingMouseLeft) {
-                        //gameManager.simulationManager.recentlyAddedSpeciesOn = true; // ** needed?
-                        uiManagerRef.isBrushAddingAgents = true;
-                                        
-                        //Debug.Log("isBrushAddingAgents = true; speciesID = " + speciesIndex.ToString());
+            }
+            else if(selectedEssenceSlot.kingdomID == KingdomId.Plants) {
+                simulationManager.vegetationManager.isBrushActive = true;
+            }
+            else if(selectedEssenceSlot.id == KnowledgeMapId.Animals) {
+                int speciesIndex = selectedEssenceSlot.linkedSpeciesID;
+                if (theCursorCzar.isDraggingMouseLeft) {
+                    //gameManager.simulationManager.recentlyAddedSpeciesOn = true; // ** needed?
+                    uiManagerRef.isBrushAddingAgents = true;
+                                    
+                    //Debug.Log("isBrushAddingAgents = true; speciesID = " + speciesIndex.ToString());
 
-                        uiManagerRef.brushAddAgentCounter++;
+                    uiManagerRef.brushAddAgentCounter++;
 
-                        if(uiManagerRef.brushAddAgentCounter >= uiManagerRef.framesPerAgentSpawn) {
-                            uiManagerRef.brushAddAgentCounter = 0;
+                    if(uiManagerRef.brushAddAgentCounter >= uiManagerRef.framesPerAgentSpawn) {
+                        uiManagerRef.brushAddAgentCounter = 0;
 
-                            simulationManager.AttemptToBrushSpawnAgent(speciesIndex);
-                        }
+                        simulationManager.AttemptToBrushSpawnAgent(speciesIndex);
                     }
-                    if (theCursorCzar.isDraggingMouseRight) {
-                        simulationManager.AttemptToKillAgent(speciesIndex, new Vector2(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y), 15f);
-                    }                                   
+                }
+                if (theCursorCzar.isDraggingMouseRight) {
+                    simulationManager.AttemptToKillAgent(speciesIndex, new Vector2(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y), 15f);
                 }
             }
-            else if (selectedEssenceSlot.kingdomID == 3) {
+            else if (selectedEssenceSlot.kingdomID == KingdomId.Terrain) {
                 uiManagerRef.updateTerrainAltitude = true;
                 uiManagerRef.terrainUpdateMagnitude = 0.05f;
-                if(selectedEssenceSlot.slotID == 0) { // WORLD
+                if(selectedEssenceSlot.layerIndex == 0) { // WORLD
                     uiManagerRef.terrainUpdateMagnitude = 1f;
                     //theRenderKing.ClickTestTerrainUpdateMaps(true, 0.4f);
                 }
-                else if(selectedEssenceSlot.slotID == 1) {  // STONE
+                else if(selectedEssenceSlot.layerIndex == 1) {  // STONE
                     uiManagerRef.terrainUpdateMagnitude = 1f;
                     //theRenderKing.ClickTestTerrainUpdateMaps(true, 0.04f);
                 }
-                else if(selectedEssenceSlot.slotID == 2) {  // PEBBLES
+                else if(selectedEssenceSlot.layerIndex == 2) {  // PEBBLES
                     uiManagerRef.terrainUpdateMagnitude = 1f;
                     //theRenderKing.ClickTestTerrainUpdateMaps(true, 0.04f);
                 }
-                else if(selectedEssenceSlot.slotID == 3) {  // SAND
+                else if(selectedEssenceSlot.layerIndex == 3) {  // SAND
                     uiManagerRef.terrainUpdateMagnitude = 1f;
                     //heRenderKing.ClickTestTerrainUpdateMaps(true, 0.04f);
                 }
-                                
             }
             else {
-                if (selectedEssenceSlot.slotID == 0) {  // MINERALS
+                if (selectedEssenceSlot.layerIndex == 0) {  // MINERALS
                     simulationManager.vegetationManager.isBrushActive = true;
-                    Debug.Log("SDFADSFAS");
                 }
-                else if (selectedEssenceSlot.slotID == 1) {   // WATER
+                else if (selectedEssenceSlot.layerIndex == 1) {   // WATER
                     if (theCursorCzar.isDraggingMouseLeft) {
                         SimulationManager._GlobalWaterLevel = Mathf.Clamp01(SimulationManager._GlobalWaterLevel + 0.002f);
                     }
@@ -644,7 +634,7 @@ public class BrushesUI : MonoBehaviour {
                         SimulationManager._GlobalWaterLevel = Mathf.Clamp01(SimulationManager._GlobalWaterLevel - 0.002f);
                     }
                 }
-                else if (selectedEssenceSlot.slotID == 2) {   // AIR
+                else if (selectedEssenceSlot.layerIndex == 2) {   // AIR
                     if (theCursorCzar.isDraggingMouseLeft) {
                         if (Random.Range(0f, 1f) < 0.1f) {
                             simulationManager.environmentFluidManager.curTierWaterCurrents = Mathf.Clamp((simulationManager.environmentFluidManager.curTierWaterCurrents + 1), 0, 10);
@@ -779,10 +769,8 @@ public class BrushesUI : MonoBehaviour {
     }
     
     //*********************************************
-    public void ClickButtonBrushPaletteOther(int index) {
-        Debug.Log("ClickButtonPaletteOther: " + index);
-
-        TrophicSlot slot = trophicLayersManager.kingdomOther.trophicTiersList[0].trophicSlots[index];
+    public void ClickButtonBrushPaletteOther(TrophicLayerSO data) {
+        TrophicSlot slot = trophicLayersManager.GetSlot(data);
         selectedEssenceSlot = slot;
         //trophicLayersManager.isSelectedTrophicSlot = true;
         //trophicLayersManager.selectedTrophicSlotRef = slot;
@@ -790,24 +778,22 @@ public class BrushesUI : MonoBehaviour {
         //
         selectedBrushVertebrateSpeciesID = slot.linkedSpeciesID; // update this next ***
         
-        selectedBrushLinkedSpiritOtherLayer = index;
+        selectedBrushLinkedSpiritOtherLayer = data.layerIndex;
 
         //isBrushSelected = false;
         isPaletteOpen = false;
         EnterCreationBrushMode();
     }
     
-    public void ClickButtonBrushPaletteTerrain(int index) {
-        Debug.Log("ClickButtonPaletteTerrain: " + index);
-
-        TrophicSlot slot = trophicLayersManager.kingdomTerrain.trophicTiersList[0].trophicSlots[index];
+    public void ClickButtonBrushPaletteTerrain(TrophicLayerSO data) {
+        TrophicSlot slot = trophicLayersManager.GetSlot(data);
         //trophicLayersManager.isSelectedTrophicSlot = true;
         //old: //trophicLayersManager.selectedTrophicSlotRef = slot;
         selectedEssenceSlot = slot;
         
         //selectedBrushVertebrateSpeciesID = slot.linkedSpeciesID; // update this next
 
-        selectedBrushLinkedSpiritTerrainLayer = index;
+        selectedBrushLinkedSpiritTerrainLayer = data.layerIndex;
 
         //isBrushSelected = false;
         isPaletteOpen = false;
@@ -815,40 +801,44 @@ public class BrushesUI : MonoBehaviour {
     }
     
     public void ClickButtonBrushPaletteDecomposers() {
-        TrophicSlot slot = trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
+        //TrophicSlot slot = trophicLayersManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0];
+        var slot = trophicLayersManager.GetSlot(KnowledgeMapId.Decomposers);
         selectedEssenceSlot = slot; 
         isPaletteOpen = false;
         EnterCreationBrushMode();
     }
     
-    public void ClickButtonBrushPaletteAlgae() {  // shouldn't be able to click if LOCKED (interactive = false)
-        TrophicSlot slot = trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
+    // Not interactable if locked
+    public void ClickButtonBrushPaletteAlgae() { 
+        //TrophicSlot slot = trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
+        var slot = trophicLayersManager.GetSlot(KnowledgeMapId.Algae);
         selectedEssenceSlot = slot;    
         isPaletteOpen = false;
         EnterCreationBrushMode();
     }
     
-    public void ClickButtonBrushPalettePlants(int slotID) {
-        TrophicSlot slot = trophicLayersManager.kingdomPlants.trophicTiersList[1].trophicSlots[slotID];
+    public void ClickButtonBrushPalettePlants(TrophicLayerSO data) {
+        TrophicSlot slot = trophicLayersManager.GetSlot(data);
         selectedEssenceSlot = slot;      
         isPaletteOpen = false;
         EnterCreationBrushMode();
     }
     
     public void ClickButtonBrushPaletteZooplankton() {
-        TrophicSlot slot = trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];        
+        //TrophicSlot slot = trophicLayersManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0];   
+        var slot = trophicLayersManager.GetSlot(KnowledgeMapId.Microbes);     
         selectedEssenceSlot = slot;  
         isPaletteOpen = false;
         EnterCreationBrushMode();
     }
     
-    public void ClickButtonBrushPaletteAgent(int index) {
-        TrophicSlot slot = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[index];
+    public void ClickButtonBrushPaletteAgent(TrophicLayerSO data) {
+        TrophicSlot slot = trophicLayersManager.GetSlot(data);
         selectedEssenceSlot = slot;
        
         selectedBrushVertebrateSpeciesID = slot.linkedSpeciesID; // update this next
 
-        selectedBrushLinkedSpiritVertebrateLayer = index;
+        selectedBrushLinkedSpiritVertebrateLayer = data.layerIndex;
         isPaletteOpen = false;
         EnterCreationBrushMode();
     }

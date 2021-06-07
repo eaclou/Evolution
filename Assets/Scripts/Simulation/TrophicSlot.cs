@@ -1,35 +1,35 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class TrophicSlot {
-
-    public SlotStatus status;
-    public enum SlotStatus {
-        Off,  // doesn't exist
-        Locked,  // exists but unavailable
-        Unlocked,  // ready to be added
-        On,  // active, occupied
-    }
-    public int kingdomID;
-    public int tierID;
+    public TrophicLayerSO data;
+    public KnowledgeMapId id => data.id;
+    public KingdomId kingdomID => data.kingdom;
+    
+    // Obsolete identifier -> remove
+    //public int tierID => data.listIndex;
+    
+    public int layerIndex => data.layerIndex;
+    public Sprite icon => data.icon;
+    public Color color => data.color;
+    
+    public TrophicSlotStatus status;
+    
+    // For animals
+    public int linkedSpeciesID; // * WPP: what is the purpose of this?
     public int slotID;
-    public int linkedSpeciesID;
     public string speciesName;
-    public Sprite icon;
-    public Color color;
 
-    public TrophicSlot() {
-        status = SlotStatus.Off;  // default off (hidden)
-    }
 
-    public void Initialize(string name, SlotStatus status, int kingdomID, int tierID, int slotID, Sprite icon, Color color) {
-        speciesName = name;
-        this.status = status;
-        this.kingdomID = kingdomID;
-        this.tierID = tierID;
-        this.slotID = slotID;
-        this.icon = icon;
-        this.color = color;
+    public TrophicSlot(TrophicLayerSO data) {
+        this.data = data;
+        status = data.initialStatus;
+        speciesName = data.defaultSpeciesName;
     }
+}
+
+public enum TrophicSlotStatus {
+    Off,       // doesn't exist
+    Locked,    // exists but unavailable
+    Unlocked,  // ready to be added
+    On,        // active, occupied
 }

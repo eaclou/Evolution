@@ -179,7 +179,7 @@ public class KnowledgeUI : MonoBehaviour {
         }
         
         //knowledgeLockedTrophicSlotRef ---> worldSpiritSelectedSlotRef
-        if (slotRef.kingdomID == 0) {
+        if (slotRef.kingdomID == KingdomId.Decomposers) {
             // DECOMPOSERS
             panelKnowledgeInfoDecomposers.SetActive(true);
 
@@ -202,75 +202,69 @@ public class KnowledgeUI : MonoBehaviour {
                 textDecomposersPage2.text = decompInfoString;
             }            
         }
-        else if (slotRef.kingdomID == 1) {
-            if (slotRef.tierID == 0) {  // ALGAE
-                
-                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", simulationManager.vegetationManager.resourceGridRT1);
-                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
-                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
-                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
-                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 3);
-                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
-                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f); 
+        else if (slotRef.id == KnowledgeMapId.Algae) {
+            imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
+            uiKnowledgeMapViewerMat.SetTexture("_MainTex", simulationManager.vegetationManager.resourceGridRT1);
+            uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
+            uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
+            uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
+            uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 3);
+            uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
+            uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f); 
+        
+            panelKnowledgeInfoAlgae.SetActive(true);
+
+            float metabolicRate = simulationManager.vegetationManager.algaeSlotGenomeCurrent.metabolicRate;
+            float efficiencyDecomp = simulationManager.vegetationManager.algaeSlotGenomeCurrent.growthEfficiency;
+            string decompInfoString = "Metabolic Rate: " + metabolicRate.ToString();
+            decompInfoString += "\nGrowth Efficiency: " + efficiencyDecomp.ToString();
+            textDecomposersPage2.text = decompInfoString;
             
-                panelKnowledgeInfoAlgae.SetActive(true);
-
-                float metabolicRate = simulationManager.vegetationManager.algaeSlotGenomeCurrent.metabolicRate;
-                float efficiencyDecomp = simulationManager.vegetationManager.algaeSlotGenomeCurrent.growthEfficiency;
-                string decompInfoString = "Metabolic Rate: " + metabolicRate.ToString();
-                decompInfoString += "\nGrowth Efficiency: " + efficiencyDecomp.ToString();
-                textDecomposersPage2.text = decompInfoString;
-                
-            }
-            else {  // PLANT PARTICLES
-                panelKnowledgeInfoPlants.SetActive(true);
-
-                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", simulationManager.environmentFluidManager._SourceColorRT);
-                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
-                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
-                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
-                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 0);
-                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 0f);
-                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f); 
-            }
         }
-        else if (slotRef.kingdomID == 2) {
-            if (slotRef.tierID == 0) { // ZOOPLANKTON
-                panelKnowledgeInfoZooplankton.SetActive(true);
+        else if (slotRef.id == KnowledgeMapId.Plants) {  
+            panelKnowledgeInfoPlants.SetActive(true);
 
-                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", simulationManager.environmentFluidManager._SourceColorRT);
-                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
-                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
-                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
-                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 0);
-                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 0f);
-                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f); 
-            }
-            else {  // VERTEBRATES
-                panelKnowledgeInfoVertebrates.SetActive(true);
-
-                //textKnowledgeGraphLifespan.text = lifespan.ToString("F0");
-                //textKnowledgeGraphPopulation.text = population.ToString("F0");
-                //textKnowledgeGraphFoodEaten.text = foodEaten.ToString("F3");
-                //textKnowledgeGraphGenome.text = genome.ToString("F1");  // avg Body size
-
-                imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
-                uiKnowledgeMapViewerMat.SetTexture("_MainTex", simulationManager.environmentFluidManager._SourceColorRT);
-                uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
-                uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
-                uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
-                uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 3);
-                uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
-                uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f); 
-            }
-
+            imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
+            uiKnowledgeMapViewerMat.SetTexture("_MainTex", simulationManager.environmentFluidManager._SourceColorRT);
+            uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
+            uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
+            uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
+            uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 0);
+            uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 0f);
+            uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);
         }
-        else if (slotRef.kingdomID == 3) {
+        else if (slotRef.id == KnowledgeMapId.Microbes) {
+            panelKnowledgeInfoZooplankton.SetActive(true);
+
+            imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
+            uiKnowledgeMapViewerMat.SetTexture("_MainTex", simulationManager.environmentFluidManager._SourceColorRT);
+            uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
+            uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
+            uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
+            uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 0);
+            uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 0f);
+            uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f); 
+        }
+        else if (slotRef.id == KnowledgeMapId.Animals) { 
+            panelKnowledgeInfoVertebrates.SetActive(true);
+
+            //textKnowledgeGraphLifespan.text = lifespan.ToString("F0");
+            //textKnowledgeGraphPopulation.text = population.ToString("F0");
+            //textKnowledgeGraphFoodEaten.text = foodEaten.ToString("F3");
+            //textKnowledgeGraphGenome.text = genome.ToString("F1");  // avg Body size
+
+            imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
+            uiKnowledgeMapViewerMat.SetTexture("_MainTex", simulationManager.environmentFluidManager._SourceColorRT);
+            uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
+            uiKnowledgeMapViewerMat.SetFloat("_Amplitude", 1f);
+            uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); // _ChannelMask);
+            uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", 3);
+            uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
+            uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);
+        }
+        else if (slotRef.kingdomID == KingdomId.Terrain) {
             //panelKnowledgeInfoWorld.SetActive(true);
-            if (slotRef.slotID == 0) {
+            if (slotRef.layerIndex == 0) {
                 // WORLD 
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
                 uiKnowledgeMapViewerMat.SetTexture("_MainTex", theRenderKing.baronVonTerrain.terrainHeightDataRT);
@@ -281,7 +275,7 @@ public class KnowledgeUI : MonoBehaviour {
                 uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
                 uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);  
             }
-            else if (slotRef.slotID == 1) {
+            else if (slotRef.layerIndex == 1) {
                 // STONE
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
                 uiKnowledgeMapViewerMat.SetTexture("_MainTex", theRenderKing.baronVonTerrain.terrainHeightDataRT);
@@ -292,7 +286,7 @@ public class KnowledgeUI : MonoBehaviour {
                 uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
                 uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);
             }
-            else if (slotRef.slotID == 2) {
+            else if (slotRef.layerIndex == 2) {
                 // PEBBLES
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
                 uiKnowledgeMapViewerMat.SetTexture("_MainTex", theRenderKing.baronVonTerrain.terrainHeightDataRT);
@@ -315,10 +309,10 @@ public class KnowledgeUI : MonoBehaviour {
                 uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);
             }
         }
-        else if (slotRef.kingdomID == 4) {
+        else if (slotRef.kingdomID == KingdomId.Other) {
             //panelKnowledgeInfoWorld.SetActive(true);
             
-            if (slotRef.slotID == 0) {
+            if (slotRef.layerIndex == 0) {
                 // Minerals
                 panelKnowledgeInfoAlgae.SetActive(true);
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
@@ -330,7 +324,7 @@ public class KnowledgeUI : MonoBehaviour {
                 uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", 1f);
                 uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f); 
             }
-            else if (slotRef.slotID == 1) {
+            else if (slotRef.layerIndex == 1) {
                 // Water
                 //Debug.Log("sadfasdfadsfas");
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
@@ -343,7 +337,7 @@ public class KnowledgeUI : MonoBehaviour {
                 uiKnowledgeMapViewerMat.SetFloat("_Gamma", 1f);  
             
             }
-            else if (slotRef.slotID == 2) {
+            else if (slotRef.layerIndex == 2) {
                 // AIR
                 imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
                 uiKnowledgeMapViewerMat.SetTexture("_MainTex", theRenderKing.baronVonWater.waterSurfaceDataRT0);
@@ -366,7 +360,6 @@ public class KnowledgeUI : MonoBehaviour {
     }
 
     /*
-    
         string[] strSpiritBrushDescriptionArray = new string[6]; // = "Decomposers break down the old so that new life can grow.";
         strSpiritBrushDescriptionArray[0] = "Provides information about the world and its contents, and chronicles events through time";
         strSpiritBrushDescriptionArray[1] = "This spirit possesses limited control of life & existence itself";
@@ -395,7 +388,7 @@ public class KnowledgeUI : MonoBehaviour {
 
         TrophicSlot slot = uiManager.worldSpiritHubUI.selectedWorldSpiritSlot;
 
-        if(slot.kingdomID == 0) {
+        if(slot.kingdomID == KingdomId.Decomposers) {
             str = "Bacterial and Fungal organisms that recycle vital nutrients."; //   \n\nUses: <b><color=#A97860FF>Waste</color></b>, <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#FBC653FF>Nutrients</color></b>";
 
             str += "\n\n";
@@ -406,87 +399,80 @@ public class KnowledgeUI : MonoBehaviour {
             str += "<color=#A97860FF>Waste Processed: <b>" + simManager.simResourceManager.detritusRemovedByDecomposersLastFrame.ToString("F3") + "</b></color>\n";
 
         }
-        else if(slot.kingdomID == 1) {
-            if (slot.tierID == 0) {  // ALGAE GRID
-                str = "Microscopic Plants that form the foundation of the ecosystem along with the Decomposers."; //   \n\nUses: <b><color=#FBC653FF>Nutrients</color></b>\n\nProduces: <b><color=#8EDEEEFF>Oxygen</color></b>";
+        else if(slot.id == KnowledgeMapId.Algae) {
+            str = "Microscopic Plants that form the foundation of the ecosystem along with the Decomposers."; //   \n\nUses: <b><color=#FBC653FF>Nutrients</color></b>\n\nProduces: <b><color=#8EDEEEFF>Oxygen</color></b>";
 
-                str += "\n\n";
-                str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalAlgaeReservoir.ToString("F1") + "</b></size>\n\n";
+            str += "\n\n";
+            str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalAlgaeReservoir.ToString("F1") + "</b></size>\n\n";
 
-                str += "<color=#8EDEEEFF>Oxygen Production: <b>" + simManager.simResourceManager.oxygenProducedByAlgaeReservoirLastFrame.ToString("F3") + "</b></color>\n";
-                str += "<color=#FBC653FF>Nutrient Usage: <b>" + simManager.simResourceManager.nutrientsUsedByAlgaeReservoirLastFrame.ToString("F3") + "</b></color>\n";
-                str += "<color=#A97860FF>Waste Generated: <b>" + simManager.simResourceManager.wasteProducedByAlgaeReservoirLastFrame.ToString("F3") + "</b></color>\n";
+            str += "<color=#8EDEEEFF>Oxygen Production: <b>" + simManager.simResourceManager.oxygenProducedByAlgaeReservoirLastFrame.ToString("F3") + "</b></color>\n";
+            str += "<color=#FBC653FF>Nutrient Usage: <b>" + simManager.simResourceManager.nutrientsUsedByAlgaeReservoirLastFrame.ToString("F3") + "</b></color>\n";
+            str += "<color=#A97860FF>Waste Generated: <b>" + simManager.simResourceManager.wasteProducedByAlgaeReservoirLastFrame.ToString("F3") + "</b></color>\n";
 
-            }
-            else { //BIG PLANTS
-                str = "Larger Plants."; //   \n\nUses: <b><color=#FBC653FF>Nutrients</color></b>\n\nProduces: <b><color=#8EDEEEFF>Oxygen</color></b>";
-                str += "\n\nWelcome to the Big Leagues, chloroplasts";
-                str += "\n\n";
-                str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalPlantParticles.ToString("F1") + "</b></size>\n\n";
-
-                str += "<color=#8EDEEEFF>Oxygen Production: <b>" + simManager.simResourceManager.oxygenProducedByPlantParticlesLastFrame.ToString("F3") + "</b></color>\n";
-                str += "<color=#FBC653FF>Nutrient Usage: <b>" + simManager.simResourceManager.nutrientsUsedByPlantParticlesLastFrame.ToString("F3") + "</b></color>\n";
-                str += "<color=#A97860FF>Waste Generated: <b>" + simManager.simResourceManager.wasteProducedByPlantParticlesLastFrame.ToString("F3") + "</b></color>\n";
-
-            }
-            
         }
-        else if(slot.kingdomID == 2) {
-            if(slot.tierID == 0) {
-                str = "Tiny Animals that feed on Algae."; //   \n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
-                str += "\n\n";
-                str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalAnimalParticles.ToString("F1") + "</b></size>\n\n";
-                str += "<color=#8EDEEEFF>Oxygen Usage: <b>" + simManager.simResourceManager.oxygenUsedByAnimalParticlesLastFrame.ToString("F3") + "</b></color>\n";                
-                str += "<color=#A97860FF>Waste Generated: <b>" + simManager.simResourceManager.wasteProducedByAnimalParticlesLastFrame.ToString("F3") + "</b></color>\n";
+        else if (slot.id == KnowledgeMapId.Plants) {
+            str = "Larger Plants."; //   \n\nUses: <b><color=#FBC653FF>Nutrients</color></b>\n\nProduces: <b><color=#8EDEEEFF>Oxygen</color></b>";
+            str += "\n\nWelcome to the Big Leagues, chloroplasts";
+            str += "\n\n";
+            str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalPlantParticles.ToString("F1") + "</b></size>\n\n";
 
+            str += "<color=#8EDEEEFF>Oxygen Production: <b>" + simManager.simResourceManager.oxygenProducedByPlantParticlesLastFrame.ToString("F3") + "</b></color>\n";
+            str += "<color=#FBC653FF>Nutrient Usage: <b>" + simManager.simResourceManager.nutrientsUsedByPlantParticlesLastFrame.ToString("F3") + "</b></color>\n";
+            str += "<color=#A97860FF>Waste Generated: <b>" + simManager.simResourceManager.wasteProducedByPlantParticlesLastFrame.ToString("F3") + "</b></color>\n";
+        }
+        else if(slot.id == KnowledgeMapId.Microbes) {
+            str = "Tiny Animals that feed on Algae."; //   \n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
+            str += "\n\n";
+            str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalAnimalParticles.ToString("F1") + "</b></size>\n\n";
+            str += "<color=#8EDEEEFF>Oxygen Usage: <b>" + simManager.simResourceManager.oxygenUsedByAnimalParticlesLastFrame.ToString("F3") + "</b></color>\n";                
+            str += "<color=#A97860FF>Waste Generated: <b>" + simManager.simResourceManager.wasteProducedByAnimalParticlesLastFrame.ToString("F3") + "</b></color>\n";
+        }
+        else if(slot.id == KnowledgeMapId.Animals) {
+            str = "Simple Animal that feeds on Plants and Zooplankton.";  //    \n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
+            str += "\n\n";
+            /*float speciesMass = 0f;
+            if (slot.slotID == 0) {
+                speciesMass = simManager.simResourceManager.curGlobalAgentBiomass0;
+            }
+            else if(slot.slotID == 1) {
+                speciesMass = simManager.simResourceManager.curGlobalAgentBiomass1;
+            }
+            else if(slot.slotID == 2) {
+                speciesMass = simManager.simResourceManager.curGlobalAgentBiomass2;
             }
             else {
-                str = "Simple Animal that feeds on Plants and Zooplankton.";  //    \n\nUses: <b><color=#8EDEEEFF>Oxygen</color></b>\n\nProduces: <b><color=#A97860FF>Waste</color></b>";
-                str += "\n\n";
-                /*float speciesMass = 0f;
-                if (slot.slotID == 0) {
-                    speciesMass = simManager.simResourceManager.curGlobalAgentBiomass0;
-                }
-                else if(slot.slotID == 1) {
-                    speciesMass = simManager.simResourceManager.curGlobalAgentBiomass1;
-                }
-                else if(slot.slotID == 2) {
-                    speciesMass = simManager.simResourceManager.curGlobalAgentBiomass2;
-                }
-                else {
-                    speciesMass = simManager.simResourceManager.curGlobalAgentBiomass3;
-                }*/
-                str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalAgentBiomass.ToString("F1") + "</b></size>\n\n";// simManager.simResourceManager.curGlobalAgentBiomass.ToString("F1") + "</b></size>\n\n";
+                speciesMass = simManager.simResourceManager.curGlobalAgentBiomass3;
+            }*/
+            str += "<size=13><b>Total Biomass: " + simManager.simResourceManager.curGlobalAgentBiomass.ToString("F1") + "</b></size>\n\n";// simManager.simResourceManager.curGlobalAgentBiomass.ToString("F1") + "</b></size>\n\n";
 
-                SpeciesGenomePool GenomePool = simManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot.linkedSpeciesID];
-                str += "<color=#8EDEEEFF>Oxygen Usage: <b>" + simManager.simResourceManager.oxygenUsedByAgentsLastFrame.ToString("F3") + "</b></color>\n";
-                str += "<color=#A97860FF>Waste Generated: <b>" + simManager.simResourceManager.wasteProducedByAgentsLastFrame.ToString("F3") + "</b></color>\n";
-                //str += "<color=#8BD06AFF>Avg Food Eaten: <b>" + (GenomePool.avgConsumptionPlant + GenomePool.avgConsumptionMeat).ToString("F3") + "</b></color>\n";
-                //str += "\n\n\nAvg Lifespan: <b>" + (GenomePool.avgLifespan / 1500f).ToString("F1") + " Years</b>\n\n";
+            SpeciesGenomePool GenomePool = simManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot.linkedSpeciesID];
+            str += "<color=#8EDEEEFF>Oxygen Usage: <b>" + simManager.simResourceManager.oxygenUsedByAgentsLastFrame.ToString("F3") + "</b></color>\n";
+            str += "<color=#A97860FF>Waste Generated: <b>" + simManager.simResourceManager.wasteProducedByAgentsLastFrame.ToString("F3") + "</b></color>\n";
+            //str += "<color=#8BD06AFF>Avg Food Eaten: <b>" + (GenomePool.avgConsumptionPlant + GenomePool.avgConsumptionMeat).ToString("F3") + "</b></color>\n";
+            //str += "\n\n\nAvg Lifespan: <b>" + (GenomePool.avgLifespan / 1500f).ToString("F1") + " Years</b>\n\n";
 
-                /*
-                str += "Avg Body Size: <b>" + ((GenomePool.representativeCandidate.candidateGenome.bodyGenome.GetFullsizeBoundingBox().x + GenomePool.representativeCandidate.candidateGenome.bodyGenome.GetFullsizeBoundingBox().y) * 0.5f * GenomePool.representativeCandidate.candidateGenome.bodyGenome.GetFullsizeBoundingBox().z).ToString("F2") + "</b>\n";
-                str += "Avg Brain Size: <b>" + ((GenomePool.avgNumNeurons + GenomePool.avgNumAxons) * 1f).ToString("F0") + "</b>\n";
-                
-                str += "\nFOOD EATEN:\nPlants: <b>" + ((GenomePool.avgFoodEatenPlant) * 1f).ToString("F3") + "</b> [" + (GenomePool.avgFoodSpecPlant).ToString() + "]\n";
-                str += "Meat: <b>" + ((GenomePool.avgFoodEatenZoop) * 1f).ToString("F3") + "</b> [" + (GenomePool.avgFoodSpecMeat).ToString() + "]\n";
+            /*
+            str += "Avg Body Size: <b>" + ((GenomePool.representativeCandidate.candidateGenome.bodyGenome.GetFullsizeBoundingBox().x + GenomePool.representativeCandidate.candidateGenome.bodyGenome.GetFullsizeBoundingBox().y) * 0.5f * GenomePool.representativeCandidate.candidateGenome.bodyGenome.GetFullsizeBoundingBox().z).ToString("F2") + "</b>\n";
+            str += "Avg Brain Size: <b>" + ((GenomePool.avgNumNeurons + GenomePool.avgNumAxons) * 1f).ToString("F0") + "</b>\n";
+            
+            str += "\nFOOD EATEN:\nPlants: <b>" + ((GenomePool.avgFoodEatenPlant) * 1f).ToString("F3") + "</b> [" + (GenomePool.avgFoodSpecPlant).ToString() + "]\n";
+            str += "Meat: <b>" + ((GenomePool.avgFoodEatenZoop) * 1f).ToString("F3") + "</b> [" + (GenomePool.avgFoodSpecMeat).ToString() + "]\n";
 
-                str += "\nSPECIALIZATIONS:\nAttack: <b>" + ((GenomePool.avgSpecAttack) * 1f).ToString("F2") + "</b>\n";
-                str += "Defend: <b>" + ((GenomePool.avgSpecDefend) * 1f).ToString("F2") + "</b>\n";
-                str += "Speed: <b>" + ((GenomePool.avgSpecSpeed) * 1f).ToString("F2") + "</b>\n";
-                str += "Utility: <b>" + ((GenomePool.avgSpecUtility) * 1f).ToString("F2") + "</b>\n";*/
-            }            
+            str += "\nSPECIALIZATIONS:\nAttack: <b>" + ((GenomePool.avgSpecAttack) * 1f).ToString("F2") + "</b>\n";
+            str += "Defend: <b>" + ((GenomePool.avgSpecDefend) * 1f).ToString("F2") + "</b>\n";
+            str += "Speed: <b>" + ((GenomePool.avgSpecSpeed) * 1f).ToString("F2") + "</b>\n";
+            str += "Utility: <b>" + ((GenomePool.avgSpecUtility) * 1f).ToString("F2") + "</b>\n";*/
         }
-        else if(slot.kingdomID == 3) {
-            if(slot.slotID == 0) {
+        else if(slot.kingdomID == KingdomId.Terrain) {
+            if(slot.layerIndex == 0) {
                 str = "World";
                 str += "\n\nWorld Size: X square meters";
             }
-            else if(slot.slotID == 1) {
+            else if(slot.layerIndex == 1) {
                 str = "Stone";
                 str += "\n\nTotal Stone: Y lbs";
             }
-            else if(slot.slotID == 2) {
+            else if(slot.layerIndex == 2) {
                 str = "Pebbles";
             }
             else {
@@ -494,36 +480,39 @@ public class KnowledgeUI : MonoBehaviour {
             }
         }
         else {
-            if(slot.slotID == 0) {
+            if(slot.layerIndex == 0) {
                 str = "Minerals";
             }
-            else if(slot.slotID == 1) {
+            else if(slot.layerIndex == 1) {
                 str = "Water";
             }
-            else if(slot.slotID == 2) {
+            else if(slot.layerIndex == 2) {
                 str = "Air";
             }
         }
-
-
+        
         return str;
     }
     
     public void ClickMinimapZoomIn() {
 
     }
+    
     public void ClickMinimapZoomOut() {
 
     }
     public void ClickPageOne() {
         curPage = Page.One;
     }
+    
     public void ClickPageTwo() {
         curPage = Page.Two;
     }
+    
     public void ClickPageThree() {
         curPage = Page.Three;
     }
+    
     /*
     private void UpdateUI() {        
         imageKnowledgeSpeciesStatsGraph.gameObject.SetActive(false);

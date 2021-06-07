@@ -2,17 +2,63 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e5216a40-1993-4f7b-88ca-3d6aa0d75e16" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Detritus.asset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Detritus.asset.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Other.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Other/Detritus.asset.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Other/Nutrients.asset.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Terrain.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Terrain/Pebbles.asset.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Terrain/Sand.asset.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Terrain/Stone.asset.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Terrain/World.asset.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Algae.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Algae.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Algae.asset.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Algae.asset.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Animals.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Animals.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Animals.asset.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Animals.asset.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Decomposers.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Decomposers.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Decomposers.asset.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Decomposers.asset.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Detritus.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Other/Detritus.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Detritus.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Microbes.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Microbes.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Microbes.asset.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Microbes.asset.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Nutrients.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Other/Nutrients.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Nutrients.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Pebbles.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Terrain/Pebbles.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Pebbles.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Plants.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Plants.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Plants.asset.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Plants.asset.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Sand.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Terrain/Sand.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Sand.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Stone.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Terrain/Stone.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Stone.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Water.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Other/Water.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Water.asset.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Other/Water.asset.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Wind.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Other/Wind.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/Wind.asset.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Other/Wind.asset.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/World.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Trophic Slots/Terrain/World.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Knowledge Maps/World.asset.meta" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Lookup.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Lookup.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/PanelGlobalResources.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/PanelGlobalResources.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/PanelPlaying.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/PanelPlaying.prefab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicKingdom.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicKingdom.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicLayersManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicLayersManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/KnowledgeMapSO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/KnowledgeMapSO.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicSlot.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicSlot.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicTier.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicTier.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/VegetationManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/VegetationManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/KnowledgeMapSO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/TrophicLayerSO.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/KnowledgeMapSO.cs.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/TrophicLayerSO.cs.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/MinimapPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/MinimapPanel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesOverviewUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesOverviewUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/OLD/BrushesUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/OLD/BrushesUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/OLD/KnowledgeUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/OLD/KnowledgeUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/OLD/MutationUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/OLD/MutationUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/OLD/WatcherUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/OLD/WatcherUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/OLD/WorldSpiritHubUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/OLD/WorldSpiritHubUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,18 +110,11 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesGraphPanelUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/FeatsUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/KnowledgeUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/MutationUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/SimEventComponent.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/TreeOfLifeManager.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/WatcherUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationStateData.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/Logger.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/BaronVonTerrain.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/MasterGenomePool.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/VegetationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/Quality of Life/Statics/VectorMath.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/AgentGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/EggSackGenome.cs" />
@@ -86,8 +125,6 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/CreatureBrainActivityUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/DebugPanelUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/BrushesUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/GlobalResourcesUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/SensorsPanel.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/DigestionPanel.cs" />
@@ -104,16 +141,25 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/LinkGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButtonPrefabScript.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/SpeciesGenomePool.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/MinimapUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicKingdom.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/WorldSpiritHubUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesOverviewUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/KnowledgeMapSO.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicTier.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicKingdom.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/MinimapPanel.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/WatcherUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/WorldSpiritHubUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/VegetationManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/KnowledgeUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/MutationUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicSlot.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/TrophicLayerSO.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/BrushesUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicLayersManager.cs" />
     </changedPaths>
   </component>
@@ -201,7 +247,8 @@
       <workItem from="1622184369588" duration="3619000" />
       <workItem from="1622615139768" duration="3842000" />
       <workItem from="1622679194762" duration="11270000" />
-      <workItem from="1622928611718" duration="3106000" />
+      <workItem from="1622928611718" duration="4649000" />
+      <workItem from="1622963111070" duration="7306000" />
     </task>
     <servers />
   </component>
