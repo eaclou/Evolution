@@ -38,31 +38,7 @@ public class TrophicLayersManager {
     private int timeStepsLayerGrowthDuration = 1200;
     
     Lookup lookup => Lookup.instance;
-    
-    // WPP: now stored in SOs
-    /*Sprite spiritWorldIcon => lookup.spiritWorldIcon;
-    Sprite spiritStoneIcon => lookup.spiritStoneIcon;
-    Sprite spiritAlgaeIcon => lookup.spiritAlgaeIcon;
-    Sprite spiritPlantIcon => lookup.spiritPlantIcon;
-    Sprite spiritZooplanktonIcon => lookup.spiritZooplanktonIcon;
-    Sprite spiritVertebrateIcon => lookup.spiritVertebrateIcon;
-    Sprite spiritDecomposerIcon => lookup.spiritDecomposerIcon;
-    Sprite spiritPebblesIcon => lookup.spiritPebblesIcon;
-    Sprite spiritSandIcon => lookup.spiritSandIcon;
-    Sprite spiritMineralsIcon => lookup.spiritMineralsIcon;
-    Sprite spiritWaterIcon => lookup.spiritWaterIcon;
-    Sprite spiritAirIcon => lookup.spiritAirIcon;
-    Color colorVertebratesLayer => lookup.colorVertebratesLayer;
-    Color colorWorldLayer => lookup.colorWorldLayer;
-    Color colorTerrainLayer => lookup.colorTerrainLayer; 
-    Color colorMineralLayer => lookup.colorMineralLayer;
-    Color colorWaterLayer => lookup.colorWaterLayer;
-    Color colorAirLayer => lookup.colorAirLayer;
-    Color colorPlantsLayer => lookup.colorPlantsLayer;
-    Color colorZooplanktonLayer => lookup.colorZooplanktonLayer;
-    Color colorAlgaeLayer => lookup.colorAlgaeLayer;
-    Color colorDecomposersLayer => lookup.colorDecomposersLayer;*/
-    
+
     List<TrophicSlot> allTrophicSlots = new List<TrophicSlot>();
     public List<TrophicSlot> animalSlots = new List<TrophicSlot>();
     

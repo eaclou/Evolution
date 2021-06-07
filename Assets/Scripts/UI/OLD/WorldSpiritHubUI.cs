@@ -89,33 +89,8 @@ public class WorldSpiritHubUI : MonoBehaviour {
     TheRenderKing theRenderKing => TheRenderKing.instance;
     CameraManager cameraManager => CameraManager.instance;
 
-    // WPP: redundant with TrophicSlotSO
-    /*Lookup lookup => Lookup.instance;
-    Sprite spiritWorldIcon => lookup.spiritWorldIcon;
-    Sprite spiritStoneIcon => lookup.spiritStoneIcon;
-    Sprite spiritAlgaeIcon => lookup.spiritAlgaeIcon;
-    Sprite spiritPlantIcon => lookup.spiritPlantIcon;
-    Sprite spiritZooplanktonIcon => lookup.spiritZooplanktonIcon;
-    Sprite spiritVertebrateIcon => lookup.spiritVertebrateIcon;
-    Sprite spiritDecomposerIcon => lookup.spiritDecomposerIcon;
-    Sprite spiritPebblesIcon => lookup.spiritPebblesIcon;
-    Sprite spiritSandIcon => lookup.spiritSandIcon;
-    Sprite spiritMineralsIcon => lookup.spiritMineralsIcon;
-    Sprite spiritWaterIcon => lookup.spiritWaterIcon;
-    Sprite spiritAirIcon => lookup.spiritAirIcon;
-    Color colorVertebratesLayer => lookup.colorVertebratesLayer;
-    Color colorWorldLayer => lookup.colorWorldLayer;
-    Color colorTerrainLayer => lookup.colorTerrainLayer; 
-    Color colorMineralLayer => lookup.colorMineralLayer;
-    Color colorWaterLayer => lookup.colorWaterLayer;
-    Color colorAirLayer => lookup.colorAirLayer;
-    Color colorAlgaeLayer => lookup.colorAlgaeLayer;
-    Color colorPlantsLayer => lookup.colorPlantsLayer;
-    Color colorZooplanktonLayer => lookup.colorZooplanktonLayer;
-    Color colorDecomposersLayer => lookup.colorDecomposersLayer;*/
 
-
-	// Use this for initialization
+    // Use this for initialization
 	void Start () {
         isUnlocked = true; 
         //isFocused = true;

@@ -39,12 +39,7 @@ public class UIManager : Singleton<UIManager> {
     public GameOptionsManager gameOptionsManager;    
     
     Lookup lookup => Lookup.instance;
-    Color colorDecomposersLayer => lookup.colorDecomposersLayer;
-    Color colorAlgaeLayer => lookup.colorAlgaeLayer;
-    Color colorPlantsLayer => lookup.colorPlantsLayer;
-    Color colorZooplanktonLayer => lookup.colorZooplanktonLayer;
-    Color colorVertebratesLayer => lookup.colorVertebratesLayer;
-    
+
     public float isPlantParticleHighlight;
     public float isZooplanktonHighlight;
     public float isVertebrateHighlight;
@@ -615,7 +610,8 @@ public class UIManager : Singleton<UIManager> {
                     announceAlgaeCollapsePossible = false;
                     announceAlgaeCollapseOccurred = true;
 
-                    panelNotificationsUI.Narrate("<color=#DDDDDDFF>Algae Died from lack of Nutrients!</color>\nAdd Decomposers to recycle waste", colorDecomposersLayer);
+                    var decomposersColor = lookup.GetTrophicSlotData(KnowledgeMapId.Decomposers).color;
+                    panelNotificationsUI.Narrate("<color=#DDDDDDFF>Algae Died from lack of Nutrients!</color>\nAdd Decomposers to recycle waste", decomposersColor);
                     isAnnouncementTextOn = true;
                 }
             }
