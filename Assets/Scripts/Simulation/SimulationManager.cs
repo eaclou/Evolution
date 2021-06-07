@@ -1526,8 +1526,7 @@ public class SimulationManager : Singleton<SimulationManager>
     }
 
     private void UpdateSimulationClimate() {
-        // Change force of turbulence, damping, other fluidSim parameters,
-        // Inject pre-trained critters
+        // Change force of turbulence, damping, other fluidSim parameters,        
         environmentFluidManager.UpdateSimulationClimate();
     }
     
@@ -1555,15 +1554,16 @@ public class SimulationManager : Singleton<SimulationManager>
         masterGenomePool.completeSpeciesPoolsList.Add(newSpecies);
         masterGenomePool.speciesCreatedOrDestroyedThisFrame = true;
 
+        int lastIndex = Mathf.Max(0, masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgCandidateDataYearList.Count - 1);
+        if(lastIndex > 0) {
+            newSpecies.avgCandidateData = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgCandidateDataYearList[lastIndex];    
+        }
         //newSpecies.avgPerformanceDataYearList.Clear(); // handled inside FirstTimeInitialize()
-        int lastIndex = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgCandidateDataYearList.Count - 1;
         // Inherit Parent Data Stats:  // *** Vestigial but harmless ***
         
         for(int i = 0; i < masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgCandidateDataYearList.Count; i++) {
-            newSpecies.avgCandidateDataYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgCandidateDataYearList[i]);
-        }  
-        // set
-        newSpecies.avgCandidateData = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgCandidateDataYearList[lastIndex];
+            newSpecies.avgCandidateDataYearList.Add(masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgCandidateDataYearList[i]);                
+        }
         
         if(newSpecies.depthLevel > masterGenomePool.currentHighestDepth) {
             masterGenomePool.currentHighestDepth = newSpecies.depthLevel;

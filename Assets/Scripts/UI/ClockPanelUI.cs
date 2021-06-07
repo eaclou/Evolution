@@ -42,6 +42,7 @@ public class ClockPanelUI : MonoBehaviour
     private int maxNumClockEarthStamps = 1024;
     [SerializeField]
     int numTicksPerEarthStamp = 60;
+    [SerializeField]
     private float earthSpeed = 1f;
     public ComputeBuffer clockMoonStampDataCBuffer;    
     private int maxNumClockMoonStamps = 1024;
@@ -54,6 +55,8 @@ public class ClockPanelUI : MonoBehaviour
 
     [SerializeField]
     float clockRadiusEarth;
+    [SerializeField]
+    float clockPlanetRPM;
     [SerializeField]
     float clockRadiusMoon;
     [SerializeField]
@@ -91,14 +94,6 @@ public class ClockPanelUI : MonoBehaviour
 
     public void Tick() {
         
-        int numTicks = simulation.simAgeTimeSteps;
-        float angVelA = -2.25f;
-        float angVelB = -0.25f;
-        float angVelC = -0.002f;
-        imageClockHandA.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, (float)numTicks * angVelA);
-        imageClockHandB.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, (float)numTicks * angVelB);
-        imageClockHandC.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, (float)numTicks * angVelC);
-
         float cursorCoordsX = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().x) / 360f);
         float cursorCoordsY = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().y - 720f) / 360f);                
         float curTimeStep = simulation.simAgeTimeSteps;
@@ -118,6 +113,8 @@ public class ClockPanelUI : MonoBehaviour
         if(imageClockPlanet) {            
             imageClockPlanet.rectTransform.localPosition = Vector3.zero;            
             imageClockPlanet.rectTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * sunOrbitPhase);
+
+            imageClockHandA.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * GetPlanetSpinPhase(cursorTimeStep));
             
         }
         // MOON:
@@ -126,17 +123,24 @@ public class ClockPanelUI : MonoBehaviour
             imageClockMoon.rectTransform.localPosition = new Vector3(moonDir.x * 16f, moonDir.y * 16f, 0f);
             imageClockMoon.rectTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * sunOrbitPhase);
             
+            imageClockHandB.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * GetMoonOrbitPhase(cursorTimeStep));
         }
         // SUN:
         if(imageClockSun) {
             Vector2 sunDir = GetSunDir(cursorTimeStep);
             imageClockSun.rectTransform.localPosition = new Vector3(sunDir.x * 32f, sunDir.y * 32f, 0f);
+
+            imageClockHandC.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * sunOrbitPhase);
             
         }
-	
+    }
+
+    public float GetPlanetSpinPhase(float timeStep) {
+        float phase = clockPlanetRPM * timeStep;
+        return phase;
     }
     public float GetMoonOrbitPhase(float timeStep) {
-        float phase = clockMoonRPM * timeStep + Mathf.PI * 0.5f;
+        float phase = clockMoonRPM * timeStep;
         return phase;
     }
     public Vector2 GetMoonDir(float timeStep) {        
