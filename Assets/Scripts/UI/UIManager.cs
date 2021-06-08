@@ -22,6 +22,7 @@ public class UIManager : Singleton<UIManager> {
     public SpeciesGraphPanelUI speciesGraphPanelUI;  //***EAC to be phased-out --> incorporated into WorldTreePanel
     public GenomeViewerUI genomeViewerUI;
     public BrainGenomeImage brainGenomeImage;
+    public PanelTopLeftUI panelTopLeftUI;
     public WorldTreePanelUI worldTreePanelUI;
     public BigBangPanelUI bigBangPanelUI;
     public ClockPanelUI clockPanelUI;
@@ -33,8 +34,7 @@ public class UIManager : Singleton<UIManager> {
     public CreatureBrainActivityUI creatureBrainActivityUI;
     public CreaturePaperDollUI creaturePaperDollUI;
     public CreatureLifeEventsLogUI creatureLifeEventsLogUI;
-    public MinimapPanel minimapUI;
-      
+    public MinimapPanel minimapUI;      
         
     public GameOptionsManager gameOptionsManager;    
     

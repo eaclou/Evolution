@@ -100,7 +100,7 @@ public class ClockPanelUI : MonoBehaviour
         
         cursorTimeStep = Mathf.RoundToInt(curTimeStep * cursorCoordsX);
 
-        float sunOrbitPhase = GetSunOrbitPhase(cursorTimeStep);
+        float sunOrbitPhase = GetSunOrbitPhase(cursorTimeStep) + Mathf.PI * 0.5f;
 
         int cursorYear = Mathf.FloorToInt(cursorTimeStep / (float)simulation.GetNumTimeStepsPerYear());
         int seasonInt = Mathf.FloorToInt(cursorTimeStep / (float)simulation.GetNumTimeStepsPerYear() * 4f) % 4;
@@ -130,7 +130,7 @@ public class ClockPanelUI : MonoBehaviour
             Vector2 sunDir = GetSunDir(cursorTimeStep);
             imageClockSun.rectTransform.localPosition = new Vector3(sunDir.x * 32f, sunDir.y * 32f, 0f);
 
-            imageClockHandC.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * sunOrbitPhase);
+            imageClockHandC.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * GetSunOrbitPhase(cursorTimeStep));
             
         }
     }
@@ -149,12 +149,12 @@ public class ClockPanelUI : MonoBehaviour
         return new Vector2(localPosX, localPosY).normalized;
     }
     public float GetSunOrbitPhase(float timeStep) {
-        float phase = clockSunRPM * timeStep + Mathf.PI * 0.5f;
+        float phase = clockSunRPM * timeStep;
         return phase;
     }
     public Vector2 GetSunDir(float timeStep) {        
-        float localPosX = Mathf.Cos(GetSunOrbitPhase(timeStep));
-        float localPosY = Mathf.Sin(GetSunOrbitPhase(timeStep));
+        float localPosX = Mathf.Cos(GetSunOrbitPhase(timeStep) + Mathf.PI * 0.5f);
+        float localPosY = Mathf.Sin(GetSunOrbitPhase(timeStep) + Mathf.PI * 0.5f);
         return new Vector2(localPosX, localPosY).normalized;
     }
 
@@ -262,12 +262,15 @@ public class ClockPanelUI : MonoBehaviour
         
         int numStamps = Mathf.Min(Mathf.RoundToInt((float)simulation.simAgeTimeSteps / (float)numTicksPerSunStamp), maxNumClockSunStamps);
         float totalDistanceTraveled = (float)simulation.simAgeTimeSteps * earthSpeed;
+
         for(int i = 0; i < numStamps; i++) {
             float lerp = (float)i / (float)(numStamps - 1);
             ClockStampData data = new ClockStampData();
             
-            float stampWorldPosX = i * numTicksPerSunStamp * earthSpeed + Mathf.Cos(clockSunRPM * (float)(i * numTicksPerSunStamp) + Mathf.PI * 0.5f) * clockSunOrbitRadius;
-            float stampWorldPosY = Mathf.Sin(clockSunRPM * (float)(i * numTicksPerSunStamp) + Mathf.PI * 0.5f) * clockSunOrbitRadius;
+            float sunOrbitPhase = GetSunOrbitPhase((float)(i * numTicksPerSunStamp)) + Mathf.PI * 0.5f;
+
+            float stampWorldPosX = i * numTicksPerSunStamp * earthSpeed + Mathf.Cos(sunOrbitPhase) * clockSunOrbitRadius;
+            float stampWorldPosY = Mathf.Sin(sunOrbitPhase) * clockSunOrbitRadius;
 
             float xCoord = stampWorldPosX / totalDistanceTraveled;
             float yCoord = stampWorldPosY / totalDistanceTraveled;
