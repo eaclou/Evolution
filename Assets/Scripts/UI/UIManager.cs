@@ -89,12 +89,6 @@ public class UIManager : Singleton<UIManager> {
     List<SpeciesGenomePool> speciesPools => genomePool.completeSpeciesPoolsList;
     bool isRebuildTimeStep => simulationManager.simAgeTimeSteps % timeStepsToRebuildGenomeButtons == 1;
 
-
-    // ***EAC -- Reorganize these to their appropriate locations once you have it working:
-    //private bool isTopLeftPanelOpen;
-    //private bool isSpeciesListOn;
-    //private bool isGraphModeOn;
-    //private bool isSpeciesOverview;
     
     #endregion
     

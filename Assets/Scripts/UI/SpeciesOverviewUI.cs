@@ -62,11 +62,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
         isShowingLineage = !isShowingLineage;
         RebuildGenomeButtons();
     }
-
-    public void RefreshPanelUI() {
-        RebuildGenomeButtons();
-    }
-    
+        
     public void RebuildGenomeButtons() 
     {
         SpeciesGenomePool pool = simulationManager.GetSelectedGenomePool(); 
@@ -76,44 +72,9 @@ public class SpeciesOverviewUI : MonoBehaviour {
         textSpeciesLineage.gameObject.SetActive(true);
         textSpeciesLineage.text = GetLineageText(pool);
 
-        // * WPP: remove obsolete comments
-        //panelCurrentGenepool.SetActive(!isShowingLineage);
-        //panelLineageGenomes.SetActive(isShowingLineage);
-        //if(isShowingLineage) {
-
-            //uiManagerRef.panelHallOfFameGenomes.SetActive(true);
-            //textHallOfFameTitle.gameObject.SetActive(true);
-
-            //uiManagerRef.panelLeaderboardGenomes.SetActive(false);
-            //textCurrentGenepoolTitle.gameObject.SetActive(false);
-
         RebuildGenomeButtonsLineage(pool);
 
-            //float timeLerp = Mathf.Clamp01(sliderLineageGenomes.value);
-            
-        //}
-        //else {
-            //uiManagerRef.panelHallOfFameGenomes.SetActive(false);
-            //textHallOfFameTitle.gameObject.SetActive(false);
-
-            //uiManagerRef.panelLeaderboardGenomes.SetActive(true);
-            //textCurrentGenepoolTitle.gameObject.SetActive(true);
-
-        RebuildGenomeButtonsCurrent(pool);
-        //}
-        
-        // Current Leaderboard:
-        /*foreach (Transform child in uiManagerRef.panelLeaderboardGenomes.transform) {
-             GameObject.Destroy(child.gameObject);
-        }
-        for(int i = 0; i < Mathf.Min(32, pool.candidateGenomesList.Count); i++) {
-            GameObject tempObj = Instantiate(uiManagerRef.prefabGenomeIcon, new Vector3(0, 0, 0), Quaternion.identity);
-            tempObj.transform.SetParent(uiManagerRef.panelLeaderboardGenomes.transform, false);
-
-            GenomeButtonPrefabScript buttonScript = tempObj.GetComponent<GenomeButtonPrefabScript>();
-            buttonScript.UpdateButtonPrefab(uiManagerRef, SpeciesOverviewUI.SelectionGroup.Candidates, i);
-            uiManagerRef.speciesOverviewUI.leaderboardGenomeButtonsList.Add(buttonScript);
-        }*/
+        RebuildGenomeButtonsCurrent(pool);        
     }
     
     private void SetLineageColors(CritterModuleAppearanceGenome appearance) {
