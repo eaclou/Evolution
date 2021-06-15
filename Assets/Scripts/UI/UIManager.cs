@@ -130,9 +130,7 @@ public class UIManager : Singleton<UIManager> {
             // already selected -->
             worldTreePanelUI.ToggleFocusLevel(); // species overview vs world overview
         }
-        else {
 
-        }
         selectedSpeciesID = id;
         worldTreePanelUI.RefreshPanelUI();
         speciesOverviewUI.RebuildGenomeButtons();
@@ -526,7 +524,7 @@ public class UIManager : Singleton<UIManager> {
         //featsUI.isOpen = true;
     }
     
-    public void Narrate(NarrationSO value) 
+    public void Narrate(TrophicLayerSO value) 
     { 
         panelNotificationsUI.Narrate(value); 
         

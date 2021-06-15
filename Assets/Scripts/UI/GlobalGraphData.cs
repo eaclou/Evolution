@@ -37,13 +37,13 @@ public class GlobalGraphData
     // testing!!!!
     public void Initialize()
     {
-        nutrients = new GraphData(lookup.knowledgeGraphNutrientsMat);  
-        waste = new GraphData(lookup.knowledgeGraphDetritusMat); 
-        decomposers = new GraphData(lookup.knowledgeGraphDecomposersMat); 
-        algae = new GraphData(lookup.knowledgeGraphAlgaeMat); 
-        plants = new GraphData(lookup.knowledgeGraphPlantsMat);  
-        zooplankton = new GraphData(lookup.knowledgeGraphZooplanktonMat); 
-        vertebrates = new GraphData(lookup.knowledgeGraphVertebratesMat);
+        nutrients = new GraphData(lookup.GetTrophicSlotData(KnowledgeMapId.Nutrients).knowledgeGraph);  
+        waste = new GraphData(lookup.GetTrophicSlotData(KnowledgeMapId.Detritus).knowledgeGraph); 
+        decomposers = new GraphData(lookup.GetTrophicSlotData(KnowledgeMapId.Decomposers).knowledgeGraph); 
+        algae = new GraphData(lookup.GetTrophicSlotData(KnowledgeMapId.Algae).knowledgeGraph); 
+        plants = new GraphData(lookup.GetTrophicSlotData(KnowledgeMapId.Plants).knowledgeGraph);  
+        zooplankton = new GraphData(lookup.GetTrophicSlotData(KnowledgeMapId.Microbes).knowledgeGraph); 
+        vertebrates = new GraphData(lookup.GetTrophicSlotData(KnowledgeMapId.Animals).knowledgeGraph);
         
         /*
         graphDataVertebrateLifespan0 = new GraphData(ui.knowledgeUI.knowledgeGraphVertebrateLifespanMat0);

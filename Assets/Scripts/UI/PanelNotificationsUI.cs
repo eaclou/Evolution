@@ -9,7 +9,7 @@ public class PanelNotificationsUI : MonoBehaviour
     [SerializeField] Text text;
     [SerializeField] Image image;
     
-    public void Narrate(NarrationSO value) { Narrate(value.message, value.color); }
+    public void Narrate(TrophicLayerSO value) { Narrate(value.unlockMessage, value.color); }
     public void Narrate(string message, Color color)
     {
         text.text = message;

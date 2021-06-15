@@ -20,6 +20,8 @@ public class Lookup : ScriptableObject
     public Color colorSpiritBrushLight;
     public Color colorSpiritBrushDark;
 
+    // WPP: folded into TrophicLayerSO
+    /*
     [Header("Materials")]
 	public Material knowledgeGraphOxygenMat;
 	public Material knowledgeGraphNutrientsMat;
@@ -29,16 +31,17 @@ public class Lookup : ScriptableObject
 	public Material knowledgeGraphPlantsMat;
 	public Material knowledgeGraphZooplanktonMat;
 	public Material knowledgeGraphVertebratesMat;
+	
+	[Header("Narration")]
+	public NarrationSO unlockAlgae;
+	public NarrationSO unlockDecomposers;
+	public NarrationSO unlockZooplankton;
+	public NarrationSO unlockVertebrates;
+	public NarrationSO unlockPlant;
+	*/
     
     [Header("Prefabs")]
     public GameObject genomeIcon;
-    
-    [Header("Narration")]
-    public NarrationSO unlockAlgae;
-    public NarrationSO unlockDecomposers;
-    public NarrationSO unlockZooplankton;
-    public NarrationSO unlockVertebrates;
-    public NarrationSO unlockPlant;
 
     #endregion
 	
