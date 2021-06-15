@@ -529,7 +529,7 @@ public class VegetationManager {
         
         computeShaderPlantParticles.SetFloat("_IsBrushing", 1f);
 
-        float spawnLerp = simManager.trophicLayersManager.GetAlgaeOnLerp(simManager.simAgeTimeSteps);
+        float spawnLerp = simManager.trophicLayersManager.GetLayerLerp(KnowledgeMapId.Algae, simManager.simAgeTimeSteps);
         float spawnRadius = Mathf.Lerp(1f, SimulationManager._MapSize, spawnLerp);
         Vector4 spawnPos = new Vector4(simManager.trophicLayersManager.algaeOriginPos.x, simManager.trophicLayersManager.algaeOriginPos.y, 0f, 0f);
         computeShaderPlantParticles.SetFloat("_FoodSprinkleRadius", spawnRadius);
@@ -639,13 +639,8 @@ public class VegetationManager {
         for (int i = 0; i < newBuffer.Length; i++) {
             Vector4 cellDataA = inBuffer[i * 2];
             Vector4 cellDataB = inBuffer[i * 2 + 1];
-
-            if(cellDataA.y <= cellDataB.y) {  // A is closer
-                newBuffer[i] = cellDataA;
-            }
-            else {
-                newBuffer[i] = cellDataB;
-            }
+            
+            newBuffer[i] = cellDataA.y <= cellDataB.y ? cellDataA : cellDataB;
         }
 
         return newBuffer;

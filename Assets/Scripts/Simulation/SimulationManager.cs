@@ -501,7 +501,7 @@ public class SimulationManager : Singleton<SimulationManager>
         
         vegetationManager.MeasureTotalPlantParticlesAmount();
 
-        if(trophicLayersManager.GetZooplanktonOnOff()) {
+        if(trophicLayersManager.IsLayerOn(KnowledgeMapId.Microbes)) {
             zooplanktonManager.MeasureTotalAnimalParticlesAmount();
         }
         
@@ -509,7 +509,7 @@ public class SimulationManager : Singleton<SimulationManager>
         float totalOxygenUsedByAgents = 0f;
         float totalWasteProducedByAgents = 0f;
         
-        if(trophicLayersManager.GetAgentsOnOff()) {
+        if(trophicLayersManager.IsLayerOn(KnowledgeMapId.Animals)) {
             vegetationManager.FindClosestPlantParticleToCritters(simStateData);
             
             foreach (var agent in agentsArray) {
@@ -541,7 +541,7 @@ public class SimulationManager : Singleton<SimulationManager>
                 
         // CHECK FOR NULL Objects:        
         // ******** REVISIT CODE ORDERING!!!!  -- Should check for death Before or After agent Tick/PhysX ???
-        if(trophicLayersManager.GetAgentsOnOff()) {
+        if(trophicLayersManager.IsLayerOn(KnowledgeMapId.Animals)) {
             CheckForDevouredEggSacks();
             CheckForNullAgents();  // Result of this will affect: "simStateData.PopulateSimDataArrays(this)" !!!!!
             if(simResourceManager.curGlobalOxygen > 10f) {
@@ -568,20 +568,20 @@ public class SimulationManager : Singleton<SimulationManager>
         vegetationManager.SimResourceGrid(ref environmentFluidManager, ref theRenderKing.baronVonTerrain);
         //}
         
-        if(trophicLayersManager.GetPlantsOnOff()) {
+        if(trophicLayersManager.IsLayerOn(KnowledgeMapId.Plants)) {
             vegetationManager.EatSelectedFoodParticles(simStateData); // 
             // How much light/nutrients available?
             vegetationManager.SimulatePlantParticles(environmentFluidManager, theRenderKing, simStateData, simResourceManager);
         }
         
-        if(trophicLayersManager.GetZooplanktonOnOff()) {
+        if(trophicLayersManager.IsLayerOn(KnowledgeMapId.Microbes)) {
             zooplanktonManager.EatSelectedAnimalParticles(simStateData);        
             // Send back information about how much growth/photosynthesis there was?
             zooplanktonManager.SimulateAnimalParticles(environmentFluidManager, theRenderKing, simStateData, simResourceManager);
             // how much oxygen used? How much eaten? How much growth? How much waste/detritus?
         }
               
-        if(trophicLayersManager.GetAgentsOnOff()) {
+        if(trophicLayersManager.IsLayerOn(KnowledgeMapId.Animals)) {
             HookUpModules(); // Sets nearest-neighbors etc. feed current data into agent Brains
             // Load gameState into Agent Brain, process brain function, read out brainResults,
             // Execute Agent Actions -- apply propulsive force to each Agent:       
@@ -641,7 +641,7 @@ public class SimulationManager : Singleton<SimulationManager>
 
         if(simAgeTimeSteps % 80 == 10) {
             uiManager.speciesGraphPanelUI.UpdateSpeciesTreeDataTextures(curSimYear);
-
+            
             uiManager.worldTreePanelUI.UpdateSpeciesIconsTargetCoords();
             
             // WPP: use animalSlots list index
@@ -651,36 +651,44 @@ public class SimulationManager : Singleton<SimulationManager>
             int speciesID2 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[2].linkedSpeciesID;
             int speciesID3 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[3].linkedSpeciesID;*/
             
+            // WPP: not used, delegated to GetTotalSpeciesMass methods
+            /*
             int speciesID0 = trophicLayersManager.animalSlots[0].linkedSpeciesID;
             int speciesID1 = trophicLayersManager.animalSlots[1].linkedSpeciesID;
             int speciesID2 = trophicLayersManager.animalSlots[2].linkedSpeciesID;
             int speciesID3 = trophicLayersManager.animalSlots[3].linkedSpeciesID;
-
-            float totalAgentBiomass = 0f;
             float totalSpeciesPopulation0 = 0f;
             float totalSpeciesPopulation1 = 0f;
             float totalSpeciesPopulation2 = 0f;
             float totalSpeciesPopulation3 = 0f;
+            */
             
-            for(int a = 0; a < _NumAgents; a++) {
-                if(agentsArray[a].curLifeStage != Agent.AgentLifeStage.AwaitingRespawn) {
-                    totalAgentBiomass += agentsArray[a].currentBiomass;
-                    if(speciesID0 == agentsArray[a].speciesIndex) {
-                    totalSpeciesPopulation0 += 1f;
-                    }
-                    if(speciesID1 == agentsArray[a].speciesIndex) {
-                        totalSpeciesPopulation1 += 1f;
-                    }
-                    if(speciesID2 == agentsArray[a].speciesIndex) {
-                        totalSpeciesPopulation2 += 1f;
-                    }
-                    if(speciesID3 == agentsArray[a].speciesIndex) {
-                        totalSpeciesPopulation3 += 1f;
-                    }
-                }                
+            // WPP: delegated to GetTotalAgentBiomass
+            /*
+            float totalAgentBiomass = 0f;
+
+            for(int a = 0; a < _NumAgents; a++) 
+            {
+                if(agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) 
+                    continue;
+
+                totalAgentBiomass += agentsArray[a].currentBiomass;
+                
+                // WPP: not used
+                
+                //if(speciesID0 == agentsArray[a].speciesIndex) 
+                //    totalSpeciesPopulation0 += 1f;
+                //if(speciesID1 == agentsArray[a].speciesIndex) 
+                //    totalSpeciesPopulation1 += 1f;
+                //if(speciesID2 == agentsArray[a].speciesIndex) 
+                //   totalSpeciesPopulation2 += 1f;
+                //if(speciesID3 == agentsArray[a].speciesIndex) 
+                //    totalSpeciesPopulation3 += 1f;
+                
             }
+            */
             
-            globalGraphData.AddNewEntry(simResourceManager, totalAgentBiomass);
+            globalGraphData.AddNewEntry(simResourceManager, GetTotalAgentBiomass());
             //graphDataGlobalVertebrates.AddNewEntry(totalAgentBiomass); // simResourceManager.curGlobalAgentBiomass);
                                                                        //uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
 
@@ -706,11 +714,29 @@ public class SimulationManager : Singleton<SimulationManager>
         }
     }
     
+    float GetTotalSpeciesBiomassBySpeciesIndex(int index) {
+        return GetTotalAgentBiomass(trophicLayersManager.animalSlots[index].linkedSpeciesID);
+    }
+    
+    /// Pass in linkedSpeciesID to get mass for one species only, otherwise gets entire population mass
+    float GetTotalAgentBiomass(int linkedSpeciesID = -1) {
+        float result = 0f;
+        
+        for(int a = 0; a < _NumAgents; a++) {
+            if(agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn ||
+               linkedSpeciesID != -1 && linkedSpeciesID == agentsArray[a].speciesIndex) 
+                continue;
+            
+            result += agentsArray[a].currentBiomass;
+        }
+        
+        return result;
+    }
+
     [SerializeField] YearEventData[] yearEvents;
     
     private void CheckForYearEvent() {
-        foreach (var yearEvent in yearEvents)
-        {
+        foreach (var yearEvent in yearEvents) {
             if (curSimYear != yearEvent.year)
                 continue;
 
@@ -720,8 +746,7 @@ public class SimulationManager : Singleton<SimulationManager>
     }
     
     [Serializable]
-    public struct YearEventData
-    {
+    public struct YearEventData {
         public int year;
         public string message;
     }
@@ -872,7 +897,6 @@ public class SimulationManager : Singleton<SimulationManager>
             yCoord = Mathf.Clamp(yCoord, 0, agentGridCellResolution - 1);
 
             mapGridCellArray[xCoord][yCoord].eggSackIndicesList.Add(f);
-                       
         }
         
         // FRIENDS::::::
@@ -886,7 +910,6 @@ public class SimulationManager : Singleton<SimulationManager>
 
             mapGridCellArray[xCoord][yCoord].agentIndicesList.Add(a);
         }
-        
     }
     
     private void HookUpModules() 
@@ -930,35 +953,38 @@ public class SimulationManager : Singleton<SimulationManager>
                 print("error! index = " + index.ToString() + ", xCoord: " + xCoord.ToString() + ", yCoord: " + yCoord.ToString() + ", xPos: " + agentPos.x.ToString() + ", yPos: " + agentPos.y.ToString());
             } */
             // *** Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
-            // *** WPP: Simplify: foreach, invert conditions with continue (or AND)
-            for (int i = 0; i < mapGridCellArray[xCoord][yCoord].agentIndicesList.Count; i++) {
+            for (int i = 0; i < mapGridCellArray[xCoord][yCoord].agentIndicesList.Count; i++) 
+            {
                 int neighborIndex = mapGridCellArray[xCoord][yCoord].agentIndicesList[i];
                 int neighborSpeciesIndex = agentsArray[neighborIndex].speciesIndex; 
 
-                if(agentsArray[neighborIndex].curLifeStage == Agent.AgentLifeStage.Mature) {
-                    // FRIEND:
-                    Vector2 neighborPos = new Vector2(agentsArray[neighborIndex].bodyRigidbody.transform.localPosition.x, agentsArray[neighborIndex].bodyRigidbody.transform.localPosition.y);
-                    float squaredDistNeighbor = (neighborPos - agentPos).sqrMagnitude;
-                            
-                    if (squaredDistNeighbor <= nearestFriendSquaredDistance) { // if now the closest so far, update index and dist:
-                        //int neighborSpeciesIndex = agentsArray[neighborIndex].speciesIndex; // Mathf.FloorToInt((float)neighborIndex / (float)numAgents * (float)numSpecies);
-                        if(ownSpeciesIndex == neighborSpeciesIndex) {  // if two agents are of same species - friends
-                            if(a != neighborIndex) {  // make sure it doesn't consider itself:
-                                closestFriendIndex = neighborIndex;
-                                nearestFriendSquaredDistance = squaredDistNeighbor;
-                            } 
-                        }                                       
-                    }
+                if(agentsArray[neighborIndex].curLifeStage != Agent.AgentLifeStage.Mature) 
+                    continue;
 
-                    if (squaredDistNeighbor <= nearestEnemyAgentSqDistance) { // if now the closest so far, update index and dist:
-                        // Mathf.FloorToInt((float)neighborIndex / (float)numAgents * (float)numSpecies);
-                        if(ownSpeciesIndex != neighborSpeciesIndex) {  // if two agents are of different species - enemy
-                            if(a != neighborIndex) {  // make sure it doesn't consider itself:
-                                closestEnemyAgentIndex = neighborIndex;
-                                nearestEnemyAgentSqDistance = squaredDistNeighbor;
-                            }
-                        }                                        
-                    }
+                // FRIEND:
+                Vector2 neighborPos = new Vector2(agentsArray[neighborIndex].bodyRigidbody.transform.localPosition.x, agentsArray[neighborIndex].bodyRigidbody.transform.localPosition.y);
+                float squaredDistNeighbor = (neighborPos - agentPos).sqrMagnitude;
+                
+                // make sure it doesn't consider itself
+                if (a == neighborIndex)
+                    continue;
+                  
+                // if now the closest so far, update index and dist:
+                // if two agents are of same species - friends
+                if (squaredDistNeighbor <= nearestFriendSquaredDistance &&
+                    ownSpeciesIndex == neighborSpeciesIndex) 
+                {
+                    closestFriendIndex = neighborIndex;
+                    nearestFriendSquaredDistance = squaredDistNeighbor;
+                }
+
+               // If now the closest so far, update index and dist:
+               // if two agents are of different species - enemy
+                if (squaredDistNeighbor <= nearestEnemyAgentSqDistance &&
+                    ownSpeciesIndex != neighborSpeciesIndex) 
+                {
+                    closestEnemyAgentIndex = neighborIndex;
+                    nearestEnemyAgentSqDistance = squaredDistNeighbor;
                 }
             }
         

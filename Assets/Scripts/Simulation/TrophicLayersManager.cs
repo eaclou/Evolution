@@ -45,7 +45,6 @@ public class TrophicLayersManager {
     public TrophicSlot selectedSlot;
     
 
-    // * WPP: remove magic numbers
 	public TrophicLayersManager() {  // constructor
         decomposersOn = true;  // first pass -- temporary?
         algaeOn = true;
@@ -220,7 +219,6 @@ public class TrophicLayersManager {
             if (slot.status == TrophicSlotStatus.Locked)
                 slot.status = TrophicSlotStatus.On;
         
-        // WPP
         // ALGAE
         /*if(kingdomPlants.trophicTiersList[0].trophicSlots[0].status == TrophicSlotStatus.Locked) {            
             kingdomPlants.trophicTiersList[0].trophicSlots[0].status = TrophicSlotStatus.On;
@@ -337,7 +335,8 @@ public class TrophicLayersManager {
         agentsOn = false;
     }
 
-    public float GetDecomposersOnLerp(int curTimeStep) {
+    // WPP: condensed into GetLayerLerp
+    /*public float GetDecomposersOnLerp(int curTimeStep) {
         float lerp = 0f;
         if(decomposersOn) {
             lerp = Mathf.Clamp01((float)(curTimeStep - timeStepDecomposersOn) / (float)timeStepsLayerGrowthDuration);
@@ -367,9 +366,40 @@ public class TrophicLayersManager {
             lerp = Mathf.Clamp01((float)(curTimeStep - timeStepZooplanktonOn) / (float)timeStepsLayerGrowthDuration);
         }
         return lerp;
+    }*/
+    
+    public float GetLayerLerp(KnowledgeMapId layer, int timeStep) {
+        return IsLayerOn(layer) ?
+            Mathf.Clamp01((float)(timeStep - TimeStepLayerOn(layer)) / (float)timeStepsLayerGrowthDuration) :
+            0f;
     }
-
-    public bool GetDecomposersOnOff() {
+    
+    public bool IsLayerOn(KnowledgeMapId layer)
+    {
+        switch (layer)
+        {
+            case KnowledgeMapId.Decomposers: return decomposersOn;
+            case KnowledgeMapId.Algae: return algaeOn;
+            case KnowledgeMapId.Plants: return plantsOn;
+            case KnowledgeMapId.Microbes: return zooplanktonOn;
+            case KnowledgeMapId.Animals: return agentsOn;
+            default: return false;
+        }
+    }
+    
+    int TimeStepLayerOn(KnowledgeMapId layer)
+    {
+        switch (layer)
+        {
+            case KnowledgeMapId.Microbes: return timeStepZooplanktonOn; 
+            case KnowledgeMapId.Plants: return timeStepPlantsOn; 
+            case KnowledgeMapId.Algae: return timeStepAlgaeOn; 
+            case KnowledgeMapId.Decomposers: return timeStepDecomposersOn; 
+            default: return 0;
+        }
+    }
+    
+    /*public bool GetDecomposersOnOff() {
         return decomposersOn;
     }
 
@@ -387,5 +417,5 @@ public class TrophicLayersManager {
 
     public bool GetAgentsOnOff() {
         return agentsOn;
-    }
+    }*/
 }

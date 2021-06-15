@@ -2864,7 +2864,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_Time", Time.realtimeSinceStartup);
         baronVonTerrain.computeShaderTerrainGeneration.SetVector("_SpawnBoundsCameraDetails", baronVonTerrain.spawnBoundsCameraDetails);
-        float spawnLerp = simManager.trophicLayersManager.GetDecomposersOnLerp(simManager.simAgeTimeSteps);
+        float spawnLerp = simManager.trophicLayersManager.GetLayerLerp(KnowledgeMapId.Decomposers, simManager.simAgeTimeSteps);
         float spawnRadius = Mathf.Lerp(1f, SimulationManager._MapSize, spawnLerp);
         Vector4 spawnPos = new Vector4(simManager.trophicLayersManager.decomposerOriginPos.x, simManager.trophicLayersManager.decomposerOriginPos.y, 0f, 0f);
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_SpawnRadius", spawnRadius);
@@ -3900,7 +3900,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             animalParticleDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized); 
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
 
-            if (simManager.trophicLayersManager.GetAgentsOnOff()) {
+            if (simManager.trophicLayersManager.IsLayerOn(KnowledgeMapId.Animals)) {
 
                 eggSackStrokeDisplayMat.SetPass(0);
                 eggSackStrokeDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);

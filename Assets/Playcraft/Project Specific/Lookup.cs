@@ -61,6 +61,7 @@ public class Lookup : ScriptableObject
     
     public TrophicLayerSO[] knowledgeMaps;
     
+    // TBD: cache specific elements for faster lookup
     public TrophicLayerSO GetTrophicSlotData(KnowledgeMapId id)
     {
 	    foreach (var map in knowledgeMaps)

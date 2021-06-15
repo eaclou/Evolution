@@ -60,7 +60,7 @@ public class SimResourceManager {
         
         float nutrientsProduced = 0f;
         float decomposersTotalProductivity = 0f;
-        if(trophicLayersManager.GetDecomposersOnOff()) {
+        if(trophicLayersManager.IsLayerOn(KnowledgeMapId.Decomposers)) {
             float decomposersOxygenMask = Mathf.Clamp01(curGlobalOxygen * settings.environmentSettings._DecomposersOxygenMask);
             float decomposersDetritusMask = Mathf.Clamp01(curGlobalDetritus * settings.environmentSettings._DecomposersDetritusMask);
             decomposersTotalProductivity = curGlobalDecomposers * settings.environmentSettings._BaseDecompositionRate * decomposersOxygenMask * decomposersDetritusMask;

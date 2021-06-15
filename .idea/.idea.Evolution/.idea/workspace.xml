@@ -4,11 +4,12 @@
     <list default="true" id="e5216a40-1993-4f7b-88ca-3d6aa0d75e16" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/GlobalGraphData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/GlobalGraphData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/NarrationSO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/NarrationSO.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/PanelNotificationsUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/PanelNotificationsUI.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/TrophicLayerSO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/TrophicLayerSO.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimResourceManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimResourceManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicLayersManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicLayersManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/VegetationManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/VegetationManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/ZooplanktonManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/ZooplanktonManager.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,13 +61,11 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/Logger.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/BaronVonTerrain.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/MasterGenomePool.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/Quality of Life/Statics/VectorMath.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/AgentGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/EggSackGenome.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimResourceManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePaperDollUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/BrainGenomeImage.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/CreatureBrainActivityUI.cs" />
@@ -95,22 +94,24 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicTier.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicKingdom.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/MinimapPanel.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/WatcherUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/VegetationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/KnowledgeUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/MutationUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicSlot.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/BrushesUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicLayersManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/WorldSpiritHubUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/PanelNotificationsUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/NarrationSO.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/GlobalGraphData.cs" />
-      <option value="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/TrophicLayerSO.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimResourceManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicLayersManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/VegetationManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/ZooplanktonManager.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1owaWgGpM80xkcfA3szn5iw9YkG" />
@@ -131,7 +132,7 @@
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="settings.editor.selected.configurable" value="editor.preferences.smartKeys_rider" />
+    <property name="settings.editor.selected.configurable" value="preferences.editor" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
@@ -199,7 +200,7 @@
       <workItem from="1622679194762" duration="11270000" />
       <workItem from="1622928611718" duration="4649000" />
       <workItem from="1622963111070" duration="7306000" />
-      <workItem from="1623737876671" duration="1460000" />
+      <workItem from="1623737876671" duration="6344000" />
     </task>
     <servers />
   </component>
