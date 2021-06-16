@@ -161,7 +161,7 @@ public class SpeciesGenomePool {
             debugTxt += "" + candidate.candidateGenome.brainGenome.linkList[0].weight.ToString("F2") + "  ";
         }
 
-        Debug.Log("SPECIES CREATED! " + debugTxt);
+        //Debug.Log("SPECIES CREATED! " + debugTxt);
 
         representativeCandidate = foundingGenome;
     }

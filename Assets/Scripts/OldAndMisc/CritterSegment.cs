@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CritterSegment : MonoBehaviour {
     
@@ -9,14 +7,4 @@ public class CritterSegment : MonoBehaviour {
     public int segmentIndex;
 
     public CapsuleCollider2D segmentCollider;
-
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 }

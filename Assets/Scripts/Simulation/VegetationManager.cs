@@ -249,7 +249,7 @@ public class VegetationManager {
         
         plantParticlesRepresentativeGenomeCBuffer = new ComputeBuffer(1, GetPlantParticleDataSize());
         PlantParticleData[] plantParticlesRepresentativeGenomeArray = new PlantParticleData[1];
-        Debug.Log(" BADFHADFHADF" + plantSlotGenomeCurrent.name);
+        //Debug.Log(" BADFHADFHADF" + plantSlotGenomeCurrent.name);
         plantParticlesRepresentativeGenomeArray[0] = plantParticlesArray[0]; // plantSlotGenomeCurrent.plantRepData;
         plantParticlesRepresentativeGenomeCBuffer.SetData(plantParticlesRepresentativeGenomeArray);
         

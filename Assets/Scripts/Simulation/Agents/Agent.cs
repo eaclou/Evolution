@@ -865,7 +865,6 @@ public class Agent : MonoBehaviour {
         throttle = new Vector2(horizontalMovementInput, verticalMovementInput);        
         smoothedThrottle = Vector2.Lerp(smoothedThrottle, throttle, smoothedThrottleLerp);
         Vector2 throttleForwardDir = throttle.normalized;
-        
 
         if(isDead || isEgg) {
             throttle = Vector2.zero;
@@ -918,7 +917,6 @@ public class Agent : MonoBehaviour {
     }
     
     public void TickMetabolism() {
-        
         // Digestion:
         float maxDigestionRate = settingsRef.agentSettings._BaseDigestionRate * currentBiomass; // proportional to biomass?        
         float totalStomachContents = coreModule.totalStomachContents;        
@@ -949,20 +947,14 @@ public class Agent : MonoBehaviour {
 
         if(index == 1) {
             //Debug.Log(createdEnergyTotal + "  GetEnergyCreatedFromDigestion: " + coreModule.stomachContentsPlant + ", " + coreModule.stomachContentsMeat + ", " + coreModule.stomachContentsDecay);
-
         }
         
         //float spentEnergyTotal = 
-        
         //(plantToEnergyAmount * coreModule.dietSpecPlantNorm + meatToEnergyAmount * coreModule.dietSpecMeatNorm + decayToEnergyAmount * coreModule.dietSpecDecayNorm)
-        
-        
-   
+
         coreModule.Regenerate(healRate, energyToHealth);
 
         //float oxygenMask = Mathf.Clamp01(simManager.simResourceManager.curGlobalOxygen * settingsRef.agentSettings._OxygenEnergyMask);
-        
-        
 
         //ENERGY:
         float energyCostMult = settingsRef.agentSettings._BaseEnergyCost; // Mathf.Lerp(settingsRef.agentSettings._BaseEnergyCost, settingsRef.agentSettings._BaseEnergyCost * 0.25f, sizePercentage);
@@ -970,7 +962,6 @@ public class Agent : MonoBehaviour {
         float restingEnergyCost = Mathf.Sqrt(currentBiomass) * energyCostMult * restingBonus; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
         
         float throttleMag = smoothedThrottle.magnitude;
-        
 
         coreModule.energy += createdEnergyTotal;
         // ENERGY DRAIN::::        
@@ -982,7 +973,6 @@ public class Agent : MonoBehaviour {
         coreModule.stamina[0] += staminaRefillRate * energyToStaminaConversionRate;
         coreModule.energy -= staminaRefillRate; // / energyToStaminaConversionRate;
 
-        
         if(coreModule.stamina[0] < 0.1f) {
             staminaRefillRate *= 0.5f;
         }
@@ -1000,7 +990,6 @@ public class Agent : MonoBehaviour {
             coreModule.stamina[0] = 1f;
         }
         */
-        
     }
 
     private void SelectAction() {
@@ -1135,7 +1124,7 @@ public class Agent : MonoBehaviour {
 
     public void InitializeModules(AgentGenome genome) {
         communicationModule = new CritterModuleCommunication();
-        communicationModule.Initialize(genome.bodyGenome.communicationGenome, this);
+        communicationModule.Initialize(genome.bodyGenome.communicationGenome);
 
         coreModule = new CritterModuleCore(genome.bodyGenome.coreGenome, this);
 
@@ -1152,11 +1141,14 @@ public class Agent : MonoBehaviour {
         settingsRef = settings;
         curLifeStage = AgentLifeStage.AwaitingRespawn;
         //InitializeAgentWidths(genome);
-        InitializeGameObjectsAndComponents();
+        //InitializeGameObjectsAndComponents();
         //InitializeModules(genome);  //  This breaks MapGridCell update, because coreModule doesn't exist?
     }
     
-    private void InitializeGameObjectsAndComponents() {
+    // WPP: remove, replace with settings on prefab
+    /*private void InitializeGameObjectsAndComponents() {
+        //InitializeModules(new AgentGenome());
+        
         // Create Physics GameObject:
         if (bodyGO)
             return;
@@ -1189,8 +1181,8 @@ public class Agent : MonoBehaviour {
         mouseClickColliderGO.transform.parent = bodyGO.transform;
         mouseClickColliderGO.transform.localPosition = new Vector3(0f, 0f, 0f);
         mouseClickCollider = mouseClickColliderGO.AddComponent<CapsuleCollider>();
-        mouseClickCollider.isTrigger = true;
-    }
+        mouseClickCollider.isTrigger = true; 
+    }*/
     
     // Colliders Footprint???  *************************************************************************************************************
 
@@ -1202,7 +1194,7 @@ public class Agent : MonoBehaviour {
         //pregnancyRefactoryDuration = Mathf.RoundToInt(Mathf.Lerp(3600f, 800f, eggLerp));
 
         //InitializeAgentWidths(genome);
-        InitializeGameObjectsAndComponents();  // Not needed??? ***
+        //InitializeGameObjectsAndComponents();  // Not needed??? ***
 
         //genome.bodyGenome.CalculateFullsizeBoundingBox();
         //Debug.Log("fullSize = " + genome.bodyGenome.fullsizeBoundingBox.ToString() + ", head: " + genome.bodyGenome.coreGenome.headLength.ToString());
@@ -1290,10 +1282,8 @@ public class Agent : MonoBehaviour {
         smoothedThrottle = new Vector2(0f, 0.01f); 
     }
 
-    //  When should biomass be transferred from EggSack?
+    // When should biomass be transferred from EggSack?
     // If spawnImmaculate, where does the biomass come from? -- should it be free?
-    //  
-
     public void InitializeSpawnAgentImmaculate(SettingsManager settings, int agentIndex, CandidateAgentData candidateData, Vector3 spawnWorldPos, float globalWaterLevel) {        
         index = agentIndex;
         speciesIndex = candidateData.speciesID;

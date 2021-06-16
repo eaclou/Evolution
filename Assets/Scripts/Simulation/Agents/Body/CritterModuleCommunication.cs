@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CritterModuleCommunication {
 
@@ -22,7 +20,7 @@ public class CritterModuleCommunication {
                
     }
 
-    public void Initialize(CritterModuleCommunicationGenome genome, Agent agent) {
+    public void Initialize(CritterModuleCommunicationGenome genome) {
         this.genome = genome;
 
         inComm0 = new float[1]; // 40

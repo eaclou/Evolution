@@ -8,6 +8,7 @@ using Random = UnityEngine.Random;
 // The meat of the Game, controls the primary simulation/core logic gameplay Loop
 public class SimulationManager : Singleton<SimulationManager> 
 {
+    Lookup lookup => Lookup.instance;
     UIManager uiManager => UIManager.instance;
     TheRenderKing theRenderKing => TheRenderKing.instance;
     CameraManager cameraManager => CameraManager.instance;
@@ -337,8 +338,13 @@ public class SimulationManager : Singleton<SimulationManager>
     
     void InstantiateAgent(int index)
     {
-        GameObject agentGO = new GameObject("Agent " + index);
-        Agent newAgent = agentGO.AddComponent<Agent>();
+        // WPP: replaced with prefab configuration
+        //GameObject agentGO = new GameObject("Agent " + index);
+        //Agent newAgent = agentGO.AddComponent<Agent>();
+        var agentGO = Instantiate(lookup.agent);
+        agentGO.name = "Agent " + index;
+        var newAgent = agentGO.GetComponent<Agent>();
+        
         //newAgent.speciesIndex = Mathf.FloorToInt((float)i / (float)numAgents * (float)numSpecies);
         newAgent.FirstTimeInitialize(settingsManager); // agentGenomePoolArray[i]);
         agentsArray[index] = newAgent;        

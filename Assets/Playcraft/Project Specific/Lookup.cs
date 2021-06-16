@@ -13,6 +13,9 @@ public class Lookup : ScriptableObject
 	#endregion
 	
 	#region Global Resource References
+	
+	[Header("Prefabs")]
+	public GameObject agent;
 
 	[Header("Colors")]
     public Color buttonActiveColor = new Color(1f, 1f, 1f, 1f);

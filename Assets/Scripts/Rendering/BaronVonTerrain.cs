@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Rendering;
 
 public class BaronVonTerrain : RenderBaron {
@@ -498,7 +496,7 @@ public class BaronVonTerrain : RenderBaron {
 
     
     public void RebuildTerrainMesh() {
-        Debug.Log("InitializeTerrain!");
+        //Debug.Log("InitializeTerrain!");
 
         int meshResolution = 128;
         float mapSize = SimulationManager._MapSize;

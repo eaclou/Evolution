@@ -17,64 +17,35 @@ public class CreatureBrainActivityUI : MonoBehaviour
     private Agent agent;
 
     public void Tick() {
-
         critterIndex = cameraManager.targetAgentIndex;
         agent = simulationManager.agentsArray[critterIndex];
 
-        if (agent.coreModule != null)
-        {
-            // WPP: ID selection moved to Agent
-            int curActivityID = agent.GetActivityID();
-            /*if (agent.isDead) {
-            //curActivityID = 7;
-            }
-            if (agent.isMature) {
+        if (agent.coreModule == null || agent.communicationModule == null)
+            return;
 
-                // curActivity
-                if (agent.isPregnantAndCarryingEggs) {
-                    curActivityID = 6;
-                }
-                if (agent.isFeeding) {
-                    curActivityID = 1;
-                }
-                if (agent.isAttacking) {
-                    curActivityID = 2;
-                }
-                if (agent.isDashing) {
-                    curActivityID = 3;
-                }
-                if (agent.isDefending) {
-                    curActivityID = 4;
-                }
-                if (agent.isResting) {
-                    curActivityID = 5;
-                }
-                if (agent.isCooldown) {
-                    curActivityID = 7;
-                }
-            }*/
-            
-            newInspectAgentCurActivityMat.SetInt("_CurActivityID", curActivityID);
-            newInspectAgentThrottleMat.SetFloat("_ThrottleX", Mathf.Clamp01(agent.smoothedThrottle.x));
-            newInspectAgentThrottleMat.SetFloat("_ThrottleY", Mathf.Clamp01(agent.smoothedThrottle.y));
-            newInspectAgentThrottleMat.SetTexture("_VelocityTex", simulationManager.environmentFluidManager._VelocityPressureDivergenceMain);
-            newInspectAgentThrottleMat.SetFloat("_AgentCoordX", agent.ownPos.x / SimulationManager._MapSize);
-            newInspectAgentThrottleMat.SetFloat("_AgentCoordY", agent.ownPos.y / SimulationManager._MapSize);
+        int curActivityID = agent.GetActivityID();
 
-            agentBehaviorOneHot.UpdateBars( agent.coreModule.healEffector[0],
-                                            agent.coreModule.dashEffector[0],
-                                            agent.coreModule.defendEffector[0],
-                                            agent.coreModule.mouthFeedEffector[0],
-                                            agent.coreModule.mouthAttackEffector[0],
-                                            agent.communicationModule.outComm0[0], agent.isCooldown);
+        newInspectAgentCurActivityMat.SetInt("_CurActivityID", curActivityID);
+        newInspectAgentThrottleMat.SetFloat("_ThrottleX", Mathf.Clamp01(agent.smoothedThrottle.x));
+        newInspectAgentThrottleMat.SetFloat("_ThrottleY", Mathf.Clamp01(agent.smoothedThrottle.y));
+        newInspectAgentThrottleMat.SetTexture("_VelocityTex", simulationManager.environmentFluidManager._VelocityPressureDivergenceMain);
+        newInspectAgentThrottleMat.SetFloat("_AgentCoordX", agent.ownPos.x / SimulationManager._MapSize);
+        newInspectAgentThrottleMat.SetFloat("_AgentCoordY", agent.ownPos.y / SimulationManager._MapSize);
+        
+        agentBehaviorOneHot.UpdateBars( agent.coreModule.healEffector[0],
+                                        agent.coreModule.dashEffector[0],
+                                        agent.coreModule.defendEffector[0],
+                                        agent.coreModule.mouthFeedEffector[0],
+                                        agent.coreModule.mouthAttackEffector[0],
+                                        agent.communicationModule.outComm0[0], agent.isCooldown);
 
-            // * WPP: what concept does this condition represent? -> convert to getter in Agent
-            callTickCounter = agent.communicationModule.outComm3[0] > 0.25f ? 
-                Mathf.Min(200, callTickCounter++) : 
-                Mathf.Max(0, callTickCounter--);
-            
-            agentBehaviorOneHot.UpdateExtras(agent);
-        }        
+        // * WPP: what concept does this condition represent? -> convert to getter in Agent
+        callTickCounter = agent.communicationModule.outComm3[0] > 0.25f ? 
+            Mathf.Min(200, callTickCounter++) : 
+            Mathf.Max(0, callTickCounter--);
+        
+        agentBehaviorOneHot.UpdateExtras(agent);
+    
     }
 
 }
