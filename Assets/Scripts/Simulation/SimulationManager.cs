@@ -3,12 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Playcraft;
+using Playcraft.Pooling;
 using Random = UnityEngine.Random;
 
 // The meat of the Game, controls the primary simulation/core logic gameplay Loop
 public class SimulationManager : Singleton<SimulationManager> 
 {
     Lookup lookup => Lookup.instance;
+    ObjectPoolMaster spawner => ObjectPoolMaster.instance;
     UIManager uiManager => UIManager.instance;
     TheRenderKing theRenderKing => TheRenderKing.instance;
     CameraManager cameraManager => CameraManager.instance;
@@ -338,7 +340,7 @@ public class SimulationManager : Singleton<SimulationManager>
     
     void InstantiateAgent(int index)
     {
-        var agentGO = Instantiate(lookup.agent);
+        var agentGO = spawner.Spawn(lookup.agent, Vector3.zero);
         agentGO.name = "Agent " + index;
         var newAgent = agentGO.GetComponent<Agent>();
         
@@ -368,7 +370,7 @@ public class SimulationManager : Singleton<SimulationManager>
         eggSackArray = new EggSack[numEggSacks];
         
         for (int i = 0; i < eggSackArray.Length; i++) {
-            var eggSackGO = Instantiate(lookup.eggSack);
+            var eggSackGO = spawner.Spawn(lookup.eggSack, Vector3.zero);
             eggSackGO.name = "EggSack " + i;
             var newEggSack = eggSackGO.GetComponent<EggSack>();
             
