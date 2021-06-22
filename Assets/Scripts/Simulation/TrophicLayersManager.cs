@@ -18,14 +18,6 @@ public class TrophicLayersManager {
 
     //private bool _IsUnlocked
 
-    // WPP
-    /*
-    public TrophicKingdom kingdomDecomposers;
-    public TrophicKingdom kingdomPlants;
-    public TrophicKingdom kingdomAnimals;
-    public TrophicKingdom kingdomTerrain;
-    public TrophicKingdom kingdomOther;
-    */
 
     public Vector2 decomposerOriginPos;
     public Vector2 algaeOriginPos;
@@ -64,63 +56,10 @@ public class TrophicLayersManager {
                     animalSlots.Add(slot);
             }
         }
-
-        // WPP
-        // DECOMPOSERS::::  // hacky manual initialization for now!!!!
-        /*kingdomDecomposers = new TrophicKingdom();
-        kingdomDecomposers.name = "Decomposers";
-        TrophicTier decomposersTier0 = new TrophicTier();
-        decomposersTier0.trophicSlots[0].Initialize("Decomposers", TrophicSlotStatus.On, 0, 0, 0, spiritDecomposerIcon, colorDecomposersLayer);
-        kingdomDecomposers.trophicTiersList.Add(decomposersTier0);
-
-        // PLANTS::::
-        kingdomPlants = new TrophicKingdom();
-        kingdomPlants.name = "Plants";
-        TrophicTier plantsTier0 = new TrophicTier();  // simple algae
-        plantsTier0.trophicSlots[0].Initialize("Algae", TrophicSlotStatus.On, 1, 0, 0, spiritAlgaeIcon, colorAlgaeLayer);        
-        kingdomPlants.trophicTiersList.Add(plantsTier0);
-        TrophicTier plantsTier1 = new TrophicTier();  // bigger plants
-        plantsTier1.trophicSlots[0].Initialize("Floating Plants", TrophicSlotStatus.Locked, 1, 1, 0, spiritPlantIcon, colorPlantsLayer);
-        plantsTier1.trophicSlots[1].Initialize("Submerged Plants", TrophicSlotStatus.Locked, 1, 1, 1, spiritPlantIcon, colorPlantsLayer);
-        kingdomPlants.trophicTiersList.Add(plantsTier1);
         
-        // ANIMALS:::::
-        kingdomAnimals = new TrophicKingdom();
-        kingdomAnimals.name = "Animals";
-        TrophicTier animalsTier0 = new TrophicTier();  // Zooplankton
-        animalsTier0.trophicSlots[0].Initialize("Zooplankton", TrophicSlotStatus.Locked, 2, 0, 0, spiritZooplanktonIcon, colorZooplanktonLayer);
-        kingdomAnimals.trophicTiersList.Add(animalsTier0);
-        TrophicTier animalsTier1 = new TrophicTier();  // full Agents
-        animalsTier1.trophicSlots[0].Initialize("Vertebrate", TrophicSlotStatus.Locked, 2, 1, 0, spiritVertebrateIcon, colorVertebratesLayer);
-        animalsTier1.trophicSlots[1].Initialize("Vertebrate", TrophicSlotStatus.Locked, 2, 1, 1, spiritVertebrateIcon, colorVertebratesLayer);
-        animalsTier1.trophicSlots[2].Initialize("Vertebrate", TrophicSlotStatus.Locked, 2, 1, 2, spiritVertebrateIcon, colorVertebratesLayer);
-        animalsTier1.trophicSlots[3].Initialize("Vertebrate", TrophicSlotStatus.Locked, 2, 1, 3, spiritVertebrateIcon, colorVertebratesLayer);
-        kingdomAnimals.trophicTiersList.Add(animalsTier1);
-
-
-        // TERRAIN !!!!::::::
-        kingdomTerrain = new TrophicKingdom();
-        kingdomTerrain.name = "Terrain";
-        TrophicTier terrainTier0 = new TrophicTier();
-        terrainTier0.trophicSlots[0].Initialize("World", TrophicSlotStatus.On, 3, 0, 0, spiritWorldIcon, colorWorldLayer);
-        terrainTier0.trophicSlots[1].Initialize("*World*", TrophicSlotStatus.On, 3, 0, 1, spiritStoneIcon, colorTerrainLayer);
-        terrainTier0.trophicSlots[2].Initialize("Pebbles", TrophicSlotStatus.Locked, 3, 0, 2, spiritPebblesIcon, colorTerrainLayer);
-        terrainTier0.trophicSlots[3].Initialize("Sand", TrophicSlotStatus.Locked, 3, 0, 3, spiritSandIcon, colorTerrainLayer);
-        kingdomTerrain.trophicTiersList.Add(terrainTier0);
-
-        // OTHER!!!!!%%%
-        kingdomOther = new TrophicKingdom();
-        kingdomOther.name = "Other";
-        TrophicTier otherTier0 = new TrophicTier();
-        otherTier0.trophicSlots[0].Initialize("Minerals", TrophicSlotStatus.Locked, 4, 0, 0, spiritMineralsIcon, colorMineralLayer);
-        otherTier0.trophicSlots[1].Initialize("Water", TrophicSlotStatus.On, 4, 0, 1, spiritWaterIcon, colorWaterLayer);
-        otherTier0.trophicSlots[2].Initialize("Air", TrophicSlotStatus.Locked, 4, 0, 2, spiritAirIcon, colorAirLayer);
-        kingdomOther.trophicTiersList.Add(otherTier0);*/
-                
         //selectedTrophicSlotRef = terrainTier0.trophicSlots[0];        
         //isSelectedTrophicSlot = true;
-
-        // WPP
+        
         SetSlot(KnowledgeMapId.Water);
         uiManager.worldSpiritHubUI.selectedWorldSpiritSlot = selectedSlot; //kingdomTerrain.trophicTiersList[0].trophicSlots[1];
         uiManager.brushesUI.selectedEssenceSlot = selectedSlot; //kingdomTerrain.trophicTiersList[0].trophicSlots[1];
@@ -179,34 +118,6 @@ public class TrophicLayersManager {
             case KnowledgeMapId.Microbes: TurnOnZooplankton(spawnPos, timeStep); break;
             case KnowledgeMapId.Animals: TurnOnAgents(); break;
         }
-
-        // WPP
-        /*if (addedSlot.kingdomID == 0) { // decomposers:
-            TurnOnDecomposers(spawnPos, timeStep);
-        }
-        if (addedSlot.kingdomID == 1) { // plants!:
-            if (addedSlot.tierID == 0) { // ALGAE!:
-                TurnOnAlgae(spawnPos, timeStep);
-                //simManagerRef.vegetationManager.SpawnInitialAlgaeParticles(5f, new Vector4(spawnPos.x, spawnPos.y, 0f, 0f));
-            }
-            else {
-                TurnOnPlants(spawnPos, timeStep);
-            }
-        }
-        if (addedSlot.kingdomID == 2) { // Animals:
-            if (addedSlot.tierID == 0) { // Animals:
-                TurnOnZooplankton(spawnPos, timeStep);
-                // Unlock Slots:
-                //kingdomAnimals.trophicTiersList[1].unlocked = true;
-                //kingdomAnimals.trophicTiersList[1].trophicSlots[0].status = TrophicSlot.SlotStatus.Empty;
-                //kingdomAnimals.trophicTiersList[1].trophicSlots[1].status = TrophicSlot.SlotStatus.Empty;
-                //kingdomAnimals.trophicTiersList[1].trophicSlots[2].status = TrophicSlot.SlotStatus.Empty;
-                //kingdomAnimals.trophicTiersList[1].trophicSlots[3].status = TrophicSlot.SlotStatus.Empty;
-            }
-            if(addedSlot.tierID == 1) {
-                TurnOnAgents();
-            }
-        }*/
     }
     
     public void SetSlotStatus(KnowledgeMapId id, TrophicSlotStatus value)
@@ -335,39 +246,6 @@ public class TrophicLayersManager {
         agentsOn = false;
     }
 
-    // WPP: condensed into GetLayerLerp
-    /*public float GetDecomposersOnLerp(int curTimeStep) {
-        float lerp = 0f;
-        if(decomposersOn) {
-            lerp = Mathf.Clamp01((float)(curTimeStep - timeStepDecomposersOn) / (float)timeStepsLayerGrowthDuration);
-        }
-        return lerp;
-    }
-    
-    public float GetAlgaeOnLerp(int curTimeStep) {
-        float lerp = 0f;
-        if(algaeOn) {
-            lerp = Mathf.Clamp01((float)(curTimeStep - timeStepAlgaeOn) / (float)timeStepsLayerGrowthDuration);
-        }
-        return lerp;
-    }
-    
-    public float GetPlantsOnLerp(int curTimeStep) {
-        float lerp = 0f;
-        if(plantsOn) {
-            lerp = Mathf.Clamp01((float)(curTimeStep - timeStepPlantsOn) / (float)timeStepsLayerGrowthDuration);
-        }
-        return lerp;
-    }
-    
-    public float GetZooplanktonOnLerp(int curTimeStep) {
-        float lerp = 0f;
-        if(zooplanktonOn) {
-            lerp = Mathf.Clamp01((float)(curTimeStep - timeStepZooplanktonOn) / (float)timeStepsLayerGrowthDuration);
-        }
-        return lerp;
-    }*/
-    
     public float GetLayerLerp(KnowledgeMapId layer, int timeStep) {
         return IsLayerOn(layer) ?
             Mathf.Clamp01((float)(timeStep - TimeStepLayerOn(layer)) / (float)timeStepsLayerGrowthDuration) :
@@ -398,24 +276,4 @@ public class TrophicLayersManager {
             default: return 0;
         }
     }
-    
-    /*public bool GetDecomposersOnOff() {
-        return decomposersOn;
-    }
-
-    public bool GetAlgaeOnOff() {
-        return algaeOn;
-    }
-
-    public bool GetPlantsOnOff() {
-        return plantsOn;
-    }
-
-    public bool GetZooplanktonOnOff() {
-        return zooplanktonOn;
-    }
-
-    public bool GetAgentsOnOff() {
-        return agentsOn;
-    }*/
 }

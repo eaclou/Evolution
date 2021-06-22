@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 
 public class EggSack : MonoBehaviour {
-    
-    SettingsManager settingsRef;
+    SettingsManager settingsRef => SettingsManager.instance;
 
     public int index;    
     public int speciesIndex; // temp - based on static species    
@@ -10,60 +9,21 @@ public class EggSack : MonoBehaviour {
     public EggLifeStage curLifeStage;
     public enum EggLifeStage {
         Growing,
-        Mature,  // Developed enough for some eggs to start hatching
+        Mature,    // Developed enough for some eggs to start hatching
         Decaying,  // all eggs either hatched or failed
         Null
     }
-    /*private int pregnantDurationTimeSteps = 360;
-    public int _PregnantDurationTimeSteps
-    {
-        get
-        {
-            return pregnantDurationTimeSteps;
-        }
-        set
-        {
 
-        }
-    }*/
     private float pregnancyPercentageOfTotalGrowTime = 0.5f;
     private int birthDurationTimeSteps = 30;
     private int growDurationTimeSteps = 640;
-    public int _GrowDurationTimeSteps
-    {
-        get
-        {
-            return growDurationTimeSteps;
-        }
-        set
-        {
+    public int _GrowDurationTimeSteps => growDurationTimeSteps;
 
-        }
-    }
     private int matureDurationTimeSteps = 210;  // buffer time for late bloomers to spawn
-    public int _MatureDurationTimeSteps
-    {
-        get
-        {
-            return matureDurationTimeSteps;
-        }
-        set
-        {
+    public int _MatureDurationTimeSteps => matureDurationTimeSteps;
 
-        }
-    }
     private int decayDurationTimeSteps = 720;  // how long it takes to rot/decay
-    public int _DecayDurationTimeSteps
-    {
-        get
-        {
-            return decayDurationTimeSteps;
-        }
-        set
-        {
-
-        }
-    }
+    public int _DecayDurationTimeSteps => decayDurationTimeSteps;
 
     public float individualEggMaxSize = 0.1f;
     public int maxNumEggs = 64;
@@ -89,17 +49,7 @@ public class EggSack : MonoBehaviour {
     private int numSkipFramesResize = 7;
 
     private Vector2 prevPos;
-    public Vector3 _PrevPos
-    {
-        get
-        {
-            return prevPos;
-        }
-        set
-        {
-
-        }
-    }
+    public Vector3 _PrevPos => prevPos;
 
     public Vector2 facingDirection;
         
@@ -125,22 +75,14 @@ public class EggSack : MonoBehaviour {
     public float wasteProducedLastFrame = 0f;
     public float oxygenUsedLastFrame = 0f;
     
+    
+    public void FirstTimeInitialize() {
+        //settingsRef = settings; // WPP: moved to Singleton pattern
+        fixedJoint.frequency = springJointMaxStrength;
 
-    // Use this for initialization
-    void Start() {
-        
-    }
-
-    // Update is called once per frame
-    void Update () {
-		
-	}
-
-    public void FirstTimeInitialize(SettingsManager settings) {
-        settingsRef = settings;
-
+        // WPP: redundant, setup in prefab
+        /*
         if(rigidbodyRef == null) {
-            
             rigidbodyRef = this.gameObject.AddComponent<Rigidbody2D>();
             mainCollider = this.gameObject.AddComponent<CapsuleCollider2D>();
             rigidbodyRef.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
@@ -169,23 +111,22 @@ public class EggSack : MonoBehaviour {
             mouseClickCollider.isTrigger = true;
             mouseClickColliderGO.SetActive(false);
         }
+        */
     }
 
     public void InitializeEggSackFromGenome(int index, AgentGenome agentGenome, Agent parentAgent, Vector3 startPos) {
         //currentBiomass = 0.01f; // immaculate eggsacks given free mass?
 
-        if (parentAgent == null) {  // Immaculate Conception:
-
-        }
-        else {
+        if (parentAgent != null) {  
             parentAgentIndex = parentAgent.index;
         }
-        
+
         this.index = index;        
         this.fullSize = Vector2.one * (agentGenome.bodyGenome.GetFullsizeBoundingBox().x + agentGenome.bodyGenome.GetFullsizeBoundingBox().y) * 0.5f; // new Vector2(agentGenome.bodyGenome.fullsizeBoundingBox.x, agentGenome.bodyGenome.fullsizeBoundingBox.y) * 1f;
                
         BeginLifeStageGrowing(parentAgent, agentGenome, startPos);
     }
+    
     /*public void InitializeEggSackFromGenomeImmaculate(int eggSackIndex, AgentGenome genome, StartPositionGenome startPos) {
         curLifeStage = EggLifeStage.GrowingIndependent;
 
@@ -219,8 +160,8 @@ public class EggSack : MonoBehaviour {
     }*/
 
     private void UpdateEggSackSize(float percentage, bool resizeCollider) {
-
         Vector2 newSize = fullSize * Mathf.Max(0.01f, percentage);
+        
         if(resizeCollider) {
             mainCollider.size = fullSize * Mathf.Clamp01(Mathf.Max(0.01f, percentage + 0.2f));
             float mass = mainCollider.size.x * mainCollider.size.y; // Mathf.Lerp(minMass, maxMass, percentage);  // *** <<< REVISIT!!! ****
@@ -228,10 +169,8 @@ public class EggSack : MonoBehaviour {
             rigidbodyRef.mass = mass;
         }  
 
-        curSize = newSize;    
-        
+        curSize = newSize;
         healthStructural = (float)curNumEggs / (float)maxNumEggs;
-
         foodAmount = healthStructural * curSize.x * curSize.y;
     }
 
@@ -253,7 +192,6 @@ public class EggSack : MonoBehaviour {
         rigidbodyRef.angularDrag = 1.5f;
 
         if(parentAgentRef == null) {
-            
             isProtectedByParent = false;
             isAttachedBySpring = false;
             
@@ -298,17 +236,15 @@ public class EggSack : MonoBehaviour {
         isBeingBorn = true;
         isProtectedByParent = false;
     }
+    
     private void BeginLifeStageMature() {  // Buffer time for late bloomers to hatch
-        curLifeStage = EggLifeStage.Mature;        
-                    
+        curLifeStage = EggLifeStage.Mature;
         lifeStageTransitionTimeStepCounter = 0;
-
         developmentProgress = 1f;
-
         UpdateEggSackSize(1f, true);
     }
+    
     public void ParentDiedWhilePregnant() {
-
         parentAgentRef = null;
         fixedJoint.enabled = false;
         fixedJoint.enableCollision = false;
@@ -328,11 +264,8 @@ public class EggSack : MonoBehaviour {
         fixedJoint.enabled = false;
         fixedJoint.enableCollision = false;
         fixedJoint.connectedBody = null;
-
         mainCollider.enabled = true;  // *** ???? maybe?
-
-        //Debug.Log("is this gfunction being run?");
-        
+        //Debug.Log("is this function being run?");
     }
 
     public void ConsumedByPredatorAgent() {
@@ -354,7 +287,6 @@ public class EggSack : MonoBehaviour {
     private void CheckForLifeStageTransition() {
         switch(curLifeStage) {
             case EggLifeStage.Growing:
-                // 
                 // Preggers
                 if(lifeStageTransitionTimeStepCounter >= Mathf.RoundToInt((float)growDurationTimeSteps * (float)pregnancyPercentageOfTotalGrowTime)) {                   
                     // transition from being attached to parent Agent rigidbody, to free-floating:
@@ -367,22 +299,18 @@ public class EggSack : MonoBehaviour {
                 if(lifeStageTransitionTimeStepCounter >= growDurationTimeSteps) {
                     BeginLifeStageMature();
                 }
-                                
+                
+                // Birth time is up                
                 if(birthTimeStepsCounter >= birthDurationTimeSteps) {
-                    // Birth time is up
                     isBeingBorn = false;
                 }
 
                 if(!isProtectedByParent && isAttachedBySpring) {
                     float distToParent = (parentAgentRef.bodyRigidbody.transform.position - rigidbodyRef.transform.position).magnitude;
-                    
                     SeverJointAttachment();                    
                 }
-                
                 break;
-            
             case EggLifeStage.Mature:
-                
                 if(lifeStageTransitionTimeStepCounter >= matureDurationTimeSteps) {
                     curLifeStage = EggLifeStage.Decaying;
                     lifeStageTransitionTimeStepCounter = 0;
@@ -412,15 +340,14 @@ public class EggSack : MonoBehaviour {
                 }*/
                 break;
             case EggLifeStage.Null:
-                //
                 healthStructural = 0f; // temp hack
-                
                 break;
             default:
                 Debug.LogError("NO SUCH ENUM ENTRY IMPLEMENTED, YOU FOOL!!! (" + curLifeStage.ToString() + ")");
                 break;
         }
     }
+    
     public void Tick() {
         wasteProducedLastFrame = 0f;
         oxygenUsedLastFrame = 0f;
@@ -434,20 +361,16 @@ public class EggSack : MonoBehaviour {
         
         switch(curLifeStage) {
             case EggLifeStage.Growing:
-                //
                 TickGrowing();
                 break;
             case EggLifeStage.Mature:
-                //
                 TickMature();
                 break;
             case EggLifeStage.Decaying:
-                //
                 TickDecaying();
                 break;
             case EggLifeStage.Null:
                 decayStatus = 1f;
-                //
                 //Debug.Log("agent is null - probably shouldn't have gotten to this point...;");
                 break;
             default:
@@ -476,9 +399,8 @@ public class EggSack : MonoBehaviour {
                         
         if(isBeingBorn) {
             birthTimeStepsCounter++;
-
-            
         }
+        
         if(isAttachedBySpring) {
             float birthPercentage = Mathf.Clamp01((float)birthTimeStepsCounter / (float)birthDurationTimeSteps);
             //float lerpVal = birthPercentage;
@@ -491,16 +413,16 @@ public class EggSack : MonoBehaviour {
             //Debug.Log("_" + parentAgentRef.ToString());
             fixedJoint.anchor = Vector2.Lerp(new Vector2(0f, 0f), new Vector2(0f, parentAgentRef.fullSizeBoundingBox.y * 0.25f), birthPercentage);
             fixedJoint.connectedAnchor = Vector2.Lerp(new Vector2(0f, 0f), new Vector2(0f, parentAgentRef.fullSizeBoundingBox.y * -0.25f), birthPercentage);
-
         }
-    }    
+    } 
+       
     private void TickMature() {
         lifeStageTransitionTimeStepCounter++;
         //growthScaleNormalized = 1f;                
         isDepleted = CheckIfDepleted();      
     }
+    
     private void TickDecaying() {
-        
         float decayAmount = settingsRef.agentSettings._BaseDecompositionRate;
         currentBiomass -= decayAmount;
         wasteProducedLastFrame += decayAmount;
@@ -516,6 +438,8 @@ public class EggSack : MonoBehaviour {
     }
     
     private bool CheckIfDepleted() {
+        // WPP: simplified       
+        /*
         bool depleted = true;
         //if (foodAmount > 0f)
             //depleted = false;
@@ -524,6 +448,7 @@ public class EggSack : MonoBehaviour {
         //if (amountB > 0f)
         //    depleted = false;
         // If any of the the 3 types
-        return depleted;
+        */
+        return currentBiomass <= 0f;
     }
 }

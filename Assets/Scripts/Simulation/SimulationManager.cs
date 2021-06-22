@@ -338,9 +338,6 @@ public class SimulationManager : Singleton<SimulationManager>
     
     void InstantiateAgent(int index)
     {
-        // WPP: replaced with prefab configuration
-        //GameObject agentGO = new GameObject("Agent " + index);
-        //Agent newAgent = agentGO.AddComponent<Agent>();
         var agentGO = Instantiate(lookup.agent);
         agentGO.name = "Agent " + index;
         var newAgent = agentGO.GetComponent<Agent>();
@@ -370,13 +367,13 @@ public class SimulationManager : Singleton<SimulationManager>
     private void LoadingInstantiateEggSacks() {
         eggSackArray = new EggSack[numEggSacks];
         
-        //Debug.Log("SpawnFood!");
         for (int i = 0; i < eggSackArray.Length; i++) {
-            GameObject eggSackGO = new GameObject("EggSack" + i); // Instantiate(Resources.Load("Prefabs/FoodPrefab")) as GameObject;
-            //eggSackGO.name = "EggSack" + i.ToString();
-            EggSack newEggSack = eggSackGO.AddComponent<EggSack>();
+            var eggSackGO = Instantiate(lookup.eggSack);
+            eggSackGO.name = "EggSack " + i;
+            var newEggSack = eggSackGO.GetComponent<EggSack>();
+            
             newEggSack.speciesIndex = masterGenomePool.currentlyActiveSpeciesIDList[0]; // Mathf.FloorToInt((float)i / (float)numEggSacks * (float)numSpecies);
-            newEggSack.FirstTimeInitialize(settingsManager);
+            newEggSack.FirstTimeInitialize();
             eggSackArray[i] = newEggSack; // Add to stored list of current Food objects                     
         }
     }
@@ -649,51 +646,7 @@ public class SimulationManager : Singleton<SimulationManager>
             uiManager.speciesGraphPanelUI.UpdateSpeciesTreeDataTextures(curSimYear);
             
             uiManager.worldTreePanelUI.UpdateSpeciesIconsTargetCoords();
-            
-            // WPP: use animalSlots list index
-            // * eliminate repetition by iterating through array
-            /*int speciesID0 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].linkedSpeciesID;
-            int speciesID1 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].linkedSpeciesID;
-            int speciesID2 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[2].linkedSpeciesID;
-            int speciesID3 = trophicLayersManager.kingdomAnimals.trophicTiersList[1].trophicSlots[3].linkedSpeciesID;*/
-            
-            // WPP: not used, delegated to GetTotalSpeciesMass methods
-            /*
-            int speciesID0 = trophicLayersManager.animalSlots[0].linkedSpeciesID;
-            int speciesID1 = trophicLayersManager.animalSlots[1].linkedSpeciesID;
-            int speciesID2 = trophicLayersManager.animalSlots[2].linkedSpeciesID;
-            int speciesID3 = trophicLayersManager.animalSlots[3].linkedSpeciesID;
-            float totalSpeciesPopulation0 = 0f;
-            float totalSpeciesPopulation1 = 0f;
-            float totalSpeciesPopulation2 = 0f;
-            float totalSpeciesPopulation3 = 0f;
-            */
-            
-            // WPP: delegated to GetTotalAgentBiomass
-            /*
-            float totalAgentBiomass = 0f;
 
-            for(int a = 0; a < _NumAgents; a++) 
-            {
-                if(agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) 
-                    continue;
-
-                totalAgentBiomass += agentsArray[a].currentBiomass;
-                
-                // WPP: not used
-                
-                //if(speciesID0 == agentsArray[a].speciesIndex) 
-                //    totalSpeciesPopulation0 += 1f;
-                //if(speciesID1 == agentsArray[a].speciesIndex) 
-                //    totalSpeciesPopulation1 += 1f;
-                //if(speciesID2 == agentsArray[a].speciesIndex) 
-                //   totalSpeciesPopulation2 += 1f;
-                //if(speciesID3 == agentsArray[a].speciesIndex) 
-                //    totalSpeciesPopulation3 += 1f;
-                
-            }
-            */
-            
             globalGraphData.AddNewEntry(simResourceManager, GetTotalAgentBiomass());
             //graphDataGlobalVertebrates.AddNewEntry(totalAgentBiomass); // simResourceManager.curGlobalAgentBiomass);
                                                                        //uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
@@ -730,7 +683,7 @@ public class SimulationManager : Singleton<SimulationManager>
         
         for(int a = 0; a < _NumAgents; a++) {
             if(agentsArray[a].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn ||
-               linkedSpeciesID != -1 && linkedSpeciesID == agentsArray[a].speciesIndex) 
+               linkedSpeciesID != -1 && linkedSpeciesID != agentsArray[a].speciesIndex) 
                 continue;
             
             result += agentsArray[a].currentBiomass;

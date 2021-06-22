@@ -1144,46 +1144,7 @@ public class Agent : MonoBehaviour {
         //InitializeGameObjectsAndComponents();
         //InitializeModules(genome);  //  This breaks MapGridCell update, because coreModule doesn't exist?
     }
-    
-    // WPP: remove, replace with settings on prefab
-    /*private void InitializeGameObjectsAndComponents() {
-        //InitializeModules(new AgentGenome());
-        
-        // Create Physics GameObject:
-        if (bodyGO)
-            return;
-        
-        GameObject bodySegmentGO = new GameObject("RootSegment" + index);
-        bodySegmentGO.transform.parent = gameObject.transform;            
-        bodySegmentGO.tag = "LiveAnimal";
-        bodyGO = bodySegmentGO;
-        //bodyCritterSegment = bodySegmentGO.AddComponent<CritterSegment>();
-        bodyRigidbody = bodySegmentGO.AddComponent<Rigidbody2D>();
-        colliderBody = bodyGO.AddComponent<CapsuleCollider2D>();            
-        //bodyCritterSegment.segmentCollider = colliderBody;
-        bodyRigidbody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
-        springJoint = bodyGO.AddComponent<SpringJoint2D>();
-        springJoint.enabled = false;
-        springJoint.autoConfigureDistance = false;
-        springJoint.distance = 0f;
-        springJoint.dampingRatio = 0.1f;
-        springJoint.frequency = 15f;
-
-        GameObject testMouthGO = new GameObject("Mouth");
-        testMouthGO.transform.parent = bodyGO.transform;
-        testMouthGO.transform.localPosition = Vector3.zero;
-        mouthRef = testMouthGO.AddComponent<CritterMouthComponent>();
-        CircleCollider2D mouthTrigger = testMouthGO.AddComponent<CircleCollider2D>();
-        mouthRef.triggerCollider = mouthTrigger;
-
-        GameObject mouseClickColliderGO = new GameObject("MouseClickCollider");
-        mouseClickColliderGO.transform.parent = bodyGO.transform;
-        mouseClickColliderGO.transform.localPosition = new Vector3(0f, 0f, 0f);
-        mouseClickCollider = mouseClickColliderGO.AddComponent<CapsuleCollider>();
-        mouseClickCollider.isTrigger = true; 
-    }*/
-    
     // Colliders Footprint???  *************************************************************************************************************
 
     public void ReconstructAgentGameObjects(SettingsManager settings, AgentGenome genome, EggSack parentEggSack, Vector3 startPos, bool isImmaculate, float waterLevel) {

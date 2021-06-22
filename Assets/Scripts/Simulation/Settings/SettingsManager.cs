@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Playcraft;
 
-public class SettingsManager : MonoBehaviour {
+public class SettingsManager : Singleton<SettingsManager> {
 
     //public MutationSettings mutationSettingsSupervised;
     public MutationSettings mutationSettingsVertebrates;

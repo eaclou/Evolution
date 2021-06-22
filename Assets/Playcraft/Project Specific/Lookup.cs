@@ -16,6 +16,7 @@ public class Lookup : ScriptableObject
 	
 	[Header("Prefabs")]
 	public GameObject agent;
+	public GameObject eggSack;
 
 	[Header("Colors")]
     public Color buttonActiveColor = new Color(1f, 1f, 1f, 1f);
@@ -23,26 +24,6 @@ public class Lookup : ScriptableObject
     public Color colorSpiritBrushLight;
     public Color colorSpiritBrushDark;
 
-    // WPP: folded into TrophicLayerSO
-    /*
-    [Header("Materials")]
-	public Material knowledgeGraphOxygenMat;
-	public Material knowledgeGraphNutrientsMat;
-	public Material knowledgeGraphDetritusMat;
-	public Material knowledgeGraphDecomposersMat;
-	public Material knowledgeGraphAlgaeMat;
-	public Material knowledgeGraphPlantsMat;
-	public Material knowledgeGraphZooplanktonMat;
-	public Material knowledgeGraphVertebratesMat;
-	
-	[Header("Narration")]
-	public NarrationSO unlockAlgae;
-	public NarrationSO unlockDecomposers;
-	public NarrationSO unlockZooplankton;
-	public NarrationSO unlockVertebrates;
-	public NarrationSO unlockPlant;
-	*/
-    
     [Header("Prefabs")]
     public GameObject genomeIcon;
 
