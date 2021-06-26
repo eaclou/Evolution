@@ -126,6 +126,8 @@ public class Agent : MonoBehaviour {
     public int curLevel = 0;
     
     public int pregnancyRefactoryTimeStepCounter = 0;
+    
+    public bool pregnancyRefactoryComplete => pregnancyRefactoryTimeStepCounter > pregnancyRefactoryDuration;
 
     // *** Need resource Overhaul
     public float currentBiomass = 0f;
@@ -206,6 +208,8 @@ public class Agent : MonoBehaviour {
     public bool isDead => curLifeStage == AgentLifeStage.Dead;
     public bool isEgg => curLifeStage == AgentLifeStage.Egg;
     public bool isMature => curLifeStage == AgentLifeStage.Mature;
+    public bool isNull => curLifeStage == AgentLifeStage.Null;
+    public bool isAwaitingRespawn => curLifeStage == AgentLifeStage.AwaitingRespawn;
 
     public float GetDecayPercentage() {
         if (biomassAtDeath == 0f) {

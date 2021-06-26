@@ -1295,26 +1295,23 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         //Debug.Log("Depth at 0: " + objectDepthsArray[0].ToString());
 
         return objectDepthsArray;
-
     }
 
     private void PopulateObstaclesBuffer() {
-
         int baseIndex = 0;
         // AGENTS:
-        for (int i = 0; i < simManager.agentsArray.Length; i++) {
-            Vector3 agentPos = simManager.agentsArray[i].bodyRigidbody.transform.position;
+        for (int i = 0; i < simManager.agents.Length; i++) {
+            Vector3 agentPos = simManager.agents[i].bodyRigidbody.transform.position;
             obstacleStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
-            obstacleStrokeDataArray[baseIndex + i].localDir = simManager.agentsArray[i].facingDirection;
+            obstacleStrokeDataArray[baseIndex + i].localDir = simManager.agents[i].facingDirection;
             float deadMult = 1f;
-            if (simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
+            if (simManager.agents[i].isDead) {
                 deadMult = 0f;
             }
-            obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.agentsArray[i].currentBoundingBoxSize.x, simManager.agentsArray[i].currentBoundingBoxSize.y) * deadMult; // Vector2.one * 5.5f * simManager.agentsArray[i].sizePercentage; // new Vector2(simManager.agentsArray[i].transform.localScale.x, simManager.agentsArray[i].transform.localScale.y) * 2.9f; // ** revisit this later // should leave room for velSampling around Agent *** weird popping when * 0.9f
+            obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.agents[i].currentBoundingBoxSize.x, simManager.agents[i].currentBoundingBoxSize.y) * deadMult; // Vector2.one * 5.5f * simManager.agentsArray[i].sizePercentage; // new Vector2(simManager.agentsArray[i].transform.localScale.x, simManager.agentsArray[i].transform.localScale.y) * 2.9f; // ** revisit this later // should leave room for velSampling around Agent *** weird popping when * 0.9f
 
-            float velX = Mathf.Clamp(simManager.agentsArray[i].ownVel.x, -100f, 100f) * velScale * 0.01f; // agentPos.x - simManager.agentsArray[i]._PrevPos.x * velScale;
-            float velY = Mathf.Clamp(simManager.agentsArray[i].ownVel.y, -100f, 100f) * velScale * 0.01f;
-
+            float velX = Mathf.Clamp(simManager.agents[i].ownVel.x, -100f, 100f) * velScale * 0.01f; // agentPos.x - simManager.agentsArray[i]._PrevPos.x * velScale;
+            float velY = Mathf.Clamp(simManager.agents[i].ownVel.y, -100f, 100f) * velScale * 0.01f;
 
             obstacleStrokeDataArray[baseIndex + i].color = new Vector4(velX, velY, 1f, 1f);
         }
@@ -1351,55 +1348,55 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         int baseIndex = 0;
         // AGENTS:
-        for (int i = 0; i < simManager.agentsArray.Length; i++) {
-            Vector3 agentPos = simManager.agentsArray[i].bodyRigidbody.position;
+        for (int i = 0; i < simManager.agents.Length; i++) {
+            Vector3 agentPos = simManager.agents[i].bodyRigidbody.position;
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
-            colorInjectionStrokeDataArray[baseIndex + i].localDir = simManager.agentsArray[i].facingDirection;
-            colorInjectionStrokeDataArray[baseIndex + i].scale = Vector2.one * 1.5f; // simManager.agentsArray[i].fullSizeBoundingBox * 1.55f; // * simManager.agentsArray[i].sizePercentage;
-                                                                                     /*
-                                                                                     float agentAlpha = 1f;
-                                                                                     if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
-                                                                                         agentAlpha = 2.2f / simManager.agentsArray[i].fullSizeBoundingBox.magnitude;
-                                                                                     }
-                                                                                     if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
-                                                                                         agentAlpha = 3f * simManager.agentsArray[i].GetDecayPercentage();
-                                                                                     }*/
+            colorInjectionStrokeDataArray[baseIndex + i].localDir = simManager.agents[i].facingDirection;
+            colorInjectionStrokeDataArray[baseIndex + i].scale = Vector2.one * 1.5f; 
+            // simManager.agentsArray[i].fullSizeBoundingBox * 1.55f; // * simManager.agentsArray[i].sizePercentage;
+            /*
+            float agentAlpha = 1f;
+            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
+                agentAlpha = 2.2f / simManager.agentsArray[i].fullSizeBoundingBox.magnitude;
+            }
+            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
+                agentAlpha = 3f * simManager.agentsArray[i].GetDecayPercentage();
+            }*/
 
             Vector4 hue = Vector4.one * 0.695f;
-            if (simManager.agentsArray[i].candidateRef != null) {
-
-                if (simManager.agentsArray[i].candidateRef.speciesID == uiManager.focusedCandidate.speciesID) {
+            if (simManager.agents[i].candidateRef != null) {
+                if (simManager.agents[i].candidateRef.speciesID == uiManager.focusedCandidate.speciesID) {
                     hue = new Vector4(1f, 1f, 0f, 1f);
                     colorInjectionStrokeDataArray[baseIndex + i].scale = Vector2.one * 5f;
                 }
-                if (simManager.agentsArray[i].candidateRef.candidateID == uiManager.focusedCandidate.candidateID) {
+                if (simManager.agents[i].candidateRef.candidateID == uiManager.focusedCandidate.candidateID) {
                     hue = new Vector4(1f, 1f, 1f, 1f);
                     colorInjectionStrokeDataArray[baseIndex + i].scale = Vector2.one * 10f;
                 }
-
             }
-
 
             //Color drawColor = new Color(hue.x, hue.y, hue.z);
             colorInjectionStrokeDataArray[baseIndex + i].color = hue;
-
         }
+        
         // FOOD:
-        baseIndex = simManager.agentsArray.Length;
-        for (int i = 0; i < simManager.eggSackArray.Length; i++) {
-            Vector3 foodPos = simManager.eggSackArray[i].transform.position;
+        baseIndex = simManager.agents.Length;
+        for (int i = 0; i < simManager.eggSacks.Length; i++) {
+            Vector3 foodPos = simManager.eggSacks[i].transform.position;
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(foodPos.x, foodPos.y);
-            colorInjectionStrokeDataArray[baseIndex + i].localDir = simManager.eggSackArray[i].facingDirection;
-            colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.eggSackArray[i].curSize * 1.0f;
+            colorInjectionStrokeDataArray[baseIndex + i].localDir = simManager.eggSacks[i].facingDirection;
+            colorInjectionStrokeDataArray[baseIndex + i].scale = simManager.eggSacks[i].curSize * 1.0f;
 
             float foodAlpha = 0.06f;
-            if (simManager.eggSackArray[i].isBeingEaten > 0.5) {
+            if (simManager.eggSacks[i].isBeingEaten > 0.5) {
                 foodAlpha = 1.2f;
             }
 
-            colorInjectionStrokeDataArray[baseIndex + i].color = new Vector4(Mathf.Lerp(simManager.eggSackGenomePoolArray[i].fruitHue.x, 0.1f, 0.7f), Mathf.Lerp(simManager.eggSackGenomePoolArray[i].fruitHue.y, 0.9f, 0.7f), Mathf.Lerp(simManager.eggSackGenomePoolArray[i].fruitHue.z, 0.2f, 0.7f), foodAlpha);
+            colorInjectionStrokeDataArray[baseIndex + i].color = 
+                new Vector4(Mathf.Lerp(simManager.eggSackGenomes[i].fruitHue.x, 0.1f, 0.7f), 
+                            Mathf.Lerp(simManager.eggSackGenomes[i].fruitHue.y, 0.9f, 0.7f), 
+                            Mathf.Lerp(simManager.eggSackGenomes[i].fruitHue.z, 0.2f, 0.7f), foodAlpha);
         }
-
 
         colorInjectionStrokesCBuffer.SetData(colorInjectionStrokeDataArray);
     }
@@ -1412,10 +1409,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         for (int i = 0; i < eggDataArray.Length; i++) {
             eggDataArray[i] = new SimulationStateData.EggData();
             eggDataArray[i].eggSackIndex = eggSackIndex;
-            Vector3 randSphere = UnityEngine.Random.insideUnitSphere;
-            eggDataArray[i].localCoords = UnityEngine.Random.insideUnitCircle; // new Vector2(randSphere.x, randSphere.y); // * 0.5f + UnityEngine.Random.insideUnitCircle * 0.4f;
+            Vector3 randSphere = Random.insideUnitSphere;
+            eggDataArray[i].localCoords = Random.insideUnitCircle; // new Vector2(randSphere.x, randSphere.y); // * 0.5f + UnityEngine.Random.insideUnitCircle * 0.4f;
             eggDataArray[i].localScale = Vector2.one * 0.25f; // simManager.eggSackGenomePoolArray[eggSackIndex].fruitScale;  
-            eggDataArray[i].worldPos = simManager.eggSackArray[eggSackIndex].transform.position;
+            eggDataArray[i].worldPos = simManager.eggSacks[eggSackIndex].transform.position;
             eggDataArray[i].attached = 1f;
         }
         eggsUpdateCBuffer.SetData(eggDataArray);
@@ -2184,8 +2181,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         fluidManager.computeShaderFluidSim.SetTexture(kernelSimFloatyBits, "VelocityRead", fluidManager._VelocityPressureDivergenceMain);
         fluidManager.computeShaderFluidSim.Dispatch(kernelSimFloatyBits, floatyBitsCBuffer.count / 1024, 1, 1);
     }
+    
     public void SimSpiritBrushQuads() {
-
         bool isSpawn = false;
         //if (simManager.uiManager.panelFocus == PanelFocus.Brushes) {
         //    isSpawn = true;
@@ -2242,7 +2239,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     }
 
     public void SpawnSpiritBrushQuads(CreationBrush brushData, int startIndex, int numCells) {
-
         //spiritBrushSpawnCounter++;
 
         //if(spiritBrushSpawnCounter > 32) {
@@ -2269,7 +2265,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         computeShaderSpiritBrush.Dispatch(kernelCSSpawnBrushQuads, 1, 1, 1);
         //}
         spiritBrushQuadDataSpawnCBuffer.Release();
-
     }
 
     private void SimEggSacks() {
@@ -2293,6 +2288,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         computeShaderCritters.Dispatch(kernelCSSimulateCritterGenericStrokes, critterGenericStrokesCBuffer.count / 16, 1, 1);
 
     }
+    
     private void SimUIToolbarCritterPortraitStrokes() {
         int kernelCSSimulateCritterPortraitStrokes = computeShaderCritters.FindKernel("CSSimulateCritterPortraitStrokes");
         computeShaderCritters.SetTexture(kernelCSSimulateCritterPortraitStrokes, "velocityRead", fluidManager._VelocityPressureDivergenceMain);
@@ -2302,9 +2298,11 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         computeShaderCritters.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderCritters.Dispatch(kernelCSSimulateCritterPortraitStrokes, toolbarCritterPortraitStrokesCBuffer.count / 16, 1, 1);
     }
+    
     private void SimWorldTreeGPU() {
 
     }
+    
     private void SimWorldTreeCPU() { //***EAC destined to be replaced by GPU ^ ^ ^
         uiManager.clockPanelUI.UpdateEarthStampData();
         uiManager.clockPanelUI.UpdateMoonStampData();
@@ -2557,7 +2555,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     }
     
     private void SetToolbarPortraitCritterInitData(AgentGenome genome) {
-
         // Get genomes:
         AgentGenome genome0 = genome; // simManager.masterGenomePool.completeSpeciesPoolsList[simManager.uiManager.globalResourcesUI.selectedSpeciesIndex].representativeGenome;
         //AgentGenome genome1 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][simManager.uiManager.mutationUI.selectedToolbarMutationID].representativeGenome;
@@ -2569,8 +2566,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         // NOT the best place for this:::: ***        
         treeOfLifeBackdropPortraitBorderMat.SetColor("_TintPri", new Color(genome0.bodyGenome.appearanceGenome.huePrimary.x, genome0.bodyGenome.appearanceGenome.huePrimary.y, genome0.bodyGenome.appearanceGenome.huePrimary.z));
         treeOfLifeBackdropPortraitBorderMat.SetColor("_TintSec", new Color(genome0.bodyGenome.appearanceGenome.hueSecondary.x, genome0.bodyGenome.appearanceGenome.hueSecondary.y, genome0.bodyGenome.appearanceGenome.hueSecondary.z));
-
-
+        
         SimulationStateData.CritterInitData[] toolbarPortraitCritterInitDataArray = new SimulationStateData.CritterInitData[6];
         SimulationStateData.CritterInitData initData = new SimulationStateData.CritterInitData();
 
@@ -2619,8 +2615,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         initData.bodyPatternY = genome0.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
 
         toolbarPortraitCritterInitDataArray[0] = initData;
-
-
+        
         /*
         initData.primaryHue = genome1.bodyGenome.appearanceGenome.huePrimary;
         initData.secondaryHue = genome1.bodyGenome.appearanceGenome.hueSecondary;
@@ -2793,7 +2788,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             simData.accel = (Mathf.Sin(Time.realtimeSinceStartup * 0.79f) * 0.5f + 0.5f) * 0.081f; // Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 1f; // ** RE-FACTOR!!!!
             simData.smoothedThrottle = (Mathf.Sin(Time.realtimeSinceStartup * 3.97f + 0.4f) * 0.5f + 0.5f) * 0.85f;
             simData.velocity = facingDir.normalized * (simData.accel + simData.smoothedThrottle);
-
         }
 
         toolbarPortraitCritterSimDataArray[0] = simData;
@@ -2811,7 +2805,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     }
     
     public void Tick() {  // should be called from SimManager at proper time!
-
         sunDirection = -sunGO.transform.forward;
 
         SimFloatyBits();
@@ -2824,7 +2817,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             debugFrameCounter = 0;
         }
 
-        
         if (toolbarPortraitCritterSimDataCBuffer != null) {
             toolbarPortraitCritterSimDataCBuffer.Release();
         }
@@ -2841,7 +2833,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         // WORLDTREE
         SimWorldTreeCPU();
 
-
         baronVonWater.altitudeMapRef = baronVonTerrain.terrainHeightDataRT;
         float camDist = Mathf.Clamp01(-1f * cameraManager.gameObject.transform.position.z / (400f - 10f));
         baronVonWater.camDistNormalized = camDist;
@@ -2853,8 +2844,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                                                             cameraManager.curCameraFocusPivotPos.y + boxSizeHalf.y);
 
         baronVonTerrain.spawnBoundsCameraDetails = baronVonWater.spawnBoundsCameraDetails;
-
-
+        
         //baronVonTerrain.Tick(simManager.vegetationManager.rdRT1);
         int kernelSimGroundBits = baronVonTerrain.computeShaderTerrainGeneration.FindKernel("CSSimDecomposerBitsData");
         baronVonTerrain.computeShaderTerrainGeneration.SetBuffer(kernelSimGroundBits, "groundBitsCBuffer", baronVonTerrain.decomposerBitsCBuffer);
@@ -2910,11 +2900,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         //cmdBufferFluidObstacles.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, obstacleStrokesCBuffer.count);
         // Disabling for now -- starting with one-way interaction between fluid & objects (fluid pushes objects, they don't push back)
 
-
         Graphics.ExecuteCommandBuffer(cmdBufferFluidObstacles);
         // Still not sure if this will work correctly... ****
         fluidObstaclesRenderCamera.Render(); // is this even needed? all drawcalls taken care of within commandBuffer?
-
 
         //if(simManager.uiManager.knowledgeUI.isOpen) {
 
@@ -3026,9 +3014,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 }
             }
         }
-        else { // Continuous/Drag type brush  
-            
-
+         // Continuous/Drag type brush 
+        else { 
             // *******************************************************
             isBrushing = true;
             if (Time.realtimeSinceStartup % 1f > 0.5f) { // ***EC -- Change this when simulation spawn mechanics updated

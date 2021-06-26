@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Playcraft;
 using UnityEngine;
-using UnityEngine.UI;
 
 public enum ToolType {
     None,

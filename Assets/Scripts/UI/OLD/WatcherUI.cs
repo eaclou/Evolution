@@ -91,9 +91,8 @@ public class WatcherUI : MonoBehaviour {
     }
     	
     private void UpdateUI() {
-        panelWatcherExpand.SetActive(false);            
-        
-        
+        panelWatcherExpand.SetActive(false);
+
         if(cameraManager.isFollowingPlantParticle) {
             cameraManager.targetPlantWorldPos = simulationManager.vegetationManager.selectedPlantParticleData.worldPos;
         }
@@ -108,7 +107,7 @@ public class WatcherUI : MonoBehaviour {
             TextCommonStatsA.gameObject.SetActive(true);
 
             int critterIndex = cameraManager.targetAgentIndex;
-            Agent agent = simulationManager.agentsArray[critterIndex];
+            Agent agent = simulationManager.agents[critterIndex];
 
             imageDimmingSheet.gameObject.SetActive(agent.isDecaying);  // ** dimming sheet! to show not following???? just an experiment
             //button
@@ -121,7 +120,7 @@ public class WatcherUI : MonoBehaviour {
             
             string str = "";
             
-            textTargetLayer.text = "Species " + agent.speciesIndex.ToString() + ":  " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name;
+            textTargetLayer.text = "Species " + agent.speciesIndex + ":  " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name;
 
             //textNewInspectAgentName.text = "Critter #" + agent.candidateRef.candidateID.ToString(); //.candidateGenome.bodyGenome.coreGenome.name;
             //textNewInspectAgentName.color = textColorSecondary; // uiManagerRef.colorVertebratesLayer;
@@ -138,7 +137,7 @@ public class WatcherUI : MonoBehaviour {
                 TextCommonStatsA.gameObject.SetActive(false);  // non-vertebrates just share one textbox for now
 
                 //textWatcherVertebratePageNum.text = "PAGE " + (curWatcherPanelVertebratePageNum + 1).ToString() + " of 4";
-                textWatcherTargetIndex.text = "#" + agent.index.ToString();
+                textWatcherTargetIndex.text = "#" + agent.index;
                                 
                 //textNewInspectLog.text = "";
                 textWatcherVertebrateHUD.text = "";
@@ -148,10 +147,10 @@ public class WatcherUI : MonoBehaviour {
                 int startIndex = Mathf.Max(0, agent.candidateRef.candidateEventDataList.Count - maxEventsToDisplay);                   
                 string eventString = "";
                 for(int q = agent.candidateRef.candidateEventDataList.Count - 1; q >= startIndex; q--) {
-                    eventString += "\n[" + agent.candidateRef.candidateEventDataList[q].eventFrame.ToString() + "] " + agent.candidateRef.candidateEventDataList[q].eventText;
+                    eventString += "\n[" + agent.candidateRef.candidateEventDataList[q].eventFrame + "] " + agent.candidateRef.candidateEventDataList[q].eventText;
                 }                
 
-                string textStringLog = "Event Log! Agent[" + agent.index.ToString() + "]";                    
+                string textStringLog = "Event Log! Agent[" + agent.index + "]";                    
                 // Agent Event Log:
                 int maxEventsToDisplayLog = 12;
                 //int numEventsLog = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplayLog);
@@ -184,15 +183,15 @@ public class WatcherUI : MonoBehaviour {
                     
                 int curCount = 0;
                 int maxCount = 1;
-                if (agent.curLifeStage == Agent.AgentLifeStage.Egg) {
+                if (agent.isEgg) {
                     curCount = agent.lifeStageTransitionTimeStepCounter;
                     maxCount = agent._GestationDurationTimeSteps;
                 }            
-                if (agent.curLifeStage == Agent.AgentLifeStage.Mature) {
+                if (agent.isMature) {
                     curCount = agent.ageCounter;
                     maxCount = agent.maxAgeTimeSteps;
                 }
-                if (agent.curLifeStage == Agent.AgentLifeStage.Dead) {
+                if (agent.isDead) {
                     curCount = agent.lifeStageTransitionTimeStepCounter;
                     maxCount = curCount; // agentRef._DecayDurationTimeSteps;
                 }
@@ -205,13 +204,7 @@ public class WatcherUI : MonoBehaviour {
                 followCreaturePanel.SetActive(false);
             }
             TextCommonStatsA.text = str;
-            
-            // string?
         }
-        else {
-            // No target
-        }  
-        
     }
 
 	public void UpdateWatcherPanelUI() {
@@ -238,6 +231,7 @@ public class WatcherUI : MonoBehaviour {
 
         panelWatcherSpiritMain.SetActive(true); // isOpen);
     }
+    
     /*
     TrophicSlot slotRefWatcher = trophicLayersManager.selectedTrophicSlotRef;
         if(slotRefWatcher != null) {
@@ -288,6 +282,7 @@ public class WatcherUI : MonoBehaviour {
         }
     }
     */
+    
     public void ClickToolButton() {
         isOpen = !isOpen;
         //isHighlight = true;
@@ -305,11 +300,13 @@ public class WatcherUI : MonoBehaviour {
         }
         //watcherLockedTrophicSlotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;//
     }
+    
     public void ClickSnoopModeButton() {        
         //uiManagerRef.isBrushModeON_snoopingOFF = false;
         //uiManagerRef.panelFocus = PanelFocus.Watcher;
         //uiManagerRef.curActiveTool = UIManager.ToolType.None;
     }
+    
     public void ActivateWatcherPanel() {
         isOpen = true;
         //uiManagerRef.panelFocus = PanelFocus.Watcher;
@@ -323,6 +320,7 @@ public class WatcherUI : MonoBehaviour {
             curWatcherPanelVertebratePageNum = 3;
         }
     }
+    
     public void ClickWatcherVertebratePageCycleNext() {
         curWatcherPanelVertebratePageNum++;
 
@@ -385,13 +383,13 @@ public class WatcherUI : MonoBehaviour {
     public void ClickPrevAgent() {
         Debug.Log("ClickPrevAgent");
         int newIndex = (simulationManager._NumAgents + cameraManager.targetAgentIndex - 1) % simulationManager._NumAgents;
-        cameraManager.SetTargetAgent(simulationManager.agentsArray[newIndex], newIndex);                              
+        cameraManager.SetTargetAgent(simulationManager.agents[newIndex], newIndex);                              
     }
     
     public void ClickNextAgent() {
         Debug.Log("ClickNextAgent");
         int newIndex = (cameraManager.targetAgentIndex + 1) % simulationManager._NumAgents;
-        cameraManager.SetTargetAgent(simulationManager.agentsArray[newIndex], newIndex);                
+        cameraManager.SetTargetAgent(simulationManager.agents[newIndex], newIndex);                
     }
 
     public void StopFollowingAgent() {
@@ -407,6 +405,7 @@ public class WatcherUI : MonoBehaviour {
         cameraManager.isFollowingPlantParticle = false;
         
     }
+    
     public void StartFollowingPlantParticle() {
         cameraManager.isFollowingPlantParticle = true;
         cameraManager.isFollowingAnimalParticle = false; 

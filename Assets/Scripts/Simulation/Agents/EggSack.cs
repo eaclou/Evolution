@@ -13,6 +13,9 @@ public class EggSack : MonoBehaviour {
         Decaying,  // all eggs either hatched or failed
         Null
     }
+    
+    public bool isNull => curLifeStage == EggLifeStage.Null;
+    public bool isMature => curLifeStage == EggLifeStage.Mature;
 
     private float pregnancyPercentageOfTotalGrowTime = 0.5f;
     private int birthDurationTimeSteps = 30;

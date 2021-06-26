@@ -170,7 +170,7 @@ public class DebugPanelUI : MonoBehaviour {
                 int speciesPopSize = 0;
                 //float avgFitness = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgPerformanceData.totalTicksAlive;
                 for (int a = 0; a < simulation._NumAgents; a++) {
-                    if (simulation.agentsArray[a].speciesIndex == speciesID) {
+                    if (simulation.agents[a].speciesIndex == speciesID) {
                         speciesPopSize++;
                     }
                 }
@@ -189,7 +189,6 @@ public class DebugPanelUI : MonoBehaviour {
                              ", avgExp: " + simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgExperience.ToString() + "\n\n";*/
             }
 
-            
             /*debugTxtGlobalSim += "\n\nAll-Time Species List:\n";
             for (int p = 0; p < simManager.masterGenomePool.completeSpeciesPoolsList.Count; p++) {
                 string extString = "Active!";
@@ -314,7 +313,6 @@ public class DebugPanelUI : MonoBehaviour {
         debugTextureViewerArray[10] = vegetationManager.resourceGridRT1;
         debugTextureViewerArray[10].name = "Resources Grid";
 
-        
         //}
         //if(gameManager.theRenderKing.spiritBrushRT != null) {
         debugTextureViewerArray[11] = theRenderKing.spiritBrushRT;

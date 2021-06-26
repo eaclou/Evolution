@@ -18,7 +18,7 @@ public class CreatureBrainActivityUI : MonoBehaviour
 
     public void Tick() {
         critterIndex = cameraManager.targetAgentIndex;
-        agent = simulationManager.agentsArray[critterIndex];
+        agent = simulationManager.agents[critterIndex];
 
         if (agent.coreModule == null || agent.communicationModule == null)
             return;

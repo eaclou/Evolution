@@ -252,18 +252,17 @@ public class SimulationStateData {
         
         // CRITTER INIT: // *** MOVE INTO OWN FUNCTION -- update more efficiently with compute shader?
         for(int i = 0; i < simManager._NumAgents; i++) {
-
-            if (simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
+            if (simManager.agents[i].isAwaitingRespawn) {
 
             }
             else {
                 //Debug.Log("Error isInert FALSE: " + i.ToString());
                 // INITDATA ::==========================================================================================================================================================================
-                AgentGenome genome = simManager.agentsArray[i].candidateRef.candidateGenome;
-                critterInitDataArray[i].boundingBoxSize = simManager.agentsArray[i].fullSizeBoundingBox; //genome.bodyGenome.GetFullsizeBoundingBox(); // simManager.agentsArray[i].fullSizeBoundingBox;
-                critterInitDataArray[i].spawnSizePercentage = simManager.agentsArray[i].spawnStartingScale;
-                critterInitDataArray[i].maxEnergy = Mathf.Min(simManager.agentsArray[i].fullSizeBoundingBox.x * simManager.agentsArray[i].fullSizeBoundingBox.y, 0.5f);
-                critterInitDataArray[i].maxStomachCapacity = simManager.agentsArray[i].coreModule.stomachCapacity;
+                AgentGenome genome = simManager.agents[i].candidateRef.candidateGenome;
+                critterInitDataArray[i].boundingBoxSize = simManager.agents[i].fullSizeBoundingBox; //genome.bodyGenome.GetFullsizeBoundingBox(); // simManager.agentsArray[i].fullSizeBoundingBox;
+                critterInitDataArray[i].spawnSizePercentage = simManager.agents[i].spawnStartingScale;
+                critterInitDataArray[i].maxEnergy = Mathf.Min(simManager.agents[i].fullSizeBoundingBox.x * simManager.agents[i].fullSizeBoundingBox.y, 0.5f);
+                critterInitDataArray[i].maxStomachCapacity = simManager.agents[i].coreModule.stomachCapacity;
                 critterInitDataArray[i].primaryHue = genome.bodyGenome.appearanceGenome.huePrimary;
                 critterInitDataArray[i].secondaryHue = genome.bodyGenome.appearanceGenome.hueSecondary;
                 // **** UPDATE THESE!!!
@@ -293,31 +292,30 @@ public class SimulationStateData {
 	            critterInitDataArray[i].headCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
                 critterInitDataArray[i].mouthCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength + genome.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
                 critterInitDataArray[i].bendiness = flexibilityScore;
-                critterInitDataArray[i].bodyPatternX = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
-                critterInitDataArray[i].bodyPatternY = simManager.agentsArray[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
-                critterInitDataArray[i].speciesID = simManager.agentsArray[i].speciesIndex;
-
-
+                critterInitDataArray[i].bodyPatternX = simManager.agents[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
+                critterInitDataArray[i].bodyPatternY = simManager.agents[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
+                critterInitDataArray[i].speciesID = simManager.agents[i].speciesIndex;
+                
                 // SIMDATA ::===========================================================================================================================================================================
-                Vector2 agentPos = simManager.agentsArray[i].bodyRigidbody.position;
+                Vector2 agentPos = simManager.agents[i].bodyRigidbody.position;
                 critterSimDataArray[i].worldPos = new Vector3(agentPos.x, agentPos.y, -SimulationManager._GlobalWaterLevel * SimulationManager._MaxAltitude);
-                if(simManager.agentsArray[i].smoothedThrottle.sqrMagnitude > 0f) {
-                    critterSimDataArray[i].velocity = simManager.agentsArray[i].smoothedThrottle.normalized;
+                if(simManager.agents[i].smoothedThrottle.sqrMagnitude > 0f) {
+                    critterSimDataArray[i].velocity = simManager.agents[i].smoothedThrottle.normalized;
                 }
-                critterSimDataArray[i].heading = simManager.agentsArray[i].facingDirection;            
+                critterSimDataArray[i].heading = simManager.agents[i].facingDirection;            
                 float embryo = 1f;
-                if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Egg) {
-                    embryo = (float)simManager.agentsArray[i].lifeStageTransitionTimeStepCounter / (float)simManager.agentsArray[i]._GestationDurationTimeSteps;
+                if(simManager.agents[i].isEgg) {
+                    embryo = (float)simManager.agents[i].lifeStageTransitionTimeStepCounter / (float)simManager.agents[i]._GestationDurationTimeSteps;
                     embryo = Mathf.Clamp01(embryo);
                 }
-                critterSimDataArray[i].currentBiomass = simManager.agentsArray[i].currentBiomass;
+                critterSimDataArray[i].currentBiomass = simManager.agents[i].currentBiomass;
                 critterSimDataArray[i].embryoPercentage = embryo;
-                critterSimDataArray[i].growthPercentage = Mathf.Clamp01(simManager.agentsArray[i].sizePercentage);
+                critterSimDataArray[i].growthPercentage = Mathf.Clamp01(simManager.agents[i].sizePercentage);
                 float decay = 0f;
-                if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
-                    decay = simManager.agentsArray[i].GetDecayPercentage();
+                if(simManager.agents[i].isDead) {
+                    decay = simManager.agents[i].GetDecayPercentage();
                 }
-                if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.AwaitingRespawn) {
+                if(simManager.agents[i].isAwaitingRespawn) {
                     decay = 0f;
                 }
                 critterSimDataArray[i].decayPercentage = decay;
@@ -327,49 +325,48 @@ public class SimulationStateData {
                     //float digestedPercentage = (float)simManager.agentsArray[i].beingSwallowedFrameCounter / (float)simManager.agentsArray[i].swallowDuration;
                     //critterSimDataArray[i].decayPercentage = digestedPercentage;
                 //}
-                critterSimDataArray[i].foodAmount = Mathf.Lerp(critterSimDataArray[i].foodAmount, simManager.agentsArray[i].coreModule.stomachContentsPercent, 0.16f); //*********???????
-                critterSimDataArray[i].energy = simManager.agentsArray[i].coreModule.energy; // Raw / simManager.agentsArray[i].coreModule.maxEnergyStorage;
-                critterSimDataArray[i].health = simManager.agentsArray[i].coreModule.health;
-                critterSimDataArray[i].stamina = simManager.agentsArray[i].coreModule.stamina[0];
-
+                critterSimDataArray[i].foodAmount = Mathf.Lerp(critterSimDataArray[i].foodAmount, simManager.agents[i].coreModule.stomachContentsPercent, 0.16f); //*********???????
+                critterSimDataArray[i].energy = simManager.agents[i].coreModule.energy; // Raw / simManager.agentsArray[i].coreModule.maxEnergyStorage;
+                critterSimDataArray[i].health = simManager.agents[i].coreModule.health;
+                critterSimDataArray[i].stamina = simManager.agents[i].coreModule.stamina[0];
                 
                 float isFreeToEat = 1f;
-                if(simManager.agentsArray[i].isFeeding) { // simManager.agentsArray[i].isFeeding) { // 
+                if(simManager.agents[i].isFeeding) { // simManager.agentsArray[i].isFeeding) { // 
                     isFreeToEat = 1f;
                 }
                 
-                if(simManager.agentsArray[i].isDefending) {
+                if(simManager.agents[i].isDefending) {
                     isFreeToEat = 0f;
                 }
-                if(simManager.agentsArray[i].isCooldown) {
+                if(simManager.agents[i].isCooldown) {
                     isFreeToEat = 0f;
                 }
-                if(simManager.agentsArray[i].feedingFrameCounter > 4) {
+                if(simManager.agents[i].feedingFrameCounter > 4) {
                     isFreeToEat = 0f;
                 }
                 
                 critterSimDataArray[i].consumeOn = isFreeToEat;    // Flag for intention to eat gpu food particle (plant-type)         
 
                 critterSimDataArray[i].biteAnimCycle = 0f;
-                if(simManager.agentsArray[i].isFeeding) {
-                    critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agentsArray[i].feedingFrameCounter / (float)simManager.agentsArray[i].feedAnimDuration);
+                if(simManager.agents[i].isFeeding) {
+                    critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agents[i].feedingFrameCounter / (float)simManager.agents[i].feedAnimDuration);
                 }
-                if(simManager.agentsArray[i].isAttacking) {
-                    critterSimDataArray[i].biteAnimCycle = simManager.agentsArray[i].attackAnimCycle;
+                if(simManager.agents[i].isAttacking) {
+                    critterSimDataArray[i].biteAnimCycle = simManager.agents[i].attackAnimCycle;
                     //Mathf.Clamp01((float)simManager.agentsArray[i].attackingFrameCounter / (float)simManager.agentsArray[i].attackAnimDuration);
                 }
-                if (simManager.agentsArray[i].curLifeStage != Agent.AgentLifeStage.Mature)
+                if (!simManager.agents[i].isMature)
                 {
                     critterSimDataArray[i].consumeOn = 0f;
                     //critterSimDataArray[i].biteAnimCycle *= 0.75f;
                 }
 
-                critterSimDataArray[i].moveAnimCycle = simManager.agentsArray[i].animationCycle;
-                critterSimDataArray[i].turnAmount = simManager.agentsArray[i].turningAmount * 2f;
-                critterSimDataArray[i].accel += Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 0.8f; // ** RE-FACTOR!!!!
-		        critterSimDataArray[i].smoothedThrottle = simManager.agentsArray[i].smoothedThrottle.magnitude;
+                critterSimDataArray[i].moveAnimCycle = simManager.agents[i].animationCycle;
+                critterSimDataArray[i].turnAmount = simManager.agents[i].turningAmount * 2f;
+                critterSimDataArray[i].accel += Mathf.Clamp01(simManager.agents[i].curAccel) * 0.8f; // ** REFACTOR!!!!
+		        critterSimDataArray[i].smoothedThrottle = simManager.agents[i].smoothedThrottle.magnitude;
 
-                critterSimDataArray[i].wasteProduced = simManager.agentsArray[i].wasteProducedLastFrame;// 
+                critterSimDataArray[i].wasteProduced = simManager.agents[i].wasteProducedLastFrame;// 
 
                 // Z & W coords represents agent's x/y Radii (in FluidCoords)
                 float agentCenterX = agentPos.x / SimulationManager._MapSize;
@@ -386,12 +383,9 @@ public class SimulationStateData {
                 
                 agentFluidPositionsArray[i] = new Vector4(agentCenterX, 
                                                           agentCenterY, 
-                                                          (simManager.agentsArray[i].fullSizeBoundingBox.x + 0.25f) * 0.5f / SimulationManager._MapSize, // **** RE-VISIT!!!!! ****
-                                                          (simManager.agentsArray[i].fullSizeBoundingBox.y + 0.25f) * 0.5f / SimulationManager._MapSize); //... 0.5/140 ...
-
+                                                          (simManager.agents[i].fullSizeBoundingBox.x + 0.25f) * 0.5f / SimulationManager._MapSize,  // **** REVISIT!!!!! ****
+                                                          (simManager.agents[i].fullSizeBoundingBox.y + 0.25f) * 0.5f / SimulationManager._MapSize); //... 0.5/140 ...
                 
-                
-
                 // ***************************** // TEMP HACK!!!!!!! *************************
                 /*if(i == 0) {
                     critterSimDataArray[i].worldPos = simManager.uiManager.curMousePositionOnWaterPlane;// / SimulationManager._MapSize;
@@ -399,25 +393,26 @@ public class SimulationStateData {
                 }*/
             }
         }
+        
         critterInitDataCBuffer.SetData(critterInitDataArray);        
         critterSimDataCBuffer.SetData(critterSimDataArray);
-
-
+        
         for (int i = 0; i < simManager._NumEggSacks; i++) {
-            Vector3 eggSackPos = simManager.eggSackArray[i].transform.position;
+            Vector3 eggSackPos = simManager.eggSacks[i].transform.position;
             //int speciesSize = simManager._NumAgents / 4;
             //int eggSpecies = Mathf.FloorToInt((float)i / (float)simManager._NumEggSacks * 4f);
-            int agentGenomeIndex = simManager.eggSackArray[i].parentAgentIndex; // eggSpecies * speciesSize; // UnityEngine.Random.Range(eggSpecies * speciesSize, (eggSpecies + 1) * speciesSize);
+            int agentGenomeIndex = simManager.eggSacks[i].parentAgentIndex; // eggSpecies * speciesSize; // UnityEngine.Random.Range(eggSpecies * speciesSize, (eggSpecies + 1) * speciesSize);
                      
+            // * WPP: move to EggSackSimData
             eggSackSimDataArray[i].parentAgentIndex = agentGenomeIndex;
             eggSackSimDataArray[i].worldPos = new Vector2(eggSackPos.x, eggSackPos.y);
-            eggSackSimDataArray[i].velocity = simManager.eggSackArray[i].rigidbodyRef.velocity; // new Vector2(simManager.eggSackArray[i].rigidbodyRef.velocity.x, simManager.eggSackArray[i].rigidbodyRef.velocity.y);
-            eggSackSimDataArray[i].heading = simManager.eggSackArray[i].facingDirection;            
-            eggSackSimDataArray[i].fullSize = simManager.eggSackArray[i].fullSize;
-            eggSackSimDataArray[i].foodAmount = simManager.eggSackArray[i].foodAmount; // new Vector3(simManager.eggSackArray[i].foodAmount, simManager.eggSackArray[i].foodAmount, simManager.eggSackArray[i].foodAmount);
-            eggSackSimDataArray[i].growth = simManager.eggSackArray[i].developmentProgress;
-            eggSackSimDataArray[i].decay = simManager.eggSackArray[i].decayStatus;
-            eggSackSimDataArray[i].health = simManager.eggSackArray[i].healthStructural;
+            eggSackSimDataArray[i].velocity = simManager.eggSacks[i].rigidbodyRef.velocity; // new Vector2(simManager.eggSackArray[i].rigidbodyRef.velocity.x, simManager.eggSackArray[i].rigidbodyRef.velocity.y);
+            eggSackSimDataArray[i].heading = simManager.eggSacks[i].facingDirection;            
+            eggSackSimDataArray[i].fullSize = simManager.eggSacks[i].fullSize;
+            eggSackSimDataArray[i].foodAmount = simManager.eggSacks[i].foodAmount; // new Vector3(simManager.eggSackArray[i].foodAmount, simManager.eggSackArray[i].foodAmount, simManager.eggSackArray[i].foodAmount);
+            eggSackSimDataArray[i].growth = simManager.eggSacks[i].developmentProgress;
+            eggSackSimDataArray[i].decay = simManager.eggSacks[i].decayStatus;
+            eggSackSimDataArray[i].health = simManager.eggSacks[i].healthStructural;
             
             // Z & W coords represents agent's x/y Radii (in FluidCoords)
             // convert from scene coords (-mapSize --> +mapSize to fluid coords (0 --> 1):::
@@ -425,9 +420,10 @@ public class SimulationStateData {
             //float sampleRadius = (simManager.foodArray[i].curSize.magnitude + 0.1f) / (simManager._MapSize * 2f); // ****  ***** Revisit the 0.1f offset -- should be one pixel in fluidCoords?
             eggSackFluidPositionsArray[i] = new Vector4(eggSackPos.x / SimulationManager._MapSize, 
                                                       eggSackPos.y / SimulationManager._MapSize, 
-                                                      (simManager.eggSackArray[i].curSize.x + 0.1f) * 0.5f / SimulationManager._MapSize, 
-                                                      (simManager.eggSackArray[i].curSize.y + 0.1f) * 0.5f / SimulationManager._MapSize);
+                                                      (simManager.eggSacks[i].curSize.x + 0.1f) * 0.5f / SimulationManager._MapSize, 
+                                                      (simManager.eggSacks[i].curSize.y + 0.1f) * 0.5f / SimulationManager._MapSize);
         }
+        
         eggSackSimDataCBuffer.SetData(eggSackSimDataArray); // send data to GPU for Rendering
         
         // Grab data from GPU FluidSim!        
@@ -436,8 +432,6 @@ public class SimulationStateData {
         //fluidVelocitiesAtPredatorPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(predatorFluidPositionsArray);
         //Debug.Log("agentFluidPositionsArray: " + agentFluidPositionsArray.Length.ToString());
         depthAtAgentPositionsArray = theRenderKing.GetDepthAtObjectPositions(agentFluidPositionsArray);
-
-
         
         // Movement Animation Test:
         /*for(int i = 0; i < agentMovementAnimDataArray.Length; i++) {            

@@ -190,7 +190,7 @@ public class CameraManager : Singleton<CameraManager> {
     }
     
     public void SetTargetAgent() {
-        SetTargetAgent(simulation.agentsArray[targetAgentIndex], targetAgentIndex);
+        SetTargetAgent(simulation.agents[targetAgentIndex], targetAgentIndex);
     }
     
     public void SetTargetAgent(Agent agent, int index) {

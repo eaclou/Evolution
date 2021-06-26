@@ -33,7 +33,7 @@ public class CreaturePaperDollUI : MonoBehaviour
     #endregion
 
     public void Tick() {
-        Agent agent = simulationManager.agentsArray[cameraManager.targetAgentIndex];
+        Agent agent = simulationManager.agents[cameraManager.targetAgentIndex];
         if (agent.coreModule == null) return;
         
         widgetAgentStatus.UpdateBars(agent.coreModule.health,
