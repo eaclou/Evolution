@@ -120,12 +120,12 @@ public class EggSack : MonoBehaviour {
     public void InitializeEggSackFromGenome(int index, AgentGenome agentGenome, Agent parentAgent, Vector3 startPos) {
         //currentBiomass = 0.01f; // immaculate eggsacks given free mass?
 
-        if (parentAgent != null) {  
+        if (parentAgent) {  
             parentAgentIndex = parentAgent.index;
         }
 
         this.index = index;        
-        this.fullSize = Vector2.one * (agentGenome.bodyGenome.GetFullsizeBoundingBox().x + agentGenome.bodyGenome.GetFullsizeBoundingBox().y) * 0.5f; // new Vector2(agentGenome.bodyGenome.fullsizeBoundingBox.x, agentGenome.bodyGenome.fullsizeBoundingBox.y) * 1f;
+        fullSize = Vector2.one * (agentGenome.bodyGenome.GetFullsizeBoundingBox().x + agentGenome.bodyGenome.GetFullsizeBoundingBox().y) * 0.5f; // new Vector2(agentGenome.bodyGenome.fullsizeBoundingBox.x, agentGenome.bodyGenome.fullsizeBoundingBox.y) * 1f;
                
         BeginLifeStageGrowing(parentAgent, agentGenome, startPos);
     }
@@ -161,6 +161,12 @@ public class EggSack : MonoBehaviour {
         healthStructural = 1f;
         prevPos = transform.position;        
     }*/
+    
+    public void Nullify()
+    {
+        isDepleted = true;
+        curLifeStage = EggLifeStage.Null;
+    }
 
     private void UpdateEggSackSize(float percentage, bool resizeCollider) {
         Vector2 newSize = fullSize * Mathf.Max(0.01f, percentage);
@@ -441,17 +447,6 @@ public class EggSack : MonoBehaviour {
     }
     
     private bool CheckIfDepleted() {
-        // WPP: simplified       
-        /*
-        bool depleted = true;
-        //if (foodAmount > 0f)
-            //depleted = false;
-        if (currentBiomass > 0f)
-            depleted = false;
-        //if (amountB > 0f)
-        //    depleted = false;
-        // If any of the the 3 types
-        */
         return currentBiomass <= 0f;
     }
 }

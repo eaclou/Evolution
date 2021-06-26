@@ -3,16 +3,13 @@
   <component name="ChangeListManager">
     <list default="true" id="e5216a40-1993-4f7b-88ca-3d6aa0d75e16" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleFood.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleFood.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/EggSack.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/EggSack.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Environment/SpawnZone.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Environment/SpawnZone.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationStateData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationStateData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePaperDollUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePaperDollUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/DebugPanelUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/DebugPanelUI.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/OLD/WatcherUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/OLD/WatcherUI.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,8 +61,6 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/GlobalResourcesUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/SensorsPanel.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/DigestionPanel.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/BehaviorPanel.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/FoodEatenPanel.cs" />
@@ -78,7 +73,6 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/CreatureLifeEventsLogUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/CandidateAgentData.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/LinkGenome.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButtonPrefabScript.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/MinimapUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesOverviewUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/KnowledgeMapSO.cs" />
@@ -101,20 +95,23 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/BaronVonTerrain.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/OldAndMisc/CritterSegment.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCommunication.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/CreatureBrainActivityUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCore.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicLayersManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/EggSack.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleFood.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePaperDollUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/CreatureBrainActivityUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButtonPrefabScript.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Environment/SpawnZone.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/DebugPanelUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/WatcherUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/EggSack.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationStateData.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1owaWgGpM80xkcfA3szn5iw9YkG" />
@@ -206,7 +203,7 @@
       <workItem from="1623737876671" duration="6853000" />
       <workItem from="1623804249388" duration="4969000" />
       <workItem from="1623963957317" duration="1259000" />
-      <workItem from="1624663299460" duration="4080000" />
+      <workItem from="1624663299460" duration="9532000" />
     </task>
     <servers />
   </component>

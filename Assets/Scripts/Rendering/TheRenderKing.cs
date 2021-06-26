@@ -467,7 +467,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         baronVonWater.veggieManRef = simManager.vegetationManager;
         baronVonWater.Initialize();
 
-        for (int i = 0; i < simManager._NumEggSacks; i++) {
+        for (int i = 0; i < simManager.numEggSacks; i++) {
             UpdateDynamicFoodBuffers(i);
         }
 
@@ -483,10 +483,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         InitializeFluidRenderMesh();
         //InitializeBodySwimAnimMeshBuffer(); // test movementAnimation
 
-        obstacleStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumEggSacks, sizeof(float) * 10);
+        obstacleStrokesCBuffer = new ComputeBuffer(simManager.numAgents + simManager.numEggSacks, sizeof(float) * 10);
         obstacleStrokeDataArray = new BasicStrokeData[obstacleStrokesCBuffer.count];
 
-        colorInjectionStrokesCBuffer = new ComputeBuffer(simManager._NumAgents + simManager._NumEggSacks, sizeof(float) * 10);
+        colorInjectionStrokesCBuffer = new ComputeBuffer(simManager.numAgents + simManager.numEggSacks, sizeof(float) * 10);
         colorInjectionStrokeDataArray = new BasicStrokeData[colorInjectionStrokesCBuffer.count];
 
         InitializeCritterUberStrokesBuffer();  // In-World        
@@ -517,13 +517,15 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         return numStrokes;
     }
+    
     private void InitializeCritterUberStrokesBuffer() {
         // Most of this will be populated piece-meal later as critters are generated:
-        int bufferLength = simManager._NumAgents * GetNumUberStrokesPerCritter();
+        int bufferLength = simManager.numAgents * GetNumUberStrokesPerCritter();
         critterGenericStrokesCBuffer = new ComputeBuffer(bufferLength, GetMemorySizeCritterUberStrokeData());
 
         toolbarCritterPortraitStrokesCBuffer = new ComputeBuffer(1 * GetNumUberStrokesPerCritter(), GetMemorySizeCritterUberStrokeData());
     }
+    
     private int GetMemorySizeCritterUberStrokeData() {
         int numBytes = sizeof(int) * 3 + sizeof(float) * 32;
         return numBytes;
@@ -532,13 +534,12 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private int GetMemorySizeSpiritbrushQuadData() {
         return (sizeof(int) * 2 + sizeof(float) * 19);
     }
+    
     private int GetMemorySizeCursorParticleData() {
         return (sizeof(int) * 2 + sizeof(float) * 19);
     }
+    
     private void InitializeSpiritBrushQuadBuffer() {
-
-
-
         cursorParticlesArray = new CursorParticleData[1024];
         //spiritBrushQuadDataSpawnCBuffer = new ComputeBuffer(32, GetMemorySizeSpiritbrushQuadData());
         cursorParticlesCBuffer0 = new ComputeBuffer(1024, GetMemorySizeCursorParticleData());
@@ -547,17 +548,17 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         int numSpawnPoints = 3;
         Vector3[] spawnPointsArray = new Vector3[numSpawnPoints];
         for (int j = 0; j < numSpawnPoints; j++) {
-            spawnPointsArray[j] = UnityEngine.Random.onUnitSphere;
+            spawnPointsArray[j] = Random.onUnitSphere;
         }
         for (int i = 0; i < 1024; i++) {
             CursorParticleData data = new CursorParticleData();
-            data.worldPos = new Vector3(UnityEngine.Random.Range(0f, 256f), UnityEngine.Random.Range(0f, 256f), 0f);
-            data.vel = UnityEngine.Random.insideUnitCircle;
+            data.worldPos = new Vector3(Random.Range(0f, 256f), Random.Range(0f, 256f), 0f);
+            data.vel = Random.insideUnitCircle;
 
             int spawnPointIndex = i % numSpawnPoints;
             data.heading = new Vector2(spawnPointsArray[spawnPointIndex].x, spawnPointsArray[spawnPointIndex].z);
-            data.lifespan = UnityEngine.Random.Range(20f, 40f);
-            data.age01 = UnityEngine.Random.Range(0f, 1f);
+            data.lifespan = Random.Range(20f, 40f);
+            data.age01 = Random.Range(0f, 1f);
             cursorParticlesArray[i] = data;
         }
         cursorParticlesCBuffer0.SetData(cursorParticlesArray);
@@ -569,7 +570,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         spiritBrushQuadDataCBuffer1 = new ComputeBuffer(1024, GetMemorySizeSpiritbrushQuadData());
         for (int i = 0; i < 1024; i++) {
             SpiritBrushQuadData data = new SpiritBrushQuadData();
-            data.worldPos = new Vector3(UnityEngine.Random.Range(0f, 256f), UnityEngine.Random.Range(200f, 256f), 0f);
+            data.worldPos = new Vector3(Random.Range(0f, 256f), Random.Range(200f, 256f), 0f);
             data.vel = new Vector2(0f, 0.3f);
             data.heading = new Vector2(0f, 1f);
             data.lifespan = 1f;
@@ -636,6 +637,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             new Vector3(-0.5f, 0.5f)
         });
     }
+    
     private void InitializeFluidRenderMesh() {
         //GameObject plane  = GameObject.CreatePrimitive(PrimitiveType.Plane);
         //fluidRenderMesh = plane.GetComponent<MeshFilter>().sharedMesh; // 
@@ -684,13 +686,12 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         floatyBitsCBuffer.SetData(floatyBitsInitPos);
         int kernelSimFloatyBits = fluidManager.computeShaderFluidSim.FindKernel("SimFloatyBits");
         fluidManager.computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
-
     }
 
     public void InitializeCritterSkinStrokesCBuffer() {
-        critterSkinStrokesCBuffer = new ComputeBuffer(simManager._NumAgents * numStrokesPerCritterSkin, sizeof(float) * 16 + sizeof(int) * 2);
+        critterSkinStrokesCBuffer = new ComputeBuffer(simManager.numAgents * numStrokesPerCritterSkin, sizeof(float) * 16 + sizeof(int) * 2);
         CritterSkinStrokeData[] critterSkinStrokesArray = new CritterSkinStrokeData[critterSkinStrokesCBuffer.count];
-        for (int i = 0; i < simManager._NumAgents; i++) {
+        for (int i = 0; i < simManager.numAgents; i++) {
             for (int j = 0; j < numStrokesPerCritterSkin; j++) {
                 CritterSkinStrokeData skinStroke = new CritterSkinStrokeData();
                 skinStroke.parentIndex = i;
@@ -700,24 +701,24 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
                 float zCoord = (1f - ((float)j / (float)(numStrokesPerCritterSkin - 1))) * 2f - 1f;
                 float radiusAtZ = Mathf.Sqrt(1f - zCoord * zCoord); // pythagorean theorem
-                Vector2 xyCoords = UnityEngine.Random.insideUnitCircle.normalized * radiusAtZ; // possibility for (0,0) ??? ***** undefined/null divide by zero hazard!
+                Vector2 xyCoords = Random.insideUnitCircle.normalized * radiusAtZ; // possibility for (0,0) ??? ***** undefined/null divide by zero hazard!
                 skinStroke.localPos = new Vector3(xyCoords.x, xyCoords.y, zCoord);
                 //float width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((skinStroke.localPos.y * 0.5f + 0.5f) * 15f)];
                 skinStroke.localPos.x *= 0.5f;
                 skinStroke.localPos.z *= 0.5f;               // * width  
                 skinStroke.localDir = new Vector3(0f, 1f, 0f); // start up? shouldn't matter
                 skinStroke.localScale = new Vector2(0.25f, 0.420f) * 1.25f; // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio;
-                skinStroke.strength = UnityEngine.Random.Range(0f, 1f);
+                skinStroke.strength = Random.Range(0f, 1f);
                 skinStroke.lifeStatus = 0f;
-                skinStroke.age = UnityEngine.Random.Range(1f, 2f);
-                skinStroke.randomSeed = UnityEngine.Random.Range(0f, 1f);
+                skinStroke.age = Random.Range(1f, 2f);
+                skinStroke.randomSeed = Random.Range(0f, 1f);
                 skinStroke.followLerp = 1f;
 
                 critterSkinStrokesArray[i * numStrokesPerCritterSkin + j] = skinStroke;
             }
         }
+        
         critterSkinStrokesCBuffer.SetData(critterSkinStrokesArray);
-
     }
 
     public void InitializeGizmos() {
@@ -727,6 +728,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         gizmoCursorPosCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
         gizmoCursorPosCBuffer.SetData(dataArray);
     }
+    
     private void InitializeTreeOfLifeBuffers() {
 
         testTreeOfLifePositionArray = new Vector3[64];
@@ -835,8 +837,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         //treeOfLifeStemSegmentDataCBuffer.GetData(treeOfLifeStemSegmentDataArray);
         //Debug.Log("WTF M8 treeOfLifeStemSegmentDataArray " + treeOfLifeStemSegmentDataArray[32].speciesID.ToString());
         //TreeOfLifeAddNewSpecies(0, 0);
-
-
+        
         // Backdrop:
         // float2 forward = data.localDir;
         // float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
@@ -918,6 +919,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         // Decorations:
     }
+    
     private void InitializeWorldTreeBuffers() {
         
         //**** TEMP!!! TESTING!!!
@@ -1403,9 +1405,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
     public void UpdateDynamicFoodBuffers(int eggSackIndex) {
         // *** Hard-coded 64 Fruits per food object!!!! *** BEWARE!!!
-        ComputeBuffer eggsUpdateCBuffer = new ComputeBuffer(simManager._NumEggSacks, sizeof(float) * 8 + sizeof(int) * 1);
+        ComputeBuffer eggsUpdateCBuffer = new ComputeBuffer(simManager.numEggSacks, sizeof(float) * 8 + sizeof(int) * 1);
 
-        SimulationStateData.EggData[] eggDataArray = new SimulationStateData.EggData[simManager._NumEggSacks];
+        SimulationStateData.EggData[] eggDataArray = new SimulationStateData.EggData[simManager.numEggSacks];
         for (int i = 0; i < eggDataArray.Length; i++) {
             eggDataArray[i] = new SimulationStateData.EggData();
             eggDataArray[i].eggSackIndex = eggSackIndex;

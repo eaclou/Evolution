@@ -18,6 +18,7 @@ public class SimulationStateData {
         public float eatingStatus;
         public float foodAmount;
     }*/
+    
     public struct CritterInitData {  // 25f + 3i
         public Vector3 boundingBoxSize;
         public float spawnSizePercentage;
@@ -44,6 +45,7 @@ public class SimulationStateData {
         public int bodyPatternY;  // what grid cell of texture sheet to use
         public int speciesID;
     }
+    
     public struct CritterSimData {
         public Vector3 worldPos;
         public Vector2 velocity;
@@ -64,6 +66,7 @@ public class SimulationStateData {
 		public float smoothedThrottle;
         public float wasteProduced;  // newly added 8/1/2019
     }
+    
     /*public struct DebugBodyResourcesData {
         public float developmentPercentage;
         public float health;
@@ -75,12 +78,14 @@ public class SimulationStateData {
         public float isBiting;
         public float isDamageFrame;        
     }*/
+    
     /*public struct AgentMovementAnimData {
         public float animCycle;
         public float turnAmount;
         public float accel;
 		public float smoothedThrottle;
     }*/
+    
     public struct EggSackSimData {  // 12f + 2i
         public int parentAgentIndex;
         public Vector2 worldPos;
@@ -93,6 +98,7 @@ public class SimulationStateData {
         public float health;
         public int brushType;
     }
+    
     /*
     public struct FoodSimData {  
         public Vector2 worldPos;
@@ -111,6 +117,7 @@ public class SimulationStateData {
         public Vector3 fruitHue;
     }
     */
+    
     public struct StemData {  // Only the main trunk for now!!! worry about other ones later!!! SIMPLIFY!!!
         public int foodIndex;
         public Vector2 localBaseCoords;  // main trunk is always (0, -1f) --> (0f, 1f), secondary stems need to start with x=0 (to be on main trunk)
@@ -119,6 +126,7 @@ public class SimulationStateData {
         public float childGrowth; // for future use:  // 0-1, 1 means fully mature childFood attached to this, 0 means empty end  
         public float attached;
     }
+    
     public struct LeafData { // fixed number, but some aren't used (zero scale??)
         public int foodIndex;
         public Vector2 worldPos;
@@ -126,6 +134,7 @@ public class SimulationStateData {
         public Vector2 localScale;
         public float attached;  // if attached, sticks to parent food, else, floats in water
     }
+    
     public struct EggData {  // 8f + 1i
         public int eggSackIndex;
         public Vector2 worldPos;
@@ -171,8 +180,7 @@ public class SimulationStateData {
     //public Vector4[] predatorFluidPositionsArray;
 
     public Vector4[] depthAtAgentPositionsArray;
-        
-
+    
     public SimulationStateData(SimulationManager simManager) {
         InitializeData(simManager);
     }
@@ -185,24 +193,24 @@ public class SimulationStateData {
     }
 	
     private void InitializeData(SimulationManager simManager) {
-
         /*agentSimDataArray = new AgentSimData[simManager._NumAgents];
         for(int i = 0; i < agentSimDataArray.Length; i++) {
             agentSimDataArray[i] = new AgentSimData();
         }
         agentSimDataCBuffer = new ComputeBuffer(agentSimDataArray.Length, sizeof(float) * 18);
         */
-        critterInitDataArray = new CritterInitData[simManager._NumAgents];
+        
+        critterInitDataArray = new CritterInitData[simManager.numAgents];
         for(int i = 0; i < critterInitDataArray.Length; i++) {
             critterInitDataArray[i] = new CritterInitData();
         }
         critterInitDataCBuffer = new ComputeBuffer(critterInitDataArray.Length, GetCritterInitDataSize());
 
-        critterSimDataArray = new CritterSimData[simManager._NumAgents];
+        critterSimDataArray = new CritterSimData[simManager.numAgents];
         for(int i = 0; i < critterSimDataArray.Length; i++) {
             critterSimDataArray[i] = new CritterSimData();
         }
-        critterSimDataCBuffer = new ComputeBuffer(critterSimDataArray.Length, SimulationStateData.GetCritterSimDataSize());
+        critterSimDataCBuffer = new ComputeBuffer(critterSimDataArray.Length, GetCritterSimDataSize());
         /*
         debugBodyResourcesArray = new DebugBodyResourcesData[simManager._NumAgents];
         for(int i = 0; i < debugBodyResourcesArray.Length; i++) {
@@ -216,7 +224,7 @@ public class SimulationStateData {
         }
         agentMovementAnimDataCBuffer = new ComputeBuffer(agentMovementAnimDataArray.Length, sizeof(float) * 4);
         */
-        eggSackSimDataArray = new EggSackSimData[simManager._NumEggSacks];
+        eggSackSimDataArray = new EggSackSimData[simManager.numEggSacks];
         for (int i = 0; i < eggSackSimDataArray.Length; i++) {
             eggSackSimDataArray[i] = new EggSackSimData();
         }
@@ -226,9 +234,8 @@ public class SimulationStateData {
         //for (int i = 0; i < stemDataArray.Length; i++) {
         //    stemDataArray[i] = new StemData();
         //}
-        foodStemDataCBuffer = new ComputeBuffer(simManager._NumEggSacks, sizeof(float) * 7 + sizeof(int) * 1);
-        foodLeafDataCBuffer = new ComputeBuffer(simManager._NumEggSacks * 16, sizeof(float) * 7 + sizeof(int) * 1);
-
+        foodStemDataCBuffer = new ComputeBuffer(simManager.numEggSacks, sizeof(float) * 7 + sizeof(int) * 1);
+        foodLeafDataCBuffer = new ComputeBuffer(simManager.numEggSacks * 16, sizeof(float) * 7 + sizeof(int) * 1);
         eggDataCBuffer = new ComputeBuffer(eggSackSimDataCBuffer.count * 64, sizeof(float) * 8 + sizeof(int) * 1);
 
         /*predatorSimDataArray = new PredatorSimData[simManager._NumPredators];
@@ -238,20 +245,19 @@ public class SimulationStateData {
         predatorSimDataCBuffer = new ComputeBuffer(predatorSimDataArray.Length, sizeof(float) * 5);
         */
 
-        fluidVelocitiesAtAgentPositionsArray = new Vector2[simManager._NumAgents];
-        fluidVelocitiesAtEggSackPositionsArray = new Vector2[simManager._NumEggSacks];
+        fluidVelocitiesAtAgentPositionsArray = new Vector2[simManager.numAgents];
+        fluidVelocitiesAtEggSackPositionsArray = new Vector2[simManager.numEggSacks];
         //fluidVelocitiesAtPredatorPositionsArray = new Vector2[simManager._NumPredators];
-        agentFluidPositionsArray = new Vector4[simManager._NumAgents];
-        eggSackFluidPositionsArray = new Vector4[simManager._NumEggSacks];
+        agentFluidPositionsArray = new Vector4[simManager.numAgents];
+        eggSackFluidPositionsArray = new Vector4[simManager.numEggSacks];
         //predatorFluidPositionsArray = new Vector4[simManager._NumPredators];
 
-        depthAtAgentPositionsArray = new Vector4[simManager._NumAgents];
+        depthAtAgentPositionsArray = new Vector4[simManager.numAgents];
     }
 
     public void PopulateSimDataArrays() {
-        
         // CRITTER INIT: // *** MOVE INTO OWN FUNCTION -- update more efficiently with compute shader?
-        for(int i = 0; i < simManager._NumAgents; i++) {
+        for(int i = 0; i < simManager.numAgents; i++) {
             if (simManager.agents[i].isAwaitingRespawn) {
 
             }
@@ -379,7 +385,6 @@ public class SimulationStateData {
                 directionsArray[3] = new Vector2(0f, -1f) * sensorRange;
                 directionsArray[4] = new Vector2(-1f, 0f) * sensorRange;
                 */
-
                 
                 agentFluidPositionsArray[i] = new Vector4(agentCenterX, 
                                                           agentCenterY, 
@@ -397,13 +402,12 @@ public class SimulationStateData {
         critterInitDataCBuffer.SetData(critterInitDataArray);        
         critterSimDataCBuffer.SetData(critterSimDataArray);
         
-        for (int i = 0; i < simManager._NumEggSacks; i++) {
+        for (int i = 0; i < simManager.numEggSacks; i++) {
             Vector3 eggSackPos = simManager.eggSacks[i].transform.position;
             //int speciesSize = simManager._NumAgents / 4;
             //int eggSpecies = Mathf.FloorToInt((float)i / (float)simManager._NumEggSacks * 4f);
             int agentGenomeIndex = simManager.eggSacks[i].parentAgentIndex; // eggSpecies * speciesSize; // UnityEngine.Random.Range(eggSpecies * speciesSize, (eggSpecies + 1) * speciesSize);
                      
-            // * WPP: move to EggSackSimData
             eggSackSimDataArray[i].parentAgentIndex = agentGenomeIndex;
             eggSackSimDataArray[i].worldPos = new Vector2(eggSackPos.x, eggSackPos.y);
             eggSackSimDataArray[i].velocity = simManager.eggSacks[i].rigidbodyRef.velocity; // new Vector2(simManager.eggSackArray[i].rigidbodyRef.velocity.x, simManager.eggSackArray[i].rigidbodyRef.velocity.y);
