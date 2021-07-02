@@ -1082,7 +1082,7 @@ public class Agent : MonoBehaviour {
         Vector2 headRightDir =  new Vector2(bodyRigidbody.transform.right.x, bodyRigidbody.transform.right.y).normalized;
         Vector2 throttleDir = throttle.normalized;
 
-        float turnSharpness = (-Vector2.Dot(throttleDir, headForwardDir) * 0.5f + 0.5f);
+        float turnSharpness = -Vector2.Dot(throttleDir, headForwardDir) * 0.5f + 0.5f;
         float headTurn = Vector2.Dot(throttleDir, headRightDir) * -1f * turnSharpness;
         float headTurnSign = Mathf.Clamp(Vector2.Dot(throttleDir, headRightDir) * -10000f, -1f, 1f);
           
@@ -1130,7 +1130,7 @@ public class Agent : MonoBehaviour {
         communicationModule = new CritterModuleCommunication();
         communicationModule.Initialize(genome.bodyGenome.communicationGenome);
 
-        coreModule = new CritterModuleCore(genome.bodyGenome.coreGenome, this);
+        coreModule = new CritterModuleCore(genome.bodyGenome.coreGenome);
 
         mouthRef.Initialize(genome.bodyGenome.coreGenome, this);
 
@@ -1151,6 +1151,7 @@ public class Agent : MonoBehaviour {
 
     // Colliders Footprint???  *************************************************************************************************************
 
+    // * WPP: expose magic numbers
     public void ReconstructAgentGameObjects(SettingsManager settings, AgentGenome genome, EggSack parentEggSack, Vector3 startPos, bool isImmaculate, float waterLevel) {
         //float corpseLerp = (float)settings.curTierFoodCorpse / 10f;
         //decayDurationTimeSteps = 480; // Mathf.RoundToInt(Mathf.Lerp(360f, 3600f, corpseLerp));

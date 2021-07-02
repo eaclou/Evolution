@@ -879,7 +879,7 @@ public class SimulationManager : Singleton<SimulationManager>
  
             Vector3 agentPosition3 = agents[agentIndex].bodyRigidbody.transform.position;
             Vector2 agentPosition = new Vector2(agentPosition3.x, agentPosition3.y);
-            int xCoord = Mathf.FloorToInt(agentPosition.x / mapSize * (float)agentGridCellResolution); // Mathf.FloorToInt((agentPos.x + mapSize) / (mapSize * 2f) * (float)agentGridCellResolution);
+            int xCoord = Mathf.FloorToInt(agentPosition.x / mapSize * (float)agentGridCellResolution); 
             xCoord = Mathf.Clamp(xCoord, 0, agentGridCellResolution - 1);
             int yCoord = Mathf.FloorToInt(agentPosition.y / mapSize * (float)agentGridCellResolution);
             yCoord = Mathf.Clamp(yCoord, 0, agentGridCellResolution - 1);
