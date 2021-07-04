@@ -86,11 +86,13 @@ public class CritterModuleThreats {
         }
     }
 
-    public void Tick(Agent agent) {
+    public void Tick(Agent agent) 
+    {
         Vector2 enemyPos = Vector2.zero;
         Vector2 enemyDir = Vector2.zero;
         Vector2 enemyVel = Vector2.zero;
-        if(agent.coreModule.nearestEnemyAgent != null) {
+        if(agent.coreModule.nearestEnemyAgent) 
+        {
             enemyPos = new Vector2(agent.coreModule.nearestEnemyAgent.bodyRigidbody.transform.localPosition.x - agent.ownPos.x, agent.coreModule.nearestEnemyAgent.bodyRigidbody.transform.localPosition.y - agent.ownPos.y);
             enemyDir = enemyPos.normalized;
             enemyVel = new Vector2(agent.coreModule.nearestEnemyAgent.bodyRigidbody.velocity.x, agent.coreModule.nearestEnemyAgent.bodyRigidbody.velocity.y);
@@ -98,32 +100,30 @@ public class CritterModuleThreats {
             float ownSize = 1f; // currentBodySize.x;
             float enemySize = 1f; // nearestEnemyAgent.coreModule.currentBodySize.x;
 
-            if(ownSize != 0f && enemySize != 0) {
+            if(ownSize != 0f && enemySize != 0) 
+            {
                 float sizeRatio = enemySize / ownSize - 1f; 
-                if(enemySize < ownSize) {
+                
+                if(enemySize < ownSize) 
+                {
                     sizeRatio = -1f * (ownSize / enemySize - 1f);
                 }
                 enemyRelSize[0] = TransferFunctions.Evaluate(TransferFunctions.TransferFunction.RationalSigmoid, sizeRatio);  // smaller creatures negative values, larger creatures positive, 0 = same size
             }
-            else {
 
-            } 
             enemyHealth[0] = 0f;
             enemyGrowthStage[0] = 0f;
-            if(agent.coreModule != null) {
-                if (agent.coreModule.nearestEnemyAgent != null) {
-                    if (agent.coreModule.nearestEnemyAgent.coreModule != null) {
-                        enemyHealth[0] = agent.coreModule.nearestEnemyAgent.coreModule.hitPoints[0];              
-                    }
-                                   
-                    enemyGrowthStage[0] = agent.coreModule.nearestEnemyAgent.sizePercentage;
-                    
+            
+            if(agent.coreModule != null && agent.coreModule.nearestEnemyAgent) 
+            {
+                if (agent.coreModule.nearestEnemyAgent.coreModule != null) 
+                {
+                    enemyHealth[0] = agent.coreModule.nearestEnemyAgent.coreModule.hitPoints[0];              
                 }
                 
+                enemyGrowthStage[0] = agent.coreModule.nearestEnemyAgent.sizePercentage;
             }
             
-            
-
             //float threat = 1f;
             //if(agent.coreModule.nearestEnemyAgent.mouthRef.isPassive) {
             //    threat = 0f;

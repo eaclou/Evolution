@@ -246,7 +246,8 @@ public class SimulationManager : Singleton<SimulationManager>
         LoadingInitializeGridCells();
         // Populates GridCells with their contents (agents/food/preds)
         PopulateGridCells();
-        HookUpModules();
+        // WPP: Removed
+        //HookUpModules();
 
         loadingPanel.Refresh("", 3);
         
@@ -583,7 +584,9 @@ public class SimulationManager : Singleton<SimulationManager>
         }
               
         if(trophicLayersManager.IsLayerOn(KnowledgeMapId.Animals)) {
-            HookUpModules(); // Sets nearest-neighbors etc. feed current data into agent Brains
+            // WPP: removed
+            //HookUpModules(); // Sets nearest-neighbors etc. feed current data into agent Brains
+            
             // Load gameState into Agent Brain, process brain function, read out brainResults,
             // Execute Agent Actions -- apply propulsive force to each Agent:       
             foreach (var agent in agents) {
@@ -860,7 +863,8 @@ public class SimulationManager : Singleton<SimulationManager>
         }
     }
     
-    private void HookUpModules() 
+    // WPP: Refactored to TrackNearbyAgents/EggSacks, FindNearestAgent/EggSack
+    /*private void HookUpModules() 
     {            
         // mapSize is global now, get with the times, jeez-louise!
         //float cellSize = mapSize / agentGridCellResolution;
@@ -894,13 +898,13 @@ public class SimulationManager : Singleton<SimulationManager>
             int ownSpeciesIndex = agents[agentIndex].speciesIndex; // Mathf.FloorToInt((float)a / (float)numAgents * (float)numSpecies);
 
             // **** Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
-            /*int index = -1;
-            try {
-                index = mapGridCellArray[xCoord][yCoord].friendIndicesList.Count;
-            }
-            catch (Exception e) {
-                print("error! index = " + index.ToString() + ", xCoord: " + xCoord.ToString() + ", yCoord: " + yCoord.ToString() + ", xPos: " + agentPos.x.ToString() + ", yPos: " + agentPos.y.ToString());
-            } */
+            //int index = -1;
+            //try {
+            //    index = mapGridCellArray[xCoord][yCoord].friendIndicesList.Count;
+            //}
+            //catch (Exception e) {
+            //    print("error! index = " + index.ToString() + ", xCoord: " + xCoord.ToString() + ", yCoord: " + yCoord.ToString() + ", xPos: " + agentPos.x.ToString() + ", yPos: " + agentPos.y.ToString());
+            //} 
             // *** Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
             foreach (var neighborIndex in mapGridCellArray[xCoord][yCoord].agentIndicesList)
             {
@@ -977,7 +981,7 @@ public class SimulationManager : Singleton<SimulationManager>
             return;
 
         critter.nearestEggSackModule = eggSacks[closestEggSackIndex];                 
-    }
+    }*/
     
     // CHECK FOR DEAD FOOD!!! :::::::   *** revisit
     private void CheckForDevouredEggSacks() {

@@ -88,7 +88,7 @@ public class Agent : MonoBehaviour {
     public float sizePercentage = 0f;
     
     public Brain brain;
-    public GameObject bodyGO;
+    public GameObject bodyGO;   // * WPP: Remove, just move the agent
     public Rigidbody2D bodyRigidbody;
 
     // MODULES:::

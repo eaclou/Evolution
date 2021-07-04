@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class FindNearestNeighbors : MonoBehaviour
+public class FindNearestAgent : MonoBehaviour
 {
     [SerializeField] Agent self;
     [SerializeField] TrackNearbyAgents agentTracker;
@@ -11,23 +11,23 @@ public class FindNearestNeighbors : MonoBehaviour
     CritterModuleCore core => self.coreModule;
 
     float nearestFriendDistance;
-    Agent nearestFriend;
+    [Tooltip("Exposed for debugging")]
+    public Agent nearestFriend;
     
     float nearestEnemyDistance;
-    Agent nearestEnemy;
+    [Tooltip("Exposed for debugging")]
+    public Agent nearestEnemy;
     
     bool _isFriend;
     float _neighborDistance;
     
-    public void Refresh()
-    {
-        SetNearestFriendAndEnemy();
-        SetNearestEggSack();
-    }
+    // Replace with InvokeRepeating to expose interval
+    private void Update() { Refresh(); }
     
-    void SetNearestFriendAndEnemy()
+    private void Refresh()
     {
-        nearestFriend = self;
+        nearestFriend = null;
+        nearestEnemy = null;
         nearestFriendDistance = Mathf.Infinity;
         nearestEnemyDistance = Mathf.Infinity;
     
@@ -52,13 +52,6 @@ public class FindNearestNeighbors : MonoBehaviour
         }
         
         core.nearestFriendAgent = nearestFriend;
-        core.nearestEnemyAgent = nearestEnemy;        
-    }
-    
-    // In progress
-    // * Remove: use separate component
-    void SetNearestEggSack()
-    {
-        
+        core.nearestEnemyAgent = nearestEnemy;   
     }
 }

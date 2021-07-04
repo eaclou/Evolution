@@ -63,7 +63,7 @@ public class CritterModuleFriends {
         Vector2 friendPos = Vector2.zero;
         Vector2 friendDir = Vector2.zero;
         Vector2 friendVel = Vector2.zero;
-        if(agent.coreModule.nearestFriendAgent != null) {
+        if(agent.coreModule.nearestFriendAgent) {
             friendPos = new Vector2(agent.coreModule.nearestFriendAgent.bodyRigidbody.transform.localPosition.x - agent.ownPos.x, agent.coreModule.nearestFriendAgent.bodyRigidbody.transform.localPosition.y - agent.ownPos.y);
             friendDir = friendPos.normalized;
             friendVel = new Vector2(agent.coreModule.nearestFriendAgent.bodyRigidbody.velocity.x, agent.coreModule.nearestFriendAgent.bodyRigidbody.velocity.y);
