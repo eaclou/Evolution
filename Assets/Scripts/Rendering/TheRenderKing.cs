@@ -3799,7 +3799,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             plantParticleDisplayMat.SetInt("_HoverParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index));
             //Debug.Log("_SelectedParticleIndex: " + Mathf.RoundToInt(simManager.vegetationManager.selectedPlantParticleIndex).ToString() + ", _HoverParticleIndex: " + Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index).ToString());
             plantParticleDisplayMat.SetFloat("_IsSelected", isSelectedPlant); // isSelected);
-            plantParticleDisplayMat.SetFloat("_IsHover", uiManager.isPlantParticleHighlight * isHighlight); // isHighlight); // isHover);
+            plantParticleDisplayMat.SetFloat("_IsHover", uiManager.plantHighlight * isHighlight);
             plantParticleDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
             plantParticleDisplayMat.SetVector("_FogColor", simManager.fogColor);
             plantParticleDisplayMat.SetVector("_SunDir", sunDirection);
@@ -3882,8 +3882,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             animalParticleDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(simManager.zooplanktonManager.selectedAnimalParticleIndex));
             animalParticleDisplayMat.SetInt("_ClosestParticleID", Mathf.RoundToInt(simManager.zooplanktonManager.closestZooplanktonToCursorIndex));
             animalParticleDisplayMat.SetFloat("_IsSelected", isSelectedZoop);// isSelectedA);
-            animalParticleDisplayMat.SetFloat("_IsHover", uiManager.isZooplanktonHighlight * isHighlight); // isHighlight); // isHoverA); // isHoverA);
-            animalParticleDisplayMat.SetFloat("_IsHighlight", uiManager.isZooplanktonHighlight * isHighlight); // isHighlight); // isHighlight);
+            animalParticleDisplayMat.SetFloat("_IsHover", uiManager.zooplanktonHighlight * isHighlight);
+            animalParticleDisplayMat.SetFloat("_IsHighlight", uiManager.zooplanktonHighlight * isHighlight); 
             animalParticleDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
             animalParticleDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
             animalParticleDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized); 

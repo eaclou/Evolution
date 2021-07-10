@@ -29,6 +29,8 @@ public class TheCursorCzar : Singleton<TheCursorCzar> {
     public bool isDraggingMouseLeft = false;
     public bool isDraggingMouseRight = false;
     public bool isDraggingSpeciesNode = false;
+    
+    public bool isDraggingMouse => isDraggingMouseLeft || isDraggingMouseRight;
 
     public Texture2D cursorTexBrush;
     public Texture2D cursorTexWatcher;
@@ -42,6 +44,10 @@ public class TheCursorCzar : Singleton<TheCursorCzar> {
     public Vector2 GetCursorPixelCoords() {
         return curMousePixelPos;
     }
+    
+    public bool cursorInBounds => curMousePixelPos.x <= 360 && curMousePixelPos.y > 720;
+
+    
     private void MouseRaycastWaterPlane(Vector3 screenPos) {
 
         mouseRaycastWaterPlane.SetActive(true);

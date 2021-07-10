@@ -17,7 +17,6 @@ public class GenomeViewerUI : MonoBehaviour {
     public GameObject panelPerformanceBehavior;
     public GameObject panelEaten;
     
-    
     public bool isGenomeTabActive = true;
     public bool isPerformanceTabActive = false;
     public bool isHistoryTabActive = false;
@@ -77,7 +76,6 @@ public class GenomeViewerUI : MonoBehaviour {
     }
     
     #endregion
-
     
     public void EnterTooltipObject(GenomeButtonTooltipSource tip) {
         isTooltipHover = true;

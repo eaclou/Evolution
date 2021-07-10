@@ -39,9 +39,15 @@ public class UIManager : Singleton<UIManager> {
     
     Lookup lookup => Lookup.instance;
 
-    public float isPlantParticleHighlight;
-    public float isZooplanktonHighlight;
-    public float isVertebrateHighlight;
+    public bool isPlantHighlight;
+    public bool isZooplanktonHighlight;
+    public bool isVertebrateHighlight;
+    
+    public bool isLifeHighlight => isPlantHighlight || isZooplanktonHighlight || isVertebrateHighlight;
+
+    public float plantHighlight => isPlantHighlight ? 1f : 0f;
+    public float zooplanktonHighlight => isZooplanktonHighlight ? 1f : 0f;
+    public float vertebrateHighlight => isVertebrateHighlight ? 1f : 0f;
        
     public bool updateTerrainAltitude;  // WPP: assigned but not used
     public float terrainUpdateMagnitude;// WPP: assigned but not used
