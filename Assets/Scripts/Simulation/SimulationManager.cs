@@ -58,7 +58,6 @@ public class SimulationManager : Singleton<SimulationManager>
     private int agentGridCellResolution = 1;  // How much to subdivide the map in order to detect nearest-neighbors more efficiently --> to not be O(n^2)
     public MapGridCell[][] mapGridCellArray;
 
-    // WPP: removed unnecessary get/set
     // * rename to maxAgents (use array size to calculate numAgents if helpful)
     // * or remove the hard cap entirely and scale down the pond to create a soft cap
     [NonSerialized]
@@ -246,8 +245,6 @@ public class SimulationManager : Singleton<SimulationManager>
         LoadingInitializeGridCells();
         // Populates GridCells with their contents (agents/food/preds)
         PopulateGridCells();
-        // WPP: Removed
-        //HookUpModules();
 
         loadingPanel.Refresh("", 3);
         
@@ -584,9 +581,6 @@ public class SimulationManager : Singleton<SimulationManager>
         }
               
         if(trophicLayersManager.IsLayerOn(KnowledgeMapId.Animals)) {
-            // WPP: removed
-            //HookUpModules(); // Sets nearest-neighbors etc. feed current data into agent Brains
-            
             // Load gameState into Agent Brain, process brain function, read out brainResults,
             // Execute Agent Actions -- apply propulsive force to each Agent:       
             foreach (var agent in agents) {
@@ -862,127 +856,7 @@ public class SimulationManager : Singleton<SimulationManager>
             mapGridCellArray[xCoord][yCoord].agentIndicesList.Add(a);
         }
     }
-    
-    // WPP: Refactored to TrackNearbyAgents/EggSacks, FindNearestAgent/EggSack
-    /*private void HookUpModules() 
-    {            
-        // mapSize is global now, get with the times, jeez-louise!
-        //float cellSize = mapSize / agentGridCellResolution;
-        //Vector2 playerPos = new Vector2(playerAgent.transform.localPosition.x, playerAgent.transform.localPosition.y);
 
-        // ***** Check for inactive/Null agents and cull them from consideration:
-        // ******  REFACTOR!!! BROKEN BY SPECIATION UPDATE! ***
-
-        // **** Add priority targeting here? save closest of each time for later determination? ***
-
-        // Find NearestNeighbors:
-        for (int agentIndex = 0; agentIndex < agents.Length; agentIndex++) 
-        {
-            if (!agents[agentIndex].isMature)
-                continue;
- 
-            Vector3 agentPosition3 = agents[agentIndex].bodyRigidbody.transform.position;
-            Vector2 agentPosition = new Vector2(agentPosition3.x, agentPosition3.y);
-            int xCoord = Mathf.FloorToInt(agentPosition.x / mapSize * (float)agentGridCellResolution); 
-            xCoord = Mathf.Clamp(xCoord, 0, agentGridCellResolution - 1);
-            int yCoord = Mathf.FloorToInt(agentPosition.y / mapSize * (float)agentGridCellResolution);
-            yCoord = Mathf.Clamp(yCoord, 0, agentGridCellResolution - 1);
-
-            int closestFriendIndex = agentIndex;  // default to self
-            float nearestFriendSquaredDistance = float.PositiveInfinity;
-            int closestEnemyAgentIndex = 0;
-            float nearestEnemyAgentSqDistance = float.PositiveInfinity;
-            int closestEggSackIndex = -1; // default to -1??? ***            
-            float nearestFoodDistance = float.PositiveInfinity;
-
-            int ownSpeciesIndex = agents[agentIndex].speciesIndex; // Mathf.FloorToInt((float)a / (float)numAgents * (float)numSpecies);
-
-            // **** Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
-            //int index = -1;
-            //try {
-            //    index = mapGridCellArray[xCoord][yCoord].friendIndicesList.Count;
-            //}
-            //catch (Exception e) {
-            //    print("error! index = " + index.ToString() + ", xCoord: " + xCoord.ToString() + ", yCoord: " + yCoord.ToString() + ", xPos: " + agentPos.x.ToString() + ", yPos: " + agentPos.y.ToString());
-            //} 
-            // *** Only checking its own grid cell!!! Will need to expand to adjacent cells as well!
-            foreach (var neighborIndex in mapGridCellArray[xCoord][yCoord].agentIndicesList)
-            {
-                int neighborSpeciesIndex = agents[neighborIndex].speciesIndex; 
-
-                if(!agents[neighborIndex].isMature) 
-                    continue;
-                    
-                // FRIEND:
-                Vector3 neighborPosition3 = agents[neighborIndex].bodyRigidbody.transform.localPosition;
-                Vector2 neighborPosition = new Vector2(neighborPosition3.x, neighborPosition3.y);
-                float squaredDistNeighbor = (neighborPosition - agentPosition).sqrMagnitude;
-                
-                // make sure it doesn't consider itself
-                if (agentIndex == neighborIndex)
-                    continue;
-                  
-                // if now the closest so far, update index and dist:
-                // if two agents are of same species - friends
-                if (squaredDistNeighbor <= nearestFriendSquaredDistance &&
-                    ownSpeciesIndex == neighborSpeciesIndex) 
-                {
-                    closestFriendIndex = neighborIndex;
-                    nearestFriendSquaredDistance = squaredDistNeighbor;
-                }
-
-               // If now the closest so far, update index and dist:
-               // if two agents are of different species - enemy
-                if (squaredDistNeighbor <= nearestEnemyAgentSqDistance &&
-                    ownSpeciesIndex != neighborSpeciesIndex) 
-                {
-                    closestEnemyAgentIndex = neighborIndex;
-                    nearestEnemyAgentSqDistance = squaredDistNeighbor;
-                }
-            }
-        
-            foreach (var eggSackIndex in mapGridCellArray[xCoord][yCoord].eggSackIndicesList)
-            {
-                if (eggSacks[eggSackIndex].isNull ||
-                    eggSacks[eggSackIndex].isProtectedByParent)
-                    continue;
-
-                Vector3 eggSackPosition3 = eggSacks[eggSackIndex].rigidbodyRef.transform.position;
-                Vector2 eggSackPosition = new Vector2(eggSackPosition3.x, eggSackPosition3.y);
-                float distEggSack = (eggSackPosition - agentPosition).magnitude - (eggSacks[eggSackIndex].curSize.magnitude + 1f) * 0.5f;  // subtract food & agent radii
-
-                if (distEggSack > nearestFoodDistance) 
-                    continue;
-
-                closestEggSackIndex = eggSackIndex;
-                nearestFoodDistance = distEggSack;                           
-            }
-        
-            // Set proper references between AgentBrains and Environment/Game Objects:::
-            // ***** DISABLED!!!! *** NEED TO RE_IMPLEMENT THIS LATER!!!! ********************************************
-            SetNearestToCritter(agents[agentIndex].coreModule, closestFriendIndex, closestEnemyAgentIndex, closestEggSackIndex, agentIndex);            
-        }
-    }
-    
-    private void SetNearestToCritter(CritterModuleCore critter, int closestFriendIndex, 
-    int closestEnemyAgentIndex, int closestEggSackIndex, int agentIndex) 
-    {
-        if (critter == null) 
-        {
-            Debug.LogError("agentsArray[" + agentIndex + "].coreModule == null) " + agents[agentIndex].curLifeStage);                
-            return;
-        }
-    
-        critter.nearestFriendAgent = agents[closestFriendIndex];
-        critter.nearestEnemyAgent = agents[closestEnemyAgentIndex];
-            
-        // * If the result is that the module is set to null, set it explcitly with a ternary
-        if(closestEggSackIndex == -1) 
-            return;
-
-        critter.nearestEggSackModule = eggSacks[closestEggSackIndex];                 
-    }*/
-    
     // CHECK FOR DEAD FOOD!!! :::::::   *** revisit
     private void CheckForDevouredEggSacks() {
         for (int f = 0; f < eggSacks.Length; f++) {

@@ -29,27 +29,9 @@ public class CritterModuleCore {
     //public float stomachContentsTotal01 = 0f;
      
     public float stomachCapacity = 1f;  // absolute value in units of (area?)
-
-    //float _stomachContentsDecay;
     public float stomachContentsDecay;
-    //{
-    //    get => _stomachContentsDecay;
-    //    set => Mathf.Min(_stomachContentsDecay + value, 0f);
-    //}
-
-    //float _stomachContentsPlant;
     public float stomachContentsPlant;
-    //{
-    //    get => _stomachContentsPlant;
-    //    set => Mathf.Min(_stomachContentsPlant + value, 0f);
-    //}
-
-    //float _stomachContentsMeat;
     public float stomachContentsMeat;
-    //{
-    //    get => _stomachContentsMeat;
-    //    set => Mathf.Min(_stomachContentsMeat + value, 0f);
-    //}
 
     //public float debugFoodValue = 0f;
     
@@ -109,10 +91,6 @@ public class CritterModuleCore {
     public bool stomachEmpty => stomachContentsPercent <= 0f;
     public bool isFull => stomachContentsPercent >= 1f;
     
-    // *** WPP: replaced Vector math with simpler percent calculation
-    // (might be causing an error)
-    //public Vector3 foodProportionsVector => foodVector / (totalStomachContents + 0.000001f);
-    //Vector3 foodVector => new Vector3(stomachContentsPlant, stomachContentsMeat, stomachContentsDecay);
     public float plantEatenPercent => Mathf.Clamp01(stomachContentsPlant / (totalStomachContents + 0.0000001f));
     public float meatEatenPercent => Mathf.Clamp01(stomachContentsMeat / (totalStomachContents + 0.0000001f));
     public float decayEatenPercent => Mathf.Clamp01(stomachContentsDecay / (totalStomachContents + 0.0000001f));
@@ -174,24 +152,11 @@ public class CritterModuleCore {
         parentID = genome.parentID;
         inno = genome.inno;
 
-        // WPP: moved to getter
-        //float talentSpecTotal = genome.talentSpecializationAttack + genome.talentSpecializationDefense + genome.talentSpecializationSpeed + genome.talentSpecializationUtility;
-        //talentSpecAttackNorm = genome.talentSpecializationAttack / talentSpecTotal;
-        //talentSpecDefenseNorm = genome.talentSpecializationDefense / talentSpecTotal;
-        //talentSpecSpeedNorm = genome.talentSpecializationSpeed / talentSpecTotal;
-        //talentSpecUtilityNorm = genome.talentSpecializationUtility / talentSpecTotal;
-        
         // * WPP: expose magic numbers
         damageBonus = Mathf.Lerp(0.33f, 2f, talentSpecAttackNorm);
         healthBonus = Mathf.Lerp(0.33f, 2f, talentSpecDefenseNorm);
         speedBonus = Mathf.Lerp(0.33f, 2f, talentSpecSpeedNorm);        
         energyBonus = Mathf.Lerp(0.75f, 1.5f, talentSpecUtilityNorm);
-        
-        // WPP: moved to getter
-        //float dietSpecTotal = genome.dietSpecializationDecay + genome.dietSpecializationPlant + genome.dietSpecializationMeat; 
-        //digestEfficiencyDecay = genome.dietSpecializationDecay / dietSpecTotal;
-        //digestEfficiencyPlant = genome.dietSpecializationPlant / dietSpecTotal;
-        //digestEfficiencyMeat = genome.dietSpecializationMeat / dietSpecTotal;
     }
 
     // * WPP: move to Neuron, 
@@ -273,13 +238,8 @@ public class CritterModuleCore {
         health -= damage;
     }
 
-    public void SetAllHealth(float value)
-    {
+    public void SetAllHealth(float value) {
         health = value;
-        //hitPoints[0] = value;
-        //healthHead = value;
-        //healthBody = value;
-        //healthExternal = value;
     }
 }
 

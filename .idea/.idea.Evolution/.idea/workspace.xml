@@ -2,20 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e5216a40-1993-4f7b-88ca-3d6aa0d75e16" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Perception/FindNearestAgent.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Perception/FindNearestAgent.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Perception/TrackNearbyEggSacks.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Perception/TrackNearbyEggSacks.cs.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/AgentPrefab.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/AgentPrefab.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCommunication.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCommunication.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleFriends.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleFriends.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleThreats.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleThreats.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Perception/FindNearestNeighbors.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Perception/FindNearestNeighbors.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCore.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCore.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/SensorsPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/SensorsPanel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButtonTooltipSource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButtonTooltipSource.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,8 +64,6 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/CreatureLifeEventsLogUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/CandidateAgentData.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/LinkGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/MinimapUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesOverviewUI.cs" />
@@ -113,16 +103,18 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Fluid/EnvironmentFluidManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/CritterModuleCoreGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Perception/FindNearestNeighbors.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCore.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Perception/TrackNearbyAgents.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCommunication.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleFriends.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Perception/FindNearestAgent.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleThreats.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Perception/FindNearestEggSack.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Perception/TrackNearbyEggSacks.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCore.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButtonTooltipSource.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/SensorsPanel.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1owaWgGpM80xkcfA3szn5iw9YkG" />
@@ -216,7 +208,8 @@
       <workItem from="1623963957317" duration="1259000" />
       <workItem from="1624663299460" duration="9663000" />
       <workItem from="1625208675434" duration="6176000" />
-      <workItem from="1625380874879" duration="4322000" />
+      <workItem from="1625380874879" duration="4579000" />
+      <workItem from="1625940085988" duration="2252000" />
     </task>
     <servers />
   </component>

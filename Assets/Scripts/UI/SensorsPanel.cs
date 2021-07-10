@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class SensorsPanel : MonoBehaviour
 {
     AgentGenome genome => UIManager.instance.focusedCandidate.candidateGenome;
-    
+
     [SerializeField] Image internals;
     [SerializeField] Image contact;
     
@@ -27,7 +27,8 @@ public class SensorsPanel : MonoBehaviour
     CritterModuleEnvironmentSensorsGenome environment;
     CritterModuleCommunicationGenome communication;
 
-    public void Refresh() {
+    public void Refresh() 
+    {
         if (genome.bodyGenome.foodGenome == null) return;
         
         body = genome.bodyGenome;
@@ -47,88 +48,6 @@ public class SensorsPanel : MonoBehaviour
         waterSensor.SetSensorEnabled(environment.useWaterStats);
         wallSensor.SetSensorEnabled(environment.useCardinals || environment.useDiagonals);
         commSensor.SetSensorEnabled(communication.useComms);
-        
-        /*
-        imageSensorComms.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.communicationGenome.useComms;
-        imageSensorWater.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.environmentalGenome.useWaterStats;
-        imageSensorWalls.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.environmentalGenome.useCardinals || genome.bodyGenome.environmentalGenome.useDiagonals;
-        imageSensorFoodPlant.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = foodGenome.useNutrients || foodGenome.useStats;
-        imageSensorFoodMicrobe.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.foodGenome.usePos;  // ********* THESE ARE WRONG ^ ^ ^
-        imageSensorFoodMeat.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.foodGenome.useVel;
-        imageSensorFoodEggs.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.foodGenome.useEggs;
-        imageSensorFoodCorpse.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.foodGenome.useCorpse;
-        imageSensorFriend.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.friendGenome.usePos || genome.bodyGenome.friendGenome.useVel || genome.bodyGenome.friendGenome.useDir;
-        imageSensorFoe.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = genome.bodyGenome.threatGenome.usePos || genome.bodyGenome.threatGenome.useVel || genome.bodyGenome.threatGenome.useDir;
-        imageSensorInternals.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = true;
-        imageSensorContact.GetComponent<GenomeButtonTooltipSource>().isSensorEnabled = true;
-
-        if (genome.bodyGenome.communicationGenome.useComms) {
-            imageSensorComms.color = Color.white;
-        }
-        else {
-            imageSensorComms.color = Color.gray * 0.75f;
-        }
-        if (genome.bodyGenome.environmentalGenome.useWaterStats) {
-            imageSensorWater.color = Color.white;
-        }
-        else {
-            imageSensorWater.color = Color.gray * 0.75f;
-        }
-        if (genome.bodyGenome.environmentalGenome.useCardinals || genome.bodyGenome.environmentalGenome.useDiagonals) {
-            imageSensorWalls.color = Color.white;
-        }
-        else {
-            imageSensorWalls.color = Color.gray * 0.75f;
-        }
-                        
-        if (foodGenome.useNutrients || foodGenome.useStats) {
-            imageSensorFoodPlant.color = Color.white;
-        }
-        else {
-            imageSensorFoodPlant.color = Color.gray * 0.75f;
-        }
-
-        if (foodGenome.usePos) {
-            imageSensorFoodMicrobe.color = Color.white;
-        }
-        else {
-            imageSensorFoodMicrobe.color = Color.gray * 0.75f;
-        }
-
-        if (foodGenome.useVel) {
-            imageSensorFoodMeat.color = Color.white;
-        }
-        else {
-            imageSensorFoodMeat.color = Color.gray * 0.75f;
-        }
-
-        if (foodGenome.useEggs) {
-            imageSensorFoodEggs.color = Color.white;
-        }
-        else {
-            imageSensorFoodEggs.color = Color.gray * 0.75f;
-        }
-
-        if (foodGenome.useCorpse) {
-            imageSensorFoodCorpse.color = Color.white;
-        }
-        else {
-            imageSensorFoodCorpse.color = Color.gray * 0.75f;
-        }
-
-        if (genome.bodyGenome.friendGenome.usePos || genome.bodyGenome.friendGenome.useVel || genome.bodyGenome.friendGenome.useDir) {
-            imageSensorFriend.color = Color.white;
-        }
-        else {
-            imageSensorFriend.color = Color.gray * 0.75f;
-        }
-        if (genome.bodyGenome.threatGenome.usePos || genome.bodyGenome.threatGenome.useVel || genome.bodyGenome.threatGenome.useDir) {
-            imageSensorFoe.color = Color.white;
-        }
-        else {
-            imageSensorFoe.color = Color.gray * 0.75f;
-        }
-        */
 
         internals.color = Color.white;        
         contact.color = Color.white;         
@@ -140,12 +59,14 @@ public class SensorsPanel : MonoBehaviour
         [SerializeField] Image image;
         [SerializeField] GenomeButtonTooltipSource tooltip;
         
+        // * Move to central location (lookup?)
+        [SerializeField] Color enabledColor = Color.white;
+        [SerializeField] Color disabledColor = Color.gray * 0.75f;
+        
         public void SetSensorEnabled(bool value) 
         { 
             tooltip.isSensorEnabled = value;
-            
-            // * Expose values in central location (lookup?)
-            image.color = value ? Color.white : Color.gray * 0.75f;     
+            image.color = value ? enabledColor : disabledColor;     
         }
     }
 }

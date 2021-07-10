@@ -1,28 +1,17 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class GenomeButtonTooltipSource : MonoBehaviour {
+    UIManager ui => UIManager.instance;
+    GenomeViewerUI genomeViewer => ui.genomeViewerUI;
 
-    
     public string tooltipString;
-    //public GenomeViewerUI genomeViewerUIRef;
     public bool isSensorEnabled;
 
     public void OnHoverStart() {
-        UIManager.instance.genomeViewerUI.EnterTooltipObject(this);
-        
+        genomeViewer.EnterTooltipObject(this);
     }
+    
     public void OnHoverExit() {
-        UIManager.instance.genomeViewerUI.EnterTooltipObject(this);
+        genomeViewer.EnterTooltipObject(this);
     }
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 }
