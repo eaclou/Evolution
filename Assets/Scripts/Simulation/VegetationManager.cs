@@ -647,7 +647,6 @@ public class VegetationManager {
     }
     
     public void FindClosestPlantParticleToCursor(float xCoord, float yCoord) {
-        
         int kernelCSMeasureInitCursorDistances = computeShaderPlantParticles.FindKernel("CSMeasureInitCursorDistances");        
         computeShaderPlantParticles.SetBuffer(kernelCSMeasureInitCursorDistances, "foodParticlesRead", plantParticlesCBuffer);  
         computeShaderPlantParticles.SetBuffer(kernelCSMeasureInitCursorDistances, "cursorDistancesWrite", cursorDistances1024);

@@ -772,6 +772,17 @@ public class SimulationManager : Singleton<SimulationManager>
         }*/
     }
     
+    public void TickPlayerStirTool()
+    {
+        if (theCursorCzar.isDraggingMouseLeft || theCursorCzar.smoothedMouseVel.magnitude <= 0f)
+            PlayerToolStirOff();
+        else
+        {
+            float radiusMult = Mathf.Lerp(0.075f, 1.33f, Mathf.Clamp01(theRenderKing.baronVonWater.camDistNormalized * 1.4f)); // 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
+            PlayerToolStirOn(theCursorCzar.curMousePositionOnWaterPlane, theCursorCzar.smoothedMouseVel * (0.25f + theRenderKing.baronVonWater.camDistNormalized * 1.2f), radiusMult);  
+        }
+    }
+    
     public void PlayerToolStirOn(Vector3 origin, Vector2 forceVector, float radiusMult) {
         float magnitude = forceVector.magnitude;
         if(magnitude == 0f) {

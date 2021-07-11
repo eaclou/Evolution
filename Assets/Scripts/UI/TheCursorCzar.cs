@@ -11,6 +11,7 @@ public class TheCursorCzar : Singleton<TheCursorCzar> {
     public GameObject mouseRaycastWaterPlane;
 
     public Vector3 curMousePositionOnWaterPlane;
+    public Vector2 curMousePositionOnWaterPlane2D => new Vector2(curMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y);
 
     public Text textTooltip;
     public GameObject panelTooltip;
@@ -45,7 +46,7 @@ public class TheCursorCzar : Singleton<TheCursorCzar> {
         return curMousePixelPos;
     }
     
-    public bool cursorInBounds => curMousePixelPos.x <= 360 && curMousePixelPos.y > 720;
+    public bool cursorInTopLeftWindow => curMousePixelPos.x <= 360 && curMousePixelPos.y > 720;
 
     
     private void MouseRaycastWaterPlane(Vector3 screenPos) {

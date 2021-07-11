@@ -564,6 +564,14 @@ public class BrushesUI : MonoBehaviour {
         uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritOther2, layerManager.kingdomOther.trophicTiersList[0].trophicSlots[2].status, isSelectedAir);
         */
     }
+    
+    public void TickCreationBrush()
+    {
+        if(toolbarInfluencePoints >= 0.05f)
+            ApplyCreationBrush();
+        else
+            isInfluencePointsCooldown = true;
+    }
 	
     // * WPP: reduce conditional nesting
     public void ApplyCreationBrush() {
@@ -575,76 +583,67 @@ public class BrushesUI : MonoBehaviour {
         }
         uiManagerRef.updateTerrainAltitude = false;                
 
-        if (true) { //trophicLayersManager.isSelectedTrophicSlot) {
-            if(selectedEssenceSlot.kingdomID == KingdomId.Decomposers) {
+        if (true) //trophicLayersManager.isSelectedTrophicSlot)
+        { 
+            if(selectedEssenceSlot.kingdomID == KingdomId.Decomposers) 
+            {
                 simulationManager.vegetationManager.isBrushActive = true;
             }
-            else if(selectedEssenceSlot.kingdomID == KingdomId.Plants) {
+            else if(selectedEssenceSlot.kingdomID == KingdomId.Plants) 
+            {
                 simulationManager.vegetationManager.isBrushActive = true;
             }
-            else if(selectedEssenceSlot.id == KnowledgeMapId.Animals) {
+            else if(selectedEssenceSlot.id == KnowledgeMapId.Animals) 
+            {
                 int speciesIndex = selectedEssenceSlot.linkedSpeciesID;
-                if (theCursorCzar.isDraggingMouseLeft) {
+                if (theCursorCzar.isDraggingMouseLeft) 
+                {
                     //gameManager.simulationManager.recentlyAddedSpeciesOn = true; // ** needed?
                     uiManagerRef.isBrushAddingAgents = true;
-                                    
                     //Debug.Log("isBrushAddingAgents = true; speciesID = " + speciesIndex.ToString());
-
                     uiManagerRef.brushAddAgentCounter++;
 
-                    if(uiManagerRef.brushAddAgentCounter >= uiManagerRef.framesPerAgentSpawn) {
+                    if(uiManagerRef.brushAddAgentCounter >= uiManagerRef.framesPerAgentSpawn) 
+                    {
                         uiManagerRef.brushAddAgentCounter = 0;
-
                         simulationManager.AttemptToBrushSpawnAgent(speciesIndex);
                     }
                 }
-                if (theCursorCzar.isDraggingMouseRight) {
+                if (theCursorCzar.isDraggingMouseRight) 
+                {
                     simulationManager.AttemptToKillAgent(speciesIndex, new Vector2(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y), 15f);
                 }
             }
-            else if (selectedEssenceSlot.kingdomID == KingdomId.Terrain) {
+            else if (selectedEssenceSlot.terrainSelected) 
+            {
                 uiManagerRef.updateTerrainAltitude = true;
                 uiManagerRef.terrainUpdateMagnitude = 0.05f;
-                if(selectedEssenceSlot.layerIndex == 0) { // WORLD
+                
+                // * WPP: is this all possible conditions?
+                if (selectedEssenceSlot.worldSelected || 
+                    selectedEssenceSlot.stoneSelected ||   
+                    selectedEssenceSlot.pebblesSelected ||  
+                    selectedEssenceSlot.sandSelected)  
+                { 
                     uiManagerRef.terrainUpdateMagnitude = 1f;
                     //theRenderKing.ClickTestTerrainUpdateMaps(true, 0.4f);
                 }
-                else if(selectedEssenceSlot.layerIndex == 1) {  // STONE
-                    uiManagerRef.terrainUpdateMagnitude = 1f;
-                    //theRenderKing.ClickTestTerrainUpdateMaps(true, 0.04f);
-                }
-                else if(selectedEssenceSlot.layerIndex == 2) {  // PEBBLES
-                    uiManagerRef.terrainUpdateMagnitude = 1f;
-                    //theRenderKing.ClickTestTerrainUpdateMaps(true, 0.04f);
-                }
-                else if(selectedEssenceSlot.layerIndex == 3) {  // SAND
-                    uiManagerRef.terrainUpdateMagnitude = 1f;
-                    //heRenderKing.ClickTestTerrainUpdateMaps(true, 0.04f);
-                }
             }
-            else {
-                if (selectedEssenceSlot.layerIndex == 0) {  // MINERALS
+            else 
+            {
+                if (selectedEssenceSlot.mineralsSelected) 
+                {  
                     simulationManager.vegetationManager.isBrushActive = true;
                 }
-                else if (selectedEssenceSlot.layerIndex == 1) {   // WATER
-                    if (theCursorCzar.isDraggingMouseLeft) {
-                        SimulationManager._GlobalWaterLevel = Mathf.Clamp01(SimulationManager._GlobalWaterLevel + 0.002f);
-                    }
-                    if (theCursorCzar.isDraggingMouseRight) {
-                        SimulationManager._GlobalWaterLevel = Mathf.Clamp01(SimulationManager._GlobalWaterLevel - 0.002f);
-                    }
+                else if (selectedEssenceSlot.waterSelected && theCursorCzar.isDraggingMouse)
+                {
+                    SimulationManager._GlobalWaterLevel = Mathf.Clamp01(SimulationManager._GlobalWaterLevel + 0.002f);
                 }
-                else if (selectedEssenceSlot.layerIndex == 2) {   // AIR
-                    if (theCursorCzar.isDraggingMouseLeft) {
-                        if (Random.Range(0f, 1f) < 0.1f) {
-                            simulationManager.environmentFluidManager.curTierWaterCurrents = Mathf.Clamp((simulationManager.environmentFluidManager.curTierWaterCurrents + 1), 0, 10);
-                        }                                    
-                    }
-                    if (theCursorCzar.isDraggingMouseRight) {
-                        if(Random.Range(0f, 1f) < 0.1f) {
-                            simulationManager.environmentFluidManager.curTierWaterCurrents = Mathf.Clamp((simulationManager.environmentFluidManager.curTierWaterCurrents - 1), 0, 10);                       
-                        }
-                    }  
+                else if (selectedEssenceSlot.airSelected &&
+                        theCursorCzar.isDraggingMouse &&
+                        Random.Range(0f, 1f) < 0.1f) 
+                {
+                    simulationManager.environmentFluidManager.curTierWaterCurrents = Mathf.Clamp((simulationManager.environmentFluidManager.curTierWaterCurrents + 1), 0, 10);
                 }
             }              
         }
@@ -679,12 +678,10 @@ public class BrushesUI : MonoBehaviour {
         if(isOpen) {
             EnterCreationBrushMode();
             //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
-
             //animatorBrushesUI.SetBool("MinPanel", false);
         }
         else {
             //uiManagerRef.panelFocus = PanelFocus.WorldHub;
-
             //animatorBrushesUI.SetBool("MinPanel", true);
         }
     }
@@ -775,9 +772,7 @@ public class BrushesUI : MonoBehaviour {
         //trophicLayersManager.isSelectedTrophicSlot = true;
         //trophicLayersManager.selectedTrophicSlotRef = slot;
         
-        //
         selectedBrushVertebrateSpeciesID = slot.linkedSpeciesID; // update this next ***
-        
         selectedBrushLinkedSpiritOtherLayer = data.layerIndex;
 
         //isBrushSelected = false;
@@ -837,7 +832,6 @@ public class BrushesUI : MonoBehaviour {
         selectedEssenceSlot = slot;
        
         selectedBrushVertebrateSpeciesID = slot.linkedSpeciesID; // update this next
-
         selectedBrushLinkedSpiritVertebrateLayer = data.layerIndex;
         isPaletteOpen = false;
         EnterCreationBrushMode();

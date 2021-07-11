@@ -70,17 +70,15 @@ public class ObserverModeUI : MonoBehaviour
         TickAnnouncement();
                                 
         // If mouse is over ANY unity canvas UI object (with raycast enabled)
-        if (EventSystem.current.IsPointerOverGameObject()) 
-        {  
+        if (EventSystem.current.IsPointerOverGameObject())
             TickUITooltip();
-        }
         else 
         {
             TickObjectTooltip();
             TickBrushes();
         }
         
-        // WPP: branches have identical result
+        // WPP: branches have identical result - error?
         //if (theCursorCzar.isDraggingMouseLeft || theCursorCzar.isDraggingMouseRight) {
         //    theRenderKing.ClickTestTerrainUpdateMaps(updateTerrainAltitude, terrainUpdateMagnitude);
         //}
@@ -108,33 +106,22 @@ public class ObserverModeUI : MonoBehaviour
     
     void TickUITooltip()
     {
-        if(genomeViewerUI.isTooltipHover) 
-        {
-            panelTooltip.SetActive(true);
-            string tipString = genomeViewerUI.tooltipString;
-            textTooltip.text = tipString;
-            textTooltip.color = Color.cyan;
-        }
-        else 
-        {
-            panelTooltip.SetActive(theCursorCzar.cursorInBounds);
-            if (!panelTooltip.activeSelf) return;
-
-            textTooltip.text = "Year " + ((simulationManager.simAgeTimeSteps / 2048f) * cursorX / 360f).ToString("F0");
-            textTooltip.color = Color.yellow;
-            panelTooltip.SetActive(true);
-        } 
+        if (genomeViewerUI.isTooltipHover)
+            ActivateTooltip(genomeViewerUI.tooltipString, Color.cyan);
+        else if (theCursorCzar.cursorInTopLeftWindow)
+            ActivateTooltip("Year " + ((simulationManager.simAgeTimeSteps / 2048f) * cursorX / 360f).ToString("F0"), Color.yellow);
+        else
+            panelTooltip.SetActive(false);
     }
     
     void TickObjectTooltip()
     {
+        #region dead code - please delete
         //int selectedPlantID = vegetationManager.selectedPlantParticleIndex;
         //int closestPlantID = vegetationManager.closestPlantParticleData.index;
-        float plantDist = (vegetationManager.closestPlantParticleData.worldPos - new Vector2(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y)).magnitude;
 
         //int selectedZoopID = zooplanktonManager.selectedAnimalParticleIndex;
         //int closestZoopID = zooplanktonManager.closestAnimalParticleData.index;
-        float zoopDist = (new Vector2(zooplanktonManager.closestAnimalParticleData.worldPos.x, zooplanktonManager.closestAnimalParticleData.worldPos.y) - new Vector2(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y)).magnitude;
         
         //if(plantDist < zoopDist) {                       
         //    if(panelFocus == PanelFocus.Watcher && !cameraManager.isMouseHoverAgent && theCursorCzar.leftClickThisFrame) { 
@@ -159,45 +146,54 @@ public class ObserverModeUI : MonoBehaviour
         //        }
         //    }
         //}
+        #endregion
         
         manager.isPlantHighlight = false;
         manager.isZooplanktonHighlight = false;
         manager.isVertebrateHighlight = false;
         
         float hitboxRadius = 1f;
+        float plantDistance = (vegetationManager.closestPlantParticleData.worldPos - theCursorCzar.curMousePositionOnWaterPlane2D).magnitude;
+        float microbeDistance = (zooplanktonManager.closestAnimalParticlePosition2D - theCursorCzar.curMousePositionOnWaterPlane2D).magnitude;
         
-        if(cameraManager.isMouseHoverAgent) 
+        if (cameraManager.isMouseHoverAgent) 
         {
             manager.isVertebrateHighlight = true;
-            textTooltip.text = "Critter #" + cameraManager.mouseHoverAgentRef.candidateRef.candidateID;
-            textTooltip.color = Color.white;
+            ActivateTooltip("Critter #" + cameraManager.mouseHoverAgentRef.candidateRef.candidateID, Color.white);
         }
-        else 
+        else if (plantDistance < hitboxRadius || microbeDistance < hitboxRadius)
         {
-            if(plantDist < zoopDist && plantDist < hitboxRadius) 
+            if (plantDistance < microbeDistance) 
             {
                 manager.isPlantHighlight = true;
-                textTooltip.text = "Algae #" + vegetationManager.closestPlantParticleData.index;
-                textTooltip.color = Color.green;
+                ActivateTooltip("Algae #" + vegetationManager.closestPlantParticleData.index, Color.green);
             }
-            if(plantDist > zoopDist && zoopDist < hitboxRadius) 
+            else
             {
                 manager.isZooplanktonHighlight = true;
-                textTooltip.text = "Microbe #" + zooplanktonManager.closestAnimalParticleData.index;
-                textTooltip.color = Color.yellow;
+                ActivateTooltip("Microbe #" + zooplanktonManager.closestAnimalParticleData.index, Color.yellow);
             }
         }
-        
-        panelTooltip.SetActive(manager.isLifeHighlight);
+        else
+            panelTooltip.SetActive(false);
 
         //float cursorCoordsX = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().x) / 360f);
         //float cursorCoordsY = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().y - 720f) / 360f);  
-        if (theCursorCzar.cursorInBounds) 
-        {
-            textTooltip.text = "TimeStep #" + (simulationManager.simAgeTimeSteps * cursorX / 360f).ToString("F0");
-            textTooltip.color = Color.yellow;
-            panelTooltip.SetActive(true);
-        }
+        if (theCursorCzar.cursorInTopLeftWindow)
+            ActivateTooltip("TimeStep #" + (simulationManager.simAgeTimeSteps * cursorX / 360f).ToString("F0"), Color.yellow);
+    }
+    
+    // WPP - TBD:
+    // string GetTooltipText(TooltipTypeEnum) { }
+    // TooltipData GetTooltipData(TooltipTypeEnum) { }
+    // struct TooltipData { TooltipTypeEnum, Color }
+    // void ActivateTooltip(TooltipTypeEnum) { }
+    
+    void ActivateTooltip(string text, Color color)
+    {
+        textTooltip.text = text;
+        textTooltip.color = color;
+        panelTooltip.SetActive(true);        
     }
     
     void TickBrushes()
@@ -205,33 +201,11 @@ public class ObserverModeUI : MonoBehaviour
         if (curActiveTool == ToolType.Stir) 
         {  
             theCursorCzar.stirGizmoVisible = true;
-            
-            float isActing = 0f;
-            
-            if (theCursorCzar.isDraggingMouseLeft) 
-            { 
-                isActing = 1f;
-                float mag = theCursorCzar.smoothedMouseVel.magnitude;
-                float radiusMult = Mathf.Lerp(0.075f, 1.33f, Mathf.Clamp01(theRenderKing.baronVonWater.camDistNormalized * 1.4f)); // 0.62379f; // (1f + gameManager.simulationManager.theRenderKing.baronVonWater.camDistNormalized * 1.5f);
-
-                // * WPP: move to SimulationManager
-                if(mag > 0f) 
-                {
-                    simulationManager.PlayerToolStirOn(theCursorCzar.curMousePositionOnWaterPlane, theCursorCzar.smoothedMouseVel * (0.25f + theRenderKing.baronVonWater.camDistNormalized * 1.2f), radiusMult);  
-                }
-                else 
-                {
-                    simulationManager.PlayerToolStirOff();
-                }
-            }
-            else 
-            {
-                simulationManager.PlayerToolStirOff();                        
-            }
+            simulationManager.TickPlayerStirTool();
 
             // var stirMin = isActing > 0.5f ? 1f : -4f;
             // theCursorCzar.stirStickDepth = Mathf.Lerp(theCursorCzar.stirStickDepth, stirMin, 0.2f);
-            
+            float isActing = theCursorCzar.isDraggingMouseLeft ? 1f : 0f;
             theRenderKing.isStirring = theCursorCzar.isDraggingMouseLeft;
             theRenderKing.gizmoStirToolMat.SetFloat(STIRRING, isActing);
             theRenderKing.gizmoStirStickAMat.SetFloat(STIRRING, isActing);                    
@@ -250,19 +224,8 @@ public class ObserverModeUI : MonoBehaviour
             theCursorCzar.stirGizmoVisible = true;
             simulationManager.PlayerToolStirOff();
 
-            if (theCursorCzar.isDraggingMouse && !brushesUI.isInfluencePointsCooldown) 
-            {
-                if(brushesUI.toolbarInfluencePoints >= 0.05f) 
-                {
-                    brushesUI.ApplyCreationBrush();
-                }
-                else 
-                {
-                    Debug.Log("NOT ENOUGH MANA!");
-                    // Enter Cooldown!
-                    brushesUI.isInfluencePointsCooldown = true;
-                }
-            }
+            if (theCursorCzar.isDraggingMouse && !brushesUI.isInfluencePointsCooldown)
+                brushesUI.TickCreationBrush();
         }
     }  
     

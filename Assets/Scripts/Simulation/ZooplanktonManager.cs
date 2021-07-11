@@ -45,6 +45,8 @@ public class ZooplanktonManager {
     public WorldLayerZooplanktonGenome zooplanktonSlotGenomeCurrent;  // algae particles!  -- likely to be converted into plants eventually ***
     public WorldLayerZooplanktonGenome[] zooplanktonSlotGenomeMutations;
     
+    public Vector2 closestAnimalParticlePosition2D => closestAnimalParticleData.worldPos2D;
+    
     public struct AnimalParticleData {
         public int index;
 	    public int critterIndex; // index of creature which swallowed this foodParticle
@@ -70,6 +72,8 @@ public class ZooplanktonManager {
         public Vector4 genomeVector;
         public float extra0;
         public float energy;
+        
+        public Vector2 worldPos2D => new Vector2(worldPos.x, worldPos.y);
     }
    
     private int GetAnimalParticleDataSize() {
