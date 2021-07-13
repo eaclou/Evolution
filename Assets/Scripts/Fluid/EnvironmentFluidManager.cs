@@ -282,7 +282,7 @@ public class EnvironmentFluidManager : MonoBehaviour {
         computeShaderFluidSim.SetBuffer(kernelGetObjectVelocities, "VelocityValuesCBuffer", velocityValuesCBuffer);
         computeShaderFluidSim.SetTexture(kernelGetObjectVelocities, "VelocityRead", velocityPressureDivergenceMain);
         computeShaderFluidSim.SetFloat("_MapSize", SimulationManager._MapSize);
-        computeShaderFluidSim.Dispatch(kernelGetObjectVelocities, positionsArray.Length, 1, 1);
+        computeShaderFluidSim.Dispatch(kernelGetObjectVelocities, 1, 1, 1);
 
         velocityValuesCBuffer.GetData(objectVelocitiesArray);
 

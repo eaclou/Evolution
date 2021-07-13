@@ -118,10 +118,6 @@ public class SimulationManager : Singleton<SimulationManager>
         return null;
     }
 
-    //public bool recentlyAddedSpeciesOn = false;// = true;
-    //private Vector2 recentlyAddedSpeciesWorldPos; // = new Vector2(spawnPos.x, spawnPos.y);
-    //private int recentlyAddedSpeciesID; // = masterGenomePool.completeSpeciesPoolsList.Count - 1;
-    //private int recentlyAddedSpeciesTimeCounter = 0;
 
     GlobalGraphData globalGraphData = new GlobalGraphData();
         
@@ -675,6 +671,7 @@ public class SimulationManager : Singleton<SimulationManager>
     /// Pass in linkedSpeciesID to get mass for one species only, otherwise gets entire population mass
     float GetTotalAgentBiomass(int linkedSpeciesID = -1) {
         float result = 0f;
+        int aliveCreatures = 0;
         
         for (int a = 0; a < numAgents; a++) {
             if(agents[a].isAwaitingRespawn ||
@@ -682,8 +679,10 @@ public class SimulationManager : Singleton<SimulationManager>
                 continue;
             
             result += agents[a].currentBiomass;
+            aliveCreatures++;
         }
-        
+
+        masterGenomePool.curNumAliveAgents = aliveCreatures;
         return result;
     }
 
@@ -715,20 +714,7 @@ public class SimulationManager : Singleton<SimulationManager>
             agents[i].depthGradient = depthSampleInitialized ? 
                 new Vector2(depthSample.y, depthSample.z).normalized :
                 Vector2.zero;
-
-            //float agentSize = (agentsArray[i].fullSizeBoundingBox.x + agentsArray[i].fullSizeBoundingBox.y) * agentsArray[i].sizePercentage * 0.25f + 0.025f;
-            //float floorDepth = depthSample.x * 10f;
-            /*Vector3 depthSampleNorth = simStateData.depthAtAgentPositionsArray[i * 5 + 1];
-            agentsArray[i].depthNorth = depthSampleNorth.x;
-            Vector3 depthSampleEast = simStateData.depthAtAgentPositionsArray[i * 5 + 2];
-            agentsArray[i].depthEast = depthSampleEast.x;
-            Vector3 depthSampleSouth = simStateData.depthAtAgentPositionsArray[i * 5 + 3];
-            agentsArray[i].depthSouth = depthSampleSouth.x;
-            Vector3 depthSampleWest = simStateData.depthAtAgentPositionsArray[i * 5 + 4];
-            agentsArray[i].depthWest = depthSampleWest.x;
-            */
-            // precalculate normals?
-                                                   //***** world boundary *****
+                                    //***** world boundary *****
             if (depthSample.x > _GlobalWaterLevel || depthSample.w < 0.1f) //(floorDepth < agentSize)
             {
                 float wallForce = 12.0f; // Mathf.Clamp01(agentSize - floorDepth) / agentSize;
@@ -748,12 +734,7 @@ public class SimulationManager : Singleton<SimulationManager>
                     defendBonus = agents[i].isDefending ? 0f : 1.5f;
                     damage *= defendBonus;
 
-                    //agentsArray[i].coreModule.hitPoints[0] -= damage;
-                    // currently no distinctionbetween regions:
-                    //agentsArray[i].coreModule.healthHead -= damage;  //***EAC Handled inside TakeDamage() func!!!
-                    //agentsArray[i].coreModule.healthBody -= damage;
-                    //agentsArray[i].coreModule.healthExternal -= damage;
-
+                   
                     agents[i].candidateRef.performanceData.totalDamageTaken += damage;
                     agents[i].coreModule.isContact[0] = 1f;
                     agents[i].coreModule.contactForceX[0] = grad.x;
@@ -802,31 +783,7 @@ public class SimulationManager : Singleton<SimulationManager>
     public void PlayerToolStirOff() {        
         environmentFluidManager.StirWaterOff();
     }
-    /*public void PlayerFeedToolSprinkle(Vector3 pos) {
-        Debug.Log("PlayerFeedToolSprinkle pos: " + pos.ToString());
-        int[] respawnIndices = new int[4];
-        for(int i = 0; i < respawnIndices.Length; i++) {
-            respawnIndices[i] = UnityEngine.Random.Range(0, 1024);
-        }
-        //vegetationManager.ReviveSelectFoodParticles(respawnIndices, 1.25f, new Vector4(pos.x / _MapSize, pos.y / _MapSize, 0f, 0f), simStateData);
-    }
-    public void PlayerFeedToolPour(Vector3 pos) {        
-        int xCoord = Mathf.RoundToInt(pos.x / 256f * vegetationManager.resourceGridTexResolution);
-        int yCoord = Mathf.RoundToInt(pos.y / 256f * vegetationManager.resourceGridTexResolution);
-
-        Debug.Log("PlayerFeedToolPour pos: " + xCoord.ToString() + ", " + yCoord.ToString());
-
-        //vegetationManager.AddAlgaeAtCoords(5f, xCoord, yCoord);
-
-        int[] respawnIndices = new int[32];
-        for(int i = 0; i < respawnIndices.Length; i++) {
-            respawnIndices[i] = UnityEngine.Random.Range(0, 1024);
-        }
-        //vegetationManager.ReviveSelectFoodParticles(respawnIndices, 6f, new Vector4(pos.x / _MapSize, pos.y / _MapSize, 0f, 0f), simStateData);
-    }*/
-    //public void ChangeGlobalMutationRate(float normalizedVal) {
-    //    settingsManager.SetGlobalMutationRate(normalizedVal);
-    //}
+    
     
     private void PopulateGridCells() {
 
@@ -887,17 +844,8 @@ public class SimulationManager : Singleton<SimulationManager>
     
     // AUTO-SPAWN  *** revisit 
     private void CheckForReadyToSpawnAgents() {      
-        int respawnThreshold = 55;
-        //lifespan = uiManagerRef.gameManager.simulationManager.graphDataVertebrateLifespan0.curVal;
-        //       population = uiManagerRef.gameManager.simulationManager.graphDataVertebratePopulation0.curVal;
-        //        foodEaten = uiManagerRef.gameManager.simulationManager.graphDataVertebrateFoodEaten0.curVal;
-        //        genome = uiManagerRef.gameManager.simulationManager.graphDataVertebrateGenome0.curVal
-        /*if (graphDataVertebratePopulation0.curVal < 32) {
-            respawnThreshold = 21;
-        }
-        else if (graphDataVertebratePopulation0.curVal > 48) {
-            respawnThreshold = 700;
-        }*/
+        int respawnThreshold = 1;
+        
 
         for (int a = 0; a < agents.Length; a++) {
             if(agentRespawnCounter <= respawnThreshold || !agents[a].isAwaitingRespawn)
@@ -1014,23 +962,9 @@ public class SimulationManager : Singleton<SimulationManager>
             candidateData.isBeingEvaluated = true;
         }
         else { // No eggSack found:
-               //if(agentIndex != 0) {  // temp hack to avoid null reference exceptions:
-
+            
             Vector3 randWorldPos = new Vector3(Random.Range(_MapSize * 0.4f, _MapSize * 0.6f), Random.Range(_MapSize * 0.4f, _MapSize * 0.6f), 0f);// GetRandomFoodSpawnPosition().startPosition;
-            // Find parent agent location:
-            //Agent parentAgent;
-            /*for(int i = 0; i < numAgents; i++) {
-                if(agentsArray[i].isMature) {
-                    float rand = Random.Range(0f, 1f);
-                    if(rand < 0.1f) {
-                        float mag = 7.5f;
-                        randWorldPos = new Vector3(agentsArray[i].ownPos.x + Random.Range(-1f, 1f) * mag, agentsArray[i].ownPos.y + Random.Range(-1f, 1f) * mag, 0f);
-
-                        break;
-                    }
-                }
-            }*/
-
+            
             Vector2 spawnWorldPos = new Vector2(randWorldPos.x, randWorldPos.y);
             Vector4 altitudeSample = uiManager.SampleTexture(theRenderKing.baronVonTerrain.terrainHeightDataRT, spawnWorldPos / _MapSize);
 
@@ -1132,49 +1066,8 @@ public class SimulationManager : Singleton<SimulationManager>
             // -- at the same time, remove it from the ToBeEvaluated pool
             speciesPool.ProcessCompletedCandidate(candidateData, masterGenomePool);
 
-            /*
-            float lerpAmount = Mathf.Max(0.01f, 1f / (float)speciesPool.numAgentsEvaluated);  //***EC isn't this handled elsewhere???
-
-            avgPerformanceData.totalTicksAlive = (int)Mathf.Lerp((float)avgPerformanceData.totalTicksAlive, (float)agentRef.ageCounter, lerpAmount);
-            avgPerformanceData.totalFoodEatenCorpse = Mathf.Lerp(avgPerformanceData.totalFoodEatenCorpse, agentPerformanceData.totalFoodEatenCorpse, lerpAmount);
-            avgPerformanceData.totalFoodEatenPlant = Mathf.Lerp(avgPerformanceData.totalFoodEatenPlant, agentPerformanceData.totalFoodEatenPlant, lerpAmount);
-            avgPerformanceData.totalFoodEatenZoop = Mathf.Lerp(avgPerformanceData.totalFoodEatenZoop, agentPerformanceData.totalFoodEatenZoop, lerpAmount);
-            avgPerformanceData.totalFoodEatenEgg = Mathf.Lerp(avgPerformanceData.totalFoodEatenEgg, agentPerformanceData.totalFoodEatenEgg, lerpAmount);
-            avgPerformanceData.totalFoodEatenCreature = Mathf.Lerp(avgPerformanceData.totalFoodEatenCreature, agentPerformanceData.totalFoodEatenCreature, lerpAmount);
-            */
-            //Debug.Log("WTF?? " + avgPerformanceData.totalTicksAlive.ToString());
-
-            //speciesPool.avgPerformanceData.avgBodySize = Mathf.Lerp(speciesPool.avgPerformanceData.avgBodySize, agentRef.candidateRef.performanceData.fullSizeBodyVolume, lerpAmount);
-            //speciesPool.avgPerformanceData.avgSpecAttack = Mathf.Lerp(speciesPool.avgPerformanceData.avgSpecAttack, (float)agentRef.candidateRef.performanceData.coreModule.talentSpecAttackNorm, lerpAmount);
-            ////speciesPool.avgPerformanceData.avgSpecDefend = Mathf.Lerp(speciesPool.avgPerformanceData.avgSpecDefend, (float)agentRef.candidateRef.performanceData.coreModule.talentSpecDefenseNorm, lerpAmount);
-            //speciesPool.avgPerformanceData.avgSpecSpeed = Mathf.Lerp(speciesPool.avgPerformanceData.avgSpecSpeed, (float)agentRef.candidateRef.performanceData.coreModule.talentSpecSpeedNorm, lerpAmount);
-            //speciesPool.avgPerformanceData.avgSpecUtility = Mathf.Lerp(speciesPool.avgPerformanceData.avgSpecUtility, (float)agentRef.candidateRef.performanceData.coreModule.talentSpecUtilityNorm, lerpAmount);
-            //speciesPool.avgPerformanceData.avgFoodSpecDecay = Mathf.Lerp(speciesPool.avgPerformanceData.avgFoodSpecDecay, (float)agentRef.candidateRef.performanceData.coreModule.dietSpecDecayNorm, lerpAmount);
-            //speciesPool.avgPerformanceData.avgFoodSpecPlant = Mathf.Lerp(speciesPool.avgPerformanceData.avgFoodSpecPlant, (float)agentRef.candidateRef.performanceData.coreModule.dietSpecPlantNorm, lerpAmount);
-            //speciesPool.avgPerformanceData.avgFoodSpecMeat = Mathf.Lerp(speciesPool.avgPerformanceData.avgFoodSpecMeat, (float)agentRef.candidateRef.performanceData.coreModule.dietSpecMeatNorm, lerpAmount);
-            //speciesPool.avgPerformanceData.avgNumNeurons = Mathf.Lerp(speciesPool.avgPerformanceData.avgNumNeurons, (float)agentRef.candidateRef.performanceData.brain.neuronList.Count, lerpAmount);
-            //speciesPool.avgPerformanceData.avgNumAxons = Mathf.Lerp(speciesPool.avgPerformanceData.avgNumAxons, (float)agentRef.candidateRef.performanceData.brain.axonList.Count, lerpAmount);
-            //speciesPool.avgPerformanceData.avgExperience = Mathf.Lerp(speciesPool.avgPerformanceData.avgExperience, (float)agentRef.candidateRef.performanceData.totalExperience, lerpAmount);
-            //speciesPool.avgPerformanceData.avgFitnessScore = Mathf.Lerp(speciesPool.avgPerformanceData.avgFitnessScore, (float)agentRef.candidateRef.performanceData.masterFitnessScore, lerpAmount);
-            /*
-            avgPerformanceData.totalDamageDealt = Mathf.Lerp(avgPerformanceData.totalDamageDealt, agentPerformanceData.totalDamageDealt, lerpAmount);
-            avgPerformanceData.totalDamageTaken = Mathf.Lerp(avgPerformanceData.totalDamageTaken, agentPerformanceData.totalDamageTaken, lerpAmount);
-
-            avgPerformanceData.totalTicksRested = (int)Mathf.Lerp((float)avgPerformanceData.totalTicksRested, (float)agentPerformanceData.totalTicksRested, lerpAmount);
-            avgPerformanceData.totalTimesAttacked = (int)Mathf.Lerp((float)avgPerformanceData.totalTimesAttacked, (float)agentPerformanceData.totalTimesAttacked, lerpAmount);
-            avgPerformanceData.totalTimesDefended = (int)Mathf.Lerp((float)avgPerformanceData.totalTimesDefended, (float)agentPerformanceData.totalTimesDefended, lerpAmount);
-            avgPerformanceData.totalTimesDashed = (int)Mathf.Lerp((float)avgPerformanceData.totalTimesDashed, (float)agentPerformanceData.totalTimesDashed, lerpAmount);
-            avgPerformanceData.totalTimesPregnant = (int)Mathf.Lerp((float)avgPerformanceData.totalTimesPregnant, (float)agentPerformanceData.totalTimesPregnant, lerpAmount);
-            */
-            // More??
-            //masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex].
         }
-        else {
-            // -- Else:
-            // -- (move to end of pool queue OR evaluate all Trials of one genome before moving onto the next)
-            // only used if single genomes are tested multiple times
-        }
-
+     
         // &&&&& *****  HERE!!!! **** &&&&&&   --- Select a species first to serve as parentGenome !! ***** &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
         // Can be random selection (unbiased), or proportional to species avg Fitnesses?
         SpeciesGenomePool sourceSpeciesPool = masterGenomePool.SelectNewGenomeSourceSpecies(false, 0.33f); // select at random
@@ -1331,17 +1224,9 @@ public class SimulationManager : Singleton<SimulationManager>
                 
         float approxGen = (float)numAgentsBorn / (float)(numAgents - 1);
         if (approxGen > curApproxGen) {
-            //statsNutrientsEachGenerationList.Add(new Vector4(foodManager.curGlobalNutrients, foodManager.curGlobalFoodParticles, 0f, 0f));
             curApproxGen++;            
         }
-        /*else {
-            if(numAgentsProcessed < 130) {
-                if(numAgentsProcessed % 8 == 0) {
-                    //statsNutrientsEachGenerationList[curApproxGen - 1] = new Vector4(foodManager.curGlobalNutrients, foodManager.curGlobalFoodParticles, 0f, 0f);
-                    
-                }
-            }
-        }*/
+        
     }
     
     float GetTotalEggSackVolume() {
@@ -1523,10 +1408,13 @@ public class SimulationManager : Singleton<SimulationManager>
     QualitySettingId fluidPhysicsQuality => gameOptions.fluidPhysicsQuality;
     
     public void ApplyQualitySettings() {
+        
         numAgents = qualitySettings.GetAgentCount(simulationComplexity);
         numEggSacks = qualitySettings.GetEggSackCount(simulationComplexity);
         numInitialHiddenNeurons = qualitySettings.GetHiddenNeuronCont(simulationComplexity);
         environmentFluidManager.SetResolution(fluidPhysicsQuality);
+
+        Debug.Log("ApplyQualitySettings() numAgents: " + numAgents);
     }
     
     private void OnDisable() {

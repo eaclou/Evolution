@@ -213,7 +213,7 @@ public class Agent : MonoBehaviour {
 
     public float GetDecayPercentage() {
         if (biomassAtDeath == 0f) {
-            Debug.LogError("Biomass at death zero for " + index);
+            //Debug.LogError("Biomass at death zero for " + index);
             return 0f;
         }
         if (!isDead) {

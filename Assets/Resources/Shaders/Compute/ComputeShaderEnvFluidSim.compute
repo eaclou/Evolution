@@ -370,7 +370,7 @@ void GetVelAtCoords (uint3 id : SV_DispatchThreadID)
 	VelocityValuesCBuffer[0] = vel;
 }
 
-[numthreads(1,1,1)]
+[numthreads(256,1,1)]
 void GetObjectVelocities (uint3 id : SV_DispatchThreadID)
 {	
 	

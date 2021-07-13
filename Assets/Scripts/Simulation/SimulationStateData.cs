@@ -253,6 +253,8 @@ public class SimulationStateData {
         //predatorFluidPositionsArray = new Vector4[simManager._NumPredators];
 
         depthAtAgentPositionsArray = new Vector4[simManager.numAgents];
+
+        Logger.Log("depthAtAgentPositionsArray " + fluidVelocitiesAtAgentPositionsArray.Length + ", " + agentFluidPositionsArray.Length);
     }
 
     public void PopulateSimDataArrays() {
@@ -364,7 +366,6 @@ public class SimulationStateData {
                 if (!simManager.agents[i].isMature)
                 {
                     critterSimDataArray[i].consumeOn = 0f;
-                    //critterSimDataArray[i].biteAnimCycle *= 0.75f;
                 }
 
                 critterSimDataArray[i].moveAnimCycle = simManager.agents[i].animationCycle;
@@ -377,25 +378,13 @@ public class SimulationStateData {
                 // Z & W coords represents agent's x/y Radii (in FluidCoords)
                 float agentCenterX = agentPos.x / SimulationManager._MapSize;
                 float agentCenterY = agentPos.y / SimulationManager._MapSize;
-                /*float sensorRange = 0.0025f;  // in UV 0-1
-                Vector2[] directionsArray = new Vector2[5];
-                directionsArray[0] = new Vector2(0f, 0f) * sensorRange;
-                directionsArray[1] = new Vector2(0f, 1f) * sensorRange;
-                directionsArray[2] = new Vector2(1f, 0f) * sensorRange;
-                directionsArray[3] = new Vector2(0f, -1f) * sensorRange;
-                directionsArray[4] = new Vector2(-1f, 0f) * sensorRange;
-                */
-                
+                               
                 agentFluidPositionsArray[i] = new Vector4(agentCenterX, 
                                                           agentCenterY, 
                                                           (simManager.agents[i].fullSizeBoundingBox.x + 0.25f) * 0.5f / SimulationManager._MapSize,  // **** REVISIT!!!!! ****
                                                           (simManager.agents[i].fullSizeBoundingBox.y + 0.25f) * 0.5f / SimulationManager._MapSize); //... 0.5/140 ...
                 
-                // ***************************** // TEMP HACK!!!!!!! *************************
-                /*if(i == 0) {
-                    critterSimDataArray[i].worldPos = simManager.uiManager.curMousePositionOnWaterPlane;// / SimulationManager._MapSize;
-                    critterSimDataArray[i].consumeOn = 0f;
-                }*/
+                
             }
         }
         

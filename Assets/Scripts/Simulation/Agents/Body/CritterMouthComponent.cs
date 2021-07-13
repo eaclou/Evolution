@@ -181,7 +181,7 @@ public class CritterMouthComponent : MonoBehaviour {
             // No idea what's going on -- game crashes if agent[0] is eaten and seems to thing it's null when it is not??? ****
         }
         else {
-            Debug.Log("SwallowAnimalWhole [" + agentRef.index.ToString() + "] ---> [" + preyAgent.index.ToString() + "]");
+            //Debug.Log("SwallowAnimalWhole [" + agentRef.index.ToString() + "] ---> [" + preyAgent.index.ToString() + "]");
             ProcessPredatorySwallowAttempt(agentRef, preyAgent);
         }
         

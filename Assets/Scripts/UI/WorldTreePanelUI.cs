@@ -58,6 +58,8 @@ public class WorldTreePanelUI : MonoBehaviour
 
     public void UpdateUI() { //***EAC UpdateUI() AND RefreshUI() ?????? 
         textTitle.text = "mode: " + curPanelMode + ", focus: " + focusLevel + ", " + timelineStartTimeStep.ToString("F0");
+        textTitle.text = simulationManager.masterGenomePool.curNumAliveAgents.ToString();
+
         //*** update positions of buttons, etc.
         //**** TEMP!!! TESTING!!!
 

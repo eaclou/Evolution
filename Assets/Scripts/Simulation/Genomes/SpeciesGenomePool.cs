@@ -144,7 +144,7 @@ public class SpeciesGenomePool {
         //=========================================================================
 
         string debugTxt = "";
-        for (int i = 0; i < 12; i++) {
+        for (int i = 0; i < 64; i++) {
             
             mutationSettingsRef.bodyCoreSizeMutationChance = 0.5f;
             mutationSettingsRef.bodyCoreMutationStepSize = 0.1f;

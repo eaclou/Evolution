@@ -171,7 +171,7 @@ void CSUpdateGroundStrokes (uint3 id : SV_DispatchThreadID)
 	terrainFrameBufferStrokesCBuffer[id.x] = data;
 }
 
-[numthreads(64,1,1)]
+[numthreads(256,1,1)]
 void CSGetObjectDepths (uint3 id : SV_DispatchThreadID)
 {				
 	float4 data = ObjectPositionsCBuffer[id.x];

@@ -1286,7 +1286,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_TextureResolution", (float)baronVonTerrain.terrainHeightDataRT.width);
-        baronVonTerrain.computeShaderTerrainGeneration.Dispatch(kernelGetObjectDepths, positionsArray.Length / 64, 1, 1);
+        baronVonTerrain.computeShaderTerrainGeneration.Dispatch(kernelGetObjectDepths, 1, 1, 1);
         // *******
         // only returning x channel data currently!!!! **** Need to move depthMapGeneration to terrainCompute and pre-calculate gradients there
         depthValuesCBuffer.GetData(objectDepthsArray);
