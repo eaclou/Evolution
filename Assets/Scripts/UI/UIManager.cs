@@ -313,7 +313,7 @@ public class UIManager : Singleton<UIManager> {
         
         observerModeUI.Tick();  // <== this is the big one *******  
         // ^^^  Need to Clean this up and replace with better approach ***********************        
-        theCursorCzar.UpdateCursorCzar();  // this will assume a larger role
+        theCursorCzar.Tick();  // this will assume a larger role
         brushesUI.UpdateBrushesUI();        
         
         if(focusedCandidate != null && focusedCandidate.candidateGenome != null) {

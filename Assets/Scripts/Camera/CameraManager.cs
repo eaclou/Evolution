@@ -63,7 +63,7 @@ public class CameraManager : Singleton<CameraManager> {
         if (targetAgentTransform && isFollowingAgent)
         {
             curCameraFocusPivotPos = targetAgentTransform.position;
-            curCameraFocusPivotPos.z = -SimulationManager._GlobalWaterLevel * SimulationManager._MaxAltitude; // *** for now this is where creatures are for now          
+            curCameraFocusPivotPos.z = -SimulationManager._GlobalWaterLevel * SimulationManager._MaxAltitude; // *** This is where creatures are for now          
         }
 
         if(isFollowingPlantParticle) {
@@ -118,6 +118,7 @@ public class CameraManager : Singleton<CameraManager> {
 
         UpdateWorldSpaceCorners();
     }
+    
     private void UpdateWorldSpaceCorners() {
         Vector3 botLeft = cameraRef.ScreenToWorldPoint( new Vector3(0f, 0f, worldSpaceCornersDistance));
         worldSpaceBottomLeft = new Vector4(botLeft.x, botLeft.y, botLeft.z, 0f);
@@ -192,14 +193,39 @@ public class CameraManager : Singleton<CameraManager> {
     public void SetTargetAgent() {
         SetTargetAgent(simulation.agents[targetAgentIndex], targetAgentIndex);
     }
-    
+
     public void SetTargetAgent(Agent agent, int index) {
         //Debug.Log("SetTarget! " + index.ToString());
         targetAgent = agent;
         targetAgentTransform = agent.bodyGO.transform;
         targetAgentIndex = index;
     }
+
+    public void MouseOverAgent(Agent agent, bool clicked)
+    {
+        if (clicked) 
+        {
+            SetTargetAgent(agent, agent.index);
+            SetFollowingAgent();
+        }
+            
+        SetMouseHoverAgent(agent, true);
+    }
     
+    public void SetMouseHoverAgent(Agent agent, bool value)
+    {
+        isMouseHoverAgent = value;
+        mouseHoverAgentRef = agent;
+        mouseHoverAgentIndex = agent ? agent.index : 0;
+    }
+    
+    public void SetFollowingAgent()
+    {
+        isFollowingAgent = true;
+        isFollowingPlantParticle = false;
+        isFollowingAnimalParticle = false; 
+    }
+        
     private Vector2 SmoothApproach(Vector2 pastPosition, Vector2 pastTargetPosition, Vector2 targetPosition, float speed) {
         float t = Time.deltaTime * speed;
         Vector2 v = (targetPosition - pastTargetPosition) / t;
