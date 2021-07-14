@@ -6,14 +6,14 @@ public class GenomeViewerUI : MonoBehaviour {
     SimulationManager simulationManager => SimulationManager.instance;
     UIManager uiManager => UIManager.instance;
 
-    public SpeciesOverviewUI speciesOverviewUI;
+    //public SpeciesOverviewUI speciesOverviewUI;
     public GameObject panelGenomeSensors;
     
-    [SerializeField] Tab genomeTab;
-    [SerializeField] Tab historyTab;
-    [SerializeField] Tab performanceTab;
+    //[SerializeField] Tab genomeTab;
+    //[SerializeField] Tab historyTab;
+   // [SerializeField] Tab performanceTab;
 
-    public GameObject panelGenomeAbilities;
+    //public GameObject panelGenomeAbilities;
     public GameObject panelPerformanceBehavior;
     public GameObject panelEaten;
     
@@ -21,7 +21,7 @@ public class GenomeViewerUI : MonoBehaviour {
     public bool isPerformanceTabActive = false;
     public bool isHistoryTabActive = false;
 
-    public GameObject imageDeadDim;
+    //public GameObject imageDeadDim;
 
     public bool isTooltipHover = true;
     public string tooltipString;
@@ -33,16 +33,16 @@ public class GenomeViewerUI : MonoBehaviour {
     public void UpdateUI() {
         // * WPP: only usage, may as well set in editor
         // relates to future use items
-        panelGenomeAbilities.SetActive(false);
+        //panelGenomeAbilities.SetActive(false);
         panelGenomeSensors.SetActive(true);
         panelPerformanceBehavior.SetActive(true);
         panelEaten.SetActive(true);
 
         // * WPP delegate to components (organize scattered references first)
-        genomeTab.SetActive(isGenomeTabActive);
-        performanceTab.SetActive(isPerformanceTabActive);
-        historyTab.SetActive(isHistoryTabActive);
-        imageDeadDim.SetActive(simulationManager.targetAgentIsDead);
+        //genomeTab.SetActive(isGenomeTabActive);
+        //performanceTab.SetActive(isPerformanceTabActive);
+        //historyTab.SetActive(isHistoryTabActive);
+        //imageDeadDim.SetActive(simulationManager.targetAgentIsDead);
     }
     
     #region Button Clicks
@@ -54,7 +54,7 @@ public class GenomeViewerUI : MonoBehaviour {
     // * WPP: should be a similar process to ClickButtonNext
     public void ClickButtonPrev() {
         //speciesOverviewUI.CycleHallOfFame();
-        speciesOverviewUI.CycleCurrentGenome();
+        //speciesOverviewUI.CycleCurrentGenome();
     }
     
     public void ClickButtonGenomeTab() {

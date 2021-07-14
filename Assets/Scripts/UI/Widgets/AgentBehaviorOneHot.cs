@@ -18,11 +18,11 @@ public class AgentBehaviorOneHot : MonoBehaviour {
     public GameObject outComm3;
 
     public GameObject throttleGO;
-    public GameObject mouthTriggerGO;
-    public GameObject isContactGO;
+    //public GameObject mouthTriggerGO;
+    //public GameObject isContactGO;
     public GameObject contactForceGO;
 
-    public GameObject waterDepthGO;
+    //public GameObject waterDepthGO;
     public GameObject waterVelGO;
 
     public GameObject food0;
@@ -47,12 +47,12 @@ public class AgentBehaviorOneHot : MonoBehaviour {
 	}
 
     public void UpdateExtras(Agent agentRef) {
-
+        /*
         waterDepthGO.GetComponent<Text>().text = "Water Depth: " + agentRef.waterDepth.ToString() + 
                                                  "\ncontact:(" + agentRef.coreModule.contactForceX[0].ToString() + ", " + agentRef.coreModule.contactForceY[0].ToString() + ")" +
                                                  "\nmeat eaten: " + (agentRef.candidateRef.performanceData.totalFoodEatenZoop * 1000f).ToString("F0") + 
                                                  "\nplants eaten: " + (agentRef.candidateRef.performanceData.totalFoodEatenPlant * 1000f).ToString("F0");
-
+*/
 
 
 

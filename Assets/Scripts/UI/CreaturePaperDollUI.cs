@@ -12,10 +12,7 @@ public class CreaturePaperDollUI : MonoBehaviour
     public Text textStomachContents;
     public Text textEnergy;
     public Text textHealth;
-    public Text textWaste;
    
-    //public GameObject panelNewInspect;
-    //public Text textNewInspectAgentName;
     public Material newInspectAgentEnergyMat;
     public Material newInspectAgentStaminaMat;
     public Material newInspectAgentStomachMat;
@@ -26,10 +23,7 @@ public class CreaturePaperDollUI : MonoBehaviour
     
     public Material newInspectAgentWasteMat;
     public Material newInspectAgentBrainMat;
-
-    //public Text textNewInspectLog;
-    public Text textVertebrateLifestage;
-    public Text textVertebrateStatus;
+        
     #endregion
 
     public void Tick() {

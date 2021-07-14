@@ -15,7 +15,9 @@ public class StatUI
     
     public void RefreshDisplay(float numericValue, float barScale, bool useDecimal = false)
     {
-        percent.text = useDecimal ? numericValue.ToString("F2") : numericValue.ToString("F0");
         bar.transform.localScale = new Vector3(1f, barScale, 1f);
+        if(percent) {
+            percent.text = useDecimal ? numericValue.ToString("F2") : numericValue.ToString("F0");
+        }        
     }
 }
