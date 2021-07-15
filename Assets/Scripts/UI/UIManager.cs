@@ -21,7 +21,8 @@ public class UIManager : Singleton<UIManager> {
     public SpeciesGraphPanelUI speciesGraphPanelUI;  //***EAC to be phased-out --> incorporated into WorldTreePanel
     public GenomeViewerUI genomeViewerUI;
     public BrainGenomeImage brainGenomeImage;
-    public PanelTopLeftUI panelTopLeftUI;
+    public CreaturePanelUI creaturePanelUI;
+    public HistoryPanelUI historyPanelUI;
     public WorldTreePanelUI worldTreePanelUI;
     public BigBangPanelUI bigBangPanelUI;
     public ClockPanelUI clockPanelUI;
@@ -317,6 +318,9 @@ public class UIManager : Singleton<UIManager> {
         brushesUI.UpdateBrushesUI();        
         
         if(focusedCandidate != null && focusedCandidate.candidateGenome != null) {
+
+            creaturePanelUI.Tick();
+
             genomeViewerUI.UpdateUI();
             creatureBrainActivityUI.Tick();
             creaturePaperDollUI.Tick();

@@ -7,10 +7,10 @@ public class MasterGenomePool {
 
     public static int nextCandidateIndex = 0;
 
-    public int maxNumActiveSpecies = 6;
-    private int targetNumSpecies = 2;
+    public int maxNumActiveSpecies = 8;
+    private int targetNumSpecies = 3;
     public float speciesSimilarityDistanceThreshold = 12f;
-    private int minNumGuaranteedEvalsForNewSpecies = 32;
+    private int minNumGuaranteedEvalsForNewSpecies = 128;
 
     public int curNumAliveAgents;
 

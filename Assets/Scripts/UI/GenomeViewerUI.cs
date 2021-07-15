@@ -6,21 +6,10 @@ public class GenomeViewerUI : MonoBehaviour {
     SimulationManager simulationManager => SimulationManager.instance;
     UIManager uiManager => UIManager.instance;
 
-    //public SpeciesOverviewUI speciesOverviewUI;
-    public GameObject panelGenomeSensors;
-    
-    //[SerializeField] Tab genomeTab;
-    //[SerializeField] Tab historyTab;
-   // [SerializeField] Tab performanceTab;
-
-    //public GameObject panelGenomeAbilities;
+    public GameObject panelGenomeSensors;    
     public GameObject panelPerformanceBehavior;
     public GameObject panelEaten;
     
-    public bool isGenomeTabActive = true;
-    public bool isPerformanceTabActive = false;
-    public bool isHistoryTabActive = false;
-
     //public GameObject imageDeadDim;
 
     public bool isTooltipHover = true;
@@ -56,24 +45,7 @@ public class GenomeViewerUI : MonoBehaviour {
         //speciesOverviewUI.CycleHallOfFame();
         //speciesOverviewUI.CycleCurrentGenome();
     }
-    
-    public void ClickButtonGenomeTab() {
-        isGenomeTabActive = true;
-        isPerformanceTabActive = false;
-        isHistoryTabActive = false; 
-    }
-    
-    public void ClickButtonPerformanceTab() {
-        isGenomeTabActive = false;
-        isPerformanceTabActive = true;
-        isHistoryTabActive = false;
-    }
-    
-    public void ClickButtonHistoryTab() {
-        isGenomeTabActive = false;
-        isPerformanceTabActive = false;
-        isHistoryTabActive = true;
-    }
+        
     
     #endregion
     
