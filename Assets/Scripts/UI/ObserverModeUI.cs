@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
@@ -15,7 +16,9 @@ public class ObserverModeUI : MonoBehaviour
     ZooplanktonManager zooplanktonManager => simulationManager.zooplanktonManager;
     VegetationManager vegetationManager => simulationManager.vegetationManager;
     ToolType curActiveTool => manager.curActiveTool;
+    
     float cursorX => theCursorCzar.GetCursorPixelCoords().x;
+    Vector2 mousePositionOnWater => theCursorCzar.curMousePositionOnWaterPlane2D;
     
     [SerializeField] int announcementDuration = 640;
         
@@ -47,6 +50,9 @@ public class ObserverModeUI : MonoBehaviour
     }
     
     bool isKeyboardInput;
+    
+    public bool cursorInSpeciesHistoryPanel;
+    public void SetCursorInSpeciesHistoryPanel(bool value) { cursorInSpeciesHistoryPanel = value; }
 
     public void StepCamera(Vector2 input)
     {    
@@ -107,9 +113,9 @@ public class ObserverModeUI : MonoBehaviour
     void TickUITooltip()
     {
         if (genomeViewerUI.isTooltipHover)
-            ActivateTooltip(genomeViewerUI.tooltipString, Color.cyan);
-        else if (theCursorCzar.cursorInTopLeftWindow)
-            ActivateTooltip("Year " + ((simulationManager.simAgeTimeSteps / 2048f) * cursorX / 360f).ToString("F0"), Color.yellow);
+            ActivateTooltip(TooltipId.Genome); 
+        else if (cursorInSpeciesHistoryPanel)
+            ActivateTooltip(TooltipId.Year);
         else
             panelTooltip.SetActive(false);
     }
@@ -153,25 +159,25 @@ public class ObserverModeUI : MonoBehaviour
         manager.isVertebrateHighlight = false;
         
         float hitboxRadius = 1f;
-        float plantDistance = (vegetationManager.closestPlantParticleData.worldPos - theCursorCzar.curMousePositionOnWaterPlane2D).magnitude;
-        float microbeDistance = (zooplanktonManager.closestAnimalParticlePosition2D - theCursorCzar.curMousePositionOnWaterPlane2D).magnitude;
+        float plantDistance = (vegetationManager.closestPlantParticleData.worldPos - mousePositionOnWater).magnitude;
+        float microbeDistance = (zooplanktonManager.closestAnimalParticlePosition2D - mousePositionOnWater).magnitude;
         
         if (cameraManager.isMouseHoverAgent) 
         {
             manager.isVertebrateHighlight = true;
-            ActivateTooltip("Critter #" + cameraManager.mouseHoverAgentRef.candidateRef.candidateID, Color.white);
+            ActivateTooltip(TooltipId.Agent);
         }
         else if (plantDistance < hitboxRadius || microbeDistance < hitboxRadius)
         {
             if (plantDistance < microbeDistance) 
             {
                 manager.isPlantHighlight = true;
-                ActivateTooltip("Algae #" + vegetationManager.closestPlantParticleData.index, Color.green);
+                ActivateTooltip(TooltipId.Algae);
             }
             else
             {
                 manager.isZooplanktonHighlight = true;
-                ActivateTooltip("Microbe #" + zooplanktonManager.closestAnimalParticleData.index, Color.yellow);
+                ActivateTooltip(TooltipId.Microbe); 
             }
         }
         else
@@ -179,15 +185,15 @@ public class ObserverModeUI : MonoBehaviour
 
         //float cursorCoordsX = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().x) / 360f);
         //float cursorCoordsY = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().y - 720f) / 360f);  
-        if (theCursorCzar.cursorInTopLeftWindow)
-            ActivateTooltip("TimeStep #" + (simulationManager.simAgeTimeSteps * cursorX / 360f).ToString("F0"), Color.yellow);
+        if (cursorInSpeciesHistoryPanel)
+            ActivateTooltip(TooltipId.Timestep); 
     }
-    
-    // WPP - TBD:
-    // string GetTooltipText(TooltipTypeEnum) { }
-    // TooltipData GetTooltipData(TooltipTypeEnum) { }
-    // struct TooltipData { TooltipTypeEnum, Color }
-    // void ActivateTooltip(TooltipTypeEnum) { }
+
+    void ActivateTooltip(TooltipId id)
+    {
+        var data = GetTooltipData(id);
+        ActivateTooltip(GetTooltipString(id), data.color);
+    }
     
     void ActivateTooltip(string text, Color color)
     {
@@ -234,6 +240,54 @@ public class ObserverModeUI : MonoBehaviour
         var visibility = theCursorCzar.stirGizmoVisible ? 1f : 0f;
         theRenderKing.gizmoStirToolMat.SetFloat(VISIBLE, visibility);
         theRenderKing.gizmoStirStickAMat.SetFloat(VISIBLE, visibility);
-    }   
+    }
+    
+    #region Tooltip Data
+    
+    [SerializeField] TooltipData[] tooltips;
+    
+    string GetTooltipString(TooltipId id)
+    {
+        switch (id)
+        {
+            case TooltipId.Genome: return genomeViewerUI.tooltipString;
+            case TooltipId.Year: return "Year " + ((simulationManager.simAgeTimeSteps / 2048f) * cursorX / 360f).ToString("F0");
+            case TooltipId.Agent: return "Critter #" + cameraManager.mouseHoverAgentRef.candidateRef.candidateID;
+            case TooltipId.Algae: return "Algae #" + vegetationManager.closestPlantParticleData.index;
+            case TooltipId.Microbe: return "Microbe #" + zooplanktonManager.closestAnimalParticleData.index;
+            case TooltipId.Timestep: return "TimeStep #" + (simulationManager.simAgeTimeSteps * cursorX / 360f).ToString("F0");
+            default: return "";
+        }
+    }
+    
+    TooltipData GetTooltipData(TooltipId id)
+    {
+        foreach (var tooltip in tooltips)
+            if (tooltip.id == id)
+                return tooltip;
+                
+        Debug.LogError(id + " not found");
+        return tooltips[0];
+    }
+    
+    // WPP: colors exposed in editor, opens door to further variation as needed
+    [Serializable]
+    public struct TooltipData
+    {
+        public TooltipId id;
+        public Color color;
+    }
+    
+    public enum TooltipId
+    {
+        Genome,
+        Year,
+        Agent,
+        Algae,
+        Microbe,
+        Timestep,
+    }
+    
+    #endregion
 }
 

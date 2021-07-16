@@ -6,7 +6,15 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
 {
     CameraManager cameraManager => CameraManager.instance;
     UIManager uiManagerRef => UIManager.instance;
-
+    TheRenderKing theRenderKing => TheRenderKing.instance;
+    
+    Camera cam => cameraManager.cameraRef;
+    
+    float mapSize => SimulationManager._MapSize;
+    float halfMapSize => mapSize * 0.5f;
+    float waterLevel => SimulationManager._GlobalWaterLevel;
+    float maxAltitude => SimulationManager._MaxAltitude;
+    
     public bool isHoverClickableSpirit;     // WPP: not used
 
     public GameObject mouseRaycastWaterPlane;
@@ -41,23 +49,29 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
     public Vector3 cursorParticlesWorldPos;
     public Ray cursorRay;   // WPP: not used
     
-    TheRenderKing theRenderKing => TheRenderKing.instance;
-
+    // WPP: screen resolution exposed, change in game settings if needed
+    public Vector2 screenResolution = new Vector2(1780, 1000);
+    float mouseXScreenNormal => Mathf.Clamp(curMousePixelPos.x, 0f, screenResolution.x);
+    float mouseYScreenNormal => Mathf.Clamp(curMousePixelPos.y, 0f, screenResolution.y);
+    
     public Vector2 GetCursorPixelCoords() {
         return curMousePixelPos;
     }
     
-    public bool cursorInTopLeftWindow => curMousePixelPos.x <= 360 && curMousePixelPos.y > 720;
-    
+    [SerializeField] RectTransform speciesHistoryRect;
+
+    // WPP: magic numbers, replaced with CursorInRectBounds
+    //public bool cursorInTopLeftWindow => curMousePixelPos.x <= 360 && curMousePixelPos.y > 720;
+
     /// Get position of mouse on water plane:
     private void MouseRaycastWaterPlane(Vector3 screenPos) {
         mouseRaycastWaterPlane.SetActive(true);
         
-        Vector3 targetPosition = new Vector3(SimulationManager._MapSize * 0.5f, SimulationManager._MapSize * 0.5f, -SimulationManager._GlobalWaterLevel * SimulationManager._MaxAltitude);
+        Vector3 targetPosition = new Vector3(halfMapSize, halfMapSize, -waterLevel * maxAltitude);
 
         mouseRaycastWaterPlane.gameObject.transform.position = targetPosition;
         
-        cursorRay = cameraManager.cameraRef.ScreenPointToRay(screenPos);
+        cursorRay = cam.ScreenPointToRay(screenPos);
         //cursorRay = new Ray(uiManagerRef.cameraManager.gameObject.transform.position, midMidpoint - uiManagerRef.cameraManager.gameObject.transform.position);
         int layerMask = 1 << 12;  // UtilityRaycast???
         Physics.Raycast(cursorRay, out RaycastHit hit, layerMask);
@@ -75,7 +89,7 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
     // WPP: simplified conditionals, moved camera logic to CameraManager, removed GetComponent calls to Camera
     /// Check for player clicking on an animal in the world
     private void MouseRaycastCheckAgents(bool clicked) {
-        Ray ray = cameraManager.cameraRef.ScreenPointToRay(Input.mousePosition);
+        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
         int layerMask = ~(1 << LayerMask.NameToLayer("UtilityRaycast"));  // *** THIS ISN'T WORKING!!! *** might be inverted?
 
         Physics.Raycast(ray, out RaycastHit hit, 1000f, layerMask);  // *** USE DEDICATED LAYER FOR THIS CHECK!!!! *********
@@ -98,7 +112,7 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
         else if (!clicked) 
         {
             isHoverClickableSpirit = true;
-            Debug.Log("_IsHoverClickableSpirit ON: [ ");
+            //Debug.Log("_IsHoverClickableSpirit ON: [ ");
         }
         //Debug.Log("CLICKED ON: [ " + hit.collider.gameObject.name + " ] Ray= " + ray.ToString() + ", hit= " + hit.point.ToString());
     }
@@ -122,7 +136,7 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
         smoothedMouseVel = Vector2.Lerp(smoothedMouseVel, instantMouseVel, 0.16f);
         prevMousePixelPos = curMousePixelPos;
 
-        Vector3 newTooltipPosition = new Vector3(Mathf.Clamp(curMousePixelPos.x, 0f, 1780f), Mathf.Clamp(curMousePixelPos.y, 0f, 1000f), 0f); // *** BAD! requires 1920x1080 res ***
+        Vector3 newTooltipPosition = new Vector3(mouseXScreenNormal, mouseYScreenNormal, 0f);
         panelTooltip.transform.position = newTooltipPosition;
 	}
 	

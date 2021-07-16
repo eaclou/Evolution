@@ -2,10 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e5216a40-1993-4f7b-88ca-3d6aa0d75e16" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/Assets/Playcraft/_NEW/CursorInRectBounds.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Playcraft/_NEW/CursorInRectBounds.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Playcraft/_NEW/EnterExitRectBounds.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Playcraft/_NEW/EnterExitRectBounds.cs.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/PanelObserverMode.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/PanelObserverMode.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/PanelTopLeftCorner.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/PanelTopLeftCorner.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/PanelTopLeftUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/PanelTopLeftUI.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/TheCursorCzar.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/TheCursorCzar.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,6 +60,7 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/17AD9609-AE06-4F2C-9315-931FF97ADCF1/5e/7303bde5/RenderTexture.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/CauseOfDeathSO.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Playcraft/_NEW/CursorInRectBounds.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/SensorsPanel.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/CreaturePortraitPanel.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/FoodEatenPanel.cs" root0="FORCE_HIGHLIGHTING" />
@@ -62,10 +70,6 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/KnowledgeMapSO.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicTier.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicKingdom.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/MinimapPanel.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/KnowledgeUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/MutationUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/PanelNotificationsUI.cs" />
@@ -109,10 +113,14 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/ZooplanktonManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicSlot.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/BrushesUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/PanelTopLeftUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/TheCursorCzar.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/CursorInRectBoundsMono.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/EnterExitRectBounds.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/CursorInRectBounds.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1owaWgGpM80xkcfA3szn5iw9YkG" />
@@ -209,7 +217,8 @@
       <workItem from="1625380874879" duration="4579000" />
       <workItem from="1625940085988" duration="6360000" />
       <workItem from="1625985529643" duration="5102000" />
-      <workItem from="1626210328526" duration="2482000" />
+      <workItem from="1626210328526" duration="3243000" />
+      <workItem from="1626333821544" duration="6770000" />
     </task>
     <servers />
   </component>
