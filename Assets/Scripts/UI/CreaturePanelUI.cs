@@ -15,8 +15,11 @@ public class CreaturePanelUI : MonoBehaviour
     [SerializeField]
     GameObject panelPaperDoll;
 
-    private PanelMode curPanelMode;
-    public enum PanelMode {
+    [SerializeField]
+    Text textPanelStateDebug;
+
+    private CreaturePanelMode curPanelMode;
+    public enum CreaturePanelMode {
         Portrait,
         Genome,
         Brain
@@ -28,19 +31,21 @@ public class CreaturePanelUI : MonoBehaviour
     }
     
     public void Tick() {
-        if(curPanelMode == PanelMode.Portrait) {
+        textPanelStateDebug.text = "MODE: " + curPanelMode;
+
+        if (curPanelMode == CreaturePanelMode.Portrait) {
             panelPortrait.SetActive(true);
 
             panelGenome.SetActive(false);
             panelBrain.SetActive(false);
         }
-        else if(curPanelMode == PanelMode.Genome) {
+        else if(curPanelMode == CreaturePanelMode.Genome) {
             panelGenome.SetActive(true);
 
             panelPortrait.SetActive(false);
             panelBrain.SetActive(false);
         }
-        else if(curPanelMode == PanelMode.Brain) {
+        else if(curPanelMode == CreaturePanelMode.Brain) {
             panelBrain.SetActive(true);
 
             panelGenome.SetActive(false);
@@ -49,6 +54,6 @@ public class CreaturePanelUI : MonoBehaviour
     }
 
     public void SetPanelMode(int modeID) {
-        curPanelMode = (PanelMode)modeID;
+        curPanelMode = (CreaturePanelMode)modeID;
     }
 }

@@ -23,7 +23,7 @@ public class UIManager : Singleton<UIManager> {
     public BrainGenomeImage brainGenomeImage;
     public CreaturePanelUI creaturePanelUI;
     public HistoryPanelUI historyPanelUI;
-    public WorldTreePanelUI worldTreePanelUI;
+    //public WorldTreePanelUI worldTreePanelUI;
     public BigBangPanelUI bigBangPanelUI;
     public ClockPanelUI clockPanelUI;
     public ObserverModeUI observerModeUI;
@@ -134,11 +134,11 @@ public class UIManager : Singleton<UIManager> {
     public void SetSelectedSpeciesUI(int id) {
         if(id == selectedSpeciesID) {
             // already selected -->
-            worldTreePanelUI.ToggleFocusLevel(); // species overview vs world overview
+            //worldTreePanelUI.ToggleFocusLevel(); // species overview vs world overview
         }
 
         selectedSpeciesID = id;
-        worldTreePanelUI.RefreshPanelUI();
+        //worldTreePanelUI.RefreshPanelUI();
         speciesOverviewUI.RebuildGenomeButtons();
     }
 
@@ -253,7 +253,8 @@ public class UIManager : Singleton<UIManager> {
 
         worldSpiritHubUI.ClickButtonWorldSpiritHubAgent(lookup.GetTrophicSlotData(KnowledgeMapId.Animals));
 
-        worldTreePanelUI.InitializeSpeciesIcons();
+        historyPanelUI.InitializeSpeciesIcons();
+        //worldTreePanelUI.InitializeSpeciesIcons();
     }
     
     public void TransitionToNewGameState(GameState gameState) {
@@ -315,15 +316,17 @@ public class UIManager : Singleton<UIManager> {
         observerModeUI.Tick();  // <== this is the big one *******  
         // ^^^  Need to Clean this up and replace with better approach ***********************        
         theCursorCzar.Tick();  // this will assume a larger role
-        brushesUI.UpdateBrushesUI();        
+        brushesUI.UpdateBrushesUI(); 
         
         if(focusedCandidate != null && focusedCandidate.candidateGenome != null) {
 
             creaturePanelUI.Tick();
-
-            genomeViewerUI.UpdateUI();
+            // --- Move these into CreaturePanel?
+            genomeViewerUI.UpdateUI(); 
             creatureBrainActivityUI.Tick();
-            creaturePaperDollUI.Tick();
+            creaturePaperDollUI.Tick();            
+            // ---
+
             creatureLifeEventsLogUI.Tick(focusedCandidate);
 
             if(simulationManager.simAgeTimeSteps % 37 == 11) { //***EAC still needed? answer: yes :(
@@ -331,7 +334,8 @@ public class UIManager : Singleton<UIManager> {
             }
         }
 
-        worldTreePanelUI.UpdateUI();
+        historyPanelUI.Tick();
+        //worldTreePanelUI.UpdateUI();
         clockPanelUI.Tick();
         minimapUI.Tick();
         debugPanelUI.UpdateDebugUI();

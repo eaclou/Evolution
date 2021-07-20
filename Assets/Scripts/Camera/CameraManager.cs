@@ -23,6 +23,11 @@ public class CameraManager : Singleton<CameraManager> {
     public Vector2 targetPlantWorldPos;
     public bool isFollowingAnimalParticle = false;
     public Vector2 targetZooplanktonWorldPos;
+
+    [SerializeField]
+    float camMinAltitude = 5f;
+    [SerializeField]
+    float camMaxAltitude = 420f;
     
     public float masterTargetDistance = 50f;
     public float masterTargetTiltAngle = 33f;
@@ -41,7 +46,6 @@ public class CameraManager : Singleton<CameraManager> {
     public Vector4 worldSpaceCameraRightDir;
     public Vector4 worldSpaceCameraUpDir;
 
-    //public GameObject debugMarker;
     
     // Use this for initialization
     void Start () {
@@ -78,44 +82,34 @@ public class CameraManager : Singleton<CameraManager> {
         }
 
         curTiltAngleDegrees = Mathf.Lerp(curTiltAngleDegrees, -masterTargetTiltAngle, 12f * Time.deltaTime);        
-        // Calculate Target cam pos:
-        //float rotateX = curTiltAngleDegrees;
-        //this.transform.localEulerAngles = new Vector3(rotateX, 0f, 0f);
-
+        
         float offsetY = Mathf.Abs(masterTargetDistance) * Mathf.Sin(masterTargetTiltAngle * Mathf.Deg2Rad); // compensate for camera tilt
         float offsetZ = Mathf.Abs(masterTargetDistance) * Mathf.Cos(masterTargetTiltAngle * Mathf.Deg2Rad);
                 
-        curCameraFocusPivotPos.x = Mathf.Min(curCameraFocusPivotPos.x, 256f);
+        curCameraFocusPivotPos.x = Mathf.Min(curCameraFocusPivotPos.x, SimulationManager._MapSize);
         curCameraFocusPivotPos.x = Mathf.Max(curCameraFocusPivotPos.x, 0f);
-        curCameraFocusPivotPos.y = Mathf.Min(curCameraFocusPivotPos.y, 256f);
+        curCameraFocusPivotPos.y = Mathf.Min(curCameraFocusPivotPos.y, SimulationManager._MapSize);
         curCameraFocusPivotPos.y = Mathf.Max(curCameraFocusPivotPos.y, 0f);
 
         masterTargetCamPosition = curCameraFocusPivotPos;
         masterTargetCamPosition.y -= offsetY;
         masterTargetCamPosition.z -= offsetZ;  // camera is towards the negative Z axis.... a bit awkward.
 
-        // Lerp towards Target Transform Position & Orientation:
-        float minDistance = 5f;
-        float maxDistance = 500f;
-        float relSize = (masterTargetDistance - minDistance) / (minDistance + maxDistance);
+        // Lerp towards Target Transform Position & Orientation:        
+        float relSize = Mathf.Clamp01((masterTargetDistance - camMinAltitude) / (camMinAltitude + camMaxAltitude));
 
         float minSizeLerpSpeed = 15f;
         float maxSizeLerpSpeed = 5f;
         masterLerpSpeed = Mathf.Lerp(minSizeLerpSpeed, maxSizeLerpSpeed, relSize);
         masterLerpSpeed = Mathf.Max(masterLerpSpeed, 5f);  // cap
 
-        masterTargetDistance = Mathf.Min(masterTargetDistance, maxDistance);
-        masterTargetDistance = Mathf.Max(masterTargetDistance, minDistance);        
+        masterTargetDistance = Mathf.Min(masterTargetDistance, camMaxAltitude);
+        masterTargetDistance = Mathf.Max(masterTargetDistance, camMinAltitude);        
 
         curCameraPos = Vector3.Lerp(transform.position, masterTargetCamPosition, masterLerpSpeed * Time.deltaTime);
         transform.position = curCameraPos;
         transform.localEulerAngles = new Vector3(curTiltAngleDegrees, 0f, 0f);
-
-        // store info for next frame:
-        //prevCameraPos = curCameraPos;
-        //prevTiltAngleDegrees = curTiltAngleDegrees;
-        //prevCameraFocusPivotPos = curCameraFocusPivotPos;
-
+        
         UpdateWorldSpaceCorners();
     }
     
@@ -132,14 +126,12 @@ public class CameraManager : Singleton<CameraManager> {
         worldSpaceCameraRightDir = new Vector4(camRight.x, camRight.y, camRight.z, 0f);
         Vector3 camUp = gameObject.transform.up;
         worldSpaceCameraUpDir = new Vector4(camUp.x, camUp.y, camUp.z, 0f);
-
-        //debugMarker.transform.position = topLeft;
+                
     }
 
     public void MoveCamera(Vector2 dir) {
-        float minDistance = 1f;
-        float maxDistance = 420f;
-        float relSize = Mathf.Clamp01((masterTargetDistance - minDistance) / (minDistance + maxDistance));
+        
+        float relSize = Mathf.Clamp01((masterTargetDistance - camMinAltitude) / (camMinAltitude + camMaxAltitude));
 
         float minSizePanSpeedMult = 0.1f;
         float maxSizePanSpeedMult = 12f;
@@ -151,9 +143,8 @@ public class CameraManager : Singleton<CameraManager> {
     }
     
     public void TiltCamera(float tiltAngle) {
-        float minDistance = 1f;
-        float maxDistance = 420f;
-        float relSize = Mathf.Clamp01((masterTargetDistance - minDistance) / (minDistance + maxDistance));
+        
+        float relSize = Mathf.Clamp01((masterTargetDistance - camMinAltitude) / (camMinAltitude + camMaxAltitude));
 
         float minSizeTiltSpeedMult = 1f;
         float maxSizeTiltSpeedMult = 1f;
@@ -161,10 +152,8 @@ public class CameraManager : Singleton<CameraManager> {
 
         masterTargetTiltAngle += tiltAngle * masterTiltSpeed * tiltSpeedMult * Time.deltaTime;
 
-        masterTargetTiltAngle = Mathf.Min(masterTargetTiltAngle, 60f);
-        masterTargetTiltAngle = Mathf.Max(masterTargetTiltAngle, 0);
+        masterTargetTiltAngle = Mathf.Clamp(masterTargetTiltAngle, 0f, 60f);
 
-        //cameraManager.masterTargetTiltAngle -= cameraManager.masterTiltSpeed * tiltSpeedMult * Time.deltaTime;
     }
 
     public void ZoomCameraFixed(float zoomValue) {
@@ -174,9 +163,8 @@ public class CameraManager : Singleton<CameraManager> {
     }
         
     public void ZoomCamera(float zoomValue) {
-        float minDistance = 1f;
-        float maxDistance = 420f;
-        float relSize = Mathf.Clamp01((masterTargetDistance - minDistance) / (minDistance + maxDistance));
+        
+        float relSize = Mathf.Clamp01((masterTargetDistance - camMinAltitude) / (camMinAltitude + camMaxAltitude));
 
         float minSizeZoomSpeedMult = 0.075f;
         float maxSizeZoomSpeedMult = 2.5f;
@@ -186,8 +174,6 @@ public class CameraManager : Singleton<CameraManager> {
 
         masterTargetDistance += zoomSpeed;
 
-        //masterTargetDistance = Mathf.Min(masterTargetDistance, maxDistance);
-        //masterTargetDistance = Mathf.Max(masterTargetDistance, minDistance);
     }
     
     public void SetTargetAgent() {
@@ -231,134 +217,5 @@ public class CameraManager : Singleton<CameraManager> {
         Vector2 v = (targetPosition - pastTargetPosition) / t;
         Vector2 f = pastPosition - pastTargetPosition + v;
         return targetPosition - v + f * Mathf.Exp(-t);
-    } 
-    
-    /*private void UpdateCameraNew() {
-
-        float targetPosX = targetCamPos.x;
-        float targetPosY = targetCamPos.y;
-        float targetPosZ = targetCamPos.z;
-
-        targetPosZ = -masterTargetDistance;
-        cameraZoomAmount = targetPosZ;
-
-        targetPosX = Mathf.Min(targetPosX, 256f);
-        targetPosX = Mathf.Max(targetPosX, 0f);
-
-        targetPosY = Mathf.Min(targetPosY, 320f);
-        targetPosY = Mathf.Max(targetPosY, -64f);
-
-        masterTiltAngle = Mathf.Min(masterTiltAngle, 75f); // degree tilt max
-        masterTiltAngle = Mathf.Max(masterTiltAngle, 0f); // degree tilt max
-
-        curTiltAngle = Mathf.Lerp(curTiltAngle, -masterTiltAngle, 0.08f);
-        float rotateX = curTiltAngle;
-        this.transform.localEulerAngles = new Vector3(rotateX, 0f, 0f);
-
-        if (targetTransform != null && isFollowing)
-        {
-            targetPosX = targetTransform.position.x;
-            targetPosY = targetTransform.position.y;
-                         
-            float centeringVerticalOffset = Mathf.Abs(masterTargetDistance) * Mathf.Tan(masterTiltAngle * Mathf.Deg2Rad); // compensate for camera tilt
-            targetPosY -= centeringVerticalOffset;
-            centeringOffset = centeringVerticalOffset;
-
-        }
-        else
-        {
-            
-        }
-
-        float minDistance = 1f;
-        float maxDistance = 256f;
-        float relSize = (masterTargetDistance - minDistance) / (minDistance + maxDistance);
-
-        float minSizeLerpSpeed = 12f;
-        float maxSizeLerpSpeed = 0.5f;
-        masterLerpSpeed = Mathf.Lerp(minSizeLerpSpeed, maxSizeLerpSpeed, relSize);
-
-        masterTargetDistance = Mathf.Min(masterTargetDistance, maxDistance);
-        masterTargetDistance = Mathf.Max(masterTargetDistance, minDistance);
-        
-        
-        targetCamPos = new Vector3(targetPosX, targetPosY, targetPosZ);        
-
-        this.transform.position = Vector3.Lerp(this.transform.position, targetCamPos, masterLerpSpeed * Time.deltaTime);
-
-    }*/
-    /*private void UpdateCameraOld() {
-        //float orthoLerp = 0.9f;
-        float timeScaleLerp = 0.02f;
-
-        //float targetTimeScale = Mathf.Lerp(0.5f, 1.5f, (camera.orthographicSize - 5f) / 40f);
-        //Time.timeScale = Mathf.Lerp(Time.timeScale, targetTimeScale, timeScaleLerp);        
-        //Time.fixedDeltaTime = Time.timeScale * 0.02f; // Mathf.Lerp(Time.fixedDeltaTime, targetFixedTimeStep, timeScaleLerp);
-        float targetPosX = 0f;
-        float targetPosY = 0f;
-        float targetPosZ = 0f;
-
-        float lerpSpeed = 0.1f;
-
-        if (targetTransform != null) {
-            switch (curMode) {
-                case GameMode.ModeA:
-                    //
-                    targetPosX = targetTransform.position.x; // Mathf.Lerp(targetCamPos.x, targetTransform.position.x, 0.08f);
-                    targetPosY = targetTransform.position.y; // Mathf.Lerp(targetCamPos.y, targetTransform.position.y, 0.08f);
-                    //targetCamPos = Vector3.Lerp(targetCamPos, targetTransform.position, 0.08f);
-                    lerpSpeed = lerpSpeedA;
-                    float linearAgentSize = Mathf.Lerp(targetAgent.spawnStartingScale, 1f, targetAgent.growthPercentage) * targetAgent.fullSizeBoundingBox.x;
-
-                    perspZoomDist = perspZoomDistNear * linearAgentSize;
-                    targetAgentSize = linearAgentSize;
-                    targetTiltAngleDegrees = targetTiltAngleA;
-                    break;
-                case GameMode.ModeB:
-                    //
-                    targetPosX = targetTransform.position.x;
-                    targetPosY = targetTransform.position.y;
-                    //targetPosX = Mathf.Lerp(targetCamPos.x, targetTransform.position.x, 0.08f);
-                    //targetPosY = Mathf.Lerp(targetCamPos.y, targetTransform.position.y, 0.08f);
-                    //if(targetTransform != null) {
-                        //targetCamPos = Vector3.Lerp(targetCamPos, targetTransform.position, 0.08f);
-                    lerpSpeed = lerpSpeedB;
-                    linearAgentSize = Mathf.Lerp(targetAgent.spawnStartingScale, 1f, targetAgent.growthPercentage) * targetAgent.fullSizeBoundingBox.x;
-                    targetAgentSize = linearAgentSize;
-                    perspZoomDist = perspZoomDistMid * linearAgentSize;
-                    targetTiltAngleDegrees = targetTiltAngleB;
-                    //}
-                    //orthoLerp = 0.9f;
-                    break;
-                case GameMode.ModeC:
-                    targetPosX = SimulationManager._MapSize * 0.5f; // Mathf.Lerp(targetCamPos.x, 0f, 0.08f);
-                    targetPosY = SimulationManager._MapSize * 0.4f; // Mathf.Lerp(targetCamPos.y, 0f, 0.08f);
-                    //targetCamPos = Vector3.Lerp(targetCamPos, Vector3.zero, 0.08f);
-                    lerpSpeed = lerpSpeedC;
-                    perspZoomDist = perspZoomDistFar;
-                    targetTiltAngleDegrees = targetTiltAngleC;
-                    //orthoLerp = 0.6f;
-                    //
-                    break;
-                default:
-                    //
-                    break;
-            }
-        }        
-
-        targetPosZ = -perspZoomDist;
-        cameraZoomAmount = targetPosZ;
-
-        curTiltAngle = Mathf.Lerp(curTiltAngle, -targetTiltAngleDegrees, 0.08f);
-        float rotateX = curTiltAngle;
-        this.transform.localEulerAngles = new Vector3(rotateX, 0f, 0f);
-        float centeringVerticalOffset = Mathf.Abs(targetPosZ) * Mathf.Tan(targetTiltAngleDegrees * Mathf.Deg2Rad); // compensate for camera tilt
-        targetPosY -= centeringVerticalOffset;
-        centeringOffset = centeringVerticalOffset;
-
-        targetCamPos = new Vector3(targetPosX, targetPosY, targetPosZ);
-
-        this.transform.position = Vector3.Lerp(this.transform.position, targetCamPos, 0.1f); // lerpSpeed * Time.deltaTime);
-        
-    }*/
+    }     
 }

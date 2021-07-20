@@ -636,7 +636,7 @@ public class SimulationManager : Singleton<SimulationManager>
         if(simAgeTimeSteps % 80 == 10) {
             uiManager.speciesGraphPanelUI.UpdateSpeciesTreeDataTextures(curSimYear);
             
-            uiManager.worldTreePanelUI.UpdateSpeciesIconsTargetCoords();
+            //uiManager.worldTreePanelUI.UpdateSpeciesIconsTargetCoords();
 
             globalGraphData.AddNewEntry(simResourceManager, GetTotalAgentBiomass());
             //graphDataGlobalVertebrates.AddNewEntry(totalAgentBiomass); // simResourceManager.curGlobalAgentBiomass);
@@ -1303,7 +1303,7 @@ public class SimulationManager : Singleton<SimulationManager>
             masterGenomePool.currentHighestDepth = newSpecies.depthLevel;
         }
 
-        uiManager.worldTreePanelUI.AddNewSpeciesToPanel(newSpecies);
+        uiManager.historyPanelUI.AddNewSpeciesToPanel(newSpecies);
     }
     
     private StartPositionGenome GetInitialAgentSpawnPosition() {

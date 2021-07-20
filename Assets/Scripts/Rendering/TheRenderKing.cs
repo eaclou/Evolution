@@ -945,7 +945,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
                 float xCoord = (float)(i % clockOrbitNumPointsPerLine) / (float)clockOrbitNumPointsPerLine;
                 //float timeStepStart = 0f;
-                float timelineRange = Mathf.Max(1f, simManager.simAgeTimeSteps - uiManager.worldTreePanelUI.timelineStartTimeStep);
+                float timelineRange = Mathf.Max(1f, simManager.simAgeTimeSteps - uiManager.historyPanelUI.timelineStartTimeStep);
                 /*
                 float time01 = Mathf.Lerp(uiManager.worldTreePanelUI.timelineStartTimeStep, simManager.simAgeTimeSteps, xCoord) / timelineRange; // Mathf.Lerp(timeStepStart, (float)simManager.simAgeTimeSteps, xCoord);
                 if(uiManager.worldTreePanelUI.GetFocusLevel() == 0) {
@@ -955,7 +955,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                     //time01 = Mathf.Lerp(timeStepStart, (float)simManager.simAgeTimeSteps, xCoord);
                 }*/
 
-                float timeInput = Mathf.Lerp(uiManager.worldTreePanelUI.timelineStartTimeStep, simManager.simAgeTimeSteps, xCoord);
+                float timeInput = Mathf.Lerp(uiManager.historyPanelUI.timelineStartTimeStep, simManager.simAgeTimeSteps, xCoord);
                 float yCoord = Mathf.Cos(timeInput / orbitalPeriod) * 0.15f * (float)lineID + 0.5f;
                 //float yCoord = Mathf.Cos(time01 / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
 
@@ -998,12 +998,12 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                     SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[line];
                     WorldTreeLineData data = new WorldTreeLineData();
 
-                    if(uiManager.worldTreePanelUI.GetPanelMode() == 0) {
+                    if(uiManager.historyPanelUI.GetIntMode() == 0) {
                         // LINEAGE:
                         float xCoord = (float)i / (float)worldTreeNumPointsPerLine;
                         float yCoord = 1f - ((float)pool.speciesID / (float)Mathf.Max(simManager.masterGenomePool.completeSpeciesPoolsList.Count - 1, 1)); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
                         float zCoord = 0f;
-                        if (uiManager.worldTreePanelUI.GetFocusLevel() == 0) { // Top-Level View -- all species
+                        if (uiManager.historyPanelUI.GetFocusLevel() == 0) { // Top-Level View -- all species
                                 
                         }
                         else {
@@ -1013,7 +1013,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                         
                         Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
 
-                        int timeStepStart = Mathf.RoundToInt(uiManager.worldTreePanelUI.timelineStartTimeStep);
+                        int timeStepStart = Mathf.RoundToInt(uiManager.historyPanelUI.timelineStartTimeStep);
 
                         float xStart01 = (float)(pool.timeStepCreated - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
                         float xEnd01 = 1f;
@@ -1050,7 +1050,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                             float val = (float)pool.avgCandidateDataYearList[graphDataYearIndex].performanceData.totalTicksAlive / uiManager.speciesGraphPanelUI.maxValuesStatArray[0];
                             float yCoord = val; // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
                             float zCoord = 0f;
-                            if(uiManager.worldTreePanelUI.GetFocusLevel() == 0) { // Top-Level View -- all species
+                            if(uiManager.historyPanelUI.GetFocusLevel() == 0) { // Top-Level View -- all species
                                 
                             }
                             else {
@@ -1058,7 +1058,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                                 yCoord = 0f;
                             }
                             Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-                            int timeStepStart = Mathf.RoundToInt(uiManager.worldTreePanelUI.timelineStartTimeStep);
+                            int timeStepStart = Mathf.RoundToInt(uiManager.historyPanelUI.timelineStartTimeStep);
 
                             float xStart01 = (float)(pool.timeStepCreated - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
                             float xEnd01 = 1f;
@@ -1113,7 +1113,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                     Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary * 2f;
 
 
-                    int timeStepStart = Mathf.RoundToInt(uiManager.worldTreePanelUI.timelineStartTimeStep);
+                    int timeStepStart = Mathf.RoundToInt(uiManager.historyPanelUI.timelineStartTimeStep);
                     float xStart = (float)(pool.candidateGenomesList[line].performanceData.timeStepHatched - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
                     float xEnd = 1f;
                     if(pool.isExtinct || cand.performanceData.timeStepDied > 1) {
@@ -1142,7 +1142,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                     xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
                     yCoord = yCoord * 0.67f + 0.1f;
 
-                    if(uiManager.worldTreePanelUI.GetFocusLevel() == 0) { // Top-Level View -- all species
+                    if(uiManager.historyPanelUI.GetFocusLevel() == 0) { // Top-Level View -- all species
                         xCoord = 0f; //***EAC TEMPORARY!!!! should be animated or just hidden
                         yCoord = 0f;
                     }
