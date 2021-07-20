@@ -12,6 +12,6 @@ public class GenomeButtonTooltipSource : MonoBehaviour {
     }
     
     public void OnHoverExit() {
-        genomeViewer.EnterTooltipObject(this);
+        genomeViewer.ExitTooltipObject();
     }
 }

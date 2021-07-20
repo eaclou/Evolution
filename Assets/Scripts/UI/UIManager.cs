@@ -44,11 +44,11 @@ public class UIManager : Singleton<UIManager> {
     public bool isZooplanktonHighlight;
     public bool isVertebrateHighlight;
     
-    public bool isLifeHighlight => isPlantHighlight || isZooplanktonHighlight || isVertebrateHighlight;
+    //public bool isLifeHighlight => isPlantHighlight || isZooplanktonHighlight || isVertebrateHighlight;
 
-    public float plantHighlight => isPlantHighlight ? 1f : 0f;
-    public float zooplanktonHighlight => isZooplanktonHighlight ? 1f : 0f;
-    public float vertebrateHighlight => isVertebrateHighlight ? 1f : 0f;
+    public float plantHighlight => observerModeUI.isPlantHighlight ? 1f : 0f;
+    public float zooplanktonHighlight => observerModeUI.isMicrobeHighlight ? 1f : 0f;
+    public float vertebrateHighlight => observerModeUI.isVertebrateHighlight ? 1f : 0f;
        
     public bool updateTerrainAltitude;  // WPP: assigned but not used
     public float terrainUpdateMagnitude;// WPP: assigned but not used

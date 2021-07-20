@@ -21,7 +21,8 @@ public class ObserverModeUI : MonoBehaviour
     Vector2 mousePositionOnWater => theCursorCzar.curMousePositionOnWaterPlane2D;
     
     [SerializeField] int announcementDuration = 640;
-        
+    [SerializeField] float hitboxRadius = 1f;
+
     public new bool enabled;
     public GameObject panelObserverMode;
     public WatcherUI watcherUI;
@@ -39,6 +40,11 @@ public class ObserverModeUI : MonoBehaviour
     public bool isBrushAddingAgents = false;
     public bool updateTerrainAltitude;
     public float terrainUpdateMagnitude;
+    
+    [SerializeField] TooltipId tooltipId;
+    public bool isVertebrateHighlight => tooltipId == TooltipId.Agent;
+    public bool isPlantHighlight => tooltipId == TooltipId.Algae;
+    public bool isMicrobeHighlight => tooltipId == TooltipId.Microbe;
         
     public PanelFocus panelFocus = PanelFocus.WorldHub;
     public enum PanelFocus 
@@ -67,6 +73,8 @@ public class ObserverModeUI : MonoBehaviour
 
         cameraManager.MoveCamera(input.normalized);
     }
+    
+    bool tooltipActive;
 
     // WPP: broken into helper functions
     public void Tick()
@@ -74,16 +82,24 @@ public class ObserverModeUI : MonoBehaviour
         if(vegetationManager == null) return;
 
         TickAnnouncement();
-                                
-        // If mouse is over ANY unity canvas UI object (with raycast enabled)
-        if (EventSystem.current.IsPointerOverGameObject())
-            TickUITooltip();
-        else 
-        {
-            TickObjectTooltip();
-            TickBrushes();
-        }
         
+        plantDistance = (vegetationManager.closestPlantParticleData.worldPos - mousePositionOnWater).magnitude;
+        microbeDistance = (zooplanktonManager.closestAnimalParticlePosition2D - mousePositionOnWater).magnitude;
+                                
+        tooltipActive = false;
+        foreach (var tooltip in tooltips)
+        {
+            if (!GetTooltipCondition(tooltip.id))
+                continue;
+            
+            ActivateTooltip(tooltip);
+            tooltipActive = true;
+            break;
+        }
+        panelTooltip.SetActive(tooltipActive);
+        
+        TickBrushes();
+
         // WPP: branches have identical result - error?
         //if (theCursorCzar.isDraggingMouseLeft || theCursorCzar.isDraggingMouseRight) {
         //    theRenderKing.ClickTestTerrainUpdateMaps(updateTerrainAltitude, terrainUpdateMagnitude);
@@ -109,20 +125,13 @@ public class ObserverModeUI : MonoBehaviour
             //inspectToolUnlockedAnnounce = false;
         }
     }
-    
-    void TickUITooltip()
-    {
-        if (genomeViewerUI.isTooltipHover)
-            ActivateTooltip(TooltipId.Genome); 
-        else if (cursorInSpeciesHistoryPanel)
-            ActivateTooltip(TooltipId.Year);
-        else
-            panelTooltip.SetActive(false);
-    }
-    
+
+    float plantDistance;
+    float microbeDistance;
+
+    #region dead code - please delete
     void TickObjectTooltip()
     {
-        #region dead code - please delete
         //int selectedPlantID = vegetationManager.selectedPlantParticleIndex;
         //int closestPlantID = vegetationManager.closestPlantParticleData.index;
 
@@ -152,49 +161,18 @@ public class ObserverModeUI : MonoBehaviour
         //        }
         //    }
         //}
-        #endregion
-        
-        manager.isPlantHighlight = false;
-        manager.isZooplanktonHighlight = false;
-        manager.isVertebrateHighlight = false;
-        
-        float hitboxRadius = 1f;
-        float plantDistance = (vegetationManager.closestPlantParticleData.worldPos - mousePositionOnWater).magnitude;
-        float microbeDistance = (zooplanktonManager.closestAnimalParticlePosition2D - mousePositionOnWater).magnitude;
-        
-        if (cameraManager.isMouseHoverAgent) 
-        {
-            manager.isVertebrateHighlight = true;
-            ActivateTooltip(TooltipId.Agent);
-        }
-        else if (plantDistance < hitboxRadius || microbeDistance < hitboxRadius)
-        {
-            if (plantDistance < microbeDistance) 
-            {
-                manager.isPlantHighlight = true;
-                ActivateTooltip(TooltipId.Algae);
-            }
-            else
-            {
-                manager.isZooplanktonHighlight = true;
-                ActivateTooltip(TooltipId.Microbe); 
-            }
-        }
-        else
-            panelTooltip.SetActive(false);
 
         //float cursorCoordsX = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().x) / 360f);
-        //float cursorCoordsY = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().y - 720f) / 360f);  
-        if (cursorInSpeciesHistoryPanel)
-            ActivateTooltip(TooltipId.Timestep); 
+        //float cursorCoordsY = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().y - 720f) / 360f); 
+    }
+    #endregion
+    
+    void ActivateTooltip(TooltipData data)
+    {
+        tooltipId = data.id;
+        ActivateTooltip(GetTooltipString(data.id), data.color);
     }
 
-    void ActivateTooltip(TooltipId id)
-    {
-        var data = GetTooltipData(id);
-        ActivateTooltip(GetTooltipString(id), data.color);
-    }
-    
     void ActivateTooltip(string text, Color color)
     {
         textTooltip.text = text;
@@ -204,6 +182,9 @@ public class ObserverModeUI : MonoBehaviour
     
     void TickBrushes()
     {
+        if (EventSystem.current.IsPointerOverGameObject())
+            return;
+    
         if (curActiveTool == ToolType.Stir) 
         {  
             theCursorCzar.stirGizmoVisible = true;
@@ -211,10 +192,10 @@ public class ObserverModeUI : MonoBehaviour
 
             // var stirMin = isActing > 0.5f ? 1f : -4f;
             // theCursorCzar.stirStickDepth = Mathf.Lerp(theCursorCzar.stirStickDepth, stirMin, 0.2f);
-            float isActing = theCursorCzar.isDraggingMouseLeft ? 1f : 0f;
+            float brushStrength = theCursorCzar.isDraggingMouseLeft ? 1f : 0f;
             theRenderKing.isStirring = theCursorCzar.isDraggingMouseLeft;
-            theRenderKing.gizmoStirToolMat.SetFloat(STIRRING, isActing);
-            theRenderKing.gizmoStirStickAMat.SetFloat(STIRRING, isActing);                    
+            theRenderKing.gizmoStirToolMat.SetFloat(STIRRING, brushStrength);
+            theRenderKing.gizmoStirStickAMat.SetFloat(STIRRING, brushStrength);                    
             theRenderKing.gizmoStirStickAMat.SetFloat(RADIUS, 6.2f);
         }
 
@@ -260,16 +241,20 @@ public class ObserverModeUI : MonoBehaviour
         }
     }
     
-    TooltipData GetTooltipData(TooltipId id)
+    bool GetTooltipCondition(TooltipId id)
     {
-        foreach (var tooltip in tooltips)
-            if (tooltip.id == id)
-                return tooltip;
-                
-        Debug.LogError(id + " not found");
-        return tooltips[0];
+        switch (id)
+        {
+            case TooltipId.Genome: return genomeViewerUI.isTooltipHover;
+            case TooltipId.Year: return cursorInSpeciesHistoryPanel;
+            case TooltipId.Agent: return cameraManager.isMouseHoverAgent;
+            case TooltipId.Algae: return plantDistance < hitboxRadius && plantDistance < microbeDistance;
+            case TooltipId.Microbe: return microbeDistance < hitboxRadius && microbeDistance < plantDistance;
+            case TooltipId.Timestep: return cursorInSpeciesHistoryPanel;    // ERROR: same as Year
+            default: return false;
+        }
     }
-    
+
     // WPP: colors exposed in editor, opens door to further variation as needed
     [Serializable]
     public struct TooltipData

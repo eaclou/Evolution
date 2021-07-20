@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class GenomeViewerUI : MonoBehaviour {
-    SimulationManager simulationManager => SimulationManager.instance;
     UIManager uiManager => UIManager.instance;
 
     public GameObject panelGenomeSensors;    
@@ -12,7 +11,7 @@ public class GenomeViewerUI : MonoBehaviour {
     
     //public GameObject imageDeadDim;
 
-    public bool isTooltipHover = true;
+    public bool isTooltipHover;
     public string tooltipString;
 
     void Start () {
