@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
+// Handles tooltips, announcements, moving the camera, and setting brushes
 public class ObserverModeUI : MonoBehaviour
 {
     UIManager manager => UIManager.instance;
@@ -25,8 +26,8 @@ public class ObserverModeUI : MonoBehaviour
 
     public new bool enabled;
     public GameObject panelObserverMode;
-    public WatcherUI watcherUI;
-    public DebugPanelUI debugPanelUI;
+    public WatcherUI watcherUI;         // * Not used
+    public DebugPanelUI debugPanelUI;   // * Not used
     public BrushesUI brushesUI;
     public GenomeViewerUI genomeViewerUI;
     public GameObject panelPendingClickPrompt;
@@ -41,7 +42,7 @@ public class ObserverModeUI : MonoBehaviour
     public bool updateTerrainAltitude;
     public float terrainUpdateMagnitude;
     
-    [SerializeField] TooltipId tooltipId;
+    TooltipId tooltipId;
     public bool isVertebrateHighlight => tooltipId == TooltipId.Agent;
     public bool isPlantHighlight => tooltipId == TooltipId.Algae;
     public bool isMicrobeHighlight => tooltipId == TooltipId.Microbe;
@@ -67,10 +68,14 @@ public class ObserverModeUI : MonoBehaviour
         if (!enabled || input == Vector2.zero) 
             return;
 
-        watcherUI.StopFollowingAgent();
-        watcherUI.StopFollowingPlantParticle();
-        watcherUI.StopFollowingAnimalParticle();
-
+        // WPP: cut middle-man reference, condensed to single function
+        //watcherUI.StopFollowingAgent();
+        //watcherUI.StopFollowingPlantParticle();
+        //watcherUI.StopFollowingAnimalParticle();
+        
+        // Don't auto-follow anything if player is manually controlling camera
+        cameraManager.SetFollowing(KnowledgeMapId.Undefined);
+        
         cameraManager.MoveCamera(input.normalized);
     }
     
@@ -82,22 +87,7 @@ public class ObserverModeUI : MonoBehaviour
         if(vegetationManager == null) return;
 
         TickAnnouncement();
-        
-        plantDistance = (vegetationManager.closestPlantParticleData.worldPos - mousePositionOnWater).magnitude;
-        microbeDistance = (zooplanktonManager.closestAnimalParticlePosition2D - mousePositionOnWater).magnitude;
-                                
-        tooltipActive = false;
-        foreach (var tooltip in tooltips)
-        {
-            if (!GetTooltipCondition(tooltip.id))
-                continue;
-            
-            ActivateTooltip(tooltip);
-            tooltipActive = true;
-            break;
-        }
-        panelTooltip.SetActive(tooltipActive);
-        
+        TickTooltip();
         TickBrushes();
 
         // WPP: branches have identical result - error?
@@ -125,9 +115,6 @@ public class ObserverModeUI : MonoBehaviour
             //inspectToolUnlockedAnnounce = false;
         }
     }
-
-    float plantDistance;
-    float microbeDistance;
 
     #region dead code - please delete
     void TickObjectTooltip()
@@ -166,6 +153,27 @@ public class ObserverModeUI : MonoBehaviour
         //float cursorCoordsY = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().y - 720f) / 360f); 
     }
     #endregion
+    
+    float plantDistance;
+    float microbeDistance;
+    
+    void TickTooltip()
+    {
+        plantDistance = (vegetationManager.closestPlantParticleData.worldPos - mousePositionOnWater).magnitude;
+        microbeDistance = (zooplanktonManager.closestAnimalParticlePosition2D - mousePositionOnWater).magnitude;
+                                
+        tooltipActive = false;
+        foreach (var tooltip in tooltips)
+        {
+            if (!GetTooltipCondition(tooltip.id))
+                continue;
+            
+            ActivateTooltip(tooltip);
+            tooltipActive = true;
+            break;
+        }
+        panelTooltip.SetActive(tooltipActive);
+    }
     
     void ActivateTooltip(TooltipData data)
     {

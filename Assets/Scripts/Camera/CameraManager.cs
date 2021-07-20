@@ -206,7 +206,7 @@ public class CameraManager : Singleton<CameraManager> {
         if (clicked) 
         {
             SetTargetAgent(agent, agent.index);
-            SetFollowingAgent();
+            SetFollowing(KnowledgeMapId.Animals);
         }
             
         SetMouseHoverAgent(agent, true);
@@ -219,13 +219,13 @@ public class CameraManager : Singleton<CameraManager> {
         mouseHoverAgentIndex = agent ? agent.index : 0;
     }
     
-    public void SetFollowingAgent()
+    public void SetFollowing(KnowledgeMapId id)
     {
-        isFollowingAgent = true;
-        isFollowingPlantParticle = false;
-        isFollowingAnimalParticle = false; 
+        isFollowingAgent = id == KnowledgeMapId.Animals;
+        isFollowingPlantParticle = id == KnowledgeMapId.Plants;
+        isFollowingAnimalParticle = id == KnowledgeMapId.Microbes;
     }
-        
+
     private Vector2 SmoothApproach(Vector2 pastPosition, Vector2 pastTargetPosition, Vector2 targetPosition, float speed) {
         float t = Time.deltaTime * speed;
         Vector2 v = (targetPosition - pastTargetPosition) / t;

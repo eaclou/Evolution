@@ -209,7 +209,6 @@ public class WatcherUI : MonoBehaviour {
 
 	public void UpdateWatcherPanelUI() {
         //animatorWatcherUI.SetBool("_IsOpen", isOpen);
-
         UpdateUI();
 
         if(cameraManager.isFollowingAgent) {  // only active when following a selected critter -- make sure it only contains:
@@ -222,9 +221,11 @@ public class WatcherUI : MonoBehaviour {
         else {
             //animatorWatcherUI.SetBool("_IsDim", true);
 
-            StopFollowingAgent();
-            StopFollowingPlantParticle();
-            StopFollowingAnimalParticle();
+            // WPP: condensed
+            //StopFollowingAgent();
+            //StopFollowingPlantParticle();
+            //StopFollowingAnimalParticle();
+            cameraManager.SetFollowing(KnowledgeMapId.Undefined);
 
             followCreaturePanel.SetActive(false);
         }
@@ -392,34 +393,33 @@ public class WatcherUI : MonoBehaviour {
         cameraManager.SetTargetAgent(simulationManager.agents[newIndex], newIndex);                
     }
 
+    // WPP: removed, access cameraManager directly when needed
+    /*
     public void StopFollowingAgent() {
         cameraManager.isFollowingAgent = false;
     }
     
-    public void StartFollowingAgent() {
-        cameraManager.isFollowingAgent = true;
-        //uiManagerRef.globalResourcesUI.CreateBrainGenomeTexture(uiManagerRef.cameraManager.targetAgent.candidateRef.candidateGenome);
-    }
-
     public void StopFollowingPlantParticle() {
         cameraManager.isFollowingPlantParticle = false;
-        
-    }
-    
-    public void StartFollowingPlantParticle() {
-        cameraManager.isFollowingPlantParticle = true;
-        cameraManager.isFollowingAnimalParticle = false; 
-        watcherSelectedTrophicSlotRef = trophicLayersManager.GetSlot(KnowledgeMapId.Plants); //.kingdomPlants.trophicTiersList[1].trophicSlots[0];
-        //trophicLayersManager.selectedTrophicSlotRef =   
     }
     
     public void StopFollowingAnimalParticle() {
         cameraManager.isFollowingAnimalParticle = false;        
     }
+    */    
+        
+    public void StartFollowingAgent() {
+        cameraManager.isFollowingAgent = true;
+        //uiManagerRef.globalResourcesUI.CreateBrainGenomeTexture(uiManagerRef.cameraManager.targetAgent.candidateRef.candidateGenome);
+    }
+    
+    public void StartFollowingPlantParticle() {
+        cameraManager.SetFollowing(KnowledgeMapId.Plants);
+        watcherSelectedTrophicSlotRef = trophicLayersManager.GetSlot(KnowledgeMapId.Plants); 
+    }
     
     public void StartFollowingAnimalParticle() {
-        cameraManager.isFollowingAnimalParticle = true;  
-        cameraManager.isFollowingPlantParticle = false;
-        watcherSelectedTrophicSlotRef = trophicLayersManager.GetSlot(KnowledgeMapId.Microbes); //kingdomAnimals.trophicTiersList[0].trophicSlots[0];
+        cameraManager.SetFollowing(KnowledgeMapId.Microbes);
+        watcherSelectedTrophicSlotRef = trophicLayersManager.GetSlot(KnowledgeMapId.Microbes);
     }
 }
