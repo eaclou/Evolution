@@ -57,7 +57,7 @@ public class SensorsPanel : MonoBehaviour
     public class Sensor
     {
         [SerializeField] Image image;
-        [SerializeField] GenomeButtonTooltipSource tooltip;
+        [SerializeField] TooltipUI tooltip;
         
         // * Move to central location (lookup?)
         [SerializeField] Color enabledColor = Color.white;
@@ -65,7 +65,7 @@ public class SensorsPanel : MonoBehaviour
         
         public void SetSensorEnabled(bool value) 
         { 
-            tooltip.isSensorEnabled = value;
+            //tooltip.isSensorEnabled = value; //***EAC re-implement this later
             image.color = value ? enabledColor : disabledColor;     
         }
     }

@@ -8,10 +8,10 @@ public class GenomeButtonTooltipSource : MonoBehaviour {
     public bool isSensorEnabled;
 
     public void OnHoverStart() {
-        genomeViewer.EnterTooltipObject(this);
+        //genomeViewer.EnterTooltipObject(this);
     }
     
     public void OnHoverExit() {
-        genomeViewer.ExitTooltipObject();
+        //genomeViewer.ExitTooltipObject();
     }
 }

@@ -9,15 +9,7 @@ public class GenomeViewerUI : MonoBehaviour {
     public GameObject panelPerformanceBehavior;
     public GameObject panelEaten;
     
-    //public GameObject imageDeadDim;
-
-    public bool isTooltipHover;
-    public string tooltipString;
-
-    void Start () {
-		isTooltipHover = false;
-	}
-    
+        
     public void UpdateUI() {
         // * WPP: only usage, may as well set in editor
         // relates to future use items
@@ -47,15 +39,15 @@ public class GenomeViewerUI : MonoBehaviour {
         
     
     #endregion
-    
-    public void EnterTooltipObject(GenomeButtonTooltipSource tip) {
+    //moved to ObserverModeUI:
+    /*public void EnterTooltipObject(GenomeButtonTooltipSource tip) {
         isTooltipHover = true;
         tooltipString = tip.tooltipString;
     }
     
     public void ExitTooltipObject() {
         isTooltipHover = false;
-    }
+    }*/
     
     [Serializable]
     public class Tab

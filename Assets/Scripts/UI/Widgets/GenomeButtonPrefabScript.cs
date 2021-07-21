@@ -12,7 +12,7 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
     
     public Button button;
     public Image backgroundImage;
-    public GenomeButtonTooltipSource tooltip;
+    public TooltipUI tooltip;
     
     [SerializeField] BackgroundState selectedState;
     [SerializeField] BackgroundState[] lifeStageStates;

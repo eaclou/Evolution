@@ -17,6 +17,9 @@ public class ObserverModeUI : MonoBehaviour
     ZooplanktonManager zooplanktonManager => simulationManager.zooplanktonManager;
     VegetationManager vegetationManager => simulationManager.vegetationManager;
     ToolType curActiveTool => manager.curActiveTool;
+
+    public bool isTooltipHover = false;
+    public string tooltipString;
     
     float cursorX => theCursorCzar.GetCursorPixelCoords().x;
     Vector2 mousePositionOnWater => theCursorCzar.curMousePositionOnWaterPlane2D;
@@ -26,7 +29,7 @@ public class ObserverModeUI : MonoBehaviour
 
     public new bool enabled;
     public GameObject panelObserverMode;
-    public WatcherUI watcherUI;         // * Not used
+    //public WatcherUI watcherUI;         // * Not used
     public DebugPanelUI debugPanelUI;   // * Not used
     public BrushesUI brushesUI;
     public GenomeViewerUI genomeViewerUI;
@@ -235,11 +238,19 @@ public class ObserverModeUI : MonoBehaviour
     
     [SerializeField] TooltipData[] tooltips;
     
+    public void EnterTooltipObject(TooltipUI tip) {
+        isTooltipHover = true;
+        tooltipString = tip.tooltipString;
+    }
+    
+    public void ExitTooltipObject() {
+        isTooltipHover = false;
+    }
     string GetTooltipString(TooltipId id)
     {
         switch (id)
         {
-            case TooltipId.Genome: return genomeViewerUI.tooltipString;
+            case TooltipId.CanvasElement: return tooltipString;
             case TooltipId.Year: return "Year " + ((simulationManager.simAgeTimeSteps / 2048f) * cursorX / 360f).ToString("F0");
             case TooltipId.Agent: return "Critter #" + cameraManager.mouseHoverAgentRef.candidateRef.candidateID;
             case TooltipId.Algae: return "Algae #" + vegetationManager.closestPlantParticleData.index;
@@ -253,7 +264,7 @@ public class ObserverModeUI : MonoBehaviour
     {
         switch (id)
         {
-            case TooltipId.Genome: return genomeViewerUI.isTooltipHover;
+            case TooltipId.CanvasElement: return isTooltipHover;
             case TooltipId.Year: return cursorInSpeciesHistoryPanel;
             case TooltipId.Agent: return cameraManager.isMouseHoverAgent;
             case TooltipId.Algae: return plantDistance < hitboxRadius && plantDistance < microbeDistance;
@@ -273,7 +284,7 @@ public class ObserverModeUI : MonoBehaviour
     
     public enum TooltipId
     {
-        Genome,
+        CanvasElement,
         Year,
         Agent,
         Algae,
