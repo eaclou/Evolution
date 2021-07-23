@@ -1,6 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
+// * WPP: Refactor -> remove dead code, expose magic values, simplify conditionals
 public class BrushesUI : MonoBehaviour {
     UIManager uiManagerRef => UIManager.instance;
     WorldSpiritHubUI worldSpiritHubUI => uiManagerRef.worldSpiritHubUI;
@@ -20,6 +23,12 @@ public class BrushesUI : MonoBehaviour {
     public Button buttonBrushExtra1;
     public Button buttonBrushExtra2;
     public Button buttonBrushExtra3;
+    
+    public ButtonBrush stirBrush;
+    public ButtonBrush addBrush;
+    public ButtonBrush extraBrush1;
+    public ButtonBrush extraBrush2;
+    public ButtonBrush extraBrush3;
 
     //public Animator animatorBrushesUI;
         
@@ -99,29 +108,8 @@ public class BrushesUI : MonoBehaviour {
     Color buttonDisabledColor => lookup.buttonDisabledColor;
     Color colorSpiritBrushLight => lookup.colorSpiritBrushLight;
     Color colorSpiritBrushDark => lookup.colorSpiritBrushDark;
-    
-    /*Sprite spiritWorldIcon => lookup.spiritWorldIcon;
-    Sprite spiritStoneIcon => lookup.spiritStoneIcon;
-    Sprite spiritAlgaeIcon => lookup.spiritAlgaeIcon;
-    Sprite spiritPlantIcon => lookup.spiritPlantIcon;
-    Sprite spiritZooplanktonIcon => lookup.spiritZooplanktonIcon;
-    Sprite spiritVertebrateIcon => lookup.spiritVertebrateIcon;
-    Sprite spiritDecomposerIcon => lookup.spiritDecomposerIcon;
-    Sprite spiritPebblesIcon => lookup.spiritPebblesIcon;
-    Sprite spiritSandIcon => lookup.spiritSandIcon;
-    Sprite spiritMineralsIcon => lookup.spiritMineralsIcon;
-    Sprite spiritWaterIcon => lookup.spiritWaterIcon;
-    Sprite spiritAirIcon => lookup.spiritAirIcon;
-    Color colorVertebratesLayer => lookup.colorVertebratesLayer;
-    Color colorWorldLayer => lookup.colorWorldLayer;
-    Color colorTerrainLayer => lookup.colorTerrainLayer; 
-    Color colorMineralLayer => lookup.colorMineralLayer;
-    Color colorWaterLayer => lookup.colorWaterLayer;
-    Color colorAirLayer => lookup.colorAirLayer;
-    Color colorDecomposersLayer => lookup.colorDecomposersLayer;
-    Color colorAlgaeLayer => lookup.colorAlgaeLayer;
-    Color colorPlantsLayer => lookup.colorPlantsLayer;
-    Color colorZooplanktonLayer => lookup.colorZooplanktonLayer;*/
+    [SerializeField] Vector3 inactiveBrushScale = Vector3.one;
+    [SerializeField] Vector3 activeBrushScale = new Vector3(1.3f, 1.3f, 1.3f);
 
 
     private string GetSpiritBrushSummary(TrophicLayersManager layerManager) {
@@ -130,10 +118,8 @@ public class BrushesUI : MonoBehaviour {
         switch(uiManagerRef.curActiveTool) {
             case ToolType.None:
                 //buttonToolbarInspect.GetComponent<Image>().color = buttonDisabledColor;
-
                 break;
                 /*case ToolType.Watcher:
-
                 str = "This spirit reveals\nhidden information.";
                 str += "\n\n";                
                 break;
@@ -152,12 +138,11 @@ public class BrushesUI : MonoBehaviour {
                 break;
             default:
                 break;
-
         }
 
         return str;
     }
-	// Use this for initialization
+    
 	void Start () {
         // ********************************************* MOVE THIS!!!! somewhere into initial loading code
         creationBrushesArray = new CreationBrush[4];
@@ -199,8 +184,7 @@ public class BrushesUI : MonoBehaviour {
         creationBrushesArray[1] = createBrush1;
         creationBrushesArray[2] = createBrush2;
         creationBrushesArray[3] = createBrush3;
-        
-	}
+    }
 
     public void UpdateBrushesUI() {
         // TEMPORARY!!!!!::::::
@@ -211,7 +195,7 @@ public class BrushesUI : MonoBehaviour {
         
         //animatorBrushesUI.SetBool("MinPanel", !isOpen);
         bool isDim = false;
-        
+        // * WPP: isDim is always false
         textBrushLinkedSpiritName.gameObject.SetActive(!isDim);
         textSelectedBrushDescription.gameObject.SetActive(!isDim);
         textSelectedBrushEffects.gameObject.SetActive(!isDim);
@@ -230,9 +214,11 @@ public class BrushesUI : MonoBehaviour {
             }
         }        
     }
+    
+    // WPP: using nested class pattern to avoid GetComponent in main loop
+    // Eliminated repetition in conditions with SetBrush methods
     private void UpdateUI() {
-        // * WPP: use nested class pattern to avoid GetComponent in main loop
-        buttonBrushStir.GetComponent<Image>().color = buttonDisabledColor;
+        /*buttonBrushStir.GetComponent<Image>().color = buttonDisabledColor;
         buttonBrushStir.gameObject.transform.localScale = Vector3.one;
         buttonBrushAdd.GetComponent<Image>().color = buttonDisabledColor;
         buttonBrushAdd.gameObject.transform.localScale = Vector3.one;
@@ -241,8 +227,10 @@ public class BrushesUI : MonoBehaviour {
         buttonBrushExtra2.GetComponent<Image>().color = buttonDisabledColor;
         buttonBrushExtra2.gameObject.transform.localScale = Vector3.one;
         buttonBrushExtra3.GetComponent<Image>().color = buttonDisabledColor;
-        buttonBrushExtra3.gameObject.transform.localScale = Vector3.one;
+        buttonBrushExtra3.gameObject.transform.localScale = Vector3.one;*/
         
+        SetAllBrushesInactive();
+
         UpdateCurSelectedColor();
         
         curIconColor = new Color(curIconColor.r * 0.35f, curIconColor.g * 0.35f, curIconColor.b * 0.35f);
@@ -254,23 +242,24 @@ public class BrushesUI : MonoBehaviour {
 
         switch(uiManagerRef.curActiveTool) {
             case ToolType.None:
-                //
                 break;            
             case ToolType.Add:
                 if(curCreationBrushIndex == 0) {
-                    // * WPP: use nested class pattern to avoid GetComponent in main loop
-                    buttonBrushAdd.GetComponent<Image>().color = buttonActiveColor;
-                    buttonBrushAdd.gameObject.transform.localScale = Vector3.one * 1.33f;
+                    SetBrushActive(addBrush);
 
+                    // WPP: using nested class pattern to avoid GetComponent in main loop
+                    /*buttonBrushAdd.GetComponent<Image>().color = buttonActiveColor;
+                    buttonBrushAdd.gameObject.transform.localScale = Vector3.one * 1.33f;
                     buttonBrushExtra1.GetComponent<Image>().color = buttonDisabledColor;
                     buttonBrushExtra1.gameObject.transform.localScale = Vector3.one;
                     buttonBrushExtra2.GetComponent<Image>().color = buttonDisabledColor;
                     buttonBrushExtra2.gameObject.transform.localScale = Vector3.one;
                     buttonBrushExtra3.GetComponent<Image>().color = buttonDisabledColor;
-                    buttonBrushExtra3.gameObject.transform.localScale = Vector3.one;
+                    buttonBrushExtra3.gameObject.transform.localScale = Vector3.one;*/
                 }
                 else if(curCreationBrushIndex == 1) {
-                    buttonBrushExtra1.GetComponent<Image>().color = buttonActiveColor;
+                    SetBrushActive(extraBrush1);
+                    /*buttonBrushExtra1.GetComponent<Image>().color = buttonActiveColor;
                     buttonBrushExtra1.gameObject.transform.localScale = Vector3.one * 1.33f;
 
                     buttonBrushAdd.GetComponent<Image>().color = buttonDisabledColor;
@@ -278,10 +267,11 @@ public class BrushesUI : MonoBehaviour {
                     buttonBrushExtra2.GetComponent<Image>().color = buttonDisabledColor;
                     buttonBrushExtra2.gameObject.transform.localScale = Vector3.one;
                     buttonBrushExtra3.GetComponent<Image>().color = buttonDisabledColor;
-                    buttonBrushExtra3.gameObject.transform.localScale = Vector3.one;
+                    buttonBrushExtra3.gameObject.transform.localScale = Vector3.one;*/
                 }
                 else if(curCreationBrushIndex == 2) {
-                    buttonBrushExtra2.GetComponent<Image>().color = buttonActiveColor;
+                    SetBrushActive(extraBrush2);
+                    /*buttonBrushExtra2.GetComponent<Image>().color = buttonActiveColor;
                     buttonBrushExtra2.gameObject.transform.localScale = Vector3.one * 1.33f;
 
                     buttonBrushExtra1.GetComponent<Image>().color = buttonDisabledColor;
@@ -289,10 +279,11 @@ public class BrushesUI : MonoBehaviour {
                     buttonBrushAdd.GetComponent<Image>().color = buttonDisabledColor;
                     buttonBrushAdd.gameObject.transform.localScale = Vector3.one;
                     buttonBrushExtra3.GetComponent<Image>().color = buttonDisabledColor;
-                    buttonBrushExtra3.gameObject.transform.localScale = Vector3.one;
+                    buttonBrushExtra3.gameObject.transform.localScale = Vector3.one;*/
                 }
                 else {
-                    buttonBrushExtra3.GetComponent<Image>().color = buttonActiveColor;
+                    SetBrushActive(extraBrush3);
+                    /*buttonBrushExtra3.GetComponent<Image>().color = buttonActiveColor;
                     buttonBrushExtra3.gameObject.transform.localScale = Vector3.one * 1.33f;
 
                     buttonBrushExtra1.GetComponent<Image>().color = buttonDisabledColor;
@@ -300,28 +291,29 @@ public class BrushesUI : MonoBehaviour {
                     buttonBrushExtra2.GetComponent<Image>().color = buttonDisabledColor;
                     buttonBrushExtra2.gameObject.transform.localScale = Vector3.one;
                     buttonBrushAdd.GetComponent<Image>().color = buttonDisabledColor;
-                    buttonBrushAdd.gameObject.transform.localScale = Vector3.one;
+                    buttonBrushAdd.gameObject.transform.localScale = Vector3.one;*/
                 }
                 break;            
             case ToolType.Stir:
-                buttonBrushStir.GetComponent<Image>().color = buttonActiveColor;
-                buttonBrushStir.gameObject.transform.localScale = Vector3.one * 1.5f;
+                //buttonBrushStir.GetComponent<Image>().color = buttonActiveColor;
+                //buttonBrushStir.gameObject.transform.localScale = Vector3.one * 1.5f;
+                stirBrush.image.color = buttonActiveColor;
+                stirBrush.transform.localScale = Vector3.one * 1.5f;
                 break;            
             default:
                 break;
-
         }
 
         //if(uiManagerRef.panelFocus != PanelFocus.Brushes) {
-            buttonBrushAdd.GetComponent<Image>().color = buttonDisabledColor * 0.5f;
+            addBrush.image.color = buttonDisabledColor * 0.5f;
         //}
     
-        string spiritBrushName = "Minor Creation Spirit " + curCreationBrushIndex.ToString();
+        string spiritBrushName = "Minor Creation Spirit " + curCreationBrushIndex;
         imageSelectedBrushThumbnail.sprite = spiritBrushCreationIcon;
         //strSpiritBrushDescription = "This spirit has some powers of life and death";
         //strSpiritBrushEffects = "Left-Click:\n" + strLeftClickEffect[leftClickDescriptionIndex] + "\n\nRight-Click:\n" + strRightClickEffect[rightClickDescriptionIndex];
         if(theCursorCzar.isDraggingMouseRight) {
-            spiritBrushName = "Minor Decay Spirit" + curCreationBrushIndex.ToString();  
+            spiritBrushName = "Minor Decay Spirit" + curCreationBrushIndex;  
         }
         
         if(uiManagerRef.curActiveTool == ToolType.Stir) {
@@ -351,7 +343,28 @@ public class BrushesUI : MonoBehaviour {
         imageBrushLinkedSpiritThumbnail.sprite = curIconSprite;
     }
     
-    // WPP: pull data from SO
+    void SetBrushActive(ButtonBrush brush)
+    {
+        SetAllBrushesInactive();
+        SetBrush(brush, true);
+    }
+    
+    void SetAllBrushesInactive()
+    {
+        SetBrush(stirBrush, false);
+        SetBrush(addBrush, false);
+        SetBrush(extraBrush1, false);
+        SetBrush(extraBrush2, false);
+        SetBrush(extraBrush3, false);
+    }
+    
+    void SetBrush(ButtonBrush brush, bool active)
+    {
+        brush.image.color = active ? buttonActiveColor : buttonDisabledColor;
+        brush.transform.localScale = active ? activeBrushScale : inactiveBrushScale;
+    }
+    
+    // WPP: data pulled from SO
     private void UpdateCurSelectedColor() {  
         /*string str = "";
         //selected layer ui identifying color:
@@ -441,9 +454,11 @@ public class BrushesUI : MonoBehaviour {
         textSelectedBrushDescription.text = selectedEssenceSlot.data.brushDescription;
     }
     
+    // * WPP: empty method -> delete and reimplement when useful
     private void UpdateBrushPaletteUI() {
-        Color iconColor = Color.white;
         /*
+        Color iconColor = Color.white;
+
         bool isSelectedDecomposers = false;
         bool isSelectedAlgae = false;
         bool isSelectedPlants = false;
@@ -583,71 +598,69 @@ public class BrushesUI : MonoBehaviour {
         }
         uiManagerRef.updateTerrainAltitude = false;                
 
-        if (true) //trophicLayersManager.isSelectedTrophicSlot)
-        { 
-            if(selectedEssenceSlot.kingdomID == KingdomId.Decomposers) 
-            {
-                simulationManager.vegetationManager.isBrushActive = true;
-            }
-            else if(selectedEssenceSlot.kingdomID == KingdomId.Plants) 
-            {
-                simulationManager.vegetationManager.isBrushActive = true;
-            }
-            else if(selectedEssenceSlot.id == KnowledgeMapId.Animals) 
-            {
-                int speciesIndex = selectedEssenceSlot.linkedSpeciesID;
-                if (theCursorCzar.isDraggingMouseLeft) 
-                {
-                    //gameManager.simulationManager.recentlyAddedSpeciesOn = true; // ** needed?
-                    uiManagerRef.isBrushAddingAgents = true;
-                    //Debug.Log("isBrushAddingAgents = true; speciesID = " + speciesIndex.ToString());
-                    uiManagerRef.brushAddAgentCounter++;
-
-                    if(uiManagerRef.brushAddAgentCounter >= uiManagerRef.framesPerAgentSpawn) 
-                    {
-                        uiManagerRef.brushAddAgentCounter = 0;
-                        simulationManager.AttemptToBrushSpawnAgent(speciesIndex);
-                    }
-                }
-                if (theCursorCzar.isDraggingMouseRight) 
-                {
-                    simulationManager.AttemptToKillAgent(speciesIndex, new Vector2(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y), 15f);
-                }
-            }
-            else if (selectedEssenceSlot.terrainSelected) 
-            {
-                uiManagerRef.updateTerrainAltitude = true;
-                uiManagerRef.terrainUpdateMagnitude = 0.05f;
-                
-                // * WPP: is this all possible conditions?
-                if (selectedEssenceSlot.worldSelected || 
-                    selectedEssenceSlot.stoneSelected ||   
-                    selectedEssenceSlot.pebblesSelected ||  
-                    selectedEssenceSlot.sandSelected)  
-                { 
-                    uiManagerRef.terrainUpdateMagnitude = 1f;
-                    //theRenderKing.ClickTestTerrainUpdateMaps(true, 0.4f);
-                }
-            }
-            else 
-            {
-                if (selectedEssenceSlot.mineralsSelected) 
-                {  
-                    simulationManager.vegetationManager.isBrushActive = true;
-                }
-                else if (selectedEssenceSlot.waterSelected && theCursorCzar.isDraggingMouse)
-                {
-                    SimulationManager._GlobalWaterLevel = Mathf.Clamp01(SimulationManager._GlobalWaterLevel + 0.002f);
-                }
-                else if (selectedEssenceSlot.airSelected &&
-                        theCursorCzar.isDraggingMouse &&
-                        Random.Range(0f, 1f) < 0.1f) 
-                {
-                    simulationManager.environmentFluidManager.curTierWaterCurrents = Mathf.Clamp((simulationManager.environmentFluidManager.curTierWaterCurrents + 1), 0, 10);
-                }
-            }              
+        //if (trophicLayersManager.isSelectedTrophicSlot) { }
+        if (selectedEssenceSlot.kingdomID == KingdomId.Decomposers) 
+        {
+            simulationManager.vegetationManager.isBrushActive = true;
         }
-                        
+        else if(selectedEssenceSlot.kingdomID == KingdomId.Plants) 
+        {
+            simulationManager.vegetationManager.isBrushActive = true;
+        }
+        else if(selectedEssenceSlot.id == KnowledgeMapId.Animals) 
+        {
+            int speciesIndex = selectedEssenceSlot.linkedSpeciesID;
+            if (theCursorCzar.isDraggingMouseLeft) 
+            {
+                //gameManager.simulationManager.recentlyAddedSpeciesOn = true; // ** needed?
+                uiManagerRef.isBrushAddingAgents = true;
+                //Debug.Log("isBrushAddingAgents = true; speciesID = " + speciesIndex.ToString());
+                uiManagerRef.brushAddAgentCounter++;
+
+                if(uiManagerRef.brushAddAgentCounter >= uiManagerRef.framesPerAgentSpawn) 
+                {
+                    uiManagerRef.brushAddAgentCounter = 0;
+                    simulationManager.AttemptToBrushSpawnAgent(speciesIndex);
+                }
+            }
+            if (theCursorCzar.isDraggingMouseRight) 
+            {
+                simulationManager.AttemptToKillAgent(speciesIndex, new Vector2(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y), 15f);
+            }
+        }
+        else if (selectedEssenceSlot.terrainSelected) 
+        {
+            uiManagerRef.updateTerrainAltitude = true;
+            uiManagerRef.terrainUpdateMagnitude = 0.05f;
+            
+            // * WPP: is this all possible conditions?
+            if (selectedEssenceSlot.worldSelected || 
+                selectedEssenceSlot.stoneSelected ||   
+                selectedEssenceSlot.pebblesSelected ||  
+                selectedEssenceSlot.sandSelected)  
+            { 
+                uiManagerRef.terrainUpdateMagnitude = 1f;
+                //theRenderKing.ClickTestTerrainUpdateMaps(true, 0.4f);
+            }
+        }
+        else 
+        {
+            if (selectedEssenceSlot.mineralsSelected) 
+            {  
+                simulationManager.vegetationManager.isBrushActive = true;
+            }
+            else if (selectedEssenceSlot.waterSelected && theCursorCzar.isDraggingMouse)
+            {
+                SimulationManager._GlobalWaterLevel = Mathf.Clamp01(SimulationManager._GlobalWaterLevel + 0.002f);
+            }
+            else if (selectedEssenceSlot.airSelected &&
+                    theCursorCzar.isDraggingMouse &&
+                    Random.Range(0f, 1f) < 0.1f) 
+            {
+                simulationManager.environmentFluidManager.curTierWaterCurrents = Mathf.Clamp((simulationManager.environmentFluidManager.curTierWaterCurrents + 1), 0, 10);
+            }
+        }
+
         theRenderKing.isBrushing = true;
         theRenderKing.isSpiritBrushOn = true;
         theRenderKing.spiritBrushPosNeg = 1f;
@@ -680,10 +693,11 @@ public class BrushesUI : MonoBehaviour {
             //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
             //animatorBrushesUI.SetBool("MinPanel", false);
         }
-        else {
-            //uiManagerRef.panelFocus = PanelFocus.WorldHub;
-            //animatorBrushesUI.SetBool("MinPanel", true);
-        }
+        // * WPP: delete dead code
+        /*else {
+            uiManagerRef.panelFocus = PanelFocus.WorldHub;
+            animatorBrushesUI.SetBool("MinPanel", true);
+        }*/
     }
     
     public void SetTargetFromWorldTree() {
@@ -707,14 +721,14 @@ public class BrushesUI : MonoBehaviour {
         //uiManagerRef.watcherUI.StopFollowingAgent();
         //uiManagerRef.watcherUI.StopFollowingPlantParticle();
         //uiManagerRef.watcherUI.StopFollowingAnimalParticle();
-        buttonBrushStir.GetComponent<Image>().color = buttonActiveColor; 
- 
+        
+        stirBrush.image.color = buttonActiveColor;
+
         //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
-              
     }
     
     public void ClickToolButtonAdd() {  
-        Debug.Log("ClickToolButtonAdd(0)");
+        //Debug.Log("ClickToolButtonAdd(0)");
         curCreationBrushIndex = 0;
         EnterCreationBrushMode();
         
@@ -722,7 +736,7 @@ public class BrushesUI : MonoBehaviour {
     }
     
     public void ClickToolButtonExtra1() {
-        Debug.Log("ClickToolButtonExtra1()");
+        //Debug.Log("ClickToolButtonExtra1()");
         curCreationBrushIndex = 1;
         EnterCreationBrushMode();
         //buttonBrushAdd.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
@@ -734,7 +748,7 @@ public class BrushesUI : MonoBehaviour {
     }
     
     public void ClickToolButtonExtra2() {
-        Debug.Log("ClickToolButtonExtra2()");
+        //Debug.Log("ClickToolButtonExtra2()");
         curCreationBrushIndex = 2;
         EnterCreationBrushMode();
         //buttonBrushAdd.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
@@ -746,7 +760,7 @@ public class BrushesUI : MonoBehaviour {
     }
     
     public void ClickToolButtonExtra3() {
-        Debug.Log("ClickToolButtonExtra3()");
+        //Debug.Log("ClickToolButtonExtra3()");
         curCreationBrushIndex = 3;
         EnterCreationBrushMode();
         //buttonBrushAdd.GetComponent<Image>().color = uiManagerRef.buttonDisabledColor;
@@ -835,5 +849,34 @@ public class BrushesUI : MonoBehaviour {
         selectedBrushLinkedSpiritVertebrateLayer = data.layerIndex;
         isPaletteOpen = false;
         EnterCreationBrushMode();
+    }
+    
+    [Serializable] public struct ButtonBrush
+    {
+        public Button button;
+        
+        private Transform _transform;
+        public Transform transform
+        {
+            get
+            {
+                if (!_transform)
+                    _transform = button.transform;
+                
+                return _transform;
+            }
+        }
+        
+        private Image _image;
+        public Image image
+        {
+            get
+            {
+                if (!_image)
+                    _image = transform.GetComponent<Image>();
+                    
+                return _image;
+            }
+        }
     }
 }

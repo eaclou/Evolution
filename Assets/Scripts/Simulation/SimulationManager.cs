@@ -266,8 +266,8 @@ public class SimulationManager : Singleton<SimulationManager>
         featsList.Insert(0, feat);
     }
 
-    private void LoadingInitializeCoreSimulationState() {
-
+    private void LoadingInitializeCoreSimulationState() 
+    {
         featsList = new List<Feat>();
         Feat feat = new Feat("Power of Creation", FeatType.WorldExpand, 0, Color.white, "A new world is created!");
         LogFeat(feat);
@@ -277,7 +277,7 @@ public class SimulationManager : Singleton<SimulationManager>
 
         settingsManager.Initialize();
         trophicLayersManager = new TrophicLayersManager();
-        simEventsManager = new SimEventsManager(this);
+        simEventsManager = new SimEventsManager();
         simResourceManager = new SimResourceManager();
         //agentsManager = new AgentsManager();
         vegetationManager = new VegetationManager(settingsManager, simResourceManager);

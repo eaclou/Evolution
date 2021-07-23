@@ -1,8 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class SimEventsManager {
+// * WPP: Refactor -> repetition, overly-nested conditionals, expose values, remove dead code, shorten reference chains
+public class SimEventsManager 
+{
+    SimulationManager simManager => SimulationManager.instance;
 
     private const int numAvailableEventsPerMenu = 4;
 
@@ -19,29 +21,31 @@ public class SimEventsManager {
 
     public List<SimEventData> completeEventHistoryList;
 
-	public SimEventsManager(SimulationManager simManager) {
-
+	public SimEventsManager() 
+	{
         availableMinorEventsList = new List<SimEventData>();
         availableMajorEventsList = new List<SimEventData>();
         availableExtremeEventsList = new List<SimEventData>();
 
         completeEventHistoryList = new List<SimEventData>();
 
-        RegenerateAvailableMinorEvents(simManager);
-        RegenerateAvailableMajorEvents(simManager);
-        RegenerateAvailableExtremeEvents(simManager);
+        RegenerateAvailableMinorEvents();
+        RegenerateAvailableMajorEvents();
+        RegenerateAvailableExtremeEvents();
     }
 
     public void Tick() {
-        if(isCooldown) {
-            curCooldownCounter++;
+        if (!isCooldown) return;
 
-            if(curCooldownCounter > cooldownDurationTicks) {
-                curCooldownCounter = 0;
-                isCooldown = false;
-            }
+        curCooldownCounter++;
+
+        if(curCooldownCounter > cooldownDurationTicks) 
+        {
+            curCooldownCounter = 0;
+            isCooldown = false;
         }
     }
+    
     /*
     public void ExecuteEvent(SimulationManager simManager, SimEventData data) {
         curEventBucks -= data.cost;
@@ -302,7 +306,8 @@ public class SimEventsManager {
         }
     }
     */
-    private int GetEventSpeciesID(SimulationManager simManager, SimEventData data) {
+    
+    private int GetEventSpeciesID(SimEventData data) {
         int speciesID = 0; // -1;
         float recordLow = 9999999f;
         float recordHigh = -9999999f;
@@ -356,7 +361,7 @@ public class SimEventsManager {
                 }
             }
             else if(data.speciesQualifier == SimEventData.SpeciesQualifier.Novelty) {  // **** IMPLEMENT ACTUAL NOVELTY SCORE!!!! ****
-                float val = UnityEngine.Random.Range(0f, 1f); // (float)simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[i]].av;
+                float val = Random.Range(0f, 1f); // (float)simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[i]].av;
 
                 if(data.polarity) {
                     if (val > recordHigh) {
@@ -370,9 +375,6 @@ public class SimEventsManager {
                         speciesID = simManager.masterGenomePool.currentlyActiveSpeciesIDList[i];
                     }
                 }
-            }
-            else {
-                //Debug.LogError("No such enum found!?!?! Now you've done it...");
             }
         }       
 
@@ -399,15 +401,14 @@ public class SimEventsManager {
         }
 
         // Avoid Duplicates????
-        SimEventData.SimEventTypeMinor randType = (SimEventData.SimEventTypeMinor)UnityEngine.Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeMinor)).Length);
+        SimEventData.SimEventTypeMinor randType = (SimEventData.SimEventTypeMinor)Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeMinor)).Length);
         for(int i = 0; i < 8; i++) {
             
             // Check if impossible:
             
-            
             // check for DUPES:
             if (eventList.Count > 0) {  // if not the first selection:
-                randType = (SimEventData.SimEventTypeMinor)UnityEngine.Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeMinor)).Length);
+                randType = (SimEventData.SimEventTypeMinor)Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeMinor)).Length);
                 // reroll isPositive?
 
                 bool duplicateDetected = false;
@@ -433,8 +434,6 @@ public class SimEventsManager {
             else {  // first One
                 break;
             }
-            
-            
         }
         
         newEventData.typeMinor = randType;
@@ -545,7 +544,6 @@ public class SimEventsManager {
                 newEventData.description = "A species chosen at random goes extinct";                                
                 break;            
             default:
-
                 break;
         }
 
@@ -562,25 +560,23 @@ public class SimEventsManager {
         
         newEventData.isPositive = true;
         newEventData.polarity = true;
-        float randPolarity = UnityEngine.Random.Range(0f, 1f);
+        float randPolarity = Random.Range(0f, 1f);
         if(randPolarity < 0.5f) {
             newEventData.polarity = false;
         }
-        float randSign = UnityEngine.Random.Range(0f, 1f);
+        float randSign = Random.Range(0f, 1f);
         if(randSign < 0.5f) {
             newEventData.isPositive = false;
         }
 
         // Avoid Duplicates????
-        SimEventData.SimEventTypeMajor randType = (SimEventData.SimEventTypeMajor)UnityEngine.Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeMajor)).Length);
+        SimEventData.SimEventTypeMajor randType = (SimEventData.SimEventTypeMajor)Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeMajor)).Length);
         for(int i = 0; i < 8; i++) {
-            
             // Check if impossible:
-            
             
             // check for DUPES:
             if (eventList.Count > 0) {  // if not the first selection:
-                randType = (SimEventData.SimEventTypeMajor)UnityEngine.Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeMajor)).Length);
+                randType = (SimEventData.SimEventTypeMajor)Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeMajor)).Length);
                 // reroll isPositive?
 
                 bool duplicateDetected = false;
@@ -688,7 +684,7 @@ public class SimEventsManager {
                         qualityString = "Most Unique";
                     }
                 }
-                newEventData.name = "New Species\n(" + qualityString.ToString() + ")";
+                newEventData.name = "New Species\n(" + qualityString + ")";
                 newEventData.description = "A new lineage emerges, originating from the current " + qualityString + " species";
                 break;
 
@@ -774,7 +770,6 @@ public class SimEventsManager {
                 newEventData.description = "The current " + qualityString + " species goes extinct";
                 break;            
             default:
-
                 break;
         }
 
@@ -789,25 +784,23 @@ public class SimEventsManager {
        
         newEventData.isPositive = true;
         newEventData.polarity = true;
-        float randPolarity = UnityEngine.Random.Range(0f, 1f);
+        float randPolarity = Random.Range(0f, 1f);
         if(randPolarity < 0.5f) {
             newEventData.polarity = false;
         }
-        float randSign = UnityEngine.Random.Range(0f, 1f);
+        float randSign = Random.Range(0f, 1f);
         if(randSign < 0.5f) {
             newEventData.isPositive = false;
         }
 
         // Avoid Duplicates????
-        SimEventData.SimEventTypeExtreme randType = (SimEventData.SimEventTypeExtreme)UnityEngine.Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeExtreme)).Length);
+        SimEventData.SimEventTypeExtreme randType = (SimEventData.SimEventTypeExtreme)Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeExtreme)).Length);
         for(int i = 0; i < 8; i++) {
-            
             // Check if impossible:
-            
             
             // check for DUPES:
             if (eventList.Count > 0) {  // if not the first selection:
-                randType = (SimEventData.SimEventTypeExtreme)UnityEngine.Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeExtreme)).Length);
+                randType = (SimEventData.SimEventTypeExtreme)Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeExtreme)).Length);
                 // reroll isPositive?
 
                 bool duplicateDetected = false;
@@ -839,11 +832,10 @@ public class SimEventsManager {
             qualifierTxt = "INCREASE";
         }
 
-        SimEventData.SpeciesQualifier randQualifier = (SimEventData.SpeciesQualifier)UnityEngine.Random.Range(1, 5);
+        SimEventData.SpeciesQualifier randQualifier = (SimEventData.SpeciesQualifier)Random.Range(1, 5);
         
         switch(randType) {
             case SimEventData.SimEventTypeExtreme.BodyModules:
-                //
                 if (newEventData.isPositive) {
                     newEventData.name = "Differentiate Senses III";
                     newEventData.description = " Greatly " + qualifierTxt + " the chance of altering the creatures' sensory capabilities";       
@@ -914,8 +906,8 @@ public class SimEventsManager {
                         qualityString = "Most Unique";
                     }
                 }
-                newEventData.name = "New Species\n(" + qualityString.ToString() + ")";
-                newEventData.description = "Up to " + newEventData.quantity.ToString() + " new lineages emerge, originating from the current " + qualityString + " species";
+                newEventData.name = "New Species\n(" + qualityString + ")";
+                newEventData.description = "Up to " + newEventData.quantity + " new lineages emerge, originating from the current " + qualityString + " species";
                 break;
 
             case SimEventData.SimEventTypeExtreme.FoodCorpse:
@@ -969,7 +961,6 @@ public class SimEventsManager {
                 }
                 break;
             case SimEventData.SimEventTypeExtreme.KillSpecies:
-                
                 newEventData.speciesQualifier = randQualifier; // SimEventData.SpeciesQualifier.Random;  // only random allowed for minor events                
                 qualityString = "";
                 if(randQualifier == SimEventData.SpeciesQualifier.Age) {
@@ -1007,29 +998,29 @@ public class SimEventsManager {
         return newEventData;
     }
 
-    public void RegenerateAvailableMinorEvents(SimulationManager simManager) {
+    public void RegenerateAvailableMinorEvents() {
         availableMinorEventsList.Clear();
 
         for(int i = 0; i < numAvailableEventsPerMenu; i++) {
-            SimEventData newEventData = GenerateNewRandomMinorEvent(availableMinorEventsList); // new SimEventData();            
+            SimEventData newEventData = GenerateNewRandomMinorEvent(availableMinorEventsList);           
             availableMinorEventsList.Add(newEventData);
         }
     }
 
-    public void RegenerateAvailableMajorEvents(SimulationManager simManager) {
+    public void RegenerateAvailableMajorEvents() {
         availableMajorEventsList.Clear();
 
         for(int i = 0; i < numAvailableEventsPerMenu; i++) {
-            SimEventData newEventData = GenerateNewRandomMajorEvent(availableMajorEventsList); // new SimEventData();            
+            SimEventData newEventData = GenerateNewRandomMajorEvent(availableMajorEventsList);           
             availableMajorEventsList.Add(newEventData);
         }
     }
 
-    public void RegenerateAvailableExtremeEvents(SimulationManager simManager) {
+    public void RegenerateAvailableExtremeEvents() {
         availableExtremeEventsList.Clear();
 
         for(int i = 0; i < numAvailableEventsPerMenu; i++) {
-            SimEventData newEventData = GenerateNewRandomExtremeEvent(availableExtremeEventsList); // new SimEventData();            
+            SimEventData newEventData = GenerateNewRandomExtremeEvent(availableExtremeEventsList);           
             availableExtremeEventsList.Add(newEventData);
         }
     }

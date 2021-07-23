@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -47,7 +46,6 @@ public class HistoryPanelUI : MonoBehaviour
     public void Tick() {
         textPanelStateDebug.text = "MODE: " + curPanelMode;
 
-        
         if(curPanelMode == HistoryPanelMode.AllSpecies) {
             UpdateSpeciesIconsDefault();
         }
@@ -60,11 +58,8 @@ public class HistoryPanelUI : MonoBehaviour
         else if(curPanelMode == HistoryPanelMode.CreatureTimeline) {
 
         }
-        
 
-        for(int i = 0; i < speciesIconsList.Count; i++) {
-            SpeciesIconUI icon = speciesIconsList[i];
-            
+        foreach (var icon in speciesIconsList) {
             bool isSelected = false;
             if (icon.speciesID == uiManagerRef.selectedSpeciesID) {
                 isSelected = true;
@@ -75,12 +70,10 @@ public class HistoryPanelUI : MonoBehaviour
 
         float targetStartTimeStep = 0f;
         /*if(focusLevel == 0) {
-
         }
         else {
             if(simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].candidateGenomesList.Count > 0) {
                 targetStartTimeStep = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].candidateGenomesList[0].performanceData.timeStepHatched; //***EAC better less naive way to calculate this
-            
             }            
         }*/
         timelineStartTimeStep = Mathf.Lerp(timelineStartTimeStep, targetStartTimeStep, 0.125f);
@@ -98,7 +91,7 @@ public class HistoryPanelUI : MonoBehaviour
             obj.GetComponent<Image>().color = color;
           
             string labelText = "";
-            labelText += "[" + pool.speciesID.ToString() + "]";// " + masterGenomePool.completeSpeciesPoolsList[pool.speciesID].foundingCandidate.candidateGenome.bodyGenome.coreGenome.name;
+            labelText += "[" + pool.speciesID + "]";// " + masterGenomePool.completeSpeciesPoolsList[pool.speciesID].foundingCandidate.candidateGenome.bodyGenome.coreGenome.name;
 
             obj.GetComponentInChildren<Text>().text = labelText;
             SpeciesIconUI iconScript = obj.GetComponent<SpeciesIconUI>();
@@ -115,10 +108,6 @@ public class HistoryPanelUI : MonoBehaviour
             if(child.GetComponent<SpeciesIconUI>()) {
                 Destroy(child.gameObject);
             }
-            else {
-
-            }
-            
         }
 
         for (int s = 0; s < numSpecies; s++) {
@@ -126,13 +115,11 @@ public class HistoryPanelUI : MonoBehaviour
             int parentSpeciesID = masterGenomePool.completeSpeciesPoolsList[speciesID].parentSpeciesID;
 
             CreateSpeciesIcon(masterGenomePool.completeSpeciesPoolsList[speciesID]);
-            
         }
     }
 
     public void AddNewSpeciesToPanel(SpeciesGenomePool pool) {
-        Debug.Log("AddNewSpeciesToPanelUI: " + pool.speciesID);
-
+        //Debug.Log("AddNewSpeciesToPanelUI: " + pool.speciesID);
         CreateSpeciesIcon(pool);
     }
     

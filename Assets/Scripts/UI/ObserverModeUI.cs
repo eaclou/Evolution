@@ -29,10 +29,9 @@ public class ObserverModeUI : MonoBehaviour
 
     public new bool enabled;
     public GameObject panelObserverMode;
-    //public WatcherUI watcherUI;         // * Not used
-    public DebugPanelUI debugPanelUI;   // * Not used
+    public DebugPanelUI debugPanelUI;       // * Not used
     public BrushesUI brushesUI;
-    public GenomeViewerUI genomeViewerUI;
+    public GenomeViewerUI genomeViewerUI;   // * Not used
     public GameObject panelPendingClickPrompt;
 
     const string VISIBLE = "_IsVisible";
@@ -92,15 +91,9 @@ public class ObserverModeUI : MonoBehaviour
         TickAnnouncement();
         TickTooltip();
         TickBrushes();
-
-        // WPP: branches have identical result - error?
-        //if (theCursorCzar.isDraggingMouseLeft || theCursorCzar.isDraggingMouseRight) {
-        //    theRenderKing.ClickTestTerrainUpdateMaps(updateTerrainAltitude, terrainUpdateMagnitude);
-        //}
-        //else {
-        theRenderKing.ClickTestTerrainUpdateMaps(updateTerrainAltitude, terrainUpdateMagnitude);                   
-        //}
         
+        theRenderKing.ClickTestTerrainUpdateMaps(updateTerrainAltitude, terrainUpdateMagnitude);
+
         SetStirVisible();
     }
     
@@ -201,7 +194,6 @@ public class ObserverModeUI : MonoBehaviour
             theCursorCzar.stirGizmoVisible = true;
             simulationManager.TickPlayerStirTool();
 
-            // var stirMin = isActing > 0.5f ? 1f : -4f;
             // theCursorCzar.stirStickDepth = Mathf.Lerp(theCursorCzar.stirStickDepth, stirMin, 0.2f);
             float brushStrength = theCursorCzar.isDraggingMouseLeft ? 1f : 0f;
             theRenderKing.isStirring = theCursorCzar.isDraggingMouseLeft;

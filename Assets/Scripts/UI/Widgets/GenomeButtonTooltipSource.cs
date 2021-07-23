@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 
+// * WPP: no functionality, delete script if obsolete
 public class GenomeButtonTooltipSource : MonoBehaviour {
     UIManager ui => UIManager.instance;
     GenomeViewerUI genomeViewer => ui.genomeViewerUI;

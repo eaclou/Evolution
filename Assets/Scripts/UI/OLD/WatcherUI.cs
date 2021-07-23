@@ -382,13 +382,13 @@ public class WatcherUI : MonoBehaviour {
     }
     
     public void ClickPrevAgent() {
-        Debug.Log("ClickPrevAgent");
+        //Debug.Log("ClickPrevAgent");
         int newIndex = (simulationManager.numAgents + cameraManager.targetAgentIndex - 1) % simulationManager.numAgents;
         cameraManager.SetTargetAgent(simulationManager.agents[newIndex], newIndex);                              
     }
     
     public void ClickNextAgent() {
-        Debug.Log("ClickNextAgent");
+        //Debug.Log("ClickNextAgent");
         int newIndex = (cameraManager.targetAgentIndex + 1) % simulationManager.numAgents;
         cameraManager.SetTargetAgent(simulationManager.agents[newIndex], newIndex);                
     }

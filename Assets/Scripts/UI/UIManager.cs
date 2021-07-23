@@ -286,7 +286,7 @@ public class UIManager : Singleton<UIManager> {
         panelLoading.SetActive(false);
         panelPlaying.SetActive(true);
 
-        Debug.Log("EnterPlayingUI() " + Time.timeScale);
+        //Debug.Log("EnterPlayingUI() " + Time.timeScale);
         //Animation Big Bang here
         simulationManager._BigBangOn = true;
         //worldSpiritHubUI.OpenWorldTreeSelect();

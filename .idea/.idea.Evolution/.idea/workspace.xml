@@ -3,9 +3,16 @@
   <component name="ChangeListManager">
     <list default="true" id="e5216a40-1993-4f7b-88ca-3d6aa0d75e16" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimEventsManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimEventsManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/HistoryPanelUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/HistoryPanelUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/OLD/BrushesUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/OLD/BrushesUI.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/OLD/WatcherUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/OLD/WatcherUI.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButtonTooltipSource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButtonTooltipSource.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,8 +70,6 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/KnowledgeUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/MutationUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/PanelNotificationsUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/NarrationSO.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/GlobalGraphData.cs" />
@@ -99,21 +104,23 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/SensorsPanel.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/VegetationManager.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/ZooplanktonManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicSlot.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/BrushesUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/PanelTopLeftUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/TheCursorCzar.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/CursorInRectBoundsMono.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/EnterExitRectBounds.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/CursorInRectBounds.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButtonTooltipSource.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/GenomeViewerUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/WatcherUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButtonTooltipSource.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimEventsManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/HistoryPanelUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/WatcherUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/BrushesUI.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1owaWgGpM80xkcfA3szn5iw9YkG" />
@@ -212,7 +219,8 @@
       <workItem from="1625985529643" duration="5102000" />
       <workItem from="1626210328526" duration="3243000" />
       <workItem from="1626333821544" duration="6770000" />
-      <workItem from="1626759635101" duration="5222000" />
+      <workItem from="1626759635101" duration="5580000" />
+      <workItem from="1627070827903" duration="3792000" />
     </task>
     <servers />
   </component>
