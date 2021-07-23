@@ -213,7 +213,7 @@ public class TrophicLayersManager {
         plantOriginPos = spawnPos;
         timeStepPlantsOn = timeStep;
         plantsOn = true;
-        Debug.Log("PLANTS ON!");
+        //Debug.Log("PLANTS ON!");
     }
     
     public void TurnOnZooplankton(Vector2 spawnPos, int timeStep) {

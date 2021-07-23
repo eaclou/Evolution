@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 
 [System.Serializable] // Temporary for debug purposes (view in inspector)
-public class CritterModuleCore {
+public class CritterModuleCore 
+{
+    SettingsManager settings => SettingsManager.instance;
 
     public int parentID;
     public int inno;
@@ -94,6 +96,21 @@ public class CritterModuleCore {
     public float plantEatenPercent => Mathf.Clamp01(stomachContentsPlant / (totalStomachContents + 0.0000001f));
     public float meatEatenPercent => Mathf.Clamp01(stomachContentsMeat / (totalStomachContents + 0.0000001f));
     public float decayEatenPercent => Mathf.Clamp01(stomachContentsDecay / (totalStomachContents + 0.0000001f));
+        
+    // *** Remember to Re-Implement dietary specialization!!! ****
+    // How much of what was eaten is actually digested this frame (absolute value)
+    public void TickDigestion(float totalMassDigested)
+    {
+        float digestedPlantMass = totalMassDigested * plantEatenPercent;
+        float digestedMeatMass = totalMassDigested * meatEatenPercent;
+        float digestedDecayMass = totalMassDigested * decayEatenPercent; 
+        
+        stomachContentsPlant -= digestedPlantMass;        
+        stomachContentsMeat -= digestedMeatMass;
+        stomachContentsDecay -= digestedDecayMass;
+        
+        energy += GetEnergyCreatedFromDigestion(digestedPlantMass, digestedMeatMass, digestedDecayMass) * settings.agentSettings._DigestionEnergyEfficiency;
+    }
     
     public float GetEnergyCreatedFromDigestion(float plantMassDigested, float meatMassDigested, float decayMassDigested)
     {

@@ -20,7 +20,6 @@ public struct PerformanceData {
     public float timeStepHatched;
     public float timeStepDied;
         
-    // * WPP: corpse included twice = error?
     public float totalEaten => totalFoodEatenCorpse + totalFoodEatenEgg + totalFoodEatenCreature + totalFoodEatenPlant + totalFoodEatenZoop;
     public float corpseEatenPercent => totalFoodEatenCorpse / (totalEaten + .01f);
     public float eggEatenPercent => totalFoodEatenEgg / (totalEaten + .01f);

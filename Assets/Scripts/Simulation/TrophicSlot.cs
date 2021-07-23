@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
-public class TrophicSlot {
+public class TrophicSlot 
+{
     public TrophicLayerSO data;
     public KnowledgeMapId id => data.id;
     public KingdomId kingdomID => data.kingdom;

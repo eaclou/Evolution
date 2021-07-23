@@ -46,7 +46,7 @@ public class Agent : MonoBehaviour {
     public int defendDuration = 60;
     public int defendCooldown = 60;
 
-    public bool isResting = false;
+    public bool isResting = false;  // * WPP: same functionality as isFreeToAct -> pick one to use and delete other
     public bool isCooldown => cooldown.inProcess;
 
     public int cooldownFrameCounter => cooldown.frameCount;
@@ -179,9 +179,7 @@ public class Agent : MonoBehaviour {
     IAgentAbility feed;
     Cooldown cooldown;
     
-    // *** WPP: delegate to performanceData
-    public float totalEaten => candidateRef.performanceData.totalFoodEatenCorpse + candidateRef.performanceData.totalFoodEatenEgg + candidateRef.performanceData.totalFoodEatenCorpse + candidateRef.performanceData.totalFoodEatenPlant + candidateRef.performanceData.totalFoodEatenZoop;
-
+    public float totalEaten => candidateRef.performanceData.totalEaten;
     //public float overflowFoodAmount = 0f;
         
     private void Awake() {        
@@ -306,17 +304,17 @@ public class Agent : MonoBehaviour {
     public void TickBrain() {
         brain.BrainMasterFunction();
     }
-    public void TickModules(SimulationManager simManager) { // Updates internal state of body - i.e health, energy etc. -- updates input Neuron values!!!
-                                // Update Stocks & Flows ::: new health, energy, stamina
-                                // This should have happened during last frame's Internal PhysX Update
-
-        // HOWEVER, some updates only happen once per frame and can be handled here, like converting food into energy automatically
-
-        // Turns out that most of these updates are updating input neurons which tend to be sensors
-        // These values are sometimes raw attributes & sometimes processed data
-        // Should I break them up into individual sensor types -- like Ears, Collider Rangefind, etc.?
-        // Separate sensors for each target type or add multiple data types to rangefinder raycasts?
-        
+    
+    // Updates internal state of body - i.e health, energy etc. -- updates input Neuron values!!!
+    // Update Stocks & Flows ::: new health, energy, stamina
+    // This should have happened during last frame's Internal PhysX Update
+    // HOWEVER, some updates only happen once per frame and can be handled here, like converting food into energy automatically
+    // Turns out that most of these updates are updating input neurons which tend to be sensors
+    // These values are sometimes raw attributes & sometimes processed data
+    // Should I break them up into individual sensor types -- like Ears, Collider Rangefind, etc.?
+    // Separate sensors for each target type or add multiple data types to rangefinder raycasts?
+    public void TickModules(SimulationManager simManager) 
+    {
         //UpdateInternalResources();  // update energy, stamina, food -- or do this during TickActions?
                
         coreModule.Tick();
@@ -471,10 +469,9 @@ public class Agent : MonoBehaviour {
             //ProcessDamageReceived(overStuffAmount);
             //coreModule.stomachContentsPercent = 1f;            
         }
-        else {
-            coreModule.stomachContentsPlant += amount;
-        }
-        
+
+        coreModule.stomachContentsPlant += amount;
+
         // Exp for appropriate food
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.digestEfficiencyPlant * 1f);     
 
@@ -496,14 +493,14 @@ public class Agent : MonoBehaviour {
             //ProcessDamageReceived(overStuffAmount);
             //coreModule.stomachContentsPercent = 1f;
         }
-        else {
-            coreModule.stomachContentsMeat += amount;
-        }
+
+        coreModule.stomachContentsMeat += amount;
         
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.digestEfficiencyMeat * 1f); // Exp for appropriate food
 
         //RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Zoop! (" + amount.ToString() + ")", 1f);
     }
+    
     public void EatFoodDecay(float amount) {
         
         amount = Mathf.Min(amount, coreModule.stomachSpace);
@@ -515,10 +512,9 @@ public class Agent : MonoBehaviour {
             //float overStuffAmount = coreModule.stomachContentsNorm - 1f;            
             //coreModule.stomachContentsPercent = 1f;
         }
-        else {
-            coreModule.stomachContentsDecay += amount;
-        }
-        
+
+        coreModule.stomachContentsDecay += amount;
+
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.digestEfficiencyDecay * 1f); // Exp for appropriate food
 
         RegisterAgentEvent(Time.frameCount, "Ate Corpse! (" + amount + ")", 1f);
@@ -778,7 +774,7 @@ public class Agent : MonoBehaviour {
             RegisterAgentEvent(Time.frameCount, "Pregnant! " + starterMass, 0.5f);
         }
         else {
-            //Debug.LogError("Something went wrong!! " + " curMass: " + currentBiomass + ", reqMass: " + starterMass.ToString() + ", curProp: " + curProportion.ToString() );
+            Debug.LogError("Something went wrong!! " + " curMass: " + currentBiomass + ", reqMass: " + starterMass.ToString() + ", curProp: " + curProportion.ToString() );
         }
     }
     
@@ -925,15 +921,6 @@ public class Agent : MonoBehaviour {
         float maxDigestionRate = settingsRef.agentSettings._BaseDigestionRate * currentBiomass; // proportional to biomass?        
         float totalStomachContents = coreModule.totalStomachContents;        
         float digestedAmountTotal = Mathf.Min(totalStomachContents, maxDigestionRate);
-        
-        // *** Remember to Re-Implement dietary specialization!!! ****
-        
-        // *** WPP: abstract to method
-        // How much of what was eaten is actually digested this frame (absolute value)
-        float digestedPlantMass = digestedAmountTotal * coreModule.plantEatenPercent;
-        // Amount of energy derived from the digested plant mass
-        float digestedMeatMass = digestedAmountTotal * coreModule.meatEatenPercent;
-        float digestedDecayMass = digestedAmountTotal * coreModule.decayEatenPercent; 
 
         wasteProducedLastFrame += digestedAmountTotal * settingsRef.agentSettings._DigestionWasteEfficiency;
         oxygenUsedLastFrame = currentBiomass * settingsRef.agentSettings._BaseOxygenUsage;
@@ -944,11 +931,18 @@ public class Agent : MonoBehaviour {
             currentBiomass = fullsizeBiomass;
         }
         
+        // WPP: delegated to CritterModuleCore
+        coreModule.TickDigestion(digestedAmountTotal);
+        /*float digestedPlantMass = digestedAmountTotal * coreModule.plantEatenPercent;
+        float digestedMeatMass = digestedAmountTotal * coreModule.meatEatenPercent;
+        float digestedDecayMass = digestedAmountTotal * coreModule.decayEatenPercent; 
+        
         float createdEnergyTotal = coreModule.GetEnergyCreatedFromDigestion(digestedPlantMass, digestedMeatMass, digestedDecayMass) * settingsRef.agentSettings._DigestionEnergyEfficiency;
         coreModule.stomachContentsPlant -= digestedPlantMass;        
         coreModule.stomachContentsMeat -= digestedMeatMass;
         coreModule.stomachContentsDecay -= digestedDecayMass;
-
+        //coreModule.energy += createdEnergyTotal; */
+        
         if(index == 1) {
             //Debug.Log(createdEnergyTotal + "  GetEnergyCreatedFromDigestion: " + coreModule.stomachContentsPlant + ", " + coreModule.stomachContentsMeat + ", " + coreModule.stomachContentsDecay);
         }
@@ -962,14 +956,12 @@ public class Agent : MonoBehaviour {
 
         //ENERGY:
         float energyCostMult = settingsRef.agentSettings._BaseEnergyCost; // Mathf.Lerp(settingsRef.agentSettings._BaseEnergyCost, settingsRef.agentSettings._BaseEnergyCost * 0.25f, sizePercentage);
-        
         float restingEnergyCost = Mathf.Sqrt(currentBiomass) * energyCostMult * restingBonus; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
+        //float throttleMag = smoothedThrottle.magnitude;
         
-        float throttleMag = smoothedThrottle.magnitude;
-
-        coreModule.energy += createdEnergyTotal;
         // ENERGY DRAIN::::        
         coreModule.energy -= restingEnergyCost;
+        
         /*
         // STAMINA:
         float staminaRefillRate = 0.00025f;
@@ -1025,7 +1017,6 @@ public class Agent : MonoBehaviour {
         }    
     }
     
-    // TBD: handle null case if needed
     private void UseAbility(IAgentAbility ability)
     {
         activeAbility = ability;
@@ -1141,7 +1132,7 @@ public class Agent : MonoBehaviour {
         threatsModule = new CritterModuleThreats(genome.bodyGenome.threatGenome, this);
     }
     
-    public void FirstTimeInitialize(SettingsManager settings) {  //AgentGenome genome) {  // ** See if I can get away with init sans Genome
+    public void FirstTimeInitialize(SettingsManager settings) { 
         settingsRef = settings;
         curLifeStage = AgentLifeStage.AwaitingRespawn;
         //InitializeAgentWidths(genome);
@@ -1223,9 +1214,8 @@ public class Agent : MonoBehaviour {
         mouseClickCollider.height = fullSizeBoundingBox.y / 2f * sizePercentage;
     }
 
-    private void ResetStartingValues() {
-        //causeOfDeath = "alive"; --> moved to CandidateAgentData
-        
+    private void ResetStartingValues() 
+    {
         animationCycle = 0f;
         lifeStageTransitionTimeStepCounter = 0;
         pregnancyRefactoryTimeStepCounter = 0;
@@ -1265,7 +1255,6 @@ public class Agent : MonoBehaviour {
         ResetStartingValues();
         InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
         
-        // Upgrade this to proper Pooling!!!!
         ReconstructAgentGameObjects(settings, genome, null, spawnWorldPos, true, globalWaterLevel);
 
         brain = new Brain(genome.brainGenome, this); 
@@ -1284,8 +1273,7 @@ public class Agent : MonoBehaviour {
         ResetStartingValues();       
         InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
 
-        // Upgrade this to proper Pooling!!!!
-        Vector3 spawnOffset = Random.insideUnitSphere * parentEggSack.curSize.magnitude * 0.167f;
+        Vector3 spawnOffset = 0.167f * parentEggSack.curSize.magnitude * Random.insideUnitSphere;
         spawnOffset.z = 0f;
         
         ReconstructAgentGameObjects(settings, genome, parentEggSack, parentEggSack.gameObject.transform.position + spawnOffset, false, globalWaterLevel);

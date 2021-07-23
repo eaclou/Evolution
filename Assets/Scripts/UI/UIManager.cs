@@ -121,7 +121,7 @@ public class UIManager : Singleton<UIManager> {
         focusedCandidate = candidate;
         
         theRenderKing.InitializeCreaturePortrait(focusedCandidate.candidateGenome);
-        Debug.Log("SetFocusedCandidateGenome --> theRenderKing.InitializeCreaturePortrait(focusedCandidate.candidateGenome);");
+        //Debug.Log("SetFocusedCandidateGenome --> theRenderKing.InitializeCreaturePortrait(focusedCandidate.candidateGenome);");
         
         speciesOverviewUI.RebuildGenomeButtons();
         brainGenomeImage.SetTexture(focusedCandidate.candidateGenome.brainGenome);

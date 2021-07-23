@@ -1,7 +1,8 @@
 ﻿using Playcraft;
 using UnityEngine;
 
-public class CameraManager : Singleton<CameraManager> {
+public class CameraManager : Singleton<CameraManager> 
+{
     SimulationManager simulation => SimulationManager.instance;
 
     public Vector3 curCameraFocusPivotPos;
@@ -62,7 +63,8 @@ public class CameraManager : Singleton<CameraManager> {
         UpdateCam();
     }
 
-    private void UpdateCam() {
+    private void UpdateCam() 
+    {
         // Calculate where the focus pivot should be:
         if (targetAgentTransform && isFollowingAgent)
         {
@@ -113,7 +115,8 @@ public class CameraManager : Singleton<CameraManager> {
         UpdateWorldSpaceCorners();
     }
     
-    private void UpdateWorldSpaceCorners() {
+    private void UpdateWorldSpaceCorners() 
+    {
         Vector3 botLeft = cameraRef.ScreenToWorldPoint( new Vector3(0f, 0f, worldSpaceCornersDistance));
         worldSpaceBottomLeft = new Vector4(botLeft.x, botLeft.y, botLeft.z, 0f);
         Vector3 topLeft = cameraRef.ViewportToWorldPoint(new Vector3(0f,1f,10f)); //cameraRef.ScreenToWorldPoint( new Vector3(0f, cameraRef.pixelWidth, worldSpaceCornersDistance));
@@ -126,11 +129,10 @@ public class CameraManager : Singleton<CameraManager> {
         worldSpaceCameraRightDir = new Vector4(camRight.x, camRight.y, camRight.z, 0f);
         Vector3 camUp = gameObject.transform.up;
         worldSpaceCameraUpDir = new Vector4(camUp.x, camUp.y, camUp.z, 0f);
-                
     }
 
-    public void MoveCamera(Vector2 dir) {
-        
+    public void MoveCamera(Vector2 dir) 
+    {
         float relSize = Mathf.Clamp01((masterTargetDistance - camMinAltitude) / (camMinAltitude + camMaxAltitude));
 
         float minSizePanSpeedMult = 0.1f;
@@ -142,8 +144,8 @@ public class CameraManager : Singleton<CameraManager> {
         curCameraFocusPivotPos += new Vector3(dir.x * camPanSpeed, dir.y * camPanSpeed, 0f);
     }
     
-    public void TiltCamera(float tiltAngle) {
-        
+    public void TiltCamera(float tiltAngle) 
+    {
         float relSize = Mathf.Clamp01((masterTargetDistance - camMinAltitude) / (camMinAltitude + camMaxAltitude));
 
         float minSizeTiltSpeedMult = 1f;
@@ -156,14 +158,15 @@ public class CameraManager : Singleton<CameraManager> {
 
     }
 
-    public void ZoomCameraFixed(float zoomValue) {
+    public void ZoomCameraFixed(float zoomValue) 
+    {
         if (zoomValue > 0f) zoomValue = 1f;
         else if (zoomValue < 0f) zoomValue = -1f;
         ZoomCamera(zoomValue);
     }
         
-    public void ZoomCamera(float zoomValue) {
-        
+    public void ZoomCamera(float zoomValue) 
+    {
         float relSize = Mathf.Clamp01((masterTargetDistance - camMinAltitude) / (camMinAltitude + camMaxAltitude));
 
         float minSizeZoomSpeedMult = 0.075f;
@@ -173,14 +176,14 @@ public class CameraManager : Singleton<CameraManager> {
         float zoomSpeed = zoomValue * masterZoomSpeed * zoomSpeedMult * Time.deltaTime;
 
         masterTargetDistance += zoomSpeed;
-
     }
     
     public void SetTargetAgent() {
         SetTargetAgent(simulation.agents[targetAgentIndex], targetAgentIndex);
     }
 
-    public void SetTargetAgent(Agent agent, int index) {
+    public void SetTargetAgent(Agent agent, int index) 
+    {
         //Debug.Log("SetTarget! " + index.ToString());
         targetAgent = agent;
         targetAgentTransform = agent.bodyGO.transform;
@@ -212,7 +215,8 @@ public class CameraManager : Singleton<CameraManager> {
         isFollowingAnimalParticle = id == KnowledgeMapId.Microbes;
     }
 
-    private Vector2 SmoothApproach(Vector2 pastPosition, Vector2 pastTargetPosition, Vector2 targetPosition, float speed) {
+    private Vector2 SmoothApproach(Vector2 pastPosition, Vector2 pastTargetPosition, Vector2 targetPosition, float speed) 
+    {
         float t = Time.deltaTime * speed;
         Vector2 v = (targetPosition - pastTargetPosition) / t;
         Vector2 f = pastPosition - pastTargetPosition + v;

@@ -891,10 +891,6 @@ public class SimulationManager : Singleton<SimulationManager>
             CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
             candidateData.candidateGenome = masterGenomePool.completeSpeciesPoolsList[speciesIndex].representativeCandidate.candidateGenome;
             
-            if (candidateData == null) {
-                Debug.LogError("GetNextAvailableCandidate(): candidateData NULL!!!!");
-                continue;
-            }
             //Debug.Log("AttemptToBrushSpawnAgent(" + a.ToString() + ") species: " + speciesIndex.ToString() + ", " + candidateData.ToString());
             
             // Spawn POS:
@@ -1056,16 +1052,14 @@ public class SimulationManager : Singleton<SimulationManager>
 
         UpdateRecords(agentRef);
 
-        // -- save its fitness score
+        // save fitness score
         candidateData.ProcessCompletedEvaluation(agentRef);
         
-        // -- check if it has finished all of its evaluations
+        // check if it has finished all of its evaluations
         if(candidateData.numCompletedEvaluations >= numAgentEvaluationsPerGenome) {
-            // -- If it has:
-            // -- then push the candidate to Leaderboard List so it is eligible for reproduction
-            // -- at the same time, remove it from the ToBeEvaluated pool
+            // If it has, then push the candidate to Leaderboard List so it is eligible for reproduction
+            // and remove it from the ToBeEvaluated pool
             speciesPool.ProcessCompletedCandidate(candidateData, masterGenomePool);
-
         }
      
         // &&&&& *****  HERE!!!! **** &&&&&&   --- Select a species first to serve as parentGenome !! ***** &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&

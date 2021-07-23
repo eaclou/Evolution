@@ -43,6 +43,7 @@ public class HistoryPanelUI : MonoBehaviour
     public void Awake() {
         speciesIconsList = new List<SpeciesIconUI>();
     }
+    
     public void Tick() {
         textPanelStateDebug.text = "MODE: " + curPanelMode;
 
@@ -79,9 +80,9 @@ public class HistoryPanelUI : MonoBehaviour
         timelineStartTimeStep = Mathf.Lerp(timelineStartTimeStep, targetStartTimeStep, 0.125f);
     }
 
-    private void CreateSpeciesIcon(SpeciesGenomePool pool) {
-        
-            AgentGenome templateGenome = masterGenomePool.completeSpeciesPoolsList[pool.speciesID].leaderboardGenomesList[0].candidateGenome; //.bodyGenome.coreGenome.name;
+    private void CreateSpeciesIcon(SpeciesGenomePool pool) 
+    {
+        AgentGenome templateGenome = masterGenomePool.completeSpeciesPoolsList[pool.speciesID].leaderboardGenomesList[0].candidateGenome; //.bodyGenome.coreGenome.name;
             Color color = new Color(templateGenome.bodyGenome.appearanceGenome.huePrimary.x, templateGenome.bodyGenome.appearanceGenome.huePrimary.y, templateGenome.bodyGenome.appearanceGenome.huePrimary.z);
 
             GameObject obj = Instantiate(prefabSpeciesIcon, new Vector3(0f, 0f, 0f), Quaternion.identity);
@@ -101,7 +102,7 @@ public class HistoryPanelUI : MonoBehaviour
  
     }
     public void InitializeSpeciesIcons() {
-        Debug.Log("InitializeSpeciesListBarsInitializeSpeciesListBarsInitializeSpeciesListBars");
+        //Debug.Log("InitializeSpeciesListBars");
         int numSpecies = masterGenomePool.completeSpeciesPoolsList.Count;
 
         foreach (Transform child in anchorGO.transform) { // clear all GO's

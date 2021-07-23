@@ -1,10 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using Playcraft;
+﻿using Playcraft;
 
-public class SettingsManager : Singleton<SettingsManager> {
-
+public class SettingsManager : Singleton<SettingsManager> 
+{
     //public MutationSettings mutationSettingsSupervised;
     public MutationSettings mutationSettingsVertebrates;
     public MutationSettings mutationSettingsNoneCopy;
@@ -14,7 +11,6 @@ public class SettingsManager : Singleton<SettingsManager> {
     public SettingsZooplankton zooplanktonSettings;
     public SettingsAgents agentSettings;
     
-
     public float maxGlobalNutrients = 5f;
     public float eatRateMultiplier = 1f;
     //public float energyDrainMultiplier = 1f;
