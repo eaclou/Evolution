@@ -25,29 +25,6 @@ public class GenomeViewerUI : MonoBehaviour {
         //imageDeadDim.SetActive(simulationManager.targetAgentIsDead);
     }
     
-    #region Button Clicks
-    
-    public void ClickButtonNext() {
-        uiManager.CycleFocusedCandidateGenome();
-    }
-    
-    // * WPP: should be a similar process to ClickButtonNext
-    public void ClickButtonPrev() {
-        //speciesOverviewUI.CycleHallOfFame();
-        //speciesOverviewUI.CycleCurrentGenome();
-    }
-        
-    
-    #endregion
-    //moved to ObserverModeUI:
-    /*public void EnterTooltipObject(GenomeButtonTooltipSource tip) {
-        isTooltipHover = true;
-        tooltipString = tip.tooltipString;
-    }
-    
-    public void ExitTooltipObject() {
-        isTooltipHover = false;
-    }*/
     
     [Serializable]
     public class Tab

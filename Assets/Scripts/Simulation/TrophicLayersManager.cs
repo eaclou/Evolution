@@ -60,7 +60,7 @@ public class TrophicLayersManager {
         //selectedTrophicSlotRef = terrainTier0.trophicSlots[0];        
         //isSelectedTrophicSlot = true;
         
-        SetSlot(KnowledgeMapId.Water);
+        SetSlot(KnowledgeMapId.Animals);
         uiManager.worldSpiritHubUI.selectedWorldSpiritSlot = selectedSlot; //kingdomTerrain.trophicTiersList[0].trophicSlots[1];
         uiManager.brushesUI.selectedEssenceSlot = selectedSlot; //kingdomTerrain.trophicTiersList[0].trophicSlots[1];
     }

@@ -856,7 +856,7 @@ public class Agent : MonoBehaviour {
     float restingBonus => isResting ? restingBonusWhenResting : 1f;
 
     public void TickActions(SimulationManager simManager) {
-        AgentActionState currentState = AgentActionState.Default;
+        //AgentActionState currentState = AgentActionState.Default;
         
         float horizontalMovementInput = movementModule.throttleX[0]; // Mathf.Lerp(horAI, horHuman, humanControlLerp);
         float verticalMovementInput = movementModule.throttleY[0]; // Mathf.Lerp(verAI, verHuman, humanControlLerp);
@@ -913,7 +913,7 @@ public class Agent : MonoBehaviour {
         float rotationInRadians = (bodyRigidbody.transform.localRotation.eulerAngles.z + 90f) * Mathf.Deg2Rad;
         facingDirection = new Vector2(Mathf.Cos(rotationInRadians), Mathf.Sin(rotationInRadians));
                 
-        curActionState = currentState;
+        //curActionState = currentState;
     }
     
     public void TickMetabolism() {
@@ -989,6 +989,8 @@ public class Agent : MonoBehaviour {
     }
 
     private void SelectAction() {
+        curActionState = AgentActionState.Default;
+
         float[] effectorValues = { 0f, coreModule.mouthFeedEffector[0], 
             coreModule.mouthAttackEffector[0], coreModule.defendEffector[0],
             coreModule.dashEffector[0], coreModule.healEffector[0] };
@@ -1001,18 +1003,24 @@ public class Agent : MonoBehaviour {
             if(isFreeToAct) {
                 candidateRef.performanceData.totalTicksRested++;
             }
+            curActionState = AgentActionState.Resting;
         }
         
-        if (!isFreeToAct)
+        if (!isFreeToAct) {
+            curActionState = AgentActionState.Cooldown;
             return;
+        }  
 
         if(coreModule.mouthAttackEffector[0] >= mostActiveEffectorValue) {
+            curActionState = AgentActionState.Attacking;
             UseAbility(attack);
         }
         if(coreModule.dashEffector[0] >= mostActiveEffectorValue) {
+            curActionState = AgentActionState.Dashing;
             UseAbility(dash);
         }
         if(coreModule.defendEffector[0] >= mostActiveEffectorValue) {
+            curActionState = AgentActionState.Defending;
             UseAbility(defend);
         }    
     }

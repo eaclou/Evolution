@@ -138,7 +138,6 @@ public class UIManager : Singleton<UIManager> {
         }
 
         selectedSpeciesID = id;
-        //worldTreePanelUI.RefreshPanelUI();
         speciesOverviewUI.RebuildGenomeButtons();
     }
 

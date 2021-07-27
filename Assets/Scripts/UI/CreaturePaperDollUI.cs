@@ -12,6 +12,9 @@ public class CreaturePaperDollUI : MonoBehaviour
     public Text textStomachContents;
     public Text textEnergy;
     public Text textHealth;
+    public Text textBiomass;
+    public Text textAge;
+    public Text textCurBehavior;
    
     public Material newInspectAgentEnergyMat;
     public Material newInspectAgentStaminaMat;
@@ -30,10 +33,6 @@ public class CreaturePaperDollUI : MonoBehaviour
         Agent agent = simulationManager.agents[cameraManager.targetAgentIndex];
         if (agent.coreModule == null) return;
         
-        widgetAgentStatus.UpdateBars(agent.coreModule.health,
-                                     agent.coreModule.energy,
-                                     agent.coreModule.stomachContentsPercent,
-                                     agent.currentBiomass,
-                                     agent.coreModule.stamina[0]);           
+        widgetAgentStatus.UpdateBars(agent);           
     }
 }

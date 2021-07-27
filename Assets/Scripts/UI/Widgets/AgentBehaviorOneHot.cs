@@ -101,57 +101,60 @@ public class AgentBehaviorOneHot : MonoBehaviour {
 
         float highestPriority = Mathf.Max(rest, Mathf.Max(dash, Mathf.Max(guard, Mathf.Max(bite, attack))));
 
+        Color activeColor = Color.white;
+        Color inactiveColor = Color.clear;
+
         bool isActive = false;
         if(rest >= highestPriority && !isCooldown) {
-            textRest.color = Color.white;
+            textRest.color = activeColor;
             isActive = true;
         }
         else {
-            textRest.color = Color.gray;
+            textRest.color = inactiveColor;
         }
         behaviorBarRest.transform.localScale = new Vector3(rest * 0.5f + 0.5f, rest * 0.5f + 0.5f,  1f);
         UpdateBarColor(behaviorBarRest.GetComponent<Image>(), rest, isActive);
         
         isActive = false;
         if(dash >= highestPriority && !isCooldown) {
-            textDash.color = Color.white;
+            textDash.color = activeColor;
             isActive = true;
         }
         else {
-            textDash.color = Color.gray;
+            textDash.color = inactiveColor;
         }
         behaviorBarDash.transform.localScale = Vector3.one * (dash * 0.5f + 0.5f); // new Vector3(dash * 0.5f + 0.5f, dash * 0.5f + 0.5f, 1f);
         UpdateBarColor(behaviorBarDash.GetComponent<Image>(), dash, isActive);
 
         isActive = false;
         if(guard >= highestPriority && !isCooldown) {
-            textGuard.color = Color.white;
+            textGuard.color = activeColor;
             isActive = true;
         }
         else {
-            textGuard.color = Color.gray;
+            textGuard.color = inactiveColor;
         }
         behaviorBarGuard.transform.localScale = Vector3.one * (guard * 0.5f + 0.5f); // new Vector3(guard * 0.5f + 0.5f, guard * 0.5f + 0.5f,  1f);
         UpdateBarColor(behaviorBarGuard.GetComponent<Image>(), guard, isActive);
 
         isActive = false;
         if(bite >= highestPriority && !isCooldown) {
-            textBite.color = Color.white;
+            textBite.color = activeColor;
             isActive = true;
         }
         else {
-            textBite.color = Color.gray;
+            textBite.color = inactiveColor;
         }
         behaviorBarBite.transform.localScale = Vector3.one * (bite * 0.5f + 0.5f); // new Vector3(bite * 0.5f + 0.5f, bite * 0.5f + 0.5f, 1f);
         UpdateBarColor(behaviorBarBite.GetComponent<Image>(), bite, isActive);
 
         isActive = false;
         if(attack >= highestPriority && !isCooldown) {
-            textAttack.color = Color.white;
+            textAttack.color = activeColor;
             isActive = true;
         }
         else {
-            textAttack.color = Color.gray;
+            textAttack.color = inactiveColor;
         }
         behaviorBarAttack.transform.localScale = Vector3.one * (attack * 0.5f + 0.5f); // new Vector3(attack * 0.5f + 0.5f, attack * 0.5f + 0.5f, 1f);
         UpdateBarColor(behaviorBarAttack.GetComponent<Image>(), attack, isActive);
@@ -166,7 +169,7 @@ public class AgentBehaviorOneHot : MonoBehaviour {
             textOther.gameObject.SetActive(false);
             throttleGO.gameObject.SetActive(true);
         }
-        behaviorBarOther.transform.localScale = Vector3.one * (other * 0.5f + 0.5f); // new Vector3(other, other, 1f);
+        //behaviorBarOther.transform.localScale = Vector3.one * (other * 0.5f + 0.5f);
         UpdateBarColor(behaviorBarOther.GetComponent<Image>(), other, isActive);
 
     }

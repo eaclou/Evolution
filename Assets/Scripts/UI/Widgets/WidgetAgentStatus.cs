@@ -4,28 +4,24 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class WidgetAgentStatus : MonoBehaviour {
-
-    //public Image imageHealth;
-    //public Image imageEnergy;
-    //public Image imageFood;
-    //public Image imageStamina;
+        
     public Text textValHealth;
     public Text textValEnergy;
     public Text textValFood;
-    //public Text textValStamina;
-
-    public Text textBiomass;
-
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
-
+    public Text textValAge;
+    public Text textCurBehavior;
+    public Text textValBiomass;
+    	
+    public void UpdateBars(Agent agent) {
+        
+        textValHealth.text = (agent.coreModule.health * 100f).ToString("F0");        
+        textValEnergy.text = agent.coreModule.energy.ToString("F0");        
+        textValFood.text = (agent.coreModule.stomachContentsPercent * 100f).ToString("F0");
+        textValBiomass.text = "Biomass: " + agent.currentBiomass.ToString("F3");
+        textValAge.text = agent.curLifeStage.ToString() + ", Age: " + agent.ageCounter;
+        textCurBehavior.text = agent.curActionState.ToString();
+        
+    }
     public void UpdateBars(float health, float energy, float food, float mass, float stamina) {
 
         //imageHealth.gameObject.transform.localScale = new Vector3(1f, health, 1f);
@@ -38,7 +34,9 @@ public class WidgetAgentStatus : MonoBehaviour {
         //imageFood.gameObject.transform.localScale = new Vector3(1f, food, 1f);
         textValFood.text = (food * 100f).ToString("F0");
 
-        textBiomass.text = "Biomass: " + mass.ToString("F3");
+        textValBiomass.text = "Biomass: " + mass.ToString("F3");
+
+        textValAge.text = "Age: ";
 
         //imageStamina.gameObject.transform.localScale = new Vector3(1f, stamina, 1f);
         //textValStamina.text = (stamina * 100f).ToString("F0");
