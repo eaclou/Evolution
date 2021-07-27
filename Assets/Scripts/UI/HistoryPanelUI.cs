@@ -43,21 +43,31 @@ public class HistoryPanelUI : MonoBehaviour
     public void Awake() {
         speciesIconsList = new List<SpeciesIconUI>();
     }
-    
+    public void ClickButtonModeCycle() {
+        curPanelMode++;
+        if((int)curPanelMode >= 4) {
+            curPanelMode = 0;
+        }
+    }
     public void Tick() {
         textPanelStateDebug.text = "MODE: " + curPanelMode;
+        float targetStartTimeStep = 0f;
 
         if(curPanelMode == HistoryPanelMode.AllSpecies) {
-            UpdateSpeciesIconsDefault();
+            //UpdateSpeciesIconsDefault();
+            UpdateSpeciesIconsLineageMode();
         }
         else if(curPanelMode == HistoryPanelMode.ActiveSpecies) {
             UpdateSpeciesIconsGraphMode();
+            targetStartTimeStep = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].candidateGenomesList[0].performanceData.timeStepHatched; //***EAC better less naive way to calculate this
         }
         else if(curPanelMode == HistoryPanelMode.SpeciesPopulation) {
-
+            UpdateSpeciesIconsSinglePop();
+            targetStartTimeStep = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].timeStepCreated;
         }
         else if(curPanelMode == HistoryPanelMode.CreatureTimeline) {
-
+            UpdateSpeciesIconsCreatureEvents();
+            targetStartTimeStep = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].candidateGenomesList[0].performanceData.timeStepHatched;
         }
 
         foreach (var icon in speciesIconsList) {
@@ -69,7 +79,7 @@ public class HistoryPanelUI : MonoBehaviour
             icon.UpdateIconDisplay(360, isSelected);
         }
 
-        float targetStartTimeStep = 0f;
+        
         /*if(focusLevel == 0) {
         }
         else {
@@ -202,5 +212,11 @@ public class HistoryPanelUI : MonoBehaviour
             yCoord = yCoord * 0.67f + 0.1f;
             speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
         }
+    }
+    private void UpdateSpeciesIconsSinglePop() {
+
+    }
+    private void UpdateSpeciesIconsCreatureEvents() {
+
     }
 }
