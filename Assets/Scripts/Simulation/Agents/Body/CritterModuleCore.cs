@@ -44,8 +44,19 @@ public class CritterModuleCore
     //public Vector2 nearestEggSackPos;
 
     // WPP: added abstraction for more intuitive interface
+    float[] _mouthTriggerOutputs;
+    public float[] mouthTriggerOutputs
+    {
+        get
+        {
+            if (_mouthTriggerOutputs == null)
+                _mouthTriggerOutputs = new float[1];
+            
+            return _mouthTriggerOutputs;
+        }
+    }
     public bool objectInRangeOfMouth { set => mouthTriggerOutputs[0] = value ? 1f : 0f; }
-    public float[] mouthTriggerOutputs;
+    
     
     //public float[] temperature;
     //public float[] pressure;
@@ -141,7 +152,6 @@ public class CritterModuleCore
         
         bias = new float[1];   //0
 
-        mouthTriggerOutputs = new float[1];
         //temperature = new float[1]; // 22
         //pressure = new float[1]; // 23
         isContact = new float[1]; // 24
