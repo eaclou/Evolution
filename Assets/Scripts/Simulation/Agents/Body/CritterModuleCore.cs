@@ -38,12 +38,15 @@ public class CritterModuleCore
     //public float debugFoodValue = 0f;
     
     public EggSack nearestEggSackModule;
-    public PredatorModule nearestPredatorModule;
+    public PredatorModule nearestPredatorModule;    // * WPP: not used
     public Agent nearestFriendAgent;
     public Agent nearestEnemyAgent;
     //public Vector2 nearestEggSackPos;
 
-    public float[] isMouthTrigger;
+    // WPP: added abstraction for more intuitive interface
+    public bool objectInRangeOfMouth { set => mouthTriggerOutputs[0] = value ? 1f : 0f; }
+    public float[] mouthTriggerOutputs;
+    
     //public float[] temperature;
     //public float[] pressure;
     public float[] isContact;
@@ -138,7 +141,7 @@ public class CritterModuleCore
         
         bias = new float[1];   //0
 
-        isMouthTrigger = new float[1];
+        mouthTriggerOutputs = new float[1];
         //temperature = new float[1]; // 22
         //pressure = new float[1]; // 23
         isContact = new float[1]; // 24
@@ -186,7 +189,7 @@ public class CritterModuleCore
             neuron.neuronType = NeuronGenome.NeuronType.In;
         }            
         if (nid.neuronID == 21) {
-            neuron.currentValue = isMouthTrigger;
+            neuron.currentValue = mouthTriggerOutputs;
             neuron.neuronType = NeuronGenome.NeuronType.In;
         }
         if (nid.neuronID == 24) {

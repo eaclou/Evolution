@@ -3,16 +3,13 @@
   <component name="ChangeListManager">
     <list default="true" id="e5216a40-1993-4f7b-88ca-3d6aa0d75e16" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCore.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCore.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/CandidateAgentData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/CandidateAgentData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/SettingsManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/SettingsManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicLayersManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicLayersManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicSlot.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicSlot.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/HistoryPanelUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/HistoryPanelUI.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterMouthComponent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterMouthComponent.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/EggSack.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/EggSack.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/OLD/BrushesUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/OLD/BrushesUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,7 +67,6 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/GlobalGraphData.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/TrophicLayerSO.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimResourceManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/WorldSpiritHubUI.cs" />
@@ -84,7 +80,6 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButtonPrefabScript.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Environment/SpawnZone.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/DebugPanelUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/EggSack.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationStateData.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Fluid/EnvironmentFluidManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/CritterModuleCoreGenome.cs" />
@@ -106,11 +101,9 @@
       <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/EnterExitRectBounds.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/CursorInRectBounds.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/GenomeViewerUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButtonTooltipSource.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimEventsManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/WatcherUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/BrushesUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicLayersManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/HistoryPanelUI.cs" />
@@ -118,9 +111,13 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/TrophicSlot.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/SettingsManager.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCore.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/CandidateAgentData.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/BrushesUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCore.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/EggSack.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterMouthComponent.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1owaWgGpM80xkcfA3szn5iw9YkG" />
@@ -220,7 +217,8 @@
       <workItem from="1626210328526" duration="3243000" />
       <workItem from="1626333821544" duration="6770000" />
       <workItem from="1626759635101" duration="5580000" />
-      <workItem from="1627070827903" duration="6792000" />
+      <workItem from="1627070827903" duration="6832000" />
+      <workItem from="1627419646507" duration="10059000" />
     </task>
     <servers />
   </component>

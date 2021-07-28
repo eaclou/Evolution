@@ -32,6 +32,8 @@ public class EggSack : MonoBehaviour {
     public int maxNumEggs = 64;
     public int curNumEggs = 64;
     public float foodAmount;  // if eaten, how much nutrients is the entire EggSack worth?
+    
+    public float eggSize => individualEggMaxSize * growthScaleNormalized;
 
     public float developmentProgress = 0f; // 0-1 born --> mature
     public float growthScaleNormalized = 0f; // the normalized size compared to max fullgrown size
@@ -41,6 +43,7 @@ public class EggSack : MonoBehaviour {
 
     public Vector2 fullSize;
     public Vector2 curSize;
+    public float area => curSize.x * curSize.y;
 
     //private float minMass = 0.33f;
     //private float maxMass = 3.33f;
@@ -275,6 +278,22 @@ public class EggSack : MonoBehaviour {
         fixedJoint.connectedBody = null;
         mainCollider.enabled = true;  // *** ???? maybe?
         //Debug.Log("is this function being run?");
+    }
+    
+    public void BittenByAgent(int numEggsEaten, float massConsumed)
+    {
+        curNumEggs -= numEggsEaten;
+        
+        if (curNumEggs <= 0) 
+        {
+            curNumEggs = 0;            
+            ConsumedByPredatorAgent();
+        }
+
+        currentBiomass -= massConsumed;
+        
+        // Deprecate this
+        foodAmount = (float)curNumEggs / (float)maxNumEggs * curSize.x * curSize.y;
     }
 
     public void ConsumedByPredatorAgent() {

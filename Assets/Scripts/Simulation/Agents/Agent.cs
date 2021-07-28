@@ -111,6 +111,8 @@ public class Agent : MonoBehaviour {
     public float fullSizeBodyVolume = 1f;
     //public float centerOfMass = 0f;
     
+    public float xyBoundArea => currentBoundingBoxSize.x * currentBoundingBoxSize.y;
+    
     // * Combine thse stats into a serializable class for cleanliness?
     public int lifeStageTransitionTimeStepCounter = 0; // keeps track of how long agent has been in its current lifeStage
     public int ageCounter = 0;
@@ -477,6 +479,31 @@ public class Agent : MonoBehaviour {
 
         //Debug.Log("EatFoodPlant " + amount.ToString());
         RegisterAgentEvent(Time.frameCount, "Ate Plant! (+" + (amount * 1000).ToString("F0") + " food)", 1f);
+    }
+    
+    // * WPP: combine below two methods (were extracted from CritterMouthComponent)
+    public void EatEggs(float amount)
+    {
+        candidateRef.performanceData.totalFoodEatenEgg += amount;
+        EatFoodMeat(amount); // assumes all foodAmounts are equal
+        RegisterAgentEvent(Time.frameCount, "Ate Egg Bit! (" + amount + ")", 1f);
+    }
+    
+    public void EatEggsWhole(float amount)
+    {
+        candidateRef.performanceData.totalFoodEatenEgg += amount;
+        EatFoodDecay(amount);
+        RegisterAgentEvent(Time.frameCount, "Ate Egg! (" + amount + ")", 1f);
+    }
+    
+    public void EatCorpse(float amount, float biteSize)
+    {
+        candidateRef.performanceData.totalFoodEatenCorpse += biteSize;
+        EatFoodDecay(amount); // assumes all foodAmounts are equal !! *****
+        RegisterAgentEvent(Time.frameCount, "Ate Carrion! (" + amount + ")", 1f);
+        //if(coreModule.foodEfficiencyMeat > 0.5f) { // ** // damage bonus -- provided has the required specialization level:::::
+        //    GainExperience((flowR / coreModule.stomachCapacity) * 0.5f);  
+        //}  
     }
     
     public void EatFoodMeat(float amount) {

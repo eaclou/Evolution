@@ -1,351 +1,217 @@
 ﻿using UnityEngine;
 
-public class CritterMouthComponent : MonoBehaviour {
+public class CritterMouthComponent : MonoBehaviour 
+{
+    [SerializeField] float predatorBonus = 1f;
+    [SerializeField] float defaultTargetArea = 1f;
 
     public Agent agentRef;
     public int agentIndex = -1;
-
-    public Vector2 mouthTriggerSize;
     
     public bool isFeeding = false;
     public bool isAttacking = false;
 
-    public float lastBiteFoodAmount = 0f;
-
-    // efficiency? calculated elsewhere?
+    public float lastBiteFoodAmount = 0f;   // * WPP: assigned but not used
     
-
-    /*public enum MouthType {
-        None,
-        Simple,
-        Jaw
-    }
-
-    public bool isBiting = false;
-    public int bitingFrameCounter = 0;    
-    public Vector2 mouthSize;  // relative to head size?
-    public Vector2 biteZoneDimensions;
-    public float biteZoneOffset;
-    public int biteHalfCycleDuration = 6;
-    public int biteCooldownDuration = 48;
-    public int biteCooldownOversaturationPenalty = 1;
-    public float biteStrength;
-    public float biteSharpness;
-     */  
     public CircleCollider2D triggerCollider;
+    
+    float ownBiteArea => Mathf.Pow(triggerCollider.radius, 2) * 2f;
 
-    public void Tick() {
-        agentRef.coreModule.isMouthTrigger[0] = 0f;
-        /*else
-        {
-            bitingFrameCounter = 0; // needed?
-        }*/
+    public void Tick() 
+    {
+        agentRef.coreModule.objectInRangeOfMouth = false;
     }
     
-    public void Disable() {
+    public void Disable() 
+    {
         triggerCollider.enabled = false;
-        //isCooldown = false;
-        //isFeeding = false;
-        //isAttacking = false;
-        //isBiting = false;        
     }
-    public void Enable() {
+    
+    public void Enable() 
+    {
         triggerCollider.enabled = true;
-        /*isCooldown = false;
-        if(!isFeeding) {
-            feedingFrameCounter = 0;
-        }
-        if(!isAttacking) {
-            attackingFrameCounter = 0;
-        }*/
     }
 
-    public void Initialize(CritterModuleCoreGenome genome, Agent agent) {
-        // Set Values from Genome:
-
-        
-    }
-
+    // TBD: Set Values from Genome
+    public void Initialize(CritterModuleCoreGenome genome, Agent agent) { }
     
-    private void ActiveFeedBiteCheck(Collider2D collider) {
-        // own Bite Capacity:
-        float ownBiteArea = triggerCollider.radius * triggerCollider.radius * 2f;
-        float targetArea = 1f;
-
-        Agent collidingAgent = collider.gameObject.GetComponentInParent<Agent>();
-        if(collidingAgent != null) {
-            if(agentIndex != collidingAgent.index) {
-
-                if(agentRef.speciesIndex == collidingAgent.speciesIndex) {  // same species  // Cannibalism
-                    if(collidingAgent.curLifeStage == Agent.AgentLifeStage.Dead)
-                    {
-                        if (ownBiteArea > targetArea) {
-                            SwallowAnimalWhole(collidingAgent);
-                        }
-                        else {
-                            BiteCorpseFood(collidingAgent, ownBiteArea);
-                        }
-                    }
-                }
-                else {
-                    targetArea = collidingAgent.currentBoundingBoxSize.x * collidingAgent.currentBoundingBoxSize.y;
-                    
-                    if(ownBiteArea > targetArea) {
-                        // Swallow!:::
-                        SwallowAnimalWhole(collidingAgent);
-                    }
-                    else {
-                        //Debug.Log("Bite Animal!");
-                        // Toothy Attack Bite GO!!!
-                        if(collidingAgent.curLifeStage == Agent.AgentLifeStage.Dead)
-                        {
-                            BiteCorpseFood(collidingAgent, ownBiteArea);
-                        }
-                        else
-                        {
-                            //BiteDamageAnimal(collidingAgent, ownBiteArea, targetArea);
-                        }                               
-                    }
-                }
-            }
-            else {
-                //Debug.Log("SELF");
-            }
-        }
-
-        EggSack collidingEggSack = collider.gameObject.GetComponent<EggSack>();
-        if (collidingEggSack != null) {
-            // FOOD:
-            // Compare sizes:
-            targetArea = collidingEggSack.curSize.x * collidingEggSack.curSize.y;
-
-            if(ownBiteArea > targetArea) {
-                // Swallow!:::
-                //Debug.Log("SwallowEggSackWhole:    Agent [" + agentRef.index.ToString() + "] biteSize: " + ownBiteArea.ToString() + "   ---> EggSack [" + collidingEggSack.index.ToString() + "] food: " + collidingEggSack.foodAmount.ToString() + ", growthStatus: ");
-                SwallowEggSackWhole(collidingEggSack);
-            }
-            else {
-                // Bite off a smaller chunk -- sharper teeth better?
-                BiteDamageEggSack(collidingEggSack, ownBiteArea, targetArea);      
-            }
-        }
-    } 
+    void OnTriggerEnter2D(Collider2D collider) { TriggerCheck(collider); }
     
-    private void ActiveAttackBiteCheck(Collider2D collider) {
-        // own Bite Capacity:
-        float ownBiteArea = triggerCollider.radius * triggerCollider.radius * 2f;
-        float targetArea = 1f;
+    void OnTriggerStay2D(Collider2D collider) { TriggerCheck(collider); }
+    
+    void TriggerCheck(Collider2D collider) 
+    {
+        // Creature OutputNeuron controls mouthEffector[0] = (intention to feed) --> enables collider trigger
+        // when collider enabled, OnTriggerEnter/Stay --> attempt to start a bite
+        // when bite reaches execution frame, process bite action & consequences
+        if (!collider.gameObject.CompareTag("HazardCollider") && agentRef != null)
+            agentRef.coreModule.objectInRangeOfMouth = true;
 
-        Agent collidingAgent = collider.gameObject.GetComponentInParent<Agent>();
-        if(collidingAgent != null) {
-            if(agentIndex != collidingAgent.index) {
+        // is the current frame the Damage-Frame?
+        if (isFeeding && agentRef.feedingFrameCounter == agentRef.feedAnimDuration / 2 && !agentRef.isDead)
+            ActiveFeedBiteCheck(collider);
 
-                targetArea = collidingAgent.currentBoundingBoxSize.x * collidingAgent.currentBoundingBoxSize.y;
-
-                if(collidingAgent.curLifeStage != Agent.AgentLifeStage.Dead)
-                {
-                    if (ownBiteArea > targetArea) {
-                        SwallowAnimalWhole(collidingAgent);
-                    }
-                    else {
-                        BiteDamageAnimal(collidingAgent, ownBiteArea, targetArea);
-                    }
-                }
-            }
-            else {
-                //Debug.Log("SELF");
-            }
+        if(isAttacking && agentRef.isAttackBiteFrame && !agentRef.isDead)
+            ActiveAttackBiteCheck(collider);
+    }
+    
+    void ActiveFeedBiteCheck(Collider2D collider) 
+    {
+        RequestFeedBiteAgent(collider);
+        RequestBiteEggSack(collider);
+    }
+    
+    void RequestFeedBiteAgent(Collider2D collider)
+    {
+        Agent collidingAgent = collider.GetComponentInParent<Agent>();
+        
+        if (collidingAgent == null || 
+            agentIndex == collidingAgent.index) 
+            return;
+        
+        // Same species = cannibalism
+        if (agentRef.speciesIndex == collidingAgent.speciesIndex) 
+        {  
+            if (!collidingAgent.isDead) return;
+            
+            if (ownBiteArea > defaultTargetArea)
+                SwallowAnimalWhole(collidingAgent);
+            else
+                BiteCorpse(collidingAgent);
         }
-
-        EggSack collidingEggSack = collider.gameObject.GetComponent<EggSack>();
-        if (collidingEggSack != null) {
-            // FOOD:
-            // Compare sizes:
-            targetArea = collidingEggSack.curSize.x * collidingEggSack.curSize.y;
-
-            if(ownBiteArea > targetArea) {
-                // Swallow!:::
-                //Debug.Log("SwallowEggSackWhole:    Agent [" + agentRef.index.ToString() + "] biteSize: " + ownBiteArea.ToString() + "   ---> EggSack [" + collidingEggSack.index.ToString() + "] food: " + collidingEggSack.foodAmount.ToString() + ", growthStatus: " + collidingEggSack.growthStatus.ToString());
-                SwallowEggSackWhole(collidingEggSack);
-            }
-            else {
-                // Bite off a smaller chunk -- sharper teeth better?
-                BiteDamageEggSack(collidingEggSack, ownBiteArea, targetArea);      
-            }
+        else
+        {
+            if (ownBiteArea > collidingAgent.xyBoundArea)
+                SwallowAnimalWhole(collidingAgent);
+            else if (collidingAgent.isDead)
+                BiteCorpse(collidingAgent);
         }
     }
 
-    private void SwallowAnimalWhole(Agent preyAgent) {
-        if(preyAgent.index == 0) {
-            Debug.Log("So tired of this BUG");
-            // No idea what's going on -- game crashes if agent[0] is eaten and seems to thing it's null when it is not??? ****
-        }
-        else {
-            //Debug.Log("SwallowAnimalWhole [" + agentRef.index.ToString() + "] ---> [" + preyAgent.index.ToString() + "]");
-            ProcessPredatorySwallowAttempt(agentRef, preyAgent);
-        }
+    void RequestBiteEggSack(Collider2D collider)
+    {
+        EggSack collidingEggSack = collider.GetComponent<EggSack>();
         
+        if (collidingEggSack == null) return;
+        
+        if(ownBiteArea > collidingEggSack.area)
+            SwallowEggSackWhole(collidingEggSack);
+        else
+            BiteEggSack(collidingEggSack, ownBiteArea);
+    }
+
+    void ActiveAttackBiteCheck(Collider2D collider) 
+    {
+        RequestAttackBiteAgent(collider);
+        RequestBiteEggSack(collider);
+    }
+    
+    void RequestAttackBiteAgent(Collider2D collider)
+    {
+        Agent collidingAgent = collider.GetComponentInParent<Agent>();
+        
+        if (collidingAgent == null || 
+            agentIndex == collidingAgent.index ||
+            collidingAgent.isDead) 
+            return;
+        
+        float targetArea = collidingAgent.xyBoundArea;
+        
+        if (ownBiteArea > targetArea)
+            SwallowAnimalWhole(collidingAgent);
+        else
+            BiteAnimal(collidingAgent, targetArea);
+    }
+
+    void SwallowAnimalWhole(Agent preyAgent) 
+    {
+        if(preyAgent.index == 0) 
+        {
+            // No idea what's going on -- game crashes if agent[0] is eaten and seems to think it's null when it is not??? ****
+            Debug.LogError("preyAgent.index = 0", preyAgent.gameObject);
+            return;
+        }
+
+        //Debug.Log("SwallowAnimalWhole [" + agentRef.index.ToString() + "] ---> [" + preyAgent.index.ToString() + "]");
+        if (agentRef.isSwallowingPrey) return;
+        
+        preyAgent.InitiateBeingSwallowed(agentRef);            
+        agentRef.InitiateSwallowingPrey(preyAgent);
         // Credit food:
         //float flow = preyAgent.sizePercentage * (preyAgent.fullSizeBoundingBox.x + preyAgent.fullSizeBoundingBox.z) * preyAgent.fullSizeBoundingBox.y * 0.5f; // + preyAgent.coreModule.stomachContents;
         //agentRef.EatFoodMeat(flow); // assumes all foodAmounts are equal !! *****    
     }
-    
-    private void ProcessPredatorySwallowAttempt(Agent predatorAgent, Agent preyAgent)
+
+    void SwallowEggSackWhole(EggSack eggSack) 
     {
-        // add boolean check here? possibly attempting to swallow multiple things?
-        if(predatorAgent.isSwallowingPrey)
-        {
-
-        }
-        else
-        {
-            preyAgent.InitiateBeingSwallowed(predatorAgent);            
-            predatorAgent.InitiateSwallowingPrey(preyAgent);
-        }
-    }
-    private void SwallowEggSackWhole(EggSack eggSack) {
-        
-        
-        float flow = eggSack.foodAmount * 10f * agentRef.coreModule.digestEfficiencyDecay;
-        //Debug.Log("SwallowEggSackWhole " + flow.ToString());
-
-        agentRef.candidateRef.performanceData.totalFoodEatenEgg += flow;
-        agentRef.EatFoodDecay(flow);
-        agentRef.RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Egg! (" + flow + ")", 1f);
+        float foodEaten = eggSack.foodAmount * 10f * agentRef.coreModule.digestEfficiencyDecay;
+        agentRef.EatEggsWhole(foodEaten);
         eggSack.ConsumedByPredatorAgent();
     }
-    private void BiteDamageAnimal(Agent preyAgent, float ownBiteArea, float targetArea) {
-        
-        //Debug.Log("BiteDamageAnimal");
+    
+    void BiteAnimal(Agent preyAgent, float targetArea) 
+    {
         float baseDamage = 3.14f;
-
         float sizeRatio = ownBiteArea / targetArea; // for now clamped to 10x
-
         float damage = baseDamage * sizeRatio * agentRef.coreModule.damageBonus;
         damage = Mathf.Clamp01(damage);
 
         //agentRef.coreModule.energy += 5f;
 
         preyAgent.ProcessBiteDamageReceived(damage, agentRef);
-        agentRef.RegisterAgentEvent(UnityEngine.Time.frameCount, "Bit Vertebrate! (" + damage + ") candID: " + preyAgent.candidateRef.candidateID.ToString(), 1f);
+        agentRef.RegisterAgentEvent(Time.frameCount, "Bit Vertebrate! (" + damage + ") candID: " + preyAgent.candidateRef.candidateID, 1f);
         //if(agentRef.coreModule.foodEfficiencyMeat > 0.5f) { // ** // damage bonus -- provided has the required specialization level:::::
         //    agentRef.GainExperience(damage * 0.5f);  
         //}
         //Debug.Log("BiteDamageAnimal [" + agentRef.index.ToString() + "] ---> [" + preyAgent.index.ToString() + "] damage: " + damage.ToString() + ", preyHealth: " + preyAgent.coreModule.healthHead.ToString());
     }
-    private void BiteDamageEggSack(EggSack eggSack, float ownArea, float targetArea) {
-
-        float sizeOfEachEgg = (float)eggSack.individualEggMaxSize * eggSack.growthScaleNormalized;
-                
-        int numEggsEaten = Mathf.FloorToInt(ownArea / sizeOfEachEgg);
+    
+    void BiteEggSack(EggSack eggSack, float ownArea) 
+    {
+        int numEggsEaten = Mathf.FloorToInt(ownArea / eggSack.eggSize);
         numEggsEaten = Mathf.Min(numEggsEaten, eggSack.curNumEggs);  // prevent overdraw
 
         float massProportionEaten = (float)numEggsEaten / (float)eggSack.curNumEggs;
-
         float massConsumed = eggSack.currentBiomass * massProportionEaten;
 
-        eggSack.curNumEggs -= numEggsEaten;
-        if(eggSack.curNumEggs <= 0) {
-            eggSack.curNumEggs = 0;            
-            eggSack.ConsumedByPredatorAgent();
-        }
+        eggSack.BittenByAgent(numEggsEaten, massConsumed);
 
-        eggSack.currentBiomass -= massConsumed;
-        
-        // Deprecate this:::
-        eggSack.foodAmount = (float)eggSack.curNumEggs / (float)eggSack.maxNumEggs * eggSack.curSize.x * eggSack.curSize.y;
-        
-        // CONSUME FOOD!
-        float flowR = 0f;
-        if(numEggsEaten > 0) {
-            float flow = ownArea * 1f; // bonus for predators? // maximum bite intake
-            flowR = Mathf.Min(massConsumed, flow) * 10f * agentRef.coreModule.digestEfficiencyDecay;
-        }
+        float foodEaten = numEggsEaten > 0 ? 
+            Mathf.Min(massConsumed, ownArea * predatorBonus) * 10f * agentRef.coreModule.digestEfficiencyDecay : 
+            0f;
 
-        agentRef.candidateRef.performanceData.totalFoodEatenEgg += flowR;
-
-        agentRef.EatFoodMeat(flowR); // assumes all foodAmounts are equal !! *****
-        agentRef.RegisterAgentEvent(Time.frameCount, "Ate Egg Bit! (" + flowR + ")", 1f);
-        //Debug.Log("BiteEggsack [" + agentRef.index.ToString() + "] ---> [" + eggSack.index.ToString() + "] " + agentRef.totalFoodEatenEgg.ToString());
+        agentRef.EatEggs(foodEaten);
     }
-    public void BiteCorpseFood(Agent corpseAgent, float ownBiteArea)
+    
+    public void BiteCorpse(Agent corpseAgent)
     {  
-        //Debug.Log("BiteCorpseFood [" + agentRef.index.ToString() + "] ---> [" + corpseAgent.index.ToString() + "]");
-        float flow = ownBiteArea * 10f * agentRef.coreModule.digestEfficiencyDecay; // / colliderCount;        
-        float flowR = Mathf.Min(corpseAgent.currentBiomass, flow) * 100f;
-
-        agentRef.candidateRef.performanceData.totalFoodEatenCorpse += flow;
-        agentRef.EatFoodDecay(flowR); // assumes all foodAmounts are equal !! *****
-        agentRef.RegisterAgentEvent(Time.frameCount, "Ate Carrion! (" + flowR + ")", 1f);
-        //if(agentRef.coreModule.foodEfficiencyMeat > 0.5f) { // ** // damage bonus -- provided has the required specialization level:::::
-        //    agentRef.GainExperience((flowR / agentRef.coreModule.stomachCapacity) * 0.5f);  
-        //}        
-
-        corpseAgent.ProcessBeingEaten(flowR);
-    }
-
-    private void TriggerCheck(Collider2D collider) {
-        // Creature OutputNeuron controls mouthEffector[0] = (intention to feed) --> enables collider trigger
-        // when collider enabled, OnTriggerEnter/Stay --> attempt to start a bite
-        // when bite reaches execution frame, process bite action & consequences
-        if(collider.gameObject.CompareTag("HazardCollider")) {
-
-        }
-        else {
-            //Debug.Log(agentRef.coreModule.ToString());
-            if(agentRef != null) {
-                agentRef.coreModule.isMouthTrigger[0] = 1f;  // there is an object in range of mouth trigger:
-            }
-        } 
-
-        if(isFeeding) {
-            // is the current frame the Damage-Frame?
-            if(agentRef.feedingFrameCounter == agentRef.feedAnimDuration / 2 && !agentRef.isDead) {
-               //agentRef.curLifeStage != Agent.AgentLifeStage.Dead) {  
-                // if so, BITE!!
-                ActiveFeedBiteCheck(collider);              
-            }
-        }
-        else {
-            if(collider.gameObject.CompareTag("HazardCollider")) {
-
-            }
-            else {                
-                //AttemptInitiateActiveFeedBite();
-            }                
-        }
-
-        // WPP: simplified conditionals with AND logic and getter in agentRef
-        if(isAttacking && agentRef.isAttackBiteFrame && !agentRef.isDead) {
-            ActiveAttackBiteCheck(collider);              
-        }
+        float biteSize = ownBiteArea * 10f * agentRef.coreModule.digestEfficiencyDecay;        
+        float foodEaten = Mathf.Min(corpseAgent.currentBiomass, biteSize) * 100f;
         
-        // WPP: removed, no purpose
-        /*else {
-            if(collider.gameObject.CompareTag("HazardCollider")) {
+        agentRef.EatCorpse(foodEaten, biteSize);
+        corpseAgent.ProcessBeingEaten(foodEaten);
+    }
+}
 
-            }
-            else {
-                //AttemptInitiateActiveAttackBite();
-            }                
-        }*/
 
-        /*if(isPassive) {
-            PassiveBiteCheck(collider);
-        }
-        else {  // Active Bite Animation:
-            // TEMP!!!
-            
-        }*/
-    }
-    
-    private void OnTriggerEnter2D(Collider2D collider) {
-        TriggerCheck(collider);  
-    }
-    
-    private void OnTriggerStay2D(Collider2D collider) {
-        TriggerCheck(collider); 
-    }
+#region Dead code, please delete
+/*public enum MouthType {
+    None,
+    Simple,
+    Jaw
+}
+
+public bool isBiting = false;
+public int bitingFrameCounter = 0;    
+public Vector2 mouthSize;  // relative to head size?
+public Vector2 biteZoneDimensions;
+public float biteZoneOffset;
+public int biteHalfCycleDuration = 6;
+public int biteCooldownDuration = 48;
+public int biteCooldownOversaturationPenalty = 1;
+public float biteStrength;
+public float biteSharpness;
+ */ 
 
     /*public void Bite() {
         // BITING:
@@ -441,4 +307,4 @@ public class CritterMouthComponent : MonoBehaviour {
 
     }
     */
-}
+#endregion

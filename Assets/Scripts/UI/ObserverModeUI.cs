@@ -70,11 +70,6 @@ public class ObserverModeUI : MonoBehaviour
         if (!enabled || input == Vector2.zero) 
             return;
 
-        // WPP: cut middle-man reference, condensed to single function
-        //watcherUI.StopFollowingAgent();
-        //watcherUI.StopFollowingPlantParticle();
-        //watcherUI.StopFollowingAnimalParticle();
-        
         // Don't auto-follow anything if player is manually controlling camera
         cameraManager.SetFollowing(KnowledgeMapId.Undefined);
         
@@ -83,7 +78,6 @@ public class ObserverModeUI : MonoBehaviour
     
     bool tooltipActive;
 
-    // WPP: broken into helper functions
     public void Tick()
     {
         if(vegetationManager == null) return;
@@ -238,6 +232,7 @@ public class ObserverModeUI : MonoBehaviour
     public void ExitTooltipObject() {
         isTooltipHover = false;
     }
+    
     string GetTooltipString(TooltipId id)
     {
         switch (id)
