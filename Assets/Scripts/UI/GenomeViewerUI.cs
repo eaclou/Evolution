@@ -11,20 +11,12 @@ public class GenomeViewerUI : MonoBehaviour {
     
         
     public void UpdateUI() {
-        // * WPP: only usage, may as well set in editor
-        // relates to future use items
-        //panelGenomeAbilities.SetActive(false);
+        
         panelGenomeSensors.SetActive(true);
         panelPerformanceBehavior.SetActive(true);
         panelEaten.SetActive(true);
 
-        // * WPP delegate to components (organize scattered references first)
-        //genomeTab.SetActive(isGenomeTabActive);
-        //performanceTab.SetActive(isPerformanceTabActive);
-        //historyTab.SetActive(isHistoryTabActive);
-        //imageDeadDim.SetActive(simulationManager.targetAgentIsDead);
-    }
-    
+    }    
     
     [Serializable]
     public class Tab

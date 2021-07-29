@@ -5,9 +5,10 @@ public class TooltipUI : MonoBehaviour
     UIManager ui => UIManager.instance;
 
     [SerializeField]
-    public string tooltipString;
-    //public bool isSensorEnabled;
-
+    public string tooltipString;    
+    [SerializeField]
+    public int elementID;
+    
     public void OnHoverStart() {
         ui.observerModeUI.EnterTooltipObject(this);
     }

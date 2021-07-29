@@ -81,19 +81,6 @@ public class BrushesUI : MonoBehaviour {
     public Color curIconColor = Color.white;
     public Sprite curIconSprite = null;    
 
-    //public Text textLinkedSpiritDescription; -- more of KnowledgeSpirit's thing
-
-    //public Image imageToolbarButtonBarBackground;
-    //public Image imageToolbarWingLine;
-    //public Button buttonToolbarWingCreateSpecies;
-    //public Text textToolbarWingSpeciesSummary;
-    //public Text textToolbarWingPanelName;
-    //public Text textSelectedSpeciesTitle;
-    //public Text textSelectedSpeciesIndex;
-    
-    //public Text textSelectedSpeciesDescription;
-    //public int selectedSpeciesStatsIndex;
-    
     SimulationManager simulationManager => SimulationManager.instance;
     TrophicLayersManager trophicLayersManager => simulationManager.trophicLayersManager;
     TheCursorCzar theCursorCzar => TheCursorCzar.instance;
@@ -206,7 +193,7 @@ public class BrushesUI : MonoBehaviour {
         panelBrushPaletteSelect.SetActive(false); // isPaletteOpen);
         if (isOpen) {
             UpdateUI();
-            UpdateBrushPaletteUI();
+            //UpdateBrushPaletteUI();
             if(isPaletteOpen) {
                 //UpdateBrushPaletteUI();
             }
@@ -220,10 +207,6 @@ public class BrushesUI : MonoBehaviour {
         
         curIconColor = new Color(curIconColor.r * 0.35f, curIconColor.g * 0.35f, curIconColor.b * 0.35f);
         imageColorBar.color = curIconColor;
-
-        //imageIsBrushing.gameObject.SetActive(uiManagerRef.isBrushModeON_snoopingOFF);
-        //imageIsBrushing.sprite = curIconSprite;
-        //imageIsBrushing.color = curIconColor;
 
         switch(uiManagerRef.curActiveTool) {
             case ToolType.None:
@@ -254,9 +237,8 @@ public class BrushesUI : MonoBehaviour {
 
         string spiritBrushName = "Minor Creation Spirit " + curCreationBrushIndex;
         imageSelectedBrushThumbnail.sprite = spiritBrushCreationIcon;
-        //strSpiritBrushDescription = "This spirit has some powers of life and death";
-        //strSpiritBrushEffects = "Left-Click:\n" + strLeftClickEffect[leftClickDescriptionIndex] + "\n\nRight-Click:\n" + strRightClickEffect[rightClickDescriptionIndex];
-        if(theCursorCzar.isDraggingMouseRight) {
+
+        if (theCursorCzar.isDraggingMouseRight) {
             spiritBrushName = "Minor Decay Spirit" + curCreationBrushIndex;  
         }
         
@@ -264,8 +246,6 @@ public class BrushesUI : MonoBehaviour {
             spiritBrushName = "Lesser Stir Spirit";      
             imageSelectedBrushThumbnail.sprite = spiritBrushStirIcon;
 
-            //strSpiritBrushDescription = "This spirit reveals hidden information about aspects of the world";
-            //strSpiritBrushEffects = "Left-Click:\nFollows the nearest Vertebrate\n\nRight-Click:\nStops following";
         }
 
         textBrushLinkedSpiritName.resizeTextMaxSize = 20;
@@ -314,131 +294,6 @@ public class BrushesUI : MonoBehaviour {
         textSelectedBrushDescription.text = selectedEssenceSlot.data.brushDescription;
     }
     
-    // * WPP: empty method -> delete and reimplement when useful
-    private void UpdateBrushPaletteUI() {
-        /*
-        Color iconColor = Color.white;
-
-        bool isSelectedDecomposers = false;
-        bool isSelectedAlgae = false;
-        bool isSelectedPlants = false;
-        bool isSelectedZooplankton = false;
-        bool isSelectedVertebrate0 = false;
-        bool isSelectedVertebrate1 = false;
-        bool isSelectedVertebrate2 = false;
-        bool isSelectedVertebrate3 = false;
-        bool isSelectedMinerals = false;
-        bool isSelectedWater = false;
-        bool isSelectedAir = false;
-        bool isSelectedTerrain0 = false;
-        bool isSelectedTerrain1 = false;
-        bool isSelectedTerrain2 = false;
-        bool isSelectedTerrain3 = false;
-        if (true) { //layerManager.isSelectedTrophicSlot) {
-            if (selectedEssenceSlot.kingdomID == 0) {
-                isSelectedDecomposers = true;
-                iconColor = colorDecomposersLayer;
-                //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritDecomposerIcon;
-            }
-            else if (selectedEssenceSlot.kingdomID == 1) {
-                if (selectedEssenceSlot.tierID == 0) {
-                    isSelectedAlgae = true;
-                    iconColor = colorAlgaeLayer;
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritAlgaeIcon;
-                }
-                else {
-                    isSelectedPlants = true;
-                    iconColor = colorPlantsLayer;
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritPlantIcon;
-                }
-            }
-            else if (selectedEssenceSlot.kingdomID == 2) {
-                if (selectedEssenceSlot.tierID == 0) {
-                    isSelectedZooplankton = true;
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritZooplanktonIcon;
-                }
-                else {
-                    iconColor = colorVertebratesLayer;
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritVertebrateIcon;
-
-                    if (selectedEssenceSlot.slotID == 0) {
-                        isSelectedVertebrate0 = true;
-                    }
-                    else if (selectedEssenceSlot.slotID == 1) {
-                        isSelectedVertebrate1 = true;
-                    }
-                    else if (selectedEssenceSlot.slotID == 2) {
-                        isSelectedVertebrate2 = true;
-                    }
-                    else {
-                        isSelectedVertebrate3 = true;
-                    }
-
-                }
-
-            }
-            else if (selectedEssenceSlot.kingdomID == 3) {
-                iconColor = colorTerrainLayer;
-                if (selectedEssenceSlot.slotID == 0) {
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritWorldIcon;
-                    isSelectedTerrain0 = true;
-                }
-                else if (selectedEssenceSlot.slotID == 1) {
-                    isSelectedTerrain1 = true;
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritStoneIcon;
-                }
-                else if (selectedEssenceSlot.slotID == 2) {
-                    isSelectedTerrain2 = true;
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritPebblesIcon;
-                }
-                else if (selectedEssenceSlot.slotID == 3) {
-                    isSelectedTerrain3 = true;
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritSandIcon;
-                }
-            }
-            else if (selectedEssenceSlot.kingdomID == 4) {
-                if (selectedEssenceSlot.slotID == 0) {
-                    isSelectedMinerals = true;
-                    iconColor = colorMineralLayer;
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritMineralsIcon;
-                }
-                else if (selectedEssenceSlot.slotID == 1) {
-                    isSelectedWater = true;
-                    iconColor = colorWaterLayer;
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritWaterIcon;
-                }
-                else if (selectedEssenceSlot.slotID == 2) {
-                    isSelectedAir = true;
-                    iconColor = colorAirLayer;
-                    //imageToolbarSpeciesPortraitRender.sprite = uiManagerRef.spriteSpiritAirIcon;
-                }
-            }
-        }
-        */
-        //bool dimButtons = true;
-        /*
-        uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritDecomposers, layerManager.kingdomDecomposers.trophicTiersList[0].trophicSlots[0].status, isSelectedDecomposers);
-
-        uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritAlgae, layerManager.kingdomPlants.trophicTiersList[0].trophicSlots[0].status, isSelectedAlgae);
-        uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritPlant1, layerManager.kingdomPlants.trophicTiersList[1].trophicSlots[0].status, isSelectedPlants);
-        uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritPlant2, layerManager.kingdomPlants.trophicTiersList[1].trophicSlots[1].status, isSelectedPlants);
-
-        uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritZooplankton, layerManager.kingdomAnimals.trophicTiersList[0].trophicSlots[0].status, isSelectedZooplankton);
-        uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritAnimal1, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[0].status, isSelectedVertebrate0);
-        uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritAnimal2, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[1].status, isSelectedVertebrate1);
-        uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritAnimal3, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[2].status, isSelectedVertebrate2);
-        uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritAnimal4, layerManager.kingdomAnimals.trophicTiersList[1].trophicSlots[3].status, isSelectedVertebrate3);
-
-        uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritTerrain0, layerManager.kingdomTerrain.trophicTiersList[0].trophicSlots[0].status, isSelectedTerrain0);
-        uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritTerrain1, layerManager.kingdomTerrain.trophicTiersList[0].trophicSlots[1].status, isSelectedTerrain1);
-        uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritTerrain2, layerManager.kingdomTerrain.trophicTiersList[0].trophicSlots[2].status, isSelectedTerrain2);
-        uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritTerrain3, layerManager.kingdomTerrain.trophicTiersList[0].trophicSlots[3].status, isSelectedTerrain3);
-
-        uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritOther0, layerManager.kingdomOther.trophicTiersList[0].trophicSlots[0].status, isSelectedMinerals);
-        uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritOther1, layerManager.kingdomOther.trophicTiersList[0].trophicSlots[1].status, isSelectedWater);
-        uiManagerRef.SetToolbarButtonStateUI(dimButtons, ref buttonBrushLinkedSpiritOther2, layerManager.kingdomOther.trophicTiersList[0].trophicSlots[2].status, isSelectedAir);
-        */
-    }
     
     public void TickCreationBrush()
     {
@@ -457,8 +312,7 @@ public class BrushesUI : MonoBehaviour {
             theRenderKing.baronVonWater.RequestNewWaterRipple(new Vector2(theCursorCzar.curMousePositionOnWaterPlane.x / SimulationManager._MapSize, theCursorCzar.curMousePositionOnWaterPlane.y / SimulationManager._MapSize));
         }
         uiManagerRef.updateTerrainAltitude = false;                
-
-        //if (trophicLayersManager.isSelectedTrophicSlot) { }
+               
         if (selectedEssenceSlot.kingdomID == KingdomId.Decomposers) 
         {
             simulationManager.vegetationManager.isBrushActive = true;
@@ -550,14 +404,8 @@ public class BrushesUI : MonoBehaviour {
 
         if(isOpen) {
             EnterCreationBrushMode();
-            //uiManagerRef.isBrushModeON_snoopingOFF = true; // ***** Switching to brushingMode!!! ***
-            //animatorBrushesUI.SetBool("MinPanel", false);
         }
-        // * WPP: delete dead code
-        /*else {
-            uiManagerRef.panelFocus = PanelFocus.WorldHub;
-            animatorBrushesUI.SetBool("MinPanel", true);
-        }*/
+        
     }
     
     public void SetTargetFromWorldTree() {
@@ -568,12 +416,6 @@ public class BrushesUI : MonoBehaviour {
         isPaletteOpen = false;
     }
     
-    /*public void ClickBrushPaletteOpen() {
-        isPaletteOpen = !isPaletteOpen;
-        uiManagerRef.curActiveTool = UIManager.ToolType.Add;
-        uiManagerRef.isBrushModeON_snoopingOFF = true;
-        EnterCreationBrushMode();
-    }*/
     
     public void ClickToolButtonStir() {
         uiManagerRef.curActiveTool = ToolType.Stir;

@@ -8,7 +8,7 @@ public class CreaturePortraitPanel : MonoBehaviour
     [SerializeField] Text candidateName;
     [SerializeField] Image background;
     
-    [SerializeField] [Range(0, 1)] float backgroundHueModifier = .75f;
+    //[SerializeField] [Range(0, 1)] float backgroundHueModifier = .75f;
     [SerializeField] [Range(0, 1)] float nameHueModifier = .25f;
     
     string title;
@@ -30,10 +30,7 @@ public class CreaturePortraitPanel : MonoBehaviour
     }
     
     public void SetColors(CritterModuleAppearanceGenome appearance)
-    {
-        hue = appearance.huePrimary * backgroundHueModifier;
-        background.color = new Color(hue.x, hue.y, hue.z);
-        
+    {       
         hue = appearance.hueSecondary * nameHueModifier;
         candidateName.color = new Color(hue.x, hue.y, hue.z);        
     }

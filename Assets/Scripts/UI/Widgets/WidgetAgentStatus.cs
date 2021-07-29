@@ -14,18 +14,27 @@ public class WidgetAgentStatus : MonoBehaviour {
     	
     public void UpdateBars(Agent agent) {
         
-        textValHealth.text = (agent.coreModule.health * 100f).ToString("F0");        
+        textValHealth.text = (agent.coreModule.health * 100f).ToString("F0") + "%";      
         textValEnergy.text = agent.coreModule.energy.ToString("F0");        
         textValFood.text = (agent.coreModule.stomachContentsPercent * 100f).ToString("F0");
         textValBiomass.text = "Biomass: " + agent.currentBiomass.ToString("F3");
-        textValAge.text = agent.curLifeStage.ToString() + ", Age: " + agent.ageCounter;
+        string lifeStage = agent.curLifeStage.ToString();
+        if(agent.curLifeStage == Agent.AgentLifeStage.Mature) {
+            if(agent.isSexuallyMature) {
+                lifeStage = "Mature";
+            }
+            else {
+                lifeStage = "Young";
+            }
+        }
+        textValAge.text = lifeStage + ", Age: " + agent.ageCounter;
         textCurBehavior.text = agent.curActionState.ToString();
         
     }
     public void UpdateBars(float health, float energy, float food, float mass, float stamina) {
 
         //imageHealth.gameObject.transform.localScale = new Vector3(1f, health, 1f);
-        textValHealth.text = (health * 100f).ToString("F0");
+        textValHealth.text = (health * 100f).ToString("F0") + "%";
         
         float energyCapped = Mathf.Clamp01(energy * 0.1f); //***EC refactor how energy works
         //imageEnergy.gameObject.transform.localScale = new Vector3(1f, energyCapped, 1f);
@@ -41,5 +50,5 @@ public class WidgetAgentStatus : MonoBehaviour {
         //imageStamina.gameObject.transform.localScale = new Vector3(1f, stamina, 1f);
         //textValStamina.text = (stamina * 100f).ToString("F0");
         
-    }
+    } //*** OLD
 }

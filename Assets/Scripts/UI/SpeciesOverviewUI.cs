@@ -12,16 +12,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
     
     Color CLEAR => Color.black;
 
-
-    //private bool isFoundingGenomeSelected = false;
-    //private bool isRepresentativeGenomeSelected = false;
-    //private bool isLongestLivedGenomeSelected = false;
-    //private bool isMostEatenGenomeSelected = false;
-    //private bool isHallOfFameSelected = false;
     private int selectedHallOfFameIndex = 0;
-    //private bool isLeaderboardGenomesSelected = false;
-    //private int selectedLeaderboardGenomeIndex = 0;
-    //private bool isCandidateGenomesSelected = false;
     private int selectedCandidateGenomeIndex = 0;
     
     public GameObject panelGenomeViewer;
@@ -36,25 +27,12 @@ public class SpeciesOverviewUI : MonoBehaviour {
     
     [SerializeField] [Range(0, 1)] float hueMin = 0.2f;
     
-    
-    // * WPP: references null in editor, not used
-    public List<GenomeButtonPrefabScript> hallOfFameButtonsList;
-    public List<GenomeButtonPrefabScript> leaderboardGenomeButtonsList;
-    public List<GenomeButtonPrefabScript> candidateGenomeButtonsList;
-    public Text textHallOfFameTitle;
-    public Text textCurrentGenepoolTitle;
-    public GameObject panelCurrentGenepool;
-    public GameObject panelLineageGenomes;
-    public Slider sliderLineageGenomes;
-
     public Text textSpeciesLineage;
     
     public bool isShowingLineage = false;
     
     private Texture2D speciesPoolGenomeTex; // speciesOverviewPanel
     public Material speciesPoolGenomeMat;
-    
-    //private SelectionGroup selectionGroup = SelectionGroup.Founder;
     
     List<GenomeButtonPrefabScript> buttons = new List<GenomeButtonPrefabScript>();
 

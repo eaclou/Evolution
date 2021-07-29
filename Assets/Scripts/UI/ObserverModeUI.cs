@@ -19,7 +19,8 @@ public class ObserverModeUI : MonoBehaviour
     ToolType curActiveTool => manager.curActiveTool;
 
     public bool isTooltipHover = false;
-    public string tooltipString;
+    public TooltipUI tooltip;
+    //public string tooltipString;
     
     float cursorX => theCursorCzar.GetCursorPixelCoords().x;
     Vector2 mousePositionOnWater => theCursorCzar.curMousePositionOnWaterPlane2D;
@@ -106,44 +107,6 @@ public class ObserverModeUI : MonoBehaviour
         }
     }
 
-    #region dead code - please delete
-    void TickObjectTooltip()
-    {
-        //int selectedPlantID = vegetationManager.selectedPlantParticleIndex;
-        //int closestPlantID = vegetationManager.closestPlantParticleData.index;
-
-        //int selectedZoopID = zooplanktonManager.selectedAnimalParticleIndex;
-        //int closestZoopID = zooplanktonManager.closestAnimalParticleData.index;
-        
-        //if(plantDist < zoopDist) {                       
-        //    if(panelFocus == PanelFocus.Watcher && !cameraManager.isMouseHoverAgent && theCursorCzar.leftClickThisFrame) { 
-        //        if(selectedPlantID != closestPlantID && plantDist < 3.3f) {
-        //            vegetationManager.selectedPlantParticleIndex = closestPlantID;
-        //            vegetationManager.isPlantParticleSelected = true;
-        //            Debug.Log("FOLLOWING PLANT " + vegetationManager.selectedPlantParticleIndex.ToString());
-                    //isSpiritBrushSelected = true;
-        //            watcherUI.StartFollowingPlantParticle();
-        //        }
-        //    }
-            
-        //}
-        //else {                   
-        //    if (panelFocus == PanelFocus.Watcher && !cameraManager.isMouseHoverAgent && theCursorCzar.leftClickThisFrame) {
-        //        if (selectedZoopID != closestZoopID && zoopDist < 3.3f) {
-        //            zooplanktonManager.selectedAnimalParticleIndex = closestZoopID;
-        //            zooplanktonManager.isAnimalParticleSelected = true;
-        //            Debug.Log("FOLLOWING ZOOP " + zooplanktonManager.selectedAnimalParticleIndex.ToString());
-                    //isSpiritBrushSelected = true;
-        //            watcherUI.StartFollowingAnimalParticle();
-        //        }
-        //    }
-        //}
-
-        //float cursorCoordsX = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().x) / 360f);
-        //float cursorCoordsY = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().y - 720f) / 360f); 
-    }
-    #endregion
-    
     float plantDistance;
     float microbeDistance;
     
@@ -226,7 +189,7 @@ public class ObserverModeUI : MonoBehaviour
     
     public void EnterTooltipObject(TooltipUI tip) {
         isTooltipHover = true;
-        tooltipString = tip.tooltipString;
+        tooltip = tip;
     }
     
     public void ExitTooltipObject() {
@@ -237,12 +200,22 @@ public class ObserverModeUI : MonoBehaviour
     {
         switch (id)
         {
-            case TooltipId.CanvasElement: return tooltipString;
-            case TooltipId.Year: return "Year " + ((simulationManager.simAgeTimeSteps / 2048f) * cursorX / 360f).ToString("F0");
+            case TooltipId.CanvasElement: {
+                //if (cameraManager.targetAgent) {
+                //    return "OutComm[" + tooltip.elementID.ToString() + "] " + cameraManager.targetAgent.communicationModule.outComm0[0];
+                //}
+                //else {
+                    return tooltip.tooltipString;
+                //}
+            }
+
+            case TooltipId.Time: return "Year " + ((simulationManager.simAgeTimeSteps / 2048f) * cursorX / 360f).ToString("F0");
             case TooltipId.Agent: return "Critter #" + cameraManager.mouseHoverAgentRef.candidateRef.candidateID;
             case TooltipId.Algae: return "Algae #" + vegetationManager.closestPlantParticleData.index;
             case TooltipId.Microbe: return "Microbe #" + zooplanktonManager.closestAnimalParticleData.index;
-            case TooltipId.Timestep: return "TimeStep #" + (simulationManager.simAgeTimeSteps * cursorX / 360f).ToString("F0");
+            case TooltipId.Sensor: return "Sensor #" + (simulationManager.simAgeTimeSteps * cursorX / 360f).ToString("F0");
+            case TooltipId.Specialization: return "Specializations";
+            case TooltipId.Status: return "STATUS";
             default: return "";
         }
     }
@@ -252,11 +225,13 @@ public class ObserverModeUI : MonoBehaviour
         switch (id)
         {
             case TooltipId.CanvasElement: return isTooltipHover;
-            case TooltipId.Year: return cursorInSpeciesHistoryPanel;
+            case TooltipId.Time: return cursorInSpeciesHistoryPanel;
             case TooltipId.Agent: return cameraManager.isMouseHoverAgent;
             case TooltipId.Algae: return plantDistance < hitboxRadius && plantDistance < microbeDistance;
             case TooltipId.Microbe: return microbeDistance < hitboxRadius && microbeDistance < plantDistance;
-            case TooltipId.Timestep: return cursorInSpeciesHistoryPanel;    // ERROR: same as Year
+            case TooltipId.Sensor: return cursorInSpeciesHistoryPanel;    // ERROR: same as Year
+            case TooltipId.Specialization: return isTooltipHover;
+            case TooltipId.Status: return isTooltipHover;
             default: return false;
         }
     }
@@ -272,11 +247,13 @@ public class ObserverModeUI : MonoBehaviour
     public enum TooltipId
     {
         CanvasElement,
-        Year,
+        Time,
         Agent,
         Algae,
         Microbe,
-        Timestep,
+        Sensor,
+        Specialization,
+        Status
     }
     
     #endregion

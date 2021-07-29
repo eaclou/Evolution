@@ -5,8 +5,7 @@ public class GenomeOverviewPanel : MonoBehaviour
 {
     SimulationManager simulation => SimulationManager.instance;
     CandidateAgentData agent => UIManager.instance.focusedCandidate;
-
-    // WPP: use descriptive names instead of A,B,C    
+ 
     public Text textGeneration;
     public Text textBodySize;
     public Text textBrainSize;
