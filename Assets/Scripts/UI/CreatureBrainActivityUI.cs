@@ -7,6 +7,50 @@ public class CreatureBrainActivityUI : MonoBehaviour
 
     public AgentBehaviorOneHot agentBehaviorOneHot;
 
+    //*** EAC REFACTOR THIS!!! *** first pass brute force approach just to get the Tooltips working initially!!!! ***
+    /*[SerializeField]
+    public TooltipUI sensorFoodPlant;
+    [SerializeField]
+    public TooltipUI sensorFoodMicrobe;
+    [SerializeField]
+    public TooltipUI sensorFoodEgg;
+    [SerializeField]
+    public TooltipUI sensorFoodAnimal;
+    [SerializeField]
+    public TooltipUI sensorFoodCorpse;
+    [SerializeField]
+    public TooltipUI sensorFriend;
+    [SerializeField]
+    public TooltipUI sensorFoe;
+    [SerializeField]
+    public TooltipUI sensorWalls;
+    [SerializeField]
+    public TooltipUI sensorWater;
+    [SerializeField]
+    public TooltipUI sensorInternals;
+    [SerializeField]
+    public TooltipUI sensorContact;
+    [SerializeField]
+    public TooltipUI sensorCommsIn;
+    [SerializeField]
+    public TooltipUI effectorBite;
+    [SerializeField]
+    public TooltipUI effectorAttack;
+    [SerializeField]
+    public TooltipUI effectorDefend;
+    [SerializeField]
+    public TooltipUI effectorDash;
+    [SerializeField]
+    public TooltipUI effectorRest;
+    [SerializeField]
+    public TooltipUI effectorComms0;
+    [SerializeField]
+    public TooltipUI effectorComms1;
+    [SerializeField]
+    public TooltipUI effectorComms2;
+    [SerializeField]
+    public TooltipUI effectorComms3;
+    */
     public Material newInspectAgentCurActivityMat;
     public Material newInspectAgentThrottleMat;
     public Material newInspectAgentCommsMat;
@@ -32,12 +76,7 @@ public class CreatureBrainActivityUI : MonoBehaviour
         newInspectAgentThrottleMat.SetFloat("_AgentCoordX", agent.ownPos.x / SimulationManager._MapSize);
         newInspectAgentThrottleMat.SetFloat("_AgentCoordY", agent.ownPos.y / SimulationManager._MapSize);
         
-        agentBehaviorOneHot.UpdateBars( agent.coreModule.healEffector[0],
-                                        agent.coreModule.dashEffector[0],
-                                        agent.coreModule.defendEffector[0],
-                                        agent.coreModule.mouthFeedEffector[0],
-                                        agent.coreModule.mouthAttackEffector[0],
-                                        agent.communicationModule.outComm0[0], agent.isCooldown);
+        agentBehaviorOneHot.UpdateBars(agent);
 
         // * WPP: what concept does this condition represent? -> convert to getter in Agent
         callTickCounter = agent.communicationModule.outComm3[0] > 0.25f ? 
@@ -48,4 +87,7 @@ public class CreatureBrainActivityUI : MonoBehaviour
     
     }
 
+    public void TickTooltips() {
+
+    }
 }

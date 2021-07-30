@@ -200,7 +200,7 @@ public class ObserverModeUI : MonoBehaviour
     {
         switch (id)
         {
-            case TooltipId.CanvasElement: {
+            case TooltipId.CanvasElement: { //*** EAC Moving the logic to CreaturePanelUI to update Tooltip text for matching neurons
                 //if (cameraManager.targetAgent) {
                 //    return "OutComm[" + tooltip.elementID.ToString() + "] " + cameraManager.targetAgent.communicationModule.outComm0[0];
                 //}
@@ -208,7 +208,6 @@ public class ObserverModeUI : MonoBehaviour
                     return tooltip.tooltipString;
                 //}
             }
-
             case TooltipId.Time: return "Year " + ((simulationManager.simAgeTimeSteps / 2048f) * cursorX / 360f).ToString("F0");
             case TooltipId.Agent: return "Critter #" + cameraManager.mouseHoverAgentRef.candidateRef.candidateID;
             case TooltipId.Algae: return "Algae #" + vegetationManager.closestPlantParticleData.index;

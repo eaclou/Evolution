@@ -57,9 +57,20 @@ public class AgentBehaviorOneHot : MonoBehaviour {
 
 
         outComm0.GetComponent<Image>().color = Color.Lerp(Color.black, Color.white, agentRef.communicationModule.outComm0[0]);
+        outComm0.GetComponent<TooltipUI>().tooltipString = "OutComm0: " + agentRef.communicationModule.outComm0[0].ToString("F2");
         outComm1.GetComponent<Image>().color = Color.Lerp(Color.black, Color.white, agentRef.communicationModule.outComm1[0]);
+        outComm1.GetComponent<TooltipUI>().tooltipString = "OutComm1: " + agentRef.communicationModule.outComm1[0].ToString("F2");
         outComm2.GetComponent<Image>().color = Color.Lerp(Color.black, Color.white, agentRef.communicationModule.outComm2[0]);
+        outComm2.GetComponent<TooltipUI>().tooltipString = "OutComm2: " + agentRef.communicationModule.outComm2[0].ToString("F2");
         outComm3.GetComponent<Image>().color = Color.Lerp(Color.black, Color.white, agentRef.communicationModule.outComm3[0]);
+        outComm3.GetComponent<TooltipUI>().tooltipString = "OutComm3: " + agentRef.communicationModule.outComm3[0].ToString("F2");
+
+        if(!agentRef.candidateRef.candidateGenome.bodyGenome.communicationGenome.useComms) {
+            outComm0.GetComponent<TooltipUI>().tooltipString = "OutComms (disabled)";
+            outComm1.GetComponent<TooltipUI>().tooltipString = "OutComms (disabled)";
+            outComm2.GetComponent<TooltipUI>().tooltipString = "OutComms (disabled)";
+            outComm3.GetComponent<TooltipUI>().tooltipString = "OutComms (disabled)";
+        }
 
         float sigma = Mathf.Atan2(agentRef.movementModule.throttleY[0], agentRef.movementModule.throttleX[0]) * Mathf.Rad2Deg;// Vector3.Angle(new Vector3(0.0f, 1.0f, 0.0f), new Vector3(agentRef.movementModule.throttleX[0], agentRef.movementModule.throttleY[0], 0.0f)); // agentRef.movementModule.throttleX[0];
         sigma -= 90f;
@@ -97,70 +108,80 @@ public class AgentBehaviorOneHot : MonoBehaviour {
         
         
     }
-    public void UpdateBars(float rest, float dash, float guard, float bite, float attack, float other, bool isCooldown) {
+    public void UpdateBars(Agent agent) { //float rest, float dash, float guard, float bite, float attack, float other, bool isCooldown) {
 
+        float bite = agent.coreModule.mouthFeedEffector[0];
+        float guard = agent.coreModule.defendEffector[0];
+        float rest = agent.coreModule.healEffector[0];
+        float dash = agent.coreModule.dashEffector[0];
+        float attack = agent.coreModule.mouthAttackEffector[0];
         float highestPriority = Mathf.Max(rest, Mathf.Max(dash, Mathf.Max(guard, Mathf.Max(bite, attack))));
 
         Color activeColor = Color.white;
         Color inactiveColor = Color.clear;
 
         bool isActive = false;
-        if(rest >= highestPriority && !isCooldown) {
+        if(rest >= highestPriority && !agent.isCooldown) {
             textRest.color = activeColor;
             isActive = true;
         }
         else {
             textRest.color = inactiveColor;
         }
-        behaviorBarRest.transform.localScale = new Vector3(rest * 0.5f + 0.5f, rest * 0.5f + 0.5f,  1f);
+        behaviorBarRest.transform.localScale = new Vector3(rest * 0.25f + 0.75f, rest * 0.25f + 0.75f,  1f);
         UpdateBarColor(behaviorBarRest.GetComponent<Image>(), rest, isActive);
+        behaviorBarRest.GetComponent<TooltipUI>().tooltipString = "Rest: " + rest.ToString("F2");
         
         isActive = false;
-        if(dash >= highestPriority && !isCooldown) {
+        if(dash >= highestPriority && !agent.isCooldown) {
             textDash.color = activeColor;
             isActive = true;
         }
         else {
             textDash.color = inactiveColor;
         }
-        behaviorBarDash.transform.localScale = Vector3.one * (dash * 0.5f + 0.5f); // new Vector3(dash * 0.5f + 0.5f, dash * 0.5f + 0.5f, 1f);
+        behaviorBarDash.transform.localScale = Vector3.one * (dash * 0.25f + 0.75f); // new Vector3(dash * 0.5f + 0.5f, dash * 0.5f + 0.5f, 1f);
         UpdateBarColor(behaviorBarDash.GetComponent<Image>(), dash, isActive);
+        behaviorBarDash.GetComponent<TooltipUI>().tooltipString = "Dash: " + dash.ToString("F2");
 
         isActive = false;
-        if(guard >= highestPriority && !isCooldown) {
+        if(guard >= highestPriority && !agent.isCooldown) {
             textGuard.color = activeColor;
             isActive = true;
         }
         else {
             textGuard.color = inactiveColor;
         }
-        behaviorBarGuard.transform.localScale = Vector3.one * (guard * 0.5f + 0.5f); // new Vector3(guard * 0.5f + 0.5f, guard * 0.5f + 0.5f,  1f);
+        behaviorBarGuard.transform.localScale = Vector3.one * (guard * 0.25f + 0.75f); // new Vector3(guard * 0.5f + 0.5f, guard * 0.5f + 0.5f,  1f);
         UpdateBarColor(behaviorBarGuard.GetComponent<Image>(), guard, isActive);
+        behaviorBarGuard.GetComponent<TooltipUI>().tooltipString = "Guard: " + guard.ToString("F2");
 
         isActive = false;
-        if(bite >= highestPriority && !isCooldown) {
+        if(bite >= highestPriority && !agent.isCooldown) {
             textBite.color = activeColor;
             isActive = true;
         }
         else {
             textBite.color = inactiveColor;
         }
-        behaviorBarBite.transform.localScale = Vector3.one * (bite * 0.5f + 0.5f); // new Vector3(bite * 0.5f + 0.5f, bite * 0.5f + 0.5f, 1f);
+        behaviorBarBite.transform.localScale = Vector3.one * (bite * 0.25f + 0.75f); // new Vector3(bite * 0.5f + 0.5f, bite * 0.5f + 0.5f, 1f);
         UpdateBarColor(behaviorBarBite.GetComponent<Image>(), bite, isActive);
+        behaviorBarBite.GetComponent<TooltipUI>().tooltipString = "Bite: " + bite.ToString("F2");
 
         isActive = false;
-        if(attack >= highestPriority && !isCooldown) {
+        if(attack >= highestPriority && !agent.isCooldown) {
             textAttack.color = activeColor;
             isActive = true;
         }
         else {
             textAttack.color = inactiveColor;
         }
-        behaviorBarAttack.transform.localScale = Vector3.one * (attack * 0.5f + 0.5f); // new Vector3(attack * 0.5f + 0.5f, attack * 0.5f + 0.5f, 1f);
+        behaviorBarAttack.transform.localScale = Vector3.one * (attack * 0.25f + 0.75f); // new Vector3(attack * 0.5f + 0.5f, attack * 0.5f + 0.5f, 1f);
         UpdateBarColor(behaviorBarAttack.GetComponent<Image>(), attack, isActive);
+        behaviorBarAttack.GetComponent<TooltipUI>().tooltipString = "Attack: " + attack.ToString("F2");
 
         //isActive = false;
-        if(isCooldown) {
+        if(agent.isCooldown) {
             textOther.color = Color.yellow;
             textOther.gameObject.SetActive(true);
             //throttleGO.gameObject.SetActive(false);
@@ -170,7 +191,7 @@ public class AgentBehaviorOneHot : MonoBehaviour {
             throttleGO.gameObject.SetActive(true);
         }
         //behaviorBarOther.transform.localScale = Vector3.one * (other * 0.5f + 0.5f);
-        UpdateBarColor(behaviorBarOther.GetComponent<Image>(), other, isActive);
+        UpdateBarColor(behaviorBarOther.GetComponent<Image>(), agent.coreModule.healEffector[0], isActive);
 
     }
 

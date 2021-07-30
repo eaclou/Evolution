@@ -7,6 +7,8 @@ public class StatUI
 {
     public Text percent;    // * Consider rename
     public Image bar;
+    public TooltipUI tip;
+    public string name;
         
     public void RefreshPercent(float value, float scale)
     {
@@ -18,6 +20,7 @@ public class StatUI
         bar.transform.localScale = new Vector3(1f, barScale, 1f);
         if(percent) {
             percent.text = useDecimal ? numericValue.ToString("F2") : numericValue.ToString("F0");
-        }        
+        }
+        tip.tooltipString = this.name + ": " + numericValue.ToString("F2");
     }
 }
