@@ -11,12 +11,15 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     UIManager uiManager => UIManager.instance;
     WorldSpiritHubUI worldSpiritHubUI => uiManager.worldSpiritHubUI;
     TrophicSlot selectedWorldSpiritSlot => worldSpiritHubUI.selectedWorldSpiritSlot;
+    
+    Agent[] agents => simManager.agents;
 
     // SET IN INSPECTOR!!!::::
     public EnvironmentFluidManager fluidManager;
     public BaronVonTerrain baronVonTerrain;
     public BaronVonWater baronVonWater;
 
+    // * WPP: values assigned but not used
     public float tempSwimMag = 1f;
     public float tempSwimFreq = 1f;
     public float tempSwimSpeed = 1f;
@@ -47,23 +50,23 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private CommandBuffer cmdBufferResourceSim;
     private CommandBuffer cmdBufferWorldTree;
 
-    public ComputeShader computeShaderBrushStrokes;
-    public ComputeShader computeShaderUberChains;
+    public ComputeShader computeShaderBrushStrokes;  // Not used
+    public ComputeShader computeShaderUberChains;    // Not used
     public ComputeShader computeShaderCritters;
     public ComputeShader computeShaderEggSacks;
     public ComputeShader computeShaderTreeOfLife; //***EAC revisit --> convert to WorldTree
     public ComputeShader computeShaderSpiritBrush;
 
-    public Mesh meshStirStickA;
-    public Mesh meshStirStickSml;
-    public Mesh meshStirStickMed;
-    public Mesh meshStirStickLrg;
+    public Mesh meshStirStickA;     // Not used
+    public Mesh meshStirStickSml;   // Not used
+    public Mesh meshStirStickMed;   // Not used
+    public Mesh meshStirStickLrg;   // Not used
+    
     public Material gizmoStirStickAMat;
-    public Material gizmoStirStickShadowMat;
+    public Material gizmoStirStickShadowMat;    // Not used
+    public Material gizmoProtoSpiritClickableMat; // Not used
 
-    public Material gizmoProtoSpiritClickableMat;
-
-    public Material cursorParticlesDisplayMat;
+    public Material cursorParticlesDisplayMat;  // Not used
 
     // ORGANIZE AND REMOVE UNUSED!!!!!! *********
     public Material rockMat;
@@ -73,10 +76,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     public Material debugVisAlgaeParticlesMat;
     public Material debugVisAnimalParticlesMat;
     public Material basicStrokeDisplayMat;
-    public Material fluidBackgroundColorMat;
+    public Material fluidBackgroundColorMat;    // Not used
     public Material floatyBitsDisplayMat;
     public Material floatyBitsShadowDisplayMat;
-    public Material fluidRenderMat;
+    public Material fluidRenderMat;             // Not used
 
     public Material eggSackStrokeDisplayMat;
     public Material eggSackShadowDisplayMat;
@@ -90,14 +93,14 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
     public Material eggCoverDisplayMat;
     public Material critterDebugGenericStrokeMat;
-    public Material critterUberStrokeShadowMat;
+    public Material critterUberStrokeShadowMat;     // Not used
 
     //public Material critterInspectHighlightMat;
     //public Material critterHighlightTrailMat;
 
     public Material algaeParticleColorInjectMat;
     public Material zooplanktonParticleColorInjectMat;
-    public Material playerBrushColorInjectMat;
+    public Material playerBrushColorInjectMat;      // Not used
     public Material resourceSimTransferMat;
     public Material resourceSimAgentDataMat;
     public Material plantParticleDataMat;
@@ -109,23 +112,23 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     public Material treeOfLifeStemSegmentsMat;
     public Material treeOfLifeBackdropMat;
     public Material treeOfLifeBackdropPortraitBorderMat;
-    public Material treeOfLifePortraitBorderMat;
+    public Material treeOfLifePortraitBorderMat;    // Not used
     public Material treeOfLifePortraitMat;
-    public Material treeOfLifePortraitEyeMat;
-    public Material treeOfLifeDecorationMat;
+    public Material treeOfLifePortraitEyeMat;       // Not used
+    public Material treeOfLifeDecorationMat;        // Not used
 
-    public Material treeOfLifeWorldStatsMat;  // start with these simple ones first
-    public Material treeOfLifeSpeciesLineMat;
-    public Material treeOfLifeEventsLineMat;
-    public Material treeOfLifeSpeciesHeadTipMat;
-    public Material treeOfLifeCursorLineMat;
+    public Material treeOfLifeWorldStatsMat;     // Not used
+    public Material treeOfLifeSpeciesLineMat;    // Not used
+    public Material treeOfLifeEventsLineMat;     // Not used
+    public Material treeOfLifeSpeciesHeadTipMat; // Not used
+    public Material treeOfLifeCursorLineMat;     // Not used
     public Material toolbarSpeciesPortraitStrokesMat;
     public Material spiritBrushRenderMultiBurstMat;
     public Material spiritBrushRenderMat;
     //public Material mutationUIVertebratesRenderTexMat;
-    public Material worldTreeDisplayRTMat;
+    public Material worldTreeDisplayRTMat;      // Not used
     public Material worldTreeLineDataMat;
-    public Material clockOrbitLineDataMat;
+    public Material clockOrbitLineDataMat;      // Not used
 
     public ComputeBuffer gizmoCursorPosCBuffer;
     public ComputeBuffer gizmoFeedToolPosCBuffer;
@@ -138,10 +141,12 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
     private const float velScale = 0.390f; // Conversion for rigidBody Vel --> fluid vel units ----  // approx guess for now ** HACK
 
+    // * WPP: values assigned but not used
     public bool nutrientToolOn = false;
     public bool mutateToolOn = false;
     public bool removeToolOn = false;
     public bool isStirring = false;
+    
     public bool isBrushing = false;
 
     private ComputeBuffer quadVerticesCBuffer;  // quad mesh
@@ -191,6 +196,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public float noiseFreq;
         public int brushType;
     }
+    
     private struct SpiritBrushQuadData {
         public int index;
         public Vector3 worldPos;
@@ -206,6 +212,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public float noiseFreq;
         public int brushType;
     }
+    
     private ComputeBuffer spiritBrushQuadDataSpawnCBuffer;
     private ComputeBuffer spiritBrushQuadDataCBuffer0;
     private ComputeBuffer spiritBrushQuadDataCBuffer1;
@@ -216,9 +223,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private ComputeBuffer cursorParticlesCBuffer1;
     private CursorParticleData[] cursorParticlesArray;
 
-    public Material debugMaterial;
-    public Mesh debugMesh;
-    public RenderTexture debugRT; // Used to see texture inside editor (inspector)
+    public Material debugMaterial; 
+    public Mesh debugMesh;         
+    public RenderTexture debugRT;  // Used to see texture inside editor (inspector)
 
     public bool isSpiritBrushOn = false;
     public float spiritBrushPosNeg = 1f;
@@ -236,7 +243,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private ComputeBuffer treeOfLifeSpeciesSegmentsCBuffer;
 
     public ComputeBuffer treeOfLifeSpeciesDataKeyCBuffer;
-    public Vector3[] treeOfLifeSpeciesDataHeadPosArray;
+    public Vector3[] treeOfLifeSpeciesDataHeadPosArray;     // Values assigned but not used
     public ComputeBuffer treeOfLifeSpeciesDataHeadPosCBuffer;
 
     public struct TreeOfLifeSpeciesKeyData {
@@ -282,11 +289,13 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public float eventCategory;  // minor major extreme 0, 0.5, 1.0
         public float isActive;
     }
+    
     // Is this still needed??
     public struct TreeOfLifeNodeColliderData {  // only the data that needs to be transferred between CPU & GPU  - minimize!!
         public Vector3 localPos;
         public Vector3 scale;
     }
+    
     public struct TreeOfLifeLeafNodeData {
         public int speciesID;
         public int parentSpeciesID;
@@ -302,6 +311,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public float isSelected;
         public float relFitnessScore;
     }
+    
     public struct TreeOfLifeStemSegmentStruct {
         public int speciesID;
         public int fromID;
@@ -341,6 +351,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public float strength;  // abstraction for pressure of brushstroke + amount of paint 
         public int brushType;  // what texture/mask/brush pattern to use
     }
+    
     public struct AgentBodyStrokeData {
         public int parentIndex;  // what agent/object is this attached to?
         public Vector2 localPos;
@@ -350,6 +361,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public int brushTypeX;  // what texture/mask/brush pattern to use
         public int brushTypeY;  // what texture/mask/brush pattern to use
     }
+    
     public struct CritterSkinStrokeData {
         public int parentIndex;  // what agent/object is this attached to?
         public int brushType;  // what brush alpha mask?  // just make it random???
@@ -398,7 +410,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public int brushType;
     }
 
-    public struct WaterSplineData {   // 2 ints, 17 floats
+    // 2 ints, 17 floats
+    public struct WaterSplineData {   
         public int index;
         public Vector2 p0;
         public Vector2 p1;
@@ -417,25 +430,30 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public Vector2 worldPos;
     }
 
-    public struct TrailDotData {  // for Ripples (temp)
+    // for Ripples (temp)
+    public struct TrailDotData {  
         public int parentIndex;
         public Vector2 coords01;
         public float age;
         public float initAlpha;
     }
-
-    public struct BasicStrokeData {  // fluidSim Render -- Obstacles + ColorInjection
+    
+    // fluidSim Render -- Obstacles + ColorInjection
+    public struct BasicStrokeData {  
         public Vector2 worldPos;
         public Vector2 localDir;
         public Vector2 scale;
         public Vector4 color;
     }
 
-    public struct WorldTreeLineData { // NEW - use this one! "*worldTree*"
+    // NEW - use this one! "*worldTree*"
+    public struct WorldTreeLineData {
         public Vector3 worldPos;
         public Vector4 color;
     }
-    public struct ClockOrbitLineData { // NEW - use this one! "*worldTree*"
+    
+    // NEW - use this one! "*worldTree*"
+    public struct ClockOrbitLineData { 
         public Vector3 worldPos;
         public Vector4 color;
     }
@@ -443,8 +461,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private int debugFrameCounter = 0;
 
     public bool isToolbarCritterPortraitEnabled = false;
-
-
+    
     private void Awake() {
         fluidObstaclesRenderCamera.enabled = false;
         fluidColorRenderCamera.enabled = false;
@@ -455,9 +472,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         worldTreeRenderCamera.enabled = false;
     }
+    
     // Use this for initialization:
-    public void InitializeRiseAndShine() {
-
+    public void InitializeRiseAndShine() 
+    {
         InitializeBuffers();
         InitializeMaterials();
         //InitializeUberBrushes(); // old uber
@@ -475,8 +493,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     }
 
     // Actual mix of rendering passes will change!!! 
-    private void InitializeBuffers() {  // primary function -- calls sub-functions for initializing each buffer
-
+    // primary function -- calls sub-functions for initializing each buffer
+    private void InitializeBuffers() 
+    {
         InitializeQuadMeshBuffer(); // Set up Quad Mesh billboard for brushStroke rendering            
         InitializeCurveRibbonMeshBuffer(); // Set up Curve Ribbon Mesh billboard for brushStroke rendering
         //InitializeWaterSplineMeshBuffer(); // same for water splines
@@ -489,7 +508,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         colorInjectionStrokesCBuffer = new ComputeBuffer(simManager.numAgents + simManager.numEggSacks, sizeof(float) * 10);
         colorInjectionStrokeDataArray = new BasicStrokeData[colorInjectionStrokesCBuffer.count];
 
-        InitializeCritterUberStrokesBuffer();  // In-World        
+        InitializeCritterUberStrokesBuffer();   // In-World        
         InitializeCritterSkinStrokesCBuffer();  // Portrait        
         InitializeFloatyBitsBuffer();
         InitializeGizmos();
@@ -499,31 +518,26 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         uiManager.clockPanelUI.InitializeClockBuffers();
 
         // INIT:: ugly :(
-        if (toolbarPortraitCritterInitDataCBuffer != null) {
-            toolbarPortraitCritterInitDataCBuffer.Release();
-        }
+        toolbarPortraitCritterInitDataCBuffer?.Release();
         toolbarPortraitCritterInitDataCBuffer = new ComputeBuffer(6, SimulationStateData.GetCritterInitDataSize());
     }
 
-    private int GetNumUberStrokesPerCritter() {
-        int numStrokes = numStrokesPerCritterLength * numStrokesPerCritterCross +
-                            numStrokesPerCritterEyes +
-                            numStrokesPerCritterMouth +
-                            numStrokesPerCritterTeeth +
-                            numStrokesPerCritterPectoralFins +
-                            numStrokesPerCritterDorsalFin +
-                            numStrokesPerCritterTailFin +
-                            numStrokesPerCritterSkinDetail;
-
-        return numStrokes;
+    private int GetNumuberStrokesPerCritter() {
+        return numStrokesPerCritterLength * numStrokesPerCritterCross +
+               numStrokesPerCritterEyes +
+               numStrokesPerCritterMouth +
+               numStrokesPerCritterTeeth +
+               numStrokesPerCritterPectoralFins +
+               numStrokesPerCritterDorsalFin +
+               numStrokesPerCritterTailFin +
+               numStrokesPerCritterSkinDetail; 
     }
-    
+   
+    // Most of this will be populated piece-meal later as critters are generated:
     private void InitializeCritterUberStrokesBuffer() {
-        // Most of this will be populated piece-meal later as critters are generated:
-        int bufferLength = simManager.numAgents * GetNumUberStrokesPerCritter();
+        int bufferLength = simManager.numAgents * GetNumuberStrokesPerCritter();
         critterGenericStrokesCBuffer = new ComputeBuffer(bufferLength, GetMemorySizeCritterUberStrokeData());
-
-        toolbarCritterPortraitStrokesCBuffer = new ComputeBuffer(1 * GetNumUberStrokesPerCritter(), GetMemorySizeCritterUberStrokeData());
+        toolbarCritterPortraitStrokesCBuffer = new ComputeBuffer(1 * GetNumuberStrokesPerCritter(), GetMemorySizeCritterUberStrokeData());
     }
     
     private int GetMemorySizeCritterUberStrokeData() {
@@ -532,11 +546,11 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     }
 
     private int GetMemorySizeSpiritbrushQuadData() {
-        return (sizeof(int) * 2 + sizeof(float) * 19);
+        return sizeof(int) * 2 + sizeof(float) * 19;
     }
     
     private int GetMemorySizeCursorParticleData() {
-        return (sizeof(int) * 2 + sizeof(float) * 19);
+        return sizeof(int) * 2 + sizeof(float) * 19;
     }
     
     private void InitializeSpiritBrushQuadBuffer() {
@@ -547,9 +561,11 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         int numSpawnPoints = 3;
         Vector3[] spawnPointsArray = new Vector3[numSpawnPoints];
+        
         for (int j = 0; j < numSpawnPoints; j++) {
             spawnPointsArray[j] = Random.onUnitSphere;
         }
+        
         for (int i = 0; i < 1024; i++) {
             CursorParticleData data = new CursorParticleData();
             data.worldPos = new Vector3(Random.Range(0f, 256f), Random.Range(0f, 256f), 0f);
@@ -561,6 +577,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             data.age01 = Random.Range(0f, 1f);
             cursorParticlesArray[i] = data;
         }
+        
         cursorParticlesCBuffer0.SetData(cursorParticlesArray);
 
         //============================================================
@@ -568,6 +585,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         //spiritBrushQuadDataSpawnCBuffer = new ComputeBuffer(32, GetMemorySizeSpiritbrushQuadData());
         spiritBrushQuadDataCBuffer0 = new ComputeBuffer(1024, GetMemorySizeSpiritbrushQuadData());
         spiritBrushQuadDataCBuffer1 = new ComputeBuffer(1024, GetMemorySizeSpiritbrushQuadData());
+        
         for (int i = 0; i < 1024; i++) {
             SpiritBrushQuadData data = new SpiritBrushQuadData();
             data.worldPos = new Vector3(Random.Range(0f, 256f), Random.Range(200f, 256f), 0f);
@@ -577,6 +595,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             data.age01 = 0f;
             spiritBrushQuadDataArray[i] = data;
         }
+        
         spiritBrushQuadDataCBuffer0.SetData(spiritBrushQuadDataArray);
 
         //spiritBrushQuadDataSpawnCBuffer.Release();
@@ -603,6 +622,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         curveRibbonVerticesCBuffer.SetData(verticesArray);
     }
+    
     /*
     private void InitializeWaterSplineMeshBuffer() {
         
@@ -681,8 +701,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             //float startGroupAge = (float)randGroup / (float)numGroups;
             data.age = 1.0f; // startGroupAge; // (float)i / (float)numFloatyBits;
             floatyBitsInitPos[i] = data;
-
         }
+        
         floatyBitsCBuffer.SetData(floatyBitsInitPos);
         int kernelSimFloatyBits = fluidManager.computeShaderFluidSim.FindKernel("SimFloatyBits");
         fluidManager.computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
@@ -691,6 +711,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     public void InitializeCritterSkinStrokesCBuffer() {
         critterSkinStrokesCBuffer = new ComputeBuffer(simManager.numAgents * numStrokesPerCritterSkin, sizeof(float) * 16 + sizeof(int) * 2);
         CritterSkinStrokeData[] critterSkinStrokesArray = new CritterSkinStrokeData[critterSkinStrokesCBuffer.count];
+        
         for (int i = 0; i < simManager.numAgents; i++) {
             for (int j = 0; j < numStrokesPerCritterSkin; j++) {
                 CritterSkinStrokeData skinStroke = new CritterSkinStrokeData();
@@ -703,7 +724,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 float radiusAtZ = Mathf.Sqrt(1f - zCoord * zCoord); // pythagorean theorem
                 Vector2 xyCoords = Random.insideUnitCircle.normalized * radiusAtZ; // possibility for (0,0) ??? ***** undefined/null divide by zero hazard!
                 skinStroke.localPos = new Vector3(xyCoords.x, xyCoords.y, zCoord);
-                //float width = simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((skinStroke.localPos.y * 0.5f + 0.5f) * 15f)];
+                //float width = agents[i].agentWidthsArray[Mathf.RoundToInt((skinStroke.localPos.y * 0.5f + 0.5f) * 15f)];
                 skinStroke.localPos.x *= 0.5f;
                 skinStroke.localPos.z *= 0.5f;               // * width  
                 skinStroke.localDir = new Vector3(0f, 1f, 0f); // start up? shouldn't matter
@@ -902,7 +923,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             float radiusAtZ = Mathf.Sqrt(1f - zCoord * zCoord); // pythagorean theorem
             Vector2 xyCoords = Random.insideUnitCircle.normalized * radiusAtZ; // possibility for (0,0) ??? ***** undefined/null divide by zero hazard!
             skinStroke.localPos = new Vector3(xyCoords.x, xyCoords.y, zCoord);
-            //float width = 1f; // simManager.agentsArray[i].agentWidthsArray[Mathf.RoundToInt((skinStroke.localPos.y * 0.5f + 0.5f) * 15f)];
+            //float width = 1f; // agents[i].agentWidthsArray[Mathf.RoundToInt((skinStroke.localPos.y * 0.5f + 0.5f) * 15f)];
             skinStroke.localPos.x *= 0.5f;
             skinStroke.localPos.z *= 0.5f;
             skinStroke.localDir = new Vector3(0f, 1f, 0f); // start up? shouldn't matter
@@ -916,12 +937,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             treeOfLifePortraitDataArray[j] = skinStroke;
         }
         treeOflifePortraitDataCBuffer.SetData(treeOfLifePortraitDataArray);
-
-        // Decorations:
     }
     
-    private void InitializeWorldTreeBuffers() {
-        
+    private void InitializeWorldTreeBuffers() 
+    {
         //**** TEMP!!! TESTING!!!
         float cursorCoordsX = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().x) / 360f);
         float cursorCoordsY = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().y - 720f) / 360f);                
@@ -987,185 +1006,174 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         worldTreeLineDataCBuffer = new ComputeBuffer(worldTreeBufferCount, sizeof(float) * 7);
         
         // SPECIES LINES:
-        for(int line = 0; line < worldTreeNumSpeciesLines; line++) {
-            for (int i = 0; i < worldTreeNumPointsPerLine; i++) {
+        for(int line = 0; line < worldTreeNumSpeciesLines; line++) 
+        {
+            for (int i = 0; i < worldTreeNumPointsPerLine; i++) 
+            {
                 int index = line * worldTreeNumPointsPerLine + i;
 
-                if(line >= simManager.masterGenomePool.completeSpeciesPoolsList.Count) {
+                if (line >= simManager.masterGenomePool.completeSpeciesPoolsList.Count) 
+                    continue;
+                
+                SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[line];
+                WorldTreeLineData data = new WorldTreeLineData();
 
-                }
-                else {
-                    SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[line];
-                    WorldTreeLineData data = new WorldTreeLineData();
-
-                    if(uiManager.historyPanelUI.GetIntMode() == 0) {
-                        // LINEAGE:
-                        float xCoord = (float)i / (float)worldTreeNumPointsPerLine;
-                        float yCoord = 1f - ((float)pool.speciesID / (float)Mathf.Max(simManager.masterGenomePool.completeSpeciesPoolsList.Count - 1, 1)); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
-                        float zCoord = 0f;
-                        if (uiManager.historyPanelUI.GetFocusLevel() == 0) { // Top-Level View -- all species
-                                
-                        }
-                        else {
-                            xCoord = 0f; //***EAC TEMPORARY!!!! should be animated or just hidden
-                            yCoord = 0f;
-                        }
-                        
-                        Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-
-                        int timeStepStart = Mathf.RoundToInt(uiManager.historyPanelUI.timelineStartTimeStep);
-
-                        float xStart01 = (float)(pool.timeStepCreated - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
-                        float xEnd01 = 1f;
-                        if(pool.isExtinct) {
-                            xEnd01 = (float)(pool.timeStepExtinct - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
-                        }
-
-                        if(xStart01 > xCoord || xEnd01 < xCoord) {
-                            hue = Vector3.zero;
-                        }
-                        if(pool.speciesID == uiManager.selectedSpeciesID) {
-                            hue = Vector3.one;
-                            zCoord = -0.1f;
-                        }                        
-                        data.color = new Color(hue.x, hue.y, hue.z); // Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
-
-                        xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
-                        yCoord = yCoord * 0.67f + 0.1f;
-                        if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
-                            data.color = Color.white;
-                        }
-                        data.worldPos = new Vector3(xCoord, yCoord, zCoord);
+                if (uiManager.historyPanelUI.GetIntMode() == 0) 
+                {
+                    // LINEAGE:
+                    float xCoord = (float)i / (float)worldTreeNumPointsPerLine;
+                    float yCoord = 1f - ((float)pool.speciesID / (float)Mathf.Max(simManager.masterGenomePool.completeSpeciesPoolsList.Count - 1, 1)); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
+                    float zCoord = 0f;
+                    if (uiManager.historyPanelUI.GetFocusLevel() == 0) { // Top-Level View -- all species
+                            
                     }
                     else {
-                        int graphDataYearIndex = 0;
-                        if(pool.avgCandidateDataYearList.Count == 0) {
-
-                        }
-                        else {
-
-                            float xCoord = (float)(i % worldTreeNumPointsPerLine) / (float)worldTreeNumPointsPerLine;
-
-                            graphDataYearIndex = Mathf.FloorToInt((float)pool.avgCandidateDataYearList.Count * xCoord);
-                            float val = (float)pool.avgCandidateDataYearList[graphDataYearIndex].performanceData.totalTicksAlive / uiManager.speciesGraphPanelUI.maxValuesStatArray[0];
-                            float yCoord = val; // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
-                            float zCoord = 0f;
-                            if(uiManager.historyPanelUI.GetFocusLevel() == 0) { // Top-Level View -- all species
-                                
-                            }
-                            else {
-                                xCoord = 0f; //***EAC TEMPORARY!!!! should be animated or just hidden
-                                yCoord = 0f;
-                            }
-                            Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-                            int timeStepStart = Mathf.RoundToInt(uiManager.historyPanelUI.timelineStartTimeStep);
-
-                            float xStart01 = (float)(pool.timeStepCreated - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
-                            float xEnd01 = 1f;
-                            if(pool.isExtinct) {
-                                xEnd01 = (float)(pool.timeStepExtinct - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
-                            }
-
-                            if(pool.speciesID == uiManager.selectedSpeciesID) {
-                                hue = Vector3.one;
-                                zCoord = -0.1f;
-                            }
-                            if(xStart01 > xCoord || xEnd01 < xCoord) {
-                                hue = Vector3.zero;
-                            }
-                            
-                            
-                            xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
-                            yCoord = yCoord * 0.67f + 0.1f;
-
-                            data.worldPos = new Vector3(xCoord, yCoord, zCoord);
-                            
-                            
-                            data.color = new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
-
-                            if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
-                                data.color = Color.white;
-                            }
-                        }
+                        xCoord = 0f; //***EAC TEMPORARY!!!! should be animated or just hidden
+                        yCoord = 0f;
                     }
                     
-                    worldTreeLineDataArray[index] = data;
+                    Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+
+                    int timeStepStart = Mathf.RoundToInt(uiManager.historyPanelUI.timelineStartTimeStep);
+
+                    float xStart01 = (float)(pool.timeStepCreated - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
+                    float xEnd01 = 1f;
+                    if(pool.isExtinct) {
+                        xEnd01 = (float)(pool.timeStepExtinct - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
+                    }
+
+                    if(xStart01 > xCoord || xEnd01 < xCoord) {
+                        hue = Vector3.zero;
+                    }
+                    if(pool.speciesID == uiManager.selectedSpeciesID) {
+                        hue = Vector3.one;
+                        zCoord = -0.1f;
+                    }                        
+                    data.color = new Color(hue.x, hue.y, hue.z); // Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
+
+                    xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
+                    yCoord = yCoord * 0.67f + 0.1f;
+                    if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
+                        data.color = Color.white;
+                    }
+                    data.worldPos = new Vector3(xCoord, yCoord, zCoord);
                 }
+                else 
+                {
+                    int graphDataYearIndex = 0;
+                    
+                    if (pool.avgCandidateDataYearList.Count == 0) 
+                        continue;
+                    
+                    float xCoord = (float)(i % worldTreeNumPointsPerLine) / (float)worldTreeNumPointsPerLine;
+
+                    graphDataYearIndex = Mathf.FloorToInt((float)pool.avgCandidateDataYearList.Count * xCoord);
+                    float val = (float)pool.avgCandidateDataYearList[graphDataYearIndex].performanceData.totalTicksAlive / uiManager.speciesGraphPanelUI.maxValuesStatArray[0];
+                    float yCoord = val; // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
+                    float zCoord = 0f;
+                    
+                    if(uiManager.historyPanelUI.GetFocusLevel() != 0) {
+                        xCoord = 0f; //***EAC TEMPORARY!!!! should be animated or just hidden
+                        yCoord = 0f;
+                    }
+                    
+                    Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+                    int timeStepStart = Mathf.RoundToInt(uiManager.historyPanelUI.timelineStartTimeStep);
+
+                    float xStart01 = (float)(pool.timeStepCreated - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
+                    float xEnd01 = 1f;
+                    if(pool.isExtinct) {
+                        xEnd01 = (float)(pool.timeStepExtinct - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
+                    }
+
+                    if(pool.speciesID == uiManager.selectedSpeciesID) {
+                        hue = Vector3.one;
+                        zCoord = -0.1f;
+                    }
+                    
+                    if(xStart01 > xCoord || xEnd01 < xCoord) {
+                        hue = Vector3.zero;
+                    }
+
+                    xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
+                    yCoord = yCoord * 0.67f + 0.1f;
+
+                    data.worldPos = new Vector3(xCoord, yCoord, zCoord);
+                    data.color = new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
+
+                    if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
+                        data.color = Color.white;
+                    }
+                }
+                
+                worldTreeLineDataArray[index] = data;
             }
         }
         
         // CREATURE LINES:::
-        for(int line = 0; line < worldTreeNumCreatureLines; line++) {
-            for (int i = 0; i < worldTreeNumPointsPerLine; i++) {
+        for(int line = 0; line < worldTreeNumCreatureLines; line++) 
+        {
+            for (int i = 0; i < worldTreeNumPointsPerLine; i++) 
+            {
                 int index = (line + worldTreeNumSpeciesLines) * worldTreeNumPointsPerLine + i;
                 SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[uiManager.selectedSpeciesID]; //[simManager.masterGenomePool.currentlyActiveSpeciesIDList[0]]; //***EAC ...
 
-                if(line >= pool.candidateGenomesList.Count) {
+                if (line >= pool.candidateGenomesList.Count) 
+                    continue;
+                
+                WorldTreeLineData data = new WorldTreeLineData();
+                CandidateAgentData cand = pool.candidateGenomesList[line];
 
+                float xCoord = (float)(i) / (float)worldTreeNumPointsPerLine;                        
+                float yCoord = 1f - (float)line / (float)(Mathf.Max(pool.candidateGenomesList.Count - 1, 1)); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
+
+                Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary * 2f;
+
+                int timeStepStart = Mathf.RoundToInt(uiManager.historyPanelUI.timelineStartTimeStep);
+                float xStart = (float)(pool.candidateGenomesList[line].performanceData.timeStepHatched - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
+                float xEnd = 1f;
+                if(pool.isExtinct || cand.performanceData.timeStepDied > 1) {
+                    xEnd = (float)(cand.performanceData.timeStepDied - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
                 }
-                else {                    
-                    WorldTreeLineData data = new WorldTreeLineData();
-                    CandidateAgentData cand = pool.candidateGenomesList[line];
-
-                    float xCoord = (float)(i) / (float)worldTreeNumPointsPerLine;                        
-                    float yCoord = 1f - (float)line / (float)(Mathf.Max(pool.candidateGenomesList.Count - 1, 1)); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
-
-                    Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary * 2f;
-
-
-                    int timeStepStart = Mathf.RoundToInt(uiManager.historyPanelUI.timelineStartTimeStep);
-                    float xStart = (float)(pool.candidateGenomesList[line].performanceData.timeStepHatched - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
-                    float xEnd = 1f;
-                    if(pool.isExtinct || cand.performanceData.timeStepDied > 1) {
-                        xEnd = (float)(cand.performanceData.timeStepDied - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
-                    }
-                    
-                    if(xStart > xCoord || xEnd < xCoord) {
-                        hue = Vector3.zero;
-                    }
-                    else if(cand.candidateID == uiManager.focusedCandidate.candidateID) {
-                        hue = Vector3.one;
-                    }
-                    if(!cand.isBeingEvaluated && cand.numCompletedEvaluations == 0) {
-                        hue = Vector3.zero;
-                    }   
-                    if(cand.performanceData.timeStepHatched <= 1) {
-                        hue = Vector3.zero;
-                    }
-                    if(cand.performanceData.totalTicksAlive >= 1) {
-                        hue *= 0.35f;                        
-                    }
-
-                    
-
-                    data.color = new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
-                    xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
-                    yCoord = yCoord * 0.67f + 0.1f;
-
-                    if(uiManager.historyPanelUI.GetFocusLevel() == 0) { // Top-Level View -- all species
-                        xCoord = 0f; //***EAC TEMPORARY!!!! should be animated or just hidden
-                        yCoord = 0f;
-                    }
-                    else {
-
-                    }
-                    data.worldPos = new Vector3(xCoord, yCoord, 0f);                     
-                    if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
-                        data.color = Color.white;
-                    }
-                    worldTreeLineDataArray[index] = data;
+                
+                if(xStart > xCoord || xEnd < xCoord) {
+                    hue = Vector3.zero;
                 }
+                else if(cand.candidateID == uiManager.focusedCandidate.candidateID) {
+                    hue = Vector3.one;
+                }
+                if(!cand.isBeingEvaluated && cand.numCompletedEvaluations == 0) {
+                    hue = Vector3.zero;
+                }   
+                if(cand.performanceData.timeStepHatched <= 1) {
+                    hue = Vector3.zero;
+                }
+                if(cand.performanceData.totalTicksAlive >= 1) {
+                    hue *= 0.35f;                        
+                }
+                
+                data.color = new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
+                xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
+                yCoord = yCoord * 0.67f + 0.1f;
+
+                if(uiManager.historyPanelUI.GetFocusLevel() == 0) { // Top-Level View -- all species
+                    xCoord = 0f; //***EAC TEMPORARY!!!! should be animated or just hidden
+                    yCoord = 0f;
+                }
+                data.worldPos = new Vector3(xCoord, yCoord, 0f);                     
+                if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
+                    data.color = Color.white;
+                }
+                worldTreeLineDataArray[index] = data;
             }
         }
 
         clockOrbitLineDataCBuffer.SetData(clockOrbitLineDataArray);
         worldTreeLineDataCBuffer.SetData(worldTreeLineDataArray);
-
     }
-     
-
-    private void InitializeMaterials() {
-
+    
+    private void InitializeMaterials() 
+    {
         basicStrokeDisplayMat.SetPass(0);
         basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
 
@@ -1227,10 +1235,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         worldTreeLineDataMat.SetPass(0);
         worldTreeLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-
     }
-    private void InitializeCommandBuffers() {
-
+    
+    private void InitializeCommandBuffers() 
+    {
         cmdBufferMain = new CommandBuffer();
         cmdBufferMain.name = "cmdBufferMain";
         mainRenderCam.AddCommandBuffer(CameraEvent.AfterForwardOpaque, cmdBufferMain);
@@ -1266,11 +1274,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         cmdBufferWorldTree = new CommandBuffer();
         cmdBufferWorldTree.name = "cmdBufferWorldTree";
         worldTreeRenderCamera.AddCommandBuffer(CameraEvent.BeforeDepthNormalsTexture, cmdBufferWorldTree);
-
     }
 
-    public Vector4[] GetDepthAtObjectPositions(Vector4[] positionsArray) {
-
+    public Vector4[] GetDepthAtObjectPositions(Vector4[] positionsArray) 
+    {
         ComputeBuffer objectDataInFluidCoordsCBuffer = new ComputeBuffer(positionsArray.Length, sizeof(float) * 4);
         ComputeBuffer depthValuesCBuffer = new ComputeBuffer(positionsArray.Length, sizeof(float) * 4);
 
@@ -1295,44 +1302,62 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         objectDataInFluidCoordsCBuffer.Release();
 
         //Debug.Log("Depth at 0: " + objectDepthsArray[0].ToString());
-
         return objectDepthsArray;
     }
 
-    private void PopulateObstaclesBuffer() {
-        int baseIndex = 0;
-        // AGENTS:
-        for (int i = 0; i < simManager.agents.Length; i++) {
-            Vector3 agentPos = simManager.agents[i].bodyRigidbody.transform.position;
+    private void PopulateObstaclesBuffer() 
+    {
+        PopulateAgentObstaclesBuffer(0);
+        //PopulateFoodObstaclesBuffer(agents.Length);
+        //PopulatePredatorObstaclesBuffer(agents.Length + simManager.eggSacks.Length);
+
+        obstacleStrokesCBuffer.SetData(obstacleStrokeDataArray);
+    }
+    
+    private void PopulateAgentObstaclesBuffer(int baseIndex)
+    {
+        for (int i = 0; i < agents.Length; i++) 
+        {
+            Vector3 agentPos = agents[i].bodyRigidbody.transform.position;
             obstacleStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
-            obstacleStrokeDataArray[baseIndex + i].localDir = simManager.agents[i].facingDirection;
+            obstacleStrokeDataArray[baseIndex + i].localDir = agents[i].facingDirection;
             float deadMult = 1f;
-            if (simManager.agents[i].isDead) {
+            
+            if (agents[i].isDead) {
                 deadMult = 0f;
             }
-            obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(simManager.agents[i].currentBoundingBoxSize.x, simManager.agents[i].currentBoundingBoxSize.y) * deadMult; // Vector2.one * 5.5f * simManager.agentsArray[i].sizePercentage; // new Vector2(simManager.agentsArray[i].transform.localScale.x, simManager.agentsArray[i].transform.localScale.y) * 2.9f; // ** revisit this later // should leave room for velSampling around Agent *** weird popping when * 0.9f
+            
+            // Vector2.one * 5.5f * agentsArray[i].sizePercentage; // new Vector2(agentsArray[i].transform.localScale.x, agents[i].transform.localScale.y) * 2.9f; // ** revisit this later // should leave room for velSampling around Agent *** weird popping when * 0.9f
+            obstacleStrokeDataArray[baseIndex + i].scale = new Vector2(agents[i].currentBoundingBoxSize.x, agents[i].currentBoundingBoxSize.y) * deadMult; 
 
-            float velX = Mathf.Clamp(simManager.agents[i].ownVel.x, -100f, 100f) * velScale * 0.01f; // agentPos.x - simManager.agentsArray[i]._PrevPos.x * velScale;
-            float velY = Mathf.Clamp(simManager.agents[i].ownVel.y, -100f, 100f) * velScale * 0.01f;
+            float velX = Mathf.Clamp(agents[i].ownVel.x, -100f, 100f) * velScale * 0.01f; // agentPos.x - agents[i]._PrevPos.x * velScale;
+            float velY = Mathf.Clamp(agents[i].ownVel.y, -100f, 100f) * velScale * 0.01f;
 
             obstacleStrokeDataArray[baseIndex + i].color = new Vector4(velX, velY, 1f, 1f);
         }
-        // FOOD:
-        /*baseIndex = simManager.agentsArray.Length;
-        for(int i = 0; i < simManager.eggSackArray.Length; i++) {
-            Vector3 foodPos = simManager.eggSackArray[i].transform.position;
+    }
+    
+    #region Future Use (or delete)
+    private void PopulateFoodObstaclesBuffer(int baseIndex)
+    {
+        for(int i = 0; i < simManager.eggSacks.Length; i++) 
+        {
+            Vector3 foodPos = simManager.eggSacks[i].transform.position;
             obstacleStrokeDataArray[baseIndex + i].worldPos = new Vector2(foodPos.x, foodPos.y);
-            obstacleStrokeDataArray[baseIndex + i].localDir = simManager.eggSackArray[i].facingDirection;
-            obstacleStrokeDataArray[baseIndex + i].scale = simManager.eggSackArray[i].curSize * 0.95f;
+            obstacleStrokeDataArray[baseIndex + i].localDir = simManager.eggSacks[i].facingDirection;
+            obstacleStrokeDataArray[baseIndex + i].scale = simManager.eggSacks[i].curSize * 0.95f;
 
-            float velX = (foodPos.x - simManager.eggSackArray[i]._PrevPos.x) * velScale;
-            float velY = (foodPos.y - simManager.eggSackArray[i]._PrevPos.y) * velScale;
+            float velX = (foodPos.x - simManager.eggSacks[i]._PrevPos.x) * velScale;
+            float velY = (foodPos.y - simManager.eggSacks[i]._PrevPos.y) * velScale;
 
             obstacleStrokeDataArray[baseIndex + i].color = new Vector4(velX, velY, 1f, 1f);
-        }*/
-        // PREDATORS:
-        /*baseIndex = simManager.agentsArray.Length + simManager.eggSackArray.Length;
-        for(int i = 0; i < simManager.predatorArray.Length; i++) {
+        }
+    }
+    
+    private void PopulatePredatorObstaclesBuffer(int baseIndex)
+    {
+        /*for(int i = 0; i < simManager.predatorArray.Length; i++) 
+        {
             Vector3 predatorPos = simManager.predatorArray[i].transform.position;
             obstacleStrokeDataArray[baseIndex + i].worldPos = new Vector2(predatorPos.x, predatorPos.y);
             obstacleStrokeDataArray[baseIndex + i].localDir = new Vector2(Mathf.Cos(simManager.predatorArray[i].transform.rotation.z), Mathf.Sin(simManager.predatorArray[i].transform.rotation.z));
@@ -1343,35 +1368,37 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
             obstacleStrokeDataArray[baseIndex + i].color = new Vector4(velX, velY, 1f, 1f);
         }*/
-
-        obstacleStrokesCBuffer.SetData(obstacleStrokeDataArray);
     }
-    private void PopulateColorInjectionBuffer() {
+    #endregion
 
+    private void PopulateColorInjectionBuffer() 
+    {
         int baseIndex = 0;
+        
         // AGENTS:
-        for (int i = 0; i < simManager.agents.Length; i++) {
-            Vector3 agentPos = simManager.agents[i].bodyRigidbody.position;
+        for (int i = 0; i < agents.Length; i++) 
+        {
+            Vector3 agentPos = agents[i].bodyRigidbody.position;
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(agentPos.x, agentPos.y);
-            colorInjectionStrokeDataArray[baseIndex + i].localDir = simManager.agents[i].facingDirection;
+            colorInjectionStrokeDataArray[baseIndex + i].localDir = agents[i].facingDirection;
             colorInjectionStrokeDataArray[baseIndex + i].scale = Vector2.one * 1.5f; 
-            // simManager.agentsArray[i].fullSizeBoundingBox * 1.55f; // * simManager.agentsArray[i].sizePercentage;
+            // agents[i].fullSizeBoundingBox * 1.55f; // * agents[i].sizePercentage;
             /*
             float agentAlpha = 1f;
-            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Mature) {
-                agentAlpha = 2.2f / simManager.agentsArray[i].fullSizeBoundingBox.magnitude;
+            if(agents[i].curLifeStage == Agent.AgentLifeStage.Mature) {
+                agentAlpha = 2.2f / agents[i].fullSizeBoundingBox.magnitude;
             }
-            if(simManager.agentsArray[i].curLifeStage == Agent.AgentLifeStage.Dead) {
-                agentAlpha = 3f * simManager.agentsArray[i].GetDecayPercentage();
+            if(agents[i].curLifeStage == Agent.AgentLifeStage.Dead) {
+                agentAlpha = 3f * agents[i].GetDecayPercentage();
             }*/
 
             Vector4 hue = Vector4.one * 0.695f;
-            if (simManager.agents[i].candidateRef != null) {
-                if (simManager.agents[i].candidateRef.speciesID == uiManager.focusedCandidate.speciesID) {
+            if (agents[i].candidateRef != null) {
+                if (agents[i].candidateRef.speciesID == uiManager.focusedCandidate.speciesID) {
                     hue = new Vector4(1f, 1f, 0f, 1f);
                     colorInjectionStrokeDataArray[baseIndex + i].scale = Vector2.one * 5f;
                 }
-                if (simManager.agents[i].candidateRef.candidateID == uiManager.focusedCandidate.candidateID) {
+                if (agents[i].candidateRef.candidateID == uiManager.focusedCandidate.candidateID) {
                     hue = new Vector4(1f, 1f, 1f, 1f);
                     colorInjectionStrokeDataArray[baseIndex + i].scale = Vector2.one * 10f;
                 }
@@ -1382,7 +1409,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         }
         
         // FOOD:
-        baseIndex = simManager.agents.Length;
+        baseIndex = agents.Length;
         for (int i = 0; i < simManager.eggSacks.Length; i++) {
             Vector3 foodPos = simManager.eggSacks[i].transform.position;
             colorInjectionStrokeDataArray[baseIndex + i].worldPos = new Vector2(foodPos.x, foodPos.y);
@@ -1411,12 +1438,12 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         for (int i = 0; i < eggDataArray.Length; i++) {
             eggDataArray[i] = new SimulationStateData.EggData();
             eggDataArray[i].eggSackIndex = eggSackIndex;
-            Vector3 randSphere = Random.insideUnitSphere;
             eggDataArray[i].localCoords = Random.insideUnitCircle; // new Vector2(randSphere.x, randSphere.y); // * 0.5f + UnityEngine.Random.insideUnitCircle * 0.4f;
             eggDataArray[i].localScale = Vector2.one * 0.25f; // simManager.eggSackGenomePoolArray[eggSackIndex].fruitScale;  
             eggDataArray[i].worldPos = simManager.eggSacks[eggSackIndex].transform.position;
             eggDataArray[i].attached = 1f;
         }
+        
         eggsUpdateCBuffer.SetData(eggDataArray);
         int kernelCSUpdateDynamicEggBuffers = computeShaderEggSacks.FindKernel("CSUpdateDynamicEggBuffers");
         //computeShaderBrushStrokes.SetInt("_CurveStrokesUpdateAgentIndex", agentIndex); // ** can I just use parentIndex instead?
@@ -1425,14 +1452,12 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         computeShaderEggSacks.SetBuffer(kernelCSUpdateDynamicEggBuffers, "eggDataWriteCBuffer", simManager.simStateData.eggDataCBuffer);
         computeShaderEggSacks.Dispatch(kernelCSUpdateDynamicEggBuffers, 1, 1, 1);
         eggsUpdateCBuffer.Release();
-
-
     }
 
-    public void UpdateCritterGenericStrokesData(Agent agent) { //int critterIndex, AgentGenome genome) {
-        ComputeBuffer singleCritterGenericStrokesCBuffer = new ComputeBuffer(GetNumUberStrokesPerCritter(), GetMemorySizeCritterUberStrokeData());
+    public void UpdateCritterGenericStrokesData(Agent agent) { 
+        ComputeBuffer singleCritterGenericStrokesCBuffer = new ComputeBuffer(GetNumuberStrokesPerCritter(), GetMemorySizeCritterUberStrokeData());
         CritterUberStrokeData[] singleCritterGenericStrokesArray = new CritterUberStrokeData[singleCritterGenericStrokesCBuffer.count];  // optimize this later?? ***
-        CritterGenomeInterpretor.BrushPoint[] brushPointArray = new CritterGenomeInterpretor.BrushPoint[GetNumUberStrokesPerCritter()];
+        CritterGenomeInterpretor.BrushPoint[] brushPointArray = new CritterGenomeInterpretor.BrushPoint[GetNumuberStrokesPerCritter()];
 
         // Generate main body strokes:
         GenerateCritterBodyBrushstrokes(ref singleCritterGenericStrokesArray, brushPointArray, agent.candidateRef.candidateGenome, agent.index);
@@ -1459,7 +1484,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         SortCritterBrushstrokes(ref singleCritterGenericStrokesArray, agent.index);
 
         // SET DATA:::        
-        singleCritterGenericStrokesCBuffer.SetData(singleCritterGenericStrokesArray); // send data to gPU
+        singleCritterGenericStrokesCBuffer.SetData(singleCritterGenericStrokesArray); // Send data to GPU
         int kernelCSUpdateCritterGenericStrokes = computeShaderCritters.FindKernel("CSUpdateCritterGenericStrokes");
         computeShaderCritters.SetBuffer(kernelCSUpdateCritterGenericStrokes, "critterGenericStrokesWriteCBuffer", critterGenericStrokesCBuffer);
         computeShaderCritters.SetBuffer(kernelCSUpdateCritterGenericStrokes, "critterGenericStrokesUpdateCBuffer", singleCritterGenericStrokesCBuffer);
@@ -1476,10 +1501,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         //AgentGenome genome0 = genome; // simManager.masterGenomePool.completeSpeciesPoolsList[0].representativeGenome;
 
         //ComputeBuffer singleCritterGenericStrokesCBuffer = new ComputeBuffer(GetNumUberStrokesPerCritter(), GetMemorySizeCritterUberStrokeData());
-        CritterUberStrokeData[] singleCritterGenericStrokesArray = new CritterUberStrokeData[GetNumUberStrokesPerCritter()];  // optimize this later?? ***
+        CritterUberStrokeData[] singleCritterGenericStrokesArray = new CritterUberStrokeData[GetNumuberStrokesPerCritter()];  // optimize this later?? ***
         //CritterUberStrokeData[] newCritterGenericStrokesArray = new CritterUberStrokeData[toolbarCritterPortraitStrokesCBuffer.count / 2]; 
         CritterUberStrokeData[] completeCritterGenericStrokesArray = new CritterUberStrokeData[toolbarCritterPortraitStrokesCBuffer.count];
-        CritterGenomeInterpretor.BrushPoint[] brushPointArray = new CritterGenomeInterpretor.BrushPoint[GetNumUberStrokesPerCritter()];
+        CritterGenomeInterpretor.BrushPoint[] brushPointArray = new CritterGenomeInterpretor.BrushPoint[GetNumuberStrokesPerCritter()];
         //CritterGenomeInterpretor.BrushPoint[] newPointArray = new CritterGenomeInterpretor.BrushPoint[toolbarCritterPortraitStrokesCBuffer.count / 2];   
         // Generate main body strokes:
         GenerateCritterBodyBrushstrokes(ref singleCritterGenericStrokesArray, brushPointArray, genome, 0);
@@ -1505,7 +1530,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         }
 
         toolbarCritterPortraitStrokesCBuffer.SetData(completeCritterGenericStrokesArray);
-
     }
 
     private void GenerateCritterBodyBrushstrokes(ref CritterUberStrokeData[] strokesArray, CritterGenomeInterpretor.BrushPoint[] brushPointArray, AgentGenome agentGenome, int agentIndex) {
@@ -1539,7 +1563,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 newData.bindPos = newBrushPoint.bindPos;
                 newData.scale = Vector2.one; // new Vector2(UnityEngine.Random.Range(0.75f, 1.33f), UnityEngine.Random.Range(0.75f, 1.33f));
                 newData.uv = newBrushPoint.uv;
-                newData.thresholdValue = UnityEngine.Random.Range(0f, 1f);
+                newData.thresholdValue = Random.Range(0f, 1f);
                 if (crossSectionCoordZ >= 0f) {
                     newData.jawMask = -1f;
                 }
@@ -1550,12 +1574,14 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             }
         }
     }
-    private void CalculateCritterBodyBrushstrokesNormals(ref CritterUberStrokeData[] strokesArray, CritterGenomeInterpretor.BrushPoint[] brushPointArray) {
-
-        for (int y = 0; y < numStrokesPerCritterLength; y++) {
-
-            for (int a = 0; a < numStrokesPerCritterCross; a++) {
-                // do a line from head to tail at same altitude:
+    
+    private void CalculateCritterBodyBrushstrokesNormals(ref CritterUberStrokeData[] strokesArray, CritterGenomeInterpretor.BrushPoint[] brushPointArray) 
+    {
+        for (int y = 0; y < numStrokesPerCritterLength; y++) 
+        {
+            for (int a = 0; a < numStrokesPerCritterCross; a++) 
+            {
+                // line from head to tail at same altitude:
                 int indexCenter = y * numStrokesPerCritterCross + a;
 
                 // find neighbor positions: (all in bindPos object coordinates)
@@ -1590,12 +1616,12 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 //Vector3 bitangent = Vector3.Cross(normal, tangent);
 
                 float offsetShiftX = (float)(y % 2) * 0.25f;
-                float randShift = UnityEngine.Random.Range(-1f, 1f) * 0.05f;
+                float randShift = Random.Range(-1f, 1f) * 0.05f;
                 strokesArray[indexCenter].bindPos += uTangentAvg * offsetShiftX - vTangentAvg * randShift;
                 //brushPointArray[indexCenter].normal = normal; // not needed?>
-                Vector2 randScale = new Vector2(UnityEngine.Random.Range(0.75f, 1.33f), UnityEngine.Random.Range(0.75f, 1.33f));
+                Vector2 randScale = new Vector2(Random.Range(0.75f, 1.33f), Random.Range(0.75f, 1.33f));
                 strokesArray[indexCenter].scale = new Vector2(scale.x * randScale.x, scale.y * randScale.y);
-                strokesArray[indexCenter].bindNormal = (normal + UnityEngine.Random.insideUnitSphere * 0.165f).normalized;
+                strokesArray[indexCenter].bindNormal = (normal + Random.insideUnitSphere * 0.165f).normalized;
                 strokesArray[indexCenter].bindTangent = tangent;
 
                 strokesArray[indexCenter].neighborIndex = indexNegY;
@@ -1603,8 +1629,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             }
         }
     }
-    private void GenerateCritterEyeBrushstrokes(ref CritterUberStrokeData[] strokesArray, AgentGenome agentGenome, int agentIndex) {
-
+    
+    private void GenerateCritterEyeBrushstrokes(ref CritterUberStrokeData[] strokesArray, AgentGenome agentGenome, int agentIndex) 
+    {
         int arrayIndexStart = numStrokesPerCritterLength * numStrokesPerCritterCross;
 
         CritterModuleCoreGenome gene = agentGenome.bodyGenome.coreGenome; // for readability
@@ -1628,22 +1655,18 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         float irisWidthFraction = gene.irisWidthFraction;
         float pupilWidthFraction = gene.pupilWidthFraction;  // percentage of iris size
         float pupilHeightFraction = gene.pupilHeightFraction;
-
-
+        
         int numPointsPerEye = (int)Mathf.Floor((float)numStrokesPerCritterEyes / (float)numEyes);
-
         int totalLengthResolution = (int)Mathf.Floor(Mathf.Sqrt(numPointsPerEye));
         int baseCrossResolution = totalLengthResolution;
-
         int socketLengthResolution = totalLengthResolution / 2;
         int eyeballLengthResolution = totalLengthResolution - socketLengthResolution;
 
         //Debug.Log("socketLengthResolution: " + socketLengthResolution.ToString() + ", eyeballLengthResolution: " + eyeballLengthResolution.ToString());
 
-        for (int eyeIndex = 0; eyeIndex < numEyes; eyeIndex++) {
-
+        for (int eyeIndex = 0; eyeIndex < numEyes; eyeIndex++) 
+        {
             // find eye anchor pos and normalDir:            
-
             float headStartCoordV = (gene.bodyLength * 0.9f + gene.tailLength) / segmentsSummedCritterLength;
             float headEndCoordV = (gene.mouthLength * 0.33f + gene.headLength + gene.bodyLength + gene.tailLength) / segmentsSummedCritterLength;
 
@@ -1921,78 +1944,66 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         float endCoordY = gene.dorsalFinEndCoordY;  // (gene.headLength * 0.5f + gene.bodyLength + gene.tailLength) / segmentsSummedCritterLength;
         float slantAmount = gene.dorsalFinSlantAmount;
         float baseHeight = gene.dorsalFinBaseHeight;
-
-
-
+        
         int numRows = 4;
         int pointsPerRow = numStrokesPerCritterDorsalFin / numRows / 2;  // 2 one facing each side
-
-
+        
         // Initial position:
-        for (int i = 0; i < numRows; i++) {
-
-            for (int y = 0; y < pointsPerRow; y++) {
+        for (int i = 0; i < numRows; i++) 
+        {
+            for (int y = 1; y < pointsPerRow; y++) 
+            {
                 float yLerp = Mathf.Lerp(startCoordY, endCoordY, Mathf.Clamp01((float)y / (float)(pointsPerRow - 1))); // start at tail (Y = 0)            
                 int brushIndexLeft = arrayIndexStart + pointsPerRow * i + y;
                 int brushIndexRight = arrayIndexStart + pointsPerRow * i + y + (numStrokesPerCritterDorsalFin / 2);
 
                 AddUberBrushPoint(ref strokesArray, agentGenome, agentIndex, new Vector3(0f, yLerp, -1f), new Vector2(0.5f, yLerp), brushIndexLeft);
                 AddUberBrushPoint(ref strokesArray, agentGenome, agentIndex, new Vector3(0f, yLerp, -1f), new Vector2(0.5f, yLerp), brushIndexRight);
+                
+                // WPP: instead of including a special case for y == 0, start the loop at y = 1
+                // if (y == 0) { } else { ... }
+                Vector3 uTangentAvg = (strokesArray[brushIndexLeft].bindPos - strokesArray[brushIndexLeft - 1].bindPos);
+                //Vector3 vTangentAvg = new Vector3(0f, 0f, -1f);
+                strokesArray[brushIndexLeft].scale = new Vector2(uTangentAvg.magnitude, 0.125f) * baseHeight; // vTangentAvg.magnitude);
+                strokesArray[brushIndexLeft].bindNormal = (new Vector3(1f, 0f, -0.5f) + Random.insideUnitSphere * 0.3f).normalized;
+                strokesArray[brushIndexLeft].bindTangent = new Vector3(0f, -slantAmount, -1f);
+                //strokesArray[brushIndexLeft].color = Vector4.one;
+                strokesArray[brushIndexLeft].jawMask = 1f;
+                strokesArray[brushIndexLeft].neighborIndex = arrayIndexStart + pointsPerRow * i + Mathf.Max(0, (y - 1));
+                strokesArray[brushIndexLeft].neighborAlign = 1f;
 
-                if (y == 0) {
-
-                }
-                else {
-                    Vector3 uTangentAvg = (strokesArray[brushIndexLeft].bindPos - strokesArray[brushIndexLeft - 1].bindPos);
-                    //Vector3 vTangentAvg = new Vector3(0f, 0f, -1f);
-                    strokesArray[brushIndexLeft].scale = new Vector2(uTangentAvg.magnitude, 0.125f) * baseHeight; // vTangentAvg.magnitude);
-                    strokesArray[brushIndexLeft].bindNormal = (new Vector3(1f, 0f, -0.5f) + UnityEngine.Random.insideUnitSphere * 0.3f).normalized;
-                    strokesArray[brushIndexLeft].bindTangent = new Vector3(0f, -slantAmount, -1f);
-                    //strokesArray[brushIndexLeft].color = Vector4.one;
-                    strokesArray[brushIndexLeft].jawMask = 1f;
-                    strokesArray[brushIndexLeft].neighborIndex = arrayIndexStart + pointsPerRow * i + Mathf.Max(0, (y - 1));
-                    strokesArray[brushIndexLeft].neighborAlign = 1f;
-
-                    strokesArray[brushIndexRight].scale = strokesArray[brushIndexLeft].scale; // vTangentAvg.magnitude);
-                    strokesArray[brushIndexRight].bindNormal = (new Vector3(-1f, 0f, -0.5f) + UnityEngine.Random.insideUnitSphere * 0.3f).normalized;
-                    strokesArray[brushIndexRight].bindTangent = new Vector3(0f, -slantAmount, -1f);
-                    //strokesArray[brushIndexRight].color = Vector4.one;
-                    strokesArray[brushIndexRight].jawMask = 1f;
-                    strokesArray[brushIndexRight].neighborIndex = arrayIndexStart + pointsPerRow * i + Mathf.Max(0, (y - 1)) + (numStrokesPerCritterDorsalFin / 2);
-                    strokesArray[brushIndexRight].neighborAlign = 1f;
-
-                }
+                strokesArray[brushIndexRight].scale = strokesArray[brushIndexLeft].scale; // vTangentAvg.magnitude);
+                strokesArray[brushIndexRight].bindNormal = (new Vector3(-1f, 0f, -0.5f) + Random.insideUnitSphere * 0.3f).normalized;
+                strokesArray[brushIndexRight].bindTangent = new Vector3(0f, -slantAmount, -1f);
+                //strokesArray[brushIndexRight].color = Vector4.one;
+                strokesArray[brushIndexRight].jawMask = 1f;
+                strokesArray[brushIndexRight].neighborIndex = arrayIndexStart + pointsPerRow * i + Mathf.Max(0, (y - 1)) + (numStrokesPerCritterDorsalFin / 2);
+                strokesArray[brushIndexRight].neighborAlign = 1f;
             }
         }
 
         // Offset placement from anchor pos:
-        for (int i = 0; i < numRows; i++) {
+        for (int i = 0; i < numRows; i++) 
+        {
             // top:
-
-            for (int y = 0; y < pointsPerRow; y++) {
+            for (int y = 1; y < pointsPerRow; y++) 
+            {
                 //float yLerp = Mathf.Lerp(startCoordY, endCoordY, Mathf.Clamp01((float)y / (float)(pointsPerRow - 1))); // start at tail (Y = 0)            
                 int brushIndexLeft = arrayIndexStart + pointsPerRow * i + y;
                 int brushIndexRight = arrayIndexStart + pointsPerRow * i + (numStrokesPerCritterDorsalFin / 2) + y;
-
-                if (y == 0) {
-
-                }
-                else {
-
-                    // figure out height at this point
-                    float finHeight = Mathf.Sin(Mathf.PI * Mathf.Clamp01((float)y / (float)(pointsPerRow - 1)));
-                    strokesArray[brushIndexLeft].scale.y *= finHeight;
-                    strokesArray[brushIndexRight].scale.y *= finHeight;
-                    strokesArray[brushIndexLeft].bindPos += strokesArray[brushIndexLeft].bindTangent * strokesArray[brushIndexLeft].scale.y * ((float)i - 0f);
-                    strokesArray[brushIndexRight].bindPos += strokesArray[brushIndexRight].bindTangent * strokesArray[brushIndexRight].scale.y * ((float)i - 0f);
-                    //strokesArray[brushIndexLeft].bindPos += strokesArray[brushIndexLeft].bindNormal * strokesArray[brushIndexLeft].scale.y / ((float)i - 0f) * 0.55f * UnityEngine.Random.Range(0.9f, 1.125f);
-                    //strokesArray[brushIndexRight].bindPos += strokesArray[brushIndexRight].bindNormal * strokesArray[brushIndexRight].scale.y / ((float)i - 0f) * 0.55f * UnityEngine.Random.Range(0.9f, 1.125f);
-                    strokesArray[brushIndexLeft].scale *= 1.5f;
-                    strokesArray[brushIndexRight].scale *= 1.5f;
-                    //strokesArray[brushIndexLeft].bindTangent = (strokesArray[brushIndexLeft].bindTangent + UnityEngine.Random.insideUnitSphere * 0.2f).normalized;
-                    //strokesArray[brushIndexRight].bindTangent = (strokesArray[brushIndexRight].bindTangent + UnityEngine.Random.insideUnitSphere * 0.2f).normalized;
-
-                }
+                
+                // figure out height at this point
+                float finHeight = Mathf.Sin(Mathf.PI * Mathf.Clamp01((float)y / (float)(pointsPerRow - 1)));
+                strokesArray[brushIndexLeft].scale.y *= finHeight;
+                strokesArray[brushIndexRight].scale.y *= finHeight;
+                strokesArray[brushIndexLeft].bindPos += strokesArray[brushIndexLeft].bindTangent * strokesArray[brushIndexLeft].scale.y * ((float)i - 0f);
+                strokesArray[brushIndexRight].bindPos += strokesArray[brushIndexRight].bindTangent * strokesArray[brushIndexRight].scale.y * ((float)i - 0f);
+                //strokesArray[brushIndexLeft].bindPos += strokesArray[brushIndexLeft].bindNormal * strokesArray[brushIndexLeft].scale.y / ((float)i - 0f) * 0.55f * UnityEngine.Random.Range(0.9f, 1.125f);
+                //strokesArray[brushIndexRight].bindPos += strokesArray[brushIndexRight].bindNormal * strokesArray[brushIndexRight].scale.y / ((float)i - 0f) * 0.55f * UnityEngine.Random.Range(0.9f, 1.125f);
+                strokesArray[brushIndexLeft].scale *= 1.5f;
+                strokesArray[brushIndexRight].scale *= 1.5f;
+                //strokesArray[brushIndexLeft].bindTangent = (strokesArray[brushIndexLeft].bindTangent + UnityEngine.Random.insideUnitSphere * 0.2f).normalized;
+                //strokesArray[brushIndexRight].bindTangent = (strokesArray[brushIndexRight].bindTangent + UnityEngine.Random.insideUnitSphere * 0.2f).normalized;
             }
         }
     }
@@ -2093,16 +2104,20 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             strokesArray[brushIndex].bindTangent = (anchorTangent + UnityEngine.Random.insideUnitSphere * 0.3f).normalized;
             strokesArray[brushIndex].bindPos += anchorNormal * strokesArray[brushIndex].scale.x * 0.33f;
             strokesArray[brushIndex].jawMask = 1f;
+            
             if (strokesArray[brushIndex].bindPos.z > 0f) {
                 strokesArray[brushIndex].jawMask = -1f;
             }
+            
             Vector3 hue = Vector3.Lerp(agentGenome.bodyGenome.appearanceGenome.huePrimary, agentGenome.bodyGenome.appearanceGenome.hueSecondary, UnityEngine.Random.Range(0f, 1f));
             strokesArray[brushIndex].color = new Vector4(hue.x, hue.y, hue.z, 1f);
         }
     }
 
     private void SortCritterBrushstrokes(ref CritterUberStrokeData[] strokesArray, int agentIndex) {
-        List<CritterUberStrokeData> sortedBrushStrokesList = new List<CritterUberStrokeData>(); // temporary naive approach:
+        // temporary naive approach:
+        List<CritterUberStrokeData> sortedBrushStrokesList = new List<CritterUberStrokeData>(); 
+        
         // Add first brushstroke first:
         sortedBrushStrokesList.Add(strokesArray[0]);
 
@@ -2120,44 +2135,46 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             int numSamples = 6;
             float sampleCoord = 0.5f;
             int sampleIndex = Mathf.FloorToInt((float)listSize * sampleCoord);  // Floor?
-
+            
+            // progressively bisect temporary sorted brushPointList to check if it is bigger/smaller
             for (int s = 0; s < numSamples; s++) {
-                // progressively bisect temporary sorted brushPointList to check if it is bigger/smaller
-                // 
-                if (listSize < Mathf.Pow(2f, s)) { // Add early break if list size is still tiny:
+                // Early exit if list size is still tiny:
+                if (listSize < Mathf.Pow(2f, s)) { 
                     break;
                 }
-                else {
-                    if (sampleIndex >= sortedBrushStrokesList.Count) {  // *** GROSS HACK!!! **** 
-                        sampleIndex = sortedBrushStrokesList.Count - 1;
-                        //Debug.LogError("error: sampleIndex= " + sampleIndex.ToString() + ", listCount: " + sortedBrushStrokesList.Count.ToString());
-                        //sortedBrushStrokesList.Add(singleCritterGenericStrokesArray[b]);
-                    }
-                    float sampleDepth = sortedBrushStrokesList[sampleIndex].bindPos.z;
-                    // Which half of current range to sample next
-                    if (brushDepth < sampleDepth) {
-                        sampleCoord += 1f / Mathf.Pow(2f, s + 2f);
-                    }
-                    else {
-                        sampleCoord -= 1f / Mathf.Pow(2f, s + 2f);
-                    }
-                    sampleIndex = Mathf.RoundToInt((float)listSize * sampleCoord);  // *** Might have to use FLoorToInt !!! ****
+
+                if (sampleIndex >= sortedBrushStrokesList.Count) {  // *** GROSS HACK!!! **** 
+                    sampleIndex = sortedBrushStrokesList.Count - 1;
+                    //Debug.LogError("error: sampleIndex= " + sampleIndex.ToString() + ", listCount: " + sortedBrushStrokesList.Count.ToString());
+                    //sortedBrushStrokesList.Add(singleCritterGenericStrokesArray[b]);
                 }
+                
+                float sampleDepth = sortedBrushStrokesList[sampleIndex].bindPos.z;
+                
+                var delta = 1f / Mathf.Pow(2f, s + 2f);
+                var direction = brushDepth < sampleDepth ? 1f : -1f;
+                sampleCoord += delta * direction;
+                
+                sampleIndex = Mathf.RoundToInt((float)listSize * sampleCoord);  // *** Might have to use FLoorToInt !!! ****
             }
 
             sortedBrushStrokesList.Insert(sampleIndex, strokesArray[b]);
         }
+        
         // Copy sorted list into actual buffer:
-        if (sortedBrushStrokesList.Count == strokesArray.Length) {
-            for (int i = 0; i < strokesArray.Length; i++) {
-
+        if (sortedBrushStrokesList.Count == strokesArray.Length) 
+        {
+            for (int i = 0; i < strokesArray.Length; i++) 
+            {
                 int sortedIndex = sortedBrushStrokesList[i].parentIndex; // stored own brushpoint index in critterParentIndex slot
                 sortedIndexMap[sortedIndex] = i; // store original index
 
                 strokesArray[i] = sortedBrushStrokesList[i];  // copy values
 
             }
-            for (int p = 0; p < strokesArray.Length; p++) {
+            
+            for (int p = 0; p < strokesArray.Length; p++) 
+            {
                 //int originalBrushIndex = sortedIndexMap[p];
                 int oldNeighborIndex = strokesArray[p].neighborIndex;
                 int newNeighborIndex = sortedIndexMap[oldNeighborIndex];
@@ -2167,7 +2184,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             }
         }
         else {
-            Debug.Log("Arrays don't match length!!! sorted: " + sortedBrushStrokesList.Count.ToString() + ", master: " + strokesArray.Length.ToString());
+            Debug.Log("Arrays don't match length!!! sorted: " + sortedBrushStrokesList.Count + ", master: " + strokesArray.Length);
         }
     }
 
@@ -2219,8 +2236,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         computeShaderSpiritBrush.SetBuffer(kernelCSCopyBufferCursorParticles, "_CursorParticlesRead", cursorParticlesCBuffer1);
         computeShaderSpiritBrush.SetBuffer(kernelCSCopyBufferCursorParticles, "_CursorParticlesWrite", cursorParticlesCBuffer0);
         computeShaderSpiritBrush.Dispatch(kernelCSCopyBufferCursorParticles, 1, 1, 1);
-
-
+        
         //==========================================================================================================
         int kernelCSSimulateBrushQuads = computeShaderSpiritBrush.FindKernel("CSSimulateBrushQuads");
 
@@ -2236,21 +2252,15 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         computeShaderSpiritBrush.SetBuffer(kernelCSCopyBuffer, "_SpiritBrushQuadsRead", spiritBrushQuadDataCBuffer1);
         computeShaderSpiritBrush.SetBuffer(kernelCSCopyBuffer, "_SpiritBrushQuadsWrite", spiritBrushQuadDataCBuffer0);
         computeShaderSpiritBrush.Dispatch(kernelCSCopyBuffer, 1, 1, 1);
-
-        // Get brush:
     }
 
-    public void SpawnSpiritBrushQuads(CreationBrush brushData, int startIndex, int numCells) {
-        //spiritBrushSpawnCounter++;
-
-        //if(spiritBrushSpawnCounter > 32) {
-        Debug.Log("SpawnSpiritBrushQuads(int startIndex, int numCells)");
-        //spiritBrushSpawnCounter = 0;
+    public void SpawnSpiritBrushQuads(CreationBrush brushData, int startIndex, int numCells) 
+    {
+        //Debug.Log("SpawnSpiritBrushQuads(int startIndex, int numCells)");
         SpiritBrushQuadData[] spiritBrushQuadDataArray = new SpiritBrushQuadData[32];
         spiritBrushQuadDataSpawnCBuffer = new ComputeBuffer(32, GetMemorySizeSpiritbrushQuadData());
         for (int i = 0; i < 32; i++) {
             SpiritBrushQuadData data = new SpiritBrushQuadData();
-
             data.vel = Random.insideUnitCircle * 5;// new Vector2(0f, 1f);
             data.worldPos = new Vector3(theCursorCzar.curMousePositionOnWaterPlane.x + data.vel.x, theCursorCzar.curMousePositionOnWaterPlane.y + data.vel.y, 0f);
             data.heading = data.vel.normalized;
@@ -2265,13 +2275,11 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         computeShaderSpiritBrush.SetBuffer(kernelCSSpawnBrushQuads, "_SpiritBrushQuadsRead", spiritBrushQuadDataSpawnCBuffer);
         computeShaderSpiritBrush.SetBuffer(kernelCSSpawnBrushQuads, "_SpiritBrushQuadsWrite", spiritBrushQuadDataCBuffer0);
         computeShaderSpiritBrush.Dispatch(kernelCSSpawnBrushQuads, 1, 1, 1);
-        //}
         spiritBrushQuadDataSpawnCBuffer.Release();
     }
 
     private void SimEggSacks() {
         int kernelCSSimulateEggs = computeShaderEggSacks.FindKernel("CSSimulateEggs");
-
         computeShaderEggSacks.SetTexture(kernelCSSimulateEggs, "velocityRead", fluidManager._VelocityPressureDivergenceMain);
         computeShaderEggSacks.SetBuffer(kernelCSSimulateEggs, "eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
         computeShaderEggSacks.SetBuffer(kernelCSSimulateEggs, "eggDataWriteCBuffer", simManager.simStateData.eggDataCBuffer);
@@ -2300,16 +2308,15 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         computeShaderCritters.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderCritters.Dispatch(kernelCSSimulateCritterPortraitStrokes, toolbarCritterPortraitStrokesCBuffer.count / 16, 1, 1);
     }
-    
-    private void SimWorldTreeGPU() {
 
-    }
-    
-    private void SimWorldTreeCPU() { //***EAC destined to be replaced by GPU ^ ^ ^
+    //***EAC destined to be replaced by GPU ^ ^ ^
+    private void SimWorldTreeCPU() { 
         uiManager.clockPanelUI.UpdateEarthStampData();
         uiManager.clockPanelUI.UpdateMoonStampData();
         uiManager.clockPanelUI.UpdateSunStampData();
         InitializeWorldTreeBuffers();
+        
+        #region Dead code (please delete)
         /*
         WorldTreeLineData[] dataArray = new WorldTreeLineData[numDataPoints]; 
         worldTreeLineDataCBuffer?.Release();
@@ -2477,8 +2484,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         
         worldTreeLineDataCBuffer.SetData(dataArray);
         */
-        
+        #endregion
     }
+    
+    #region Dead code (please delete)
     /*public void UpdateTreeOfLifeEventLineData(List<SimEventData> eventDataList) {
 
         // Move some of this to ComputeShader kernel?
@@ -2544,6 +2553,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         treeOfLifeSpeciesDataHeadPosCBuffer.GetData(treeOfLifeSpeciesDataHeadPosArray);
     }*/
+    #endregion
 
     public void InitializeCreaturePortrait(AgentGenome genome) {
         //InitializeNewCritterPortraitGenome(simManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[0].representativeGenome); // speciesPool.leaderboardGenomesList[0].candidateGenome);
@@ -2557,8 +2567,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     }
     
     private void SetToolbarPortraitCritterInitData(AgentGenome genome) {
-        // Get genomes:
-        AgentGenome genome0 = genome; // simManager.masterGenomePool.completeSpeciesPoolsList[simManager.uiManager.globalResourcesUI.selectedSpeciesIndex].representativeGenome;
+        AgentGenome genome0 = genome; 
+        // simManager.masterGenomePool.completeSpeciesPoolsList[simManager.uiManager.globalResourcesUI.selectedSpeciesIndex].representativeGenome;
         //AgentGenome genome1 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][simManager.uiManager.mutationUI.selectedToolbarMutationID].representativeGenome;
         //AgentGenome genome2 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][0].representativeGenome;
         //AgentGenome genome3 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][1].representativeGenome;
@@ -2610,7 +2620,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         initData.speciesID = 0; // selectedSpeciesID;
 
         //initData.mouthIsActive = 0.25f;
-        //if(simManager.agentsArray[i].mouthRef.isPassive) {
+        //if(agents[i].mouthRef.isPassive) {
         //    initData.mouthIsActive = 0f;
         //}
         initData.bodyPatternX = genome0.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
@@ -2618,6 +2628,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         toolbarPortraitCritterInitDataArray[0] = initData;
         
+        #region Dead code (please delete)
         /*
         initData.primaryHue = genome1.bodyGenome.appearanceGenome.huePrimary;
         initData.secondaryHue = genome1.bodyGenome.appearanceGenome.hueSecondary;
@@ -2723,10 +2734,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         
         toolbarPortraitCritterInitDataArray[5] = initData;
         */
+        #endregion
 
-        if (toolbarPortraitCritterInitDataCBuffer != null) {
-            toolbarPortraitCritterInitDataCBuffer.Release();
-        }
+        toolbarPortraitCritterInitDataCBuffer?.Release();
         toolbarPortraitCritterInitDataCBuffer = new ComputeBuffer(6, SimulationStateData.GetCritterInitDataSize());
         toolbarPortraitCritterInitDataCBuffer.SetData(toolbarPortraitCritterInitDataArray);
     }
@@ -2755,15 +2765,15 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 decay = 0.25f;
             }
             simData.decayPercentage = decay;
-            simData.foodAmount = 0f; // Mathf.Lerp(simData.foodAmount, simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity, 0.16f);
-            simData.energy = 1f; // simManager.agentsArray[i].coreModule.energyRaw / simManager.agentsArray[i].coreModule.maxEnergyStorage;
-            simData.health = 1f; // simManager.agentsArray[i].coreModule.healthHead;
-            simData.stamina = 1f; // simManager.agentsArray[i].coreModule.stamina[0];
+            simData.foodAmount = 0f; // Mathf.Lerp(simData.foodAmount, agents[i].coreModule.stomachContents / agents[i].coreModule.stomachCapacity, 0.16f);
+            simData.energy = 1f; // agents[i].coreModule.energyRaw / agents[i].coreModule.maxEnergyStorage;
+            simData.health = 1f; // agents[i].coreModule.healthHead;
+            simData.stamina = 1f; // agents[i].coreModule.stamina[0];
             simData.consumeOn = 0f; // Mathf.Sin(angle2 * 3.19f) * 0.5f + 0.5f;
 
             simData.moveAnimCycle = 0f; // Time.realtimeSinceStartup * 0.6f % 1f;
             simData.turnAmount = 0f; // Mathf.Sin(Time.realtimeSinceStartup * 0.654321f) * 0.65f + 0.25f;
-            simData.accel = 0f;// (Mathf.Sin(Time.realtimeSinceStartup * 0.79f) * 0.5f + 0.5f) * 0.081f; // Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 1f; // ** RE-FACTOR!!!!
+            simData.accel = 0f;// (Mathf.Sin(Time.realtimeSinceStartup * 0.79f) * 0.5f + 0.5f) * 0.081f; // Mathf.Clamp01(agents[i].curAccel) * 1f; // ** RE-FACTOR!!!!
             simData.smoothedThrottle = 0f; // (Mathf.Sin(Time.realtimeSinceStartup * 3.97f + 0.4f) * 0.5f + 0.5f) * 0.85f;
             simData.velocity = Vector2.zero; // facingDir.normalized * (simData.accel + simData.smoothedThrottle);
         }
@@ -2779,15 +2789,15 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             simData.growthPercentage = 1.5f * 1.5f;
             float decay = 0f;
             simData.decayPercentage = decay;
-            simData.foodAmount = 0f; // Mathf.Lerp(simData.foodAmount, simManager.agentsArray[i].coreModule.stomachContents / simManager.agentsArray[i].coreModule.stomachCapacity, 0.16f);
-            simData.energy = 1f; // simManager.agentsArray[i].coreModule.energyRaw / simManager.agentsArray[i].coreModule.maxEnergyStorage;
-            simData.health = 1f; // simManager.agentsArray[i].coreModule.healthHead;
-            simData.stamina = 1f; // simManager.agentsArray[i].coreModule.stamina[0];
+            simData.foodAmount = 0f; // Mathf.Lerp(simData.foodAmount, .agents[i].coreModule.stomachContents / agents[i].coreModule.stomachCapacity, 0.16f);
+            simData.energy = 1f; // agents[i].coreModule.energyRaw / agents[i].coreModule.maxEnergyStorage;
+            simData.health = 1f; // agents[i].coreModule.healthHead;
+            simData.stamina = 1f; // agents[i].coreModule.stamina[0];
             simData.consumeOn = Mathf.Sin(angle2 * 3.19f) * 0.5f + 0.5f;
 
             simData.moveAnimCycle = Time.realtimeSinceStartup * 0.6f % 1f;
             simData.turnAmount = Mathf.Sin(Time.realtimeSinceStartup * 0.654321f) * 0.65f + 0.25f;
-            simData.accel = (Mathf.Sin(Time.realtimeSinceStartup * 0.79f) * 0.5f + 0.5f) * 0.081f; // Mathf.Clamp01(simManager.agentsArray[i].curAccel) * 1f; // ** RE-FACTOR!!!!
+            simData.accel = (Mathf.Sin(Time.realtimeSinceStartup * 0.79f) * 0.5f + 0.5f) * 0.081f; // Mathf.Clamp01(agents[i].curAccel) * 1f; // ** RE-FACTOR!!!!
             simData.smoothedThrottle = (Mathf.Sin(Time.realtimeSinceStartup * 3.97f + 0.4f) * 0.5f + 0.5f) * 0.85f;
             simData.velocity = facingDir.normalized * (simData.accel + simData.smoothedThrottle);
         }
@@ -2797,16 +2807,15 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         simData.growthPercentage = 1.5f; // simManager.uiManager.mutationUI.critterSizeMult;
         toolbarPortraitCritterSimDataArray[1] = simData;
 
-        simData.growthPercentage = 2f; // ************************************************
+        simData.growthPercentage = 2f; 
         toolbarPortraitCritterSimDataArray[5] = simData;
-
         
         toolbarPortraitCritterSimDataCBuffer = new ComputeBuffer(6, SimulationStateData.GetCritterSimDataSize());
         toolbarPortraitCritterSimDataCBuffer.SetData(toolbarPortraitCritterSimDataArray);
-        // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     }
     
-    public void Tick() {  // should be called from SimManager at proper time!
+    // Should be called from SimManager at proper time!
+    public void Tick() {  
         sunDirection = -sunGO.transform.forward;
 
         SimFloatyBits();
@@ -2819,9 +2828,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             debugFrameCounter = 0;
         }
 
-        if (toolbarPortraitCritterSimDataCBuffer != null) {
-            toolbarPortraitCritterSimDataCBuffer.Release();
-        }
+        toolbarPortraitCritterSimDataCBuffer?.Release();
+
         // PORTRAIT
         if (isToolbarCritterPortraitEnabled) {
             
@@ -2876,7 +2884,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         baronVonWater.Tick(null);  // <-- SimWaterCurves/Chains/Water surface
     }
 
-    public void RenderSimulationCameras() { // **** revisit
+    // **** revisit
+    public void RenderSimulationCameras() { 
         //debugRT = fluidManager._SourceColorRT;
 
         // SOLID OBJECTS OBSTACLES:::
@@ -2893,7 +2902,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         baronVonTerrain.terrainObstaclesHeightMaskMat.SetFloat("_TexResolution", (float)simManager.environmentFluidManager.resolution);
         baronVonTerrain.terrainObstaclesHeightMaskMat.SetFloat("_MapSize", SimulationManager._MapSize);
         cmdBufferFluidObstacles.DrawMesh(baronVonTerrain.quadMesh, matrix, baronVonTerrain.terrainObstaclesHeightMaskMat); // Masks out areas above the fluid "Sea Level"
-
 
         // Draw dynamic Obstacles:        
         //basicStrokeDisplayMat.SetPass(0);
@@ -2915,10 +2923,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         //cmdBufferFluidColor.Blit(fluidManager.initialDensityTex, fluidManager._SourceColorRT);
         //cmdBufferFluidColor.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidBackgroundColorMat); // Simple unlit Texture shader -- wysiwyg
-
-        // WPP: nested check unnecessary with direct SO-based identifier
-        //if (uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == KingdomId.Plants) {
-       //     if (uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 1) {
+        
        if (selectedWorldSpiritSlot.id == KnowledgeMapId.Plants) {
             algaeParticleColorInjectMat.SetPass(0);
             algaeParticleColorInjectMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
@@ -2927,10 +2932,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             algaeParticleColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
             cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, algaeParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.plantParticlesCBuffer.count);
         }
-        //    }
-        //}
-        //else if (uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == KingdomId.Animals) {
-        //    if (uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 0) {
         if (selectedWorldSpiritSlot.id == KnowledgeMapId.Microbes) {
                 zooplanktonParticleColorInjectMat.SetPass(0);
                 zooplanktonParticleColorInjectMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
@@ -2939,9 +2940,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 zooplanktonParticleColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
                 cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, zooplanktonParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.zooplanktonManager.animalParticlesCBuffer.count);
         }
-        //}
 
-        PopulateColorInjectionBuffer(); // update data for colorInjection objects before rendering                    
+       PopulateColorInjectionBuffer(); // update data for colorInjection objects before rendering                    
         // Creatures + EggSacks:
         basicStrokeDisplayMat.SetPass(0);
         basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -2950,7 +2950,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         //why are they always rendering white??
         // Render Agent/Food/Pred colors here!!!
         // just use their display renders?
-        
 
         Graphics.ExecuteCommandBuffer(cmdBufferFluidColor);
         fluidColorRenderCamera.Render();
@@ -3001,7 +3000,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 }
                 cmdBufferSpiritBrush.DrawProcedural(Matrix4x4.identity, spiritBrushRenderMultiBurstMat, 0, MeshTopology.Triangles, 6, spiritBrushQuadDataCBuffer0.count);
 
-
                 brushData.burstFrameCounter++;
                 if (brushData.burstFrameCounter > brushData.burstTotalDuration) {
                     brushData.isBurstActive = false;
@@ -3020,7 +3018,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         else { 
             // *******************************************************
             isBrushing = true;
-            if (Time.realtimeSinceStartup % 1f > 0.5f) { // ***EC -- Change this when simulation spawn mechanics updated
+            
+            // ***EC -- Change this when simulation spawn mechanics updated
+            if (Time.realtimeSinceStartup % 1f > 0.5f) { 
                 isBrushing = false;
             }
             if (isBrushing) {                
@@ -3044,7 +3044,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 cmdBufferSpiritBrush.DrawProcedural(Matrix4x4.identity, spiritBrushRenderMat, 0, MeshTopology.Triangles, 6, 2);                
             }
             else {
-
                 spiritBrushRenderMat.SetPass(0);
                 spiritBrushRenderMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer); // *** Needed? or just set it once in beginning....
                 spiritBrushRenderMat.SetVector("_Position", new Vector4(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y, 0f, 0f));
@@ -3064,17 +3063,13 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 spiritBrushRenderMat.SetFloat("_FacingDirX", brushDir.x);
                 spiritBrushRenderMat.SetFloat("_FacingDirY", brushDir.y);
                 cmdBufferSpiritBrush.DrawProcedural(Matrix4x4.identity, spiritBrushRenderMat, 0, MeshTopology.Triangles, 6, 2);
-
-
-
             }
         }
 
         Graphics.ExecuteCommandBuffer(cmdBufferSpiritBrush);
         // Still not sure if this will work correctly... ****
         spiritBrushRenderCamera.Render();
-
-
+        
         // Species PORTRAIT:
         cmdBufferSlotPortraitDisplay.Clear();
         cmdBufferSlotPortraitDisplay.SetRenderTarget(slotPortraitRenderCamera.targetTexture); // needed???
@@ -3102,8 +3097,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color1", baronVonTerrain.pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
         baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color2", baronVonTerrain.sandSlotGenomeCurrent.color);                    
         cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesMedDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.terrainStoneStrokesCBuffer.count);
-       
-
+        
         toolbarSpeciesPortraitStrokesMat.SetPass(0);
         toolbarSpeciesPortraitStrokesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         toolbarSpeciesPortraitStrokesMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
@@ -3137,12 +3131,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         critterDebugGenericStrokeMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
         cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterDebugGenericStrokeMat, 0, MeshTopology.Triangles, 6, critterGenericStrokesCBuffer.count);
         */
-
         
         Graphics.ExecuteCommandBuffer(cmdBufferSlotPortraitDisplay);
         slotPortraitRenderCamera.Render();
         
-
         //===================   RESOURCE SIMULATION   ==========================================================
         cmdBufferResourceSim.Clear();
         cmdBufferResourceSim.SetRenderTarget(simManager.vegetationManager.resourceSimTransferRT);
@@ -3236,7 +3228,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         Graphics.ExecuteCommandBuffer(cmdBufferWorldTree);
         worldTreeRenderCamera.Render();
         
-
+        #region Dead code (delegate or delete)
         // TREE OF LIFE:
 
         //graphs mouse coords:
@@ -3346,11 +3338,11 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         Graphics.ExecuteCommandBuffer(cmdBufferTreeOfLifeSpeciesTree);
         treeOfLifeSpeciesTreeRenderCamera.Render();
         */
-
+        #endregion
     }
 
-    public void TreeOfLifeAddNewSpecies(MasterGenomePool masterGenomePool, int newSpeciesID) { //int speciesID, int parentSpeciesID) {
-
+    public void TreeOfLifeAddNewSpecies(MasterGenomePool masterGenomePool, int newSpeciesID) 
+    {
         SpeciesGenomePool newSpecies = masterGenomePool.completeSpeciesPoolsList[newSpeciesID];
 
         //computeShaderTreeOfLife.SetTexture(kernelCSAddNewSpecies, "velocityRead", fluidManager._VelocityA);
@@ -3389,44 +3381,46 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         updateLeafNodeDataCBuffer.Release();
 
         // STEM SEGMENTS:
+        // if not root node
+        if (newSpeciesID <= 0) return; 
+         
+        TreeOfLifeStemSegmentStruct[] segmentStructUpdateArray = new TreeOfLifeStemSegmentStruct[newSpecies.depthLevel]; 
+        ComputeBuffer updateStemSegmentDataCBuffer = new ComputeBuffer(segmentStructUpdateArray.Length, sizeof(int) * 3 + sizeof(float) * 1);
 
-        if (newSpeciesID > 0) {  // if not root node
-            TreeOfLifeStemSegmentStruct[] segmentStructUpdateArray = new TreeOfLifeStemSegmentStruct[newSpecies.depthLevel]; // *** +1?
-            ComputeBuffer updateStemSegmentDataCBuffer = new ComputeBuffer(segmentStructUpdateArray.Length, sizeof(int) * 3 + sizeof(float) * 1);
+        int curSpeciesID = newSpeciesID;
 
-            int curSpeciesID = newSpeciesID;
+        for (int i = 0; i < newSpecies.depthLevel; i++) 
+        {
+            int parentSpeciesID = masterGenomePool.completeSpeciesPoolsList[curSpeciesID].parentSpeciesID;
 
-            for (int i = 0; i < newSpecies.depthLevel; i++) {
+            // Create StemSegment!    
+            TreeOfLifeStemSegmentStruct newStemSegment = new TreeOfLifeStemSegmentStruct();
+            newStemSegment.speciesID = newSpeciesID;
+            newStemSegment.fromID = parentSpeciesID;
+            newStemSegment.toID = curSpeciesID;
 
-                int parentSpeciesID = masterGenomePool.completeSpeciesPoolsList[curSpeciesID].parentSpeciesID;
-
-                // Create StemSegment!    
-                TreeOfLifeStemSegmentStruct newStemSegment = new TreeOfLifeStemSegmentStruct();
-                newStemSegment.speciesID = newSpeciesID;
-                newStemSegment.fromID = parentSpeciesID;
-                newStemSegment.toID = curSpeciesID;
-
-                segmentStructUpdateArray[i] = newStemSegment;
-
-                curSpeciesID = parentSpeciesID;  // set curSpecies to ParentSpecies (traverse up tree)                
-            }
-
-            updateStemSegmentDataCBuffer.SetData(segmentStructUpdateArray);
-
-            // DISPATCH::
-            int kernelCSAddNewSpeciesStemSegments = computeShaderTreeOfLife.FindKernel("CSAddNewSpeciesStemSegments");
-            computeShaderTreeOfLife.SetBuffer(kernelCSAddNewSpeciesStemSegments, "treeOfLifeStemSegmentDataCBuffer", treeOfLifeStemSegmentDataCBuffer);
-            computeShaderTreeOfLife.SetBuffer(kernelCSAddNewSpeciesStemSegments, "updateStemSegmentDataCBuffer", updateStemSegmentDataCBuffer);
-            computeShaderTreeOfLife.SetInt("_UpdateBufferStartIndex", curNumTreeOfLifeStemSegments);
-            computeShaderTreeOfLife.Dispatch(kernelCSAddNewSpeciesStemSegments, updateStemSegmentDataCBuffer.count, 1, 1);
-
-            //Debug.Log("UPDATE STEM SEGMENTS: " + newSpeciesID.ToString() + ", depth: " + newSpecies.depthLevel.ToString());
-
-            updateStemSegmentDataCBuffer.Release();
-
-            curNumTreeOfLifeStemSegments += newSpecies.depthLevel;  // keep track of start index
+            segmentStructUpdateArray[i] = newStemSegment;
+            
+            // Traverse up tree
+            curSpeciesID = parentSpeciesID;               
         }
+
+        updateStemSegmentDataCBuffer.SetData(segmentStructUpdateArray);
+
+        // DISPATCH::
+        int kernelCSAddNewSpeciesStemSegments = computeShaderTreeOfLife.FindKernel("CSAddNewSpeciesStemSegments");
+        computeShaderTreeOfLife.SetBuffer(kernelCSAddNewSpeciesStemSegments, "treeOfLifeStemSegmentDataCBuffer", treeOfLifeStemSegmentDataCBuffer);
+        computeShaderTreeOfLife.SetBuffer(kernelCSAddNewSpeciesStemSegments, "updateStemSegmentDataCBuffer", updateStemSegmentDataCBuffer);
+        computeShaderTreeOfLife.SetInt("_UpdateBufferStartIndex", curNumTreeOfLifeStemSegments);
+        computeShaderTreeOfLife.Dispatch(kernelCSAddNewSpeciesStemSegments, updateStemSegmentDataCBuffer.count, 1, 1);
+
+        //Debug.Log("UPDATE STEM SEGMENTS: " + newSpeciesID.ToString() + ", depth: " + newSpecies.depthLevel.ToString());
+        updateStemSegmentDataCBuffer.Release();
+
+        // keep track of start index
+        curNumTreeOfLifeStemSegments += newSpecies.depthLevel;  
     }    
+    
     public void TreeOfLifeExtinctSpecies(int speciesID) {
         //computeShaderTreeOfLife.SetTexture(kernelCSAddNewSpecies, "velocityRead", fluidManager._VelocityA);
         int[] speciesIDArray = new int[1];
@@ -3463,6 +3457,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         updateLeafNodeDataCBuffer.Release();
         //Debug.Log("UPDATE STEM SEGMENTS: " + newSpeciesID.ToString() + ", depth: " + newSpecies.depthLevel.ToString());
     }    
+    
     public void TreeOfLifeGetColliderNodePositionData() {
         //simManager.uiManager.treeOfLifeManager.UpdateNodePositionsFromGPU(simManager.uiManager.cameraManager, treeOfLifeSpeciesDataHeadPosArray);     // **** Need to cap this at 32 or it breaks!!!  
     }
@@ -3470,7 +3465,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private void Render() {
         //Debug.Log("TestRenderCommandBuffer()");
 
-        if (isDebugRender) {
+        if (isDebugRender) 
+        {
             mainRenderCam.RemoveAllCommandBuffers();
             mainRenderCam.AddCommandBuffer(CameraEvent.AfterForwardOpaque, cmdBufferDebugVis);
 
@@ -3507,7 +3503,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             //cmdBufferDebugVis
             //mainRenderCam.RemoveAllCommandBuffers();
         }
-        else {
+        else 
+        {
             mainRenderCam.RemoveAllCommandBuffers();
             mainRenderCam.AddCommandBuffer(CameraEvent.AfterForwardOpaque, cmdBufferMain);
 
@@ -3661,6 +3658,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             floatyBitsDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, floatyBitsDisplayMat, 0, MeshTopology.Triangles, 6, floatyBitsCBuffer.count);
 
+            #region Dead code (please delete)
             //if (simManager.trophicLayersManager.GetAgentsOnOff()) {
                 /*critterUberStrokeShadowMat.SetPass(0);
                 critterUberStrokeShadowMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -3740,9 +3738,13 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
         
             }*/
+            #endregion
+            
             float isHighlight = 0f;
             float isSelectedZoop = 0f; //***EC -- revisit
             float isSelectedPlant = 0f;
+            
+            #region Dead code (please delete)
             /*if (simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef != null) { // && simManager.uiManager.panelFocus == PanelFocus.Watcher) {
 
                 isHighlight = 1f;
@@ -3782,6 +3784,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                     //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); 
                     cmdBufferMain.DrawProcedural(Matrix4x4.identity, plantParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.vegetationManager.plantParticlesCBuffer.count * 32);
             */
+            #endregion
 
             plantParticleDisplayMat.SetPass(0);
             plantParticleDisplayMat.SetBuffer("plantParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
@@ -3808,6 +3811,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             plantParticleDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, plantParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.vegetationManager.plantParticlesCBuffer.count * 32);
 
+            #region Dead code (delegate or delete)
             // STIR STICK!!!!
             /*
             if (simManager.uiManager.curActiveTool == ToolType.Stir) {
@@ -3868,9 +3872,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 }
             }
             */
-
-            //if (simManager.trophicLayersManager.GetZooplanktonOnOff()) {
-
+            #endregion
+            
             // add shadow pass eventually
             animalParticleDisplayMat.SetPass(0);
             animalParticleDisplayMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
@@ -3889,8 +3892,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             animalParticleDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized); 
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
 
-            if (simManager.trophicLayersManager.IsLayerOn(KnowledgeMapId.Animals)) {
-
+            if (simManager.trophicLayersManager.IsLayerOn(KnowledgeMapId.Animals)) 
+            {
                 eggSackStrokeDisplayMat.SetPass(0);
                 eggSackStrokeDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
                 eggSackStrokeDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
@@ -3964,6 +3967,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonWater.waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterNutrientsBitsCBuffer.count);
 
+            #region Dead code (delegate or delete)
             /*
             if (simManager.uiManager.curActiveTool == ToolType.Add) {
                 
@@ -3995,17 +3999,18 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             cursorParticlesDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, cursorParticlesDisplayMat, 0, MeshTopology.Triangles, 6, cursorParticlesCBuffer0.count);
         */
+        #endregion
         }
 
         // Fluid Render Article:
         // http://blog.camposanto.com/post/171934927979/hi-im-matt-wilde-an-old-man-from-the-north-of/amp?__twitter_impression=true
     }
 
-    public void ClickTestTerrainUpdateMaps(bool on, float _intensity) {  // *** RENAME!!! ***********
-
+    // *** RENAME!!!
+    public void ClickTestTerrainUpdateMaps(bool on, float _intensity) 
+    {
         float intensity = _intensity; // Mathf.Lerp(0.02f, 0.06f, baronVonWater.camDistNormalized) * 1.05f;
-
-        float addSubtract = spiritBrushPosNeg; // 1f;
+        float addSubtract = spiritBrushPosNeg; 
         int texRes = baronVonTerrain.terrainHeightRT0.width;
         int CSUpdateTerrainMapsBrushKernelID = baronVonTerrain.computeShaderTerrainGeneration.FindKernel("CSUpdateTerrainMapsBrush");
         baronVonTerrain.computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsBrushKernelID, "AltitudeRead", baronVonTerrain.terrainHeightRT0);   // Read-Only 
@@ -4020,17 +4025,15 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_BrushIntensity", intensity);
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
-
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_WorldRadius", baronVonTerrain._WorldRadius);
-
         baronVonTerrain.computeShaderTerrainGeneration.SetVector("_WorldSpaceCameraPosition", new Vector4(mainRenderCam.transform.position.x, mainRenderCam.transform.position.y, mainRenderCam.transform.position.z, 0f));
-
         baronVonTerrain.computeShaderTerrainGeneration.SetInt("_ChannelID", uiManager.brushesUI.selectedBrushLinkedSpiritTerrainLayer); // simManager.trophicLayersManager.selectedTrophicSlotRef.slotID); // 
-        if (on) {  // Actively brushing this frame
-        }
-        else {
+        
+        // Not actively brushing this frame
+        if (!on) {  
             addSubtract = 0f;
         }
+        
         // LAYERS ARE SWIZZLED!!!!! **********************************************************************************************************************************
         baronVonTerrain.computeShaderTerrainGeneration.SetVector("_Color3", baronVonTerrain.bedrockSlotGenomeCurrent.color); // new Vector4(0.54f, 0.43f, 0.37f, 1f));
         baronVonTerrain.computeShaderTerrainGeneration.SetVector("_Color0", baronVonTerrain.stoneSlotGenomeCurrent.color); // new Vector4(0.9f, 0.9f, 0.8f, 1f));
@@ -4046,12 +4049,11 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         baronVonTerrain.computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsConvolutionKernelID, "AltitudeWrite", baronVonTerrain.terrainHeightRT0);
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         baronVonTerrain.computeShaderTerrainGeneration.Dispatch(CSUpdateTerrainMapsConvolutionKernelID, texRes / 32, texRes / 32, 1);
-
         baronVonTerrain.AlignGroundStrokesToTerrain();
-
     }
-
-    private void OnWillRenderObject() {  // requires MeshRenderer Component to be called
+    
+    // requires MeshRenderer Component to be called
+    private void OnWillRenderObject() {  
         //Debug.Log("OnWillRenderObject()");
         if (isInitialized) {
             Render();

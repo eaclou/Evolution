@@ -3,8 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="e5216a40-1993-4f7b-88ca-3d6aa0d75e16" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCore.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCore.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterMouthComponent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterMouthComponent.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,7 +86,6 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Perception/FindNearestEggSack.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Perception/TrackNearbyEggSacks.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/SensorsPanel.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/VegetationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/ZooplanktonManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/PanelTopLeftUI.cs" />
@@ -113,6 +112,7 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/Brain.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCore.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterMouthComponent.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1owaWgGpM80xkcfA3szn5iw9YkG" />
@@ -213,7 +213,8 @@
       <workItem from="1626333821544" duration="6770000" />
       <workItem from="1626759635101" duration="5580000" />
       <workItem from="1627070827903" duration="6832000" />
-      <workItem from="1627419646507" duration="11040000" />
+      <workItem from="1627419646507" duration="11129000" />
+      <workItem from="1627878614747" duration="3693000" />
     </task>
     <servers />
   </component>
