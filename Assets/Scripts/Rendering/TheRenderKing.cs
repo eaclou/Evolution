@@ -11,6 +11,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     UIManager uiManager => UIManager.instance;
     WorldSpiritHubUI worldSpiritHubUI => uiManager.worldSpiritHubUI;
     TrophicSlot selectedWorldSpiritSlot => worldSpiritHubUI.selectedWorldSpiritSlot;
+    HistoryPanelUI historyPanel => uiManager.historyPanelUI;
     
     Agent[] agents => simManager.agents;
 
@@ -195,6 +196,25 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public float noiseEnd;
         public float noiseFreq;
         public int brushType;
+        
+        public CursorParticleData(Vector3[] spawnPoints, int spawnPointIndex)
+        {
+            worldPos = new Vector3(Random.Range(0f, 256f), Random.Range(0f, 256f), 0f);
+            vel = Random.insideUnitCircle;
+            heading = new Vector2(spawnPoints[spawnPointIndex].x, spawnPoints[spawnPointIndex].z);
+            lifespan = Random.Range(20f, 40f);
+            age01 = Random.Range(0f, 1f);
+            
+            // WPP: Not initialized -> are these needed?
+            brushType = default;
+            drag = default;
+            extraVec4 = default;
+            index = default;
+            localScale = default;
+            noiseEnd = default;
+            noiseFreq = default;
+            noiseStart = default;
+        }
     }
     
     private struct SpiritBrushQuadData {
@@ -211,6 +231,25 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public float noiseEnd;
         public float noiseFreq;
         public int brushType;
+        
+        public SpiritBrushQuadData(float xMin, float xMax, float yMin, float yMax, float maxVelocity)
+        {
+            worldPos = new Vector3(Random.Range(xMin, xMax), Random.Range(yMin, yMax), 0f);
+            vel = new Vector2(0f, maxVelocity);
+            heading = new Vector2(0f, 1f);
+            lifespan = 1f;
+            age01 = 0f;
+            
+            // WPP: same uninitialized variables as CursorParticleData
+            brushType = default;
+            drag = default;
+            extraVec4 = default;
+            index = default;
+            localScale = default;
+            noiseEnd = default;
+            noiseFreq = default;
+            noiseStart = default;
+        }
     }
     
     private ComputeBuffer spiritBrushQuadDataSpawnCBuffer;
@@ -290,13 +329,16 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public float isActive;
     }
     
+    
+    // only the data that needs to be transferred between CPU & GPU  - minimize!!
     // Is this still needed??
-    public struct TreeOfLifeNodeColliderData {  // only the data that needs to be transferred between CPU & GPU  - minimize!!
+    public struct TreeOfLifeNodeColliderData {  
         public Vector3 localPos;
         public Vector3 scale;
     }
     
-    public struct TreeOfLifeLeafNodeData {
+    public struct TreeOfLifeLeafNodeData 
+    {
         public int speciesID;
         public int parentSpeciesID;
         public int graphDepth;
@@ -310,13 +352,61 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public float isHover;
         public float isSelected;
         public float relFitnessScore;
+        
+        public TreeOfLifeLeafNodeData(SpeciesGenomePool newSpecies)
+        {
+            speciesID = newSpecies.speciesID;
+            parentSpeciesID = newSpecies.parentSpeciesID;
+            graphDepth = newSpecies.depthLevel;
+            primaryHue = newSpecies.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+            secondaryHue = newSpecies.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
+            growthPercentage = 1f;
+            
+            age = 0f;
+            decayPercentage = 0f;
+            isActive = 1f;
+            isExtinct = 0f;
+            
+            isHover = default;
+            isSelected = default;
+            relFitnessScore = default;
+        }
+        
+        public TreeOfLifeLeafNodeData(int speciesID)
+        {
+            this.speciesID = speciesID;
+            parentSpeciesID = 0;
+            graphDepth = 0;
+            primaryHue = Vector3.zero;
+            secondaryHue = Vector3.zero;
+            growthPercentage = 0f;
+            
+            age = 0f;
+            decayPercentage = 0f;
+            isActive = 1f;
+            isExtinct = 1f;
+            
+            isHover = default;
+            isSelected = default;
+            relFitnessScore = default;
+        }
     }
     
-    public struct TreeOfLifeStemSegmentStruct {
+    public struct TreeOfLifeStemSegmentStruct 
+    {
         public int speciesID;
         public int fromID;
         public int toID;
         public float attachPosLerp;
+        
+        public TreeOfLifeStemSegmentStruct(int curSpeciesID, int newSpeciesID, int parentSpeciesID)
+        {
+            speciesID = newSpeciesID;
+            fromID = parentSpeciesID;
+            toID = curSpeciesID;
+            
+            attachPosLerp = default;
+        }
     }
 
     public struct PlayerGlowyBitData {
@@ -466,10 +556,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         fluidObstaclesRenderCamera.enabled = false;
         fluidColorRenderCamera.enabled = false;
         spiritBrushRenderCamera.enabled = false;
-
         slotPortraitRenderCamera.enabled = false;
         resourceSimRenderCamera.enabled = false;
-
         worldTreeRenderCamera.enabled = false;
     }
     
@@ -566,15 +654,16 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             spawnPointsArray[j] = Random.onUnitSphere;
         }
         
-        for (int i = 0; i < 1024; i++) {
-            CursorParticleData data = new CursorParticleData();
-            data.worldPos = new Vector3(Random.Range(0f, 256f), Random.Range(0f, 256f), 0f);
+        // WPP: using object initializer
+        for (int i = 0; i < cursorParticlesArray.Length; i++) {
+            CursorParticleData data = new CursorParticleData(spawnPointsArray, i % numSpawnPoints);
+            /*data.worldPos = new Vector3(Random.Range(0f, 256f), Random.Range(0f, 256f), 0f);
             data.vel = Random.insideUnitCircle;
 
             int spawnPointIndex = i % numSpawnPoints;
             data.heading = new Vector2(spawnPointsArray[spawnPointIndex].x, spawnPointsArray[spawnPointIndex].z);
             data.lifespan = Random.Range(20f, 40f);
-            data.age01 = Random.Range(0f, 1f);
+            data.age01 = Random.Range(0f, 1f);*/
             cursorParticlesArray[i] = data;
         }
         
@@ -586,13 +675,14 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         spiritBrushQuadDataCBuffer0 = new ComputeBuffer(1024, GetMemorySizeSpiritbrushQuadData());
         spiritBrushQuadDataCBuffer1 = new ComputeBuffer(1024, GetMemorySizeSpiritbrushQuadData());
         
-        for (int i = 0; i < 1024; i++) {
-            SpiritBrushQuadData data = new SpiritBrushQuadData();
-            data.worldPos = new Vector3(Random.Range(0f, 256f), Random.Range(200f, 256f), 0f);
+        // WPP: using object initializer
+        for (int i = 0; i < spiritBrushQuadDataArray.Length; i++) {
+            SpiritBrushQuadData data = new SpiritBrushQuadData(0, 256f, 200f, 256f, 0.3f);
+            /*data.worldPos = new Vector3(Random.Range(0f, 256f), Random.Range(200f, 256f), 0f);
             data.vel = new Vector2(0f, 0.3f);
             data.heading = new Vector2(0f, 1f);
             data.lifespan = 1f;
-            data.age01 = 0f;
+            data.age01 = 0f;*/
             spiritBrushQuadDataArray[i] = data;
         }
         
@@ -601,13 +691,14 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         //spiritBrushQuadDataSpawnCBuffer.Release();
     }
 
-    private void InitializeCurveRibbonMeshBuffer() {
-
+    private void InitializeCurveRibbonMeshBuffer() 
+    {
         float rowSize = 1f / (float)numCurveRibbonQuads;
 
         curveRibbonVerticesCBuffer = new ComputeBuffer(6 * numCurveRibbonQuads, sizeof(float) * 3);
         Vector3[] verticesArray = new Vector3[curveRibbonVerticesCBuffer.count];
-        for (int i = 0; i < numCurveRibbonQuads; i++) {
+        for (int i = 0; i < numCurveRibbonQuads; i++) 
+        {
             int baseIndex = i * 6;
 
             float startCoord = (float)i;
@@ -797,8 +888,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         treeOfLifeLeafNodeDataArray = new TreeOfLifeLeafNodeData[maxNumTreeOfLifeNodes];
         treeOfLifeLeafNodeDataCBuffer = new ComputeBuffer(treeOfLifeLeafNodeDataArray.Length, sizeof(int) * 3 + sizeof(float) * 14);
         for (int i = 0; i < treeOfLifeLeafNodeDataArray.Length; i++) {
-            TreeOfLifeLeafNodeData data = new TreeOfLifeLeafNodeData();
-            data.speciesID = i;
+            TreeOfLifeLeafNodeData data = new TreeOfLifeLeafNodeData(i);
+            /*data.speciesID = i;
             data.parentSpeciesID = 0;
             data.graphDepth = 0;
             data.primaryHue = Vector3.one;
@@ -807,7 +898,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             data.age = 0f;
             data.decayPercentage = 0f;
             data.isActive = 0f;
-            data.isExtinct = 0f;
+            data.isExtinct = 0f;*/
             treeOfLifeLeafNodeDataArray[i] = data;
         }
         treeOfLifeLeafNodeDataCBuffer.SetData(treeOfLifeLeafNodeDataArray);
@@ -841,16 +932,16 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         }
         treeOfLifeStemSegmentVerticesCBuffer.SetData(verticesArray);
-
-
+        
         // actual segments buffer:
         TreeOfLifeStemSegmentStruct[] treeOfLifeStemSegmentDataArray = new TreeOfLifeStemSegmentStruct[maxNumTreeOfLifeSegments];
         treeOfLifeStemSegmentDataCBuffer = new ComputeBuffer(maxNumTreeOfLifeSegments, sizeof(int) * 3 + sizeof(float) * 1);
         for (int i = 0; i < treeOfLifeStemSegmentDataArray.Length; i++) {
-            TreeOfLifeStemSegmentStruct newStruct = new TreeOfLifeStemSegmentStruct();
-            newStruct.speciesID = 0;
-            newStruct.fromID = 0;
-            newStruct.toID = 0;
+            // WPP: using object initializer
+            TreeOfLifeStemSegmentStruct newStruct = new TreeOfLifeStemSegmentStruct(0, 0, 0);
+            //newStruct.speciesID = 0;
+            //newStruct.fromID = 0;
+            //newStruct.toID = 0;
             treeOfLifeStemSegmentDataArray[i] = newStruct;
         }
         treeOfLifeStemSegmentDataCBuffer.SetData(treeOfLifeStemSegmentDataArray);
@@ -964,7 +1055,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
                 float xCoord = (float)(i % clockOrbitNumPointsPerLine) / (float)clockOrbitNumPointsPerLine;
                 //float timeStepStart = 0f;
-                float timelineRange = Mathf.Max(1f, simManager.simAgeTimeSteps - uiManager.historyPanelUI.timelineStartTimeStep);
+                float timelineRange = Mathf.Max(1f, simManager.simAgeTimeSteps - historyPanel.timelineStartTimeStep);
                 /*
                 float time01 = Mathf.Lerp(uiManager.worldTreePanelUI.timelineStartTimeStep, simManager.simAgeTimeSteps, xCoord) / timelineRange; // Mathf.Lerp(timeStepStart, (float)simManager.simAgeTimeSteps, xCoord);
                 if(uiManager.worldTreePanelUI.GetFocusLevel() == 0) {
@@ -974,7 +1065,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                     //time01 = Mathf.Lerp(timeStepStart, (float)simManager.simAgeTimeSteps, xCoord);
                 }*/
 
-                float timeInput = Mathf.Lerp(uiManager.historyPanelUI.timelineStartTimeStep, simManager.simAgeTimeSteps, xCoord);
+                float timeInput = Mathf.Lerp(historyPanel.timelineStartTimeStep, simManager.simAgeTimeSteps, xCoord);
                 float yCoord = Mathf.Cos(timeInput / orbitalPeriod) * 0.15f * (float)lineID + 0.5f;
                 //float yCoord = Mathf.Cos(time01 / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
 
@@ -986,16 +1077,14 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
                 data.color = Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
                 float frequencyMatch = (orbitalPeriod / timelineRange) * 16.28f;
-                if(frequencyMatch > 0.6f && frequencyMatch < 1.4f) {
-                    data.color *= 1.25f; 
-                }
-                else {
-                    data.color *= 0.8f;
-                }
+                
+                bool isFrequencyMatch = frequencyMatch > 0.6f && frequencyMatch < 1.4f;
+                data.color *= isFrequencyMatch ? 1.25f : 0.8f;
 
                 if(Mathf.Abs(xCoord - cursorCoordsX) < 0.005f) {
                     data.color = Color.white;
                 }
+                
                 clockOrbitLineDataArray[index] = data;
             }
         }
@@ -1018,13 +1107,13 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[line];
                 WorldTreeLineData data = new WorldTreeLineData();
 
-                if (uiManager.historyPanelUI.GetCurPanelMode() == HistoryPanelUI.HistoryPanelMode.AllSpecies) 
+                if (historyPanel.isAllSpeciesMode)
                 {
                     // LINEAGE:
                     float xCoord = (float)i / (float)worldTreeNumPointsPerLine;
                     float yCoord = 1f - ((float)pool.speciesID / (float)Mathf.Max(simManager.masterGenomePool.completeSpeciesPoolsList.Count - 1, 1)); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
                     float zCoord = 0f;
-                    /*if (uiManager.historyPanelUI.GetFocusLevel() == 0) { // Top-Level View -- all species
+                    /*if (historyPanel.GetFocusLevel() == 0) { // Top-Level View -- all species
                             
                     }
                     else {
@@ -1034,7 +1123,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                     
                     Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
 
-                    int timeStepStart = Mathf.RoundToInt(uiManager.historyPanelUI.timelineStartTimeStep);
+                    int timeStepStart = Mathf.RoundToInt(historyPanel.timelineStartTimeStep);
 
                     float xStart01 = (float)(pool.timeStepCreated - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
                     float xEnd01 = 1f;
@@ -1059,7 +1148,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                     data.worldPos = new Vector3(xCoord, yCoord, zCoord);
                 }
 
-                if (uiManager.historyPanelUI.GetCurPanelMode() == HistoryPanelUI.HistoryPanelMode.ActiveSpecies)  
+                if (historyPanel.isActiveSpeciesMode)  
                 {
                     int graphDataYearIndex = 0;
                     
@@ -1072,10 +1161,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                     float val = (float)pool.avgCandidateDataYearList[graphDataYearIndex].performanceData.totalTicksAlive / uiManager.speciesGraphPanelUI.maxValuesStatArray[0];
                     float yCoord = val; // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
                     float zCoord = 0f;
-                                       
                     
                     Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-                    int timeStepStart = Mathf.RoundToInt(uiManager.historyPanelUI.timelineStartTimeStep);
+                    int timeStepStart = Mathf.RoundToInt(historyPanel.timelineStartTimeStep);
 
                     float xStart01 = (float)(pool.timeStepCreated - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
                     float xEnd01 = 1f;
@@ -1127,7 +1215,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
                 Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary * 2f;
 
-                int timeStepStart = Mathf.RoundToInt(uiManager.historyPanelUI.timelineStartTimeStep);
+                int timeStepStart = Mathf.RoundToInt(historyPanel.timelineStartTimeStep);
                 float xStart = (float)(pool.candidateGenomesList[line].performanceData.timeStepHatched - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
                 float xEnd = 1f;
                 if(pool.isExtinct || cand.performanceData.timeStepDied > 1) {
@@ -1591,17 +1679,20 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 Vector3 normal;
                 Vector3 tangent;
 
-                if (y == 0) {  // tailtip
+                // tailtip
+                if (y == 0) {  
                     scale = new Vector2(uTangentAvg.magnitude, vTangentAvg.magnitude) * 0.5f;
                     normal = new Vector3(0f, -1f, 0f);
                     tangent = new Vector3(0f, 0f, 1f);
                 }
-                else if (y == numStrokesPerCritterLength - 1) {  // headTip
+                // headTip
+                else if (y == numStrokesPerCritterLength - 1) {  
                     scale = new Vector2(uTangentAvg.magnitude, vTangentAvg.magnitude) * 0.5f;
                     normal = new Vector3(0f, 1f, 0f);
                     tangent = new Vector3(0f, 0f, 1f);
                 }
-                else {  // body
+                // body
+                else {  
                     scale = new Vector2(uTangentAvg.magnitude, vTangentAvg.magnitude);
                     normal = Vector3.Cross(uTangentAvg, vTangentAvg).normalized;
                     tangent = vTangentAvg.normalized;
@@ -3347,9 +3438,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         TreeOfLifeLeafNodeData[] updateLeafNodeDataArray = new TreeOfLifeLeafNodeData[1];
 
-        // *** WPP: delegate to constructor
-        TreeOfLifeLeafNodeData data = new TreeOfLifeLeafNodeData();
-        data.speciesID = newSpecies.speciesID;
+        // WPP: using object initializer
+        TreeOfLifeLeafNodeData data = new TreeOfLifeLeafNodeData(newSpecies);
+        /*data.speciesID = newSpecies.speciesID;
         data.parentSpeciesID = newSpecies.parentSpeciesID;
         data.graphDepth = newSpecies.depthLevel;
         data.primaryHue = newSpecies.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
@@ -3358,7 +3449,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         data.age = 0f;
         data.decayPercentage = 0f;
         data.isActive = 1f;
-        data.isExtinct = 0f;
+        data.isExtinct = 0f;*/
         updateLeafNodeDataArray[0] = data;
 
         ComputeBuffer updateLeafNodeDataCBuffer = new ComputeBuffer(updateLeafNodeDataArray.Length, sizeof(int) * 3 + sizeof(float) * 14);
@@ -3387,11 +3478,11 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         {
             int parentSpeciesID = masterGenomePool.completeSpeciesPoolsList[curSpeciesID].parentSpeciesID;
 
-            // Create StemSegment!    
-            TreeOfLifeStemSegmentStruct newStemSegment = new TreeOfLifeStemSegmentStruct();
-            newStemSegment.speciesID = newSpeciesID;
-            newStemSegment.fromID = parentSpeciesID;
-            newStemSegment.toID = curSpeciesID;
+            // WPP: using object initializer    
+            TreeOfLifeStemSegmentStruct newStemSegment = new TreeOfLifeStemSegmentStruct(curSpeciesID, newSpeciesID, parentSpeciesID);
+            //newStemSegment.speciesID = newSpeciesID;
+            //newStemSegment.fromID = parentSpeciesID;
+            //newStemSegment.toID = curSpeciesID;
 
             segmentStructUpdateArray[i] = newStemSegment;
             

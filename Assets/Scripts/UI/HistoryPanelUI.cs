@@ -24,15 +24,20 @@ public class HistoryPanelUI : MonoBehaviour
     private GameObject tempPanelSpeciesPop;
 
     private HistoryPanelMode curPanelMode;
+    
     public enum HistoryPanelMode {
         AllSpecies,
         ActiveSpecies,
         SpeciesPopulation,
         CreatureTimeline
     }
+    
     public HistoryPanelMode GetCurPanelMode() {
         return curPanelMode;
     }
+    
+    public bool isAllSpeciesMode => curPanelMode == HistoryPanelMode.AllSpecies;
+    public bool isActiveSpeciesMode => curPanelMode == HistoryPanelMode.ActiveSpecies;
 
     // How to sync rendered geo with UI buttons???
     
