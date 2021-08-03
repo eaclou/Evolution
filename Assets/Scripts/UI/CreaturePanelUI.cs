@@ -6,6 +6,9 @@ using UnityEngine.UI;
 
 public class CreaturePanelUI : MonoBehaviour
 {
+    SimulationManager simulationManager => SimulationManager.instance;
+    CameraManager cameraManager => CameraManager.instance;
+
     [SerializeField]
     GameObject panelPortrait;
     [SerializeField]
@@ -22,6 +25,11 @@ public class CreaturePanelUI : MonoBehaviour
     [SerializeField]
     Image imageBrainIcon;
 
+    public TooltipUI tooltipCurrentAction;
+    public TooltipUI tooltipGenome;
+    public TooltipUI tooltipAppearance;
+    
+
     [SerializeField]
     Text textPanelStateDebug;
 
@@ -31,18 +39,14 @@ public class CreaturePanelUI : MonoBehaviour
         Genome,
         Brain
     }
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    
     
     public void Tick() {
         textPanelStateDebug.text = "MODE: " + curPanelMode;
 
         Color onColor = Color.gray;
         Color offColor = Color.white;
-
+                
         if (curPanelMode == CreaturePanelMode.Portrait) {
             panelPortrait.SetActive(true);
             imageAppearanceIcon.color = onColor;
@@ -70,6 +74,15 @@ public class CreaturePanelUI : MonoBehaviour
             imageGenomeIcon.color = offColor;
             imageAppearanceIcon.color = offColor;
         }
+
+        Agent agent = simulationManager.agents[cameraManager.targetAgentIndex];
+        if (agent.coreModule == null) return;
+        tooltipCurrentAction.tooltipString = "BRAIN\nAction: " + agent.curActionState;
+        //textGeneration.text = "Gen: " + genome.generationCount;
+        //textBodySize.text = "Size: " + (100f * core.creatureBaseLength).ToString("F0") + ", Aspect 1:" + (1f / core.creatureAspectRatio).ToString("F0");
+        //textBrainSize.text = "Brain Size: " + brain.bodyNeuronList.Count + "--" + brain.linkList.Count;
+        tooltipGenome.tooltipString = "GENOME\nGen#" + agent.candidateRef.candidateGenome.generationCount + ", DNA length: " + (agent.candidateRef.candidateGenome.brainGenome.linkList.Count + agent.candidateRef.candidateGenome.brainGenome.bodyNeuronList.Count);
+        tooltipAppearance.tooltipString = "APPEARANCE";
     }
 
     public void SetPanelMode(int modeID) {

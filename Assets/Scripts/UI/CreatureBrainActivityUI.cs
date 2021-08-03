@@ -7,50 +7,6 @@ public class CreatureBrainActivityUI : MonoBehaviour
 
     public AgentBehaviorOneHot agentBehaviorOneHot;
 
-    //*** EAC REFACTOR THIS!!! *** first pass brute force approach just to get the Tooltips working initially!!!! ***
-    /*[SerializeField]
-    public TooltipUI sensorFoodPlant;
-    [SerializeField]
-    public TooltipUI sensorFoodMicrobe;
-    [SerializeField]
-    public TooltipUI sensorFoodEgg;
-    [SerializeField]
-    public TooltipUI sensorFoodAnimal;
-    [SerializeField]
-    public TooltipUI sensorFoodCorpse;
-    [SerializeField]
-    public TooltipUI sensorFriend;
-    [SerializeField]
-    public TooltipUI sensorFoe;
-    [SerializeField]
-    public TooltipUI sensorWalls;
-    [SerializeField]
-    public TooltipUI sensorWater;
-    [SerializeField]
-    public TooltipUI sensorInternals;
-    [SerializeField]
-    public TooltipUI sensorContact;
-    [SerializeField]
-    public TooltipUI sensorCommsIn;
-    [SerializeField]
-    public TooltipUI effectorBite;
-    [SerializeField]
-    public TooltipUI effectorAttack;
-    [SerializeField]
-    public TooltipUI effectorDefend;
-    [SerializeField]
-    public TooltipUI effectorDash;
-    [SerializeField]
-    public TooltipUI effectorRest;
-    [SerializeField]
-    public TooltipUI effectorComms0;
-    [SerializeField]
-    public TooltipUI effectorComms1;
-    [SerializeField]
-    public TooltipUI effectorComms2;
-    [SerializeField]
-    public TooltipUI effectorComms3;
-    */
     public Material newInspectAgentCurActivityMat;
     public Material newInspectAgentThrottleMat;
     public Material newInspectAgentCommsMat;

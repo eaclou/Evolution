@@ -128,7 +128,7 @@ public class AgentBehaviorOneHot : MonoBehaviour {
         else {
             textRest.color = inactiveColor;
         }
-        behaviorBarRest.transform.localScale = new Vector3(rest * 0.25f + 0.75f, rest * 0.25f + 0.75f,  1f);
+        behaviorBarRest.transform.localScale = new Vector3(rest * 0.1f + 0.9f, rest * 0.1f + 0.9f,  1f);
         UpdateBarColor(behaviorBarRest.GetComponent<Image>(), rest, isActive);
         behaviorBarRest.GetComponent<TooltipUI>().tooltipString = "Rest: " + rest.ToString("F2");
         
@@ -140,7 +140,7 @@ public class AgentBehaviorOneHot : MonoBehaviour {
         else {
             textDash.color = inactiveColor;
         }
-        behaviorBarDash.transform.localScale = Vector3.one * (dash * 0.25f + 0.75f); // new Vector3(dash * 0.5f + 0.5f, dash * 0.5f + 0.5f, 1f);
+        behaviorBarDash.transform.localScale = Vector3.one * (dash * 0.1f + 0.9f); // new Vector3(dash * 0.5f + 0.5f, dash * 0.5f + 0.5f, 1f);
         UpdateBarColor(behaviorBarDash.GetComponent<Image>(), dash, isActive);
         behaviorBarDash.GetComponent<TooltipUI>().tooltipString = "Dash: " + dash.ToString("F2");
 
@@ -152,7 +152,7 @@ public class AgentBehaviorOneHot : MonoBehaviour {
         else {
             textGuard.color = inactiveColor;
         }
-        behaviorBarGuard.transform.localScale = Vector3.one * (guard * 0.25f + 0.75f); // new Vector3(guard * 0.5f + 0.5f, guard * 0.5f + 0.5f,  1f);
+        behaviorBarGuard.transform.localScale = Vector3.one * (guard * 0.1f + 0.9f); // new Vector3(guard * 0.5f + 0.5f, guard * 0.5f + 0.5f,  1f);
         UpdateBarColor(behaviorBarGuard.GetComponent<Image>(), guard, isActive);
         behaviorBarGuard.GetComponent<TooltipUI>().tooltipString = "Guard: " + guard.ToString("F2");
 
@@ -164,7 +164,7 @@ public class AgentBehaviorOneHot : MonoBehaviour {
         else {
             textBite.color = inactiveColor;
         }
-        behaviorBarBite.transform.localScale = Vector3.one * (bite * 0.25f + 0.75f); // new Vector3(bite * 0.5f + 0.5f, bite * 0.5f + 0.5f, 1f);
+        behaviorBarBite.transform.localScale = Vector3.one * (bite * 0.1f + 0.9f); // new Vector3(bite * 0.5f + 0.5f, bite * 0.5f + 0.5f, 1f);
         UpdateBarColor(behaviorBarBite.GetComponent<Image>(), bite, isActive);
         behaviorBarBite.GetComponent<TooltipUI>().tooltipString = "Bite: " + bite.ToString("F2");
 
@@ -176,7 +176,7 @@ public class AgentBehaviorOneHot : MonoBehaviour {
         else {
             textAttack.color = inactiveColor;
         }
-        behaviorBarAttack.transform.localScale = Vector3.one * (attack * 0.25f + 0.75f); // new Vector3(attack * 0.5f + 0.5f, attack * 0.5f + 0.5f, 1f);
+        behaviorBarAttack.transform.localScale = Vector3.one * (attack * 0.1f + 0.9f); // new Vector3(attack * 0.5f + 0.5f, attack * 0.5f + 0.5f, 1f);
         UpdateBarColor(behaviorBarAttack.GetComponent<Image>(), attack, isActive);
         behaviorBarAttack.GetComponent<TooltipUI>().tooltipString = "Attack: " + attack.ToString("F2");
 

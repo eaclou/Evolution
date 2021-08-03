@@ -419,6 +419,8 @@ public class Agent : MonoBehaviour {
                 CheckForDeathHealth();
                 CheckForDeathOldAge();
                 CheckForDeathDivineJudgment();
+
+                CheckForMaturity();
                 break;
             case AgentLifeStage.Dead:
                 if(currentBiomass <= 0f) { //// || lifeStageTransitionTimeStepCounter >= decayDurationTimeSteps) {  // Fully decayed
@@ -815,7 +817,14 @@ public class Agent : MonoBehaviour {
         isPregnantAndCarryingEggs = false;
         pregnancyRefactoryTimeStepCounter = 0;
     }
-    
+    private void CheckForMaturity() {
+        float starterMass = settingsRef.agentSettings._BaseInitMass * settingsRef.agentSettings._MinPregnancyFactor;
+        float curProportion = currentBiomass * settingsRef.agentSettings._MaxPregnancyProportion;
+        // probably 0.05 * 2 = 0.1   for now
+        if (curProportion > starterMass) { // Good to go!
+            isSexuallyMature = true;
+        }
+    }
     public void CompletedPregnancy() {
         childEggSackRef = null;
         candidateRef.performanceData.totalTimesPregnant++;

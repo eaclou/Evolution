@@ -20,15 +20,8 @@ public class HistoryPanelUI : MonoBehaviour
 
     [SerializeField]
     Text textPanelStateDebug;
-
-    private int focusLevel = 0; // REMOVE!
-    public int GetFocusLevel() {
-        return focusLevel;
-    }
-    private int curIntMode = 0;  // 0 == lineage, 1 == graph // also REMOVE!
-    public int GetIntMode() {
-        return curIntMode;
-    }
+    [SerializeField]
+    private GameObject tempPanelSpeciesPop;
 
     private HistoryPanelMode curPanelMode;
     public enum HistoryPanelMode {
@@ -36,6 +29,9 @@ public class HistoryPanelUI : MonoBehaviour
         ActiveSpecies,
         SpeciesPopulation,
         CreatureTimeline
+    }
+    public HistoryPanelMode GetCurPanelMode() {
+        return curPanelMode;
     }
 
     // How to sync rendered geo with UI buttons???
@@ -52,6 +48,7 @@ public class HistoryPanelUI : MonoBehaviour
     public void Tick() {
         textPanelStateDebug.text = "MODE: " + curPanelMode;
         float targetStartTimeStep = 0f;
+        tempPanelSpeciesPop.SetActive(false);
 
         if(curPanelMode == HistoryPanelMode.AllSpecies) {
             //UpdateSpeciesIconsDefault();
@@ -62,6 +59,7 @@ public class HistoryPanelUI : MonoBehaviour
             targetStartTimeStep = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].candidateGenomesList[0].performanceData.timeStepHatched; //***EAC better less naive way to calculate this
         }
         else if(curPanelMode == HistoryPanelMode.SpeciesPopulation) {
+            tempPanelSpeciesPop.SetActive(true);
             UpdateSpeciesIconsSinglePop();
             targetStartTimeStep = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].timeStepCreated;
         }
@@ -85,22 +83,22 @@ public class HistoryPanelUI : MonoBehaviour
     private void CreateSpeciesIcon(SpeciesGenomePool pool) 
     {
         AgentGenome templateGenome = masterGenomePool.completeSpeciesPoolsList[pool.speciesID].leaderboardGenomesList[0].candidateGenome; //.bodyGenome.coreGenome.name;
-            Color color = new Color(templateGenome.bodyGenome.appearanceGenome.huePrimary.x, templateGenome.bodyGenome.appearanceGenome.huePrimary.y, templateGenome.bodyGenome.appearanceGenome.huePrimary.z);
+        Color color = new Color(templateGenome.bodyGenome.appearanceGenome.huePrimary.x, templateGenome.bodyGenome.appearanceGenome.huePrimary.y, templateGenome.bodyGenome.appearanceGenome.huePrimary.z);
 
-            GameObject obj = Instantiate(prefabSpeciesIcon, new Vector3(0f, 0f, 0f), Quaternion.identity);
-            obj.transform.SetParent(anchorGO.transform, false);
-            obj.transform.localPosition = Vector3.zero;
-            obj.transform.localScale = new Vector3(1f, 1f, 1f);
-            obj.GetComponent<Image>().color = color;
+        GameObject obj = Instantiate(prefabSpeciesIcon, new Vector3(0f, 0f, 0f), Quaternion.identity);
+        obj.transform.SetParent(anchorGO.transform, false);
+        obj.transform.localPosition = Vector3.zero;
+        obj.transform.localScale = new Vector3(1f, 1f, 1f);
+        obj.GetComponent<Image>().color = color;
           
-            string labelText = "";
-            labelText += "[" + pool.speciesID + "]";// " + masterGenomePool.completeSpeciesPoolsList[pool.speciesID].foundingCandidate.candidateGenome.bodyGenome.coreGenome.name;
+        string labelText = "";
+        labelText += "[" + pool.speciesID + "]";// " + masterGenomePool.completeSpeciesPoolsList[pool.speciesID].foundingCandidate.candidateGenome.bodyGenome.coreGenome.name;
 
-            obj.GetComponentInChildren<Text>().text = labelText;
-            SpeciesIconUI iconScript = obj.GetComponent<SpeciesIconUI>();
-            speciesIconsList.Add(iconScript);
+        obj.GetComponentInChildren<Text>().text = labelText;
+        SpeciesIconUI iconScript = obj.GetComponent<SpeciesIconUI>();
+        speciesIconsList.Add(iconScript);
 
-            iconScript.Initialize(speciesIconsList.Count - 1, masterGenomePool.completeSpeciesPoolsList[pool.speciesID]);
+        iconScript.Initialize(speciesIconsList.Count - 1, masterGenomePool.completeSpeciesPoolsList[pool.speciesID]);
  
     }
     public void InitializeSpeciesIcons() {
@@ -135,7 +133,7 @@ public class HistoryPanelUI : MonoBehaviour
             }
 
             float indent = 0.05f;
-            if(focusLevel == 0) {
+            /*if(focusLevel == 0) {
 
             }
             else {
@@ -143,7 +141,7 @@ public class HistoryPanelUI : MonoBehaviour
                 if(speciesIconsList[s].linkedPool.speciesID == uiManagerRef.selectedSpeciesID) {
                     indent = 0.1f;
                 }
-            }
+            }*/
 
             xCoord = xCoord * 0.8f + indent;
             yCoord = yCoord * 0.67f + 0.1f;
@@ -174,12 +172,7 @@ public class HistoryPanelUI : MonoBehaviour
             if (pool.isExtinct) {
                 xCoord = (float)pool.timeStepExtinct / Mathf.Max(1f, (float)simulationManager.simAgeTimeSteps);
             }
-            if(focusLevel == 0) {
-
-            }
-            else {
-                xCoord = 0f;
-            }
+            
             if(bestScore == 0f) {
                 bestScore = 1f;
             }
@@ -193,12 +186,7 @@ public class HistoryPanelUI : MonoBehaviour
     private void UpdateSpeciesIconsDefault() {
         for (int s = 0; s < speciesIconsList.Count; s++) {        // simple list, evenly spaced    
             float xCoord = 1f;
-            if(focusLevel == 0) {
-
-            }
-            else {
-                xCoord = 0f;
-            }
+            
             float yCoord = (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);      
             xCoord = xCoord * 0.8f + 0.1f;
             yCoord = yCoord * 0.67f + 0.1f;
@@ -206,7 +194,13 @@ public class HistoryPanelUI : MonoBehaviour
         }
     }
     private void UpdateSpeciesIconsSinglePop() {
-
+        for (int s = 0; s < speciesIconsList.Count; s++) {        // simple list, evenly spaced    
+            float xCoord = 0f;            
+            float yCoord = (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);      
+            xCoord = xCoord * 0.8f + 0.1f;
+            yCoord = yCoord * 0.67f + 0.1f;
+            speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
+        }
     }
     private void UpdateSpeciesIconsCreatureEvents() {
 
