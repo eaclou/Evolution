@@ -61,12 +61,14 @@ public class HistoryPanelUI : MonoBehaviour
         }
         else if(curPanelMode == HistoryPanelMode.ActiveSpecies) {
             UpdateSpeciesIconsGraphMode();
-            targetStartTimeStep = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].candidateGenomesList[0].performanceData.timeStepHatched; //***EAC better less naive way to calculate this
+            targetStartTimeStep = simulationManager.masterGenomePool.completeSpeciesPoolsList[simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[0]].timeStepCreated;
+            
         }
         else if(curPanelMode == HistoryPanelMode.SpeciesPopulation) {
             tempPanelSpeciesPop.SetActive(true);
             UpdateSpeciesIconsSinglePop();
-            targetStartTimeStep = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].timeStepCreated;
+            targetStartTimeStep = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].candidateGenomesList[0].performanceData.timeStepHatched; //***EAC better less naive way to calculate this
+            
         }
         else if(curPanelMode == HistoryPanelMode.CreatureTimeline) {
             UpdateSpeciesIconsCreatureEvents();
@@ -82,7 +84,7 @@ public class HistoryPanelUI : MonoBehaviour
             icon.UpdateIconDisplay(360, isSelected);
         }
         
-        timelineStartTimeStep = Mathf.Lerp(timelineStartTimeStep, targetStartTimeStep, 0.125f);
+        timelineStartTimeStep = Mathf.Lerp(timelineStartTimeStep, targetStartTimeStep, 0.15f);
     }
 
     private void CreateSpeciesIcon(SpeciesGenomePool pool) 

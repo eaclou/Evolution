@@ -1210,7 +1210,13 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 CandidateAgentData cand = pool.candidateGenomesList[line];
 
                 float xCoord = (float)(i) / (float)worldTreeNumPointsPerLine;
-                int numAgentsDisplayed = Mathf.Min(Mathf.Max(pool.candidateGenomesList.Count - 1, 1), worldTreeNumCreatureLines);
+                int numAgentsDisplayed = 0; // Mathf.Min(Mathf.Max(pool.candidateGenomesList.Count - 1, 1), worldTreeNumCreatureLines);
+                for(int a = 0; a < pool.candidateGenomesList.Count; a++) {
+                    if(pool.candidateGenomesList[a].isBeingEvaluated) {
+                        numAgentsDisplayed++;
+                    }
+                }
+                numAgentsDisplayed = Mathf.Max(numAgentsDisplayed, 1); // avoid divide by 0
                 float yCoord = 1f - (float)line / (float)numAgentsDisplayed; // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
 
                 Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary * 2f;
