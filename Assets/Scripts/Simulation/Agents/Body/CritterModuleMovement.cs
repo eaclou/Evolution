@@ -93,15 +93,15 @@ public class CritterModuleMovement {
         }
     }
 
-    public void Tick(Agent agentRef, Vector2 ownVel) {
-
+    public void Tick(Agent agent) 
+    {
         //Vector2 ownPos = new Vector2(agent.rigidbodiesArray[0].transform.localPosition.x, agent.rigidbodiesArray[0].transform.localPosition.y);
         //Vector2 ownVel = new Vector2(rigidbody.velocity.x, rigidbody.velocity.y);
 
-        ownVelX[0] = ownVel.x / 15f;
-        ownVelY[0] = ownVel.y / 15f;
+        ownVelX[0] = agent.ownVel.x / 15f;
+        ownVelY[0] = agent.ownVel.y / 15f;
 
-        facingDirX[0] = agentRef.facingDirection.x;
-        facingDirY[0] = agentRef.facingDirection.y;
+        facingDirX[0] = agent.facingDirection.x;
+        facingDirY[0] = agent.facingDirection.y;
     }
 }

@@ -319,16 +319,16 @@ public class Agent : MonoBehaviour {
     {
         //UpdateInternalResources();  // update energy, stamina, food -- or do this during TickActions?
                
+        // * WPP: iterate through an array of interfaces
         coreModule.Tick();
         communicationModule.Tick(this);
         environmentModule.Tick(this);
-        foodModule.Tick(simManager, this);
+        foodModule.Tick(this);
         friendModule.Tick(this);
-        movementModule.Tick(this, ownVel);
+        movementModule.Tick(this);
         threatsModule.Tick(this);
         // Add more sensor Modules later:
 
-        // Update Mouth::::         
         mouthRef.Tick();
     }
     
@@ -1167,7 +1167,7 @@ public class Agent : MonoBehaviour {
 
         coreModule = new CritterModuleCore(genome.bodyGenome.coreGenome);
 
-        mouthRef.Initialize(genome.bodyGenome.coreGenome, this);
+        mouthRef.Initialize(genome.bodyGenome.coreGenome);
 
         environmentModule = new CritterModuleEnvironment(genome.bodyGenome.environmentalGenome, this);
         foodModule = new CritterModuleFood(genome.bodyGenome.foodGenome, this);
@@ -1246,7 +1246,7 @@ public class Agent : MonoBehaviour {
         mouthRef.triggerCollider.offset = new Vector2(0f, fullSizeBoundingBox.y / 2f * sizePercentage);
         
         mouthRef.agentIndex = index;
-        mouthRef.agentRef = this;
+        //mouthRef.agent = this;
         isResting = false;
 
         //mouthRef.Disable();

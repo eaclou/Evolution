@@ -1,7 +1,11 @@
 ﻿using UnityEngine;
 
 [System.Serializable]
-public class CritterModuleFood {
+public class CritterModuleFood 
+{
+    SimulationManager simulation => SimulationManager.instance;
+    VegetationManager vegetation => simulation.vegetationManager;
+    ZooplanktonManager microbes => simulation.zooplanktonManager;
 
 	public int parentID;
     public int inno;
@@ -265,7 +269,7 @@ public class CritterModuleFood {
         }
     }
 
-    public void Tick(SimulationManager simManager, Agent agent) {
+    public void Tick(Agent agent) {
         /*if(genome.useNutrients) {
             nutrientDensity[0] = nutrientCellInfo.x;
             nutrientGradX[0] = nutrientCellInfo.y;
@@ -282,23 +286,23 @@ public class CritterModuleFood {
         // eventually, if none of first preference are in range of sensor, use next in line: *****
         //foodPreferenceOrder[0] = 0;
         //if(foodPreferenceOrder[0] == 0) {  // particle
-        nearestFoodParticleIndex = simManager.vegetationManager.closestPlantParticlesDataArray[agent.index].index;
-        nearestFoodParticlePos = simManager.vegetationManager.closestPlantParticlesDataArray[agent.index].worldPos - 
-                                    new Vector2(simManager.agents[agent.index].bodyRigidbody.transform.position.x,
-                                    simManager.agents[agent.index].bodyRigidbody.transform.position.y);
+        nearestFoodParticleIndex = vegetation.closestPlantParticlesDataArray[agent.index].index;
+        nearestFoodParticlePos = vegetation.closestPlantParticlesDataArray[agent.index].worldPos - 
+                                 new Vector2(simulation.agents[agent.index].bodyRigidbody.transform.position.x,
+                                     simulation.agents[agent.index].bodyRigidbody.transform.position.y);
 
-        nearestFoodParticleAmount = simManager.vegetationManager.closestPlantParticlesDataArray[agent.index].biomass;
-        Vector2 critterToFoodParticle = simManager.vegetationManager.closestPlantParticlesDataArray[agent.index].worldPos - agent.ownPos;
+        nearestFoodParticleAmount = vegetation.closestPlantParticlesDataArray[agent.index].biomass;
+        Vector2 critterToFoodParticle = vegetation.closestPlantParticlesDataArray[agent.index].worldPos - agent.ownPos;
         float distToNearestFoodParticle = critterToFoodParticle.magnitude;
         Vector2 foodParticleDir = critterToFoodParticle.normalized;
         float nearestFoodParticleDistance = Mathf.Clamp01((sensorRange - critterToFoodParticle.magnitude) / sensorRange); // inverted dist(proximity) 0-1
 
 
         //ANIMAL ZOOPLANKTON:
-        nearestAnimalParticleIndex = simManager.zooplanktonManager.closestAnimalParticlesDataArray[agent.index].index;
-        nearestAnimalParticlePos = simManager.zooplanktonManager.closestAnimalParticlesDataArray[agent.index].worldPos - simManager.agents[agent.index].bodyRigidbody.transform.position;
+        nearestAnimalParticleIndex = microbes.closestAnimalParticlesDataArray[agent.index].index;
+        nearestAnimalParticlePos = microbes.closestAnimalParticlesDataArray[agent.index].worldPos - simulation.agents[agent.index].bodyRigidbody.transform.position;
 
-        nearestAnimalParticleAmount = simManager.zooplanktonManager.closestAnimalParticlesDataArray[agent.index].biomass;
+        nearestAnimalParticleAmount = microbes.closestAnimalParticlesDataArray[agent.index].biomass;
         Vector2 critterToAnimalParticle = new Vector2(nearestAnimalParticlePos.x, nearestAnimalParticlePos.y); // - agent.ownPos;
         float distToNearestAnimalParticle = critterToAnimalParticle.magnitude;
         Vector2 animalParticleDir = critterToAnimalParticle.normalized;

@@ -363,7 +363,7 @@ public class UIManager : Singleton<UIManager> {
     #region UI ELEMENT CLICK FUNCTIONS!!!!
 
     public void ClickLoadingGemStart() {
-        Debug.Log("Let there be not nothing!");
+        //Debug.Log("Let there be not nothing!");
         simulationManager._BigBangOn = true;
     }
     

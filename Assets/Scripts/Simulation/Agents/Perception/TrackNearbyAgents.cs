@@ -9,14 +9,14 @@ public class TrackNearbyAgents : MonoBehaviour
     {
         var mouth = other.GetComponent<CritterMouthComponent>();
         if (!mouth) return;
-        nearbyAgents.Add(mouth.agentRef);
+        nearbyAgents.Add(mouth.agent);
     }
     
     void OnTriggerExit2D(Collider2D other)
     {
         var mouth = other.GetComponent<CritterMouthComponent>();
         if (!mouth) return;
-        nearbyAgents.Remove(mouth.agentRef);
+        nearbyAgents.Remove(mouth.agent);
     }
     
     void OnDisable() 

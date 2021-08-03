@@ -1,15 +1,19 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class CritterMouthComponent : MonoBehaviour 
 {
     [SerializeField] float predatorBonus = 1f;
     [SerializeField] float defaultTargetArea = 1f;
 
-    public Agent agentRef;
+    public Agent agent;
     public int agentIndex = -1;
     
     public bool isFeeding = false;
     public bool isAttacking = false;
+    
+    List<Collider2D> edibleObjectsInRange = new List<Collider2D>();
+    bool edibleIsInRange => edibleObjectsInRange.Count >= 1;
 
     public float lastBiteFoodAmount = 0f;   // * WPP: assigned but not used
     
@@ -19,7 +23,16 @@ public class CritterMouthComponent : MonoBehaviour
 
     public void Tick() 
     {
-        agentRef.coreModule.objectInRangeOfMouth = false;
+        //agent.coreModule.objectInRangeOfMouth = false;
+        agent.coreModule.objectInRangeOfMouth = edibleIsInRange;
+        if (!edibleIsInRange) return;
+
+        // is the current frame the Damage-Frame?
+        if (isFeeding && agent.feedingFrameCounter == agent.feedAnimDuration / 2 && !agent.isDead)
+            ActiveFeedBiteCheck();
+
+        if(isAttacking && agent.isAttackBiteFrame && !agent.isDead)
+            ActiveAttackBiteCheck();
     }
     
     public void Disable() 
@@ -33,44 +46,67 @@ public class CritterMouthComponent : MonoBehaviour
     }
 
     // TBD: Set Values from Genome
-    public void Initialize(CritterModuleCoreGenome genome, Agent agent) { }
+    public void Initialize(CritterModuleCoreGenome genome) { }
     
-    void OnTriggerEnter2D(Collider2D collider) { TriggerCheck(collider); }
+    void OnTriggerEnter2D(Collider2D other) 
+    {
+        if (IsEdible(other))
+            edibleObjectsInRange.Add(other);
+     
+        //TriggerCheck(other); 
+    }
     
+    void OnTriggerExit2D(Collider2D other) 
+    {
+        if (IsEdible(other))
+            edibleObjectsInRange.Remove(other);
+    }
+    
+    bool IsEdible(Collider2D other) 
+    { 
+        return !other.gameObject.CompareTag("HazardCollider") && agent != null; 
+    }
+    
+    // WPP: replaced OnTriggerStay with list tracking on Enter/Exit for efficiency
+    // Logic moved to Tick
+    /*
     void OnTriggerStay2D(Collider2D collider) { TriggerCheck(collider); }
-    
-    void TriggerCheck(Collider2D collider) 
+
+    void TriggerCheck()//(Collider2D other) 
     {
         // Creature OutputNeuron controls mouthEffector[0] = (intention to feed) --> enables collider trigger
         // when collider enabled, OnTriggerEnter/Stay --> attempt to start a bite
         // when bite reaches execution frame, process bite action & consequences
-        if (!collider.gameObject.CompareTag("HazardCollider") && agentRef != null)
-            agentRef.coreModule.objectInRangeOfMouth = true;
+        if (!collider.gameObject.CompareTag("HazardCollider") && agent != null)
+            agent.coreModule.objectInRangeOfMouth = true;
 
         // is the current frame the Damage-Frame?
-        if (isFeeding && agentRef.feedingFrameCounter == agentRef.feedAnimDuration / 2 && !agentRef.isDead)
-            ActiveFeedBiteCheck(collider);
+        if (isFeeding && agent.feedingFrameCounter == agent.feedAnimDuration / 2 && !agent.isDead)
+            ActiveFeedBiteCheck(other);
 
-        if(isAttacking && agentRef.isAttackBiteFrame && !agentRef.isDead)
-            ActiveAttackBiteCheck(collider);
+        if(isAttacking && agent.isAttackBiteFrame && !agent.isDead)
+            ActiveAttackBiteCheck(other);
+    }
+    */
+    
+    void ActiveFeedBiteCheck() 
+    {
+        foreach (var edible in edibleObjectsInRange)
+        {
+            RequestFeedBiteAgent(edible);
+            RequestBiteEggSack(edible);
+        }
     }
     
-    void ActiveFeedBiteCheck(Collider2D collider) 
+    void RequestFeedBiteAgent(Collider2D other)
     {
-        RequestFeedBiteAgent(collider);
-        RequestBiteEggSack(collider);
-    }
-    
-    void RequestFeedBiteAgent(Collider2D collider)
-    {
-        Agent collidingAgent = collider.GetComponentInParent<Agent>();
+        Agent collidingAgent = other.GetComponentInParent<Agent>();
         
-        if (collidingAgent == null || 
-            agentIndex == collidingAgent.index) 
+        if (!collidingAgent || agentIndex == collidingAgent.index) 
             return;
         
         // Same species = cannibalism
-        if (agentRef.speciesIndex == collidingAgent.speciesIndex) 
+        if (agent.speciesIndex == collidingAgent.speciesIndex) 
         {  
             if (!collidingAgent.isDead) return;
             
@@ -88,11 +124,11 @@ public class CritterMouthComponent : MonoBehaviour
         }
     }
 
-    void RequestBiteEggSack(Collider2D collider)
+    void RequestBiteEggSack(Collider2D other)
     {
-        EggSack collidingEggSack = collider.GetComponent<EggSack>();
+        EggSack collidingEggSack = other.GetComponent<EggSack>();
         
-        if (collidingEggSack == null) return;
+        if (!collidingEggSack) return;
         
         if(ownBiteArea > collidingEggSack.area)
             SwallowEggSackWhole(collidingEggSack);
@@ -100,19 +136,20 @@ public class CritterMouthComponent : MonoBehaviour
             BiteEggSack(collidingEggSack, ownBiteArea);
     }
 
-    void ActiveAttackBiteCheck(Collider2D collider) 
+    void ActiveAttackBiteCheck() 
     {
-        RequestAttackBiteAgent(collider);
-        RequestBiteEggSack(collider);
+        foreach (var edible in edibleObjectsInRange)
+        {
+            RequestAttackBiteAgent(edible);
+            RequestBiteEggSack(edible);
+        }
     }
     
-    void RequestAttackBiteAgent(Collider2D collider)
+    void RequestAttackBiteAgent(Collider2D other)
     {
-        Agent collidingAgent = collider.GetComponentInParent<Agent>();
+        Agent collidingAgent = other.GetComponentInParent<Agent>();
         
-        if (collidingAgent == null || 
-            agentIndex == collidingAgent.index ||
-            collidingAgent.isDead) 
+        if (!collidingAgent || agentIndex == collidingAgent.index || collidingAgent.isDead) 
             return;
         
         float targetArea = collidingAgent.xyBoundArea;
@@ -133,10 +170,10 @@ public class CritterMouthComponent : MonoBehaviour
         }
 
         //Debug.Log("SwallowAnimalWhole [" + agentRef.index.ToString() + "] ---> [" + preyAgent.index.ToString() + "]");
-        if (agentRef.isSwallowingPrey) return;
+        if (agent.isSwallowingPrey) return;
         
-        preyAgent.InitiateBeingSwallowed(agentRef);            
-        agentRef.InitiateSwallowingPrey(preyAgent);
+        preyAgent.InitiateBeingSwallowed(agent);            
+        agent.InitiateSwallowingPrey(preyAgent);
         // Credit food:
         //float flow = preyAgent.sizePercentage * (preyAgent.fullSizeBoundingBox.x + preyAgent.fullSizeBoundingBox.z) * preyAgent.fullSizeBoundingBox.y * 0.5f; // + preyAgent.coreModule.stomachContents;
         //agentRef.EatFoodMeat(flow); // assumes all foodAmounts are equal !! *****    
@@ -144,8 +181,8 @@ public class CritterMouthComponent : MonoBehaviour
 
     void SwallowEggSackWhole(EggSack eggSack) 
     {
-        float foodEaten = eggSack.foodAmount * 10f * agentRef.coreModule.digestEfficiencyDecay;
-        agentRef.EatEggsWhole(foodEaten);
+        float foodEaten = eggSack.foodAmount * 10f * agent.coreModule.digestEfficiencyDecay;
+        agent.EatEggsWhole(foodEaten);
         eggSack.ConsumedByPredatorAgent();
     }
     
@@ -154,13 +191,13 @@ public class CritterMouthComponent : MonoBehaviour
         //Debug.Log("BiteAnimal");
         float baseDamage = 3.14f;
         float sizeRatio = ownBiteArea / targetArea; // for now clamped to 10x
-        float damage = baseDamage * sizeRatio * agentRef.coreModule.damageBonus;
+        float damage = baseDamage * sizeRatio * agent.coreModule.damageBonus;
         damage = Mathf.Clamp01(damage);
 
         //agentRef.coreModule.energy += 5f;
 
-        preyAgent.ProcessBiteDamageReceived(damage, agentRef);
-        agentRef.RegisterAgentEvent(Time.frameCount, "Bit Vertebrate! (" + damage + ") candID: " + preyAgent.candidateRef.candidateID, 1f);
+        preyAgent.ProcessBiteDamageReceived(damage, agent);
+        agent.RegisterAgentEvent(Time.frameCount, "Bit Vertebrate! (" + damage + ") candID: " + preyAgent.candidateRef.candidateID, 1f);
         //if(agentRef.coreModule.foodEfficiencyMeat > 0.5f) { // ** // damage bonus -- provided has the required specialization level:::::
         //    agentRef.GainExperience(damage * 0.5f);  
         //}
@@ -178,18 +215,18 @@ public class CritterMouthComponent : MonoBehaviour
         eggSack.BittenByAgent(numEggsEaten, massConsumed);
 
         float foodEaten = numEggsEaten > 0 ? 
-            Mathf.Min(massConsumed, ownArea * predatorBonus) * 10f * agentRef.coreModule.digestEfficiencyDecay : 
+            Mathf.Min(massConsumed, ownArea * predatorBonus) * 10f * agent.coreModule.digestEfficiencyDecay : 
             0f;
 
-        agentRef.EatEggs(foodEaten);
+        agent.EatEggs(foodEaten);
     }
     
     public void BiteCorpse(Agent corpseAgent)
     {  
-        float biteSize = ownBiteArea * 10f * agentRef.coreModule.digestEfficiencyDecay;        
+        float biteSize = ownBiteArea * 10f * agent.coreModule.digestEfficiencyDecay;        
         float foodEaten = Mathf.Min(corpseAgent.currentBiomass, biteSize) * 100f;
         
-        agentRef.EatCorpse(foodEaten, biteSize);
+        agent.EatCorpse(foodEaten, biteSize);
         corpseAgent.ProcessBeingEaten(foodEaten);
     }
 }
