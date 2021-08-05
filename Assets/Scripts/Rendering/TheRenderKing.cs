@@ -21,10 +21,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     public BaronVonWater baronVonWater;
 
     // * WPP: values assigned but not used
-    public float tempSwimMag = 1f;
-    public float tempSwimFreq = 1f;
-    public float tempSwimSpeed = 1f;
-    public float tempAccelMult = 1f;
+    //public float tempSwimMag = 1f;
+    //public float tempSwimFreq = 1f;
+    //public float tempSwimSpeed = 1f;
+    //public float tempAccelMult = 1f;
 
     public GameObject sunGO;
     private Vector3 sunDirection = new Vector3(-1f, 0.7f, -1f).normalized;
@@ -48,8 +48,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private CommandBuffer cmdBufferResourceSim;
     private CommandBuffer cmdBufferWorldTree;
 
-    public ComputeShader computeShaderBrushStrokes;  // Not used
-    public ComputeShader computeShaderUberChains;    // Not used
+    //public ComputeShader computeShaderBrushStrokes;  // Not used
+    //public ComputeShader computeShaderUberChains;    // Not used
     public ComputeShader computeShaderCritters;
     public ComputeShader computeShaderEggSacks;
     public ComputeShader computeShaderTreeOfLife; //***EAC revisit --> convert to WorldTree
@@ -139,10 +139,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private const float velScale = 0.390f; // Conversion for rigidBody Vel --> fluid vel units ----  // approx guess for now ** HACK
 
     // * WPP: values assigned but not used
-    public bool nutrientToolOn = false;
-    public bool mutateToolOn = false;
-    public bool removeToolOn = false;
-    public bool isStirring = false;
+    //public bool nutrientToolOn = false;
+    //public bool mutateToolOn = false;
+    //public bool removeToolOn = false;
+    //public bool isStirring = false;
     
     public bool isBrushing = false;
 
@@ -151,7 +151,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private int numCurveRibbonQuads = 4;
     private ComputeBuffer curveRibbonVerticesCBuffer;  // short ribbon mesh
 
-    private int numStrokesPerCritterSkin = 128;        
+    //private int numStrokesPerCritterSkin = 128;        
     private int numStrokesPerCritterLength = 32;   // This is the official order of brush indexing!!!
     private int numStrokesPerCritterCross = 32;
     private int numStrokesPerCritterEyes = 256;
@@ -161,10 +161,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private int numStrokesPerCritterDorsalFin = 128;
     private int numStrokesPerCritterTailFin = 128;
     private int numStrokesPerCritterSkinDetail = 128;
-    private ComputeBuffer mainCritterStrokesCBuffer;
-    
+    private ComputeBuffer mainCritterStrokesCBuffer;    
 
-    private int numFloatyBits = 1024 * 4;
+    private int numFloatyBits = 1024 * 1;
     private ComputeBuffer floatyBitsCBuffer;
 
     private BasicStrokeData[] obstacleStrokeDataArray;
@@ -301,7 +300,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     //    public Vector3 localPos;
     //    public Vector3 scale;
     //}
-    
+    /*
     // * WPP: not used
     public struct TreeOfLifeLeafNodeData 
     {
@@ -392,7 +391,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public float age;
         public float strength;
     }
-
+    */
     public struct FloatyBitData {
         public Vector2 coords;
         public Vector2 vel;
@@ -556,8 +555,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public Vector2 scale;
         public Vector4 color;
     }
-
-
+    
     private int debugFrameCounter = 0;
 
     public bool isToolbarCritterPortraitEnabled = false;

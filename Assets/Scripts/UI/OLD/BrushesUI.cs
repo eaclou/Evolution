@@ -392,7 +392,7 @@ public class BrushesUI : MonoBehaviour {
         else {
             simulationManager.PlayerToolStirOff();
         }
-        theRenderKing.isStirring = theCursorCzar.isDraggingMouseLeft || theCursorCzar.isDraggingMouseRight; 
+        //theRenderKing.isStirring = theCursorCzar.isDraggingMouseLeft || theCursorCzar.isDraggingMouseRight; 
     }
 
     public void Unlock() {

@@ -633,25 +633,11 @@ public class SimulationManager : Singleton<SimulationManager>
             CheckForYearEvent();
         }
 
-        if(simAgeTimeSteps % 80 == 10) {
+        if(simAgeTimeSteps % 80 == 70) {
             uiManager.speciesGraphPanelUI.UpdateSpeciesTreeDataTextures(curSimYear);
             
-            //uiManager.worldTreePanelUI.UpdateSpeciesIconsTargetCoords();
-
             globalGraphData.AddNewEntry(simResourceManager, GetTotalAgentBiomass());
-            //graphDataGlobalVertebrates.AddNewEntry(totalAgentBiomass); // simResourceManager.curGlobalAgentBiomass);
-                                                                       //uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
-
-            /*
-            if(speciesID0 >= masterGenomePool.completeSpeciesPoolsList.Count) {
-                Debug.LogError("ERROR! speciesID >= masterGenomePool.completeSpeciesPoolsList.Count");
-            }
-            else {
-                graphDataVertebrateLifespan0.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID0].avgPerformanceData.totalTicksAlive);
-                graphDataVertebratePopulation0.AddNewEntry(totalSpeciesPopulation0);
-                graphDataVertebrateFoodEaten0.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID0].avgPerformanceData.totalFoodEatenZoop + masterGenomePool.completeSpeciesPoolsList[speciesID0].avgPerformanceData.totalFoodEatenPlant + masterGenomePool.completeSpeciesPoolsList[speciesID0].avgPerformanceData.totalFoodEatenEgg + masterGenomePool.completeSpeciesPoolsList[speciesID0].avgPerformanceData.totalFoodEatenCorpse + masterGenomePool.completeSpeciesPoolsList[speciesID0].avgPerformanceData.totalFoodEatenCreature);
-                //graphDataVertebrateGenome0.AddNewEntry(masterGenomePool.completeSpeciesPoolsList[speciesID0].avgBodySize);
-            }*/
+            
         }
 
         if(simAgeTimeSteps % 79 == 3) {

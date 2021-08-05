@@ -123,11 +123,7 @@ public class UIManager : Singleton<UIManager> {
     public bool IsFocus(CandidateAgentData candidate) { return candidate.candidateID == focusedCandidate.candidateID; }
     
     public void SetSelectedSpeciesUI(int id) {
-        //if(id == selectedSpeciesID) {
-            // already selected -->
-            //worldTreePanelUI.ToggleFocusLevel(); // species overview vs world overview
-        //}
-
+        
         selectedSpeciesID = id;
         speciesOverviewUI.RebuildGenomeButtons();
     }

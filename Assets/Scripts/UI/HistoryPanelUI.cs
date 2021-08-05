@@ -8,6 +8,8 @@ public class HistoryPanelUI : MonoBehaviour
     public GameObject prefabSpeciesIcon;
     public GameObject prefabCreatureIcon;
 
+    public Button buttonToggleExtinct;
+
     private List<SpeciesIconUI> speciesIconsList;  // keeping track of spawned buttons
     private List<CreatureIconUI> creatureIconsList;
 
@@ -22,6 +24,8 @@ public class HistoryPanelUI : MonoBehaviour
     Text textPanelStateDebug;
     [SerializeField]
     private GameObject tempPanelSpeciesPop;
+    [SerializeField]
+    private GameObject tempPanelGraph;
 
     private HistoryPanelMode curPanelMode;
     
@@ -90,14 +94,7 @@ public class HistoryPanelUI : MonoBehaviour
                     float xCoord = (float)i / (float)worldTreeNumPointsPerLine;
                     float yCoord = 1f - ((float)pool.speciesID / (float)Mathf.Max(simManager.masterGenomePool.completeSpeciesPoolsList.Count - 1, 1)); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
                     float zCoord = 0f;
-                    /*if (historyPanel.GetFocusLevel() == 0) { // Top-Level View -- all species
-                            
-                    }
-                    else {
-                        xCoord = 0f; //***EAC TEMPORARY!!!! should be animated or just hidden
-                        yCoord = 0f;
-                    }*/
-                    
+                                        
                     Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
 
                     int timeStepStart = Mathf.RoundToInt(timelineStartTimeStep);
@@ -124,7 +121,6 @@ public class HistoryPanelUI : MonoBehaviour
                     }
                     data.worldPos = new Vector3(xCoord, yCoord, zCoord);
                 }
-
                 if (isActiveSpeciesMode)  
                 {
                     int graphDataYearIndex = 0;
@@ -166,6 +162,11 @@ public class HistoryPanelUI : MonoBehaviour
                     if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
                         data.color = Color.white;
                     }
+                }
+
+                if (curPanelMode == HistoryPanelMode.SpeciesPopulation || curPanelMode == HistoryPanelMode.CreatureTimeline) {
+                    data.worldPos = Vector3.zero;
+                    data.color = new Color(0f, 0f, 0f, 0f);
                 }
                 
                 worldTreeLineDataArray[index] = data;
@@ -226,15 +227,48 @@ public class HistoryPanelUI : MonoBehaviour
                 yCoord = yCoord * 0.67f + 0.1f;
                                 
                 data.worldPos = new Vector3(xCoord, yCoord, 0f);                     
-                if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
+                if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) { // Mouse hover highlight
                     data.color = Color.white;
+                }
+
+                if (curPanelMode == HistoryPanelMode.AllSpecies || curPanelMode == HistoryPanelMode.ActiveSpecies) {
+                    data.worldPos = Vector3.zero;
+                    data.color = new Color(0f, 0f, 0f, 0f);
                 }
                 worldTreeLineDataArray[index] = data;
             }
         }
-
-        //clockOrbitLineDataCBuffer.SetData(clockOrbitLineDataArray);
+        
         worldTreeLineDataCBuffer.SetData(worldTreeLineDataArray);
+    }
+
+    public void ClickSpeciesIcon(SpeciesIconUI iconUI) {
+
+        if(iconUI.linkedPool.speciesID == uiManagerRef.selectedSpeciesID) {
+            Debug.Log("ClickSpeciesIcon(SpeciesIconUI iconUI) " + curPanelMode);
+            if (curPanelMode == HistoryPanelMode.SpeciesPopulation) {
+                // Acting as a "BACK" button!
+                curPanelMode = HistoryPanelMode.ActiveSpecies;
+            }
+            else if(curPanelMode == HistoryPanelMode.ActiveSpecies || curPanelMode == HistoryPanelMode.AllSpecies) {
+                // Zoom into sel species pop
+                curPanelMode = HistoryPanelMode.SpeciesPopulation;
+            }
+        }
+        else {
+            uiManagerRef.SetSelectedSpeciesUI(iconUI.linkedPool.speciesID);  
+        }
+        
+
+        
+    }
+    public void ClickButtonToggleExtinct() {
+        if(curPanelMode == HistoryPanelMode.AllSpecies) {
+            curPanelMode = HistoryPanelMode.ActiveSpecies;
+        }
+        else if(curPanelMode == HistoryPanelMode.ActiveSpecies) {
+            curPanelMode = HistoryPanelMode.AllSpecies;
+        }
     }
     public void ClickButtonModeCycle() {
         curPanelMode++;
@@ -246,25 +280,30 @@ public class HistoryPanelUI : MonoBehaviour
         textPanelStateDebug.text = "MODE: " + curPanelMode;
         float targetStartTimeStep = 0f;
         tempPanelSpeciesPop.SetActive(false);
+        tempPanelGraph.SetActive(false);
 
         if(curPanelMode == HistoryPanelMode.AllSpecies) {
             //UpdateSpeciesIconsDefault();
             UpdateSpeciesIconsLineageMode();
+            buttonToggleExtinct.gameObject.SetActive(true);
         }
         else if(curPanelMode == HistoryPanelMode.ActiveSpecies) {
             UpdateSpeciesIconsGraphMode();
             targetStartTimeStep = simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[0]].timeStepCreated;
-            
+            buttonToggleExtinct.gameObject.SetActive(true);
+            tempPanelGraph.SetActive(true);
+            //Set(bool value)
         }
         else if(curPanelMode == HistoryPanelMode.SpeciesPopulation) {
             tempPanelSpeciesPop.SetActive(true);
             UpdateSpeciesIconsSinglePop();
             targetStartTimeStep = simManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].candidateGenomesList[0].performanceData.timeStepHatched; //***EAC better less naive way to calculate this
-            
+            buttonToggleExtinct.gameObject.SetActive(false);
         }
         else if(curPanelMode == HistoryPanelMode.CreatureTimeline) {
             UpdateSpeciesIconsCreatureEvents();
             targetStartTimeStep = simManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].candidateGenomesList[0].performanceData.timeStepHatched;
+            buttonToggleExtinct.gameObject.SetActive(false);
         }
 
         foreach (var icon in speciesIconsList) {
@@ -273,7 +312,7 @@ public class HistoryPanelUI : MonoBehaviour
                 isSelected = true;
                 icon.gameObject.transform.SetAsLastSibling();
             }
-            icon.UpdateIconDisplay(360, isSelected);
+            icon.UpdateSpeciesIconDisplay(360, isSelected);
         }
         
         timelineStartTimeStep = Mathf.Lerp(timelineStartTimeStep, targetStartTimeStep, 0.15f);
@@ -385,15 +424,40 @@ public class HistoryPanelUI : MonoBehaviour
     }
     private void UpdateSpeciesIconsSinglePop() {
         for (int s = 0; s < speciesIconsList.Count; s++) {        // simple list, evenly spaced    
-            float xCoord = 0f;            
-            float yCoord = (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);      
+            float xCoord = -0.2f;
+            float yCoord = 0.2f;// (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);   // DEFAULTS
+
+            int prevSpeciesIndex = uiManagerRef.selectedSpeciesID - 1;
+            if (prevSpeciesIndex < 0) prevSpeciesIndex = masterGenomePool.completeSpeciesPoolsList.Count - 1;
+            int nextSpeciesIndex = uiManagerRef.selectedSpeciesID + 1;
+            if (nextSpeciesIndex >= masterGenomePool.completeSpeciesPoolsList.Count) nextSpeciesIndex = 0;
+
+            if (speciesIconsList[s].linkedPool.speciesID == prevSpeciesIndex) {  // CYCLE PREV SPECIES
+                xCoord = 0f;
+                yCoord = 1f;
+            }
+            if (speciesIconsList[s].linkedPool.speciesID == uiManagerRef.selectedSpeciesID) {   // SELECTED
+                xCoord = 0f;
+                yCoord = 0.5f;
+            }
+            if (speciesIconsList[s].linkedPool.speciesID == nextSpeciesIndex) {   // CYCLE NEXT SPECIES
+                xCoord = 0f;
+                yCoord = 0f;
+            }
+            
             xCoord = xCoord * 0.8f + 0.1f;
             yCoord = yCoord * 0.67f + 0.1f;
+
             speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
         }
     }
-    private void UpdateSpeciesIconsCreatureEvents() {
 
+    private void UpdateSpeciesIconsCreatureEvents() {
+        for (int s = 0; s < speciesIconsList.Count; s++) {        // simple list, evenly spaced    
+            float xCoord = 0f;            
+            float yCoord = 0f;   // DEFAULTS
+            speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
+        }        
     }
 
     private void OnDisable() {

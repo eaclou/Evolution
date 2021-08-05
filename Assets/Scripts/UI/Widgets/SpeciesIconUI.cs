@@ -25,12 +25,13 @@ public class SpeciesIconUI : MonoBehaviour {
 
     // Updates focusedCandidate in uiManager 
     public void Clicked() {
-        uiManager.SetSelectedSpeciesUI(speciesID);        
+        uiManager.historyPanelUI.ClickSpeciesIcon(this);
+        //uiManager.SetSelectedSpeciesUI(speciesID);        
     }
     public void SetTargetCoords(Vector2 newCoords) {
         targetCoords = newCoords;
     }
-    public void UpdateIconDisplay(int panelPixelSize, bool isSelected) {
+    public void UpdateSpeciesIconDisplay(int panelPixelSize, bool isSelected) {
         // POSITION
         currentCoords = Vector2.Lerp(currentCoords, targetCoords, 0.75f);
 

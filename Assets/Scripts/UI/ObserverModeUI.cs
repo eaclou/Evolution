@@ -153,7 +153,7 @@ public class ObserverModeUI : MonoBehaviour
 
             // theCursorCzar.stirStickDepth = Mathf.Lerp(theCursorCzar.stirStickDepth, stirMin, 0.2f);
             float brushStrength = theCursorCzar.isDraggingMouseLeft ? 1f : 0f;
-            theRenderKing.isStirring = theCursorCzar.isDraggingMouseLeft;
+            //theRenderKing.isStirring = theCursorCzar.isDraggingMouseLeft;
             theRenderKing.gizmoStirToolMat.SetFloat(STIRRING, brushStrength);
             theRenderKing.gizmoStirStickAMat.SetFloat(STIRRING, brushStrength);                    
             theRenderKing.gizmoStirStickAMat.SetFloat(RADIUS, 6.2f);
@@ -161,7 +161,7 @@ public class ObserverModeUI : MonoBehaviour
 
         theRenderKing.isBrushing = false;
         theRenderKing.isSpiritBrushOn = false;
-        theRenderKing.nutrientToolOn = false;
+        //theRenderKing.nutrientToolOn = false;
         isBrushAddingAgents = false;
         vegetationManager.isBrushActive = false;
         
