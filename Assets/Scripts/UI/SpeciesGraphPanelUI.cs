@@ -80,9 +80,8 @@ public class SpeciesGraphPanelUI : MonoBehaviour
         //int maxDisplaySpecies = 32;
         int[] displaySpeciesIndicesArray;
         displaySpeciesIndicesArray = new int[maxDisplaySpecies];
-
-
-        TheRenderKing.TreeOfLifeSpeciesKeyData[] speciesKeyDataArray = new TheRenderKing.TreeOfLifeSpeciesKeyData[32];
+        
+        TreeOfLifeSpeciesKeyData[] speciesKeyDataArray = new TreeOfLifeSpeciesKeyData[32];
 
          // Get Active ones first:
         for(int i = 0; i < masterGenomePool.currentlyActiveSpeciesIDList.Count; i++) {
@@ -100,7 +99,7 @@ public class SpeciesGraphPanelUI : MonoBehaviour
             //Debug.Log("(" + i.ToString() + ", " + gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[i].ToString());
             displaySpeciesIndicesArray[i] = masterGenomePool.currentlyActiveSpeciesIDList[i];
 
-            TheRenderKing.TreeOfLifeSpeciesKeyData keyData = new TheRenderKing.TreeOfLifeSpeciesKeyData();
+            TreeOfLifeSpeciesKeyData keyData = new TreeOfLifeSpeciesKeyData();
             keyData.timeCreated = pool.timeStepCreated;  // Use TimeSteps instead of Years???
             keyData.timeExtinct = pool.timeStepExtinct;
             keyData.huePrimary = huePrimary;
@@ -137,14 +136,19 @@ public class SpeciesGraphPanelUI : MonoBehaviour
             
             displaySpeciesIndicesArray[i] = i;
 
-            TheRenderKing.TreeOfLifeSpeciesKeyData keyData = new TheRenderKing.TreeOfLifeSpeciesKeyData();
+            TreeOfLifeSpeciesKeyData keyData = new TreeOfLifeSpeciesKeyData();
             keyData.timeCreated = pool.timeStepCreated;  // Use TimeSteps instead of Years???
             keyData.timeExtinct = pool.timeStepExtinct;
             keyData.huePrimary = huePrimary;
             keyData.hueSecondary = hueSecondary;
             keyData.parentHue = parentHue;
             keyData.isExtinct = pool.isExtinct ? 1f : 0f;
-            keyData.isOn = 1f;
+            keyData.isOn = i >= masterGenomePool.completeSpeciesPoolsList.Count ||
+                           pool.yearCreated == -1 || i == 0 ? 
+                                0f : 1f;
+            
+            // WPP: applied ternary
+            /*keyData.isOn = 1f;
             if(i >= masterGenomePool.completeSpeciesPoolsList.Count) {
                 keyData.isOn = 0f;
             }
@@ -153,7 +157,7 @@ public class SpeciesGraphPanelUI : MonoBehaviour
             }
             if(i == 0) {
                 keyData.isOn = 0f;
-            }
+            }*/
             
             keyData.isSelected = uiManager.selectedSpeciesID == i ? 1f : 0f;
 

@@ -277,17 +277,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     public Vector3[] treeOfLifeSpeciesDataHeadPosArray;     // Values assigned but not used
     public ComputeBuffer treeOfLifeSpeciesDataHeadPosCBuffer;
 
-    public struct TreeOfLifeSpeciesKeyData {
-        public int timeCreated;
-        public int timeExtinct;
-        public Vector3 huePrimary;
-        public Vector3 hueSecondary;
-        public Vector3 parentHue;
-        public float isOn;
-        public float isExtinct;
-        public float isSelected;
-    }
-
     //private int numTreeOfLifeStemSegmentQuads = 16;
     //private ComputeBuffer treeOfLifeStemSegmentVerticesCBuffer;  // short ribbon mesh
     //private int maxNumTreeOfLifeNodes = 512; // max numSpecies
@@ -313,6 +302,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     //    public Vector3 scale;
     //}
     
+    // * WPP: not used
     public struct TreeOfLifeLeafNodeData 
     {
         public int speciesID;
@@ -368,6 +358,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         }
     }
     
+    // * WPP: not used
     public struct TreeOfLifeStemSegmentStruct 
     {
         public int speciesID;
@@ -385,6 +376,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         }
     }
 
+    // * WPP: not used
     public struct PlayerGlowyBitData {
         public Vector2 coords;
         public Vector2 vel;
@@ -392,6 +384,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public float age;
     }
 
+    // * WPP: not used
     public struct HighlightTrailData {
         public Vector2 worldPos;
         public Vector2 vel;
@@ -467,7 +460,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public CritterUberStrokeData(int agentIndex, float t, Vector3 bindPos, Vector2 uv, float jawMask, 
         Vector2 scale = default, Vector4 color = default)
         {
-            // xWPP
             parentIndex = agentIndex;
             brushType = 0;
             this.t = t;
@@ -3496,6 +3488,17 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         //treeOfLifePortraitBorderDataCBuffer?.Release();
         //treeOflifePortraitDataCBuffer?.Release();
         //treeOfLifePortraitEyeDataCBuffer?.Release();
-        
     }
+}
+
+// * WPP: apply constructor
+public struct TreeOfLifeSpeciesKeyData {
+    public int timeCreated;
+    public int timeExtinct;
+    public Vector3 huePrimary;
+    public Vector3 hueSecondary;
+    public Vector3 parentHue;
+    public float isOn;
+    public float isExtinct;
+    public float isSelected;
 }
