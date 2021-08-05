@@ -41,13 +41,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
     private CommandBuffer cmdBufferMain;
     private CommandBuffer cmdBufferDebugVis;
-    //private CommandBuffer cmdBufferMainRender;
     private CommandBuffer cmdBufferFluidObstacles;
     private CommandBuffer cmdBufferFluidColor;
     private CommandBuffer cmdBufferSpiritBrush;
-    //private CommandBuffer cmdBufferTreeOfLifeDisplay;
     private CommandBuffer cmdBufferSlotPortraitDisplay;
-    //private CommandBuffer cmdBufferTreeOfLifeSpeciesTree;
     private CommandBuffer cmdBufferResourceSim;
     private CommandBuffer cmdBufferWorldTree;
 
@@ -133,8 +130,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
     public ComputeBuffer gizmoCursorPosCBuffer;
     public ComputeBuffer gizmoFeedToolPosCBuffer;
-
-
+    
     private Mesh fluidRenderMesh;
     public Texture2D skyTexture;
 
@@ -155,9 +151,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private int numCurveRibbonQuads = 4;
     private ComputeBuffer curveRibbonVerticesCBuffer;  // short ribbon mesh
 
-    private int numStrokesPerCritterSkin = 128;
-    private ComputeBuffer critterSkinStrokesCBuffer;
-    //private int numStrokesPerCritterBody = 1024;       
+    private int numStrokesPerCritterSkin = 128;        
     private int numStrokesPerCritterLength = 32;   // This is the official order of brush indexing!!!
     private int numStrokesPerCritterCross = 32;
     private int numStrokesPerCritterEyes = 256;
@@ -167,11 +161,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private int numStrokesPerCritterDorsalFin = 128;
     private int numStrokesPerCritterTailFin = 128;
     private int numStrokesPerCritterSkinDetail = 128;
-    private ComputeBuffer critterGenericStrokesCBuffer;
-    // PORTRAIT!!!!
-    public ComputeBuffer toolbarPortraitCritterInitDataCBuffer;
-    public ComputeBuffer toolbarPortraitCritterSimDataCBuffer;
-    private ComputeBuffer toolbarCritterPortraitStrokesCBuffer;
+    private ComputeBuffer mainCritterStrokesCBuffer;
+    
 
     private int numFloatyBits = 1024 * 4;
     private ComputeBuffer floatyBitsCBuffer;
@@ -256,8 +247,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     private ComputeBuffer spiritBrushQuadDataCBuffer0;
     private ComputeBuffer spiritBrushQuadDataCBuffer1;
     private SpiritBrushQuadData[] spiritBrushQuadDataArray;
-    //private int spiritBrushSpawnCounter = 0;
-    //private ComputeBuffer debugAgentResourcesCBuffer;
+    
     private ComputeBuffer cursorParticlesCBuffer0;
     private ComputeBuffer cursorParticlesCBuffer1;
     private CursorParticleData[] cursorParticlesArray;
@@ -274,9 +264,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     //public Texture2D critterBodyWidthsTex;
     public float fullscreenFade = 1f;
 
-    private Vector3[] testTreeOfLifePositionArray;
-    private ComputeBuffer testTreeOfLifePositionCBuffer;
-    private TreeOfLifeEventLineData[] treeOfLifeEventLineDataArray;
+    //private Vector3[] testTreeOfLifePositionArray;
+    //private ComputeBuffer testTreeOfLifePositionCBuffer;
+    //private TreeOfLifeEventLineData[] treeOfLifeEventLineDataArray;
     private ComputeBuffer treeOfLifeEventLineDataCBuffer;
     private ComputeBuffer treeOfLifeWorldStatsValuesCBuffer;
     private ComputeBuffer treeOfLifeSpeciesSegmentsCBuffer;
@@ -296,46 +286,30 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public float isSelected;
     }
 
-    private int numTreeOfLifeStemSegmentQuads = 16;
-    private ComputeBuffer treeOfLifeStemSegmentVerticesCBuffer;  // short ribbon mesh
-    private int maxNumTreeOfLifeNodes = 512; // max numSpecies
-    private int maxNumTreeOfLifeSegments = 512;
-    private TreeOfLifeNodeColliderData[] treeOfLifeNodeColliderDataArray;
-    private ComputeBuffer treeOfLifeNodeColliderDataCBufferA;
-    private ComputeBuffer treeOfLifeNodeColliderDataCBufferB;
-    private TreeOfLifeLeafNodeData[] treeOfLifeLeafNodeDataArray;
-    private ComputeBuffer treeOfLifeLeafNodeDataCBuffer;
-    private ComputeBuffer treeOfLifeStemSegmentDataCBuffer;
-    private int curNumTreeOfLifeStemSegments = 0;
+    //private int numTreeOfLifeStemSegmentQuads = 16;
+    //private ComputeBuffer treeOfLifeStemSegmentVerticesCBuffer;  // short ribbon mesh
+    //private int maxNumTreeOfLifeNodes = 512; // max numSpecies
+    //private int maxNumTreeOfLifeSegments = 512;
+    //private TreeOfLifeNodeColliderData[] treeOfLifeNodeColliderDataArray;
+    //private ComputeBuffer treeOfLifeNodeColliderDataCBufferA;
+    //private ComputeBuffer treeOfLifeNodeColliderDataCBufferB;
+    //private TreeOfLifeLeafNodeData[] treeOfLifeLeafNodeDataArray;
+    //private ComputeBuffer treeOfLifeLeafNodeDataCBuffer;
+    //private ComputeBuffer treeOfLifeStemSegmentDataCBuffer;
+    //private int curNumTreeOfLifeStemSegments = 0;
 
-    public ComputeBuffer treeOfLifeBasicStrokeDataCBuffer;
-    public ComputeBuffer treeOfLifePortraitBorderDataCBuffer; //***EAC rename or replace!!!
-    public ComputeBuffer treeOflifePortraitDataCBuffer;
-    public ComputeBuffer treeOfLifePortraitEyeDataCBuffer;
+    //public ComputeBuffer treeOfLifeBasicStrokeDataCBuffer;
+    //public ComputeBuffer treeOfLifePortraitBorderDataCBuffer; //***EAC rename or replace!!!
+    //public ComputeBuffer treeOflifePortraitDataCBuffer;
+    //public ComputeBuffer treeOfLifePortraitEyeDataCBuffer;
 
-    public ComputeBuffer worldTreeLineDataCBuffer;
-    private int worldTreeNumPointsPerLine = 64;    
-    private int worldTreeNumSpeciesLines = 32;
-    private int worldTreeNumCreatureLines = 32;
-    private int worldTreeBufferCount => worldTreeNumPointsPerLine * (worldTreeNumSpeciesLines * worldTreeNumCreatureLines);
-    public ComputeBuffer clockOrbitLineDataCBuffer;
-    private int clockOrbitNumPointsPerLine = 16;
-    private int numClockOrbitLines = 1;  
-    private int clockOrbitBufferCount => numClockOrbitLines * clockOrbitNumPointsPerLine;
-
-    public struct TreeOfLifeEventLineData { //***EAC deprecate!
-        public int timeStepActivated;
-        public float eventCategory;  // minor major extreme 0, 0.5, 1.0
-        public float isActive;
-    }
-    
     
     // only the data that needs to be transferred between CPU & GPU  - minimize!!
     // Is this still needed??
-    public struct TreeOfLifeNodeColliderData {  
-        public Vector3 localPos;
-        public Vector3 scale;
-    }
+    //public struct TreeOfLifeNodeColliderData {  
+    //    public Vector3 localPos;
+    //    public Vector3 scale;
+    //}
     
     public struct TreeOfLifeLeafNodeData 
     {
@@ -430,7 +404,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public Vector2 heading;
         public float age;
     }
-
+    /*
     public struct AgentEyeStrokeData {
         public int parentIndex;  // what agent/object is this attached to?
         public Vector2 localPos;
@@ -465,7 +439,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public float randomSeed;
         public float followLerp;
     }
-
+    */
     public struct CritterUberStrokeData {
         public int parentIndex;  // which Critter is this attached to?	
         public int neighborIndex;
@@ -536,17 +510,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         public Vector4 color;
     }
 
-    // NEW - use this one! "*worldTree*"
-    public struct WorldTreeLineData {
-        public Vector3 worldPos;
-        public Vector4 color;
-    }
-    
-    // NEW - use this one! "*worldTree*"
-    public struct ClockOrbitLineData { 
-        public Vector3 worldPos;
-        public Vector4 color;
-    }
 
     private int debugFrameCounter = 0;
 
@@ -588,8 +551,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         InitializeCurveRibbonMeshBuffer(); // Set up Curve Ribbon Mesh billboard for brushStroke rendering
         //InitializeWaterSplineMeshBuffer(); // same for water splines
         InitializeFluidRenderMesh();
-        //InitializeBodySwimAnimMeshBuffer(); // test movementAnimation
-
+        
         obstacleStrokesCBuffer = new ComputeBuffer(simManager.numAgents + simManager.numEggSacks, sizeof(float) * 10);
         obstacleStrokeDataArray = new BasicStrokeData[obstacleStrokesCBuffer.count];
 
@@ -597,20 +559,19 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         colorInjectionStrokeDataArray = new BasicStrokeData[colorInjectionStrokesCBuffer.count];
 
         InitializeCritterUberStrokesBuffer();   // In-World        
-        InitializeCritterSkinStrokesCBuffer();  // Portrait        
+        //InitializeCritterSkinStrokesCBuffer();  // not used    
         InitializeFloatyBitsBuffer();
         InitializeGizmos();
         InitializeSpiritBrushQuadBuffer();
 
-        InitializeWorldTreeBuffers();
+        //InitializeWorldTreeBuffers(); // move to history panel
+        uiManager.historyPanelUI.InitializeRenderBuffers();
+        uiManager.creaturePanelUI.InitializeRenderBuffers();
         uiManager.clockPanelUI.InitializeClockBuffers();
 
-        // INIT:: ugly :(
-        toolbarPortraitCritterInitDataCBuffer?.Release();
-        toolbarPortraitCritterInitDataCBuffer = new ComputeBuffer(6, SimulationStateData.GetCritterInitDataSize());
     }
 
-    private int GetNumuberStrokesPerCritter() {
+    public int GetNumStrokesPerCritter() {
         return numStrokesPerCritterLength * numStrokesPerCritterCross +
                numStrokesPerCritterEyes +
                numStrokesPerCritterMouth +
@@ -623,12 +584,12 @@ public class TheRenderKing : Singleton<TheRenderKing> {
    
     // Most of this will be populated piece-meal later as critters are generated:
     private void InitializeCritterUberStrokesBuffer() {
-        int bufferLength = simManager.numAgents * GetNumuberStrokesPerCritter();
-        critterGenericStrokesCBuffer = new ComputeBuffer(bufferLength, GetMemorySizeCritterUberStrokeData());
-        toolbarCritterPortraitStrokesCBuffer = new ComputeBuffer(1 * GetNumuberStrokesPerCritter(), GetMemorySizeCritterUberStrokeData());
+        int bufferLength = simManager.numAgents * GetNumStrokesPerCritter();
+        mainCritterStrokesCBuffer = new ComputeBuffer(bufferLength, GetMemorySizeCritterStrokeData());
+        
     }
     
-    private int GetMemorySizeCritterUberStrokeData() {
+    public int GetMemorySizeCritterStrokeData() {
         int numBytes = sizeof(int) * 3 + sizeof(float) * 32;
         return numBytes;
     }
@@ -798,7 +759,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         int kernelSimFloatyBits = fluidManager.computeShaderFluidSim.FindKernel("SimFloatyBits");
         fluidManager.computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
     }
-
+    /*
     public void InitializeCritterSkinStrokesCBuffer() {
         critterSkinStrokesCBuffer = new ComputeBuffer(simManager.numAgents * numStrokesPerCritterSkin, sizeof(float) * 16 + sizeof(int) * 2);
         CritterSkinStrokeData[] critterSkinStrokesArray = new CritterSkinStrokeData[critterSkinStrokesCBuffer.count];
@@ -832,7 +793,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         
         critterSkinStrokesCBuffer.SetData(critterSkinStrokesArray);
     }
-
+    */
     public void InitializeGizmos() {
         Vector4[] dataArray = new Vector4[1];
         Vector4 gizmoPos = new Vector4(128f, 128f, 0f, 0f);
@@ -840,7 +801,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         gizmoCursorPosCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
         gizmoCursorPosCBuffer.SetData(dataArray);
     }
-    
+    /*
     private void InitializeTreeOfLifeBuffers() {
 
         testTreeOfLifePositionArray = new Vector3[64];
@@ -889,16 +850,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         treeOfLifeLeafNodeDataCBuffer = new ComputeBuffer(treeOfLifeLeafNodeDataArray.Length, sizeof(int) * 3 + sizeof(float) * 14);
         for (int i = 0; i < treeOfLifeLeafNodeDataArray.Length; i++) {
             TreeOfLifeLeafNodeData data = new TreeOfLifeLeafNodeData(i);
-            /*data.speciesID = i;
-            data.parentSpeciesID = 0;
-            data.graphDepth = 0;
-            data.primaryHue = Vector3.one;
-            data.secondaryHue = Vector3.zero;
-            data.growthPercentage = 1f;
-            data.age = 0f;
-            data.decayPercentage = 0f;
-            data.isActive = 0f;
-            data.isExtinct = 0f;*/
+            
             treeOfLifeLeafNodeDataArray[i] = data;
         }
         treeOfLifeLeafNodeDataCBuffer.SetData(treeOfLifeLeafNodeDataArray);
@@ -920,15 +872,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             verticesArray[baseIndex + 4] = new Vector3(-0.5f, startCoord * rowSize - 0.5f);
             verticesArray[baseIndex + 5] = new Vector3(-0.5f, endCoord * rowSize - 0.5f);
 
-            /*quadVerticesCBuffer = new ComputeBuffer(6, sizeof(float) * 3);
-        quadVerticesCBuffer.SetData(new[] {
-            new Vector3(-0.5f, 0.5f),
-            new Vector3(0.5f, 0.5f),
-            new Vector3(0.5f, -0.5f),
-            new Vector3(0.5f, -0.5f),
-            new Vector3(-0.5f, -0.5f),
-            new Vector3(-0.5f, 0.5f)
-        });*/
 
         }
         treeOfLifeStemSegmentVerticesCBuffer.SetData(verticesArray);
@@ -973,32 +916,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         borderData.color = new Vector4(1f, 1f, 1f, 1f);
         treeOfLifePortraitBorderDataArray[0] = borderData;
         treeOfLifePortraitBorderDataCBuffer.SetData(treeOfLifePortraitBorderDataArray);
-
-        /*int numPortraitBackdropStrokes = 128;
-        int numTreeBackdropStrokes = 128;
-        BasicStrokeData[] treeOfLifeBasicStrokeDataArray = new BasicStrokeData[numPortraitBackdropStrokes + numTreeBackdropStrokes];
-        treeOfLifeBasicStrokeDataCBuffer = new ComputeBuffer(treeOfLifeBasicStrokeDataArray.Length, sizeof(float) * 10);
-        for(int i = 0; i < numTreeBackdropStrokes; i++) {
-            BasicStrokeData strokeData = new BasicStrokeData();
-            strokeData.worldPos = new Vector2(UnityEngine.Random.Range(1f, 4.5f), UnityEngine.Random.Range(-1.33f, 0.2f));
-            strokeData.localDir = new Vector2(1f, UnityEngine.Random.Range(-0.36f, 0.36f)).normalized;
-            strokeData.scale = new Vector2(UnityEngine.Random.Range(0.7f, 1.5f), UnityEngine.Random.Range(3.9f, 6f)) * UnityEngine.Random.Range(0.24f, 0.4f);
-            strokeData.color = new Vector4(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), 1f);
-            treeOfLifeBasicStrokeDataArray[i] = strokeData;
-        } 
-        for(int i = 0; i < numPortraitBackdropStrokes; i++) {
-            BasicStrokeData strokeData = new BasicStrokeData();
-            Vector2 circleCoords = UnityEngine.Random.insideUnitCircle;
-            strokeData.worldPos = circleCoords * 0.5f + new Vector2(0.5f, -0.5f);
-            strokeData.localDir = circleCoords.normalized;
-            strokeData.localDir = new Vector2(strokeData.localDir.y, -strokeData.localDir.x);
-            strokeData.scale = new Vector2(1.25f, 3.5f) * 0.1f; // * (strokeData.worldPos.magnitude * 0.5f + 0.5f);
-            strokeData.color = new Vector4(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), 1f);
-            treeOfLifeBasicStrokeDataArray[i + numTreeBackdropStrokes] = strokeData;
-        }             
-        treeOfLifeBasicStrokeDataCBuffer.SetData(treeOfLifeBasicStrokeDataArray);
-        */
-
+        
         // Portrait:
         // Update single-element buffer on-demand through UI -- repopulate from given genome
         CritterSkinStrokeData[] treeOfLifePortraitDataArray = new CritterSkinStrokeData[1 * numStrokesPerCritterSkin];
@@ -1029,237 +947,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         }
         treeOflifePortraitDataCBuffer.SetData(treeOfLifePortraitDataArray);
     }
-    
-    private void InitializeWorldTreeBuffers() 
-    {
-        //**** TEMP!!! TESTING!!!
-        float cursorCoordsX = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().x) / 360f);
-        float cursorCoordsY = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().y - 720f) / 360f);                
-        //**** !!!!!!
-
-        ClockOrbitLineData[] clockOrbitLineDataArray = new ClockOrbitLineData[clockOrbitBufferCount];
-        clockOrbitLineDataCBuffer?.Release();
-        clockOrbitLineDataCBuffer = new ComputeBuffer(clockOrbitBufferCount, sizeof(float) * 7);
-        
-        //ORBIT LINES:        
-        float orbitalPeriodBase = 24f;
-        //float animTimeScale = 1f;        
-        for(int line = 0; line < numClockOrbitLines; line++) { //***EAC  can cut out the extra positioning logic after migrating to GPU
-            for (int i = 0; i < clockOrbitNumPointsPerLine; i++) {
-                int index = line * clockOrbitNumPointsPerLine + i;
-
-                ClockOrbitLineData data = new ClockOrbitLineData();
-
-                float lineID = line + 1.5f;
-                float orbitalPeriod = orbitalPeriodBase * Mathf.Exp(lineID);
-
-                float xCoord = (float)(i % clockOrbitNumPointsPerLine) / (float)clockOrbitNumPointsPerLine;
-                //float timeStepStart = 0f;
-                float timelineRange = Mathf.Max(1f, simManager.simAgeTimeSteps - historyPanel.timelineStartTimeStep);
-                /*
-                float time01 = Mathf.Lerp(uiManager.worldTreePanelUI.timelineStartTimeStep, simManager.simAgeTimeSteps, xCoord) / timelineRange; // Mathf.Lerp(timeStepStart, (float)simManager.simAgeTimeSteps, xCoord);
-                if(uiManager.worldTreePanelUI.GetFocusLevel() == 0) {
-                    time01 = xCoord;
-                }
-                else {
-                    //time01 = Mathf.Lerp(timeStepStart, (float)simManager.simAgeTimeSteps, xCoord);
-                }*/
-
-                float timeInput = Mathf.Lerp(historyPanel.timelineStartTimeStep, simManager.simAgeTimeSteps, xCoord);
-                float yCoord = Mathf.Cos(timeInput / orbitalPeriod) * 0.15f * (float)lineID + 0.5f;
-                //float yCoord = Mathf.Cos(time01 / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
-
-                xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
-                yCoord = yCoord * 0.2f + 0.8f;
-
-                data.worldPos = new Vector3(xCoord, yCoord, 0f);
-                float lerp = Mathf.Clamp01(lineID * 0.11215f);
-
-                data.color = Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
-                float frequencyMatch = (orbitalPeriod / timelineRange) * 16.28f;
-                
-                bool isFrequencyMatch = frequencyMatch > 0.6f && frequencyMatch < 1.4f;
-                data.color *= isFrequencyMatch ? 1.25f : 0.8f;
-
-                if(Mathf.Abs(xCoord - cursorCoordsX) < 0.005f) {
-                    data.color = Color.white;
-                }
-                
-                clockOrbitLineDataArray[index] = data;
-            }
-        }
-
-        // WORLD TREE LINES SPECIES CREATURES
-        WorldTreeLineData[] worldTreeLineDataArray = new WorldTreeLineData[worldTreeBufferCount];
-        worldTreeLineDataCBuffer?.Release();
-        worldTreeLineDataCBuffer = new ComputeBuffer(worldTreeBufferCount, sizeof(float) * 7);
-        
-        // SPECIES LINES:
-        for(int line = 0; line < worldTreeNumSpeciesLines; line++) 
-        {
-            for (int i = 0; i < worldTreeNumPointsPerLine; i++) 
-            {
-                int index = line * worldTreeNumPointsPerLine + i;
-
-                if (line >= simManager.masterGenomePool.completeSpeciesPoolsList.Count) 
-                    continue;
-                
-                SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[line];
-                WorldTreeLineData data = new WorldTreeLineData();
-
-                if (historyPanel.isAllSpeciesMode)
-                {
-                    // LINEAGE:
-                    float xCoord = (float)i / (float)worldTreeNumPointsPerLine;
-                    float yCoord = 1f - ((float)pool.speciesID / (float)Mathf.Max(simManager.masterGenomePool.completeSpeciesPoolsList.Count - 1, 1)); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
-                    float zCoord = 0f;
-                    /*if (historyPanel.GetFocusLevel() == 0) { // Top-Level View -- all species
-                            
-                    }
-                    else {
-                        xCoord = 0f; //***EAC TEMPORARY!!!! should be animated or just hidden
-                        yCoord = 0f;
-                    }*/
-                    
-                    Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-
-                    int timeStepStart = Mathf.RoundToInt(historyPanel.timelineStartTimeStep);
-
-                    float xStart01 = (float)(pool.timeStepCreated - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
-                    float xEnd01 = 1f;
-                    if(pool.isExtinct) {
-                        xEnd01 = (float)(pool.timeStepExtinct - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
-                    }
-
-                    if(xStart01 > xCoord || xEnd01 < xCoord) {
-                        hue = Vector3.zero;
-                    }
-                    if(pool.speciesID == uiManager.selectedSpeciesID) {
-                        hue = Vector3.one;
-                        zCoord = -0.1f;
-                    }                        
-                    data.color = new Color(hue.x, hue.y, hue.z); // Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
-
-                    xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
-                    yCoord = yCoord * 0.67f + 0.1f;
-                    if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
-                        data.color = Color.white;
-                    }
-                    data.worldPos = new Vector3(xCoord, yCoord, zCoord);
-                }
-
-                if (historyPanel.isActiveSpeciesMode)  
-                {
-                    int graphDataYearIndex = 0;
-                    
-                    if (pool.avgCandidateDataYearList.Count == 0) 
-                        continue;
-                    
-                    float xCoord = (float)(i % worldTreeNumPointsPerLine) / (float)worldTreeNumPointsPerLine;
-
-                    graphDataYearIndex = Mathf.FloorToInt((float)pool.avgCandidateDataYearList.Count * xCoord);
-                    float val = (float)pool.avgCandidateDataYearList[graphDataYearIndex].performanceData.totalTicksAlive / uiManager.speciesGraphPanelUI.maxValuesStatArray[0];
-                    float yCoord = val; // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
-                    float zCoord = 0f;
-                    
-                    Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-                    int timeStepStart = Mathf.RoundToInt(historyPanel.timelineStartTimeStep);
-
-                    float xStart01 = (float)(pool.timeStepCreated - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
-                    float xEnd01 = 1f;
-                    if(pool.isExtinct) {
-                        xEnd01 = (float)(pool.timeStepExtinct - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
-                    }
-
-                    if(pool.speciesID == uiManager.selectedSpeciesID) {
-                        hue = Vector3.one;
-                        zCoord = -0.1f;
-                    }
-                    
-                    if(xStart01 > xCoord || xEnd01 < xCoord) {
-                        hue = Vector3.zero;
-                    }
-
-                    xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
-                    yCoord = yCoord * 0.67f + 0.1f;
-
-                    data.worldPos = new Vector3(xCoord, yCoord, zCoord);
-                    data.color = new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
-
-                    if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
-                        data.color = Color.white;
-                    }
-                }
-                
-                worldTreeLineDataArray[index] = data;
-            }
-        }
-        
-        // CREATURE LINES:::
-        for(int line = 0; line < worldTreeNumCreatureLines; line++) 
-        {
-            for (int i = 0; i < worldTreeNumPointsPerLine; i++) 
-            {
-                int index = (line + worldTreeNumSpeciesLines) * worldTreeNumPointsPerLine + i;
-                SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[uiManager.selectedSpeciesID]; //[simManager.masterGenomePool.currentlyActiveSpeciesIDList[0]]; //***EAC ...
-
-                if (line >= pool.candidateGenomesList.Count) 
-                    continue;
-                
-                WorldTreeLineData data = new WorldTreeLineData();
-                CandidateAgentData cand = pool.candidateGenomesList[line];
-
-                float xCoord = (float)(i) / (float)worldTreeNumPointsPerLine;
-                int numAgentsDisplayed = 0; // Mathf.Min(Mathf.Max(pool.candidateGenomesList.Count - 1, 1), worldTreeNumCreatureLines);
-                for(int a = 0; a < pool.candidateGenomesList.Count; a++) {
-                    if(pool.candidateGenomesList[a].isBeingEvaluated) {
-                        numAgentsDisplayed++;
-                    }
-                }
-                numAgentsDisplayed = Mathf.Max(numAgentsDisplayed, 1); // avoid divide by 0
-                float yCoord = 1f - (float)line / (float)numAgentsDisplayed; // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
-
-                Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary * 2f;
-
-                int timeStepStart = Mathf.RoundToInt(historyPanel.timelineStartTimeStep);
-                float xStart = (float)(pool.candidateGenomesList[line].performanceData.timeStepHatched - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
-                float xEnd = 1f;
-                if(pool.isExtinct || cand.performanceData.timeStepDied > 1) {
-                    xEnd = (float)(cand.performanceData.timeStepDied - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
-                }
-                
-                if(xStart > xCoord || xEnd < xCoord) {
-                    hue = Vector3.zero;
-                }
-                else if(cand.candidateID == uiManager.focusedCandidate.candidateID) {
-                    hue = Vector3.one;
-                }
-                if(!cand.isBeingEvaluated && cand.numCompletedEvaluations == 0) {
-                    hue = Vector3.zero;
-                }   
-                if(cand.performanceData.timeStepHatched <= 1) {
-                    hue = Vector3.zero;
-                }
-                if(cand.performanceData.totalTicksAlive >= 1) {
-                    hue *= 0.35f;                        
-                }
-                
-                data.color = new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
-                xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
-                yCoord = yCoord * 0.67f + 0.1f;
-                                
-                data.worldPos = new Vector3(xCoord, yCoord, 0f);                     
-                if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
-                    data.color = Color.white;
-                }
-                worldTreeLineDataArray[index] = data;
-            }
-        }
-
-        clockOrbitLineDataCBuffer.SetData(clockOrbitLineDataArray);
-        worldTreeLineDataCBuffer.SetData(worldTreeLineDataArray);
-    }
-    
+    */
     private void InitializeMaterials() 
     {
         basicStrokeDisplayMat.SetPass(0);
@@ -1308,11 +996,11 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         gizmoFeedToolMat.SetPass(0);
         gizmoFeedToolMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
 
-        treeOfLifeLeafNodesMat.SetPass(0);
-        treeOfLifeLeafNodesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        //treeOfLifeLeafNodesMat.SetPass(0);
+        //treeOfLifeLeafNodesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
 
-        treeOfLifeStemSegmentsMat.SetPass(0);
-        treeOfLifeStemSegmentsMat.SetBuffer("treeOfLifeStemSegmentVerticesCBuffer", treeOfLifeStemSegmentVerticesCBuffer);
+        //treeOfLifeStemSegmentsMat.SetPass(0);
+        //treeOfLifeStemSegmentsMat.SetBuffer("treeOfLifeStemSegmentVerticesCBuffer", treeOfLifeStemSegmentVerticesCBuffer);
 
         treeOfLifeBackdropMat.SetPass(0);
         treeOfLifeBackdropMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -1543,9 +1231,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     }
 
     public void UpdateCritterGenericStrokesData(Agent agent) { 
-        ComputeBuffer singleCritterGenericStrokesCBuffer = new ComputeBuffer(GetNumuberStrokesPerCritter(), GetMemorySizeCritterUberStrokeData());
+        ComputeBuffer singleCritterGenericStrokesCBuffer = new ComputeBuffer(GetNumStrokesPerCritter(), GetMemorySizeCritterStrokeData());
         CritterUberStrokeData[] singleCritterGenericStrokesArray = new CritterUberStrokeData[singleCritterGenericStrokesCBuffer.count];  // optimize this later?? ***
-        CritterGenomeInterpretor.BrushPoint[] brushPointArray = new CritterGenomeInterpretor.BrushPoint[GetNumuberStrokesPerCritter()];
+        CritterGenomeInterpretor.BrushPoint[] brushPointArray = new CritterGenomeInterpretor.BrushPoint[GetNumStrokesPerCritter()];
 
         // Generate main body strokes:
         GenerateCritterBodyBrushstrokes(ref singleCritterGenericStrokesArray, brushPointArray, agent.candidateRef.candidateGenome, agent.index);
@@ -1574,7 +1262,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         // SET DATA:::        
         singleCritterGenericStrokesCBuffer.SetData(singleCritterGenericStrokesArray); // Send data to GPU
         int kernelCSUpdateCritterGenericStrokes = computeShaderCritters.FindKernel("CSUpdateCritterGenericStrokes");
-        computeShaderCritters.SetBuffer(kernelCSUpdateCritterGenericStrokes, "critterGenericStrokesWriteCBuffer", critterGenericStrokesCBuffer);
+        computeShaderCritters.SetBuffer(kernelCSUpdateCritterGenericStrokes, "critterGenericStrokesWriteCBuffer", mainCritterStrokesCBuffer);
         computeShaderCritters.SetBuffer(kernelCSUpdateCritterGenericStrokes, "critterGenericStrokesUpdateCBuffer", singleCritterGenericStrokesCBuffer);
         computeShaderCritters.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
         computeShaderCritters.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
@@ -1589,10 +1277,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         //AgentGenome genome0 = genome; // simManager.masterGenomePool.completeSpeciesPoolsList[0].representativeGenome;
 
         //ComputeBuffer singleCritterGenericStrokesCBuffer = new ComputeBuffer(GetNumUberStrokesPerCritter(), GetMemorySizeCritterUberStrokeData());
-        CritterUberStrokeData[] singleCritterGenericStrokesArray = new CritterUberStrokeData[GetNumuberStrokesPerCritter()];  // optimize this later?? ***
+        CritterUberStrokeData[] singleCritterGenericStrokesArray = new CritterUberStrokeData[GetNumStrokesPerCritter()];  // optimize this later?? ***
         //CritterUberStrokeData[] newCritterGenericStrokesArray = new CritterUberStrokeData[toolbarCritterPortraitStrokesCBuffer.count / 2]; 
-        CritterUberStrokeData[] completeCritterGenericStrokesArray = new CritterUberStrokeData[toolbarCritterPortraitStrokesCBuffer.count];
-        CritterGenomeInterpretor.BrushPoint[] brushPointArray = new CritterGenomeInterpretor.BrushPoint[GetNumuberStrokesPerCritter()];
+        CritterUberStrokeData[] completeCritterGenericStrokesArray = new CritterUberStrokeData[uiManager.creaturePanelUI.critterPortraitStrokesCBuffer.count];
+        CritterGenomeInterpretor.BrushPoint[] brushPointArray = new CritterGenomeInterpretor.BrushPoint[GetNumStrokesPerCritter()];
         //CritterGenomeInterpretor.BrushPoint[] newPointArray = new CritterGenomeInterpretor.BrushPoint[toolbarCritterPortraitStrokesCBuffer.count / 2];   
         // Generate main body strokes:
         GenerateCritterBodyBrushstrokes(ref singleCritterGenericStrokesArray, brushPointArray, genome, 0);
@@ -1617,7 +1305,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             completeCritterGenericStrokesArray[i] = singleCritterGenericStrokesArray[i];
         }
 
-        toolbarCritterPortraitStrokesCBuffer.SetData(completeCritterGenericStrokesArray);
+        uiManager.creaturePanelUI.critterPortraitStrokesCBuffer.SetData(completeCritterGenericStrokesArray);
     }
 
     private void GenerateCritterBodyBrushstrokes(ref CritterUberStrokeData[] strokesArray, CritterGenomeInterpretor.BrushPoint[] brushPointArray, AgentGenome agentGenome, int agentIndex) {
@@ -2384,20 +2072,20 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         computeShaderCritters.SetTexture(kernelCSSimulateCritterGenericStrokes, "velocityRead", fluidManager._VelocityPressureDivergenceMain);
         computeShaderCritters.SetBuffer(kernelCSSimulateCritterGenericStrokes, "critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
         computeShaderCritters.SetBuffer(kernelCSSimulateCritterGenericStrokes, "critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-        computeShaderCritters.SetBuffer(kernelCSSimulateCritterGenericStrokes, "critterGenericStrokesWriteCBuffer", critterGenericStrokesCBuffer);
+        computeShaderCritters.SetBuffer(kernelCSSimulateCritterGenericStrokes, "critterGenericStrokesWriteCBuffer", mainCritterStrokesCBuffer);
         computeShaderCritters.SetFloat("_MapSize", SimulationManager._MapSize);
-        computeShaderCritters.Dispatch(kernelCSSimulateCritterGenericStrokes, critterGenericStrokesCBuffer.count / 16, 1, 1);
+        computeShaderCritters.Dispatch(kernelCSSimulateCritterGenericStrokes, mainCritterStrokesCBuffer.count / 16, 1, 1);
 
     }
     
     private void SimUIToolbarCritterPortraitStrokes() {
         int kernelCSSimulateCritterPortraitStrokes = computeShaderCritters.FindKernel("CSSimulateCritterPortraitStrokes");
         computeShaderCritters.SetTexture(kernelCSSimulateCritterPortraitStrokes, "velocityRead", fluidManager._VelocityPressureDivergenceMain);
-        computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterInitDataCBuffer", toolbarPortraitCritterInitDataCBuffer);
-        computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterSimDataCBuffer", toolbarPortraitCritterSimDataCBuffer);
-        computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterGenericStrokesWriteCBuffer", toolbarCritterPortraitStrokesCBuffer);
+        computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterInitDataCBuffer", uiManager.creaturePanelUI.portraitCritterInitDataCBuffer);
+        computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterSimDataCBuffer", uiManager.creaturePanelUI.portraitCritterSimDataCBuffer);
+        computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterGenericStrokesWriteCBuffer", uiManager.creaturePanelUI.critterPortraitStrokesCBuffer);
         computeShaderCritters.SetFloat("_MapSize", SimulationManager._MapSize);
-        computeShaderCritters.Dispatch(kernelCSSimulateCritterPortraitStrokes, toolbarCritterPortraitStrokesCBuffer.count / 16, 1, 1);
+        computeShaderCritters.Dispatch(kernelCSSimulateCritterPortraitStrokes, uiManager.creaturePanelUI.critterPortraitStrokesCBuffer.count / 16, 1, 1);
     }
 
     //***EAC destined to be replaced by GPU ^ ^ ^
@@ -2405,254 +2093,15 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         uiManager.clockPanelUI.UpdateEarthStampData();
         uiManager.clockPanelUI.UpdateMoonStampData();
         uiManager.clockPanelUI.UpdateSunStampData();
-        InitializeWorldTreeBuffers();
-        
-        #region Dead code (please delete)
-        /*
-        WorldTreeLineData[] dataArray = new WorldTreeLineData[numDataPoints]; 
-        worldTreeLineDataCBuffer?.Release();
-        worldTreeLineDataCBuffer = new ComputeBuffer(numDataPoints, sizeof(float) * 7);
-
-        //**** TEMP!!! TESTING!!!
-        float cursorCoordsX = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().x) / 360f);
-        float cursorCoordsY = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().y - 720f) / 360f);                
-        //**** !!!!!!
-        
-        //ORBIT LINES:        
-        float orbitalPeriodBase = 16f;
-        float animTimeScale = 1f;        
-        for(int line = 0; line < worldTreeNumClockOrbitLines; line++) { //***EAC  can cut out the extra positioning logic after migrating to GPU
-            for (int i = 0; i < worldTreeNumPointsPerLine; i++) {
-                int index = line * worldTreeNumPointsPerLine + i;
-
-                WorldTreeLineData data = new WorldTreeLineData();
-
-                float lineID = line + 0.45f;
-                float orbitalPeriod = orbitalPeriodBase * Mathf.Pow(3.4f, lineID);
-
-                float xCoord = (float)(i % worldTreeNumPointsPerLine) / (float)worldTreeNumPointsPerLine;
-                float yCoord = Mathf.Cos(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.11f * (float)lineID + 0.5f;
-                
-                xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
-                yCoord = yCoord * 0.2f + 0.8f;
-                
-                data.worldPos = new Vector3(xCoord, yCoord, 0f);
-                float lerp = Mathf.Clamp01(lineID * 0.11215f);
-                data.color = Color.HSVToRGB(lerp, 1f - lerp * 0.1f, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
-
-                if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
-                    data.color = Color.white;
-                }
-
-                dataArray[index] = data;
-
-            }
-        }
-
-        // SPECIES LINES:
-        for(int line = 0; line < worldTreeNumSpeciesLines; line++) {
-            for (int i = 0; i < worldTreeNumPointsPerLine; i++) {
-                int index = (line + worldTreeNumClockOrbitLines) * worldTreeNumPointsPerLine + i;
-
-                if(line >= simManager.masterGenomePool.completeSpeciesPoolsList.Count) {
-
-                }
-                else {
-                    SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[line];
-
-                    WorldTreeLineData data = new WorldTreeLineData();
-
-                    float lineID = line + 0f;
-                    float orbitalPeriod = orbitalPeriodBase * Mathf.Exp(lineID);
-
-                    if(uiManager.worldTreePanelUI.GetPanelMode() == 0) {
-                        // LINEAGE:
-                        float xCoord = (float)i / (float)worldTreeNumPointsPerLine;
-                        float yCoord = 1f - ((float)pool.speciesID / (float)Mathf.Max(simManager.masterGenomePool.completeSpeciesPoolsList.Count - 1, 1)); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
-
-                        float lerp = Mathf.Clamp01(lineID * 0.11215f);
-                        Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-
-                        float xStart = (float)pool.timeStepCreated / (float)simManager.simAgeTimeSteps;
-                        float xEnd = 1f;
-                        if(pool.isExtinct) {
-                            xEnd = (float)pool.timeStepExtinct / (float)simManager.simAgeTimeSteps;
-                        }
-
-                        if(xStart > xCoord || xEnd < xCoord) {
-                            hue = Vector3.zero;
-                        }
-                                                
-                        data.color = new Color(hue.x, hue.y, hue.z); // Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
-
-                        xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
-                        yCoord = yCoord * 0.67f + 0.1f;
-                        if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
-                            data.color = Color.white;
-                        }
-                        data.worldPos = new Vector3(xCoord, yCoord, 0f);
-                    }
-                    else {
-                        int graphDataYearIndex = 0;
-                        if(pool.avgCandidateDataYearList.Count == 0) {
-
-                        }
-                        else {
-
-                            float xCoord = (float)(i % worldTreeNumPointsPerLine) / (float)worldTreeNumPointsPerLine;
-
-                            graphDataYearIndex = Mathf.FloorToInt((float)pool.avgCandidateDataYearList.Count * xCoord);
-                            float val = (float)pool.avgCandidateDataYearList[graphDataYearIndex].performanceData.totalTicksAlive / uiManager.speciesGraphPanelUI.maxValuesStatArray[0];
-                            float yCoord = val; // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
-
-                            xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
-                            yCoord = yCoord * 0.67f + 0.1f;
-
-                            data.worldPos = new Vector3(xCoord, yCoord, 0f);
-                            float lerp = Mathf.Clamp01(lineID * 0.11215f);
-                            Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-
-                            data.color = new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
-
-                            if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
-                                data.color = Color.white;
-                            }
-                        }
-                    }
-                    
-                    dataArray[index] = data;
-                }
-            }
-        }
-                
-        // CREATURE LINES:::
-        for(int line = 0; line < worldTreeNumCreatureLines; line++) {
-            for (int i = 0; i < worldTreeNumPointsPerLine; i++) {
-                int index = (line + worldTreeNumClockOrbitLines + worldTreeNumSpeciesLines) * worldTreeNumPointsPerLine + i;
-                SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[0]]; //***EAC ...
-
-                if(line >= pool.candidateGenomesList.Count) {
-
-                }
-                else {                    
-                    WorldTreeLineData data = new WorldTreeLineData();
-                    CandidateAgentData cand = pool.candidateGenomesList[line];
-
-                    float xCoord = (float)(i) / (float)worldTreeNumPointsPerLine;                        
-                    float yCoord = 1f - (float)line / (float)(Mathf.Max(pool.candidateGenomesList.Count - 1, 1)); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
-
-                    Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary * 2f;
-
-                    float xStart = (float)pool.candidateGenomesList[line].performanceData.timeStepHatched / (float)simManager.simAgeTimeSteps;
-                    float xEnd = 1f;
-                    if(pool.isExtinct || cand.performanceData.timeStepDied > 1) {
-                        xEnd = (float)cand.performanceData.timeStepDied / (float)simManager.simAgeTimeSteps;
-                    }
-                    
-                    if(xStart > xCoord || xEnd < xCoord) {
-                        hue = Vector3.zero;
-                    }
-                    if(!cand.isBeingEvaluated && cand.numCompletedEvaluations == 0) {
-                        hue = Vector3.zero;
-                    }   
-                    if(cand.performanceData.timeStepHatched <= 1) {
-                        hue = Vector3.zero;
-                    }
-                    
-
-                    data.color = new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
-                    xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
-                    yCoord = yCoord * 0.67f + 0.1f;
-                    data.worldPos = new Vector3(xCoord, yCoord, 0f);                     
-                    if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
-                        data.color = Color.white;
-                    }
-                    dataArray[index] = data;
-                }
-                
-            }
-        }
-        
-        worldTreeLineDataCBuffer.SetData(dataArray);
-        */
-        #endregion
+        uiManager.historyPanelUI.InitializeRenderBuffers();
     }
     
-    #region Dead code (please delete)
-    /*public void UpdateTreeOfLifeEventLineData(List<SimEventData> eventDataList) {
-
-        // Move some of this to ComputeShader kernel?
-
-        treeOfLifeEventLineDataArray = new TreeOfLifeEventLineData[64]; // hardcoded!! 64 max!!!
-        if(treeOfLifeEventLineDataCBuffer != null) {
-            treeOfLifeEventLineDataCBuffer.Release();
-        }
-        treeOfLifeEventLineDataCBuffer = new ComputeBuffer(treeOfLifeEventLineDataArray.Length, sizeof(float) * 3);
-        for(int i = 0; i < testTreeOfLifePositionArray.Length; i++) {
-            TreeOfLifeEventLineData data = new TreeOfLifeEventLineData();
-
-            if(i < eventDataList.Count) {
-                data.timeStepActivated = eventDataList[i].timeStepActivated;
-                //data.xCoord = (float)eventDataList[i].timeStepActivated / (float)simManager.simAgeTimeSteps;
-                data.eventCategory = (float)eventDataList[i].category * 0.5f; // 0-->1  
-                //data.eventMagnitude = (float)(eventDataList[i].category + 1) * 0.111f;   
-                data.isActive = 1f;
-            }
-            
-            treeOfLifeEventLineDataArray[i] = data;
-        }
-        treeOfLifeEventLineDataCBuffer.SetData(treeOfLifeEventLineDataArray);
-    }
-    */
-    /*public void SimTreeOfLifeWorldStatsData(Texture2D dataTex, Texture2D keyTex) {
-        int kernelCSUpdateWorldStatsValues = computeShaderTreeOfLife.FindKernel("CSUpdateWorldStatsValues");
-        computeShaderTreeOfLife.SetTexture(kernelCSUpdateWorldStatsValues, "treeOfLifeWorldStatsTex", dataTex); // simManager.uiManager.statsTextureLifespan);
-        computeShaderTreeOfLife.SetTexture(kernelCSUpdateWorldStatsValues, "treeOfLifeWorldStatsKeyTex", keyTex);  // used for line color, max/min values reference, and other extra info per graph line (32 max)
-        computeShaderTreeOfLife.SetBuffer(kernelCSUpdateWorldStatsValues, "treeOfLifeWorldStatsValuesCBuffer", treeOfLifeWorldStatsValuesCBuffer);
-        computeShaderTreeOfLife.SetFloat("_Time", Time.realtimeSinceStartup); // for animation & shit        
-        computeShaderTreeOfLife.SetFloat("_GraphCoordStatsStart", simManager.uiManager.tolGraphCoordsStatsStart);
-        computeShaderTreeOfLife.SetFloat("_GraphCoordStatsRange", simManager.uiManager.tolGraphCoordsStatsRange);
-        computeShaderTreeOfLife.SetInt("_CurSimStep", simManager.simAgeTimeSteps);
-        computeShaderTreeOfLife.SetInt("_CurSimYear", simManager.curSimYear);
-        computeShaderTreeOfLife.SetInt("_SelectedWorldStatsID", simManager.uiManager.tolSelectedWorldStatsIndex); // UI control
-        computeShaderTreeOfLife.SetInt("_NumTimeSeriesEntries", dataTex.width);
-        computeShaderTreeOfLife.SetFloat("_MouseCoordX", simManager.uiManager.tolMouseCoords.x);
-        computeShaderTreeOfLife.SetFloat("_MouseCoordY", simManager.uiManager.tolMouseCoords.y);
-        computeShaderTreeOfLife.SetFloat("_MouseOn", simManager.uiManager.tolMouseOver);
-        computeShaderTreeOfLife.Dispatch(kernelCSUpdateWorldStatsValues, 1, 1, 1);  // need 32 * 64 segments? -- not yet - as long as one-at-a-time
-
-    }*/
-    /*
-    public void SimTreeOfLifeSpeciesTreeData(Texture2D dataTex, float maxVal) {
-        int kernelCSUpdateSpeciesTreeData = computeShaderTreeOfLife.FindKernel("CSUpdateSpeciesTreeData");
-        computeShaderTreeOfLife.SetTexture(kernelCSUpdateSpeciesTreeData, "treeOfLifeSpeciesTreeTex", dataTex); // simManager.uiManager.statsTextureLifespan);
-        computeShaderTreeOfLife.SetBuffer(kernelCSUpdateSpeciesTreeData, "treeOfLifeSpeciesDataKeyCBuffer", treeOfLifeSpeciesDataKeyCBuffer);  // 32 indices
-        computeShaderTreeOfLife.SetBuffer(kernelCSUpdateSpeciesTreeData, "treeOfLifeSpeciesDataHeadPosCBuffer", treeOfLifeSpeciesDataHeadPosCBuffer);
-        computeShaderTreeOfLife.SetBuffer(kernelCSUpdateSpeciesTreeData, "treeOfLifeSpeciesSegmentsCBuffer", treeOfLifeSpeciesSegmentsCBuffer);
-        computeShaderTreeOfLife.SetFloat("_Time", Time.realtimeSinceStartup);
-        computeShaderTreeOfLife.SetFloat("_SpeciesStatsMin", 0f);
-        computeShaderTreeOfLife.SetFloat("_SpeciesStatsMax", maxVal);
-        computeShaderTreeOfLife.SetFloat("_GraphCoordSpeciesStart", simManager.uiManager.tolGraphCoordsSpeciesStart); // try it this way first
-        computeShaderTreeOfLife.SetFloat("_GraphCoordSpeciesRange", simManager.uiManager.tolGraphCoordsSpeciesRange);
-        computeShaderTreeOfLife.SetInt("_CurSimStep", simManager.simAgeTimeSteps);
-        computeShaderTreeOfLife.SetInt("_CurSimYear", simManager.curSimYear);
-        computeShaderTreeOfLife.SetInt("_NumTimeSeriesEntries", dataTex.width);
-        computeShaderTreeOfLife.SetFloat("_MouseCoordX", simManager.uiManager.tolMouseCoords.x);
-        computeShaderTreeOfLife.SetFloat("_MouseCoordY", simManager.uiManager.tolMouseCoords.y);
-        computeShaderTreeOfLife.SetFloat("_MouseOn", simManager.uiManager.tolMouseOver);
-        computeShaderTreeOfLife.Dispatch(kernelCSUpdateSpeciesTreeData, 32, 1, 1);  // 32 = num of species displayed * 64 inside shader
-
-        treeOfLifeSpeciesDataHeadPosCBuffer.GetData(treeOfLifeSpeciesDataHeadPosArray);
-    }*/
-    #endregion
-
     public void InitializeCreaturePortrait(AgentGenome genome) {
         //InitializeNewCritterPortraitGenome(simManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[0].representativeGenome); // speciesPool.leaderboardGenomesList[0].candidateGenome);
         isToolbarCritterPortraitEnabled = true;
 
         SetToolbarPortraitCritterInitData(genome);
-        // ^^ genome data for critter
-        //Order: 0 Cur, 1 New, 2 A, 3 B, 4 C, 5 D
+        // ^^ data for critter        
         GenerateCritterPortraitStrokesData(genome);
         // ^^ skin stroke data
     }
@@ -2719,117 +2168,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         toolbarPortraitCritterInitDataArray[0] = initData;
         
-        #region Dead code (please delete)
-        /*
-        initData.primaryHue = genome1.bodyGenome.appearanceGenome.huePrimary;
-        initData.secondaryHue = genome1.bodyGenome.appearanceGenome.hueSecondary;
-        // set values
-        initData.boundingBoxSize = genome1.bodyGenome.GetFullsizeBoundingBox();
-        initData.maxEnergy = Mathf.Min(initData.boundingBoxSize.x * initData.boundingBoxSize.y, 0.5f);                
-        critterFullsizeLength = genome1.bodyGenome.coreGenome.tailLength + genome1.bodyGenome.coreGenome.bodyLength + genome1.bodyGenome.coreGenome.headLength + genome1.bodyGenome.coreGenome.mouthLength;
-        flexibilityScore = 1f;         
-        approxRadius = genome1.bodyGenome.coreGenome.creatureBaseLength * genome1.bodyGenome.coreGenome.creatureAspectRatio;
-        approxSize = 1f;
-        swimLerp = Mathf.Clamp01((genome1.bodyGenome.coreGenome.creatureAspectRatio - 0.175f) / 0.35f);  // 0 = longest, 1 = shortest
-        initData.swimMagnitude = Mathf.Lerp(0.225f, 1.1f, swimLerp); 
-        initData.swimFrequency = Mathf.Lerp(2f, 0.8f, swimLerp);  
-        initData.swimAnimSpeed = 12f; 
-
-        initData.bodyCoord = genome1.bodyGenome.coreGenome.tailLength / critterFullsizeLength;
-	    initData.headCoord = (genome1.bodyGenome.coreGenome.tailLength + genome1.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
-        initData.mouthCoord = (genome1.bodyGenome.coreGenome.tailLength + genome1.bodyGenome.coreGenome.bodyLength + genome1.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
-        initData.bendiness = 1f; // tempAccelMult;
-        initData.speciesID = 0; // selectedSpeciesID;
-
-        initData.bodyPatternX = genome1.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
-        initData.bodyPatternY = genome1.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
-        
-        toolbarPortraitCritterInitDataArray[1] = initData;
-
-        //initData.wor
-        initData.primaryHue = genome2.bodyGenome.appearanceGenome.huePrimary;
-        initData.secondaryHue = genome2.bodyGenome.appearanceGenome.hueSecondary;        
-        initData.boundingBoxSize = genome2.bodyGenome.GetFullsizeBoundingBox();
-        initData.maxEnergy = Mathf.Min(initData.boundingBoxSize.x * initData.boundingBoxSize.y, 0.5f);                
-        critterFullsizeLength = genome2.bodyGenome.coreGenome.tailLength + genome2.bodyGenome.coreGenome.bodyLength + genome2.bodyGenome.coreGenome.headLength + genome2.bodyGenome.coreGenome.mouthLength;
-        approxRadius = genome2.bodyGenome.coreGenome.creatureBaseLength * genome2.bodyGenome.coreGenome.creatureAspectRatio;        
-        swimLerp = Mathf.Clamp01((genome2.bodyGenome.coreGenome.creatureAspectRatio - 0.175f) / 0.35f);  // 0 = longest, 1 = shortest
-        initData.swimMagnitude = Mathf.Lerp(0.225f, 1.1f, swimLerp);
-        initData.swimFrequency = Mathf.Lerp(2f, 0.8f, swimLerp);
-        initData.swimAnimSpeed = 12f;
-        initData.bodyCoord = genome2.bodyGenome.coreGenome.tailLength / critterFullsizeLength;
-	    initData.headCoord = (genome2.bodyGenome.coreGenome.tailLength + genome2.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
-        initData.mouthCoord = (genome2.bodyGenome.coreGenome.tailLength + genome2.bodyGenome.coreGenome.bodyLength + genome2.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
-        initData.bendiness = 1f;
-        initData.speciesID = 0;
-        initData.bodyPatternX = genome2.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
-        initData.bodyPatternY = genome2.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
-        
-        toolbarPortraitCritterInitDataArray[2] = initData;
-
-        initData.primaryHue = genome3.bodyGenome.appearanceGenome.huePrimary;
-        initData.secondaryHue = genome3.bodyGenome.appearanceGenome.hueSecondary;        
-        initData.boundingBoxSize = genome3.bodyGenome.GetFullsizeBoundingBox();
-        initData.maxEnergy = Mathf.Min(initData.boundingBoxSize.x * initData.boundingBoxSize.y, 0.5f);                
-        critterFullsizeLength = genome3.bodyGenome.coreGenome.tailLength + genome3.bodyGenome.coreGenome.bodyLength + genome3.bodyGenome.coreGenome.headLength + genome3.bodyGenome.coreGenome.mouthLength;
-        approxRadius = genome3.bodyGenome.coreGenome.creatureBaseLength * genome3.bodyGenome.coreGenome.creatureAspectRatio;        
-        swimLerp = Mathf.Clamp01((genome3.bodyGenome.coreGenome.creatureAspectRatio - 0.175f) / 0.35f);  // 0 = longest, 1 = shortest
-        initData.swimMagnitude = Mathf.Lerp(0.225f, 1.1f, swimLerp);
-        initData.swimFrequency = Mathf.Lerp(2f, 0.8f, swimLerp);
-        initData.swimAnimSpeed = 12f;
-        initData.bodyCoord = genome3.bodyGenome.coreGenome.tailLength / critterFullsizeLength;
-	    initData.headCoord = (genome3.bodyGenome.coreGenome.tailLength + genome3.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
-        initData.mouthCoord = (genome3.bodyGenome.coreGenome.tailLength + genome3.bodyGenome.coreGenome.bodyLength + genome3.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
-        initData.bendiness = 1f;
-        initData.speciesID = 0;
-        initData.bodyPatternX = genome3.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
-        initData.bodyPatternY = genome3.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use        
-        toolbarPortraitCritterInitDataArray[3] = initData;
-
-        initData.primaryHue = genome4.bodyGenome.appearanceGenome.huePrimary;
-        initData.secondaryHue = genome4.bodyGenome.appearanceGenome.hueSecondary;        
-        initData.boundingBoxSize = genome4.bodyGenome.GetFullsizeBoundingBox();
-        initData.maxEnergy = Mathf.Min(initData.boundingBoxSize.x * initData.boundingBoxSize.y, 0.5f);                
-        critterFullsizeLength = genome4.bodyGenome.coreGenome.tailLength + genome4.bodyGenome.coreGenome.bodyLength + genome4.bodyGenome.coreGenome.headLength + genome4.bodyGenome.coreGenome.mouthLength;
-        approxRadius = genome4.bodyGenome.coreGenome.creatureBaseLength * genome4.bodyGenome.coreGenome.creatureAspectRatio;        
-        swimLerp = Mathf.Clamp01((genome4.bodyGenome.coreGenome.creatureAspectRatio - 0.175f) / 0.35f);  // 0 = longest, 1 = shortest
-        initData.swimMagnitude = Mathf.Lerp(0.225f, 1.1f, swimLerp);
-        initData.swimFrequency = Mathf.Lerp(2f, 0.8f, swimLerp);
-        initData.swimAnimSpeed = 12f;
-        initData.bodyCoord = genome4.bodyGenome.coreGenome.tailLength / critterFullsizeLength;
-	    initData.headCoord = (genome4.bodyGenome.coreGenome.tailLength + genome4.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
-        initData.mouthCoord = (genome4.bodyGenome.coreGenome.tailLength + genome4.bodyGenome.coreGenome.bodyLength + genome4.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
-        initData.bendiness = 1f;
-        initData.speciesID = 0;
-        initData.bodyPatternX = genome4.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
-        initData.bodyPatternY = genome4.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use        
-        toolbarPortraitCritterInitDataArray[4] = initData;
-
-        initData.primaryHue = genome5.bodyGenome.appearanceGenome.huePrimary;
-        initData.secondaryHue = genome5.bodyGenome.appearanceGenome.hueSecondary;        
-        initData.boundingBoxSize = genome5.bodyGenome.GetFullsizeBoundingBox();
-        initData.maxEnergy = Mathf.Min(initData.boundingBoxSize.x * initData.boundingBoxSize.y, 0.5f);                
-        critterFullsizeLength = genome5.bodyGenome.coreGenome.tailLength + genome5.bodyGenome.coreGenome.bodyLength + genome5.bodyGenome.coreGenome.headLength + genome5.bodyGenome.coreGenome.mouthLength;
-        approxRadius = genome5.bodyGenome.coreGenome.creatureBaseLength * genome5.bodyGenome.coreGenome.creatureAspectRatio;        
-        swimLerp = Mathf.Clamp01((genome5.bodyGenome.coreGenome.creatureAspectRatio - 0.175f) / 0.35f);  // 0 = longest, 1 = shortest
-        initData.swimMagnitude = Mathf.Lerp(0.225f, 1.1f, swimLerp);
-        initData.swimFrequency = Mathf.Lerp(2f, 0.8f, swimLerp);
-        initData.swimAnimSpeed = 12f;
-        initData.bodyCoord = genome5.bodyGenome.coreGenome.tailLength / critterFullsizeLength;
-	    initData.headCoord = (genome5.bodyGenome.coreGenome.tailLength + genome5.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
-        initData.mouthCoord = (genome5.bodyGenome.coreGenome.tailLength + genome5.bodyGenome.coreGenome.bodyLength + genome5.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
-        initData.bendiness = 1f;
-        initData.speciesID = 0;
-        initData.bodyPatternX = genome5.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
-        initData.bodyPatternY = genome5.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
-        
-        toolbarPortraitCritterInitDataArray[5] = initData;
-        */
-        #endregion
-
-        toolbarPortraitCritterInitDataCBuffer?.Release();
-        toolbarPortraitCritterInitDataCBuffer = new ComputeBuffer(6, SimulationStateData.GetCritterInitDataSize());
-        toolbarPortraitCritterInitDataCBuffer.SetData(toolbarPortraitCritterInitDataArray);
+        uiManager.creaturePanelUI.portraitCritterInitDataCBuffer?.Release();
+        uiManager.creaturePanelUI.portraitCritterInitDataCBuffer = new ComputeBuffer(6, SimulationStateData.GetCritterInitDataSize());
+        uiManager.creaturePanelUI.portraitCritterInitDataCBuffer.SetData(toolbarPortraitCritterInitDataArray);
     }
     
     private void SetToolbarPortraitCritterSimData() {
@@ -2901,8 +2242,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         simData.growthPercentage = 2f; 
         toolbarPortraitCritterSimDataArray[5] = simData;
         
-        toolbarPortraitCritterSimDataCBuffer = new ComputeBuffer(6, SimulationStateData.GetCritterSimDataSize());
-        toolbarPortraitCritterSimDataCBuffer.SetData(toolbarPortraitCritterSimDataArray);
+        uiManager.creaturePanelUI.portraitCritterSimDataCBuffer?.Release();
+        uiManager.creaturePanelUI.portraitCritterSimDataCBuffer = new ComputeBuffer(6, SimulationStateData.GetCritterSimDataSize());
+        uiManager.creaturePanelUI.portraitCritterSimDataCBuffer.SetData(toolbarPortraitCritterSimDataArray);
     }
     
     // Should be called from SimManager at proper time!
@@ -2918,8 +2260,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             //baronVonTerrain.RebuildTerrainMesh();
             debugFrameCounter = 0;
         }
-
-        toolbarPortraitCritterSimDataCBuffer?.Release();
 
         // PORTRAIT
         if (isToolbarCritterPortraitEnabled) {
@@ -3193,10 +2533,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         toolbarSpeciesPortraitStrokesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         toolbarSpeciesPortraitStrokesMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         toolbarSpeciesPortraitStrokesMat.SetFloat("_MapSize", SimulationManager._MapSize);
-        toolbarSpeciesPortraitStrokesMat.SetBuffer("critterInitDataCBuffer", toolbarPortraitCritterInitDataCBuffer);
-        toolbarSpeciesPortraitStrokesMat.SetBuffer("critterSimDataCBuffer", toolbarPortraitCritterSimDataCBuffer);
-        toolbarSpeciesPortraitStrokesMat.SetBuffer("critterGenericStrokesCBuffer", toolbarCritterPortraitStrokesCBuffer);
-        cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, toolbarSpeciesPortraitStrokesMat, 0, MeshTopology.Triangles, 6, toolbarCritterPortraitStrokesCBuffer.count); // toolbarCritterPortraitStrokesCBuffer.count);
+        toolbarSpeciesPortraitStrokesMat.SetBuffer("critterInitDataCBuffer", uiManager.creaturePanelUI.portraitCritterInitDataCBuffer);
+        toolbarSpeciesPortraitStrokesMat.SetBuffer("critterSimDataCBuffer", uiManager.creaturePanelUI.portraitCritterSimDataCBuffer);
+        toolbarSpeciesPortraitStrokesMat.SetBuffer("critterGenericStrokesCBuffer", uiManager.creaturePanelUI.critterPortraitStrokesCBuffer);
+        cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, toolbarSpeciesPortraitStrokesMat, 0, MeshTopology.Triangles, 6, uiManager.creaturePanelUI.critterPortraitStrokesCBuffer.count); // toolbarCritterPortraitStrokesCBuffer.count);
 
         /*
         critterDebugGenericStrokeMat.SetPass(0);
@@ -3267,18 +2607,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         worldTreeLineDataMat.SetPass(0);
         worldTreeLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        worldTreeLineDataMat.SetBuffer("worldTreeLineDataCBuffer", worldTreeLineDataCBuffer);
-        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, worldTreeLineDataMat, 0, MeshTopology.Triangles, 6, worldTreeLineDataCBuffer.count);
-        /*
-        clockOrbitLineDataMat.SetPass(0);
-        clockOrbitLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        clockOrbitLineDataMat.SetBuffer("clockOrbitLineDataCBuffer", uiManager.clockPanelUI.clockEarthStampDataCBuffer);
-        float curFrame = (simManager.simAgeTimeSteps);
-        clockOrbitLineDataMat.SetFloat("_CurFrame", curFrame);
-        clockOrbitLineDataMat.SetFloat("_NumRows", 4f);
-        clockOrbitLineDataMat.SetFloat("_NumColumns", 4f);
-        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, clockOrbitLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.clockPanelUI.clockEarthStampDataCBuffer.count);
-        */
+        worldTreeLineDataMat.SetBuffer("worldTreeLineDataCBuffer", uiManager.historyPanelUI.worldTreeLineDataCBuffer);
+        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, worldTreeLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.historyPanelUI.worldTreeLineDataCBuffer.count);
+        
         float curFrame = (simManager.simAgeTimeSteps);
 
         uiManager.clockPanelUI.clockEarthStampMat.SetPass(0);
@@ -3319,124 +2650,12 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         Graphics.ExecuteCommandBuffer(cmdBufferWorldTree);
         worldTreeRenderCamera.Render();
         
-        #region Dead code (delegate or delete)
-        // TREE OF LIFE:
-
-        //graphs mouse coords:
-        /*if(simManager.uiManager.tolMouseOver > 0.5f) {
-            Vector2 localPoint = Vector2.zero;
-            RectTransform rectTransform = simManager.uiManager.imageTolSpeciesTreeRender.gameObject.GetComponent<RectTransform>();
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, Input.mousePosition, null, out localPoint);
-
-            Vector2 uvCoord = new Vector2((localPoint.x + 230f) / 460f, (localPoint.y + 160f) / 320f);
-            simManager.uiManager.tolMouseCoords = uvCoord;
-
-            simManager.uiManager.UpdateTolGraphCursorTimeSelectUI(uvCoord);
-
-            simManager.uiManager.HoverOverTolGraphRenderPanel();
-            
-        }
-        else {
-            
-        }*/
-
-        // TREE OF LIFE STUFFS:::
-        /*
-        cmdBufferTreeOfLifeSpeciesTree.Clear();
-        cmdBufferTreeOfLifeSpeciesTree.SetRenderTarget(treeOfLifeSpeciesTreeRenderCamera.targetTexture); // needed???
-        cmdBufferTreeOfLifeSpeciesTree.ClearRenderTarget(true, true, new Color(0f,0f,0f,0f), 1.0f);  // clear -- needed???
-        cmdBufferTreeOfLifeSpeciesTree.SetViewProjectionMatrices(treeOfLifeSpeciesTreeRenderCamera.worldToCameraMatrix, treeOfLifeSpeciesTreeRenderCamera.projectionMatrix);
-
-        float panelIsOn = 0f;
-        if(simManager.uiManager.tolEventsTimelineOn) {   // room for code improvement here - only update on UI events rather than every frame conditional
-            panelIsOn = 1f;   
-        }
-
-        // Cursor line first
-        treeOfLifeCursorLineMat.SetPass(0);
-        treeOfLifeCursorLineMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        treeOfLifeCursorLineMat.SetInt("_CurSimStep", simManager.simAgeTimeSteps);
-        treeOfLifeCursorLineMat.SetFloat("_IsOn", panelIsOn);
-        treeOfLifeCursorLineMat.SetFloat("_MouseCoordX", simManager.uiManager.tolMouseCoords.x);
-        treeOfLifeCursorLineMat.SetFloat("_MouseCoordY", simManager.uiManager.tolMouseCoords.y);
-        treeOfLifeCursorLineMat.SetFloat("_MouseOn", simManager.uiManager.tolMouseOver);
-        treeOfLifeCursorLineMat.SetBuffer("treeOfLifeEventLineDataCBuffer", treeOfLifeEventLineDataCBuffer);
-        cmdBufferTreeOfLifeSpeciesTree.DrawProcedural(Matrix4x4.identity, treeOfLifeCursorLineMat, 0, MeshTopology.Triangles, 6, 1);
-        
-        // draw event lines next:
-        
-        treeOfLifeEventsLineMat.SetPass(0);
-        treeOfLifeEventsLineMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        treeOfLifeEventsLineMat.SetInt("_CurSimStep", simManager.simAgeTimeSteps);
-        treeOfLifeEventsLineMat.SetFloat("_GraphCoordEventsStart", simManager.uiManager.tolGraphCoordsEventsStart);
-        treeOfLifeEventsLineMat.SetFloat("_GraphCoordEventsRange", simManager.uiManager.tolGraphCoordsEventsRange);        
-        treeOfLifeEventsLineMat.SetFloat("_IsOn", panelIsOn);
-        treeOfLifeEventsLineMat.SetInt("_ClosestEventIndex", simManager.uiManager.curClosestEventToCursor);
-        treeOfLifeEventsLineMat.SetFloat("_MouseCoordX", simManager.uiManager.tolMouseCoords.x);
-        treeOfLifeEventsLineMat.SetFloat("_MouseCoordY", simManager.uiManager.tolMouseCoords.y);
-        treeOfLifeEventsLineMat.SetFloat("_MouseOn", simManager.uiManager.tolMouseOver);
-        treeOfLifeEventsLineMat.SetBuffer("treeOfLifeEventLineDataCBuffer", treeOfLifeEventLineDataCBuffer);
-        cmdBufferTreeOfLifeSpeciesTree.DrawProcedural(Matrix4x4.identity, treeOfLifeEventsLineMat, 0, MeshTopology.Triangles, 6, treeOfLifeEventLineDataCBuffer.count);
-        
-        // World Stats graph lines:
-        treeOfLifeWorldStatsMat.SetPass(0);
-        treeOfLifeWorldStatsMat.SetTexture("_KeyTex", simManager.uiManager.textureWorldStatsKey);
-        treeOfLifeWorldStatsMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        treeOfLifeWorldStatsMat.SetFloat("_GraphCoordStatsStart", simManager.uiManager.tolGraphCoordsStatsStart);
-        treeOfLifeWorldStatsMat.SetBuffer("treeOfLifeWorldStatsValuesCBuffer", treeOfLifeWorldStatsValuesCBuffer);
-        treeOfLifeWorldStatsMat.SetInt("_SelectedWorldStatsID", simManager.uiManager.tolSelectedWorldStatsIndex);
-        panelIsOn = 0f;
-        if(simManager.uiManager.tolWorldStatsOn) {   // room for code improvement here - only update on UI events rather than every frame conditional
-            panelIsOn = 1f;   
-        }
-        treeOfLifeWorldStatsMat.SetFloat("_IsOn", panelIsOn);
-        treeOfLifeWorldStatsMat.SetFloat("_MouseCoordX", simManager.uiManager.tolMouseCoords.x);
-        treeOfLifeWorldStatsMat.SetFloat("_MouseCoordY", simManager.uiManager.tolMouseCoords.y);
-        treeOfLifeWorldStatsMat.SetFloat("_MouseOn", simManager.uiManager.tolMouseOver);
-        cmdBufferTreeOfLifeSpeciesTree.DrawProcedural(Matrix4x4.identity, treeOfLifeWorldStatsMat, 0, MeshTopology.Triangles, 6, 64);
-
-        treeOfLifeSpeciesLineMat.SetPass(0);
-        //treeOfLifeSpeciesLineMat.SetTexture("_KeyTex", simManager.uiManager.statSpeciesColorKey);
-        treeOfLifeSpeciesLineMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        treeOfLifeSpeciesLineMat.SetBuffer("treeOfLifeSpeciesDataKeyCBuffer", treeOfLifeSpeciesDataKeyCBuffer);        
-        treeOfLifeSpeciesLineMat.SetBuffer("treeOfLifeSpeciesSegmentsCBuffer", treeOfLifeSpeciesSegmentsCBuffer);
-        treeOfLifeSpeciesLineMat.SetInt("_CurSimStep", simManager.simAgeTimeSteps);
-        treeOfLifeSpeciesLineMat.SetInt("_CurSimYear", simManager.curSimYear);
-        panelIsOn = 0f;
-        if(simManager.uiManager.tolSpeciesTreeOn) {   // room for code improvement here - only update on UI events rather than every frame conditional
-            panelIsOn = 1f;   
-        }
-        treeOfLifeSpeciesLineMat.SetFloat("_IsOn", panelIsOn);
-        treeOfLifeSpeciesLineMat.SetFloat("_MouseCoordX", simManager.uiManager.tolMouseCoords.x);
-        treeOfLifeSpeciesLineMat.SetFloat("_MouseCoordY", simManager.uiManager.tolMouseCoords.y);
-        treeOfLifeSpeciesLineMat.SetFloat("_MouseOn", simManager.uiManager.tolMouseOver);
-        cmdBufferTreeOfLifeSpeciesTree.DrawProcedural(Matrix4x4.identity, treeOfLifeSpeciesLineMat, 0, MeshTopology.Triangles, 6, 64 * 32);
-
-        // Head Tips!
-        treeOfLifeSpeciesHeadTipMat.SetPass(0);
-        treeOfLifeSpeciesHeadTipMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        treeOfLifeSpeciesHeadTipMat.SetBuffer("treeOfLifeSpeciesDataKeyCBuffer", treeOfLifeSpeciesDataKeyCBuffer);        
-        treeOfLifeSpeciesHeadTipMat.SetBuffer("treeOfLifeSpeciesDataHeadPosCBuffer", treeOfLifeSpeciesDataHeadPosCBuffer);
-        treeOfLifeSpeciesHeadTipMat.SetInt("_CurSimStep", simManager.simAgeTimeSteps);
-        treeOfLifeSpeciesHeadTipMat.SetInt("_CurSimYear", simManager.curSimYear);
-        treeOfLifeSpeciesHeadTipMat.SetInt("_HoverIndex", simManager.uiManager.treeOfLifeManager.hoverID);
-        treeOfLifeSpeciesHeadTipMat.SetFloat("_IsOn", panelIsOn);
-        treeOfLifeSpeciesHeadTipMat.SetFloat("_MouseCoordX", simManager.uiManager.tolMouseCoords.x);
-        treeOfLifeSpeciesHeadTipMat.SetFloat("_MouseCoordY", simManager.uiManager.tolMouseCoords.y);
-        treeOfLifeSpeciesHeadTipMat.SetFloat("_MouseOn", simManager.uiManager.tolMouseOver);
-        cmdBufferTreeOfLifeSpeciesTree.DrawProcedural(Matrix4x4.identity, treeOfLifeSpeciesHeadTipMat, 0, MeshTopology.Triangles, 6, 32);
-
-        Graphics.ExecuteCommandBuffer(cmdBufferTreeOfLifeSpeciesTree);
-        treeOfLifeSpeciesTreeRenderCamera.Render();
-        */
-        #endregion
     }
-
+    /*
     public void TreeOfLifeAddNewSpecies(MasterGenomePool masterGenomePool, int newSpeciesID) 
     {
         SpeciesGenomePool newSpecies = masterGenomePool.completeSpeciesPoolsList[newSpeciesID];
 
-        //computeShaderTreeOfLife.SetTexture(kernelCSAddNewSpecies, "velocityRead", fluidManager._VelocityA);
         int[] speciesIDArray = new int[1];
         speciesIDArray[0] = newSpecies.speciesID;
         ComputeBuffer speciesIDCBuffer = new ComputeBuffer(1, sizeof(int));
@@ -3445,17 +2664,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         TreeOfLifeLeafNodeData[] updateLeafNodeDataArray = new TreeOfLifeLeafNodeData[1];
 
         // WPP: using object initializer
-        TreeOfLifeLeafNodeData data = new TreeOfLifeLeafNodeData(newSpecies);
-        /*data.speciesID = newSpecies.speciesID;
-        data.parentSpeciesID = newSpecies.parentSpeciesID;
-        data.graphDepth = newSpecies.depthLevel;
-        data.primaryHue = newSpecies.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-        data.secondaryHue = newSpecies.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
-        data.growthPercentage = 1f;
-        data.age = 0f;
-        data.decayPercentage = 0f;
-        data.isActive = 1f;
-        data.isExtinct = 0f;*/
+        TreeOfLifeLeafNodeData data = new TreeOfLifeLeafNodeData(newSpecies);        
         updateLeafNodeDataArray[0] = data;
 
         ComputeBuffer updateLeafNodeDataCBuffer = new ComputeBuffer(updateLeafNodeDataArray.Length, sizeof(int) * 3 + sizeof(float) * 14);
@@ -3485,10 +2694,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             int parentSpeciesID = masterGenomePool.completeSpeciesPoolsList[curSpeciesID].parentSpeciesID;
 
             // WPP: using object initializer    
-            TreeOfLifeStemSegmentStruct newStemSegment = new TreeOfLifeStemSegmentStruct(curSpeciesID, newSpeciesID, parentSpeciesID);
-            //newStemSegment.speciesID = newSpeciesID;
-            //newStemSegment.fromID = parentSpeciesID;
-            //newStemSegment.toID = curSpeciesID;
+            TreeOfLifeStemSegmentStruct newStemSegment = new TreeOfLifeStemSegmentStruct(curSpeciesID, newSpeciesID, parentSpeciesID);           
 
             segmentStructUpdateArray[i] = newStemSegment;
             
@@ -3552,7 +2758,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
     public void TreeOfLifeGetColliderNodePositionData() {
         //simManager.uiManager.treeOfLifeManager.UpdateNodePositionsFromGPU(simManager.uiManager.cameraManager, treeOfLifeSpeciesDataHeadPosArray);     // **** Need to cap this at 32 or it breaks!!!  
     }
-
+    */
     private void Render() {
         //Debug.Log("TestRenderCommandBuffer()");
 
@@ -4004,26 +3210,23 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 critterDebugGenericStrokeMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
                 critterDebugGenericStrokeMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
                 critterDebugGenericStrokeMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-                critterDebugGenericStrokeMat.SetBuffer("critterGenericStrokesCBuffer", critterGenericStrokesCBuffer);
+                critterDebugGenericStrokeMat.SetBuffer("critterGenericStrokesCBuffer", mainCritterStrokesCBuffer);
                 critterDebugGenericStrokeMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
                 critterDebugGenericStrokeMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
                 critterDebugGenericStrokeMat.SetTexture("_VelocityTex", fluidManager._VelocityPressureDivergenceMain);
                 critterDebugGenericStrokeMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);              
                 critterDebugGenericStrokeMat.SetInt("_HoverID", cameraManager.mouseHoverAgentIndex);
-                critterDebugGenericStrokeMat.SetInt("_SelectedID", cameraManager.targetAgentIndex);
-                                
+                critterDebugGenericStrokeMat.SetInt("_SelectedID", cameraManager.targetAgentIndex);                                
                 float isHoverCritter = cameraManager.isMouseHoverAgent ? 1f : 0f;
-                float isHighlightCritter = isHoverCritter; // simManager.uiManager.panelFocus == PanelFocus.Watcher ? 1f : 0f; // ***EC -- Come back to this later
-                
+                float isHighlightCritter = isHoverCritter;
                 critterDebugGenericStrokeMat.SetFloat("_HighlightOn", isHighlightCritter);
                 critterDebugGenericStrokeMat.SetFloat("_IsHover", isHoverCritter);
                 critterDebugGenericStrokeMat.SetFloat("_IsSelected", cameraManager.isFollowingAgent ? 1f : 0f);
-                //Debug.Log("SetTargetAgent: [ " + cameraManager.targetAgentIndex.ToString());
                 critterDebugGenericStrokeMat.SetFloat("_MapSize", SimulationManager._MapSize);
                 critterDebugGenericStrokeMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
                 critterDebugGenericStrokeMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
                 critterDebugGenericStrokeMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
-                cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterDebugGenericStrokeMat, 0, MeshTopology.Triangles, 6, critterGenericStrokesCBuffer.count);
+                cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterDebugGenericStrokeMat, 0, MeshTopology.Triangles, 6, mainCritterStrokesCBuffer.count);
 
                 //if(simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == 2 && simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 1) {
                 // *** Revisit this in future - probably can get away without it, just use one pass for all eggSacks
@@ -4202,17 +3405,13 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         spiritBrushQuadDataCBuffer1?.Release();
         cursorParticlesCBuffer0?.Release();
         cursorParticlesCBuffer1?.Release();
-        critterSkinStrokesCBuffer?.Release();
-        critterGenericStrokesCBuffer?.Release();
+        //critterSkinStrokesCBuffer?.Release();
+        mainCritterStrokesCBuffer?.Release();
         gizmoCursorPosCBuffer?.Release();
         gizmoFeedToolPosCBuffer?.Release();
-
-        // WORLDTREE:
-        clockOrbitLineDataCBuffer?.Release();
-        worldTreeLineDataCBuffer?.Release();
-
+        
         // TREE OF LIFE:
-        testTreeOfLifePositionCBuffer?.Release();
+        //testTreeOfLifePositionCBuffer?.Release();
         treeOfLifeEventLineDataCBuffer?.Release();
         treeOfLifeWorldStatsValuesCBuffer?.Release();
         treeOfLifeSpeciesSegmentsCBuffer?.Release();
@@ -4220,17 +3419,16 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         treeOfLifeSpeciesDataHeadPosCBuffer?.Release();
         
         // OLD TOL:
-        treeOfLifeLeafNodeDataCBuffer?.Release();
-        treeOfLifeNodeColliderDataCBufferA?.Release();
-        treeOfLifeNodeColliderDataCBufferB?.Release();
-        treeOfLifeStemSegmentDataCBuffer?.Release();
-        toolbarCritterPortraitStrokesCBuffer?.Release();
-        treeOfLifeStemSegmentVerticesCBuffer?.Release();
-        treeOfLifeBasicStrokeDataCBuffer?.Release();
-        treeOfLifePortraitBorderDataCBuffer?.Release();
-        treeOflifePortraitDataCBuffer?.Release();
-        treeOfLifePortraitEyeDataCBuffer?.Release();
-        toolbarPortraitCritterInitDataCBuffer?.Release();
-        toolbarPortraitCritterSimDataCBuffer?.Release();
+        //treeOfLifeLeafNodeDataCBuffer?.Release();
+        //treeOfLifeNodeColliderDataCBufferA?.Release();
+        //treeOfLifeNodeColliderDataCBufferB?.Release();
+        //treeOfLifeStemSegmentDataCBuffer?.Release();
+        
+        //treeOfLifeStemSegmentVerticesCBuffer?.Release();
+        //treeOfLifeBasicStrokeDataCBuffer?.Release();
+        //treeOfLifePortraitBorderDataCBuffer?.Release();
+        //treeOflifePortraitDataCBuffer?.Release();
+        //treeOfLifePortraitEyeDataCBuffer?.Release();
+        
     }
 }

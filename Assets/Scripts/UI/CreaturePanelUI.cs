@@ -8,6 +8,8 @@ public class CreaturePanelUI : MonoBehaviour
 {
     SimulationManager simulationManager => SimulationManager.instance;
     CameraManager cameraManager => CameraManager.instance;
+    UIManager uiManagerRef => UIManager.instance;
+    TheRenderKing theRenderKing => TheRenderKing.instance;
 
     [SerializeField]
     GameObject panelPortrait;
@@ -27,8 +29,7 @@ public class CreaturePanelUI : MonoBehaviour
 
     public TooltipUI tooltipCurrentAction;
     public TooltipUI tooltipGenome;
-    public TooltipUI tooltipAppearance;
-    
+    public TooltipUI tooltipAppearance;    
 
     [SerializeField]
     Text textPanelStateDebug;
@@ -39,7 +40,20 @@ public class CreaturePanelUI : MonoBehaviour
         Genome,
         Brain
     }
-    
+
+    // PORTRAIT!!!!
+    public ComputeBuffer portraitCritterInitDataCBuffer;
+    public ComputeBuffer portraitCritterSimDataCBuffer;
+    public ComputeBuffer critterPortraitStrokesCBuffer;
+
+    public void InitializeRenderBuffers() {
+        
+        // INIT:: ugly :(
+        portraitCritterInitDataCBuffer?.Release();
+        portraitCritterInitDataCBuffer = new ComputeBuffer(6, SimulationStateData.GetCritterInitDataSize());
+
+        critterPortraitStrokesCBuffer = new ComputeBuffer(1 * theRenderKing.GetNumStrokesPerCritter(), theRenderKing.GetMemorySizeCritterStrokeData());
+    }
     
     public void Tick() {
         textPanelStateDebug.text = "MODE: " + curPanelMode;
@@ -88,4 +102,11 @@ public class CreaturePanelUI : MonoBehaviour
     public void SetPanelMode(int modeID) {
         curPanelMode = (CreaturePanelMode)modeID;
     }
+
+    private void OnDisable() {
+        critterPortraitStrokesCBuffer?.Release();
+        portraitCritterInitDataCBuffer?.Release();
+        portraitCritterSimDataCBuffer?.Release();
+    }
+    
 }

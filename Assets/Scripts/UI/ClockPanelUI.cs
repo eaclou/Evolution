@@ -191,11 +191,8 @@ public class ClockPanelUI : MonoBehaviour
 
         clockPlanetMatA.SetFloat("_NumRows", 4f);
         clockPlanetMatA.SetFloat("_NumColumns", 4f);
-
-        //clockMoonMatA.SetFloat("_CurFrame", curFrame);
         clockMoonMatA.SetFloat("_NumRows", 4f);
         clockMoonMatA.SetFloat("_NumColumns", 4f);
-        //clockSunMatA.SetFloat("_CurFrame", curFrame);
         clockSunMatA.SetFloat("_NumRows", 4f);
         clockSunMatA.SetFloat("_NumColumns", 4f);
     }
