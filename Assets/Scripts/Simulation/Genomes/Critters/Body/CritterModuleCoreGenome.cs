@@ -1,10 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class CritterModuleCoreGenome {
-
+public class CritterModuleCoreGenome 
+{
     public int parentID;
     public int inno;
 
@@ -65,6 +64,11 @@ public class CritterModuleCoreGenome {
     public float tailBackWidth; 
     public float tailBackHeight;
     public float tailBackVerticalOffset;
+    
+    public float fullLength => tailLength + bodyLength + headLength + mouthLength;
+    public float bodyCoord => tailLength / fullLength;
+    public float headCoord => (tailLength + bodyLength) / fullLength;
+    public float mouthCoord => (tailLength + bodyLength + headLength) / fullLength;
 
     // EYES:::  (Eventually separate these out better into different subclasses/structs)
     public int numEyes = 2;

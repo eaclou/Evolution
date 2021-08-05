@@ -18,55 +18,7 @@ public class SimulationStateData {
         public float eatingStatus;
         public float foodAmount;
     }*/
-    
-    public struct CritterInitData {  // 25f + 3i
-        public Vector3 boundingBoxSize;
-        public float spawnSizePercentage;
-        public float maxEnergy;
-        public float maxStomachCapacity;
-        public Vector3 primaryHue;
-        public Vector3 secondaryHue;
-        //public float mouthIsActive; // need this for animation? // morph this into mouthType?
-        // public float biteRadius; // triggerArea where bite is successful
-        public float biteConsumeRadius; 
-        public float biteTriggerRadius;
-        public float biteTriggerLength;
-        public float eatEfficiencyPlant;
-        public float eatEfficiencyDecay;
-        public float eatEfficiencyMeat;
-        public float swimMagnitude;
-	    public float swimFrequency;
-	    public float swimAnimSpeed;
-        public float bodyCoord;
-        public float headCoord;
-        public float mouthCoord;
-	    public float bendiness;
-        public int bodyPatternX;  // what grid cell of texture sheet to use
-        public int bodyPatternY;  // what grid cell of texture sheet to use
-        public int speciesID;
-    }
-    
-    public struct CritterSimData {
-        public Vector3 worldPos;
-        public Vector2 velocity;
-        public Vector2 heading;
-        public float currentBiomass;
-        public float embryoPercentage;
-        public float growthPercentage;
-        public float decayPercentage;
-        public float foodAmount;  // stomach conetents normalized 01
-        public float energy;
-        public float health;
-        public float stamina;
-        public float consumeOn; // Use for consumption
-        public float biteAnimCycle;
-        public float moveAnimCycle;
-        public float turnAmount;
-        public float accel;
-		public float smoothedThrottle;
-        public float wasteProduced;  // newly added 8/1/2019
-    }
-    
+
     /*public struct DebugBodyResourcesData {
         public float developmentPercentage;
         public float health;
@@ -132,15 +84,6 @@ public class SimulationStateData {
         public Vector2 worldPos;
         public Vector2 localCoords;
         public Vector2 localScale;
-        public float attached;  // if attached, sticks to parent food, else, floats in water
-    }
-    
-    public struct EggData {  // 8f + 1i
-        public int eggSackIndex;
-        public Vector2 worldPos;
-        public Vector2 localCoords;
-        public Vector2 localScale;
-        public float lifeStage;  // how grown is it?
         public float attached;  // if attached, sticks to parent food, else, floats in water
     }
 
@@ -383,8 +326,6 @@ public class SimulationStateData {
                                                           agentCenterY, 
                                                           (simManager.agents[i].fullSizeBoundingBox.x + 0.25f) * 0.5f / SimulationManager._MapSize,  // **** REVISIT!!!!! ****
                                                           (simManager.agents[i].fullSizeBoundingBox.y + 0.25f) * 0.5f / SimulationManager._MapSize); //... 0.5/140 ...
-                
-                
             }
         }
         
@@ -485,5 +426,142 @@ public class SimulationStateData {
         foodStemDataCBuffer?.Release();
         foodLeafDataCBuffer?.Release();
         eggDataCBuffer?.Release();
+    }
+}
+
+// WPP: de-nest structs to avoid use of dot accessor elsewhere
+// (nesting implies there is no reason for anything outside wrapping class to have access)
+public struct CritterInitData 
+{  
+    // 25f + 3i
+    public Vector3 boundingBoxSize;
+    public float spawnSizePercentage;
+    public float maxEnergy;
+    public float maxStomachCapacity;
+    public Vector3 primaryHue;
+    public Vector3 secondaryHue;
+    //public float mouthIsActive; // need this for animation? // morph this into mouthType?
+    // public float biteRadius; // triggerArea where bite is successful
+    public float biteConsumeRadius; 
+    public float biteTriggerRadius;
+    public float biteTriggerLength;
+    public float eatEfficiencyPlant;
+    public float eatEfficiencyDecay;
+    public float eatEfficiencyMeat;
+    public float swimMagnitude;
+    public float swimFrequency;
+    public float swimAnimSpeed;
+    public float bodyCoord;
+    public float headCoord;
+    public float mouthCoord;
+    public float bendiness;
+    public int bodyPatternX;  // what grid cell of texture sheet to use
+    public int bodyPatternY;  // what grid cell of texture sheet to use
+    public int speciesID;
+    
+    public CritterInitData(BodyGenome bodyGenome)
+    {
+        boundingBoxSize = bodyGenome.GetFullsizeBoundingBox(); 
+        spawnSizePercentage = 0.1f;
+        maxEnergy = Mathf.Min(boundingBoxSize.x * boundingBoxSize.y, 0.5f);
+        maxStomachCapacity = 1f;
+        primaryHue = bodyGenome.appearanceGenome.huePrimary;
+        secondaryHue = bodyGenome.appearanceGenome.hueSecondary;
+        biteConsumeRadius = 1f;
+        biteTriggerRadius = 1f;
+        biteTriggerLength = 1f;
+        eatEfficiencyPlant = 1f;
+        eatEfficiencyDecay = 1f;
+        eatEfficiencyMeat = 1f;
+
+        // 0 = longest, 1 = shortest
+        float swimLerp = Mathf.Clamp01((bodyGenome.coreGenome.creatureAspectRatio - 0.175f) / 0.35f); 
+
+        // Mag range: 2 --> 0.5
+        // freq range: 1 --> 2
+        swimMagnitude = Mathf.Lerp(0.225f, 1.1f, swimLerp); 
+        swimFrequency = Mathf.Lerp(1.5f, 0.6f, swimLerp);   
+        swimAnimSpeed = 6f;
+
+        bodyCoord = bodyGenome.coreGenome.bodyCoord;
+        headCoord = bodyGenome.coreGenome.headCoord;
+        mouthCoord = bodyGenome.coreGenome.mouthCoord;
+        bendiness = 1f; 
+        speciesID = 0; 
+        
+        // what grid cell of texture sheet to use
+        bodyPatternX = bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
+        bodyPatternY = bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  
+    }
+}
+
+public struct CritterSimData 
+{
+    public Vector3 worldPos;
+    public Vector2 velocity;
+    public Vector2 heading;
+    public float currentBiomass;
+    public float embryoPercentage;
+    public float growthPercentage;
+    public float decayPercentage;
+    public float foodAmount;  // stomach conetents normalized 01
+    public float energy;
+    public float health;
+    public float stamina;
+    public float consumeOn; // Use for consumption
+    public float biteAnimCycle;
+    public float moveAnimCycle;
+    public float turnAmount;
+    public float accel;
+    public float smoothedThrottle;
+    public float wasteProduced;  // newly added 8/1/2019
+    
+    public CritterSimData(bool isDead, bool allEvaluationsComplete)
+    {
+        biteAnimCycle = 0f; // (Time.realtimeSinceStartup * 1f) % 1f;
+        worldPos = Vector3.one * 128f * 0.034f;
+        float theta = isDead ? Time.realtimeSinceStartup : 0f;
+        float angle = Mathf.Cos(theta * 0.67f) * 2f;
+        Vector2 facingDir = new Vector2(Mathf.Cos(angle + Mathf.PI * 0.75f), Mathf.Sin(angle + Mathf.PI * 0.75f));
+        heading = facingDir.normalized;
+        float embryo = 1f; 
+        embryoPercentage = embryo;
+        growthPercentage = 1.5f * 1.5f;
+        float decay = isDead && allEvaluationsComplete ? 0.25f : 0f;
+        decayPercentage = decay;
+        foodAmount = 0f; // Mathf.Lerp(simData.foodAmount, .agents[i].coreModule.stomachContents / agents[i].coreModule.stomachCapacity, 0.16f);
+        energy = 1f; // agents[i].coreModule.energyRaw / agents[i].coreModule.maxEnergyStorage;
+        health = 1f; // agents[i].coreModule.healthHead;
+        stamina = 1f; // agents[i].coreModule.stamina[0];
+        consumeOn = isDead ? 0f : Mathf.Sin(angle * 3.19f) * 0.5f + 0.5f;
+        moveAnimCycle = isDead ? 0f : Time.realtimeSinceStartup * 0.6f % 1f;
+        turnAmount = isDead ? 0f : Mathf.Sin(Time.realtimeSinceStartup * 0.654321f) * 0.65f + 0.25f;
+        accel = isDead ? 0f : (Mathf.Sin(Time.realtimeSinceStartup * 0.79f) * 0.5f + 0.5f) * 0.081f; // Mathf.Clamp01(agents[i].curAccel) * 1f; // ** RE-FACTOR!!!!
+        smoothedThrottle = isDead ? 0f : (Mathf.Sin(Time.realtimeSinceStartup * 3.97f + 0.4f) * 0.5f + 0.5f) * 0.85f;
+        velocity = isDead ? Vector2.zero : facingDir.normalized * (accel + smoothedThrottle);
+        
+        currentBiomass = default;
+        wasteProduced = default;
+    }
+}
+
+// WPP: assigned but never used
+public struct EggData {  // 8f + 1i
+    public int eggSackIndex;
+    public Vector2 worldPos;
+    public Vector2 localCoords;
+    public Vector2 localScale;
+    public float lifeStage;  // how grown is it?
+    public float attached;  // if attached, sticks to parent food, else, floats in water
+    
+    public EggData(int eggSackIndex, float scale, Vector2 worldPos, float attached = 1f)
+    {
+        this.eggSackIndex = eggSackIndex;
+        localCoords = Random.insideUnitCircle;
+        localScale = Vector2.one * scale;  
+        this.worldPos = worldPos;
+        this.attached = attached;
+        
+        lifeStage = default;
     }
 }
