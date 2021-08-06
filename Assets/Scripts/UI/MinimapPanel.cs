@@ -30,34 +30,7 @@ public class MinimapPanel : MonoBehaviour
         //SetKnowledgeMapViewer(state);
         SetKnowledgeMapViewer(selectedTrophicSlot.data);
     }
-    
-    /*KnowledgeMapId GetStateID(TrophicSlot slot)
-    {
-        switch (slot.kingdomID)
-        {
-            case 0: return KnowledgeMapId.Decomposers;
-            case 1: return slot.tierID == 0 ? KnowledgeMapId.Algae : KnowledgeMapId.Plants;
-            case 2: return slot.tierID == 0 ? KnowledgeMapId.Microbes : KnowledgeMapId.Animals;
-            case 3: 
-                switch (slot.slotID)
-                {
-                    case 0: return KnowledgeMapId.World;
-                    case 1: return KnowledgeMapId.Stone;
-                    case 2: return KnowledgeMapId.Pebbles;
-                    default: return KnowledgeMapId.Sand;
-                }
-            case 4: 
-                switch (slot.slotID)
-                {
-                    case 0: return KnowledgeMapId.Nutrients;
-                    case 1: return KnowledgeMapId.Water;
-                    case 2: return KnowledgeMapId.Wind;
-                    default: return KnowledgeMapId.Undefined;
-                }
-            default: return KnowledgeMapId.Undefined;
-        }
-    }*/
-    
+        
     void SetKnowledgeMapViewer(TrophicLayerSO data) { SetKnowledgeMapViewer(data, GetRenderTexture(data.id)); }
     
     // * WPP: if possible, store RenderTextures in KnowledgeMapData fields
@@ -85,8 +58,8 @@ public class MinimapPanel : MonoBehaviour
     void SetKnowledgeMapViewer(TrophicLayerSO data, RenderTexture renderTexture)
     {
         //var data = lookup.GetKnowledgeMapData(id);
-    
-        textTitle.text = data.title;      
+
+        textTitle.text = "WORLD MAP"; // data.title;      
         imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
         uiKnowledgeMapViewerMat.SetTexture("_MainTex", renderTexture);
         uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);

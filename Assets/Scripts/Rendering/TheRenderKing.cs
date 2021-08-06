@@ -804,41 +804,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         int kernelSimFloatyBits = fluidManager.computeShaderFluidSim.FindKernel("SimFloatyBits");
         fluidManager.computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
     }
-    /*
-    public void InitializeCritterSkinStrokesCBuffer() {
-        critterSkinStrokesCBuffer = new ComputeBuffer(simManager.numAgents * numStrokesPerCritterSkin, sizeof(float) * 16 + sizeof(int) * 2);
-        CritterSkinStrokeData[] critterSkinStrokesArray = new CritterSkinStrokeData[critterSkinStrokesCBuffer.count];
-        
-        for (int i = 0; i < simManager.numAgents; i++) {
-            for (int j = 0; j < numStrokesPerCritterSkin; j++) {
-                CritterSkinStrokeData skinStroke = new CritterSkinStrokeData();
-                skinStroke.parentIndex = i;
-                skinStroke.brushType = 0; // ** Revisit
-
-                skinStroke.worldPos = new Vector3(SimulationManager._MapSize / 2f, SimulationManager._MapSize / 2f, 0f);
-
-                float zCoord = (1f - ((float)j / (float)(numStrokesPerCritterSkin - 1))) * 2f - 1f;
-                float radiusAtZ = Mathf.Sqrt(1f - zCoord * zCoord); // pythagorean theorem
-                Vector2 xyCoords = Random.insideUnitCircle.normalized * radiusAtZ; // possibility for (0,0) ??? ***** undefined/null divide by zero hazard!
-                skinStroke.localPos = new Vector3(xyCoords.x, xyCoords.y, zCoord);
-                //float width = agents[i].agentWidthsArray[Mathf.RoundToInt((skinStroke.localPos.y * 0.5f + 0.5f) * 15f)];
-                skinStroke.localPos.x *= 0.5f;
-                skinStroke.localPos.z *= 0.5f;               // * width  
-                skinStroke.localDir = new Vector3(0f, 1f, 0f); // start up? shouldn't matter
-                skinStroke.localScale = new Vector2(0.25f, 0.420f) * 1.25f; // simManager.agentGenomePoolArray[i].bodyGenome.sizeAndAspectRatio;
-                skinStroke.strength = Random.Range(0f, 1f);
-                skinStroke.lifeStatus = 0f;
-                skinStroke.age = Random.Range(1f, 2f);
-                skinStroke.randomSeed = Random.Range(0f, 1f);
-                skinStroke.followLerp = 1f;
-
-                critterSkinStrokesArray[i * numStrokesPerCritterSkin + j] = skinStroke;
-            }
-        }
-        
-        critterSkinStrokesCBuffer.SetData(critterSkinStrokesArray);
-    }
-    */
+    
     public void InitializeGizmos() {
         Vector4[] dataArray = new Vector4[1];
         Vector4 gizmoPos = new Vector4(128f, 128f, 0f, 0f);
@@ -2429,7 +2395,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, zooplanktonParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.zooplanktonManager.animalParticlesCBuffer.count);
         }
 
-       PopulateColorInjectionBuffer(); // update data for colorInjection objects before rendering                    
+        PopulateColorInjectionBuffer(); // update data for colorInjection objects before rendering                    
         // Creatures + EggSacks:
         basicStrokeDisplayMat.SetPass(0);
         basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -2561,9 +2527,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         // Species PORTRAIT:
         cmdBufferSlotPortraitDisplay.Clear();
         cmdBufferSlotPortraitDisplay.SetRenderTarget(slotPortraitRenderCamera.targetTexture); // needed???
-        cmdBufferSlotPortraitDisplay.ClearRenderTarget(true, true, new Color(54f / 255f, 73f / 255f, 61f / 255f, 1f), 1.0f);  // clear -- needed???
+        cmdBufferSlotPortraitDisplay.ClearRenderTarget(true, true, new Color(54f / 255f, 73f / 255f, 61f / 255f, 0f), 1.0f);  // clear -- needed???
         cmdBufferSlotPortraitDisplay.SetViewProjectionMatrices(slotPortraitRenderCamera.worldToCameraMatrix, slotPortraitRenderCamera.projectionMatrix);
-        
+        /*
         // MEDIUM STROKES!!!!
         baronVonTerrain.groundStrokesMedDisplayMat.SetPass(0);
         baronVonTerrain.groundStrokesMedDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -2585,7 +2551,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color1", baronVonTerrain.pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
         baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color2", baronVonTerrain.sandSlotGenomeCurrent.color);                    
         cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesMedDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.terrainStoneStrokesCBuffer.count);
-        
+        */
         toolbarSpeciesPortraitStrokesMat.SetPass(0);
         toolbarSpeciesPortraitStrokesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         toolbarSpeciesPortraitStrokesMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);

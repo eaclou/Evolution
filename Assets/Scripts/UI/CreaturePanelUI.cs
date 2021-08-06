@@ -74,7 +74,8 @@ public class CreaturePanelUI : MonoBehaviour
             panelGenome.SetActive(true);
             imageGenomeIcon.color = onColor;
 
-            panelPortrait.SetActive(false);
+            panelPortrait.SetActive(false);////
+
             panelBrain.SetActive(false);
             imageAppearanceIcon.color = offColor;
             imageBrainIcon.color = offColor;
@@ -84,7 +85,9 @@ public class CreaturePanelUI : MonoBehaviour
             imageBrainIcon.color = onColor;
 
             panelGenome.SetActive(false);
-            panelPortrait.SetActive(false);
+
+            panelPortrait.SetActive(false);/////
+
             imageGenomeIcon.color = offColor;
             imageAppearanceIcon.color = offColor;
         }
