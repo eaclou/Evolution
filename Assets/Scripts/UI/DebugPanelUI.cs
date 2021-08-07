@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class DebugPanelUI : MonoBehaviour {
+public class DebugPanelUI : MonoBehaviour 
+{
     SimulationManager simulation => SimulationManager.instance;
     SimResourceManager simResourceManager => simulation.simResourceManager;
     SettingsEnvironment environmentSettings => simulation.settingsManager.environmentSettings;
@@ -14,7 +15,7 @@ public class DebugPanelUI : MonoBehaviour {
     CameraManager cameraManager => CameraManager.instance;
     Agent agent => cameraManager.targetAgent;
     UIManager uiManager => UIManager.instance;
-    
+    EnvironmentFluidManager fluidManager => EnvironmentFluidManager.instance;
     
     public bool isOpen;
     public GameObject panelDebug;
@@ -290,19 +291,19 @@ public class DebugPanelUI : MonoBehaviour {
         debugTextureViewerArray[2] = theRenderKing.baronVonWater.waterSurfaceDataRT0;
         debugTextureViewerArray[2].name = "Water Surface Data";
 
-        debugTextureViewerArray[3] = theRenderKing.fluidManager._VelocityPressureDivergenceMain;
+        debugTextureViewerArray[3] = fluidManager._VelocityPressureDivergenceMain;
         debugTextureViewerArray[3].name = "_VelocityPressureDivergenceMain";
 
-        debugTextureViewerArray[4] = theRenderKing.fluidManager._VelocityPressureDivergenceMain;
+        debugTextureViewerArray[4] = fluidManager._VelocityPressureDivergenceMain;
         debugTextureViewerArray[4].name = "_VelocityPressureDivergenceMain";
 
-        debugTextureViewerArray[5] = theRenderKing.fluidManager._VelocityPressureDivergenceMain;
+        debugTextureViewerArray[5] = fluidManager._VelocityPressureDivergenceMain;
         debugTextureViewerArray[5].name = "_VelocityPressureDivergenceMain";
 
-        debugTextureViewerArray[6] = theRenderKing.fluidManager._VelocityPressureDivergenceMain;
+        debugTextureViewerArray[6] = fluidManager._VelocityPressureDivergenceMain;
         debugTextureViewerArray[6].name = "_VelocityPressureDivergenceMain";
 
-        debugTextureViewerArray[7] = theRenderKing.fluidManager._ObstaclesRT;
+        debugTextureViewerArray[7] = fluidManager._ObstaclesRT;
         debugTextureViewerArray[7].name = "Solid Obstacles Render";
 
         debugTextureViewerArray[8] = vegetationManager.critterNearestPlants32;

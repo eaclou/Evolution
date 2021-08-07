@@ -4,7 +4,7 @@ using UnityEngine.Rendering;
 public class BaronVonTerrain : RenderBaron 
 {
     SimulationManager simulation => SimulationManager.instance;
-    TheRenderKing render => TheRenderKing.instance;
+    EnvironmentFluidManager fluidManager => EnvironmentFluidManager.instance;
 
     public ComputeShader computeShaderBrushStrokes;
     public ComputeShader computeShaderTerrainGeneration;
@@ -650,12 +650,12 @@ public class BaronVonTerrain : RenderBaron
         _WorldRadius += radius;
     }
 
-    private void SimTerrainBits(RenderTexture maskTex)
+    private void SimTerrainBits(RenderTexture mask)
     {
         int kernelSimGroundBits = computeShaderTerrainGeneration.FindKernel("CSSimDecomposerBitsData");
         computeShaderTerrainGeneration.SetBuffer(kernelSimGroundBits, "groundBitsCBuffer", decomposerBitsCBuffer);
         computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "AltitudeRead", terrainHeightDataRT);
-        computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "decomposersRead", maskTex);
+        computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "decomposersRead", mask);
         computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderTerrainGeneration.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
         computeShaderTerrainGeneration.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
@@ -681,7 +681,7 @@ public class BaronVonTerrain : RenderBaron
         int kernelSimGroundBits = computeShaderTerrainGeneration.FindKernel("CSSimDecomposerBitsData");
         computeShaderTerrainGeneration.SetBuffer(kernelSimGroundBits, "groundBitsCBuffer", decomposerBitsCBuffer);
         computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "AltitudeRead", terrainHeightDataRT);
-        computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "VelocityRead", render.fluidManager._VelocityPressureDivergenceMain);
+        computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "VelocityRead", fluidManager._VelocityPressureDivergenceMain);
         computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "_ResourceGridRead", simulation.vegetationManager.resourceGridRT1);
         computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderTerrainGeneration.SetFloat("_Time", Time.realtimeSinceStartup);
@@ -700,24 +700,34 @@ public class BaronVonTerrain : RenderBaron
         int kernelSimWasteBits = computeShaderTerrainGeneration.FindKernel("CSSimWasteBitsData");
         computeShaderTerrainGeneration.SetBuffer(kernelSimWasteBits, "groundBitsCBuffer", wasteBitsCBuffer);
         computeShaderTerrainGeneration.SetTexture(kernelSimWasteBits, "AltitudeRead", terrainHeightDataRT);
-        computeShaderTerrainGeneration.SetTexture(kernelSimWasteBits, "VelocityRead", render.fluidManager._VelocityPressureDivergenceMain);
+        computeShaderTerrainGeneration.SetTexture(kernelSimWasteBits, "VelocityRead", fluidManager._VelocityPressureDivergenceMain);
         computeShaderTerrainGeneration.SetTexture(kernelSimWasteBits, "_ResourceGridRead", simulation.vegetationManager.resourceGridRT1);
         computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderTerrainGeneration.SetVector("_SpawnBoundsCameraDetails", spawnBoundsCameraDetails);
         computeShaderTerrainGeneration.Dispatch(kernelSimWasteBits, wasteBitsCBuffer.count / 1024, 1, 1);
     }
     
-    public void SetObjectDepths(ComputeBuffer objectDataInFluidCoordsCBuffer, ComputeBuffer depthValuesCBuffer)
+    public void SetObjectDepths(ComputeBuffer objectDataInFluidCoords, ComputeBuffer depthValues)
     {
         var kernelGetObjectDepths = computeShaderTerrainGeneration.FindKernel("CSGetObjectDepths");
-        computeShaderTerrainGeneration.SetBuffer(kernelGetObjectDepths, "ObjectPositionsCBuffer", objectDataInFluidCoordsCBuffer);
-        computeShaderTerrainGeneration.SetBuffer(kernelGetObjectDepths, "DepthValuesCBuffer", depthValuesCBuffer);
+        computeShaderTerrainGeneration.SetBuffer(kernelGetObjectDepths, "ObjectPositionsCBuffer", objectDataInFluidCoords);
+        computeShaderTerrainGeneration.SetBuffer(kernelGetObjectDepths, "DepthValuesCBuffer", depthValues);
         computeShaderTerrainGeneration.SetTexture(kernelGetObjectDepths, "AltitudeRead", terrainHeightDataRT);
         computeShaderTerrainGeneration.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
         computeShaderTerrainGeneration.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
         computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderTerrainGeneration.SetFloat("_TextureResolution", (float)terrainHeightDataRT.width);
         computeShaderTerrainGeneration.Dispatch(kernelGetObjectDepths, 1, 1, 1);        
+    }
+    
+    public void SetObstacleHeights(CommandBuffer fluidObstacles)
+    {
+        Matrix4x4 matrix = Matrix4x4.TRS(Vector3.one * 0.5f * SimulationManager._MapSize, Quaternion.identity, Vector3.one * SimulationManager._MapSize);
+        terrainObstaclesHeightMaskMat.SetTexture("_MainTex", terrainHeightDataRT);
+        terrainObstaclesHeightMaskMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
+        terrainObstaclesHeightMaskMat.SetFloat("_TexResolution", (float)simulation.environmentFluidManager.resolution);
+        terrainObstaclesHeightMaskMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        fluidObstacles.DrawMesh(quadMesh, matrix, terrainObstaclesHeightMaskMat); // Masks out areas above the fluid "Sea Level"
     }
 
     // * WPP: empty method -> delete

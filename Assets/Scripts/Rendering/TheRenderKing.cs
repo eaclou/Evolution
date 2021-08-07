@@ -10,14 +10,13 @@ public class TheRenderKing : Singleton<TheRenderKing>
     SimulationManager simManager => SimulationManager.instance;
     CameraManager cameraManager => CameraManager.instance;
     UIManager uiManager => UIManager.instance;
+    EnvironmentFluidManager fluidManager => EnvironmentFluidManager.instance;
     
     WorldSpiritHubUI worldSpiritHubUI => uiManager.worldSpiritHubUI;
     TrophicSlot selectedWorldSpiritSlot => worldSpiritHubUI.selectedWorldSpiritSlot;
     Agent[] agents => simManager.agents;
 
     // SET IN INSPECTOR!!!::::
-    // * WPP: convert to singletons
-    public EnvironmentFluidManager fluidManager;
     public BaronVonTerrain baronVonTerrain;
     public BaronVonWater baronVonWater;
 
@@ -2329,12 +2328,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         //cmdBufferFluidObstacles.ClearRenderTarget(true, true, Color.black, 1.0f);  // clear -- needed???
         cmdBufferFluidObstacles.SetViewProjectionMatrices(fluidObstaclesRenderCamera.worldToCameraMatrix, fluidObstaclesRenderCamera.projectionMatrix);
         // Draw Solid Land boundaries:
-        Matrix4x4 matrix = Matrix4x4.TRS(Vector3.one * 0.5f * SimulationManager._MapSize, Quaternion.identity, Vector3.one * SimulationManager._MapSize);
-        baronVonTerrain.terrainObstaclesHeightMaskMat.SetTexture("_MainTex", baronVonTerrain.terrainHeightDataRT);
-        baronVonTerrain.terrainObstaclesHeightMaskMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
-        baronVonTerrain.terrainObstaclesHeightMaskMat.SetFloat("_TexResolution", (float)simManager.environmentFluidManager.resolution);
-        baronVonTerrain.terrainObstaclesHeightMaskMat.SetFloat("_MapSize", SimulationManager._MapSize);
-        cmdBufferFluidObstacles.DrawMesh(baronVonTerrain.quadMesh, matrix, baronVonTerrain.terrainObstaclesHeightMaskMat); // Masks out areas above the fluid "Sea Level"
+        baronVonTerrain.SetObstacleHeights(cmdBufferFluidObstacles);
 
         // Draw dynamic Obstacles:        
         //basicStrokeDisplayMat.SetPass(0);

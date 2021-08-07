@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
+using Playcraft;
 
-public class EnvironmentFluidManager : MonoBehaviour {
+public class EnvironmentFluidManager : Singleton<EnvironmentFluidManager>
+{
     public QualitySettingData qualitySettings;
 
     //public Camera mainCam;
