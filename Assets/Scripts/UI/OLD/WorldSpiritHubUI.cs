@@ -95,7 +95,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
 	}
 
     public void PlayBigBangSpawnAnim() {
-        Debug.Log("Play Anim!!!!!!");
+        //Debug.Log("Play Anim!!!!!!");
         //animatorTest01.SetTrigger(animTestTriggerHash);
     }
 
@@ -326,7 +326,7 @@ public class WorldSpiritHubUI : MonoBehaviour {
         //animTerrainShake.StartPlayback();
         //animTerrainShake.Play();
 
-        Debug.Log("OpenWorldTreeSelect " + isOpen);
+        //Debug.Log("OpenWorldTreeSelect " + isOpen);
     }
     
     //*********************************************

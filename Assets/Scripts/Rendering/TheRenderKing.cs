@@ -3,19 +3,20 @@ using Playcraft;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class TheRenderKing : Singleton<TheRenderKing> {
+public class TheRenderKing : Singleton<TheRenderKing> 
+{
     // Singleton references
     TheCursorCzar theCursorCzar => TheCursorCzar.instance;
     SimulationManager simManager => SimulationManager.instance;
     CameraManager cameraManager => CameraManager.instance;
     UIManager uiManager => UIManager.instance;
+    
     WorldSpiritHubUI worldSpiritHubUI => uiManager.worldSpiritHubUI;
     TrophicSlot selectedWorldSpiritSlot => worldSpiritHubUI.selectedWorldSpiritSlot;
-    HistoryPanelUI historyPanel => uiManager.historyPanelUI;
-    
     Agent[] agents => simManager.agents;
 
     // SET IN INSPECTOR!!!::::
+    // * WPP: convert to singletons
     public EnvironmentFluidManager fluidManager;
     public BaronVonTerrain baronVonTerrain;
     public BaronVonWater baronVonWater;
@@ -577,7 +578,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         //InitializeUberBrushes(); // old uber
         InitializeCommandBuffers();
 
-        baronVonTerrain.Initialize(this);
+        baronVonTerrain.Initialize();
         baronVonWater.veggieManRef = simManager.vegetationManager;
         baronVonWater.Initialize();
 
@@ -1072,7 +1073,9 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         objectDataInFluidCoordsCBuffer.SetData(positionsArray);
 
-        int kernelGetObjectDepths = baronVonTerrain.computeShaderTerrainGeneration.FindKernel("CSGetObjectDepths");
+        // WPP: moved to BaronVonTerrain
+        baronVonTerrain.SetObjectDepths(objectDataInFluidCoordsCBuffer, depthValuesCBuffer);
+        /*int kernelGetObjectDepths = baronVonTerrain.computeShaderTerrainGeneration.FindKernel("CSGetObjectDepths");
         baronVonTerrain.computeShaderTerrainGeneration.SetBuffer(kernelGetObjectDepths, "ObjectPositionsCBuffer", objectDataInFluidCoordsCBuffer);
         baronVonTerrain.computeShaderTerrainGeneration.SetBuffer(kernelGetObjectDepths, "DepthValuesCBuffer", depthValuesCBuffer);
         baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelGetObjectDepths, "AltitudeRead", baronVonTerrain.terrainHeightDataRT);
@@ -1080,7 +1083,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_TextureResolution", (float)baronVonTerrain.terrainHeightDataRT.width);
-        baronVonTerrain.computeShaderTerrainGeneration.Dispatch(kernelGetObjectDepths, 1, 1, 1);
+        baronVonTerrain.computeShaderTerrainGeneration.Dispatch(kernelGetObjectDepths, 1, 1, 1);*/
+        
         // *******
         // only returning x channel data currently!!!! **** Need to move depthMapGeneration to terrainCompute and pre-calculate gradients there
         depthValuesCBuffer.GetData(objectDepthsArray);
@@ -1097,7 +1101,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         PopulateAgentObstaclesBuffer(0);
         //PopulateFoodObstaclesBuffer(agents.Length);
         //PopulatePredatorObstaclesBuffer(agents.Length + simManager.eggSacks.Length);
-
         obstacleStrokesCBuffer.SetData(obstacleStrokeDataArray);
     }
     
@@ -1484,15 +1487,11 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
                 float socketBulgeMultiplier = Mathf.Sin(socketFractZ * Mathf.PI) * socketBulge + 1f;
                 //float eyeballBulgeMultiplier
-                float radius = Mathf.Lerp(socketRadius, eyeballRadius, socketFractZ);
                 //radius *= Mathf.Cos(eyeballFractZ * Mathf.PI * 0.5f);
 
-                if (z < socketLengthResolution) {
-                    radius = Mathf.Lerp(socketRadius, eyeballRadius, socketFractZ) * socketBulgeMultiplier;
-                }
-                else {
-                    radius = Mathf.Cos(eyeballFractZ * Mathf.PI * 0.5f) * eyeballRadius;
-                }
+                float radius = z < socketLengthResolution ?
+                    Mathf.Lerp(socketRadius, eyeballRadius, socketFractZ) * socketBulgeMultiplier :
+                    Mathf.Cos(eyeballFractZ * Mathf.PI * 0.5f) * eyeballRadius;
 
                 //float deltaRadius = radius - prevRingRadius;
                 //float deltaHeight = 1f / (float)totalLengthResolution;
@@ -1514,13 +1513,19 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                     //Vector3 ringTangent = Vector3.Cross(ringNormal, eyeNormal);
                     Vector4 color = Vector4.zero;
 
-                    if (z > socketLengthResolution) {  // Is Part of Eyeball!
+                    // Is Part of Eyeball!
+                    if (z > socketLengthResolution) 
+                    {  
                         color = new Vector4(gene.eyeballHue.x, gene.eyeballHue.y, gene.eyeballHue.z, 1f);
-
-                        if (radius / eyeballRadius < irisWidthFraction) {  // Is part of IRIS                        
+                        
+                        // Is part of IRIS  
+                        if (radius / eyeballRadius < irisWidthFraction) 
+                        {                        
                             color = new Vector4(gene.irisHue.x, gene.irisHue.y, gene.irisHue.z, 1f);
-
-                            if (radius / eyeballRadius < pupilWidthFraction && radius / eyeballRadius < pupilHeightFraction) {  // PUPIL                        
+                            
+                            // PUPIL
+                            if (radius / eyeballRadius < pupilWidthFraction && radius / eyeballRadius < pupilHeightFraction) 
+                            {                          
                                 color = new Vector4(0f, 0f, 0f, 1f);
                             }
                         }
@@ -1546,10 +1551,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             }
 
             // CALCULATE NORMALS EMPIRICALLY:
-            for (int z = 0; z < totalLengthResolution; z++) {
-
-                for (int a = 0; a < baseCrossResolution; a++) {
-
+            for (int z = 0; z < totalLengthResolution; z++) 
+            {
+                for (int a = 0; a < baseCrossResolution; a++) 
+                {
                     //int indexCenter = arrayIndexStart + eyeIndex * (totalLengthResolution * baseCrossResolution) + z * baseCrossResolution + a;
 
                     // find neighbor positions: (all in bindPos object coordinates)+
@@ -1610,7 +1615,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         // JUST TEETH FOR NOW::::
 
         // RIGHT side:
-        for (int y = 0; y < numStrokesPerRowSide; y++) {
+        for (int y = 0; y < numStrokesPerRowSide; y++) 
+        {
             float yLerp = Mathf.Lerp(startCoordY, 1f, Mathf.Clamp01((float)y / (float)(numStrokesPerRowSide - 1))); // start at tail (Y = 0)            
             int brushIndexTop = arrayIndexStart + y;
             int brushIndexBottom = arrayIndexStart + numStrokesPerRowSide * 2 + y;
@@ -1618,10 +1624,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             AddUberBrushPoint(ref strokesArray, agentGenome, agentIndex, new Vector3(1f, yLerp, 0f), new Vector2(0.25f, yLerp), brushIndexTop);
             AddUberBrushPoint(ref strokesArray, agentGenome, agentIndex, new Vector3(1f, yLerp, 0f), new Vector2(0.25f, yLerp), brushIndexBottom);
 
-            if (y == 0) {
-
-            }
-            else {
+            if (y != 0) 
+            {
                 Vector3 uTangentAvg = new Vector3(0f, 0f, 1f);
                 Vector3 vTangentAvg = (strokesArray[brushIndexTop].bindPos - strokesArray[brushIndexTop - 1].bindPos);
                 strokesArray[brushIndexTop].scale = new Vector2(0.1f, vTangentAvg.magnitude);
@@ -1636,10 +1640,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 strokesArray[brushIndexBottom].color = Vector4.one;
                 strokesArray[brushIndexBottom].jawMask = -1f;
             }
-
         }
         // LEFT side:
-        for (int y = 0; y < numStrokesPerRowSide; y++) {
+        for (int y = 0; y < numStrokesPerRowSide; y++) 
+        {
             float yLerp = Mathf.Lerp(startCoordY, 1f, Mathf.Clamp01((float)y / (float)(numStrokesPerRowSide - 1))); // start at tail (Y = 0)            
             int brushIndexTop = arrayIndexStart + numStrokesPerRowSide + y;
             int brushIndexBottom = arrayIndexStart + numStrokesPerRowSide * 3 + y;
@@ -1647,10 +1651,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             AddUberBrushPoint(ref strokesArray, agentGenome, agentIndex, new Vector3(-1f, yLerp, 0f), new Vector2(0.75f, yLerp), brushIndexTop);
             AddUberBrushPoint(ref strokesArray, agentGenome, agentIndex, new Vector3(-1f, yLerp, 0f), new Vector2(0.75f, yLerp), brushIndexBottom);
 
-            if (y == 0) {
-
-            }
-            else {
+            if (y != 0) 
+            {
                 Vector3 uTangentAvg = new Vector3(0f, 0f, 1f);
                 Vector3 vTangentAvg = (strokesArray[brushIndexTop].bindPos - strokesArray[brushIndexTop - 1].bindPos);
                 strokesArray[brushIndexTop].scale = new Vector2(0.1f, vTangentAvg.magnitude);
@@ -1701,6 +1703,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         strokesArray[eyeBrushPointIndex].bindTangent = tangent;
         */
     }
+    
     private void AddUberBrushPoint(ref CritterUberStrokeData[] strokesArray, AgentGenome agentGenome, int agentIndex, Vector3 initCoords, Vector2 uv, int brushIndex) {
         CritterGenomeInterpretor.BrushPoint newBrushPoint = new CritterGenomeInterpretor.BrushPoint();
         newBrushPoint.initCoordsNormalized = initCoords;
@@ -1816,11 +1819,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
 
         int numRows = 8;
         int numColumns = numStrokesPerCritterTailFin / numRows / 2;
-
         float lengthMult = baseLength * gene.creatureBaseLength / (float)numRows;
-
         float tMult = segmentsSummedCritterLength * gene.creatureBaseLength;
-
         float angleInc = spreadAngle / (float)(numColumns - 1);
 
         for (int y = 0; y < numColumns; y++) 
@@ -1896,8 +1896,8 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             Vector3 anchorTangent = strokesArray[anchorIndex].bindTangent;
 
             strokesArray[brushIndex].scale = strokesArray[anchorIndex].scale * 0.4f;
-            strokesArray[brushIndex].bindNormal = (anchorNormal + UnityEngine.Random.insideUnitSphere * 0.4f).normalized;
-            strokesArray[brushIndex].bindTangent = (anchorTangent + UnityEngine.Random.insideUnitSphere * 0.3f).normalized;
+            strokesArray[brushIndex].bindNormal = (anchorNormal + Random.insideUnitSphere * 0.4f).normalized;
+            strokesArray[brushIndex].bindTangent = (anchorTangent + Random.insideUnitSphere * 0.3f).normalized;
             strokesArray[brushIndex].bindPos += anchorNormal * strokesArray[brushIndex].scale.x * 0.33f;
             strokesArray[brushIndex].jawMask = 1f;
             
@@ -1905,7 +1905,7 @@ public class TheRenderKing : Singleton<TheRenderKing> {
                 strokesArray[brushIndex].jawMask = -1f;
             }
             
-            Vector3 hue = Vector3.Lerp(agentGenome.bodyGenome.appearanceGenome.huePrimary, agentGenome.bodyGenome.appearanceGenome.hueSecondary, UnityEngine.Random.Range(0f, 1f));
+            Vector3 hue = Vector3.Lerp(agentGenome.bodyGenome.appearanceGenome.huePrimary, agentGenome.bodyGenome.appearanceGenome.hueSecondary, Random.Range(0f, 1f));
             strokesArray[brushIndex].color = new Vector4(hue.x, hue.y, hue.z, 1f);
         }
     }
@@ -1966,7 +1966,6 @@ public class TheRenderKing : Singleton<TheRenderKing> {
             {
                 int sortedIndex = sortedBrushStrokesList[i].parentIndex; // stored own brushpoint index in critterParentIndex slot
                 sortedIndexMap[sortedIndex] = i; // store original index
-
                 strokesArray[i] = sortedBrushStrokesList[i];  // copy values
             }
             
@@ -2310,30 +2309,10 @@ public class TheRenderKing : Singleton<TheRenderKing> {
         baronVonTerrain.spawnBoundsCameraDetails = baronVonWater.spawnBoundsCameraDetails;
         
         //baronVonTerrain.Tick(simManager.vegetationManager.rdRT1);
-        int kernelSimGroundBits = baronVonTerrain.computeShaderTerrainGeneration.FindKernel("CSSimDecomposerBitsData");
-        baronVonTerrain.computeShaderTerrainGeneration.SetBuffer(kernelSimGroundBits, "groundBitsCBuffer", baronVonTerrain.decomposerBitsCBuffer);
-        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "AltitudeRead", baronVonTerrain.terrainHeightDataRT);
-        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "VelocityRead", fluidManager._VelocityPressureDivergenceMain);
-        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "_ResourceGridRead", simManager.vegetationManager.resourceGridRT1);
-        baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
-        baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_Time", Time.realtimeSinceStartup);
-        baronVonTerrain.computeShaderTerrainGeneration.SetVector("_SpawnBoundsCameraDetails", baronVonTerrain.spawnBoundsCameraDetails);
-        float spawnLerp = simManager.trophicLayersManager.GetLayerLerp(KnowledgeMapId.Decomposers, simManager.simAgeTimeSteps);
-        float spawnRadius = Mathf.Lerp(1f, SimulationManager._MapSize, spawnLerp);
-        Vector4 spawnPos = new Vector4(simManager.trophicLayersManager.decomposerOriginPos.x, simManager.trophicLayersManager.decomposerOriginPos.y, 0f, 0f);
-        baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_SpawnRadius", spawnRadius);
-        baronVonTerrain.computeShaderTerrainGeneration.SetVector("_SpawnPos", spawnPos);
-        //baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_DecomposerDensityLerp", Mathf.Clamp01(simManager.simResourceManager.curGlobalDecomposers / 100f));
-        baronVonTerrain.computeShaderTerrainGeneration.Dispatch(kernelSimGroundBits, baronVonTerrain.decomposerBitsCBuffer.count / 1024, 1, 1);
-
-        int kernelSimWasteBits = baronVonTerrain.computeShaderTerrainGeneration.FindKernel("CSSimWasteBitsData");
-        baronVonTerrain.computeShaderTerrainGeneration.SetBuffer(kernelSimWasteBits, "groundBitsCBuffer", baronVonTerrain.wasteBitsCBuffer);
-        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelSimWasteBits, "AltitudeRead", baronVonTerrain.terrainHeightDataRT);
-        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelSimWasteBits, "VelocityRead", fluidManager._VelocityPressureDivergenceMain);
-        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(kernelSimWasteBits, "_ResourceGridRead", simManager.vegetationManager.resourceGridRT1);
-        baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
-        baronVonTerrain.computeShaderTerrainGeneration.SetVector("_SpawnBoundsCameraDetails", baronVonTerrain.spawnBoundsCameraDetails);
-        baronVonTerrain.computeShaderTerrainGeneration.Dispatch(kernelSimWasteBits, baronVonTerrain.wasteBitsCBuffer.count / 1024, 1, 1);
+        
+        // WPP: moved to BaronVonTerrain
+        baronVonTerrain.SimGroundBits();
+        baronVonTerrain.SimWasteBits();
 
         baronVonWater.Tick(null);  // <-- SimWaterCurves/Chains/Water surface
     }

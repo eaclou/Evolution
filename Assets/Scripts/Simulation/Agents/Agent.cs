@@ -26,7 +26,10 @@ public class Agent : MonoBehaviour {
     public bool isDecaying = false;
 
     public bool isFeeding => feed.inProcess;
-    public bool isAttacking => attack.inProcess;    
+    public bool isAttacking => attack.inProcess;
+    
+    // Flag for intention to eat gpu food particle (plant-type) 
+    public bool isFreeToEat => isFeeding && !isDefending && !isCooldown && feedingFrameCounter <= 4;
 
     //***EC eventually move these into creature genome, make variable
     public int feedAnimDuration = 30;  

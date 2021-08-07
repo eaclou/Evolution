@@ -197,136 +197,133 @@ public class SimulationStateData {
 
         depthAtAgentPositionsArray = new Vector4[simManager.numAgents];
 
-        Logger.Log("depthAtAgentPositionsArray " + fluidVelocitiesAtAgentPositionsArray.Length + ", " + agentFluidPositionsArray.Length);
+        //Logger.Log("depthAtAgentPositionsArray " + fluidVelocitiesAtAgentPositionsArray.Length + ", " + agentFluidPositionsArray.Length);
     }
 
     public void PopulateSimDataArrays() {
         // CRITTER INIT: // *** MOVE INTO OWN FUNCTION -- update more efficiently with compute shader?
-        for(int i = 0; i < simManager.numAgents; i++) {
-            if (simManager.agents[i].isAwaitingRespawn) {
-
+        for(int i = 0; i < simManager.numAgents; i++) 
+        {
+            if (simManager.agents[i].isAwaitingRespawn) 
+                continue;
+            
+            //Debug.Log("Error isInert FALSE: " + i.ToString());
+            // INITDATA ::==========================================================================================================================================================================
+            AgentGenome genome = simManager.agents[i].candidateRef.candidateGenome;
+            critterInitDataArray[i].boundingBoxSize = simManager.agents[i].fullSizeBoundingBox; //genome.bodyGenome.GetFullsizeBoundingBox(); // simManager.agentsArray[i].fullSizeBoundingBox;
+            critterInitDataArray[i].spawnSizePercentage = simManager.agents[i].spawnStartingScale;
+            critterInitDataArray[i].maxEnergy = Mathf.Min(simManager.agents[i].fullSizeBoundingBox.x * simManager.agents[i].fullSizeBoundingBox.y, 0.5f);
+            critterInitDataArray[i].maxStomachCapacity = simManager.agents[i].coreModule.stomachCapacity;
+            critterInitDataArray[i].primaryHue = genome.bodyGenome.appearanceGenome.huePrimary;
+            critterInitDataArray[i].secondaryHue = genome.bodyGenome.appearanceGenome.hueSecondary;
+            // **** UPDATE THESE!!!
+            critterInitDataArray[i].biteConsumeRadius = 1f; 
+            critterInitDataArray[i].biteTriggerRadius = 1f;
+            critterInitDataArray[i].biteTriggerLength = 1f;  // start out with these 3 same radius, can add second collision area later
+            critterInitDataArray[i].eatEfficiencyPlant = 1f;
+            critterInitDataArray[i].eatEfficiencyDecay = 1f;
+            critterInitDataArray[i].eatEfficiencyMeat = 1f;  // can go negative for food/energy penalty in extreme cases?
+            //critterInitDataArray[i].mouthIsActive = 1f;
+            //if(simManager.agentsArray[i].mouthRef.isPassive) {
+            //    critterInitDataArray[i].mouthIsActive = 0f;
+            //}
+            float critterFullsizeLength = genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength + genome.bodyGenome.coreGenome.headLength + genome.bodyGenome.coreGenome.mouthLength;
+            //0.175f, 0.525f
+            float swimLerp = Mathf.Clamp01((genome.bodyGenome.coreGenome.creatureAspectRatio - 0.175f) / 0.35f);  // 0 = longest, 1 = shortest
+            float flexibilityScore = 1f; // Mathf.Min((1f / genome.bodyGenome.coreGenome.creatureAspectRatio - 1f) * 0.6f, 6f);
+            //float mouthLengthNormalized = genome.bodyGenome.coreGenome.mouthLength / critterFullsizeLength;
+            //float approxRadius = genome.bodyGenome.coreGenome.creatureBaseLength * genome.bodyGenome.coreGenome.creatureAspectRatio;
+            //float approxSize = 1f; // approxRadius * genome.bodyGenome.coreGenome.creatureBaseLength;
+            // Mag range: 2 --> 0.5
+            //freq range: 1 --> 2
+            critterInitDataArray[i].swimMagnitude = Mathf.Lerp(0.33f, 1.5f, swimLerp); // 1f * (1f - flexibilityScore * 0.2f);
+            critterInitDataArray[i].swimFrequency = Mathf.Lerp(2f, 0.8f, swimLerp);   //flexibilityScore * 1.05f;
+            critterInitDataArray[i].swimAnimSpeed = 1f;    // 12f * (1f - approxSize * 0.25f);
+            critterInitDataArray[i].bodyCoord = genome.bodyGenome.coreGenome.tailLength / critterFullsizeLength;
+	        critterInitDataArray[i].headCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
+            critterInitDataArray[i].mouthCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength + genome.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
+            critterInitDataArray[i].bendiness = flexibilityScore;
+            critterInitDataArray[i].bodyPatternX = simManager.agents[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
+            critterInitDataArray[i].bodyPatternY = simManager.agents[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
+            critterInitDataArray[i].speciesID = simManager.agents[i].speciesIndex;
+            
+            // SIMDATA ::===========================================================================================================================================================================
+            Vector2 agentPos = simManager.agents[i].bodyRigidbody.position;
+            critterSimDataArray[i].worldPos = new Vector3(agentPos.x, agentPos.y, -SimulationManager._GlobalWaterLevel * SimulationManager._MaxAltitude);
+            if(simManager.agents[i].smoothedThrottle.sqrMagnitude > 0f) {
+                critterSimDataArray[i].velocity = simManager.agents[i].smoothedThrottle.normalized;
             }
-            else {
-                //Debug.Log("Error isInert FALSE: " + i.ToString());
-                // INITDATA ::==========================================================================================================================================================================
-                AgentGenome genome = simManager.agents[i].candidateRef.candidateGenome;
-                critterInitDataArray[i].boundingBoxSize = simManager.agents[i].fullSizeBoundingBox; //genome.bodyGenome.GetFullsizeBoundingBox(); // simManager.agentsArray[i].fullSizeBoundingBox;
-                critterInitDataArray[i].spawnSizePercentage = simManager.agents[i].spawnStartingScale;
-                critterInitDataArray[i].maxEnergy = Mathf.Min(simManager.agents[i].fullSizeBoundingBox.x * simManager.agents[i].fullSizeBoundingBox.y, 0.5f);
-                critterInitDataArray[i].maxStomachCapacity = simManager.agents[i].coreModule.stomachCapacity;
-                critterInitDataArray[i].primaryHue = genome.bodyGenome.appearanceGenome.huePrimary;
-                critterInitDataArray[i].secondaryHue = genome.bodyGenome.appearanceGenome.hueSecondary;
-                // **** UPDATE THESE!!!
-                critterInitDataArray[i].biteConsumeRadius = 1f; 
-                critterInitDataArray[i].biteTriggerRadius = 1f;
-                critterInitDataArray[i].biteTriggerLength = 1f;  // start out with these 3 same radius, can add second collision area later
-                critterInitDataArray[i].eatEfficiencyPlant = 1f;
-                critterInitDataArray[i].eatEfficiencyDecay = 1f;
-                critterInitDataArray[i].eatEfficiencyMeat = 1f;  // can go negative for food/energy penalty in extreme cases?
-                //critterInitDataArray[i].mouthIsActive = 1f;
-                //if(simManager.agentsArray[i].mouthRef.isPassive) {
-                //    critterInitDataArray[i].mouthIsActive = 0f;
-                //}
-                float critterFullsizeLength = genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength + genome.bodyGenome.coreGenome.headLength + genome.bodyGenome.coreGenome.mouthLength;
-                //0.175f, 0.525f
-                float swimLerp = Mathf.Clamp01((genome.bodyGenome.coreGenome.creatureAspectRatio - 0.175f) / 0.35f);  // 0 = longest, 1 = shortest
-                float flexibilityScore = 1f; // Mathf.Min((1f / genome.bodyGenome.coreGenome.creatureAspectRatio - 1f) * 0.6f, 6f);
-                //float mouthLengthNormalized = genome.bodyGenome.coreGenome.mouthLength / critterFullsizeLength;
-                //float approxRadius = genome.bodyGenome.coreGenome.creatureBaseLength * genome.bodyGenome.coreGenome.creatureAspectRatio;
-                //float approxSize = 1f; // approxRadius * genome.bodyGenome.coreGenome.creatureBaseLength;
-                // Mag range: 2 --> 0.5
-                //freq range: 1 --> 2
-                critterInitDataArray[i].swimMagnitude = Mathf.Lerp(0.33f, 1.5f, swimLerp); // 1f * (1f - flexibilityScore * 0.2f);
-                critterInitDataArray[i].swimFrequency = Mathf.Lerp(2f, 0.8f, swimLerp);   //flexibilityScore * 1.05f;
-                critterInitDataArray[i].swimAnimSpeed = 1f;    // 12f * (1f - approxSize * 0.25f);
-                critterInitDataArray[i].bodyCoord = genome.bodyGenome.coreGenome.tailLength / critterFullsizeLength;
-	            critterInitDataArray[i].headCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
-                critterInitDataArray[i].mouthCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength + genome.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
-                critterInitDataArray[i].bendiness = flexibilityScore;
-                critterInitDataArray[i].bodyPatternX = simManager.agents[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
-                critterInitDataArray[i].bodyPatternY = simManager.agents[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
-                critterInitDataArray[i].speciesID = simManager.agents[i].speciesIndex;
-                
-                // SIMDATA ::===========================================================================================================================================================================
-                Vector2 agentPos = simManager.agents[i].bodyRigidbody.position;
-                critterSimDataArray[i].worldPos = new Vector3(agentPos.x, agentPos.y, -SimulationManager._GlobalWaterLevel * SimulationManager._MaxAltitude);
-                if(simManager.agents[i].smoothedThrottle.sqrMagnitude > 0f) {
-                    critterSimDataArray[i].velocity = simManager.agents[i].smoothedThrottle.normalized;
-                }
-                critterSimDataArray[i].heading = simManager.agents[i].facingDirection;            
-                float embryo = 1f;
-                if(simManager.agents[i].isEgg) {
-                    embryo = (float)simManager.agents[i].lifeStageTransitionTimeStepCounter / (float)simManager.agents[i]._GestationDurationTimeSteps;
-                    embryo = Mathf.Clamp01(embryo);
-                }
-                critterSimDataArray[i].currentBiomass = simManager.agents[i].currentBiomass;
-                critterSimDataArray[i].embryoPercentage = embryo;
-                critterSimDataArray[i].growthPercentage = Mathf.Clamp01(simManager.agents[i].sizePercentage);
-                float decay = 0f;
-                if(simManager.agents[i].isDead) {
-                    decay = simManager.agents[i].GetDecayPercentage();
-                }
-                if(simManager.agents[i].isAwaitingRespawn) {
-                    decay = 0f;
-                }
-                critterSimDataArray[i].decayPercentage = decay;
-
-                //if(simManager.agentsArray[i].isBeingSwallowed)
-                //{
-                    //float digestedPercentage = (float)simManager.agentsArray[i].beingSwallowedFrameCounter / (float)simManager.agentsArray[i].swallowDuration;
-                    //critterSimDataArray[i].decayPercentage = digestedPercentage;
-                //}
-                critterSimDataArray[i].foodAmount = Mathf.Lerp(critterSimDataArray[i].foodAmount, simManager.agents[i].coreModule.stomachContentsPercent, 0.16f); //*********???????
-                critterSimDataArray[i].energy = simManager.agents[i].coreModule.energy; // Raw / simManager.agentsArray[i].coreModule.maxEnergyStorage;
-                critterSimDataArray[i].health = simManager.agents[i].coreModule.health;
-                critterSimDataArray[i].stamina = simManager.agents[i].coreModule.stamina[0];
-                
-                float isFreeToEat = 1f;
-                if(simManager.agents[i].isFeeding) { // simManager.agentsArray[i].isFeeding) { // 
-                    isFreeToEat = 1f;
-                }
-                
-                if(simManager.agents[i].isDefending) {
-                    isFreeToEat = 0f;
-                }
-                if(simManager.agents[i].isCooldown) {
-                    isFreeToEat = 0f;
-                }
-                if(simManager.agents[i].feedingFrameCounter > 4) {
-                    isFreeToEat = 0f;
-                }
-                
-                critterSimDataArray[i].consumeOn = isFreeToEat;    // Flag for intention to eat gpu food particle (plant-type)         
-
-                critterSimDataArray[i].biteAnimCycle = 0f;
-                if(simManager.agents[i].isFeeding) {
-                    critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agents[i].feedingFrameCounter / (float)simManager.agents[i].feedAnimDuration);
-                }
-                if(simManager.agents[i].isAttacking) {
-                    critterSimDataArray[i].biteAnimCycle = simManager.agents[i].attackAnimCycle;
-                    //Mathf.Clamp01((float)simManager.agentsArray[i].attackingFrameCounter / (float)simManager.agentsArray[i].attackAnimDuration);
-                }
-                if (!simManager.agents[i].isMature)
-                {
-                    critterSimDataArray[i].consumeOn = 0f;
-                }
-
-                critterSimDataArray[i].moveAnimCycle = simManager.agents[i].animationCycle;
-                critterSimDataArray[i].turnAmount = simManager.agents[i].turningAmount * 2f;
-                critterSimDataArray[i].accel += Mathf.Clamp01(simManager.agents[i].curAccel) * 0.8f; // ** REFACTOR!!!!
-		        critterSimDataArray[i].smoothedThrottle = simManager.agents[i].smoothedThrottle.magnitude;
-
-                critterSimDataArray[i].wasteProduced = simManager.agents[i].wasteProducedLastFrame;// 
-
-                // Z & W coords represents agent's x/y Radii (in FluidCoords)
-                float agentCenterX = agentPos.x / SimulationManager._MapSize;
-                float agentCenterY = agentPos.y / SimulationManager._MapSize;
-                               
-                agentFluidPositionsArray[i] = new Vector4(agentCenterX, 
-                                                          agentCenterY, 
-                                                          (simManager.agents[i].fullSizeBoundingBox.x + 0.25f) * 0.5f / SimulationManager._MapSize,  // **** REVISIT!!!!! ****
-                                                          (simManager.agents[i].fullSizeBoundingBox.y + 0.25f) * 0.5f / SimulationManager._MapSize); //... 0.5/140 ...
+            critterSimDataArray[i].heading = simManager.agents[i].facingDirection;            
+            float embryo = 1f;
+            if(simManager.agents[i].isEgg) {
+                embryo = (float)simManager.agents[i].lifeStageTransitionTimeStepCounter / (float)simManager.agents[i]._GestationDurationTimeSteps;
+                embryo = Mathf.Clamp01(embryo);
             }
+            critterSimDataArray[i].currentBiomass = simManager.agents[i].currentBiomass;
+            critterSimDataArray[i].embryoPercentage = embryo;
+            critterSimDataArray[i].growthPercentage = Mathf.Clamp01(simManager.agents[i].sizePercentage);
+            float decay = 0f;
+            if(simManager.agents[i].isDead) {
+                decay = simManager.agents[i].GetDecayPercentage();
+            }
+            if(simManager.agents[i].isAwaitingRespawn) {
+                decay = 0f;
+            }
+            critterSimDataArray[i].decayPercentage = decay;
+
+            //if(simManager.agentsArray[i].isBeingSwallowed)
+            //{
+                //float digestedPercentage = (float)simManager.agentsArray[i].beingSwallowedFrameCounter / (float)simManager.agentsArray[i].swallowDuration;
+                //critterSimDataArray[i].decayPercentage = digestedPercentage;
+            //}
+            critterSimDataArray[i].foodAmount = Mathf.Lerp(critterSimDataArray[i].foodAmount, simManager.agents[i].coreModule.stomachContentsPercent, 0.16f); //*********???????
+            critterSimDataArray[i].energy = simManager.agents[i].coreModule.energy; // Raw / simManager.agentsArray[i].coreModule.maxEnergyStorage;
+            critterSimDataArray[i].health = simManager.agents[i].coreModule.health;
+            critterSimDataArray[i].stamina = simManager.agents[i].coreModule.stamina[0];
+            
+            // WPP: calculated in Agent with OR conditions to condense branches
+            /*float isFreeToEat = 1f;
+            if(simManager.agents[i].isFeeding) { // simManager.agentsArray[i].isFeeding) { // 
+                isFreeToEat = 1f;
+            }
+            if(simManager.agents[i].isDefending) {
+                isFreeToEat = 0f;
+            }
+            if(simManager.agents[i].isCooldown) {
+                isFreeToEat = 0f;
+            }
+            if(simManager.agents[i].feedingFrameCounter > 4) {
+                isFreeToEat = 0f;
+            }*/
+            critterSimDataArray[i].consumeOn = simManager.agents[i].isFreeToEat ? 1f : 0f;        
+
+            critterSimDataArray[i].biteAnimCycle = 0f;
+            if(simManager.agents[i].isFeeding) {
+                critterSimDataArray[i].biteAnimCycle = Mathf.Clamp01((float)simManager.agents[i].feedingFrameCounter / (float)simManager.agents[i].feedAnimDuration);
+            }
+            if(simManager.agents[i].isAttacking) {
+                critterSimDataArray[i].biteAnimCycle = simManager.agents[i].attackAnimCycle;
+                //Mathf.Clamp01((float)simManager.agentsArray[i].attackingFrameCounter / (float)simManager.agentsArray[i].attackAnimDuration);
+            }
+            if (!simManager.agents[i].isMature)
+            {
+                critterSimDataArray[i].consumeOn = 0f;
+            }
+
+            critterSimDataArray[i].moveAnimCycle = simManager.agents[i].animationCycle;
+            critterSimDataArray[i].turnAmount = simManager.agents[i].turningAmount * 2f;
+            critterSimDataArray[i].accel += Mathf.Clamp01(simManager.agents[i].curAccel) * 0.8f; // ** REFACTOR!!!!
+		    critterSimDataArray[i].smoothedThrottle = simManager.agents[i].smoothedThrottle.magnitude;
+            critterSimDataArray[i].wasteProduced = simManager.agents[i].wasteProducedLastFrame;// 
+
+            // Z & W coords represents agent's x/y Radii (in FluidCoords)
+            float agentCenterX = agentPos.x / SimulationManager._MapSize;
+            float agentCenterY = agentPos.y / SimulationManager._MapSize;
+                           
+            agentFluidPositionsArray[i] = new Vector4(agentCenterX, 
+                                                      agentCenterY, 
+                                                      (simManager.agents[i].fullSizeBoundingBox.x + 0.25f) * 0.5f / SimulationManager._MapSize,  // **** REVISIT!!!!! ****
+                                                      (simManager.agents[i].fullSizeBoundingBox.y + 0.25f) * 0.5f / SimulationManager._MapSize); //... 0.5/140 ...
         }
         
         critterInitDataCBuffer.SetData(critterInitDataArray);        
@@ -367,6 +364,7 @@ public class SimulationStateData {
         //Debug.Log("agentFluidPositionsArray: " + agentFluidPositionsArray.Length.ToString());
         depthAtAgentPositionsArray = theRenderKing.GetDepthAtObjectPositions(agentFluidPositionsArray);
         
+        #region Dead code (please delete)
         // Movement Animation Test:
         /*for(int i = 0; i < agentMovementAnimDataArray.Length; i++) {            
             agentMovementAnimDataArray[i].animCycle = simManager.agentsArray[i].animationCycle;
@@ -412,6 +410,7 @@ public class SimulationStateData {
         }
         debugBodyResourcesCBuffer.SetData(debugBodyResourcesArray); // send data to GPU for Rendering
         */
+        #endregion
     }
     
     public void Release()

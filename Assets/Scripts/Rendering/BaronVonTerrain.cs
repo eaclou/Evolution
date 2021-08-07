@@ -1,13 +1,14 @@
 ﻿using UnityEngine;
 using UnityEngine.Rendering;
 
-public class BaronVonTerrain : RenderBaron {
+public class BaronVonTerrain : RenderBaron 
+{
+    SimulationManager simulation => SimulationManager.instance;
+    TheRenderKing render => TheRenderKing.instance;
 
     public ComputeShader computeShaderBrushStrokes;
     public ComputeShader computeShaderTerrainGeneration;
-
-    public TheRenderKing renderKingRef;
-
+    
     //public Material frameBufferStrokeDisplayMat;
     public Material groundStrokesLrgDisplayMat;
     public Material groundStrokesMedDisplayMat;
@@ -55,6 +56,7 @@ public class BaronVonTerrain : RenderBaron {
         public int v2;
         public int v3;
     }
+    
     public Mesh quadMesh;
     public Mesh terrainMesh;
 
@@ -89,7 +91,9 @@ public class BaronVonTerrain : RenderBaron {
         public float elevationChange;
     }*/
 
-    public struct EnvironmentStrokeData { // background terrain
+    // background terrain
+    public struct EnvironmentStrokeData 
+    { 
         public Vector3 worldPos;
 		public Vector2 scale;
 		public Vector2 heading;
@@ -108,36 +112,39 @@ public class BaronVonTerrain : RenderBaron {
         public float noiseVal;
         public float isActive;
         public int brushType;
-    };
+    }
 
-    public override void Initialize(TheRenderKing renderRef) {
-        this.renderKingRef = renderRef;
+    public override void Initialize() 
+    {
         // Bedrock data
         int numMutations = 4;
         bedrockSlotGenomeCurrent = new WorldLayerTerrainGenome();
         bedrockSlotGenomeCurrent.color = terrainColor0;
         bedrockSlotGenomeCurrent.name = "Bedrock";
         bedrockSlotGenomeCurrent.textDescriptionMutation = "Elevation Gain: " + " ??";
-        bedrockSlotGenomeMutations = new WorldLayerTerrainGenome[numMutations];                
+        bedrockSlotGenomeMutations = new WorldLayerTerrainGenome[numMutations];   
+                     
         // stones:
         stoneSlotGenomeCurrent = new WorldLayerTerrainGenome();
         stoneSlotGenomeCurrent.color = terrainColor1;
         stoneSlotGenomeCurrent.name = "Stone";
         stoneSlotGenomeMutations = new WorldLayerTerrainGenome[numMutations];
+        
         // pebbles:
         pebblesSlotGenomeCurrent = new WorldLayerTerrainGenome();
         pebblesSlotGenomeCurrent.color = terrainColor2;
         pebblesSlotGenomeCurrent.name = "Pebbles";
         pebblesSlotGenomeMutations = new WorldLayerTerrainGenome[numMutations];
+        
         // sand:
         sandSlotGenomeCurrent = new WorldLayerTerrainGenome();
         sandSlotGenomeCurrent.color = terrainColor3;
         sandSlotGenomeCurrent.name = "Sand";
         sandSlotGenomeMutations = new WorldLayerTerrainGenome[numMutations];
+        
         for(int i = 0; i < 4; i++) { // not needed?
             GenerateTerrainSlotGenomeMutationOptions(i);
         }
-
 
         terrainHeightRT0 = new RenderTexture(terrainHeightMapResolution, terrainHeightMapResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         terrainHeightRT0.wrapMode = TextureWrapMode.Clamp;
@@ -190,7 +197,6 @@ public class BaronVonTerrain : RenderBaron {
         simTextureBetaRT1.enableRandomWrite = true;
         simTextureBetaRT1.Create();
 
-
         InitializeBuffers();        
         InitializeMaterials();
         RebuildTerrainMesh();
@@ -202,6 +208,7 @@ public class BaronVonTerrain : RenderBaron {
         bedrockSlotGenomeCurrent = bedrockSlotGenomeMutations[id];
         GenerateTerrainSlotGenomeMutationOptions(id);
     }*/
+    
     public void GenerateTerrainSlotGenomeMutationOptions(int slotID) {
         float mutationSize = 1f;
         // *** Invert code to bring for() loop to the outside? might be more efficient ***
@@ -211,13 +218,13 @@ public class BaronVonTerrain : RenderBaron {
                 float iLerp = Mathf.Clamp01((float)i / 3f + 0.015f); // ((float)i + 0.2f / (bedrockSlotGenomeMutations.Length - 1f));
                 iLerp = iLerp * iLerp;
                 WorldLayerTerrainGenome mutatedGenome = new WorldLayerTerrainGenome();
-                Color randColor = UnityEngine.Random.ColorHSV();
-                float randAlpha = UnityEngine.Random.Range(0f, 1f);  // shininess
+                Color randColor = Random.ColorHSV();
+                float randAlpha = Random.Range(0f, 1f);  // shininess
                 randColor.a = randAlpha;
                 Color mutatedColor = Color.Lerp(bedrockSlotGenomeCurrent.color, randColor, mutationSize * iLerp);
                 mutatedGenome.color = mutatedColor;
                 
-                mutatedGenome.elevationChange = Mathf.Lerp(bedrockSlotGenomeCurrent.elevationChange, UnityEngine.Random.Range(0f, 1f), iLerp);
+                mutatedGenome.elevationChange = Mathf.Lerp(bedrockSlotGenomeCurrent.elevationChange, Random.Range(0f, 1f), iLerp);
 
                 mutatedGenome.name = bedrockSlotGenomeCurrent.name;
                 mutatedGenome.textDescriptionMutation = "Mutation Amt: " + (iLerp * 100f).ToString("F0") + "%";
@@ -229,12 +236,12 @@ public class BaronVonTerrain : RenderBaron {
                 float iLerp = Mathf.Clamp01((float)i / 3f + 0.015f); 
                 iLerp = iLerp * iLerp;
                 WorldLayerTerrainGenome mutatedGenome = new WorldLayerTerrainGenome();
-                Color randColor = UnityEngine.Random.ColorHSV();
-                float randAlpha = UnityEngine.Random.Range(0f, 1f);  // shininess
+                Color randColor = Random.ColorHSV();
+                float randAlpha = Random.Range(0f, 1f);  // shininess
                 randColor.a = randAlpha;
                 Color mutatedColor = Color.Lerp(stoneSlotGenomeCurrent.color, randColor, mutationSize * iLerp);
                 mutatedGenome.color = mutatedColor;
-                mutatedGenome.elevationChange = Mathf.Lerp(stoneSlotGenomeCurrent.elevationChange, UnityEngine.Random.Range(0f, 1f), iLerp);
+                mutatedGenome.elevationChange = Mathf.Lerp(stoneSlotGenomeCurrent.elevationChange, Random.Range(0f, 1f), iLerp);
 
                 mutatedGenome.name = stoneSlotGenomeCurrent.name;
                 mutatedGenome.textDescriptionMutation = "Mutation Amt: " + (iLerp * 100f).ToString("F0") + "%";
@@ -246,12 +253,12 @@ public class BaronVonTerrain : RenderBaron {
                 float iLerp = Mathf.Clamp01((float)i / 3f + 0.015f); 
                 iLerp = iLerp * iLerp;
                 WorldLayerTerrainGenome mutatedGenome = new WorldLayerTerrainGenome();
-                Color randColor = UnityEngine.Random.ColorHSV();
-                float randAlpha = UnityEngine.Random.Range(0f, 1f);  // shininess
+                Color randColor = Random.ColorHSV();
+                float randAlpha = Random.Range(0f, 1f);  // shininess
                 randColor.a = randAlpha;
                 Color mutatedColor = Color.Lerp(pebblesSlotGenomeCurrent.color, randColor, mutationSize * iLerp);
                 mutatedGenome.color = mutatedColor;
-                mutatedGenome.elevationChange = Mathf.Lerp(pebblesSlotGenomeCurrent.elevationChange, UnityEngine.Random.Range(0f, 1f), iLerp);
+                mutatedGenome.elevationChange = Mathf.Lerp(pebblesSlotGenomeCurrent.elevationChange, Random.Range(0f, 1f), iLerp);
 
                 mutatedGenome.name = pebblesSlotGenomeCurrent.name;
                 mutatedGenome.textDescriptionMutation = "Mutation Amt: " + (iLerp * 100f).ToString("F0") + "%";
@@ -263,12 +270,12 @@ public class BaronVonTerrain : RenderBaron {
                 float iLerp = Mathf.Clamp01((float)i / 3f + 0.015f); 
                 iLerp = iLerp * iLerp;
                 WorldLayerTerrainGenome mutatedGenome = new WorldLayerTerrainGenome();
-                Color randColor = UnityEngine.Random.ColorHSV();
-                float randAlpha = UnityEngine.Random.Range(0f, 1f);  // shininess
+                Color randColor = Random.ColorHSV();
+                float randAlpha = Random.Range(0f, 1f);  // shininess
                 randColor.a = randAlpha;
                 Color mutatedColor = Color.Lerp(sandSlotGenomeCurrent.color, randColor, mutationSize * iLerp);
                 mutatedGenome.color = mutatedColor;
-                mutatedGenome.elevationChange = Mathf.Lerp(sandSlotGenomeCurrent.elevationChange, UnityEngine.Random.Range(0f, 1f), iLerp);
+                mutatedGenome.elevationChange = Mathf.Lerp(sandSlotGenomeCurrent.elevationChange, Random.Range(0f, 1f), iLerp);
 
                 mutatedGenome.name = sandSlotGenomeCurrent.name;
                 mutatedGenome.textDescriptionMutation = "Mutation Amt: " + (iLerp * 100f).ToString("F0") + "%";
@@ -278,9 +285,6 @@ public class BaronVonTerrain : RenderBaron {
     }
 
     private void InitializeBuffers() {
-
-        
-
         InitializeQuadMeshBuffer(); // Set up Quad Mesh billboard for brushStroke rendering     
         //InitializeFrameBufferStrokesBuffer();
         InitializeGroundStrokeBuffers();
@@ -299,19 +303,19 @@ public class BaronVonTerrain : RenderBaron {
             //int index = y * numGroundStrokesLrg + x;
             float xPos = 0f; // (float)x / (float)(numGroundBits - 1) * boundsLrg;
             float yPos = 0f; // xPos; // (1f - (float)y / (float)(numGroundStrokesLrg - 1)) * boundsLrg;
-            Vector2 offset = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 0.0f) * 16f;
+            Vector2 offset = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f) * 0.0f) * 16f;
             Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
             decomposerBitsArray[x].worldPos = pos;
-            decomposerBitsArray[x].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
-            decomposerBitsArray[x].localScale = new Vector2(UnityEngine.Random.Range(0.4f, 1.5f), UnityEngine.Random.Range(1.0f, 2.5f)) * UnityEngine.Random.Range(1.5f, 4.2f); // Y is forward, along stroke
-            decomposerBitsArray[x].age = UnityEngine.Random.Range(1f, 2f);
+            decomposerBitsArray[x].heading = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized;
+            decomposerBitsArray[x].localScale = new Vector2(Random.Range(0.4f, 1.5f), Random.Range(1.0f, 2.5f)) * Random.Range(1.5f, 4.2f); // Y is forward, along stroke
+            decomposerBitsArray[x].age = Random.Range(1f, 2f);
             decomposerBitsArray[x].speed = 0f;
             decomposerBitsArray[x].noiseVal = 1f;
-            decomposerBitsArray[x].brushType = UnityEngine.Random.Range(0, 16);
-            
+            decomposerBitsArray[x].brushType = Random.Range(0, 16);
         }
         decomposerBitsCBuffer.SetData(decomposerBitsArray);
-}
+    }
+    
     private void InitializeWasteBits()
     {
         wasteBitsCBuffer = new ComputeBuffer(numWasteBits, sizeof(float) * 11 + sizeof(int) * 2);
@@ -326,20 +330,19 @@ public class BaronVonTerrain : RenderBaron {
             ////Vector2 offset = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 0.0f) * 16f;
             //Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
             wasteBitsArray[x].worldPos = Vector3.zero;
-            wasteBitsArray[x].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
-            wasteBitsArray[x].localScale = new Vector2(UnityEngine.Random.Range(0.5f, 1.5f), UnityEngine.Random.Range(0.5f, 1.5f)) * UnityEngine.Random.Range(0.5f, 1f); // Y is forward, along stroke
-            wasteBitsArray[x].age = UnityEngine.Random.Range(0f, 1f);
+            wasteBitsArray[x].heading = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized;
+            wasteBitsArray[x].localScale = new Vector2(Random.Range(0.5f, 1.5f), Random.Range(0.5f, 1.5f)) * Random.Range(0.5f, 1f); // Y is forward, along stroke
+            wasteBitsArray[x].age = Random.Range(0f, 1f);
             wasteBitsArray[x].speed = 0f;
             wasteBitsArray[x].noiseVal = 1f;
-            wasteBitsArray[x].brushType = UnityEngine.Random.Range(0, 32);
+            wasteBitsArray[x].brushType = Random.Range(0, 32);
             wasteBitsArray[x].isActive = 0f;
         }
         wasteBitsCBuffer.SetData(wasteBitsArray);
     }
-
-
-    private void InitializeGroundStrokeBuffers() {
-
+    
+    private void InitializeGroundStrokeBuffers() 
+    {
         // LARGE ::::::
         int totalNumStoneStrokes = numGroundStrokesStone * numGroundStrokesStone;
         int totalNumPebbleStrokes = numGroundStrokesPebbles * numGroundStrokesPebbles;
@@ -355,20 +358,22 @@ public class BaronVonTerrain : RenderBaron {
         EnvironmentStrokeData[] terrainPebbleStrokesArray = new EnvironmentStrokeData[totalNumPebbleStrokes];
         EnvironmentStrokeData[] terrainSandStrokesArray = new EnvironmentStrokeData[totalNumSandStrokes];
         //float boundsLrg = 256f;
+        
         for(int x = 0; x < numGroundStrokesStone; x++) {
             for(int y = 0; y < numGroundStrokesStone; y++) {
                 int index = y * numGroundStrokesStone + x;
                 float xPos = (float)x / (float)(numGroundStrokesStone - 1) * SimulationManager._MapSize;
                 float yPos = (1f - (float)y / (float)(numGroundStrokesStone - 1)) * SimulationManager._MapSize;
-                Vector2 offset = UnityEngine.Random.insideUnitCircle * 31.29f; // new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 1.0f) * 70.6f;
+                Vector2 offset = Random.insideUnitCircle * 31.29f; // new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 1.0f) * 70.6f;
                 Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
                 terrainStoneStrokesArray[index].worldPos = pos;
-                terrainStoneStrokesArray[index].scale = new Vector2(UnityEngine.Random.Range(1f, 1f), UnityEngine.Random.Range(1f, 1f)) * 4.737f; // Y is forward, along stroke
-                terrainStoneStrokesArray[index].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
-                terrainStoneStrokesArray[index].brushType = UnityEngine.Random.Range(0,16);
+                terrainStoneStrokesArray[index].scale = new Vector2(Random.Range(1f, 1f), Random.Range(1f, 1f)) * 4.737f; // Y is forward, along stroke
+                terrainStoneStrokesArray[index].heading = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized;
+                terrainStoneStrokesArray[index].brushType = Random.Range(0,16);
                 terrainStoneStrokesArray[index].isActive = 0f;
             }
         }
+        
         //baseIndex = totalNumStoneStrokes;
         for(int x = 0; x < numGroundStrokesPebbles; x++) {
             for(int y = 0; y < numGroundStrokesPebbles; y++) {
@@ -376,15 +381,16 @@ public class BaronVonTerrain : RenderBaron {
                 int index = y * numGroundStrokesPebbles + x;
                 float xPos = (float)x / (float)(numGroundStrokesPebbles - 1) * SimulationManager._MapSize;
                 float yPos = (1f - (float)y / (float)(numGroundStrokesPebbles - 1)) * SimulationManager._MapSize;
-                Vector2 offset = UnityEngine.Random.insideUnitCircle * 3.41729f; // new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 1.0f) * 5.6f;
+                Vector2 offset = Random.insideUnitCircle * 3.41729f; // new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 1.0f) * 5.6f;
                 Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
                 terrainPebbleStrokesArray[index].worldPos = pos;
-                terrainPebbleStrokesArray[index].scale = new Vector2(UnityEngine.Random.Range(1f, 1f), UnityEngine.Random.Range(1f, 1.7f)) * 1.15f; // Y is forward, along stroke
-                terrainPebbleStrokesArray[index].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
-                terrainPebbleStrokesArray[index].brushType = UnityEngine.Random.Range(0,16);
+                terrainPebbleStrokesArray[index].scale = new Vector2(Random.Range(1f, 1f), Random.Range(1f, 1.7f)) * 1.15f; // Y is forward, along stroke
+                terrainPebbleStrokesArray[index].heading = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized;
+                terrainPebbleStrokesArray[index].brushType = Random.Range(0,16);
                 terrainPebbleStrokesArray[index].isActive = 0f;
             }
         }
+        
         //baseIndex = totalNumStoneStrokes + totalNumPebbleStrokes;
         for(int x = 0; x < numGroundStrokesSand; x++) {
             for(int y = 0; y < numGroundStrokesSand; y++) {
@@ -392,12 +398,12 @@ public class BaronVonTerrain : RenderBaron {
                 int index = y * numGroundStrokesSand + x;
                 float xPos = (float)x / (float)(numGroundStrokesSand - 1) * SimulationManager._MapSize;
                 float yPos = (1f - (float)y / (float)(numGroundStrokesSand - 1)) * SimulationManager._MapSize;
-                Vector2 offset = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f) * 1.0f) * 0.76f;
+                Vector2 offset = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f) * 1.0f) * 0.76f;
                 Vector3 pos = new Vector3(xPos + offset.x, yPos + offset.y, 0f);
                 terrainSandStrokesArray[index].worldPos = pos;
-                terrainSandStrokesArray[index].scale = new Vector2(UnityEngine.Random.Range(0.6f, 1.4f), UnityEngine.Random.Range(1.4f, 2.1f)) * UnityEngine.Random.Range(0.4f, 1.80f) * 0.231875f; // Y is forward, along stroke
-                terrainSandStrokesArray[index].heading = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
-                terrainSandStrokesArray[index].brushType = UnityEngine.Random.Range(0,16);
+                terrainSandStrokesArray[index].scale = new Vector2(Random.Range(0.6f, 1.4f), Random.Range(1.4f, 2.1f)) * Random.Range(0.4f, 1.80f) * 0.231875f; // Y is forward, along stroke
+                terrainSandStrokesArray[index].heading = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized;
+                terrainSandStrokesArray[index].brushType = Random.Range(0,16);
                 terrainSandStrokesArray[index].isActive = 0f;
             }
         }
@@ -454,8 +460,6 @@ public class BaronVonTerrain : RenderBaron {
     }*/
 
     private void InitializeMaterials() {
-        
-        
         //groundStrokesLrgDisplayMat.SetPass(0);
         //groundStrokesLrgDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         //groundStrokesLrgDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -481,12 +485,10 @@ public class BaronVonTerrain : RenderBaron {
         decomposerBitsShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         decomposerBitsShadowDisplayMat.SetBuffer("groundBitsCBuffer", decomposerBitsCBuffer);
         
-
         wasteBitsDisplayMat.SetPass(0);
         wasteBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         wasteBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         wasteBitsDisplayMat.SetBuffer("groundBitsCBuffer", wasteBitsCBuffer);
-
         
         //groundDryLandDisplayMat.SetPass(0);
         //groundDryLandDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
@@ -494,83 +496,73 @@ public class BaronVonTerrain : RenderBaron {
         //groundDryLandDisplayMat.SetBuffer("frameBufferStrokesCBuffer", groundStrokesSmlCBuffer);  
     }
 
-    
-    public void RebuildTerrainMesh() {
+    public void RebuildTerrainMesh() 
+    {
         //Debug.Log("InitializeTerrain!");
-
         int meshResolution = 128;
         float mapSize = SimulationManager._MapSize;
 
-        if(terrainInitHeightMap != null) {
-            if (computeShaderTerrainGeneration == null) {
-                Debug.LogError("NO COMPUTE SHADER SET!!!!");
-            }
-
-            if (terrainVertexCBuffer != null)
-                terrainVertexCBuffer.Release();
-            terrainVertexCBuffer = new ComputeBuffer(meshResolution * meshResolution, sizeof(float) * 3);
-            if (terrainUVCBuffer != null)
-                terrainUVCBuffer.Release();
-            terrainUVCBuffer = new ComputeBuffer(meshResolution * meshResolution, sizeof(float) * 2);
-            if (terrainNormalCBuffer != null)
-                terrainNormalCBuffer.Release();
-            terrainNormalCBuffer = new ComputeBuffer(meshResolution * meshResolution, sizeof(float) * 3);
-            if (terrainColorCBuffer != null)
-                terrainColorCBuffer.Release();
-            terrainColorCBuffer = new ComputeBuffer(meshResolution * meshResolution, sizeof(float) * 4);
-            if (terrainTriangleCBuffer != null)
-                terrainTriangleCBuffer.Release();
-            terrainTriangleCBuffer = new ComputeBuffer((meshResolution - 1) * (meshResolution - 1) * 2, sizeof(int) * 3);
-                            
-            // Set Shader properties so it knows where and what to build::::
-            //computeShaderTerrainGeneration.SetInt("_MeshResolution", meshResolution);
-            computeShaderTerrainGeneration.SetInt("_MeshResolution", meshResolution);
-            computeShaderTerrainGeneration.SetVector("_QuadBounds", new Vector4(0f, mapSize, 0f, mapSize)); //new Vector4(-mapSize * 0.5f, mapSize * 1.5f, -mapSize * 0.5f, mapSize * 1.5f));
-            computeShaderTerrainGeneration.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
-            computeShaderTerrainGeneration.SetVector("_HeightRange", new Vector4(-SimulationManager._MaxAltitude, 0f, 0f, 0f));
-
-
-            // Creates Actual Mesh data by reading from existing main Height Texture!!!!::::::
-            int generateMeshDataKernelID = computeShaderTerrainGeneration.FindKernel("CSGenerateMeshData");
-            computeShaderTerrainGeneration.SetTexture(generateMeshDataKernelID, "AltitudeRead", terrainHeightDataRT);   // Read-Only 
-
-            computeShaderTerrainGeneration.SetBuffer(generateMeshDataKernelID, "terrainVertexCBuffer", terrainVertexCBuffer);
-            computeShaderTerrainGeneration.SetBuffer(generateMeshDataKernelID, "terrainUVCBuffer", terrainUVCBuffer);
-            computeShaderTerrainGeneration.SetBuffer(generateMeshDataKernelID, "terrainNormalCBuffer", terrainNormalCBuffer);
-            computeShaderTerrainGeneration.SetBuffer(generateMeshDataKernelID, "terrainColorCBuffer", terrainColorCBuffer);        
-        
-            // Generate list of Triangle Indices (grouped into 3 per triangle):::
-            int triangleIndicesKernelID = computeShaderTerrainGeneration.FindKernel("CSGenerateTriangleIndices");        
-            computeShaderTerrainGeneration.SetBuffer(triangleIndicesKernelID, "terrainTriangleCBuffer", terrainTriangleCBuffer);
-        
-            // GENERATE MESH DATA!!!!
-            computeShaderTerrainGeneration.Dispatch(generateMeshDataKernelID, meshResolution, 1, meshResolution);
-            computeShaderTerrainGeneration.Dispatch(triangleIndicesKernelID, meshResolution - 1, 1, meshResolution - 1);
-
-            Mesh mesh = GenerateTerrainMesh();
-
-            // CLEANUP!!
-            terrainVertexCBuffer.Release();
-            terrainUVCBuffer.Release();
-            terrainNormalCBuffer.Release();
-            terrainColorCBuffer.Release();
-            terrainTriangleCBuffer.Release();
-
-            //terrainGO.GetComponent<MeshFilter>().sharedMesh = mesh;
-            terrainMesh = mesh;
+        if(!terrainInitHeightMap) {
+            Debug.LogError("ERROR! No terrainGO or heightmap referenced! Plug them into inspector!!!", gameObject);
+            return;
         }
-        else {
-            Debug.LogError("ERROR! No terrainGO or heightmap referenced! Plug them into inspector!!!");
+        
+        if (!computeShaderTerrainGeneration) {
+            Debug.LogError("NO COMPUTE SHADER SET!!!!");
         }
+
+        terrainVertexCBuffer?.Release();
+        terrainVertexCBuffer = new ComputeBuffer(meshResolution * meshResolution, sizeof(float) * 3);
+        terrainUVCBuffer?.Release();
+        terrainUVCBuffer = new ComputeBuffer(meshResolution * meshResolution, sizeof(float) * 2);
+        terrainNormalCBuffer?.Release();
+        terrainNormalCBuffer = new ComputeBuffer(meshResolution * meshResolution, sizeof(float) * 3);
+        terrainColorCBuffer?.Release();
+        terrainColorCBuffer = new ComputeBuffer(meshResolution * meshResolution, sizeof(float) * 4);
+        terrainTriangleCBuffer?.Release();
+        terrainTriangleCBuffer = new ComputeBuffer((meshResolution - 1) * (meshResolution - 1) * 2, sizeof(int) * 3);
+                        
+        // Set Shader properties so it knows where and what to build::::
+        //computeShaderTerrainGeneration.SetInt("_MeshResolution", meshResolution);
+        computeShaderTerrainGeneration.SetInt("_MeshResolution", meshResolution);
+        computeShaderTerrainGeneration.SetVector("_QuadBounds", new Vector4(0f, mapSize, 0f, mapSize)); //new Vector4(-mapSize * 0.5f, mapSize * 1.5f, -mapSize * 0.5f, mapSize * 1.5f));
+        computeShaderTerrainGeneration.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+        computeShaderTerrainGeneration.SetVector("_HeightRange", new Vector4(-SimulationManager._MaxAltitude, 0f, 0f, 0f));
+        
+        // Creates Actual Mesh data by reading from existing main Height Texture!!!!::::::
+        int generateMeshDataKernelID = computeShaderTerrainGeneration.FindKernel("CSGenerateMeshData");
+        computeShaderTerrainGeneration.SetTexture(generateMeshDataKernelID, "AltitudeRead", terrainHeightDataRT);   // Read-Only 
+
+        computeShaderTerrainGeneration.SetBuffer(generateMeshDataKernelID, "terrainVertexCBuffer", terrainVertexCBuffer);
+        computeShaderTerrainGeneration.SetBuffer(generateMeshDataKernelID, "terrainUVCBuffer", terrainUVCBuffer);
+        computeShaderTerrainGeneration.SetBuffer(generateMeshDataKernelID, "terrainNormalCBuffer", terrainNormalCBuffer);
+        computeShaderTerrainGeneration.SetBuffer(generateMeshDataKernelID, "terrainColorCBuffer", terrainColorCBuffer);        
+    
+        // Generate list of Triangle Indices (grouped into 3 per triangle):::
+        int triangleIndicesKernelID = computeShaderTerrainGeneration.FindKernel("CSGenerateTriangleIndices");        
+        computeShaderTerrainGeneration.SetBuffer(triangleIndicesKernelID, "terrainTriangleCBuffer", terrainTriangleCBuffer);
+    
+        // GENERATE MESH DATA!!!!
+        computeShaderTerrainGeneration.Dispatch(generateMeshDataKernelID, meshResolution, 1, meshResolution);
+        computeShaderTerrainGeneration.Dispatch(triangleIndicesKernelID, meshResolution - 1, 1, meshResolution - 1);
+
+        Mesh mesh = GenerateTerrainMesh();
+
+        // CLEANUP!!
+        terrainVertexCBuffer.Release();
+        terrainUVCBuffer.Release();
+        terrainNormalCBuffer.Release();
+        terrainColorCBuffer.Release();
+        terrainTriangleCBuffer.Release();
+
+        //terrainGO.GetComponent<MeshFilter>().sharedMesh = mesh;
+        terrainMesh = mesh;
     }
+    
     private Mesh GenerateTerrainMesh() {
         if(terrainMesh == null) {
             terrainMesh = new Mesh();
         }
-        else {
-
-        }
-        
 
         TriangleIndexData[] triangleIndexDataArray = new TriangleIndexData[terrainTriangleCBuffer.count];
         terrainTriangleCBuffer.GetData(triangleIndexDataArray);
@@ -579,7 +571,6 @@ public class BaronVonTerrain : RenderBaron {
             tris[i * 3] = triangleIndexDataArray[i].v1;
             tris[i * 3 + 1] = triangleIndexDataArray[i].v2;
             tris[i * 3 + 2] = triangleIndexDataArray[i].v3;
-            
         }
 
         Vector3[] vertices = new Vector3[terrainVertexCBuffer.count];
@@ -614,7 +605,10 @@ public class BaronVonTerrain : RenderBaron {
         computeShaderBrushStrokes.SetBuffer(kernelCSAlignFrameBufferStrokes, "terrainFrameBufferStrokesCBuffer", frameBufferStrokesCBuffer);        
         computeShaderBrushStrokes.Dispatch(kernelCSAlignFrameBufferStrokes, frameBufferStrokesCBuffer.count, 1, 1);
     }*/
-    public void AlignGroundStrokesToTerrain() {  // ****  OPTIMIZE!!!! *******
+    
+    // ****  OPTIMIZE!!!! *******
+    public void AlignGroundStrokesToTerrain() 
+    {  
         int kernelCSAlignGroundStrokesLrg = computeShaderTerrainGeneration.FindKernel("CSUpdateGroundStrokes");
         computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderTerrainGeneration.SetFloat("_BrushAlignment", 1f);        
@@ -625,7 +619,6 @@ public class BaronVonTerrain : RenderBaron {
         computeShaderTerrainGeneration.SetBuffer(kernelCSAlignGroundStrokesLrg, "terrainFrameBufferStrokesCBuffer", terrainStoneStrokesCBuffer);        
         computeShaderTerrainGeneration.Dispatch(kernelCSAlignGroundStrokesLrg, terrainStoneStrokesCBuffer.count, 1, 1);
         
-
         int kernelCSAlignGroundStrokesMed = computeShaderTerrainGeneration.FindKernel("CSUpdateGroundStrokes");
         computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderTerrainGeneration.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
@@ -681,9 +674,53 @@ public class BaronVonTerrain : RenderBaron {
         computeShaderTerrainGeneration.SetFloat("_TextureResolution", terrainHeightMapResolution);
         computeShaderTerrainGeneration.SetVector("_SpawnBoundsCameraDetails", spawnBoundsCameraDetails);
         computeShaderTerrainGeneration.Dispatch(kernelSimWasteBits, wasteBitsCBuffer.count / 1024, 1, 1);
-
+    }
+    
+    public void SimGroundBits()
+    {
+        int kernelSimGroundBits = computeShaderTerrainGeneration.FindKernel("CSSimDecomposerBitsData");
+        computeShaderTerrainGeneration.SetBuffer(kernelSimGroundBits, "groundBitsCBuffer", decomposerBitsCBuffer);
+        computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "AltitudeRead", terrainHeightDataRT);
+        computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "VelocityRead", render.fluidManager._VelocityPressureDivergenceMain);
+        computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "_ResourceGridRead", simulation.vegetationManager.resourceGridRT1);
+        computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderTerrainGeneration.SetFloat("_Time", Time.realtimeSinceStartup);
+        computeShaderTerrainGeneration.SetVector("_SpawnBoundsCameraDetails", spawnBoundsCameraDetails);
+        float spawnLerp = simulation.trophicLayersManager.GetLayerLerp(KnowledgeMapId.Decomposers, simulation.simAgeTimeSteps);
+        float spawnRadius = Mathf.Lerp(1f, SimulationManager._MapSize, spawnLerp);
+        Vector4 spawnPos = new Vector4(simulation.trophicLayersManager.decomposerOriginPos.x, simulation.trophicLayersManager.decomposerOriginPos.y, 0f, 0f);
+        computeShaderTerrainGeneration.SetFloat("_SpawnRadius", spawnRadius);
+        computeShaderTerrainGeneration.SetVector("_SpawnPos", spawnPos);
+        //baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_DecomposerDensityLerp", Mathf.Clamp01(simManager.simResourceManager.curGlobalDecomposers / 100f));
+        computeShaderTerrainGeneration.Dispatch(kernelSimGroundBits, decomposerBitsCBuffer.count / 1024, 1, 1);
+    }
+    
+    public void SimWasteBits()
+    {
+        int kernelSimWasteBits = computeShaderTerrainGeneration.FindKernel("CSSimWasteBitsData");
+        computeShaderTerrainGeneration.SetBuffer(kernelSimWasteBits, "groundBitsCBuffer", wasteBitsCBuffer);
+        computeShaderTerrainGeneration.SetTexture(kernelSimWasteBits, "AltitudeRead", terrainHeightDataRT);
+        computeShaderTerrainGeneration.SetTexture(kernelSimWasteBits, "VelocityRead", render.fluidManager._VelocityPressureDivergenceMain);
+        computeShaderTerrainGeneration.SetTexture(kernelSimWasteBits, "_ResourceGridRead", simulation.vegetationManager.resourceGridRT1);
+        computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderTerrainGeneration.SetVector("_SpawnBoundsCameraDetails", spawnBoundsCameraDetails);
+        computeShaderTerrainGeneration.Dispatch(kernelSimWasteBits, wasteBitsCBuffer.count / 1024, 1, 1);
+    }
+    
+    public void SetObjectDepths(ComputeBuffer objectDataInFluidCoordsCBuffer, ComputeBuffer depthValuesCBuffer)
+    {
+        var kernelGetObjectDepths = computeShaderTerrainGeneration.FindKernel("CSGetObjectDepths");
+        computeShaderTerrainGeneration.SetBuffer(kernelGetObjectDepths, "ObjectPositionsCBuffer", objectDataInFluidCoordsCBuffer);
+        computeShaderTerrainGeneration.SetBuffer(kernelGetObjectDepths, "DepthValuesCBuffer", depthValuesCBuffer);
+        computeShaderTerrainGeneration.SetTexture(kernelGetObjectDepths, "AltitudeRead", terrainHeightDataRT);
+        computeShaderTerrainGeneration.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
+        computeShaderTerrainGeneration.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+        computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderTerrainGeneration.SetFloat("_TextureResolution", (float)terrainHeightDataRT.width);
+        computeShaderTerrainGeneration.Dispatch(kernelGetObjectDepths, 1, 1, 1);        
     }
 
+    // * WPP: empty method -> delete
     public override void RenderCommands(ref CommandBuffer cmdBuffer, int frameBufferID) {
         // Create RenderTargets:
         /*int renderedSceneID = Shader.PropertyToID("_RenderedSceneID");
@@ -736,30 +773,14 @@ public class BaronVonTerrain : RenderBaron {
         */
     }
 
-    public override void Cleanup() {
-        if (frameBufferStrokesCBuffer != null) {
-            frameBufferStrokesCBuffer.Release();
-        }
-        if (quadVerticesCBuffer != null) {
-            quadVerticesCBuffer.Release();
-        }
-        if (terrainPebbleStrokesCBuffer != null) {
-            terrainPebbleStrokesCBuffer.Release();
-        }
-        if (terrainStoneStrokesCBuffer != null) {
-            terrainStoneStrokesCBuffer.Release();
-        }
-        if (terrainSandStrokesCBuffer != null) {
-            terrainSandStrokesCBuffer.Release();
-        }
-        if (decomposerBitsCBuffer != null)
-        {
-            decomposerBitsCBuffer.Release();
-        }
-        if (wasteBitsCBuffer != null)
-        {
-            wasteBitsCBuffer.Release();
-        }
-        
+    public override void Cleanup() 
+    {
+        frameBufferStrokesCBuffer?.Release();
+        quadVerticesCBuffer?.Release();
+        terrainPebbleStrokesCBuffer?.Release();
+        terrainStoneStrokesCBuffer?.Release();
+        terrainSandStrokesCBuffer?.Release();
+        decomposerBitsCBuffer?.Release();
+        wasteBitsCBuffer?.Release();
     }
 }
