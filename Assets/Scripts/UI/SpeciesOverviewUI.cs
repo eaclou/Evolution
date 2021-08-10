@@ -40,6 +40,12 @@ public class SpeciesOverviewUI : MonoBehaviour {
         isShowingLineage = !isShowingLineage;
         RebuildGenomeButtons();
     }
+    public void SetButtonPos(int id, Vector3 pos) {
+        if(id >= 0 && id < buttons.Count) {
+            buttons[id].gameObject.transform.localPosition = pos;
+        }
+        
+    }
         
     public void RebuildGenomeButtons() 
     {
@@ -50,7 +56,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
         textSpeciesLineage.gameObject.SetActive(true);
         textSpeciesLineage.text = GetLineageText(pool);
 
-        RebuildGenomeButtonsLineage(pool);
+        //RebuildGenomeButtonsLineage(pool);
 
         RebuildGenomeButtonsCurrent(pool);        
     }
@@ -136,9 +142,13 @@ public class SpeciesOverviewUI : MonoBehaviour {
 
         if(selectedButtonData != null && selectedButtonData.image != null) {
             selectedButtonData.image.color = Color.white;
-        }
 
+        }
         panelGenomeViewer.SetActive(true);
+    }
+    
+    public void ClickedCreatureIcon() {
+
     }
 
     public void CycleHallOfFame() {

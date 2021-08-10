@@ -179,7 +179,7 @@ public class HistoryPanelUI : MonoBehaviour
             for (int i = 0; i < worldTreeNumPointsPerLine; i++) 
             {
                 int index = (line + worldTreeNumSpeciesLines) * worldTreeNumPointsPerLine + i;
-                SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID]; //[simManager.masterGenomePool.currentlyActiveSpeciesIDList[0]]; //***EAC ...
+                SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
 
                 if (line >= pool.candidateGenomesList.Count) 
                     continue;
@@ -188,14 +188,14 @@ public class HistoryPanelUI : MonoBehaviour
                 CandidateAgentData cand = pool.candidateGenomesList[line];
 
                 float xCoord = (float)(i) / (float)worldTreeNumPointsPerLine;
-                int numAgentsDisplayed = 0; // Mathf.Min(Mathf.Max(pool.candidateGenomesList.Count - 1, 1), worldTreeNumCreatureLines);
+                int numAgentsDisplayed = 0;
                 for(int a = 0; a < pool.candidateGenomesList.Count; a++) {
                     if(pool.candidateGenomesList[a].isBeingEvaluated) {
                         numAgentsDisplayed++;
                     }
                 }
                 numAgentsDisplayed = Mathf.Max(numAgentsDisplayed, 1); // avoid divide by 0
-                float yCoord = 1f - (float)line / (float)numAgentsDisplayed; // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
+                float yCoord = 1f - (float)line / (float)numAgentsDisplayed;
 
                 Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary * 2f;
 
@@ -449,6 +449,42 @@ public class HistoryPanelUI : MonoBehaviour
             yCoord = yCoord * 0.67f + 0.1f;
 
             speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
+        }
+
+        
+        SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID];
+        int numAgentsDisplayed = 0;
+        for(int a = 0; a < pool.candidateGenomesList.Count; a++) {
+            if(pool.candidateGenomesList[a].isBeingEvaluated) {
+                numAgentsDisplayed++;
+            }
+        }
+        numAgentsDisplayed = Mathf.Max(numAgentsDisplayed, 1); // avoid divide by 0
+        
+        for(int line = 0; line < worldTreeNumCreatureLines; line++) 
+        {            
+            
+            if (line >= pool.candidateGenomesList.Count) 
+                continue;
+                            
+            CandidateAgentData cand = pool.candidateGenomesList[line];
+
+            float xCoord = 1f;                
+            float yCoord = 1f - (float)line / (float)numAgentsDisplayed;
+
+            Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary * 2f;
+
+            int timeStepStart = Mathf.RoundToInt(timelineStartTimeStep);            
+            float xEnd = 1f;
+            if(pool.isExtinct || cand.performanceData.timeStepDied > 1) {
+                xEnd = (float)(cand.performanceData.timeStepDied - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
+            }
+            
+            xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
+            yCoord = yCoord * 0.67f + 0.1f;
+
+            uiManagerRef.speciesOverviewUI.SetButtonPos(line, new Vector3(xCoord * 360f, yCoord * 360f, 0f));      
+            
         }
     }
 

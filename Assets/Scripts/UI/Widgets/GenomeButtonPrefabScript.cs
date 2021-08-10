@@ -13,6 +13,9 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
     public Button button;
     public Image backgroundImage;
     public TooltipUI tooltip;
+
+    public Vector2 targetCoords; // UI canvas
+    private Vector2 currentCoords;
     
     [SerializeField] BackgroundState selectedState;
     [SerializeField] BackgroundState[] lifeStageStates;
@@ -27,6 +30,8 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
     }
 
     public void ClickedThisButton() {
+        
+
         // updates focusedCandidate in uiManager
         uiManager.speciesOverviewUI.ChangeSelectedGenome(group, index);  
         
@@ -45,10 +50,21 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
         uiManager.ResetCurrentFocusedCandidateGenome();
         cameraManager.isFollowingAgent = true; 
     }
+
+    public void SetTargetCoords(Vector2 newCoords) {
+        targetCoords = newCoords;
+    }
     
     // * Consider Refactor: move life stage to candidate    
     public void SetDisplay(CandidateAgentData candidate)
-    {
+    {   
+        
+        
+        // POSITION
+        currentCoords = Vector2.Lerp(currentCoords, targetCoords, 0.75f);
+
+        gameObject.transform.localPosition = new Vector3(currentCoords.x * 360f, currentCoords.y * 360f, 0f);
+
         string statusStr = "";
 
         if (candidate.isBeingEvaluated) 
