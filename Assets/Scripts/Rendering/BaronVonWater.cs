@@ -1,15 +1,20 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Rendering;
 
-public class BaronVonWater : RenderBaron {
+public class BaronVonWater : RenderBaron 
+{
+    SimulationManager simulation => SimulationManager.instance;
+    EnvironmentFluidManager fluidManager => EnvironmentFluidManager.instance;
+    TheRenderKing renderKing => TheRenderKing.instance;
+    BaronVonTerrain terrain => renderKing.baronVonTerrain;
+    CommandBuffer cmdBufferMain => renderKing.cmdBufferMain;
+    VegetationManager vegetation => renderKing.vegetationManager;
 
     //public ComputeShader computeShaderBrushStrokes;
     public ComputeShader computeShaderWaterRender;
 
     public EnvironmentFluidManager fluidManagerRef;
-    public VegetationManager veggieManRef;
+    
 
     //public float _GlobalWaterLevel = 0f;
 
@@ -94,18 +99,21 @@ public class BaronVonWater : RenderBaron {
 		public float age;  // to allow for fade-in and fade-out
         public int brushType;  // brush texture mask
     }
+    
     /*public struct TrailDotData { 
         public int parentIndex;
         public Vector2 coords01;
         public float age;
         public float initAlpha;
     }*/
+    
     public struct TestStrokeData { // background terrain
         public Vector3 worldPos;
 		public Vector2 scale;
 		public Vector2 heading;
 		public int brushType;
     }
+    
     public struct WaterQuadData {
 	    public int index;
 	    public Vector3 worldPos;
@@ -124,8 +132,6 @@ public class BaronVonWater : RenderBaron {
 
         InitializeBuffers();        
         InitializeMaterials();
-
-        
     }
 
     private void InitializeBuffers() {
@@ -156,13 +162,12 @@ public class BaronVonWater : RenderBaron {
         // Temp init state for debugging:
         waterRipplesCBuffer.SetData(waterRipplesDataArray);
     }
+    
     public void RequestNewWaterRipple(Vector2 coords, float time, float amp, float freq) {
 
     }
 
-
     private void InitializeWaterCurveMeshBuffer() {
-        
         float rowSize = 1f / (float)numWaterCurveMeshQuads;
 
         waterCurveVerticesCBuffer = new ComputeBuffer(6 * numWaterCurveMeshQuads, sizeof(float) * 3);
@@ -182,6 +187,7 @@ public class BaronVonWater : RenderBaron {
 
         waterCurveVerticesCBuffer.SetData(verticesArray);
     }
+    
     private void InitializeQuadMeshBuffer() {
         quadVerticesCBuffer = new ComputeBuffer(6, sizeof(float) * 3);
         quadVerticesCBuffer.SetData(new[] {
@@ -193,6 +199,7 @@ public class BaronVonWater : RenderBaron {
             new Vector3(-0.5f, 0.5f)
         });
     }
+    
     public void InitializeWaterCurveStrokesCBuffer() {
         WaterCurveStrokeData[] waterCurveStrokesDataArray = new WaterCurveStrokeData[numWaterCurves];
         waterCurveStrokesCBuffer = new ComputeBuffer(waterCurveStrokesDataArray.Length, sizeof(float) * 17 + sizeof(int) * 2);
@@ -213,6 +220,7 @@ public class BaronVonWater : RenderBaron {
 
         waterCurveStrokesCBuffer.SetData(waterCurveStrokesDataArray);
     }
+    
     public void InitializeWaterChainStrokesCBuffer() {
         Vector2[] waterChainDataArray = new Vector2[numWaterChains * numPointsPerWaterChain];
         for (int i = 0; i < waterChainDataArray.Length; i++) {
@@ -225,6 +233,7 @@ public class BaronVonWater : RenderBaron {
         waterChains0CBuffer.SetData(waterChainDataArray);
         waterChains1CBuffer = new ComputeBuffer(waterChainDataArray.Length, sizeof(float) * 2);
     }
+    
     private void InitializeWaterSurfaceReflectiveBuffers() {
         waterQuadStrokesCBufferLrg = new ComputeBuffer(numWaterQuadStrokesPerDimensionLrg * numWaterQuadStrokesPerDimensionLrg, sizeof(float) * 9 + sizeof(int) * 2);
         WaterQuadData[] waterQuadStrokesArrayLrg = new WaterQuadData[waterQuadStrokesCBufferLrg.count];
@@ -268,6 +277,7 @@ public class BaronVonWater : RenderBaron {
         }
         waterQuadStrokesCBufferSml.SetData(waterQuadStrokesArraySml);
     }
+    
     private void InitializeWaterNutrientsBits()
     {
         waterNutrientsBitsCBuffer = new ComputeBuffer(numNutrientsBits, sizeof(float) * 9 + sizeof(int) * 2);
@@ -290,6 +300,7 @@ public class BaronVonWater : RenderBaron {
         }
         waterNutrientsBitsCBuffer.SetData(waterNutrientsBitsArray);
     }
+    
     private void InitializeWaterSurfaceBits()
     {
         waterSurfaceBitsCBuffer = new ComputeBuffer(numSurfaceBits, sizeof(float) * 9 + sizeof(int) * 2);
@@ -330,6 +341,7 @@ public class BaronVonWater : RenderBaron {
         waterSurfaceBitsShadowsCBuffer.SetData(waterSurfaceBitsShadowsArray);
         */
     }
+    
     private void InitializeWaterDebrisBits()
     {
         waterDebrisBitsCBuffer = new ComputeBuffer(numDebrisBits, sizeof(float) * 9 + sizeof(int) * 2);
@@ -372,6 +384,7 @@ public class BaronVonWater : RenderBaron {
         }
         waterDebrisBitsShadowsCBuffer.SetData(waterDebrisBitsShadowsArray);
     }
+    
     private void InitializeWaterSurface()
     {
         waterSurfaceDataRT0 = new RenderTexture(waterSurfaceMapResolution, waterSurfaceMapResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
@@ -385,6 +398,7 @@ public class BaronVonWater : RenderBaron {
         waterSurfaceDataRT1.Create();
     }
 
+    // * WPP: merge repeat functionality
     private void InitializeMaterials() {
         waterQuadStrokesLrgDisplayMat.SetPass(0);
         waterQuadStrokesLrgDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
@@ -431,8 +445,8 @@ public class BaronVonWater : RenderBaron {
         waterDebrisBitsShadowsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         waterDebrisBitsShadowsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         waterDebrisBitsShadowsDisplayMat.SetBuffer("waterQuadStrokesCBuffer", waterDebrisBitsShadowsCBuffer);
-
     }
+    
     private void SimWaterQuads() {
         /*int kernelSimWaterQuads = computeShaderWaterRender.FindKernel("CSSimWaterQuadsData");                
         computeShaderWaterRender.SetBuffer(kernelSimWaterQuads, "waterQuadStrokesCBuffer", waterQuadStrokesCBufferLrg);
@@ -458,8 +472,8 @@ public class BaronVonWater : RenderBaron {
         computeShaderWaterRender.SetBuffer(kernelSimDetailBitsData, "waterQuadStrokesCBuffer", waterNutrientsBitsCBuffer);
         computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "VelocityRead", fluidManagerRef._VelocityPressureDivergenceMain);
         computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "AltitudeRead", altitudeMapRef);
-        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "_ResourceSimTransferTex", veggieManRef.resourceSimTransferRT);
-        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "_ResourceGridTex", veggieManRef.resourceGridRT1);
+        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "_ResourceSimTransferTex", vegetation.resourceSimTransferRT);
+        computeShaderWaterRender.SetTexture(kernelSimDetailBitsData, "_ResourceGridTex", vegetation.resourceGridRT1);
         computeShaderWaterRender.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderWaterRender.SetVector("_SpawnBoundsCameraDetails", spawnBoundsCameraDetails);
         computeShaderWaterRender.Dispatch(kernelSimDetailBitsData, waterNutrientsBitsCBuffer.count / 1024, 1, 1);
@@ -499,6 +513,7 @@ public class BaronVonWater : RenderBaron {
         computeShaderWaterRender.Dispatch(kernelSimDetailBitsData, waterDebrisBitsShadowsCBuffer.count / 1024, 1, 1);
         */
     }
+    
     private void SimWaterCurves() {
         int kernelSimWaterCurves = computeShaderWaterRender.FindKernel("CSSimWaterCurvesData");
 
@@ -512,6 +527,7 @@ public class BaronVonWater : RenderBaron {
         //computeShaderWaterRender.SetTexture(kernelSimWaterCurves, "DensityRead", fluidManager._DensityA);  
         computeShaderWaterRender.Dispatch(kernelSimWaterCurves, waterCurveStrokesCBuffer.count / 1024, 1, 1);
     }
+    
     private void SimWaterChains() {
         // Set position of trail Roots:
         int kernelCSPinWaterChainsData = computeShaderWaterRender.FindKernel("CSPinWaterChainsData");        
@@ -538,6 +554,7 @@ public class BaronVonWater : RenderBaron {
 
         debugFrameCounter++;
     }
+    
     public void StartCursorClick(Vector4 clickPos) {
         cursorClickWorldPos = clickPos;
         cursorClickWaveOn = 1f;
@@ -546,11 +563,12 @@ public class BaronVonWater : RenderBaron {
     //private int cursorClickWaveDuration;
     //private int cursorClickWaveTimeStepCounter = 0;
     }
-    public void RequestNewWaterRipple(Vector2 coords) {
-                
+    
+    public void RequestNewWaterRipple(Vector2 coords) 
+    {
         WaterRippleData data = new WaterRippleData();
         data.coords = coords;
-        data.startTime = UnityEngine.Time.realtimeSinceStartup;
+        data.startTime = Time.realtimeSinceStartup;
 
         waterRipplesDataArray[nextWaterRippleIndex] = data;
         nextWaterRippleIndex++;
@@ -560,6 +578,7 @@ public class BaronVonWater : RenderBaron {
 
         waterRipplesCBuffer.SetData(waterRipplesDataArray);
     }
+    
     private void SimWaterSurface()
     {
         int kernelCSUpdateWaterSurface = computeShaderWaterRender.FindKernel("CSUpdateWaterSurface");
@@ -574,7 +593,6 @@ public class BaronVonWater : RenderBaron {
         computeShaderWaterRender.SetFloat("_CursorClickTimeLerp", Mathf.Clamp01((float)cursorClickWaveTimeStepCounter / (float)cursorClickWaveDuration));
         computeShaderWaterRender.SetFloat("_CursorClickWaveOn", cursorClickWaveOn);        
         computeShaderWaterRender.Dispatch(kernelCSUpdateWaterSurface, waterSurfaceMapResolution / 32, waterSurfaceMapResolution / 32, 1);
-
         
         int kernelCSCalculateWaterSurfaceNormals = computeShaderWaterRender.FindKernel("CSCalculateWaterSurfaceNormals");
         computeShaderWaterRender.SetTexture(kernelCSCalculateWaterSurfaceNormals, "waterSurfaceDataReadRT", waterSurfaceDataRT0);
@@ -588,8 +606,8 @@ public class BaronVonWater : RenderBaron {
         Graphics.Blit(waterSurfaceDataRT1, waterSurfaceDataRT0);
     }
 
-    public override void Tick(RenderTexture maskTex) {
-
+    public override void Tick(RenderTexture maskTex) 
+    {
         if(cursorClickWaveOn > 0.5f) {
             cursorClickWaveTimeStepCounter++;
 
@@ -603,7 +621,6 @@ public class BaronVonWater : RenderBaron {
 
         SimWaterQuads();
         SimWaterCurves();
-
         SimWaterSurface();
     }
 
@@ -650,57 +667,42 @@ public class BaronVonWater : RenderBaron {
         cmdBuffer.DrawProcedural(Matrix4x4.identity, testStrokesDisplayMat, 0, MeshTopology.Triangles, 6, testStrokesCBuffer.count);
           */      
     }
+    
+    public void DisplayNutrients()
+    {
+        waterNutrientsBitsDisplayMat.SetPass(0);
+        waterNutrientsBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        waterNutrientsBitsDisplayMat.SetBuffer("frameBufferStrokesCBuffer", waterNutrientsBitsCBuffer);
+        waterNutrientsBitsDisplayMat.SetTexture("_AltitudeTex", terrain.terrainHeightDataRT);
+        waterNutrientsBitsDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityPressureDivergenceMain);
+        waterNutrientsBitsDisplayMat.SetTexture("_WaterSurfaceTex", waterSurfaceDataRT1);
+        waterNutrientsBitsDisplayMat.SetTexture("_ResourceGridTex", simulation.vegetationManager.resourceGridRT1);
+        waterNutrientsBitsDisplayMat.SetTexture("_TerrainColorTex", terrain.terrainColorRT0);
+        waterNutrientsBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        waterNutrientsBitsDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+        waterNutrientsBitsDisplayMat.SetFloat("_CamDistNormalized", camDistNormalized);
+        waterNutrientsBitsDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
+        //baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_NutrientDensity", Mathf.Clamp01(simManager.simResourceManager.curGlobalNutrients / 300f));
+        //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
+        cmdBufferMain.DrawProcedural(Matrix4x4.identity, waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, waterNutrientsBitsCBuffer.count);
+    }
 
-    public override void Cleanup() {
+    public override void Cleanup() 
+    {
+        quadVerticesCBuffer?.Release();
+        waterCurveVerticesCBuffer?.Release();
+        waterCurveStrokesCBuffer?.Release();
+        waterQuadStrokesCBufferLrg?.Release();
+        waterQuadStrokesCBufferSml?.Release();
+        waterNutrientsBitsCBuffer?.Release();
+        waterSurfaceBitsCBuffer?.Release();
+        waterRipplesCBuffer?.Release();
+        //waterSurfaceBitsShadowsCBuffer?.Release();
+        waterDebrisBitsCBuffer?.Release();
+        waterDebrisBitsShadowsCBuffer?.Release();
+        waterChains0CBuffer?.Release();
+        waterChains1CBuffer?.Release();
         
-        if (quadVerticesCBuffer != null) {
-            quadVerticesCBuffer.Release();
-        }
-        if (waterCurveVerticesCBuffer != null) {
-            waterCurveVerticesCBuffer.Release();
-        }
-        if (waterCurveStrokesCBuffer != null) {
-            waterCurveStrokesCBuffer.Release();
-        }
-        if (waterQuadStrokesCBufferLrg != null) {
-            waterQuadStrokesCBufferLrg.Release();
-        }
-        if (waterQuadStrokesCBufferSml != null) {
-            waterQuadStrokesCBufferSml.Release();
-        }
-
-        if (waterNutrientsBitsCBuffer != null)
-        {
-            waterNutrientsBitsCBuffer.Release();
-        }
-        if (waterSurfaceBitsCBuffer != null)
-        {
-            waterSurfaceBitsCBuffer.Release();
-        }
-        if(waterRipplesCBuffer != null) {
-            waterRipplesCBuffer.Release();
-        }
-        /*if (waterSurfaceBitsShadowsCBuffer != null)
-        {
-            waterSurfaceBitsShadowsCBuffer.Release();
-        }*/
-
-        if (waterDebrisBitsCBuffer != null)
-        {
-            waterDebrisBitsCBuffer.Release();
-        }
-        if (waterDebrisBitsShadowsCBuffer != null)
-        {
-            waterDebrisBitsShadowsCBuffer.Release();
-        }
-
-        if (waterChains0CBuffer != null) {
-            waterChains0CBuffer.Release();
-        }
-        if (waterChains1CBuffer != null) {
-            waterChains1CBuffer.Release();
-        }
-
         if(waterSurfaceDataRT0 != null)
         {
             waterSurfaceDataRT0.Release();

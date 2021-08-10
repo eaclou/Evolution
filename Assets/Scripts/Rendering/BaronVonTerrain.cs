@@ -5,6 +5,22 @@ public class BaronVonTerrain : RenderBaron
 {
     SimulationManager simulation => SimulationManager.instance;
     EnvironmentFluidManager fluidManager => EnvironmentFluidManager.instance;
+    UIManager ui => UIManager.instance;
+    
+    TheRenderKing renderKing => TheRenderKing.instance;
+    RenderTexture spiritBrushRT => renderKing.spiritBrushRT;
+    CommandBuffer cmdBufferMain => renderKing.cmdBufferMain;
+    Vector3 sunDirection => renderKing.sunDirection;
+    Vector3 mainRenderCamPosition => renderKing.mainRenderCam.transform.position;
+    Vector4 mainRenderCamPosition4 => new Vector4(mainRenderCamPosition.x, mainRenderCamPosition.y, mainRenderCamPosition.z, 0f);
+    float minimumFogDensity => renderKing.minimumFogDensity;
+    Texture2D skyTexture => renderKing.skyTexture;
+    BaronVonWater water => renderKing.baronVonWater;
+    RenderTexture waterSurfaceDataRT0 => water.waterSurfaceDataRT0;
+    RenderTexture waterSurfaceDataRT1 => water.waterSurfaceDataRT1;
+    float camDistanceNormalized => water.camDistNormalized;
+    VegetationManager vegetation => simulation.vegetationManager;
+    WorldLayerDecomposerGenome decomposerSlotGenomeCurrent => vegetation.decomposerSlotGenomeCurrent;
 
     public ComputeShader computeShaderBrushStrokes;
     public ComputeShader computeShaderTerrainGeneration;
@@ -682,7 +698,7 @@ public class BaronVonTerrain : RenderBaron
         computeShaderTerrainGeneration.SetBuffer(kernelSimGroundBits, "groundBitsCBuffer", decomposerBitsCBuffer);
         computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "AltitudeRead", terrainHeightDataRT);
         computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "VelocityRead", fluidManager._VelocityPressureDivergenceMain);
-        computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "_ResourceGridRead", simulation.vegetationManager.resourceGridRT1);
+        computeShaderTerrainGeneration.SetTexture(kernelSimGroundBits, "_ResourceGridRead", vegetation.resourceGridRT1);
         computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderTerrainGeneration.SetFloat("_Time", Time.realtimeSinceStartup);
         computeShaderTerrainGeneration.SetVector("_SpawnBoundsCameraDetails", spawnBoundsCameraDetails);
@@ -701,7 +717,7 @@ public class BaronVonTerrain : RenderBaron
         computeShaderTerrainGeneration.SetBuffer(kernelSimWasteBits, "groundBitsCBuffer", wasteBitsCBuffer);
         computeShaderTerrainGeneration.SetTexture(kernelSimWasteBits, "AltitudeRead", terrainHeightDataRT);
         computeShaderTerrainGeneration.SetTexture(kernelSimWasteBits, "VelocityRead", fluidManager._VelocityPressureDivergenceMain);
-        computeShaderTerrainGeneration.SetTexture(kernelSimWasteBits, "_ResourceGridRead", simulation.vegetationManager.resourceGridRT1);
+        computeShaderTerrainGeneration.SetTexture(kernelSimWasteBits, "_ResourceGridRead", vegetation.resourceGridRT1);
         computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderTerrainGeneration.SetVector("_SpawnBoundsCameraDetails", spawnBoundsCameraDetails);
         computeShaderTerrainGeneration.Dispatch(kernelSimWasteBits, wasteBitsCBuffer.count / 1024, 1, 1);
@@ -728,6 +744,114 @@ public class BaronVonTerrain : RenderBaron
         terrainObstaclesHeightMaskMat.SetFloat("_TexResolution", (float)simulation.environmentFluidManager.resolution);
         terrainObstaclesHeightMaskMat.SetFloat("_MapSize", SimulationManager._MapSize);
         fluidObstacles.DrawMesh(quadMesh, matrix, terrainObstaclesHeightMaskMat); // Masks out areas above the fluid "Sea Level"
+    }
+    
+    public void SetGroundStrokes(KnowledgeMapId id)
+    {
+        var material = GetGroundMaterial(id);
+        var buffer = GetComputeBuffer(id);
+        
+        material.SetPass(0);
+        material.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        material.SetBuffer("environmentStrokesCBuffer", buffer);
+        material.SetFloat("_MapSize", SimulationManager._MapSize);
+        material.SetTexture("_AltitudeTex", terrainHeightDataRT);
+        material.SetTexture("_WaterSurfaceTex", waterSurfaceDataRT1);
+        material.SetTexture("_ResourceGridTex", vegetation.resourceGridRT1);
+        material.SetTexture("_TerrainColorTex", terrainColorRT0);
+        material.SetTexture("_SpiritBrushTex", spiritBrushRT);
+        material.SetFloat("_Turbidity", simulation.fogAmount);
+        material.SetFloat("_MinFog", minimumFogDensity);
+        material.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
+        material.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+        material.SetVector("_FogColor", simulation.fogColor);
+        material.SetVector("_SunDir", sunDirection);
+        material.SetVector("_WorldSpaceCameraPosition", mainRenderCamPosition4);
+        material.SetVector("_Color0", stoneSlotGenomeCurrent.color);   // new Vector4(0.9f, 0.9f, 0.8f, 1f));
+        material.SetVector("_Color1", pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
+        material.SetVector("_Color2", sandSlotGenomeCurrent.color);
+        cmdBufferMain.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, 6, buffer.count);
+    }
+    
+    public void SetWasteMaterialProperties()
+    {
+        wasteBitsDisplayMat.SetPass(0);
+        wasteBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        wasteBitsDisplayMat.SetBuffer("groundBitsCBuffer", wasteBitsCBuffer);
+        wasteBitsDisplayMat.SetTexture("_AltitudeTex", terrainHeightDataRT);
+        wasteBitsDisplayMat.SetTexture("_WaterSurfaceTex", waterSurfaceDataRT1);
+        wasteBitsDisplayMat.SetTexture("_ResourceGridTex", vegetation.resourceGridRT1);
+        wasteBitsDisplayMat.SetTexture("_TerrainColorTex", terrainColorRT0);
+        wasteBitsDisplayMat.SetTexture("_SkyTex", skyTexture);
+        wasteBitsDisplayMat.SetTexture("_SpiritBrushTex", spiritBrushRT);
+        wasteBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        wasteBitsDisplayMat.SetFloat("_Turbidity", simulation.fogAmount);
+        wasteBitsDisplayMat.SetFloat("_MinFog", minimumFogDensity);
+        wasteBitsDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+        wasteBitsDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
+        wasteBitsDisplayMat.SetVector("_SunDir", sunDirection);
+        wasteBitsDisplayMat.SetVector("_WorldSpaceCameraPosition", mainRenderCamPosition4);
+        wasteBitsDisplayMat.SetFloat("_CamDistNormalized", camDistanceNormalized);
+        wasteBitsDisplayMat.SetVector("_FogColor", simulation.fogColor);
+        cmdBufferMain.DrawProcedural(Matrix4x4.identity, wasteBitsDisplayMat, 0, MeshTopology.Triangles, 6, wasteBitsCBuffer.count);
+    }
+    
+    public void SetDecomposerMaterialProperties()
+    {
+        decomposerBitsDisplayMat.SetPass(0);
+        decomposerBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        decomposerBitsDisplayMat.SetBuffer("groundBitsCBuffer", decomposerBitsCBuffer);
+        decomposerBitsDisplayMat.SetTexture("_AltitudeTex", terrainHeightDataRT);
+        decomposerBitsDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityPressureDivergenceMain);
+        decomposerBitsDisplayMat.SetTexture("_WaterSurfaceTex", waterSurfaceDataRT1);
+        decomposerBitsDisplayMat.SetTexture("_ResourceGridTex", vegetation.resourceGridRT1);
+        decomposerBitsDisplayMat.SetTexture("_TerrainColorTex", terrainColorRT0);
+        decomposerBitsDisplayMat.SetTexture("_SpiritBrushTex", spiritBrushRT);
+        decomposerBitsDisplayMat.SetTexture("_SkyTex", skyTexture);
+        decomposerBitsDisplayMat.SetVector("_SunDir", sunDirection);
+        decomposerBitsDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+        decomposerBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        decomposerBitsDisplayMat.SetFloat("_Turbidity", simulation.fogAmount);
+        decomposerBitsDisplayMat.SetFloat("_MinFog", minimumFogDensity);
+        decomposerBitsDisplayMat.SetFloat("_CamDistNormalized", camDistanceNormalized);
+        decomposerBitsDisplayMat.SetVector("_WorldSpaceCameraPosition", mainRenderCamPosition4);
+        decomposerBitsDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
+        decomposerBitsDisplayMat.SetFloat("_Density", Mathf.Lerp(0.15f, 1f, Mathf.Clamp01(simulation.simResourceManager.curGlobalDecomposers / 100f)));
+        decomposerBitsDisplayMat.SetVector("_FogColor", simulation.fogColor);
+
+        if (decomposerSlotGenomeCurrent != null) {
+            decomposerBitsDisplayMat.SetFloat("_PatternThreshold", decomposerSlotGenomeCurrent.patternThreshold);
+            decomposerBitsDisplayMat.SetColor("_TintPri", decomposerSlotGenomeCurrent.displayColorPri);
+            decomposerBitsDisplayMat.SetColor("_TintSec", decomposerSlotGenomeCurrent.displayColorSec);
+            decomposerBitsDisplayMat.SetInt("_PatternRow", decomposerSlotGenomeCurrent.patternRowID);
+            decomposerBitsDisplayMat.SetInt("_PatternColumn", decomposerSlotGenomeCurrent.patternColumnID);
+        }
+        
+        cmdBufferMain.DrawProcedural(Matrix4x4.identity, decomposerBitsDisplayMat, 0, MeshTopology.Triangles, 6, decomposerBitsCBuffer.count);
+    }
+
+    // * WPP: Move to Terrain Layer if possible
+    ComputeBuffer GetComputeBuffer(KnowledgeMapId id)
+    {
+        switch (id)
+        {
+            case KnowledgeMapId.Stone: return terrainStoneStrokesCBuffer;
+            case KnowledgeMapId.Pebbles: return terrainPebbleStrokesCBuffer;
+            case KnowledgeMapId.Sand: return terrainSandStrokesCBuffer;
+            default: Debug.LogError($"Compute buffer not found {id}"); return null;
+        }
+    }
+    
+    // * WPP: move to Terrain Layer SO
+    Material GetGroundMaterial(KnowledgeMapId id)
+    {
+        switch (id)
+        {
+            case KnowledgeMapId.Stone: return groundStrokesLrgDisplayMat;
+            case KnowledgeMapId.Pebbles: return groundStrokesMedDisplayMat;
+            case KnowledgeMapId.Sand: return groundStrokesSmlDisplayMat;
+            default: Debug.LogError($"Material not found {id}"); return null;
+        }        
     }
 
     // * WPP: empty method -> delete
@@ -781,6 +905,51 @@ public class BaronVonTerrain : RenderBaron
         cmdBuffer.SetGlobalTexture("_RenderedSceneRT", frameBufferID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
         cmdBuffer.DrawProcedural(Matrix4x4.identity, groundStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, groundStrokesSmlCBuffer.count);
         */
+    }
+    
+    public void ClickTestTerrainUpdateMaps(bool on, float _intensity) 
+    {
+        float intensity = _intensity; // Mathf.Lerp(0.02f, 0.06f, baronVonWater.camDistNormalized) * 1.05f;
+        float addSubtract = renderKing.spiritBrushPosNeg; 
+        int texRes = terrainHeightRT0.width;
+        int CSUpdateTerrainMapsBrushKernelID = computeShaderTerrainGeneration.FindKernel("CSUpdateTerrainMapsBrush");
+        computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsBrushKernelID, "AltitudeRead", terrainHeightRT0);   // Read-Only 
+        computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsBrushKernelID, "AltitudeWrite", terrainHeightRT1);
+        computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsBrushKernelID, "SpiritBrushRead", spiritBrushRT);
+        computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsBrushKernelID, "TerrainColorWrite", terrainColorRT0);
+        computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsBrushKernelID, "_WaterSurfaceTex", waterSurfaceDataRT0);
+        computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsBrushKernelID, "_ResourceGridRead", vegetation.resourceGridRT1);
+        computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsBrushKernelID, "_SkyTex", skyTexture);
+        computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderTerrainGeneration.SetFloat("_TextureResolution", texRes);
+        computeShaderTerrainGeneration.SetFloat("_BrushIntensity", intensity);
+        computeShaderTerrainGeneration.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
+        computeShaderTerrainGeneration.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+        computeShaderTerrainGeneration.SetFloat("_WorldRadius", _WorldRadius);
+        computeShaderTerrainGeneration.SetVector("_WorldSpaceCameraPosition", mainRenderCamPosition4);
+        computeShaderTerrainGeneration.SetInt("_ChannelID", ui.brushesUI.selectedBrushLinkedSpiritTerrainLayer); // simManager.trophicLayersManager.selectedTrophicSlotRef.slotID); // 
+        
+        // Not actively brushing this frame
+        if (!on) {  
+            addSubtract = 0f;
+        }
+        
+        // LAYERS ARE SWIZZLED!!!!! **********************************************************************************************************************************
+        computeShaderTerrainGeneration.SetVector("_Color3", bedrockSlotGenomeCurrent.color); // new Vector4(0.54f, 0.43f, 0.37f, 1f));
+        computeShaderTerrainGeneration.SetVector("_Color0", stoneSlotGenomeCurrent.color); // new Vector4(0.9f, 0.9f, 0.8f, 1f));
+        computeShaderTerrainGeneration.SetVector("_Color1", pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
+        computeShaderTerrainGeneration.SetVector("_Color2", sandSlotGenomeCurrent.color); // new Vector4(0.7f, 0.6f, 0.3f, 1f));
+        computeShaderTerrainGeneration.SetFloat("_AddSubtractSign", addSubtract);
+        computeShaderTerrainGeneration.Dispatch(CSUpdateTerrainMapsBrushKernelID, texRes / 32, texRes / 32, 1);
+        //----------------------------------------------------------------------------------------------------------------------------------------
+
+        // Convolve! Erosion etc.
+        int CSUpdateTerrainMapsConvolutionKernelID = computeShaderTerrainGeneration.FindKernel("CSUpdateTerrainMapsConvolution");
+        computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsConvolutionKernelID, "AltitudeRead", terrainHeightRT1);   // Read-Only 
+        computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsConvolutionKernelID, "AltitudeWrite", terrainHeightRT0);
+        computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderTerrainGeneration.Dispatch(CSUpdateTerrainMapsConvolutionKernelID, texRes / 32, texRes / 32, 1);
+        AlignGroundStrokesToTerrain();
     }
 
     public override void Cleanup() 

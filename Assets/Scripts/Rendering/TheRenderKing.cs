@@ -1,7 +1,12 @@
-﻿using System.Collections.Generic;
-using Playcraft;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Playcraft;
+using Random = UnityEngine.Random;
+
+// * WPP: 1024 is used a lot, what concept does it represent? (replace with constant, exposed value, or system setting)
+// repeat for other magic numbers
 
 public class TheRenderKing : Singleton<TheRenderKing> 
 {
@@ -11,12 +16,17 @@ public class TheRenderKing : Singleton<TheRenderKing>
     CameraManager cameraManager => CameraManager.instance;
     UIManager uiManager => UIManager.instance;
     EnvironmentFluidManager fluidManager => EnvironmentFluidManager.instance;
+    ZooplanktonManager zooplanktonManager => simManager.zooplanktonManager;
+    public VegetationManager vegetationManager => simManager.vegetationManager;
     
     WorldSpiritHubUI worldSpiritHubUI => uiManager.worldSpiritHubUI;
     TrophicSlot selectedWorldSpiritSlot => worldSpiritHubUI.selectedWorldSpiritSlot;
     Agent[] agents => simManager.agents;
+    
+    CreaturePanelUI creaturePanelUI => uiManager.creaturePanelUI;
+    ClockPanelUI clockPanelUI => uiManager.clockPanelUI;
 
-    // SET IN INSPECTOR!!!::::
+    // Set in inspector
     public BaronVonTerrain baronVonTerrain;
     public BaronVonWater baronVonWater;
 
@@ -27,7 +37,9 @@ public class TheRenderKing : Singleton<TheRenderKing>
     //public float tempAccelMult = 1f;
 
     public GameObject sunGO;
-    private Vector3 sunDirection = new Vector3(-1f, 0.7f, -1f).normalized;
+    
+    [NonSerialized] public Vector3 sunDirection = new Vector3(-1f, 0.7f, -1f).normalized;
+    public float minimumFogDensity = 0.3f;
 
     public Camera mainRenderCam;
     public Camera fluidObstaclesRenderCamera;
@@ -39,7 +51,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
 
     public bool isDebugRender = false;
 
-    private CommandBuffer cmdBufferMain;
+    [NonSerialized]
+    public CommandBuffer cmdBufferMain;
     private CommandBuffer cmdBufferDebugVis;
     private CommandBuffer cmdBufferFluidObstacles;
     private CommandBuffer cmdBufferFluidColor;
@@ -578,7 +591,6 @@ public class TheRenderKing : Singleton<TheRenderKing>
         InitializeCommandBuffers();
 
         baronVonTerrain.Initialize();
-        baronVonWater.veggieManRef = simManager.vegetationManager;
         baronVonWater.Initialize();
 
         for (int i = 0; i < simManager.numEggSacks; i++) {
@@ -611,9 +623,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
 
         //InitializeWorldTreeBuffers(); // move to history panel
         uiManager.historyPanelUI.InitializeRenderBuffers();
-        uiManager.creaturePanelUI.InitializeRenderBuffers();
-        uiManager.clockPanelUI.InitializeClockBuffers();
-
+        creaturePanelUI.InitializeRenderBuffers();
+        clockPanelUI.InitializeClockBuffers();
     }
 
     public int GetNumStrokesPerCritter() {
@@ -631,7 +642,6 @@ public class TheRenderKing : Singleton<TheRenderKing>
     private void InitializeCritterUberStrokesBuffer() {
         int bufferLength = simManager.numAgents * GetNumStrokesPerCritter();
         mainCritterStrokesCBuffer = new ComputeBuffer(bufferLength, GetMemorySizeCritterStrokeData());
-        
     }
     
     public int GetMemorySizeCritterStrokeData() {
@@ -1292,7 +1302,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         //ComputeBuffer singleCritterGenericStrokesCBuffer = new ComputeBuffer(GetNumUberStrokesPerCritter(), GetMemorySizeCritterUberStrokeData());
         CritterUberStrokeData[] singleCritterGenericStrokesArray = new CritterUberStrokeData[GetNumStrokesPerCritter()];  // optimize this later?? ***
         //CritterUberStrokeData[] newCritterGenericStrokesArray = new CritterUberStrokeData[toolbarCritterPortraitStrokesCBuffer.count / 2]; 
-        CritterUberStrokeData[] completeCritterGenericStrokesArray = new CritterUberStrokeData[uiManager.creaturePanelUI.critterPortraitStrokesCBuffer.count];
+        CritterUberStrokeData[] completeCritterGenericStrokesArray = new CritterUberStrokeData[creaturePanelUI.critterPortraitStrokesCBuffer.count];
         CritterGenomeInterpretor.BrushPoint[] brushPointArray = new CritterGenomeInterpretor.BrushPoint[GetNumStrokesPerCritter()];
         //CritterGenomeInterpretor.BrushPoint[] newPointArray = new CritterGenomeInterpretor.BrushPoint[toolbarCritterPortraitStrokesCBuffer.count / 2];   
         // Generate main body strokes:
@@ -1318,7 +1328,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
             completeCritterGenericStrokesArray[i] = singleCritterGenericStrokesArray[i];
         }
 
-        uiManager.creaturePanelUI.critterPortraitStrokesCBuffer.SetData(completeCritterGenericStrokesArray);
+        creaturePanelUI.critterPortraitStrokesCBuffer.SetData(completeCritterGenericStrokesArray);
     }
 
     private void GenerateCritterBodyBrushstrokes(ref CritterUberStrokeData[] strokesArray, CritterGenomeInterpretor.BrushPoint[] brushPointArray, AgentGenome agentGenome, int agentIndex) {
@@ -1922,8 +1932,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
             strokesArray[p].parentIndex = p;
         }
         
-        for (int b = 1; b < strokesArray.Length; b++) {
-
+        for (int b = 1; b < strokesArray.Length; b++) 
+        {
             // For each brushstroke of this creature:w
             float brushDepth = strokesArray[b].bindPos.z;
             int listSize = sortedBrushStrokesList.Count;
@@ -2097,18 +2107,18 @@ public class TheRenderKing : Singleton<TheRenderKing>
     private void SimUIToolbarCritterPortraitStrokes() {
         int kernelCSSimulateCritterPortraitStrokes = computeShaderCritters.FindKernel("CSSimulateCritterPortraitStrokes");
         computeShaderCritters.SetTexture(kernelCSSimulateCritterPortraitStrokes, "velocityRead", fluidManager._VelocityPressureDivergenceMain);
-        computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterInitDataCBuffer", uiManager.creaturePanelUI.portraitCritterInitDataCBuffer);
-        computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterSimDataCBuffer", uiManager.creaturePanelUI.portraitCritterSimDataCBuffer);
-        computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterGenericStrokesWriteCBuffer", uiManager.creaturePanelUI.critterPortraitStrokesCBuffer);
+        computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterInitDataCBuffer", creaturePanelUI.portraitCritterInitDataCBuffer);
+        computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterSimDataCBuffer", creaturePanelUI.portraitCritterSimDataCBuffer);
+        computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterGenericStrokesWriteCBuffer", creaturePanelUI.critterPortraitStrokesCBuffer);
         computeShaderCritters.SetFloat("_MapSize", SimulationManager._MapSize);
-        computeShaderCritters.Dispatch(kernelCSSimulateCritterPortraitStrokes, uiManager.creaturePanelUI.critterPortraitStrokesCBuffer.count / 16, 1, 1);
+        computeShaderCritters.Dispatch(kernelCSSimulateCritterPortraitStrokes, creaturePanelUI.critterPortraitStrokesCBuffer.count / 16, 1, 1);
     }
 
     //***EAC destined to be replaced by GPU ^ ^ ^
     private void SimWorldTreeCPU() { 
-        uiManager.clockPanelUI.UpdateEarthStampData();
-        uiManager.clockPanelUI.UpdateMoonStampData();
-        uiManager.clockPanelUI.UpdateSunStampData();
+        clockPanelUI.UpdateEarthStampData();
+        clockPanelUI.UpdateMoonStampData();
+        clockPanelUI.UpdateSunStampData();
         uiManager.historyPanelUI.InitializeRenderBuffers();
     }
     
@@ -2187,9 +2197,9 @@ public class TheRenderKing : Singleton<TheRenderKing>
 
         toolbarPortraitCritterInitDataArray[0] = initData;
         
-        uiManager.creaturePanelUI.portraitCritterInitDataCBuffer?.Release();
-        uiManager.creaturePanelUI.portraitCritterInitDataCBuffer = new ComputeBuffer(6, SimulationStateData.GetCritterInitDataSize());
-        uiManager.creaturePanelUI.portraitCritterInitDataCBuffer.SetData(toolbarPortraitCritterInitDataArray);
+        creaturePanelUI.portraitCritterInitDataCBuffer?.Release();
+        creaturePanelUI.portraitCritterInitDataCBuffer = new ComputeBuffer(6, SimulationStateData.GetCritterInitDataSize());
+        creaturePanelUI.portraitCritterInitDataCBuffer.SetData(toolbarPortraitCritterInitDataArray);
     }
     
     private void SetToolbarPortraitCritterSimData() 
@@ -2263,9 +2273,9 @@ public class TheRenderKing : Singleton<TheRenderKing>
         simData.growthPercentage = 2f; 
         toolbarPortraitCritterSimDataArray[5] = simData;
         
-        uiManager.creaturePanelUI.portraitCritterSimDataCBuffer?.Release();
-        uiManager.creaturePanelUI.portraitCritterSimDataCBuffer = new ComputeBuffer(6, SimulationStateData.GetCritterSimDataSize());
-        uiManager.creaturePanelUI.portraitCritterSimDataCBuffer.SetData(toolbarPortraitCritterSimDataArray);
+        creaturePanelUI.portraitCritterSimDataCBuffer?.Release();
+        creaturePanelUI.portraitCritterSimDataCBuffer = new ComputeBuffer(6, SimulationStateData.GetCritterSimDataSize());
+        creaturePanelUI.portraitCritterSimDataCBuffer.SetData(toolbarPortraitCritterSimDataArray);
     }
     
     // Should be called from SimManager at proper time!
@@ -2300,10 +2310,12 @@ public class TheRenderKing : Singleton<TheRenderKing>
         baronVonWater.camDistNormalized = camDist;
         Vector2 boxSizeHalf = 0.8f * Vector2.Lerp(new Vector2(16f, 12f) * 2, new Vector2(256f, 204f), Mathf.Clamp01(-(cameraManager.transform.position.z) / 150f));
 
-        baronVonWater.spawnBoundsCameraDetails = new Vector4(cameraManager.curCameraFocusPivotPos.x - boxSizeHalf.x,
-                                                            cameraManager.curCameraFocusPivotPos.y - boxSizeHalf.y,
-                                                            cameraManager.curCameraFocusPivotPos.x + boxSizeHalf.x,
-                                                            cameraManager.curCameraFocusPivotPos.y + boxSizeHalf.y);
+        // WPP: delegated to CameraManager
+        baronVonWater.spawnBoundsCameraDetails = cameraManager.Get4DFocusBox(boxSizeHalf);
+        /*new Vector4(cameraManager.curCameraFocusPivotPos.x - boxSizeHalf.x,
+                cameraManager.curCameraFocusPivotPos.y - boxSizeHalf.y,
+                cameraManager.curCameraFocusPivotPos.x + boxSizeHalf.x,
+                cameraManager.curCameraFocusPivotPos.y + boxSizeHalf.y);*/
 
         baronVonTerrain.spawnBoundsCameraDetails = baronVonWater.spawnBoundsCameraDetails;
         
@@ -2353,19 +2365,19 @@ public class TheRenderKing : Singleton<TheRenderKing>
         
        if (selectedWorldSpiritSlot.id == KnowledgeMapId.Plants) {
             algaeParticleColorInjectMat.SetPass(0);
-            algaeParticleColorInjectMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
+            algaeParticleColorInjectMat.SetBuffer("foodParticleDataCBuffer", vegetationManager.plantParticlesCBuffer);
             algaeParticleColorInjectMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             algaeParticleColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
             algaeParticleColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, algaeParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.plantParticlesCBuffer.count);
+            cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, algaeParticleColorInjectMat, 0, MeshTopology.Triangles, 6, vegetationManager.plantParticlesCBuffer.count);
         }
         if (selectedWorldSpiritSlot.id == KnowledgeMapId.Microbes) {
-                zooplanktonParticleColorInjectMat.SetPass(0);
-                zooplanktonParticleColorInjectMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
-                zooplanktonParticleColorInjectMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-                zooplanktonParticleColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-                zooplanktonParticleColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, zooplanktonParticleColorInjectMat, 0, MeshTopology.Triangles, 6, simManager.zooplanktonManager.animalParticlesCBuffer.count);
+            zooplanktonParticleColorInjectMat.SetPass(0);
+            zooplanktonParticleColorInjectMat.SetBuffer("animalParticleDataCBuffer", zooplanktonManager.animalParticlesCBuffer);
+            zooplanktonParticleColorInjectMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            zooplanktonParticleColorInjectMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+            zooplanktonParticleColorInjectMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+            cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, zooplanktonParticleColorInjectMat, 0, MeshTopology.Triangles, 6, zooplanktonManager.animalParticlesCBuffer.count);
         }
 
         PopulateColorInjectionBuffer(); // update data for colorInjection objects before rendering                    
@@ -2529,10 +2541,10 @@ public class TheRenderKing : Singleton<TheRenderKing>
         toolbarSpeciesPortraitStrokesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         toolbarSpeciesPortraitStrokesMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         toolbarSpeciesPortraitStrokesMat.SetFloat("_MapSize", SimulationManager._MapSize);
-        toolbarSpeciesPortraitStrokesMat.SetBuffer("critterInitDataCBuffer", uiManager.creaturePanelUI.portraitCritterInitDataCBuffer);
-        toolbarSpeciesPortraitStrokesMat.SetBuffer("critterSimDataCBuffer", uiManager.creaturePanelUI.portraitCritterSimDataCBuffer);
-        toolbarSpeciesPortraitStrokesMat.SetBuffer("critterGenericStrokesCBuffer", uiManager.creaturePanelUI.critterPortraitStrokesCBuffer);
-        cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, toolbarSpeciesPortraitStrokesMat, 0, MeshTopology.Triangles, 6, uiManager.creaturePanelUI.critterPortraitStrokesCBuffer.count); // toolbarCritterPortraitStrokesCBuffer.count);
+        toolbarSpeciesPortraitStrokesMat.SetBuffer("critterInitDataCBuffer", creaturePanelUI.portraitCritterInitDataCBuffer);
+        toolbarSpeciesPortraitStrokesMat.SetBuffer("critterSimDataCBuffer", creaturePanelUI.portraitCritterSimDataCBuffer);
+        toolbarSpeciesPortraitStrokesMat.SetBuffer("critterGenericStrokesCBuffer", creaturePanelUI.critterPortraitStrokesCBuffer);
+        cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, toolbarSpeciesPortraitStrokesMat, 0, MeshTopology.Triangles, 6, creaturePanelUI.critterPortraitStrokesCBuffer.count); // toolbarCritterPortraitStrokesCBuffer.count);
 
         /*
         critterDebugGenericStrokeMat.SetPass(0);
@@ -2564,24 +2576,25 @@ public class TheRenderKing : Singleton<TheRenderKing>
         
         //===================   RESOURCE SIMULATION   ==========================================================
         cmdBufferResourceSim.Clear();
-        cmdBufferResourceSim.SetRenderTarget(simManager.vegetationManager.resourceSimTransferRT);
+        cmdBufferResourceSim.SetRenderTarget(vegetationManager.resourceSimTransferRT);
         cmdBufferResourceSim.ClearRenderTarget(true, true, Color.black, 1.0f);
         cmdBufferResourceSim.SetViewProjectionMatrices(resourceSimRenderCamera.worldToCameraMatrix, resourceSimRenderCamera.projectionMatrix);
-
+        
+        // * WPP: condense repeat functionality or move to functions
         // render StructuredBuffers:
         // ZOOPLANKTON:
         resourceSimTransferMat.SetPass(0);
         resourceSimTransferMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        resourceSimTransferMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer); // simManager.vegetationManager.algaeParticlesCBuffer);    
+        resourceSimTransferMat.SetBuffer("animalParticleDataCBuffer", zooplanktonManager.animalParticlesCBuffer); // simManager.vegetationManager.algaeParticlesCBuffer);    
         resourceSimTransferMat.SetFloat("_MapSize", SimulationManager._MapSize);
-        cmdBufferResourceSim.DrawProcedural(Matrix4x4.identity, resourceSimTransferMat, 0, MeshTopology.Triangles, 6, simManager.zooplanktonManager.animalParticlesCBuffer.count); // simManager.vegetationManager.algaeParticlesCBuffer.count);
+        cmdBufferResourceSim.DrawProcedural(Matrix4x4.identity, resourceSimTransferMat, 0, MeshTopology.Triangles, 6, zooplanktonManager.animalParticlesCBuffer.count); // simManager.vegetationManager.algaeParticlesCBuffer.count);
 
         // PLANT PARTICLES:
         plantParticleDataMat.SetPass(0);
         plantParticleDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        plantParticleDataMat.SetBuffer("plantParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer); // simManager.vegetationManager.algaeParticlesCBuffer);    
+        plantParticleDataMat.SetBuffer("plantParticleDataCBuffer", vegetationManager.plantParticlesCBuffer); // simManager.vegetationManager.algaeParticlesCBuffer);    
         plantParticleDataMat.SetFloat("_MapSize", SimulationManager._MapSize);
-        cmdBufferResourceSim.DrawProcedural(Matrix4x4.identity, plantParticleDataMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.plantParticlesCBuffer.count); // simManager.vegetationManager.algaeParticlesCBuffer.count);
+        cmdBufferResourceSim.DrawProcedural(Matrix4x4.identity, plantParticleDataMat, 0, MeshTopology.Triangles, 6, vegetationManager.plantParticlesCBuffer.count); // simManager.vegetationManager.algaeParticlesCBuffer.count);
 
         // CRITTERS:
         //critterSimDataCBuffer
@@ -2608,45 +2621,46 @@ public class TheRenderKing : Singleton<TheRenderKing>
         
         float curFrame = simManager.simAgeTimeSteps;
 
-        uiManager.clockPanelUI.clockEarthStampMat.SetPass(0);
-        uiManager.clockPanelUI.clockEarthStampMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        uiManager.clockPanelUI.clockEarthStampMat.SetBuffer("clockOrbitLineDataCBuffer", uiManager.clockPanelUI.clockEarthStampDataCBuffer);        
-        uiManager.clockPanelUI.clockEarthStampMat.SetFloat("_CurFrame", curFrame);
-        uiManager.clockPanelUI.clockEarthStampMat.SetFloat("_NumRows", 4f);
-        uiManager.clockPanelUI.clockEarthStampMat.SetFloat("_NumColumns", 4f);
-        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, uiManager.clockPanelUI.clockEarthStampMat, 0, MeshTopology.Triangles, 6, uiManager.clockPanelUI.clockEarthStampDataCBuffer.count);
+        // * WPP: move to ClockPanelUI, merge repeat functionality if possible
+        clockPanelUI.clockEarthStampMat.SetPass(0);
+        clockPanelUI.clockEarthStampMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        clockPanelUI.clockEarthStampMat.SetBuffer("clockOrbitLineDataCBuffer", clockPanelUI.clockEarthStampDataCBuffer);        
+        clockPanelUI.clockEarthStampMat.SetFloat("_CurFrame", curFrame);
+        clockPanelUI.clockEarthStampMat.SetFloat("_NumRows", 4f);
+        clockPanelUI.clockEarthStampMat.SetFloat("_NumColumns", 4f);
+        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, clockPanelUI.clockEarthStampMat, 0, MeshTopology.Triangles, 6, clockPanelUI.clockEarthStampDataCBuffer.count);
 
-        uiManager.clockPanelUI.clockMoonStampMat.SetPass(0);
-        uiManager.clockPanelUI.clockMoonStampMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        uiManager.clockPanelUI.clockMoonStampMat.SetBuffer("clockOrbitLineDataCBuffer", uiManager.clockPanelUI.clockMoonStampDataCBuffer);        
-        uiManager.clockPanelUI.clockMoonStampMat.SetFloat("_CurFrame", curFrame);
-        uiManager.clockPanelUI.clockMoonStampMat.SetFloat("_NumRows", 4f);
-        uiManager.clockPanelUI.clockMoonStampMat.SetFloat("_NumColumns", 4f);
-        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, uiManager.clockPanelUI.clockMoonStampMat, 0, MeshTopology.Triangles, 6, uiManager.clockPanelUI.clockMoonStampDataCBuffer.count);
+        clockPanelUI.clockMoonStampMat.SetPass(0);
+        clockPanelUI.clockMoonStampMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        clockPanelUI.clockMoonStampMat.SetBuffer("clockOrbitLineDataCBuffer", clockPanelUI.clockMoonStampDataCBuffer);        
+        clockPanelUI.clockMoonStampMat.SetFloat("_CurFrame", curFrame);
+        clockPanelUI.clockMoonStampMat.SetFloat("_NumRows", 4f);
+        clockPanelUI.clockMoonStampMat.SetFloat("_NumColumns", 4f);
+        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, clockPanelUI.clockMoonStampMat, 0, MeshTopology.Triangles, 6, clockPanelUI.clockMoonStampDataCBuffer.count);
 
-        uiManager.clockPanelUI.clockSunStampMat.SetPass(0);
-        uiManager.clockPanelUI.clockSunStampMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        uiManager.clockPanelUI.clockSunStampMat.SetBuffer("clockOrbitLineDataCBuffer", uiManager.clockPanelUI.clockSunStampDataCBuffer);        
-        uiManager.clockPanelUI.clockSunStampMat.SetFloat("_CurFrame", curFrame);
-        uiManager.clockPanelUI.clockSunStampMat.SetFloat("_NumRows", 4f);
-        uiManager.clockPanelUI.clockSunStampMat.SetFloat("_NumColumns", 4f);
-        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, uiManager.clockPanelUI.clockSunStampMat, 0, MeshTopology.Triangles, 6, uiManager.clockPanelUI.clockSunStampDataCBuffer.count);
+        clockPanelUI.clockSunStampMat.SetPass(0);
+        clockPanelUI.clockSunStampMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        clockPanelUI.clockSunStampMat.SetBuffer("clockOrbitLineDataCBuffer", clockPanelUI.clockSunStampDataCBuffer);        
+        clockPanelUI.clockSunStampMat.SetFloat("_CurFrame", curFrame);
+        clockPanelUI.clockSunStampMat.SetFloat("_NumRows", 4f);
+        clockPanelUI.clockSunStampMat.SetFloat("_NumColumns", 4f);
+        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, clockPanelUI.clockSunStampMat, 0, MeshTopology.Triangles, 6, clockPanelUI.clockSunStampDataCBuffer.count);
 
         /*
         clockOrbitLineDataMat.SetPass(0);
         clockOrbitLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        clockOrbitLineDataMat.SetBuffer("clockOrbitLineDataCBuffer", uiManager.clockPanelUI.clockMoonStampDataCBuffer);
-        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, clockOrbitLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.clockPanelUI.clockMoonStampDataCBuffer.count);
+        clockOrbitLineDataMat.SetBuffer("clockOrbitLineDataCBuffer", clockPanelUI.clockMoonStampDataCBuffer);
+        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, clockOrbitLineDataMat, 0, MeshTopology.Triangles, 6, clockPanelUI.clockMoonStampDataCBuffer.count);
 
         clockOrbitLineDataMat.SetPass(0);
         clockOrbitLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        clockOrbitLineDataMat.SetBuffer("clockOrbitLineDataCBuffer", uiManager.clockPanelUI.clockSunStampDataCBuffer);
-        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, clockOrbitLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.clockPanelUI.clockSunStampDataCBuffer.count);
+        clockOrbitLineDataMat.SetBuffer("clockOrbitLineDataCBuffer", clockPanelUI.clockSunStampDataCBuffer);
+        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, clockOrbitLineDataMat, 0, MeshTopology.Triangles, 6, clockPanelUI.clockSunStampDataCBuffer.count);
         */
         Graphics.ExecuteCommandBuffer(cmdBufferWorldTree);
         worldTreeRenderCamera.Render();
-        
     }
+    
     /*
     public void TreeOfLifeAddNewSpecies(MasterGenomePool masterGenomePool, int newSpeciesID) 
     {
@@ -2755,7 +2769,9 @@ public class TheRenderKing : Singleton<TheRenderKing>
         //simManager.uiManager.treeOfLifeManager.UpdateNodePositionsFromGPU(simManager.uiManager.cameraManager, treeOfLifeSpeciesDataHeadPosArray);     // **** Need to cap this at 32 or it breaks!!!  
     }
     */
-    private void Render() {
+    
+    private void Render() 
+    {
         //Debug.Log("TestRenderCommandBuffer()");
 
         if (isDebugRender) 
@@ -2769,7 +2785,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
             cmdBufferDebugVis.ClearRenderTarget(true, true, Color.blue, 1.0f);  // clear -- needed???
 
             debugVisModeMat.SetPass(0);
-            debugVisModeMat.SetTexture("_MainTex", simManager.vegetationManager.resourceGridRT1);
+            debugVisModeMat.SetTexture("_MainTex", vegetationManager.resourceGridRT1);
             debugVisModeMat.SetFloat("_ColorMagnitude", 1f);
             cmdBufferDebugVis.DrawMesh(fluidRenderMesh, Matrix4x4.identity, debugVisModeMat);  //baronVonTerrain.terrainMesh
 
@@ -2780,18 +2796,17 @@ public class TheRenderKing : Singleton<TheRenderKing>
             cmdBufferDebugVis.DrawProcedural(Matrix4x4.identity, debugAgentResourcesMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
 
             debugVisAlgaeParticlesMat.SetPass(0);
-            debugVisAlgaeParticlesMat.SetBuffer("foodParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
+            debugVisAlgaeParticlesMat.SetBuffer("foodParticleDataCBuffer", vegetationManager.plantParticlesCBuffer);
             debugVisAlgaeParticlesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             //debugVisAlgaeParticlesMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            cmdBufferDebugVis.DrawProcedural(Matrix4x4.identity, debugVisAlgaeParticlesMat, 0, MeshTopology.Triangles, 6, simManager.vegetationManager.plantParticlesCBuffer.count);
+            cmdBufferDebugVis.DrawProcedural(Matrix4x4.identity, debugVisAlgaeParticlesMat, 0, MeshTopology.Triangles, 6, vegetationManager.plantParticlesCBuffer.count);
 
             // add shadow pass eventually
             debugVisAnimalParticlesMat.SetPass(0);
-            debugVisAnimalParticlesMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
+            debugVisAnimalParticlesMat.SetBuffer("animalParticleDataCBuffer", zooplanktonManager.animalParticlesCBuffer);
             debugVisAnimalParticlesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             //debugVisAnimalParticlesMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            cmdBufferDebugVis.DrawProcedural(Matrix4x4.identity, debugVisAnimalParticlesMat, 0, MeshTopology.Triangles, 6, simManager.zooplanktonManager.animalParticlesCBuffer.count);
-
+            cmdBufferDebugVis.DrawProcedural(Matrix4x4.identity, debugVisAnimalParticlesMat, 0, MeshTopology.Triangles, 6, zooplanktonManager.animalParticlesCBuffer.count);
 
             //cmdBufferDebugVis
             //mainRenderCam.RemoveAllCommandBuffers();
@@ -2805,9 +2820,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
             cmdBufferMain.ClearRenderTarget(true, true, new Color(1f, 0.9f, 0.75f) * 0.8f, 1.0f);
             RenderTargetIdentifier renderTarget = new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget);
             cmdBufferMain.SetRenderTarget(renderTarget);  // Set render Target
-
-            float minimumFogDensity = 0.3f; // **** move this
-
+            
             // TERRAIN MESH:
             //rockMat.SetPass(0);        
             Matrix4x4 canvasQuadTRS = Matrix4x4.TRS(new Vector3(SimulationManager._MapSize * 0.5f, SimulationManager._MapSize * 0.5f, 10f), Quaternion.identity, Vector3.one * 4096f);
@@ -2815,54 +2828,14 @@ public class TheRenderKing : Singleton<TheRenderKing>
             terrainMeshOpaqueMat.SetPass(0);
             terrainMeshOpaqueMat.SetTexture("_MainTex", baronVonTerrain.terrainColorRT0);
 
-            // *** WPP: delegate blocks to methods in executing class (e.g. baronVonTerrain)
+            // WPP: delegated blocks to methods in BaronVonTerrain, condensed into single function
+            baronVonTerrain.SetGroundStrokes(KnowledgeMapId.Stone);
+            baronVonTerrain.SetGroundStrokes(KnowledgeMapId.Pebbles);
+            baronVonTerrain.SetGroundStrokes(KnowledgeMapId.Sand);
 
-            // STONE STROKES!!!!
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetPass(0);
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetBuffer("environmentStrokesCBuffer", baronVonTerrain.terrainStoneStrokesCBuffer);
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetTexture("_SpiritBrushTex", spiritBrushRT);
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_MinFog", minimumFogDensity);
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetVector("_FogColor", simManager.fogColor);
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetVector("_SunDir", sunDirection);
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetVector("_WorldSpaceCameraPosition", new Vector4(mainRenderCam.transform.position.x, mainRenderCam.transform.position.y, mainRenderCam.transform.position.z, 0f));
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetVector("_Color0", baronVonTerrain.stoneSlotGenomeCurrent.color); // new Vector4(0.9f, 0.9f, 0.8f, 1f));
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetVector("_Color1", baronVonTerrain.pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
-            baronVonTerrain.groundStrokesLrgDisplayMat.SetVector("_Color2", baronVonTerrain.sandSlotGenomeCurrent.color);
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesLrgDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.terrainStoneStrokesCBuffer.count);
-
-            // MEDIUM STROKES!!!!
-            baronVonTerrain.groundStrokesMedDisplayMat.SetPass(0);
-            baronVonTerrain.groundStrokesMedDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-            baronVonTerrain.groundStrokesMedDisplayMat.SetBuffer("environmentStrokesCBuffer", baronVonTerrain.terrainPebbleStrokesCBuffer);
-            baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-            baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-            baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
-            baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
-            baronVonTerrain.groundStrokesMedDisplayMat.SetTexture("_SpiritBrushTex", spiritBrushRT);
-            baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);
-            baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_MinFog", minimumFogDensity);
-            baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
-            baronVonTerrain.groundStrokesMedDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
-            baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_FogColor", simManager.fogColor);
-            baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_SunDir", sunDirection);
-            baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_WorldSpaceCameraPosition", new Vector4(mainRenderCam.transform.position.x, mainRenderCam.transform.position.y, mainRenderCam.transform.position.z, 0f));
-            baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color0", baronVonTerrain.stoneSlotGenomeCurrent.color); // new Vector4(0.9f, 0.9f, 0.8f, 1f));
-            baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color1", baronVonTerrain.pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
-            baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color2", baronVonTerrain.sandSlotGenomeCurrent.color);
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesMedDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.terrainPebbleStrokesCBuffer.count);
-
+            // WPP: example removed code (Stone and Pebbles already deleted)
             // SAND STROKES!!!!
-            baronVonTerrain.groundStrokesSmlDisplayMat.SetPass(0);
+            /*baronVonTerrain.groundStrokesSmlDisplayMat.SetPass(0);
             baronVonTerrain.groundStrokesSmlDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
             baronVonTerrain.groundStrokesSmlDisplayMat.SetBuffer("environmentStrokesCBuffer", baronVonTerrain.terrainSandStrokesCBuffer);
             baronVonTerrain.groundStrokesSmlDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
@@ -2882,7 +2855,12 @@ public class TheRenderKing : Singleton<TheRenderKing>
             baronVonTerrain.groundStrokesSmlDisplayMat.SetVector("_Color1", baronVonTerrain.pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
             baronVonTerrain.groundStrokesSmlDisplayMat.SetVector("_Color2", baronVonTerrain.sandSlotGenomeCurrent.color);
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesSmlDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.terrainSandStrokesCBuffer.count);
+            */
 
+            baronVonTerrain.SetWasteMaterialProperties();
+            baronVonTerrain.SetDecomposerMaterialProperties();
+            // WPP: delegated to BaronVonTerrain
+            /*
             // -- DETRITUS / WASTE
             baronVonTerrain.wasteBitsDisplayMat.SetPass(0);
             baronVonTerrain.wasteBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -2905,6 +2883,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
             baronVonTerrain.wasteBitsDisplayMat.SetVector("_FogColor", simManager.fogColor);
             //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.wasteBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.wasteBitsCBuffer.count);
+           
 
             // GROUND BITS:::   DECOMPOSERS
             baronVonTerrain.decomposerBitsDisplayMat.SetPass(0);
@@ -2937,19 +2916,10 @@ public class TheRenderKing : Singleton<TheRenderKing>
                 baronVonTerrain.decomposerBitsDisplayMat.SetInt("_PatternColumn", simManager.vegetationManager.decomposerSlotGenomeCurrent.patternColumnID);
             }
             cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonTerrain.decomposerBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.decomposerBitsCBuffer.count);
+            */
 
-            // FLOATY BITS!
-            floatyBitsDisplayMat.SetPass(0);
-            //floatyBitsDisplayMat.SetTexture("_FluidColorTex", fluidManager._VelocityPressureDivergenceMain);
-            floatyBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            floatyBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-            floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
-            floatyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-            floatyBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-            floatyBitsDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
-            floatyBitsDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
-            floatyBitsDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, floatyBitsDisplayMat, 0, MeshTopology.Triangles, 6, floatyBitsCBuffer.count);
+            // WPP: delegated to function
+            DisplayFloatyBits();
 
             #region Dead code (please delete)
             //if (simManager.trophicLayersManager.GetAgentsOnOff()) {
@@ -3034,8 +3004,6 @@ public class TheRenderKing : Singleton<TheRenderKing>
             #endregion
             
             float isHighlight = 0f;
-            float isSelectedZoop = 0f; //***EC -- revisit
-            float isSelectedPlant = 0f;
             
             #region Dead code (please delete)
             /*if (simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef != null) { // && simManager.uiManager.panelFocus == PanelFocus.Watcher) {
@@ -3079,30 +3047,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
             */
             #endregion
 
-            plantParticleDisplayMat.SetPass(0);
-            plantParticleDisplayMat.SetBuffer("plantParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
-            plantParticleDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
-            plantParticleDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-            plantParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            plantParticleDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
-            plantParticleDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
-            plantParticleDisplayMat.SetTexture("_SpiritBrushTex", spiritBrushRT);
-            plantParticleDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-            plantParticleDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
-            plantParticleDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);
-            plantParticleDisplayMat.SetFloat("_MinFog", minimumFogDensity);
-            plantParticleDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.selectedPlantParticleIndex));
-            plantParticleDisplayMat.SetInt("_HoverParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index));
-            //Debug.Log("_SelectedParticleIndex: " + Mathf.RoundToInt(simManager.vegetationManager.selectedPlantParticleIndex).ToString() + ", _HoverParticleIndex: " + Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index).ToString());
-            plantParticleDisplayMat.SetFloat("_IsSelected", isSelectedPlant); // isSelected);
-            plantParticleDisplayMat.SetFloat("_IsHover", uiManager.plantHighlight * isHighlight);
-            plantParticleDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
-            plantParticleDisplayMat.SetVector("_FogColor", simManager.fogColor);
-            plantParticleDisplayMat.SetVector("_SunDir", sunDirection);
-            plantParticleDisplayMat.SetVector("_WorldSpaceCameraPosition", new Vector4(mainRenderCam.transform.position.x, mainRenderCam.transform.position.y, mainRenderCam.transform.position.z, 0f));
-
-            plantParticleDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, plantParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.vegetationManager.plantParticlesCBuffer.count * 32);
+            DisplayPlantParticles(isHighlight);
 
             #region Dead code (delegate or delete)
             // STIR STICK!!!!
@@ -3167,95 +3112,16 @@ public class TheRenderKing : Singleton<TheRenderKing>
             */
             #endregion
             
-            // add shadow pass eventually
-            animalParticleDisplayMat.SetPass(0);
-            animalParticleDisplayMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
-            animalParticleDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
-            animalParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            animalParticleDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-            animalParticleDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
-            animalParticleDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
-            animalParticleDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(simManager.zooplanktonManager.selectedAnimalParticleIndex));
-            animalParticleDisplayMat.SetInt("_ClosestParticleID", Mathf.RoundToInt(simManager.zooplanktonManager.closestZooplanktonToCursorIndex));
-            animalParticleDisplayMat.SetFloat("_IsSelected", isSelectedZoop);// isSelectedA);
-            animalParticleDisplayMat.SetFloat("_IsHover", uiManager.zooplanktonHighlight * isHighlight);
-            animalParticleDisplayMat.SetFloat("_IsHighlight", uiManager.zooplanktonHighlight * isHighlight); 
-            animalParticleDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-            animalParticleDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
-            animalParticleDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized); 
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
+            DisplayAnimalParticles(isHighlight);
 
             if (simManager.trophicLayersManager.IsLayerOn(KnowledgeMapId.Animals)) 
             {
-                eggSackStrokeDisplayMat.SetPass(0);
-                eggSackStrokeDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-                eggSackStrokeDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-                eggSackStrokeDisplayMat.SetBuffer("eggDataCBuffer", simManager.simStateData.eggDataCBuffer);
-                eggSackStrokeDisplayMat.SetBuffer("eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
-                eggSackStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-                eggSackStrokeDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-                eggSackStrokeDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
-                eggSackStrokeDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
-                eggSackStrokeDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
-                eggSackStrokeDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                eggSackStrokeDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
-                cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggSackStrokeDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.eggDataCBuffer.count);
-
-                // What is this????
-                critterDebugGenericStrokeMat.SetPass(0);
-                critterDebugGenericStrokeMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-                critterDebugGenericStrokeMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-                critterDebugGenericStrokeMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-                critterDebugGenericStrokeMat.SetBuffer("critterGenericStrokesCBuffer", mainCritterStrokesCBuffer);
-                critterDebugGenericStrokeMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                critterDebugGenericStrokeMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-                critterDebugGenericStrokeMat.SetTexture("_VelocityTex", fluidManager._VelocityPressureDivergenceMain);
-                critterDebugGenericStrokeMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);              
-                critterDebugGenericStrokeMat.SetInt("_HoverID", cameraManager.mouseHoverAgentIndex);
-                critterDebugGenericStrokeMat.SetInt("_SelectedID", cameraManager.targetAgentIndex);                                
-                float isHoverCritter = cameraManager.isMouseHoverAgent ? 1f : 0f;
-                float isHighlightCritter = isHoverCritter;
-                critterDebugGenericStrokeMat.SetFloat("_HighlightOn", isHighlightCritter);
-                critterDebugGenericStrokeMat.SetFloat("_IsHover", isHoverCritter);
-                critterDebugGenericStrokeMat.SetFloat("_IsSelected", cameraManager.isFollowingAgent ? 1f : 0f);
-                critterDebugGenericStrokeMat.SetFloat("_MapSize", SimulationManager._MapSize);
-                critterDebugGenericStrokeMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
-                critterDebugGenericStrokeMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
-                critterDebugGenericStrokeMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
-                cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterDebugGenericStrokeMat, 0, MeshTopology.Triangles, 6, mainCritterStrokesCBuffer.count);
-
-                //if(simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.kingdomID == 2 && simManager.uiManager.worldSpiritHubUI.selectedWorldSpiritSlot.tierID == 1) {
-                // *** Revisit this in future - probably can get away without it, just use one pass for all eggSacks
-                eggCoverDisplayMat.SetPass(0);
-                eggCoverDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-                eggCoverDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-                //eggCoverDisplayMat.SetBuffer("eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
-                eggCoverDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-                eggCoverDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-                eggCoverDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
-                eggCoverDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
-                eggCoverDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
-                eggCoverDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                //eggCoverDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
-                cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggCoverDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
+                DisplayEggStrokes();
+                DisplayCritterDebugGenericStrokes();
+                DisplayEggCover();
             }
 
-            // Nutrients bits:
-            baronVonWater.waterNutrientsBitsDisplayMat.SetPass(0);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetBuffer("frameBufferStrokesCBuffer", baronVonWater.waterNutrientsBitsCBuffer);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_VelocityTex", fluidManager._VelocityPressureDivergenceMain);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
-            baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
-            //baronVonWater.waterNutrientsBitsDisplayMat.SetFloat("_NutrientDensity", Mathf.Clamp01(simManager.simResourceManager.curGlobalNutrients / 300f));
-            //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); // Copy the Contents of FrameBuffer into brushstroke material so it knows what color it should be
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, baronVonWater.waterNutrientsBitsDisplayMat, 0, MeshTopology.Triangles, 6, baronVonWater.waterNutrientsBitsCBuffer.count);
+            baronVonWater.DisplayNutrients();
 
             #region Dead code (delegate or delete)
             /*
@@ -3295,9 +3161,136 @@ public class TheRenderKing : Singleton<TheRenderKing>
         // Fluid Render Article:
         // http://blog.camposanto.com/post/171934927979/hi-im-matt-wilde-an-old-man-from-the-north-of/amp?__twitter_impression=true
     }
+    
+    void DisplayFloatyBits()
+    {
+        floatyBitsDisplayMat.SetPass(0);
+        //floatyBitsDisplayMat.SetTexture("_FluidColorTex", fluidManager._VelocityPressureDivergenceMain);
+        floatyBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        floatyBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+        floatyBitsDisplayMat.SetBuffer("floatyBitsCBuffer", floatyBitsCBuffer);
+        floatyBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        floatyBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        floatyBitsDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+        floatyBitsDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
+        floatyBitsDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
+        cmdBufferMain.DrawProcedural(Matrix4x4.identity, floatyBitsDisplayMat, 0, MeshTopology.Triangles, 6, floatyBitsCBuffer.count);
+    }
+    
+    void DisplayPlantParticles(float isHighlight)
+    {
+        float isSelectedPlant = 0f;     // * WPP: hard coded value
 
-    // *** RENAME!!!
-    public void ClickTestTerrainUpdateMaps(bool on, float _intensity) 
+        plantParticleDisplayMat.SetPass(0);
+        plantParticleDisplayMat.SetBuffer("plantParticleDataCBuffer", vegetationManager.plantParticlesCBuffer);
+        plantParticleDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
+        plantParticleDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+        plantParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        plantParticleDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
+        plantParticleDisplayMat.SetTexture("_ResourceGridTex", vegetationManager.resourceGridRT1);
+        plantParticleDisplayMat.SetTexture("_SpiritBrushTex", spiritBrushRT);
+        plantParticleDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        plantParticleDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+        plantParticleDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);
+        plantParticleDisplayMat.SetFloat("_MinFog", minimumFogDensity);
+        plantParticleDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(vegetationManager.selectedPlantParticleIndex));
+        plantParticleDisplayMat.SetInt("_HoverParticleIndex", Mathf.RoundToInt(vegetationManager.closestPlantParticleData.index));
+        //Debug.Log("_SelectedParticleIndex: " + Mathf.RoundToInt(simManager.vegetationManager.selectedPlantParticleIndex).ToString() + ", _HoverParticleIndex: " + Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index).ToString());
+        plantParticleDisplayMat.SetFloat("_IsSelected", isSelectedPlant); // isSelected);
+        plantParticleDisplayMat.SetFloat("_IsHover", uiManager.plantHighlight * isHighlight);
+        plantParticleDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
+        plantParticleDisplayMat.SetVector("_FogColor", simManager.fogColor);
+        plantParticleDisplayMat.SetVector("_SunDir", sunDirection);
+        plantParticleDisplayMat.SetVector("_WorldSpaceCameraPosition", new Vector4(mainRenderCam.transform.position.x, mainRenderCam.transform.position.y, mainRenderCam.transform.position.z, 0f));
+        plantParticleDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
+        cmdBufferMain.DrawProcedural(Matrix4x4.identity, plantParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, vegetationManager.plantParticlesCBuffer.count * 32);
+    }
+    
+    // add shadow pass eventually
+    void DisplayAnimalParticles(float isHighlight)
+    {
+        float isSelectedMicrobes = 0f; //***EC -- revisit
+
+        animalParticleDisplayMat.SetPass(0);
+        animalParticleDisplayMat.SetBuffer("animalParticleDataCBuffer", zooplanktonManager.animalParticlesCBuffer);
+        animalParticleDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
+        animalParticleDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        animalParticleDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+        animalParticleDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
+        animalParticleDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+        animalParticleDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(zooplanktonManager.selectedAnimalParticleIndex));
+        animalParticleDisplayMat.SetInt("_ClosestParticleID", Mathf.RoundToInt(zooplanktonManager.closestZooplanktonToCursorIndex));
+        animalParticleDisplayMat.SetFloat("_IsSelected", isSelectedMicrobes);
+        animalParticleDisplayMat.SetFloat("_IsHover", uiManager.zooplanktonHighlight * isHighlight);
+        animalParticleDisplayMat.SetFloat("_IsHighlight", uiManager.zooplanktonHighlight * isHighlight); 
+        animalParticleDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        animalParticleDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
+        animalParticleDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized); 
+        cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, zooplanktonManager.animalParticlesCBuffer.count);
+    }
+    
+    void DisplayEggStrokes()
+    {
+        eggSackStrokeDisplayMat.SetPass(0);
+        eggSackStrokeDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        eggSackStrokeDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        eggSackStrokeDisplayMat.SetBuffer("eggDataCBuffer", simManager.simStateData.eggDataCBuffer);
+        eggSackStrokeDisplayMat.SetBuffer("eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
+        eggSackStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        eggSackStrokeDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        eggSackStrokeDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+        eggSackStrokeDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
+        eggSackStrokeDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
+        eggSackStrokeDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        eggSackStrokeDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
+        cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggSackStrokeDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.eggDataCBuffer.count);
+    }
+    
+    // What is this????
+    void DisplayCritterDebugGenericStrokes()
+    {
+        critterDebugGenericStrokeMat.SetPass(0);
+        critterDebugGenericStrokeMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        critterDebugGenericStrokeMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        critterDebugGenericStrokeMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        critterDebugGenericStrokeMat.SetBuffer("critterGenericStrokesCBuffer", mainCritterStrokesCBuffer);
+        critterDebugGenericStrokeMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        critterDebugGenericStrokeMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+        critterDebugGenericStrokeMat.SetTexture("_VelocityTex", fluidManager._VelocityPressureDivergenceMain);
+        critterDebugGenericStrokeMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);              
+        critterDebugGenericStrokeMat.SetInt("_HoverID", cameraManager.mouseHoverAgentIndex);
+        critterDebugGenericStrokeMat.SetInt("_SelectedID", cameraManager.targetAgentIndex);                                
+        float isHoverCritter = cameraManager.isMouseHoverAgent ? 1f : 0f;
+        float isHighlightCritter = isHoverCritter;
+        critterDebugGenericStrokeMat.SetFloat("_HighlightOn", isHighlightCritter);
+        critterDebugGenericStrokeMat.SetFloat("_IsHover", isHoverCritter);
+        critterDebugGenericStrokeMat.SetFloat("_IsSelected", cameraManager.isFollowingAgent ? 1f : 0f);
+        critterDebugGenericStrokeMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        critterDebugGenericStrokeMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+        critterDebugGenericStrokeMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
+        critterDebugGenericStrokeMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
+        cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterDebugGenericStrokeMat, 0, MeshTopology.Triangles, 6, mainCritterStrokesCBuffer.count);
+    }
+    
+    // *** Revisit this in future - probably can get away without it, just use one pass for all eggSacks
+    void DisplayEggCover()
+    {
+        eggCoverDisplayMat.SetPass(0);
+        eggCoverDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        eggCoverDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        //eggCoverDisplayMat.SetBuffer("eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
+        eggCoverDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        eggCoverDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        eggCoverDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+        eggCoverDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
+        eggCoverDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
+        eggCoverDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        //eggCoverDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
+        cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggCoverDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
+    }
+
+    // * WPP: moved to BaronVonTerrain
+    /*public void ClickTestTerrainUpdateMaps(bool on, float _intensity) 
     {
         float intensity = _intensity; // Mathf.Lerp(0.02f, 0.06f, baronVonWater.camDistNormalized) * 1.05f;
         float addSubtract = spiritBrushPosNeg; 
@@ -3308,7 +3301,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         baronVonTerrain.computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsBrushKernelID, "SpiritBrushRead", spiritBrushRT);
         baronVonTerrain.computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsBrushKernelID, "TerrainColorWrite", baronVonTerrain.terrainColorRT0);
         baronVonTerrain.computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsBrushKernelID, "_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT0);
-        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsBrushKernelID, "_ResourceGridRead", simManager.vegetationManager.resourceGridRT1);
+        baronVonTerrain.computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsBrushKernelID, "_ResourceGridRead", vegetationManager.resourceGridRT1);
         baronVonTerrain.computeShaderTerrainGeneration.SetTexture(CSUpdateTerrainMapsBrushKernelID, "_SkyTex", skyTexture);
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_TextureResolution", texRes);
@@ -3340,7 +3333,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         baronVonTerrain.computeShaderTerrainGeneration.SetFloat("_MapSize", SimulationManager._MapSize);
         baronVonTerrain.computeShaderTerrainGeneration.Dispatch(CSUpdateTerrainMapsConvolutionKernelID, texRes / 32, texRes / 32, 1);
         baronVonTerrain.AlignGroundStrokesToTerrain();
-    }
+    }*/
     
     // requires MeshRenderer Component to be called
     private void OnWillRenderObject() {  
