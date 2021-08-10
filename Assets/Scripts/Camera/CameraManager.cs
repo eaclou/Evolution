@@ -221,5 +221,13 @@ public class CameraManager : Singleton<CameraManager>
         Vector2 v = (targetPosition - pastTargetPosition) / t;
         Vector2 f = pastPosition - pastTargetPosition + v;
         return targetPosition - v + f * Mathf.Exp(-t);
-    }     
+    } 
+    
+    public Vector4 Get4DFocusBox(Vector2 boxSizeHalf)
+    {
+        return new Vector4(curCameraFocusPivotPos.x - boxSizeHalf.x,
+            curCameraFocusPivotPos.y - boxSizeHalf.y,
+            curCameraFocusPivotPos.x + boxSizeHalf.x,
+            curCameraFocusPivotPos.y + boxSizeHalf.y);
+    }    
 }

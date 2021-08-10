@@ -87,7 +87,7 @@ public class ObserverModeUI : MonoBehaviour
         TickTooltip();
         TickBrushes();
         
-        theRenderKing.ClickTestTerrainUpdateMaps(updateTerrainAltitude, terrainUpdateMagnitude);
+        theRenderKing.baronVonTerrain.ClickTestTerrainUpdateMaps(updateTerrainAltitude, terrainUpdateMagnitude);
 
         SetStirVisible();
     }
