@@ -519,13 +519,13 @@ public struct CritterSimData
     {
         biteAnimCycle = 0f; // (Time.realtimeSinceStartup * 1f) % 1f;
         worldPos = Vector3.one * 128f * 0.034f;
-        float theta = isDead ? Time.realtimeSinceStartup : 0f;
+        float theta = isDead ? 0f : Time.realtimeSinceStartup;
         float angle = Mathf.Cos(theta * 0.67f) * 2f;
         Vector2 facingDir = new Vector2(Mathf.Cos(angle + Mathf.PI * 0.75f), Mathf.Sin(angle + Mathf.PI * 0.75f));
         heading = facingDir.normalized;
         float embryo = 1f; 
         embryoPercentage = embryo;
-        growthPercentage = 1.5f * 1.5f;
+        growthPercentage = 2.25f;
         float decay = isDead && allEvaluationsComplete ? 0.25f : 0f;
         decayPercentage = decay;
         foodAmount = 0f; // Mathf.Lerp(simData.foodAmount, .agents[i].coreModule.stomachContents / agents[i].coreModule.stomachCapacity, 0.16f);

@@ -14,6 +14,15 @@ public class CreaturePaperDollUI : MonoBehaviour
     public TooltipUI tooltipEnergy;
     public TooltipUI tooltipStomachFood;
     public TooltipUI tooltipWaste;
+
+    [SerializeField]
+    Image imageMeterBarHealth;
+    [SerializeField]
+    Image imageMeterBarEnergy;
+    [SerializeField]
+    Image imageMeterBarStomach;
+    [SerializeField]
+    Image imageMeterBarWaste;
     
     public void Tick() {
         Agent agent = simulationManager.agents[cameraManager.targetAgentIndex];
@@ -42,8 +51,14 @@ public class CreaturePaperDollUI : MonoBehaviour
         tooltipState.gameObject.GetComponent<Image>().sprite = creatureStateSprite;
 
         tooltipHealth.tooltipString = "Health: " + (agent.coreModule.health * 100f).ToString("F0") + "%";
+        //Rect rect = imageMeterBarHealth.GetComponent<RectTransform>().rect;
+        //rect.height = Mathf.RoundToInt(32f * agent.coreModule.health);
+        imageMeterBarHealth.GetComponent<RectTransform>().transform.localScale = new Vector3(1f, agent.coreModule.health, 1f);
         tooltipEnergy.tooltipString = "Energy: " + agent.coreModule.energy.ToString("F0");
+        imageMeterBarEnergy.GetComponent<RectTransform>().transform.localScale = new Vector3(1f, Mathf.Clamp01(agent.coreModule.energy * 0.05f), 1f);
         tooltipStomachFood.tooltipString = "Stomach: " + (agent.coreModule.stomachContentsPercent * 100f).ToString("F0");
+        imageMeterBarStomach.GetComponent<RectTransform>().transform.localScale = new Vector3(1f, agent.coreModule.stomachContentsPercent, 1f);
         tooltipWaste.tooltipString = "Waste: (tbd)"; // + agent.coreModule.was.ToString("F0");
+        imageMeterBarWaste.GetComponent<RectTransform>().transform.localScale = new Vector3(1f, 0f, 1f);
     }
 }

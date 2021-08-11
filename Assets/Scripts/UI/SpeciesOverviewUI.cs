@@ -143,6 +143,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
         if(selectedButtonData != null && selectedButtonData.image != null) {
             selectedButtonData.image.color = Color.white;
 
+            uiManager.historyPanelUI.buttonSelCreatureEventsLink.GetComponent<RectTransform>().localPosition = Vector3.one * 4.2f; // new Vector3(selectedButtonData.image.rectTransform.localPosition.x + 24f, selectedButtonData.image.rectTransform.localPosition.y, 0f);
         }
         panelGenomeViewer.SetActive(true);
     }

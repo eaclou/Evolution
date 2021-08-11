@@ -27,10 +27,14 @@ public class CreaturePanelUI : MonoBehaviour
     [SerializeField]
     Image imageBrainIcon;
 
-    public TooltipUI tooltipCurrentAction;
-    public TooltipUI tooltipGenome;
-    public TooltipUI tooltipAppearance;    
+    [SerializeField]
+    Image imageCurAction;
 
+    public TooltipUI tooltipCurrentAction;
+    public TooltipUI tooltipBrain;
+    public TooltipUI tooltipGenome;
+    public TooltipUI tooltipAppearance; 
+    
     [SerializeField]
     Text textPanelStateDebug;
 
@@ -39,6 +43,14 @@ public class CreaturePanelUI : MonoBehaviour
     public Sprite spriteIconCreatureStateMature;
     public Sprite spriteIconCreatureStateDecaying;
     public Sprite spriteIconCreatureStateFossil;
+
+    public Sprite spriteIconCreatureActionAttack;
+    public Sprite spriteIconCreatureActionDefend;
+    public Sprite spriteIconCreatureActionDash;
+    public Sprite spriteIconCreatureActionRest;
+    public Sprite spriteIconCreatureActionFeed;
+
+    public Sprite spriteBrainButton;
 
     private CreaturePanelMode curPanelMode;
     public enum CreaturePanelMode {
@@ -66,6 +78,24 @@ public class CreaturePanelUI : MonoBehaviour
 
         Color onColor = Color.gray;
         Color offColor = Color.white;
+        imageCurAction.sprite = spriteBrainButton;
+        Agent agent = simulationManager.agents[cameraManager.targetAgentIndex];
+        if(agent.curActionState == Agent.AgentActionState.Attacking) {
+            imageCurAction.sprite = spriteIconCreatureActionAttack;
+        }
+        if(agent.curActionState == Agent.AgentActionState.Defending) {
+            imageCurAction.sprite = spriteIconCreatureActionDefend;
+        }
+        if(agent.curActionState == Agent.AgentActionState.Dashing) {
+            imageCurAction.sprite = spriteIconCreatureActionDash;
+        }
+        if(agent.curActionState == Agent.AgentActionState.Resting) {
+            imageCurAction.sprite = spriteIconCreatureActionRest;
+        }
+        if(agent.curActionState == Agent.AgentActionState.Default) {
+            imageCurAction.sprite = spriteIconCreatureActionFeed;
+        }
+        
                 
         if (curPanelMode == CreaturePanelMode.Portrait) {
             panelPortrait.SetActive(true);
@@ -98,7 +128,7 @@ public class CreaturePanelUI : MonoBehaviour
             imageAppearanceIcon.color = offColor;
         }
 
-        Agent agent = simulationManager.agents[cameraManager.targetAgentIndex];
+        
         if (agent.coreModule == null) return;
         tooltipCurrentAction.tooltipString = "BRAIN\nAction: " + agent.curActionState;
         //textGeneration.text = "Gen: " + genome.generationCount;

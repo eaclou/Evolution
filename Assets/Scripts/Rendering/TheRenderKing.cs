@@ -2205,73 +2205,22 @@ public class TheRenderKing : Singleton<TheRenderKing>
     private void SetToolbarPortraitCritterSimData() 
     {
         CritterSimData[] toolbarPortraitCritterSimDataArray = new CritterSimData[6];
+
+        bool isDead = true;
+        if(simManager.GetAgent(uiManager.focusedCandidate)) {
+            isDead = (simManager.GetAgent(uiManager.focusedCandidate).curLifeStage == Agent.AgentLifeStage.Dead);
+        }
         
-        //GRAB FROM UI???? positions animated there?
-        bool isDead = !uiManager.focusedCandidate.isBeingEvaluated;
         bool evaluationsComplete = uiManager.focusedCandidate.allEvaluationsComplete;
         CritterSimData simData = new CritterSimData(isDead, evaluationsComplete);
 
-        // WPP: collapsed conditional, moved to constructor
-        /*if (isDead) 
-        {
-            simData.worldPos = Vector3.one * 128f * 0.034f;
-            float angle = Mathf.Cos(0f * 0.67f) * 2f;   // WPP: combined with angle2, same value & only angle2 ever used
-            float angle2 = angle; // + (float)selectedSpeciesID; // + Time.realtimeSinceStartup * 0.1f; // + (Mathf.PI * 0.5f);
-            Vector2 facingDir = new Vector2(Mathf.Cos(angle2 + Mathf.PI * 0.75f), Mathf.Sin(angle2 + Mathf.PI * 0.75f));
-            simData.heading = facingDir.normalized;
-            float embryo = 1f;
-            simData.embryoPercentage = embryo;
-            simData.growthPercentage = 1.5f * 1.5f;
-            
-            float decay = 0f;
-            if (uiManager.focusedCandidate.allEvaluationsComplete) {
-               decay = 0.25f;
-            }
-            
-            simData.decayPercentage = decay;
-            simData.foodAmount = 0f; // Mathf.Lerp(simData.foodAmount, agents[i].coreModule.stomachContents / agents[i].coreModule.stomachCapacity, 0.16f);
-            simData.energy = 1f; // agents[i].coreModule.energyRaw / agents[i].coreModule.maxEnergyStorage;
-            simData.health = 1f; // agents[i].coreModule.healthHead;
-            simData.stamina = 1f; // agents[i].coreModule.stamina[0];
-            simData.consumeOn = 0f; // Mathf.Sin(angle2 * 3.19f) * 0.5f + 0.5f;
-            simData.moveAnimCycle = 0f; // Time.realtimeSinceStartup * 0.6f % 1f;
-            simData.turnAmount = 0f; // Mathf.Sin(Time.realtimeSinceStartup * 0.654321f) * 0.65f + 0.25f;
-            simData.accel = 0f;// (Mathf.Sin(Time.realtimeSinceStartup * 0.79f) * 0.5f + 0.5f) * 0.081f; // Mathf.Clamp01(agents[i].curAccel) * 1f; // ** RE-FACTOR!!!!
-            simData.smoothedThrottle = 0f; // (Mathf.Sin(Time.realtimeSinceStartup * 3.97f + 0.4f) * 0.5f + 0.5f) * 0.85f;
-            simData.velocity = Vector2.zero; // facingDir.normalized * (simData.accel + simData.smoothedThrottle);
-        }
-        else 
-        {
-            simData.worldPos = Vector3.one * 128f * 0.034f;
-            float angle = Mathf.Cos(Time.realtimeSinceStartup * 0.67f) * 2f;
-            float angle2 = angle; // + (float)selectedSpeciesID; // + Time.realtimeSinceStartup * 0.1f; // + (Mathf.PI * 0.5f);
-            Vector2 facingDir = new Vector2(Mathf.Cos(angle2 + Mathf.PI * 0.75f), Mathf.Sin(angle2 + Mathf.PI * 0.75f));
-            simData.heading = facingDir.normalized;    
-            float embryo = 1f;
-            simData.embryoPercentage = embryo;
-            simData.growthPercentage = 1.5f * 1.5f;
-            float decay = 0f;
-            simData.decayPercentage = decay;
-            simData.foodAmount = 0f; // Mathf.Lerp(simData.foodAmount, .agents[i].coreModule.stomachContents / agents[i].coreModule.stomachCapacity, 0.16f);
-            simData.energy = 1f; // agents[i].coreModule.energyRaw / agents[i].coreModule.maxEnergyStorage;
-            simData.health = 1f; // agents[i].coreModule.healthHead;
-            simData.stamina = 1f; // agents[i].coreModule.stamina[0];
-            simData.consumeOn = Mathf.Sin(angle2 * 3.19f) * 0.5f + 0.5f;
-
-            simData.moveAnimCycle = Time.realtimeSinceStartup * 0.6f % 1f;
-            simData.turnAmount = Mathf.Sin(Time.realtimeSinceStartup * 0.654321f) * 0.65f + 0.25f;
-            simData.accel = (Mathf.Sin(Time.realtimeSinceStartup * 0.79f) * 0.5f + 0.5f) * 0.081f; // Mathf.Clamp01(agents[i].curAccel) * 1f; // ** RE-FACTOR!!!!
-            simData.smoothedThrottle = (Mathf.Sin(Time.realtimeSinceStartup * 3.97f + 0.4f) * 0.5f + 0.5f) * 0.85f;
-            simData.velocity = facingDir.normalized * (simData.accel + simData.smoothedThrottle);
-        }*/
-
         toolbarPortraitCritterSimDataArray[0] = simData;
-        simData.worldPos = Vector3.one * 0.034f; // simManager.uiManager.mutationUI.renderSpaceMult;
-        simData.growthPercentage = 1.5f; // simManager.uiManager.mutationUI.critterSizeMult;
-        toolbarPortraitCritterSimDataArray[1] = simData;
+        //simData.worldPos = Vector3.one * 0.034f; // simManager.uiManager.mutationUI.renderSpaceMult;
+        //simData.growthPercentage = 1.5f; // simManager.uiManager.mutationUI.critterSizeMult;
+        //toolbarPortraitCritterSimDataArray[1] = simData;
 
-        simData.growthPercentage = 2f; 
-        toolbarPortraitCritterSimDataArray[5] = simData;
+        //simData.growthPercentage = 2f; 
+        //toolbarPortraitCritterSimDataArray[5] = simData;
         
         creaturePanelUI.portraitCritterSimDataCBuffer?.Release();
         creaturePanelUI.portraitCritterSimDataCBuffer = new ComputeBuffer(6, SimulationStateData.GetCritterSimDataSize());

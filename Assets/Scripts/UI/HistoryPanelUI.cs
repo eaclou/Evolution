@@ -9,6 +9,7 @@ public class HistoryPanelUI : MonoBehaviour
     public GameObject prefabCreatureIcon;
 
     public Button buttonToggleExtinct;
+    public Button buttonSelCreatureEventsLink;
 
     private List<SpeciesIconUI> speciesIconsList;  // keeping track of spawned buttons
     //private List<CreatureIconUI> creatureIconsList;
@@ -263,7 +264,7 @@ public class HistoryPanelUI : MonoBehaviour
             Debug.Log("ClickSpeciesIcon(SpeciesIconUI iconUI) " + curPanelMode);
             if (curPanelMode == HistoryPanelMode.SpeciesPopulation) {
                 // Acting as a "BACK" button!
-                curPanelMode = HistoryPanelMode.ActiveSpecies;
+                curPanelMode = HistoryPanelMode.AllSpecies;
             }
             else if(curPanelMode == HistoryPanelMode.ActiveSpecies || curPanelMode == HistoryPanelMode.AllSpecies) {
                 // Zoom into sel species pop
@@ -385,9 +386,9 @@ public class HistoryPanelUI : MonoBehaviour
                 xCoord = (float)speciesIconsList[s].linkedPool.timeStepExtinct / Mathf.Max(1f, (float)simManager.simAgeTimeSteps);
             }
 
-            float indent = 0.05f;           
+            //float indent = 0.05f;           
 
-            xCoord = xCoord * 0.8f + indent;
+            xCoord = xCoord * 0.8f + 0.1f;
             yCoord = yCoord * 0.67f + 0.1f;
             speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
         }
