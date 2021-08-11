@@ -3,6 +3,7 @@ using UnityEngine.UI;
 
 public class CreaturePaperDollUI : MonoBehaviour
 {
+    UIManager uiManager => UIManager.instance;
     SimulationManager simulationManager => SimulationManager.instance;
     CameraManager cameraManager => CameraManager.instance;
 
@@ -16,6 +17,7 @@ public class CreaturePaperDollUI : MonoBehaviour
     
     public void Tick() {
         Agent agent = simulationManager.agents[cameraManager.targetAgentIndex];
+        Sprite creatureStateSprite = uiManager.creaturePanelUI.spriteIconCreatureStateEgg;
         if (agent.coreModule == null) return;
         
         widgetAgentStatus.UpdateBars(agent); 
@@ -24,12 +26,20 @@ public class CreaturePaperDollUI : MonoBehaviour
         if(agent.curLifeStage == Agent.AgentLifeStage.Mature) {
             if(agent.isSexuallyMature) {
                 lifeStage = "Mature";
+                creatureStateSprite = uiManager.creaturePanelUI.spriteIconCreatureStateMature;
             }
             else {
                 lifeStage = "Young";
+                creatureStateSprite = uiManager.creaturePanelUI.spriteIconCreatureStateYoung;
             }
         }
+        else if(agent.curLifeStage == Agent.AgentLifeStage.Dead) {
+            creatureStateSprite = uiManager.creaturePanelUI.spriteIconCreatureStateDecaying;
+        }
+
         tooltipState.tooltipString = lifeStage + ", Age: " + agent.ageCounter + ", Size: " + agent.currentBiomass.ToString("F3");
+
+        tooltipState.gameObject.GetComponent<Image>().sprite = creatureStateSprite;
 
         tooltipHealth.tooltipString = "Health: " + (agent.coreModule.health * 100f).ToString("F0") + "%";
         tooltipEnergy.tooltipString = "Energy: " + agent.coreModule.energy.ToString("F0");

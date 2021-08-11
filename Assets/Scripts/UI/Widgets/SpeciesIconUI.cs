@@ -13,6 +13,10 @@ public class SpeciesIconUI : MonoBehaviour {
     public Vector2 targetCoords; // UI canvas
     private Vector2 currentCoords;
 
+    public Image imageColor1;
+    public Image imageColor2;
+    public Image imageColor3;
+
     public void Initialize(int index, SpeciesGenomePool pool) {        
         this.index = index;
         this.linkedPool = pool;
@@ -37,6 +41,10 @@ public class SpeciesIconUI : MonoBehaviour {
 
         gameObject.transform.localPosition = new Vector3(currentCoords.x * (float)panelPixelSize, currentCoords.y * (float)panelPixelSize, 0f);
 
+        Color colorPri = new Color(linkedPool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary.x, linkedPool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary.y, linkedPool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary.z);
+        Color colorSec = new Color(linkedPool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary.x, linkedPool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary.y, linkedPool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary.z);   
+        imageColor1.color = colorPri;
+        imageColor2.color = colorSec;
         // APPEARANCE
         if (isSelected) {
             gameObject.transform.localScale = new Vector3(1.2f, 1.2f, 1f);
@@ -44,15 +52,18 @@ public class SpeciesIconUI : MonoBehaviour {
         }
         else {
             gameObject.transform.localScale = Vector3.one;
-            Color color = new Color(linkedPool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary.x, linkedPool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary.y, linkedPool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary.z);
-            gameObject.GetComponent<Image>().color = color;
+            gameObject.GetComponent<Image>().color = Color.gray * 0.5f;
+
+            
         }  
         
         if(linkedPool.isExtinct) {
             gameObject.GetComponentInChildren<Text>().color = Color.gray * 0.05f;
             gameObject.transform.localScale = Vector3.one * 0.5f;
+            imageColor3.color = Color.black;
         }
         else {
+            imageColor3.color = Color.white;
             if (linkedPool.isFlaggedForExtinction) {
                 gameObject.GetComponentInChildren<Text>().color = Color.gray;
             }

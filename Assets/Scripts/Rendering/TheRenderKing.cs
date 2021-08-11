@@ -2614,11 +2614,6 @@ public class TheRenderKing : Singleton<TheRenderKing>
         cmdBufferWorldTree.ClearRenderTarget(true, true, new Color(0f, 0f, 0f, 0f), 1.0f);  // clear -- needed???
         cmdBufferWorldTree.SetViewProjectionMatrices(worldTreeRenderCamera.worldToCameraMatrix, worldTreeRenderCamera.projectionMatrix);
 
-        worldTreeLineDataMat.SetPass(0);
-        worldTreeLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        worldTreeLineDataMat.SetBuffer("worldTreeLineDataCBuffer", uiManager.historyPanelUI.worldTreeLineDataCBuffer);
-        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, worldTreeLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.historyPanelUI.worldTreeLineDataCBuffer.count);
-        
         float curFrame = simManager.simAgeTimeSteps;
 
         // * WPP: move to ClockPanelUI, merge repeat functionality if possible
@@ -2646,6 +2641,12 @@ public class TheRenderKing : Singleton<TheRenderKing>
         clockPanelUI.clockSunStampMat.SetFloat("_NumColumns", 4f);
         cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, clockPanelUI.clockSunStampMat, 0, MeshTopology.Triangles, 6, clockPanelUI.clockSunStampDataCBuffer.count);
 
+        
+        worldTreeLineDataMat.SetPass(0);
+        worldTreeLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        worldTreeLineDataMat.SetBuffer("worldTreeLineDataCBuffer", uiManager.historyPanelUI.worldTreeLineDataCBuffer);
+        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, worldTreeLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.historyPanelUI.worldTreeLineDataCBuffer.count);
+        
         /*
         clockOrbitLineDataMat.SetPass(0);
         clockOrbitLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);

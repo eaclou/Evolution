@@ -57,8 +57,8 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
     
     // * Consider Refactor: move life stage to candidate    
     public void SetDisplay(CandidateAgentData candidate)
-    {   
-        
+    {
+        Sprite iconSprite = uiManager.creaturePanelUI.spriteIconCreatureStateFossil;
         
         // POSITION
         currentCoords = Vector2.Lerp(currentCoords, targetCoords, 0.75f);
@@ -77,6 +77,21 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
             button.colors = block;
             
             statusStr = isFocus ? SetBackground(selectedState) : SetBackgroundByLifeStage(matchingAgent);
+
+            if(matchingAgent.curLifeStage == Agent.AgentLifeStage.Egg) {
+                iconSprite = uiManager.creaturePanelUI.spriteIconCreatureStateEgg;
+            }
+            else if(matchingAgent.curLifeStage == Agent.AgentLifeStage.Mature) {
+                if(matchingAgent.isSexuallyMature) {
+                    iconSprite = uiManager.creaturePanelUI.spriteIconCreatureStateMature;
+                }
+                else {
+                    iconSprite = uiManager.creaturePanelUI.spriteIconCreatureStateYoung;
+                }
+            }
+            else if(matchingAgent.curLifeStage == Agent.AgentLifeStage.Dead) {
+                iconSprite = uiManager.creaturePanelUI.spriteIconCreatureStateDecaying;
+            }
         }
         else 
         {
@@ -85,8 +100,9 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
 
             if(!candidate.allEvaluationsComplete)
                 gameObject.SetActive(false);
-        }        
+        }
 
+        backgroundImage.sprite = iconSprite;
         //tooltip.genomeViewerUIRef = uiManagerRef.genomeViewerUI;
         tooltip.tooltipString ="Creature #" + candidate.candidateID + "\n" + statusStr;
         //uiManagerRef.speciesOverviewUI.leaderboardGenomeButtonsList.Add(buttonScript);
@@ -115,5 +131,6 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
         public float scale;
         public Color color;
         public string status;
+        //public Sprite icon;
     }
 }

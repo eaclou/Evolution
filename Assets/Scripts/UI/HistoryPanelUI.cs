@@ -11,7 +11,7 @@ public class HistoryPanelUI : MonoBehaviour
     public Button buttonToggleExtinct;
 
     private List<SpeciesIconUI> speciesIconsList;  // keeping track of spawned buttons
-    private List<CreatureIconUI> creatureIconsList;
+    //private List<CreatureIconUI> creatureIconsList;
 
     TheCursorCzar theCursorCzar => TheCursorCzar.instance;
     SimulationManager simManager => SimulationManager.instance;
@@ -123,16 +123,21 @@ public class HistoryPanelUI : MonoBehaviour
                 }
                 if (isActiveSpeciesMode)  
                 {
-                    int graphDataYearIndex = 0;
+                    int graphDataYearIndexStart = 0;
+                    int graphDataYearIndexEnd = 0;
                     
                     if (pool.avgCandidateDataYearList.Count == 0) 
                         continue;
                     
                     float xCoord = (float)(i % worldTreeNumPointsPerLine) / (float)worldTreeNumPointsPerLine;
-
-                    graphDataYearIndex = Mathf.FloorToInt((float)pool.avgCandidateDataYearList.Count * xCoord);
-                    float val = (float)pool.avgCandidateDataYearList[graphDataYearIndex].performanceData.totalTicksAlive / uiManagerRef.speciesGraphPanelUI.maxValuesStatArray[0];
-                    float yCoord = val; // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
+                    int count = Mathf.Max(0, pool.avgCandidateDataYearList.Count - 1);
+                    graphDataYearIndexStart = Mathf.FloorToInt((float)count * xCoord);
+                    graphDataYearIndexEnd = Mathf.CeilToInt((float)count * xCoord);
+                    float frac = ((float)pool.avgCandidateDataYearList.Count * xCoord) % 1f;
+                    float valStart = (float)pool.avgCandidateDataYearList[graphDataYearIndexStart].performanceData.totalTicksAlive / uiManagerRef.speciesGraphPanelUI.maxValuesStatArray[0];
+                    float valEnd = (float)pool.avgCandidateDataYearList[graphDataYearIndexEnd].performanceData.totalTicksAlive / uiManagerRef.speciesGraphPanelUI.maxValuesStatArray[0];
+                    valEnd = Mathf.Clamp(valEnd, 0, pool.avgCandidateDataYearList.Count - 1);
+                    float yCoord = Mathf.Lerp(valStart, valEnd, frac); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
                     float zCoord = 0f;
                     
                     Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
@@ -197,7 +202,8 @@ public class HistoryPanelUI : MonoBehaviour
                 numAgentsDisplayed = Mathf.Max(numAgentsDisplayed, 1); // avoid divide by 0
                 float yCoord = 1f - (float)line / (float)numAgentsDisplayed;
 
-                Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary * 2f;
+                Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary * 1.5f;
+                Color col = new Color(hue.x, hue.y, hue.z);
 
                 int timeStepStart = Mathf.RoundToInt(timelineStartTimeStep);
                 float xStart = (float)(pool.candidateGenomesList[line].performanceData.timeStepHatched - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
@@ -207,22 +213,31 @@ public class HistoryPanelUI : MonoBehaviour
                 }
                 
                 if(xStart > xCoord || xEnd < xCoord) {
-                    hue = Vector3.zero;
+                    //hue = Vector3.zero;
+                    col.a = 0f;
                 }
                 else if(cand.candidateID == uiManagerRef.focusedCandidate.candidateID) {
-                    hue = Vector3.one;
+                    //hue = Vector3.one;
+                    col.r = 1f;
+                    col.g = 1f;
+                    col.b = 1f;
+                    col.a = 1f;
                 }
                 if(!cand.isBeingEvaluated && cand.numCompletedEvaluations == 0) {
-                    hue = Vector3.zero;
+                    //hue = Vector3.zero;
+                    col.a = 0f;
                 }   
                 if(cand.performanceData.timeStepHatched <= 1) {
-                    hue = Vector3.zero;
+                    //hue = Vector3.zero;
+                    col.a = 0f;
                 }
                 if(cand.performanceData.totalTicksAlive >= 1) {
-                    hue *= 0.35f;                        
+                    col.r *= 0.35f;     
+                    col.g *= 0.35f; 
+                    col.b *= 0.35f; 
                 }
-                
-                data.color = new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
+
+                data.color = col; // new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
                 xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
                 yCoord = yCoord * 0.67f + 0.1f;
                                 

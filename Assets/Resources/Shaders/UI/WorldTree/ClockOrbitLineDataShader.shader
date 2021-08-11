@@ -99,7 +99,7 @@
 			fixed4 frag (v2f i) : SV_Target
 			{
 				float4 col = tex2D(_BrushTex, i.uv);
-				
+				col.a *= 0.67f;
 				return col;
 
 			}

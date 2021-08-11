@@ -34,6 +34,12 @@ public class CreaturePanelUI : MonoBehaviour
     [SerializeField]
     Text textPanelStateDebug;
 
+    public Sprite spriteIconCreatureStateEgg;
+    public Sprite spriteIconCreatureStateYoung;
+    public Sprite spriteIconCreatureStateMature;
+    public Sprite spriteIconCreatureStateDecaying;
+    public Sprite spriteIconCreatureStateFossil;
+
     private CreaturePanelMode curPanelMode;
     public enum CreaturePanelMode {
         Portrait,
