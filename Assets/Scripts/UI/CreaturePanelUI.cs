@@ -78,22 +78,27 @@ public class CreaturePanelUI : MonoBehaviour
 
         Color onColor = Color.gray;
         Color offColor = Color.white;
-        imageCurAction.sprite = spriteBrainButton;
+        //imageCurAction.sprite = spriteBrainButton;
         Agent agent = simulationManager.agents[cameraManager.targetAgentIndex];
         if(agent.curActionState == Agent.AgentActionState.Attacking) {
             imageCurAction.sprite = spriteIconCreatureActionAttack;
+            tooltipCurrentAction.tooltipString = "Action: ATTACK";
         }
         if(agent.curActionState == Agent.AgentActionState.Defending) {
             imageCurAction.sprite = spriteIconCreatureActionDefend;
+            tooltipCurrentAction.tooltipString = "Action: DEFEND";
         }
         if(agent.curActionState == Agent.AgentActionState.Dashing) {
             imageCurAction.sprite = spriteIconCreatureActionDash;
+            tooltipCurrentAction.tooltipString = "Action: DASH";
         }
         if(agent.curActionState == Agent.AgentActionState.Resting) {
             imageCurAction.sprite = spriteIconCreatureActionRest;
+            tooltipCurrentAction.tooltipString = "Action: REST";
         }
         if(agent.curActionState == Agent.AgentActionState.Default) {
             imageCurAction.sprite = spriteIconCreatureActionFeed;
+            tooltipCurrentAction.tooltipString = "Action: FEED";
         }
         
                 
@@ -130,11 +135,12 @@ public class CreaturePanelUI : MonoBehaviour
 
         
         if (agent.coreModule == null) return;
-        tooltipCurrentAction.tooltipString = "BRAIN\nAction: " + agent.curActionState;
+
+        tooltipBrain.tooltipString = "BRAIN";//\nAction: " + agent.curActionState;
         //textGeneration.text = "Gen: " + genome.generationCount;
         //textBodySize.text = "Size: " + (100f * core.creatureBaseLength).ToString("F0") + ", Aspect 1:" + (1f / core.creatureAspectRatio).ToString("F0");
         //textBrainSize.text = "Brain Size: " + brain.bodyNeuronList.Count + "--" + brain.linkList.Count;
-        tooltipGenome.tooltipString = "GENOME\nGen#" + agent.candidateRef.candidateGenome.generationCount + ", DNA length: " + (agent.candidateRef.candidateGenome.brainGenome.linkList.Count + agent.candidateRef.candidateGenome.brainGenome.bodyNeuronList.Count);
+        tooltipGenome.tooltipString = "GENOME";//\nGen#" + agent.candidateRef.candidateGenome.generationCount + ", DNA length: " + (agent.candidateRef.candidateGenome.brainGenome.linkList.Count + agent.candidateRef.candidateGenome.brainGenome.bodyNeuronList.Count);
         tooltipAppearance.tooltipString = "APPEARANCE";
     }
 

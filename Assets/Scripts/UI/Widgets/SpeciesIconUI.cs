@@ -13,6 +13,8 @@ public class SpeciesIconUI : MonoBehaviour {
     public Vector2 targetCoords; // UI canvas
     private Vector2 currentCoords;
 
+    public TooltipUI tooltip;
+
     public Image imageColor1;
     public Image imageColor2;
     public Image imageColor3;
@@ -36,6 +38,8 @@ public class SpeciesIconUI : MonoBehaviour {
         targetCoords = newCoords;
     }
     public void UpdateSpeciesIconDisplay(int panelPixelSize, bool isSelected) {
+
+        string toolString = "Species " + linkedPool.speciesID;
         // POSITION
         currentCoords = Vector2.Lerp(currentCoords, targetCoords, 0.75f);
 
@@ -61,6 +65,7 @@ public class SpeciesIconUI : MonoBehaviour {
             gameObject.GetComponentInChildren<Text>().color = Color.gray * 0.05f;
             gameObject.transform.localScale = Vector3.one * 0.5f;
             imageColor3.color = Color.black;
+            toolString += "\n(Extinct)";
         }
         else {
             imageColor3.color = Color.white;
@@ -69,8 +74,10 @@ public class SpeciesIconUI : MonoBehaviour {
             }
             else {
                 gameObject.GetComponentInChildren<Text>().color = Color.white;
-            }            
-        } 
-        
+            }
+            toolString += "\nAvg Life: " + linkedPool.avgCandidateData.performanceData.totalTicksAlive.ToString("F0");
+        }
+
+        tooltip.tooltipString = toolString;
     }
 }

@@ -25,7 +25,7 @@ public class CreatureLifeEventsLogUI : MonoBehaviour
             eventString += "\n[" + agentData.candidateEventDataList[q].eventFrame + "] " + agentData.candidateEventDataList[q].eventText;
         }                
 
-        string eventsLog = "Event Log! Candidate#[" + agentData.candidateID + "]";                    
+        string eventsLog = "Event Log! Candidate#[" + agentData.candidateID + "] " + agentData.candidateEventDataList.Count;                    
         // Agent Event Log:
         int maxEventsToDisplayLog = 12;
         //int numEventsLog = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplayLog);

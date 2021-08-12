@@ -137,15 +137,20 @@ public class SpeciesOverviewUI : MonoBehaviour {
         uiManager.SetFocusedCandidateGenome(pool, group, index);
         selectedButtonData = GetSelectionGroupData(group);
 
+        uiManager.historyPanelUI.buttonSelCreatureEventsLink.gameObject.transform.localPosition = new Vector3(360f, 180f, 0f);
+
         if (group == SelectionGroup.Candidates)
             cameraManager.SetTargetAgent();
 
         if(selectedButtonData != null && selectedButtonData.image != null) {
             selectedButtonData.image.color = Color.white;
-
-            uiManager.historyPanelUI.buttonSelCreatureEventsLink.GetComponent<RectTransform>().localPosition = Vector3.one * 4.2f; // new Vector3(selectedButtonData.image.rectTransform.localPosition.x + 24f, selectedButtonData.image.rectTransform.localPosition.y, 0f);
+            
+             // new Vector3(selectedButtonData.image.rectTransform.localPosition.x + 24f, selectedButtonData.image.rectTransform.localPosition.y, 0f);
         }
         panelGenomeViewer.SetActive(true);
+
+        //uiManager.historyPanelUI.buttonSelCreatureEventsLink.GetComponent<RectTransform>().localPosition = Vector3.one * 4.2f;
+        
     }
     
     public void ClickedCreatureIcon() {

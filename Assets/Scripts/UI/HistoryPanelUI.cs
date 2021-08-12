@@ -10,6 +10,7 @@ public class HistoryPanelUI : MonoBehaviour
 
     public Button buttonToggleExtinct;
     public Button buttonSelCreatureEventsLink;
+    public Button buttonBack;
 
     private List<SpeciesIconUI> speciesIconsList;  // keeping track of spawned buttons
     //private List<CreatureIconUI> creatureIconsList;
@@ -27,6 +28,8 @@ public class HistoryPanelUI : MonoBehaviour
     private GameObject tempPanelSpeciesPop;
     [SerializeField]
     private GameObject tempPanelGraph;
+    [SerializeField]
+    private GameObject tempPanelLifeEvents;
 
     private HistoryPanelMode curPanelMode;
     
@@ -64,6 +67,9 @@ public class HistoryPanelUI : MonoBehaviour
     
     public void Awake() {
         speciesIconsList = new List<SpeciesIconUI>();
+    }
+    public void ClickedSelectedCreatureEvents() {
+        curPanelMode = HistoryPanelMode.CreatureTimeline;
     }
     public void InitializeRenderBuffers() {
         //**** TEMP!!! TESTING!!!
@@ -247,7 +253,7 @@ public class HistoryPanelUI : MonoBehaviour
                     data.color = Color.white;
                 }
 
-                if (curPanelMode == HistoryPanelMode.AllSpecies || curPanelMode == HistoryPanelMode.ActiveSpecies) {
+                if (curPanelMode == HistoryPanelMode.AllSpecies || curPanelMode == HistoryPanelMode.ActiveSpecies || curPanelMode == HistoryPanelMode.CreatureTimeline) {
                     data.worldPos = Vector3.zero;
                     data.color = new Color(0f, 0f, 0f, 0f);
                 }
@@ -286,6 +292,11 @@ public class HistoryPanelUI : MonoBehaviour
             curPanelMode = HistoryPanelMode.AllSpecies;
         }
     }
+    public void ClickButtonBack() {
+        if(curPanelMode == HistoryPanelMode.CreatureTimeline) {
+            curPanelMode = HistoryPanelMode.SpeciesPopulation;
+        }        
+    }
     public void ClickButtonModeCycle() {
         curPanelMode++;
         if((int)curPanelMode >= 4) {
@@ -297,7 +308,8 @@ public class HistoryPanelUI : MonoBehaviour
         float targetStartTimeStep = 0f;
         tempPanelSpeciesPop.SetActive(false);
         tempPanelGraph.SetActive(false);
-
+        buttonBack.gameObject.SetActive(false);
+        tempPanelLifeEvents.gameObject.SetActive(false);
         if(curPanelMode == HistoryPanelMode.AllSpecies) {
             //UpdateSpeciesIconsDefault();
             UpdateSpeciesIconsLineageMode();
@@ -315,11 +327,17 @@ public class HistoryPanelUI : MonoBehaviour
             UpdateSpeciesIconsSinglePop();
             targetStartTimeStep = simManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].candidateGenomesList[0].performanceData.timeStepHatched; //***EAC better less naive way to calculate this
             buttonToggleExtinct.gameObject.SetActive(false);
+            buttonSelCreatureEventsLink.gameObject.SetActive(true);
+
         }
         else if(curPanelMode == HistoryPanelMode.CreatureTimeline) {
+            tempPanelSpeciesPop.SetActive(false);
             UpdateSpeciesIconsCreatureEvents();
             targetStartTimeStep = simManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].candidateGenomesList[0].performanceData.timeStepHatched;
             buttonToggleExtinct.gameObject.SetActive(false);
+            buttonBack.gameObject.SetActive(true);
+            tempPanelLifeEvents.gameObject.SetActive(true);
+            buttonSelCreatureEventsLink.gameObject.SetActive(false);
         }
 
         foreach (var icon in speciesIconsList) {
