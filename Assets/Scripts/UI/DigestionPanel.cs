@@ -9,8 +9,8 @@ public class DigestionPanel : MonoBehaviour
     [SerializeField] StatUI decay;
 
     public void Refresh() {
-        plant.RefreshPercent(coreGenome.dietSpecializationPlant, 100f);
-        meat.RefreshPercent(coreGenome.dietSpecializationMeat, 100f);
-        decay.RefreshPercent(coreGenome.dietSpecializationDecay, 100f);
+        plant.RefreshDisplay(coreGenome.dietSpecializationPlant * 100f, coreGenome.dietSpecializationPlant, false);
+        meat.RefreshDisplay(coreGenome.dietSpecializationMeat * 100f, coreGenome.dietSpecializationMeat, false);
+        decay.RefreshDisplay(coreGenome.dietSpecializationDecay * 100f, coreGenome.dietSpecializationDecay, false);
     }
 }

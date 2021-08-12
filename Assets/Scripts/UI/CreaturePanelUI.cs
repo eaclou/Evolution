@@ -33,7 +33,8 @@ public class CreaturePanelUI : MonoBehaviour
     public TooltipUI tooltipCurrentAction;
     public TooltipUI tooltipBrain;
     public TooltipUI tooltipGenome;
-    public TooltipUI tooltipAppearance; 
+    public TooltipUI tooltipAppearance;
+    public TooltipUI tooltipSpeciesIcon;
     
     [SerializeField]
     Text textPanelStateDebug;
@@ -82,25 +83,27 @@ public class CreaturePanelUI : MonoBehaviour
         Agent agent = simulationManager.agents[cameraManager.targetAgentIndex];
         if(agent.curActionState == Agent.AgentActionState.Attacking) {
             imageCurAction.sprite = spriteIconCreatureActionAttack;
-            tooltipCurrentAction.tooltipString = "Action: ATTACK";
+            tooltipCurrentAction.tooltipString = "Action: ATTACKING";
         }
         if(agent.curActionState == Agent.AgentActionState.Defending) {
             imageCurAction.sprite = spriteIconCreatureActionDefend;
-            tooltipCurrentAction.tooltipString = "Action: DEFEND";
+            tooltipCurrentAction.tooltipString = "Action: DEFENDING";
         }
         if(agent.curActionState == Agent.AgentActionState.Dashing) {
             imageCurAction.sprite = spriteIconCreatureActionDash;
-            tooltipCurrentAction.tooltipString = "Action: DASH";
+            tooltipCurrentAction.tooltipString = "Action: DASHING";
         }
         if(agent.curActionState == Agent.AgentActionState.Resting) {
             imageCurAction.sprite = spriteIconCreatureActionRest;
-            tooltipCurrentAction.tooltipString = "Action: REST";
+            tooltipCurrentAction.tooltipString = "Action: RESTING";
         }
         if(agent.curActionState == Agent.AgentActionState.Default) {
             imageCurAction.sprite = spriteIconCreatureActionFeed;
-            tooltipCurrentAction.tooltipString = "Action: FEED";
+            tooltipCurrentAction.tooltipString = "Action: FEEDING";
         }
-        
+
+        tooltipSpeciesIcon.tooltipString = "Species #" + agent.speciesIndex + "\nAvg Life: " + simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].avgCandidateData.performanceData.totalTicksAlive.ToString("F0");;
+
                 
         if (curPanelMode == CreaturePanelMode.Portrait) {
             panelPortrait.SetActive(true);

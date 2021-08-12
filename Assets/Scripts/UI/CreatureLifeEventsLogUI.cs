@@ -16,21 +16,12 @@ public class CreatureLifeEventsLogUI : MonoBehaviour
     public void Tick(CandidateAgentData agentData) {
         if (agentData.candidateEventDataList == null)
             return;
-                         
-        int maxEventsToDisplay = 8;
-        //int numEvents = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplay);
-        int startIndex = Mathf.Max(0, agentData.candidateEventDataList.Count - maxEventsToDisplay);                   
-        string eventString = "";
-        for(int q = agentData.candidateEventDataList.Count - 1; q >= startIndex; q--) {
-            eventString += "\n[" + agentData.candidateEventDataList[q].eventFrame + "] " + agentData.candidateEventDataList[q].eventText;
-        }                
-
-        string eventsLog = "Event Log! Candidate#[" + agentData.candidateID + "] " + agentData.candidateEventDataList.Count;                    
+                 
         // Agent Event Log:
-        int maxEventsToDisplayLog = 12;
+        int maxEventsToDisplayLog = 16;
         //int numEventsLog = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplayLog);
         int startIndexLog = Mathf.Max(0, agentData.candidateEventDataList.Count - maxEventsToDisplayLog);                   
-        string eventLogString = "";
+        string eventLogString = "Event Log! Candidate#[" + agentData.candidateID + "] " + agentData.candidateEventDataList.Count;                  
         
         for(int q = agentData.candidateEventDataList.Count - 1; q >= startIndexLog; q--) {
             float dimAmount = Mathf.Clamp01((agentData.candidateEventDataList.Count - q - 1) * 0.55f);
@@ -43,8 +34,8 @@ public class CreatureLifeEventsLogUI : MonoBehaviour
             eventLogString += "</color>";
         }
         
-        eventsLog += eventLogString;
-        textEventsLog.text = eventsLog;       
+        //eventsLog += eventLogString;
+        textEventsLog.text = eventLogString;       
     }
     
     string EventColorString(bool isDim, bool isGood)

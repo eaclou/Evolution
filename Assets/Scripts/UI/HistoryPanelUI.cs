@@ -333,7 +333,7 @@ public class HistoryPanelUI : MonoBehaviour
         else if(curPanelMode == HistoryPanelMode.CreatureTimeline) {
             tempPanelSpeciesPop.SetActive(false);
             UpdateSpeciesIconsCreatureEvents();
-            targetStartTimeStep = simManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].candidateGenomesList[0].performanceData.timeStepHatched;
+            targetStartTimeStep = uiManagerRef.focusedCandidate.performanceData.timeStepHatched;
             buttonToggleExtinct.gameObject.SetActive(false);
             buttonBack.gameObject.SetActive(true);
             tempPanelLifeEvents.gameObject.SetActive(true);

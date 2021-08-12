@@ -276,7 +276,7 @@ public class Agent : MonoBehaviour {
         candidateRef.performanceData.totalFoodEatenCreature += foodAmount;
 
         EatFoodMeat(foodAmount);
-        RegisterAgentEvent(Time.frameCount, "Ate Vertebrate! (" + foodAmount + ") candID: " + preyAgent.candidateRef.candidateID, 1f);
+        RegisterAgentEvent(Time.frameCount, "Ate Vertebrate! (" + (foodAmount * 100f).ToString("F0") + ") candID: " + preyAgent.candidateRef.candidateID, 1f);
         preyAgent.ProcessBeingEaten(preyAgent.currentBiomass);
         
         colliderBody.enabled = false;
@@ -483,7 +483,7 @@ public class Agent : MonoBehaviour {
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.digestEfficiencyPlant * 1f);     
 
         //Debug.Log("EatFoodPlant " + amount.ToString());
-        RegisterAgentEvent(Time.frameCount, "Ate Plant! (+" + (amount * 1000).ToString("F0") + " food)", 1f);
+        RegisterAgentEvent(Time.frameCount, "Ate Plant! (+" + (amount * 100).ToString("F0") + " food)", 1f);
     }
     
     // * WPP: combine below two methods (were extracted from CritterMouthComponent)
@@ -491,21 +491,21 @@ public class Agent : MonoBehaviour {
     {
         candidateRef.performanceData.totalFoodEatenEgg += amount;
         EatFoodMeat(amount); // assumes all foodAmounts are equal
-        RegisterAgentEvent(Time.frameCount, "Ate Egg Bit! (" + amount + ")", 1f);
+        RegisterAgentEvent(Time.frameCount, "Ate Egg Bit! (" + (amount * 100f).ToString("F0") + ")", 1f);
     }
     
     public void EatEggsWhole(float amount)
     {
         candidateRef.performanceData.totalFoodEatenEgg += amount;
         EatFoodDecay(amount);
-        RegisterAgentEvent(Time.frameCount, "Ate Egg! (" + amount + ")", 1f);
+        RegisterAgentEvent(Time.frameCount, "Ate Egg! (" + (amount * 100f).ToString("F0") + ")", 1f);
     }
     
     public void EatCorpse(float amount, float biteSize)
     {
         candidateRef.performanceData.totalFoodEatenCorpse += biteSize;
         EatFoodDecay(amount); // assumes all foodAmounts are equal !! *****
-        RegisterAgentEvent(Time.frameCount, "Ate Carrion! (" + amount + ")", 1f);
+        RegisterAgentEvent(Time.frameCount, "Ate Carrion! (" + (amount * 100f).ToString("F0") + ")", 1f);
         //if(coreModule.foodEfficiencyMeat > 0.5f) { // ** // damage bonus -- provided has the required specialization level:::::
         //    GainExperience((flowR / coreModule.stomachCapacity) * 0.5f);  
         //}  
@@ -530,7 +530,7 @@ public class Agent : MonoBehaviour {
         
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.digestEfficiencyMeat * 1f); // Exp for appropriate food
 
-        //RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Zoop! (" + amount.ToString() + ")", 1f);
+        RegisterAgentEvent(UnityEngine.Time.frameCount, "Ate Microbe! (" + (amount * 100f).ToString("F0") + ")", 1f);
     }
     
     public void EatFoodDecay(float amount) {
@@ -549,13 +549,13 @@ public class Agent : MonoBehaviour {
 
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.digestEfficiencyDecay * 1f); // Exp for appropriate food
 
-        RegisterAgentEvent(Time.frameCount, "Ate Corpse! (" + amount + ")", 1f);
+        RegisterAgentEvent(Time.frameCount, "Ate Corpse! (" + (amount * 100f).ToString("F0") + ")", 1f);
     }
     
     public void TakeDamage(float damage) {
         coreModule.DirectDamage(damage);        
         candidateRef.performanceData.totalDamageTaken += damage;
-        RegisterAgentEvent(Time.frameCount, "Took Damage! (" + damage + ")", 0f);
+        RegisterAgentEvent(Time.frameCount, "Took Damage! (" + (damage * 100f).ToString("F0") + ")", 0f);
         CheckForDeathHealth();
     }
     
@@ -570,7 +570,7 @@ public class Agent : MonoBehaviour {
             damage *= defendBonus;
             predatorAgentRef.candidateRef.performanceData.totalDamageDealt += damage;
             TakeDamage(damage);
-            RegisterAgentEvent(Time.frameCount, "Bitten! (" + damage.ToString("F2") + ") by #" + predatorAgentRef.index.ToString(), 0f);
+            RegisterAgentEvent(Time.frameCount, "Bitten! (" + (damage * 100f).ToString("F0") + ") by #" + predatorAgentRef.index.ToString(), 0f);
         }
         
         //coreModule.energy *= 0.5f; 
@@ -935,7 +935,7 @@ public class Agent : MonoBehaviour {
                 
                 //Debug.Log("Agent[" + index.ToString() + "], Ate Zooplankton: " + animalParticleEatAmount.ToString());
                 EatFoodMeat(animalParticleEatAmount); // * sizeEfficiencyPlant);    
-                RegisterAgentEvent(Time.frameCount, "Ate Zooplankton! (+" + (animalParticleEatAmount * 1000).ToString("F0") + " food)", 1f);
+                RegisterAgentEvent(Time.frameCount, "Ate Zooplankton! (+" + (animalParticleEatAmount * 100).ToString("F0") + " food)", 1f);
             }
 
             mouthRef.lastBiteFoodAmount += foodParticleEatAmount + animalParticleEatAmount;

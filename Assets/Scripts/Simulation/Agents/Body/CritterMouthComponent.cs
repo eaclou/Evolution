@@ -197,7 +197,7 @@ public class CritterMouthComponent : MonoBehaviour
         //agentRef.coreModule.energy += 5f;
 
         preyAgent.ProcessBiteDamageReceived(damage, agent);
-        agent.RegisterAgentEvent(Time.frameCount, "Bit Vertebrate! (" + damage + ") candID: " + preyAgent.candidateRef.candidateID, 1f);
+        agent.RegisterAgentEvent(Time.frameCount, "Bit Vertebrate! (" + (damage * 100f).ToString("F0") + ") candID: " + preyAgent.candidateRef.candidateID, 1f);
         //if(agentRef.coreModule.foodEfficiencyMeat > 0.5f) { // ** // damage bonus -- provided has the required specialization level:::::
         //    agentRef.GainExperience(damage * 0.5f);  
         //}

@@ -4,6 +4,7 @@ using UnityEngine.UI;
 public class MinimapPanel : MonoBehaviour
 {
     SimulationManager simulationManager => SimulationManager.instance;
+    CameraManager cameraManager => CameraManager.instance;
     TrophicLayersManager trophicLayers => simulationManager.trophicLayersManager;
     TheRenderKing theRenderKing => TheRenderKing.instance;
     //Lookup lookup => Lookup.instance;
@@ -14,6 +15,7 @@ public class MinimapPanel : MonoBehaviour
     public Image imageKnowledgeMapTextureViewer;
     public Material uiKnowledgeMapViewerMat;
     public GameObject groupMinimap;
+    public Image imageCameraViewArea;
 
     private TrophicSlot selectedTrophicSlot => trophicLayers.selectedSlot;
     
@@ -29,6 +31,14 @@ public class MinimapPanel : MonoBehaviour
         //var state = GetStateID(selectedTrophicSlot);
         //SetKnowledgeMapViewer(state);
         SetKnowledgeMapViewer(selectedTrophicSlot.data);
+
+        float unitConversion = 360f / 256f;
+        imageCameraViewArea.transform.localPosition = new Vector3(cameraManager.curCameraFocusPivotPos.x * unitConversion, cameraManager.curCameraFocusPivotPos.y * unitConversion, 0f);
+        float camAltitude = -cameraManager.cameraRef.transform.position.z;
+        float startAlt = 1f;
+        float endAlt = 350f;
+        float zoomLevel01 = Mathf.Clamp01((camAltitude - startAlt) / (endAlt - startAlt));
+        imageCameraViewArea.transform.localScale = Vector3.one * Mathf.Lerp(0.15f, 2.5f, zoomLevel01);
     }
         
     void SetKnowledgeMapViewer(TrophicLayerSO data) { SetKnowledgeMapViewer(data, GetRenderTexture(data.id)); }
