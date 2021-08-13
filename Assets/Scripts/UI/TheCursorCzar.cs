@@ -41,6 +41,7 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
     public bool isDraggingSpeciesNode = false;  // Future use?
     
     public bool isDraggingMouse => isDraggingMouseLeft || isDraggingMouseRight;
+    public Vector2 normalSmoothedMouseVelocity => new Vector2(smoothedMouseVel.x, smoothedMouseVel.y).normalized;
 
     public Texture2D cursorTexBrush;    // Future use?
     public Texture2D cursorTexWatcher;

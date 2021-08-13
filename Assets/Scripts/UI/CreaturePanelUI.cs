@@ -65,12 +65,11 @@ public class CreaturePanelUI : MonoBehaviour
     public ComputeBuffer portraitCritterSimDataCBuffer;
     public ComputeBuffer critterPortraitStrokesCBuffer;
 
-    public void InitializeRenderBuffers() {
-        
+    public void InitializeRenderBuffers() 
+    {
         // INIT:: ugly :(
         portraitCritterInitDataCBuffer?.Release();
         portraitCritterInitDataCBuffer = new ComputeBuffer(6, SimulationStateData.GetCritterInitDataSize());
-
         critterPortraitStrokesCBuffer = new ComputeBuffer(1 * theRenderKing.GetNumStrokesPerCritter(), theRenderKing.GetMemorySizeCritterStrokeData());
     }
     
@@ -156,5 +155,4 @@ public class CreaturePanelUI : MonoBehaviour
         portraitCritterInitDataCBuffer?.Release();
         portraitCritterSimDataCBuffer?.Release();
     }
-    
 }

@@ -4,11 +4,11 @@
     <list default="true" id="e5216a40-1993-4f7b-88ca-3d6aa0d75e16" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Rendering/BaronVonTerrain.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Rendering/BaronVonTerrain.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Rendering/BaronVonWater.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Rendering/BaronVonWater.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/ClockPanelUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/ClockPanelUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePanelUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePanelUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/TheCursorCzar.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/TheCursorCzar.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/packages-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/packages-lock.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,8 +66,6 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/CreatureBrainActivityUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButtonPrefabScript.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Environment/SpawnZone.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Perception/FindNearestNeighbors.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCommunication.cs" />
@@ -80,7 +78,6 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/VegetationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/ZooplanktonManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/PanelTopLeftUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/TheCursorCzar.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/CursorInRectBoundsMono.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/EnterExitRectBounds.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/CursorInRectBounds.cs" />
@@ -116,6 +113,9 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/BaronVonTerrain.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/ObserverModeUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/ClockPanelUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/TheCursorCzar.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePanelUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" />
     </changedPaths>
   </component>
@@ -222,7 +222,8 @@
       <workItem from="1627972684389" duration="6034000" />
       <workItem from="1628146796937" duration="5537000" />
       <workItem from="1628323584711" duration="4522000" />
-      <workItem from="1628571958665" duration="8406000" />
+      <workItem from="1628571958665" duration="8637000" />
+      <workItem from="1628808788914" duration="6084000" />
     </task>
     <servers />
   </component>
