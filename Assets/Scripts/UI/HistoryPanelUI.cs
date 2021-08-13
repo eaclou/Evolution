@@ -275,6 +275,11 @@ public class HistoryPanelUI : MonoBehaviour
             else if(curPanelMode == HistoryPanelMode.ActiveSpecies || curPanelMode == HistoryPanelMode.AllSpecies) {
                 // Zoom into sel species pop
                 curPanelMode = HistoryPanelMode.SpeciesPopulation;
+                //int indexLast = Mathf.Max(0, iconUI.linkedPool.candidateGenomesList.Count - 1);
+                if (iconUI.linkedPool.candidateGenomesList.Count == 0) return;
+
+                uiManagerRef.SetFocusedCandidateGenome(iconUI.linkedPool.candidateGenomesList[0]);
+                uiManagerRef.speciesOverviewUI.buttons[0].ClickedThisButton();
             }
         }
         else {
@@ -309,17 +314,20 @@ public class HistoryPanelUI : MonoBehaviour
         tempPanelSpeciesPop.SetActive(false);
         tempPanelGraph.SetActive(false);
         buttonBack.gameObject.SetActive(false);
+        buttonSelCreatureEventsLink.gameObject.SetActive(false);
         tempPanelLifeEvents.gameObject.SetActive(false);
         if(curPanelMode == HistoryPanelMode.AllSpecies) {
             //UpdateSpeciesIconsDefault();
             UpdateSpeciesIconsLineageMode();
             buttonToggleExtinct.gameObject.SetActive(true);
+            
         }
         else if(curPanelMode == HistoryPanelMode.ActiveSpecies) {
             UpdateSpeciesIconsGraphMode();
             targetStartTimeStep = simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[0]].timeStepCreated;
             buttonToggleExtinct.gameObject.SetActive(true);
             tempPanelGraph.SetActive(true);
+            
             //Set(bool value)
         }
         else if(curPanelMode == HistoryPanelMode.SpeciesPopulation) {

@@ -118,6 +118,8 @@ public class UIManager : Singleton<UIManager> {
         brainGenomeImage.SetTexture(focusedCandidate.candidateGenome.brainGenome);
 
         SetSelectedSpeciesUI(focusedCandidate.speciesID);
+
+
     }
     
     public bool IsFocus(CandidateAgentData candidate) { return candidate.candidateID == focusedCandidate.candidateID; }

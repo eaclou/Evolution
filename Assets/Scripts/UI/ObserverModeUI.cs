@@ -208,7 +208,7 @@ public class ObserverModeUI : MonoBehaviour
                     return tooltip.tooltipString;
                 //}
             }
-            case TooltipId.Time: return "Year " + ((simulationManager.simAgeTimeSteps / 2048f) * cursorX / 360f).ToString("F0");
+            case TooltipId.Time: return "TIME: " + ((float)simulationManager.simAgeTimeSteps * cursorX / 360f).ToString("F0");
             case TooltipId.Agent: return "Critter #" + cameraManager.mouseHoverAgentRef.candidateRef.candidateID;
             case TooltipId.Algae: return "Algae #" + vegetationManager.closestPlantParticleData.index;
             case TooltipId.Microbe: return "Microbe #" + zooplanktonManager.closestAnimalParticleData.index;

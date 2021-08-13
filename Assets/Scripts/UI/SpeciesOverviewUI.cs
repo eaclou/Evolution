@@ -34,7 +34,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
     private Texture2D speciesPoolGenomeTex; // speciesOverviewPanel
     public Material speciesPoolGenomeMat;
     
-    List<GenomeButtonPrefabScript> buttons = new List<GenomeButtonPrefabScript>();
+    public List<GenomeButtonPrefabScript> buttons = new List<GenomeButtonPrefabScript>();
 
     public void ClickButtonToggleLineage() {
         isShowingLineage = !isShowingLineage;
