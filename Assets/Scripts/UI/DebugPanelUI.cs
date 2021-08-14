@@ -5,7 +5,8 @@ public class DebugPanelUI : MonoBehaviour
 {
     SimulationManager simulation => SimulationManager.instance;
     SimResourceManager simResourceManager => simulation.simResourceManager;
-    SettingsEnvironment environmentSettings => simulation.settingsManager.environmentSettings;
+    SettingsManager settings => SettingsManager.instance;
+    SettingsEnvironment environmentSettings => settings.environmentSettings;
     VegetationManager vegetationManager => simulation.vegetationManager;
     ZooplanktonManager zooplanktonManager => simulation.zooplanktonManager;
     MasterGenomePool masterGenomePool => simulation.masterGenomePool;
@@ -84,8 +85,7 @@ public class DebugPanelUI : MonoBehaviour
         foodModule = agent.foodModule;
         movementModule = agent.movementModule;
         foodGenome = bodyGenome.foodGenome;
-
-
+        
         if (!agent.isInert) {
             // DebugTxt1 : use this for selected creature stats:
             int curCount = 0;

@@ -2,8 +2,8 @@
 
 public class Agent : MonoBehaviour {
     Lookup lookup => Lookup.instance;
-
-    SettingsManager settingsRef;
+    SettingsManager settingsRef => SettingsManager.instance;
+    SimulationManager simManager => SimulationManager.instance;
     //private PerformanceData performanceData;
     //public float totalFoodEatenDecay = 0f;
     
@@ -607,7 +607,7 @@ public class Agent : MonoBehaviour {
         RegisterAgentEvent(Time.frameCount, "Devoured!", 0f);  
     }
 
-    public void Tick(SimulationManager simManager, SettingsManager settings) {
+    public void Tick() {
         // Resources:
         wasteProducedLastFrame = 0f;
         oxygenUsedLastFrame = 0f;
@@ -654,10 +654,10 @@ public class Agent : MonoBehaviour {
                 TickEgg();
                 break;            
             case AgentLifeStage.Mature:
-                TickMature(simManager);
+                TickMature();
                 break;
             case AgentLifeStage.Dead:
-                TickDead(settings);
+                TickDead();
                 break;
             case AgentLifeStage.Null:
                 //Debug.Log("agent is null - probably shouldn't have gotten to this point...;");
@@ -746,10 +746,10 @@ public class Agent : MonoBehaviour {
         //isCooldown = false;
         RegisterAgentEvent(Time.frameCount, "Was Born!", 1f);
 
-        candidateRef.performanceData.timeStepHatched = SimulationManager.instance.simAgeTimeSteps;
+        candidateRef.performanceData.timeStepHatched = simManager.simAgeTimeSteps;
     }
     
-    private void TickMature(SimulationManager simManager) {
+    private void TickMature() {
         mouthRef.isFeeding = isFeeding;
         mouthRef.isAttacking = isAttacking;
         //ProcessSwallowing();
@@ -837,12 +837,12 @@ public class Agent : MonoBehaviour {
         RegisterAgentEvent(Time.frameCount, "Pregnancy Complete!", 0.95f);
     }
     
-    private void TickDead(SettingsManager settings) {
+    private void TickDead() {
         lifeStageTransitionTimeStepCounter++;
 
         // DECAY HERE!
         // Should shrink as well as lose foodContent
-        float decayAmount = settings.agentSettings._BaseDecompositionRate;
+        float decayAmount = settingsRef.agentSettings._BaseDecompositionRate;
 
         // include reproductive stockpile energy???
 
@@ -1179,8 +1179,7 @@ public class Agent : MonoBehaviour {
         threatsModule = new CritterModuleThreats(genome.bodyGenome.threatGenome, this);
     }
     
-    public void FirstTimeInitialize(SettingsManager settings) { 
-        settingsRef = settings;
+    public void FirstTimeInitialize() { 
         curLifeStage = AgentLifeStage.AwaitingRespawn;
         //InitializeAgentWidths(genome);
         //InitializeGameObjectsAndComponents();
@@ -1190,7 +1189,7 @@ public class Agent : MonoBehaviour {
     // Colliders Footprint???  *************************************************************************************************************
 
     // * WPP: expose magic numbers
-    public void ReconstructAgentGameObjects(SettingsManager settings, AgentGenome genome, EggSack parentEggSack, Vector3 startPos, bool isImmaculate, float waterLevel) {
+    public void ReconstructAgentGameObjects(AgentGenome genome, EggSack parentEggSack, Vector3 startPos, bool isImmaculate, float waterLevel) {
         //float corpseLerp = (float)settings.curTierFoodCorpse / 10f;
         //decayDurationTimeSteps = 480; // Mathf.RoundToInt(Mathf.Lerp(360f, 3600f, corpseLerp));
         //float eggLerp = (float)settings.curTierFoodEgg / 10f;
@@ -1287,7 +1286,7 @@ public class Agent : MonoBehaviour {
 
     // When should biomass be transferred from EggSack?
     // If spawnImmaculate, where does the biomass come from? -- should it be free?
-    public void InitializeSpawnAgentImmaculate(SettingsManager settings, int agentIndex, CandidateAgentData candidateData, Vector3 spawnWorldPos, float globalWaterLevel) {        
+    public void InitializeSpawnAgentImmaculate(int agentIndex, CandidateAgentData candidateData, Vector3 spawnWorldPos, float globalWaterLevel) {        
         index = agentIndex;
         speciesIndex = candidateData.speciesID;
         candidateRef = candidateData;
@@ -1302,13 +1301,13 @@ public class Agent : MonoBehaviour {
         ResetStartingValues();
         InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
         
-        ReconstructAgentGameObjects(settings, genome, null, spawnWorldPos, true, globalWaterLevel);
+        ReconstructAgentGameObjects(genome, null, spawnWorldPos, true, globalWaterLevel);
 
         brain = new Brain(genome.brainGenome, this); 
         isInert = false;
     }
     
-    public void InitializeSpawnAgentFromEggSack(SettingsManager settings, int agentIndex, CandidateAgentData candidateData, EggSack parentEggSack, float globalWaterLevel) {        
+    public void InitializeSpawnAgentFromEggSack(int agentIndex, CandidateAgentData candidateData, EggSack parentEggSack, float globalWaterLevel) {        
         index = agentIndex;
         speciesIndex = candidateData.speciesID;
         candidateRef = candidateData;
@@ -1323,7 +1322,7 @@ public class Agent : MonoBehaviour {
         Vector3 spawnOffset = 0.167f * parentEggSack.curSize.magnitude * Random.insideUnitSphere;
         spawnOffset.z = 0f;
         
-        ReconstructAgentGameObjects(settings, genome, parentEggSack, parentEggSack.gameObject.transform.position + spawnOffset, false, globalWaterLevel);
+        ReconstructAgentGameObjects(genome, parentEggSack, parentEggSack.gameObject.transform.position + spawnOffset, false, globalWaterLevel);
 
         brain = new Brain(genome.brainGenome, this);   
         isInert = false;

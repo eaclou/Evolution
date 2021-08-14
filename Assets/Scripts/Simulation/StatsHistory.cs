@@ -5,6 +5,8 @@ using UnityEngine;
 [Serializable]
 public class StatsHistory
 {
+    SettingsManager settings => SettingsManager.instance;
+
     // 0 == decay nutrients  .x
     // 1 == plant food  .y
     // 2 == eggs food  .z
@@ -38,13 +40,11 @@ public class StatsHistory
     public List<float> eggSacksList;
     
     SimResourceManager resources;
-    SettingsManager settings;
     EnvironmentFluidManager fluid;
     
-    public StatsHistory(SimResourceManager resources, SettingsManager settings, EnvironmentFluidManager fluid)
+    public StatsHistory(SimResourceManager resources, EnvironmentFluidManager fluid)
     {
         this.resources = resources;
-        this.settings = settings;
         this.fluid = fluid;
     }
     

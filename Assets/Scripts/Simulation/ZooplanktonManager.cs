@@ -4,11 +4,10 @@
 /// <summary>
 ///  Move Food-related stuff from SimulationManager into here to de-clutter simManager:
 /// </summary>
-
 public class ZooplanktonManager {
     SimulationManager simManager => SimulationManager.instance;
-
-    public SettingsManager settingsRef;
+    SettingsManager settingsRef => SettingsManager.instance;
+    
     public SimResourceManager resourceManagerRef;
     
     private ComputeShader computeShaderAnimalParticles;
@@ -81,8 +80,7 @@ public class ZooplanktonManager {
         return bitSize;
     }
     
-    public ZooplanktonManager(SettingsManager settings, SimResourceManager resourcesRef) {
-        settingsRef = settings;
+    public ZooplanktonManager(SimResourceManager resourcesRef) {
         resourceManagerRef = resourcesRef;        
     }
 
@@ -149,8 +147,7 @@ public class ZooplanktonManager {
         animalParticlesMeasure32 = new ComputeBuffer(32, GetAnimalParticleDataSize());
         animalParticlesMeasure1 = new ComputeBuffer(1, GetAnimalParticleDataSize());
         //Debug.Log("End: " + (Time.realtimeSinceStartup - startTime).ToString());
-
-
+        
         critterNearestZooplankton32 = new RenderTexture(32, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         critterNearestZooplankton32.wrapMode = TextureWrapMode.Clamp;
         critterNearestZooplankton32.filterMode = FilterMode.Point;
@@ -163,8 +160,7 @@ public class ZooplanktonManager {
         cursorClosestParticleDataCBuffer = new ComputeBuffer(2, GetAnimalParticleDataSize());  // 0 = selected, 1 = closest to cursor
         cursorParticleDataArray = new AnimalParticleData[2];
         cursorDistances1024 = new ComputeBuffer(1024, sizeof(float) * 4);
-
-
+        
         int numMutations = 4;  // don't change this
         zooplanktonSlotGenomeCurrent = new WorldLayerZooplanktonGenome();
         zooplanktonSlotGenomeCurrent.representativeData = animalParticlesArray[0];
@@ -177,9 +173,6 @@ public class ZooplanktonManager {
 
         GenerateWorldLayerZooplanktonGenomeMutationOptions();
 
-
-        //////+++++++++
-        
         zooplanktonRepresentativeGenomeCBuffer = new ComputeBuffer(1, GetAnimalParticleDataSize());
         AnimalParticleData[] zooplanktonRepresentativeGenomeArray = new AnimalParticleData[1];
         zooplanktonRepresentativeGenomeArray[0] = zooplanktonSlotGenomeCurrent.representativeData;
@@ -191,27 +184,25 @@ public class ZooplanktonManager {
             float jLerp = Mathf.Clamp01((float)j / 3f + 0.015f); 
             jLerp = jLerp * jLerp;
             WorldLayerZooplanktonGenome mutatedGenome = new WorldLayerZooplanktonGenome();
-            Vector4 randColor = UnityEngine.Random.ColorHSV();
+            Vector4 randColor = Random.ColorHSV();
             
             Vector4 col = zooplanktonSlotGenomeCurrent.representativeData.color;
             col = Vector4.Lerp(col, randColor, jLerp);
             mutatedGenome.representativeData = zooplanktonSlotGenomeCurrent.representativeData;
             mutatedGenome.representativeData.color = col;
 
-            mutatedGenome.swimSpeed01 = Mathf.Lerp(0f, 1f, UnityEngine.Random.Range(0f, 1f));
+            mutatedGenome.swimSpeed01 = Mathf.Lerp(0f, 1f, Random.Range(0f, 1f));
             mutatedGenome.swimSpeed01 = Mathf.Lerp(zooplanktonSlotGenomeCurrent.swimSpeed01, mutatedGenome.swimSpeed01, jLerp);
 
-            mutatedGenome.agingRate01 = Mathf.Lerp(0f, 1f, UnityEngine.Random.Range(0f, 1f));
+            mutatedGenome.agingRate01 = Mathf.Lerp(0f, 1f, Random.Range(0f, 1f));
             mutatedGenome.agingRate01 = Mathf.Lerp(zooplanktonSlotGenomeCurrent.agingRate01, mutatedGenome.agingRate01, jLerp);
 
-            mutatedGenome.attractForce01 = Mathf.Lerp(0f, 1f, UnityEngine.Random.Range(0f, 1f));
+            mutatedGenome.attractForce01 = Mathf.Lerp(0f, 1f, Random.Range(0f, 1f));
             mutatedGenome.attractForce01 = Mathf.Lerp(zooplanktonSlotGenomeCurrent.attractForce01, mutatedGenome.attractForce01, jLerp);
-
-
+            
             mutatedGenome.name = zooplanktonSlotGenomeCurrent.name;
             mutatedGenome.textDescriptionMutation = "Swim Speed: " + mutatedGenome.swimSpeed01.ToString("F2") + "\nAging Rate: " + mutatedGenome.agingRate01.ToString("F2") + "\nAttraction: " + mutatedGenome.attractForce01.ToString("F2");
             
-
             zooplanktonSlotGenomeMutations[j] = mutatedGenome;
         }
     }
@@ -234,6 +225,7 @@ public class ZooplanktonManager {
 
         selectRespawnAnimalParticleIndicesCBuffer.Release();
     }*/
+    
     public void SimulateAnimalParticles(EnvironmentFluidManager fluidManagerRef, TheRenderKing renderKingRef, SimulationStateData simStateDataRef, SimResourceManager resourcesManager) { // Sim
         // Go through animalParticleData and check for inactive
         // determined by current total animal -- done!
@@ -344,12 +336,12 @@ public class ZooplanktonManager {
         computeShaderAnimalParticles.Dispatch(kernelCSCopyAnimalParticlesBuffer, 1, 1, 1);
     }
     
-    public void FindClosestAnimalParticleToCritters(SimulationStateData simStateDataRef) {  // need to send info on closest particle pos/dir/amt back to CPU also        
-        
+    // need to send info on closest particle pos/dir/amt back to CPU also
+    public void FindClosestAnimalParticleToCritters(SimulationStateData simStateDataRef) 
+    {
         int kernelCSNewMeasureDistancesInit = computeShaderAnimalParticles.FindKernel("CSNewMeasureDistancesInit");
         int kernelCSNewMeasureDistancesMainA = computeShaderAnimalParticles.FindKernel("CSNewMeasureDistancesMainA");
-
-
+        
         computeShaderAnimalParticles.SetBuffer(kernelCSNewMeasureDistancesInit, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
         computeShaderAnimalParticles.SetBuffer(kernelCSNewMeasureDistancesInit, "critterInitDataCBuffer", simStateDataRef.critterInitDataCBuffer);
         computeShaderAnimalParticles.SetBuffer(kernelCSNewMeasureDistancesInit, "animalParticlesRead", animalParticlesCBuffer);        
@@ -358,7 +350,6 @@ public class ZooplanktonManager {
         computeShaderAnimalParticles.SetTexture(kernelCSNewMeasureDistancesMainA, "_CritterToZooplanktonDistancesTexRead", critterNearestZooplankton32);
 
         computeShaderAnimalParticles.Dispatch(kernelCSNewMeasureDistancesInit, 1, simStateDataRef.critterSimDataCBuffer.count, 1);
-
         
         //computeShaderAnimalParticles.SetBuffer(kernelCSNewMeasureDistancesInit, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
         //computeShaderAnimalParticles.SetBuffer(kernelCSNewMeasureDistancesInit, "critterInitDataCBuffer", simStateDataRef.critterInitDataCBuffer);
@@ -368,7 +359,6 @@ public class ZooplanktonManager {
         computeShaderAnimalParticles.SetBuffer(kernelCSNewMeasureDistancesMainA, "closestParticlesDataCBuffer", closestAnimalParticlesDataCBuffer);
         computeShaderAnimalParticles.Dispatch(kernelCSNewMeasureDistancesMainA, 1, simStateDataRef.critterSimDataCBuffer.count, 1);
         
-
         closestAnimalParticlesDataCBuffer.GetData(closestAnimalParticlesDataArray);
         closestZooplanktonDistancesCBuffer.GetData(closestZooplanktonArray);
 
@@ -417,6 +407,10 @@ public class ZooplanktonManager {
         }
 
         return newBuffer;
+    }
+    
+    public void FindClosestAnimalParticleToCursor(Vector3 mousePositionOnWater) {
+        FindClosestAnimalParticleToCursor(mousePositionOnWater.x, mousePositionOnWater.y);
     }
     
     public void FindClosestAnimalParticleToCursor(float xCoord, float yCoord) {

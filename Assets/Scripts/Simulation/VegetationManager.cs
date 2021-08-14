@@ -4,8 +4,8 @@ public class VegetationManager {
     SimulationManager simManager => SimulationManager.instance;
     UIManager uiManager => UIManager.instance;
     TheRenderKing theRenderKing => TheRenderKing.instance;
+    SettingsManager settingsRef => SettingsManager.instance;
 
-    public SettingsManager settingsRef;
     public SimResourceManager resourceManagerRef;
     
     private ComputeShader computeShaderResourceGrid;
@@ -114,10 +114,8 @@ public class VegetationManager {
 
     public int tempMeasureClosestParticlesCounter = 0;
     
-    public VegetationManager(SettingsManager settings, SimResourceManager resourcesRef) {
-        settingsRef = settings;
+    public VegetationManager(SimResourceManager resourcesRef) {
         resourceManagerRef = resourcesRef;
-        
     }
 
     public void ProcessPlantSlotMutation() {  // was unused, still is but renamed
@@ -133,13 +131,9 @@ public class VegetationManager {
 
     // PLANT PARTICLES:::::
     public void InitializeAlgaeGrid() {
-        // Plants:
         algaeSlotGenomeCurrent = new WorldLayerAlgaeGenome();
-        
         algaeSlotGenomeMutations = new WorldLayerAlgaeGenome[4];
-
         GenerateWorldLayerAlgaeGridGenomeMutationOptions();
-        
     }
     
     public void InitializePlantParticles(int numAgents, ComputeShader computeShader) {
@@ -256,8 +250,8 @@ public class VegetationManager {
         GenerateWorldLayerPlantParticleGenomeMutationOptions();
     } 
        
-    public void InitializeResourceGrid(int numAgents, ComputeShader computeShader) {
-
+    public void InitializeResourceGrid(int numAgents, ComputeShader computeShader) 
+    {
         computeShaderResourceGrid = computeShader;
               
         resourceGridRT1 = new RenderTexture(resourceGridTexResolution, resourceGridTexResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
@@ -280,7 +274,6 @@ public class VegetationManager {
         resourceSimTransferRT.wrapMode = TextureWrapMode.Clamp;
         resourceSimTransferRT.enableRandomWrite = true;
         resourceSimTransferRT.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***  
-        
         
         tempTex32 = new RenderTexture(32, 32, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
         tempTex32.wrapMode = TextureWrapMode.Clamp;
@@ -331,10 +324,9 @@ public class VegetationManager {
         //theRenderKing.fluidRenderMat.SetTexture("_DebugTex", nutrientMapRT1);
     }
     
-    public void InitializeDecomposersGrid() {
-        
+    public void InitializeDecomposersGrid() 
+    {
         decomposerSlotGenomeCurrent = new WorldLayerDecomposerGenome();
-        
         decomposerSlotGenomeCurrent.name = "Decomposers";
         decomposerSlotGenomeMutations = new WorldLayerDecomposerGenome[4];
 
@@ -356,8 +348,8 @@ public class VegetationManager {
         computeShaderResourceGrid.Dispatch(kernelCSInitResourceGrid, resourceGridTexResolution / 32, resourceGridTexResolution / 32, 1);
     }
 
-    private void WorldLayerDecomposerGenomeStuff(ref WorldLayerDecomposerGenome genome, float mutationSizeLerp) {
-                
+    private void WorldLayerDecomposerGenomeStuff(ref WorldLayerDecomposerGenome genome, float mutationSizeLerp) 
+    {
         float minIntakeRate = tempSharedIntakeRate * 0.1f;
         float maxIntakeRate = tempSharedIntakeRate * 4f;
         float lnLerp = Random.Range(0f, 1f);
@@ -385,6 +377,7 @@ public class VegetationManager {
             Color mutatedColorSec = Color.Lerp(algaeSlotGenomeCurrent.displayColorSec, randColorSec, jLerp);
             mutatedGenome.displayColorPri = mutatedColorPri;
             mutatedGenome.displayColorSec = mutatedColorSec;
+            
             if(Random.Range(0f, 1f) < jLerp * 1f) {
                 mutatedGenome.patternRowID = Random.Range(0, 8);
                 mutatedGenome.patternColumnID = Random.Range(0, 8);
@@ -434,7 +427,6 @@ public class VegetationManager {
             plantSlotGenomeMutations[j].displayColorPri = new Color(hue.x, hue.y, hue.z);
             hue = mutatedGenome.plantRepData.colorB;
             plantSlotGenomeMutations[j].displayColorSec = new Color(hue.x, hue.y, hue.z);
-            
         }
     }
 
@@ -468,7 +460,6 @@ public class VegetationManager {
             
             decomposerSlotGenomeMutations[j] = mutatedGenome;
         }
-        
     }
 	
     /*public void ReviveSelectFoodParticles(int[] indicesArray, float radius, Vector4 spawnCoords, SimulationStateData simStateDataRef) {
@@ -566,7 +557,8 @@ public class VegetationManager {
         computeShaderPlantParticles.Dispatch(kernelCSCopyFoodParticlesBuffer, 1, 1, 1);        
     }
     
-    public void EatSelectedFoodParticles(SimulationStateData simStateDataRef) {  // removes gpu particle & sends consumption data back to CPU
+    /// Removes GPU particle & sends consumption data back to CPU
+    public void EatSelectedFoodParticles(SimulationStateData simStateDataRef) {  
         // Use CritterSimData to determine critter mouth locations
 
         // run through all foodParticles, check against each critter position, then measure min value with recursive reduction:
@@ -618,7 +610,6 @@ public class VegetationManager {
         //plantParticlesMeasure32.GetData(debugArray);
         //Debug.Log("Ugh: " + debugArray[0].index.ToString() + ", " + debugArray[0].worldPos.ToString());
         
-        
         computeShaderPlantParticles.SetBuffer(kernelCSNewMeasureDistancesMainA, "foodParticlesRead", plantParticlesCBuffer);      
         computeShaderPlantParticles.SetBuffer(kernelCSNewMeasureDistancesMainA, "_ClosestPlantIndexCBuffer", closestPlantIndexCBuffer);  // Float4 buffer
         computeShaderPlantParticles.SetBuffer(kernelCSNewMeasureDistancesMainA, "closestParticlesDataCBuffer", closestPlantParticlesDataCBuffer);  // PlantParticleData buffer
@@ -632,9 +623,9 @@ public class VegetationManager {
                     closestPlantParticlesDataArray[1].index.ToString());*/
     }
     
-    // Keep these two pipelines separate at first while try to debug::::
-    private Vector4[] ReduceDistancesArray(Vector4[] inBuffer) {
-
+    // Keep these two pipelines separate at first while debugging
+    private Vector4[] ReduceDistancesArray(Vector4[] inBuffer) 
+    {
         Vector4[] newBuffer = new Vector4[(inBuffer.Length / 2)];
         for (int i = 0; i < newBuffer.Length; i++) {
             Vector4 cellDataA = inBuffer[i * 2];
@@ -644,6 +635,10 @@ public class VegetationManager {
         }
 
         return newBuffer;
+    }
+    
+    public void FindClosestPlantParticleToCursor(Vector3 mousePositionOnWater) {
+        FindClosestPlantParticleToCursor(mousePositionOnWater.x, mousePositionOnWater.y);
     }
     
     public void FindClosestPlantParticleToCursor(float xCoord, float yCoord) {
@@ -656,8 +651,7 @@ public class VegetationManager {
 
         Vector4[] cursorDistanceArray1024 = new Vector4[1024];
         cursorDistances1024.GetData(cursorDistanceArray1024);
-
-
+        
         //Vector4[] dstBuffer = new Vector4[25];
 
         // Manual Sort!
@@ -704,7 +698,7 @@ public class VegetationManager {
         cursorClosestParticleDataCBuffer.GetData(cursorParticleDataArray);
 
         //string txt = "nearestIndex = " + cursorClosestParticleDataArray[0].index + " (" + cursorClosestParticleDataArray[0].age +  ")   " + (cursorClosestParticleDataArray[0].biomass * 1000f).ToString("F0"); // "lngth: " + swapBuffer.Length.ToString() + ",  " + swapBuffer[0].ToString() + "   " + swapBuffer[1].ToString() + "   " + swapBuffer[swapBuffer.Length - 2].ToString() + "   " + swapBuffer[swapBuffer.Length - 1].ToString();
-                                                                                                                                                                                                                //"nearestIndex = " + nearestIndex.ToString() + " (" + nearestDist.ToString() + ")  size: " + swapBuffer.Length.ToString() + ", " + swapBuffer[0].ToString();
+        //"nearestIndex = " + nearestIndex.ToString() + " (" + nearestDist.ToString() + ")  size: " + swapBuffer.Length.ToString() + ", " + swapBuffer[0].ToString();
 
         // TEMPP!!!!!
         //closestPlantParticlesDataArray[0] = cursorClosestParticleDataArray[0];
@@ -712,7 +706,6 @@ public class VegetationManager {
         selectedPlantParticleData = cursorParticleDataArray[0];
 
         //Debug.Log(xCoord.ToString() + ", " + yCoord.ToString() + " *** " + swapBuffer[0].x + ", c: " + closestPlantParticleData.index.ToString() + ", s: " + selectedPlantParticleData.index.ToString());
-
 
         /*
         // Reduce from 1024 --> 32 particles per cursor:  
@@ -793,7 +786,7 @@ public class VegetationManager {
         */
     }
     
-    public void MeasureTotalPlantParticlesAmount() {  // 
+    public void MeasureTotalPlantParticlesAmount() { 
         int kernelCSMeasureTotalFoodParticlesAmount = computeShaderPlantParticles.FindKernel("CSMeasureTotalFoodParticlesAmount");
         computeShaderPlantParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesRead", plantParticlesCBuffer);
         computeShaderPlantParticles.SetBuffer(kernelCSMeasureTotalFoodParticlesAmount, "foodParticlesWrite", plantParticlesMeasure32);         
@@ -873,53 +866,73 @@ public class VegetationManager {
         
     } */   
     
-    public void MeasureTotalResourceGridAmount() {
-
-        ComputeBuffer outputValuesCBuffer = new ComputeBuffer(1, sizeof(float) * 4);  // holds the result of measurement: total sum of pix colors in texture
+    public void MeasureTotalResourceGridAmount() 
+    {
+        // holds the result of measurement: total sum of pix colors in texture
+        ComputeBuffer outputValuesCBuffer = new ComputeBuffer(1, sizeof(float) * 4);  
         Vector4[] outputValuesArray = new Vector4[1];
         
-        // 128 --> 32:
         int kernelCSMeasureTotalResources2 = computeShaderResourceGrid.FindKernel("CSMeasureTotalResourceGrid2");   
         int kernelCSMeasureTotalResources4 = computeShaderResourceGrid.FindKernel("CSMeasureTotalResourceGrid4");  
 
+        CompressResourceGrid(kernelCSMeasureTotalResources4, outputValuesCBuffer, resourceGridRT1, tempTex32, 32, 32);
+        CompressResourceGrid(kernelCSMeasureTotalResources4, outputValuesCBuffer, tempTex32, tempTex8, 8, 8);
+        CompressResourceGrid(kernelCSMeasureTotalResources2, outputValuesCBuffer, tempTex8, tempTex4, 4, 4);
+        CompressResourceGrid(kernelCSMeasureTotalResources2, outputValuesCBuffer, tempTex4, tempTex2, 2, 2);
+        CompressResourceGrid(kernelCSMeasureTotalResources2, outputValuesCBuffer, tempTex2, tempTex1, 1, 1);
+        // WPP: repetitive logic condensed into function
+        /*
+        // 128 --> 32:
         computeShaderResourceGrid.SetBuffer(kernelCSMeasureTotalResources4, "outputValuesCBuffer", outputValuesCBuffer);
         computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources4, "measureValuesTex", resourceGridRT1);
         computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources4, "pooledResultTex", tempTex32);
         computeShaderResourceGrid.Dispatch(kernelCSMeasureTotalResources4, 32, 32, 1);
+        
         // 32 --> 8:
         computeShaderResourceGrid.SetBuffer(kernelCSMeasureTotalResources4, "outputValuesCBuffer", outputValuesCBuffer);
         computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources4, "measureValuesTex", tempTex32);
         computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources4, "pooledResultTex", tempTex8);
         computeShaderResourceGrid.Dispatch(kernelCSMeasureTotalResources4, 8, 8, 1);
+        
         // 8 --> 4:
         computeShaderResourceGrid.SetBuffer(kernelCSMeasureTotalResources2, "outputValuesCBuffer", outputValuesCBuffer);
         computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources2, "measureValuesTex", tempTex8);
         computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources2, "pooledResultTex", tempTex4);
-        computeShaderResourceGrid.Dispatch(kernelCSMeasureTotalResources2, 4, 4, 1);        
+        computeShaderResourceGrid.Dispatch(kernelCSMeasureTotalResources2, 4, 4, 1);
+            
         // 4 --> 2:
         computeShaderResourceGrid.SetBuffer(kernelCSMeasureTotalResources2, "outputValuesCBuffer", outputValuesCBuffer);
         computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources2, "measureValuesTex", tempTex4);
         computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources2, "pooledResultTex", tempTex2);
         computeShaderResourceGrid.Dispatch(kernelCSMeasureTotalResources2, 2, 2, 1);
+        
         // 2 --> 1:
         computeShaderResourceGrid.SetBuffer(kernelCSMeasureTotalResources2, "outputValuesCBuffer", outputValuesCBuffer);
         computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources2, "measureValuesTex", tempTex2);
         computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources2, "pooledResultTex", tempTex1);
         computeShaderResourceGrid.Dispatch(kernelCSMeasureTotalResources2, 1, 1, 1);
+        */       
         
         outputValuesCBuffer.GetData(outputValuesArray);
-        
         curGlobalNutrientGridValues = outputValuesArray[0];
-
         outputValuesCBuffer.Release();
 
         /*Debug.Log("Resource Totals:\nNutrients: " + outputValuesArray[0].x.ToString() + 
                                   "\nWaste: " + outputValuesArray[0].y.ToString() + 
                                   "\nDecomposers: " + outputValuesArray[0].z.ToString() + 
                                   "\nAlgae: " + outputValuesArray[0].w.ToString());
-*/
+        */
         //return outputValuesArray[0].x;
-    }    
+    }
+    
+    void CompressResourceGrid(int kernelIndex, ComputeBuffer output, RenderTexture measured, RenderTexture pooled, int x, int y)
+    {
+        computeShaderResourceGrid.SetBuffer(kernelIndex, "outputValuesCBuffer", output);
+        computeShaderResourceGrid.SetTexture(kernelIndex, "measureValuesTex", measured);
+        computeShaderResourceGrid.SetTexture(kernelIndex, "pooledResultTex", pooled);
+        computeShaderResourceGrid.Dispatch(kernelIndex, x, y, 1);
+    }   
+    
     /*public void AddResourcesAtCoords(Vector4 amount, float x, float y) {  // 0-1 normalized map coords
         
         ComputeBuffer addResourceCBuffer = new ComputeBuffer(1, sizeof(float) * 4);
@@ -967,6 +980,7 @@ public class VegetationManager {
         computeShaderResourceGrid.SetTexture(kernelCSSimRD, "_ResourceGridRead", resourceGridRT1);
         computeShaderResourceGrid.SetTexture(kernelCSSimRD, "_ResourceGridWrite", resourceGridRT2);
         computeShaderResourceGrid.Dispatch(kernelCSSimRD, resourceGridTexResolution / 32, resourceGridTexResolution / 32, 1);
+        
         // write into 2
         int kernelCSAdvectRD = computeShaderResourceGrid.FindKernel("CSAdvectResourceGrid");
         computeShaderResourceGrid.SetFloat("_TextureResolution", (float)resourceGridTexResolution);        
@@ -974,6 +988,7 @@ public class VegetationManager {
         computeShaderResourceGrid.SetFloat("_DeltaTime", fluidManagerRef.deltaTime);
         computeShaderResourceGrid.SetFloat("_InvGridScale", fluidManagerRef.invGridScale);
         computeShaderResourceGrid.SetFloat("_MapSize", SimulationManager._MapSize);
+        
         float brushDecomposersOn = 0f;  // eventually make this more elegant during next refactor ***
         float brushAlgaeOn = 0f;
         float brushMineralsOn = 0f;
@@ -994,6 +1009,7 @@ public class VegetationManager {
                 Debug.Log("// minerals brush on!");
             }
         }
+        
         computeShaderResourceGrid.SetFloat("_SpiritBrushIntensity", brushIntensityMult); // *** INVESTIGATE THIS -- not used/needed?
         computeShaderResourceGrid.SetFloat("_IsSpiritBrushDecomposersOn", brushDecomposersOn);
         computeShaderResourceGrid.SetFloat("_IsSpiritBrushAlgaeOn", brushAlgaeOn);

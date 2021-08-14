@@ -16,11 +16,11 @@ public class SimulationManager : Singleton<SimulationManager>
     CameraManager cameraManager => CameraManager.instance;
     AudioManager audioManager => AudioManager.instance;
     TheCursorCzar theCursorCzar => TheCursorCzar.instance;
+    SettingsManager settingsManager => SettingsManager.instance;
     
     public QualitySettingData qualitySettings;
     public LoadingPanelUI loadingPanel;
     public EnvironmentFluidManager environmentFluidManager;
-    public SettingsManager settingsManager;
     public SimulationStateData simStateData;
     public StartPositionsPresetLists startPositionsPresets;
     public ComputeShader computeShaderResourceGrid;    // algae grid
@@ -121,7 +121,7 @@ public class SimulationManager : Singleton<SimulationManager>
 
     GlobalGraphData globalGraphData = new GlobalGraphData();
         
-    #region loading   // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& LOADING LOADING LOADING &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+    #region Loading
     
     public void LoadingWarmupComplete()
     {
@@ -150,7 +150,7 @@ public class SimulationManager : Singleton<SimulationManager>
         // Fitness Stuffs:::
         startTime = Time.realtimeSinceStartup;
         
-        statsHistory = new StatsHistory(simResourceManager, settingsManager, environmentFluidManager);
+        statsHistory = new StatsHistory(simResourceManager, environmentFluidManager);
         statsHistory.Initialize();
         
         Logger.Log("LoadingSetUpFitnessStorage: " + (Time.realtimeSinceStartup - startTime), debugLogStartup);
@@ -280,8 +280,8 @@ public class SimulationManager : Singleton<SimulationManager>
         simEventsManager = new SimEventsManager();
         simResourceManager = new SimResourceManager();
         //agentsManager = new AgentsManager();
-        vegetationManager = new VegetationManager(settingsManager, simResourceManager);
-        zooplanktonManager = new ZooplanktonManager(settingsManager, simResourceManager);
+        vegetationManager = new VegetationManager(simResourceManager);
+        zooplanktonManager = new ZooplanktonManager(simResourceManager);
          
         LoadingInitializePopulationGenomes();  // **** Maybe change this up ? ** depending on time of first Agent Creation?
 
@@ -336,7 +336,7 @@ public class SimulationManager : Singleton<SimulationManager>
         var newAgent = agentGO.GetComponent<Agent>();
         
         //newAgent.speciesIndex = Mathf.FloorToInt((float)i / (float)numAgents * (float)numSpecies);
-        newAgent.FirstTimeInitialize(settingsManager); // agentGenomePoolArray[i]);
+        newAgent.FirstTimeInitialize(); // agentGenomePoolArray[i]);
         agents[index] = newAgent;        
     }
     
@@ -484,8 +484,7 @@ public class SimulationManager : Singleton<SimulationManager>
             // send current data to GPU
 
         // simulation ticks per layer
-
-
+        
         // MEASURE GLOBAL RESOURCES:
         //if(trophicLayersManager.GetAlgaeOnOff()) {
             //vegetationManager.FindClosestAlgaeParticleToCritters(simStateData);
@@ -515,8 +514,8 @@ public class SimulationManager : Singleton<SimulationManager>
             zooplanktonManager.FindClosestAnimalParticleToCritters(simStateData);            
         } 
         
-        vegetationManager.FindClosestPlantParticleToCursor(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y);
-        zooplanktonManager.FindClosestAnimalParticleToCursor(theCursorCzar.curMousePositionOnWaterPlane.x, theCursorCzar.curMousePositionOnWaterPlane.y);
+        vegetationManager.FindClosestPlantParticleToCursor(theCursorCzar.curMousePositionOnWaterPlane);
+        zooplanktonManager.FindClosestAnimalParticleToCursor(theCursorCzar.curMousePositionOnWaterPlane);
         // Find best way to insert Agent Waste into ResourceGridTex.waste
 
         simResourceManager.oxygenUsedByAgentsLastFrame = totalOxygenUsedByAgents;
@@ -524,7 +523,7 @@ public class SimulationManager : Singleton<SimulationManager>
 
         // Global Resources Here????
         // Try to make sure AlgaeReservoir and AlgaeParticles share same mechanics!!! *********************************************
-        simResourceManager.Tick(settingsManager, trophicLayersManager, vegetationManager);  // Resource Flows Here
+        simResourceManager.Tick(trophicLayersManager, vegetationManager);  // Resource Flows Here
         
         if(targetAgent && uiManager.focusedCandidate != null &&
            targetAgent.candidateRef != null &&
@@ -544,6 +543,7 @@ public class SimulationManager : Singleton<SimulationManager>
             }            
         }
 
+        // * WPP: expose and calculate in ScriptableObject
         fogColor = Color.Lerp(new Color(0.15f, 0.25f, 0.52f), new Color(0.07f, 0.27f, 0.157f), Mathf.Clamp01(simResourceManager.curGlobalPlantParticles * 0.035f));
         fogAmount = Mathf.Lerp(0.3f, 0.55f, Mathf.Clamp01(simResourceManager.curGlobalPlantParticles * 0.0036f));
 
@@ -580,7 +580,7 @@ public class SimulationManager : Singleton<SimulationManager>
             // Load gameState into Agent Brain, process brain function, read out brainResults,
             // Execute Agent Actions -- apply propulsive force to each Agent:       
             foreach (var agent in agents) {
-                agent.Tick(this, settingsManager);            
+                agent.Tick();            
             }
             foreach (var eggSack in eggSacks) {
                 eggSack.Tick();
@@ -629,15 +629,12 @@ public class SimulationManager : Singleton<SimulationManager>
 
             statsHistory.AddNewHistoricalDataEntry();            
             AddNewSpeciesDataEntry(curSimYear);
-            
             CheckForYearEvent();
         }
 
         if(simAgeTimeSteps % 80 == 70) {
             uiManager.speciesGraphPanelUI.UpdateSpeciesTreeDataTextures(curSimYear);
-            
             globalGraphData.AddNewEntry(simResourceManager, GetTotalAgentBiomass());
-            
         }
 
         if(simAgeTimeSteps % 79 == 3) {
@@ -690,6 +687,7 @@ public class SimulationManager : Singleton<SimulationManager>
         public string message;
     }
     
+    // * WPP: delegate application of per-agent effects to Agent -> ApplyFluidForce(...)
     private void ApplyFluidForcesToDynamicObjects() {
         // ********** REVISIT CONVERSION btw fluid/scene coords and Force Amounts !!!! *************
         for (int i = 0; i < agents.Length; i++) {
@@ -704,8 +702,8 @@ public class SimulationManager : Singleton<SimulationManager>
             if (depthSample.x > _GlobalWaterLevel || depthSample.w < 0.1f) //(floorDepth < agentSize)
             {
                 float wallForce = 12.0f; // Mathf.Clamp01(agentSize - floorDepth) / agentSize;
-                Vector2 grad = agents[i].depthGradient; // new Vector2(depthSample.y, depthSample.z); //.normalized;
-                agents[i].bodyRigidbody.AddForce(-grad * agents[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
+                Vector2 gradient = agents[i].depthGradient; // new Vector2(depthSample.y, depthSample.z); //.normalized;
+                agents[i].bodyRigidbody.AddForce(-gradient * agents[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
 
                 float damage = wallForce * 0.015f;  
                 
@@ -719,12 +717,11 @@ public class SimulationManager : Singleton<SimulationManager>
                 {
                     defendBonus = agents[i].isDefending ? 0f : 1.5f;
                     damage *= defendBonus;
-
-                   
+                    
                     agents[i].candidateRef.performanceData.totalDamageTaken += damage;
                     agents[i].coreModule.isContact[0] = 1f;
-                    agents[i].coreModule.contactForceX[0] = grad.x;
-                    agents[i].coreModule.contactForceY[0] = grad.y;
+                    agents[i].coreModule.contactForceX[0] = gradient.x;
+                    agents[i].coreModule.contactForceY[0] = gradient.y;
                     agents[i].TakeDamage(damage);
                 }
             }
@@ -1076,7 +1073,7 @@ public class SimulationManager : Singleton<SimulationManager>
 
         numAgentsBorn++;
         //currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounter;
-        agents[agentIndex].InitializeSpawnAgentFromEggSack(settingsManager, agentIndex, sourceCandidate, parentEggSack, _GlobalWaterLevel); // Spawn that genome in dead Agent's body and revive it!
+        agents[agentIndex].InitializeSpawnAgentFromEggSack(agentIndex, sourceCandidate, parentEggSack, _GlobalWaterLevel); // Spawn that genome in dead Agent's body and revive it!
         theRenderKing.UpdateCritterGenericStrokesData(agents[agentIndex]); // agentIndex, sourceCandidate.candidateGenome);
     }
     
@@ -1084,7 +1081,7 @@ public class SimulationManager : Singleton<SimulationManager>
         //Debug.Log("SpawnAgentImmaculate! i= " + agentIndex.ToString() + ", spawnWorldPos: " + spawnPos2D.ToString());    
         
         // Spawn that genome in dead Agent's body and revive it!
-        agents[agentIndex].InitializeSpawnAgentImmaculate(settingsManager, agentIndex, sourceCandidate, new Vector3(spawnPos2D.x, spawnPos2D.y, 0f), _GlobalWaterLevel); 
+        agents[agentIndex].InitializeSpawnAgentImmaculate(agentIndex, sourceCandidate, new Vector3(spawnPos2D.x, spawnPos2D.y, 0f), _GlobalWaterLevel); 
         theRenderKing.UpdateCritterGenericStrokesData(agents[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);
         numAgentsBorn++;
     }

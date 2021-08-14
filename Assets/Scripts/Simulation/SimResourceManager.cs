@@ -1,8 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class SimResourceManager {
+    SettingsManager settings => SettingsManager.instance;
 
     //public float baseSolarEnergy = 1f;
     public float curGlobalOxygen = 1f;
@@ -56,8 +55,8 @@ public class SimResourceManager {
         curGlobalDetritus = 0f;
     }
 
-    public void Tick(SettingsManager settings, TrophicLayersManager trophicLayersManager, VegetationManager veggieManager) {
-        
+    public void Tick(TrophicLayersManager trophicLayersManager, VegetationManager veggieManager) 
+    {
         float nutrientsProduced = 0f;
         float decomposersTotalProductivity = 0f;
         if(trophicLayersManager.IsLayerOn(KnowledgeMapId.Decomposers)) {

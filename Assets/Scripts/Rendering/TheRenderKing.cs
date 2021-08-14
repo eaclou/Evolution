@@ -8,6 +8,11 @@ using Random = UnityEngine.Random;
 // * WPP: 1024 is used a lot, what concept does it represent? (replace with constant, exposed value, or system setting)
 // repeat for other magic numbers
 
+/// Initializes and updates all materials and compute buffers in game, including individual agents
+// * WPP: break into regions to focus optimization efforts
+    // General initialization: low priority
+    // Agent initialization: low/moderate priority
+    // Update loop: high priority
 public class TheRenderKing : Singleton<TheRenderKing> 
 {
     // Singleton references
@@ -564,6 +569,9 @@ public class TheRenderKing : Singleton<TheRenderKing>
 
     public bool isToolbarCritterPortraitEnabled = false;
     
+    // * WPP: move other startup/initialize methods here, remove any not related to initialization
+    #region Initialization 
+    
     private void Awake() {
         fluidObstaclesRenderCamera.enabled = false;
         fluidColorRenderCamera.enabled = false;
@@ -1067,6 +1075,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
         cmdBufferWorldTree.name = "cmdBufferWorldTree";
         worldTreeRenderCamera.AddCommandBuffer(CameraEvent.BeforeDepthNormalsTexture, cmdBufferWorldTree);
     }
+    
+    #endregion
 
     public Vector4[] GetDepthAtObjectPositions(Vector4[] positionsArray) 
     {
@@ -1167,9 +1177,18 @@ public class TheRenderKing : Singleton<TheRenderKing>
 
     private void PopulateColorInjectionBuffer() 
     {
-        int baseIndex = 0;
+        // * WPP: hard-coded value set to default, this does nothing and has no clear future purpose
+        int baseIndex = 0;  
         
-        // AGENTS:
+        // WPP: delegated to methods (use this technique *whenever* it feels necessary to comment a code block)
+        PopulateAgentColorInjectionBuffer(baseIndex);
+        PopulateFoodColorInjectionBuffer(baseIndex);
+
+        colorInjectionStrokesCBuffer.SetData(colorInjectionStrokeDataArray);
+    }
+    
+    void PopulateAgentColorInjectionBuffer(int baseIndex)
+    {
         for (int i = 0; i < agents.Length; i++) 
         {
             Vector3 agentPos = agents[i].bodyRigidbody.position;
@@ -1201,8 +1220,10 @@ public class TheRenderKing : Singleton<TheRenderKing>
             //Color drawColor = new Color(hue.x, hue.y, hue.z);
             colorInjectionStrokeDataArray[baseIndex + i].color = hue;
         }
-        
-        // FOOD:
+    }
+    
+    void PopulateFoodColorInjectionBuffer(int baseIndex)
+    {
         baseIndex = agents.Length;
         for (int i = 0; i < simManager.eggSacks.Length; i++) {
             Vector3 foodPos = simManager.eggSacks[i].transform.position;
@@ -1217,11 +1238,9 @@ public class TheRenderKing : Singleton<TheRenderKing>
 
             colorInjectionStrokeDataArray[baseIndex + i].color = 
                 new Vector4(Mathf.Lerp(simManager.eggSackGenomes[i].fruitHue.x, 0.1f, 0.7f), 
-                            Mathf.Lerp(simManager.eggSackGenomes[i].fruitHue.y, 0.9f, 0.7f), 
-                            Mathf.Lerp(simManager.eggSackGenomes[i].fruitHue.z, 0.2f, 0.7f), foodAlpha);
+                    Mathf.Lerp(simManager.eggSackGenomes[i].fruitHue.y, 0.9f, 0.7f), 
+                    Mathf.Lerp(simManager.eggSackGenomes[i].fruitHue.z, 0.2f, 0.7f), foodAlpha);
         }
-
-        colorInjectionStrokesCBuffer.SetData(colorInjectionStrokeDataArray);
     }
 
     public void UpdateDynamicFoodBuffers(int eggSackIndex) {
@@ -1247,6 +1266,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
         computeShaderEggSacks.Dispatch(kernelCSUpdateDynamicEggBuffers, 1, 1, 1);
         eggsUpdateCBuffer.Release();
     }
+    
+    #region Agent Initialization
 
     public void UpdateCritterGenericStrokesData(Agent agent) { 
         ComputeBuffer singleCritterGenericStrokesCBuffer = new ComputeBuffer(GetNumStrokesPerCritter(), GetMemorySizeCritterStrokeData());
@@ -1289,8 +1310,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
         singleCritterGenericStrokesCBuffer.Release();
     }
     
-    public void GenerateCritterPortraitStrokesData(AgentGenome genome) { // AgentGenome genome2) {
-
+    public void GenerateCritterPortraitStrokesData(AgentGenome genome) 
+    {
         // Get genomes:
         //AgentGenome genome0 = genome; // simManager.masterGenomePool.completeSpeciesPoolsList[0].representativeGenome;
 
@@ -1484,6 +1505,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
 
             //float prevRingRadius = socketRadius; // hack for getting slope of normal?
 
+            // * WPP: define purpose of this code block and delegate to method
             for (int z = 0; z < totalLengthResolution; z++) {
                 //float zFract = (float)z / (float)totalLengthResolution;
                 float socketFractZ = Mathf.Clamp01((float)z / (float)(socketLengthResolution - 1));
@@ -1987,73 +2009,9 @@ public class TheRenderKing : Singleton<TheRenderKing>
             Debug.Log($"Arrays don't match length!!! sorted: {sortedBrushStrokesList.Count}, master: {strokesArray.Length}");
         }
     }
-
-    public void SimFloatyBits() {
-        int kernelSimFloatyBits = fluidManager.computeShaderFluidSim.FindKernel("SimFloatyBits");
-
-        fluidManager.computeShaderFluidSim.SetFloat("_TextureResolution", (float)fluidManager.resolution);
-        fluidManager.computeShaderFluidSim.SetFloat("_DeltaTime", fluidManager.deltaTime);
-        fluidManager.computeShaderFluidSim.SetFloat("_InvGridScale", fluidManager.invGridScale);
-        fluidManager.computeShaderFluidSim.SetFloat("_Time", Time.realtimeSinceStartup);
-        fluidManager.computeShaderFluidSim.SetTexture(kernelSimFloatyBits, "_SpiritBrushTex", spiritBrushRT);
-        fluidManager.computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
-        fluidManager.computeShaderFluidSim.SetTexture(kernelSimFloatyBits, "VelocityRead", fluidManager._VelocityPressureDivergenceMain);
-        fluidManager.computeShaderFluidSim.Dispatch(kernelSimFloatyBits, floatyBitsCBuffer.count / 1024, 1, 1);
-    }
     
-    public void SimSpiritBrushQuads() {
-        bool isSpawn = false;
-        //if (simManager.uiManager.panelFocus == PanelFocus.Brushes) {
-        //    isSpawn = true;
-        //}
-        float isBrushing = 0f;
-        if (isSpiritBrushOn) {
-            isBrushing = 1f;
-        }
-
-        // CursorParticles:
-        int kernelCSSimulateCursorParticles = computeShaderSpiritBrush.FindKernel("CSSimulateCursorParticles");
-
-        computeShaderSpiritBrush.SetFloat("_TextureResolution", (float)fluidManager.resolution);
-        computeShaderSpiritBrush.SetFloat("_DeltaTime", fluidManager.deltaTime);
-        computeShaderSpiritBrush.SetFloat("_InvGridScale", fluidManager.invGridScale);
-        computeShaderSpiritBrush.SetFloat("_Time", Time.realtimeSinceStartup);
-        computeShaderSpiritBrush.SetVector("_ParticleColor", uiManager.worldSpiritHubUI.curIconColor);
-        computeShaderSpiritBrush.SetFloat("_ParticleSpawnRadius", (0.515f + isBrushing * 0.075f) * 5.3065f);
-        computeShaderSpiritBrush.SetVector("_CursorWorldPosition", new Vector4(theCursorCzar.cursorParticlesWorldPos.x,
-                                                                              theCursorCzar.cursorParticlesWorldPos.y,
-                                                                              theCursorCzar.cursorParticlesWorldPos.z,
-                                                                              0f));
-        computeShaderSpiritBrush.SetBool("_SpawnOn", isSpawn);
-        computeShaderSpiritBrush.SetFloat("_IsBrushing", isBrushing);
-        //computeShaderSpiritBrush.SetFloat("_CursorWorldPosX", simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x);
-        //computeShaderSpiritBrush.SetFloat("_CursorWorldPosY", simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y);
-        computeShaderSpiritBrush.SetBuffer(kernelCSSimulateCursorParticles, "_CursorParticlesRead", cursorParticlesCBuffer0);
-        computeShaderSpiritBrush.SetBuffer(kernelCSSimulateCursorParticles, "_CursorParticlesWrite", cursorParticlesCBuffer1);
-        computeShaderSpiritBrush.Dispatch(kernelCSSimulateCursorParticles, 1, 1, 1);
-
-        int kernelCSCopyBufferCursorParticles = computeShaderSpiritBrush.FindKernel("CSCopyBufferCursorParticles");   // Copy back to original buffer0
-        computeShaderSpiritBrush.SetBuffer(kernelCSCopyBufferCursorParticles, "_CursorParticlesRead", cursorParticlesCBuffer1);
-        computeShaderSpiritBrush.SetBuffer(kernelCSCopyBufferCursorParticles, "_CursorParticlesWrite", cursorParticlesCBuffer0);
-        computeShaderSpiritBrush.Dispatch(kernelCSCopyBufferCursorParticles, 1, 1, 1);
-        
-        //==========================================================================================================
-        int kernelCSSimulateBrushQuads = computeShaderSpiritBrush.FindKernel("CSSimulateBrushQuads");
-
-        computeShaderSpiritBrush.SetFloat("_TextureResolution", (float)fluidManager.resolution);
-        computeShaderSpiritBrush.SetFloat("_DeltaTime", fluidManager.deltaTime);
-        computeShaderSpiritBrush.SetFloat("_InvGridScale", fluidManager.invGridScale);
-        computeShaderSpiritBrush.SetFloat("_Time", Time.realtimeSinceStartup);
-        computeShaderSpiritBrush.SetBuffer(kernelCSSimulateBrushQuads, "_SpiritBrushQuadsRead", spiritBrushQuadDataCBuffer0);
-        computeShaderSpiritBrush.SetBuffer(kernelCSSimulateBrushQuads, "_SpiritBrushQuadsWrite", spiritBrushQuadDataCBuffer1);
-        computeShaderSpiritBrush.Dispatch(kernelCSSimulateBrushQuads, 1, 1, 1);
-
-        int kernelCSCopyBuffer = computeShaderSpiritBrush.FindKernel("CSCopyBuffer");   // Copy back to original buffer0
-        computeShaderSpiritBrush.SetBuffer(kernelCSCopyBuffer, "_SpiritBrushQuadsRead", spiritBrushQuadDataCBuffer1);
-        computeShaderSpiritBrush.SetBuffer(kernelCSCopyBuffer, "_SpiritBrushQuadsWrite", spiritBrushQuadDataCBuffer0);
-        computeShaderSpiritBrush.Dispatch(kernelCSCopyBuffer, 1, 1, 1);
-    }
-
+    #endregion
+    
     public void SpawnSpiritBrushQuads(CreationBrush brushData, int startIndex, int numCells) 
     {
         //Debug.Log("SpawnSpiritBrushQuads(int startIndex, int numCells)");
@@ -2223,6 +2181,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
         creaturePanelUI.portraitCritterSimDataCBuffer.SetData(toolbarPortraitCritterSimDataArray);
     }
     
+    #region Per-frame calculation (optimization priority)
+    
     // Should be called from SimManager at proper time!
     public void Tick() {  
         sunDirection = -sunGO.transform.forward;
@@ -2272,6 +2232,72 @@ public class TheRenderKing : Singleton<TheRenderKing>
         baronVonTerrain.SimWasteBits();
 
         baronVonWater.Tick(null);  // <-- SimWaterCurves/Chains/Water surface
+    }
+    
+        public void SimFloatyBits() {
+        int kernelSimFloatyBits = fluidManager.computeShaderFluidSim.FindKernel("SimFloatyBits");
+
+        fluidManager.computeShaderFluidSim.SetFloat("_TextureResolution", (float)fluidManager.resolution);
+        fluidManager.computeShaderFluidSim.SetFloat("_DeltaTime", fluidManager.deltaTime);
+        fluidManager.computeShaderFluidSim.SetFloat("_InvGridScale", fluidManager.invGridScale);
+        fluidManager.computeShaderFluidSim.SetFloat("_Time", Time.realtimeSinceStartup);
+        fluidManager.computeShaderFluidSim.SetTexture(kernelSimFloatyBits, "_SpiritBrushTex", spiritBrushRT);
+        fluidManager.computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
+        fluidManager.computeShaderFluidSim.SetTexture(kernelSimFloatyBits, "VelocityRead", fluidManager._VelocityPressureDivergenceMain);
+        fluidManager.computeShaderFluidSim.Dispatch(kernelSimFloatyBits, floatyBitsCBuffer.count / 1024, 1, 1);
+    }
+    
+    public void SimSpiritBrushQuads() {
+        bool isSpawn = false;
+        //if (simManager.uiManager.panelFocus == PanelFocus.Brushes) {
+        //    isSpawn = true;
+        //}
+        float isBrushing = 0f;
+        if (isSpiritBrushOn) {
+            isBrushing = 1f;
+        }
+
+        // CursorParticles:
+        int kernelCSSimulateCursorParticles = computeShaderSpiritBrush.FindKernel("CSSimulateCursorParticles");
+
+        computeShaderSpiritBrush.SetFloat("_TextureResolution", (float)fluidManager.resolution);
+        computeShaderSpiritBrush.SetFloat("_DeltaTime", fluidManager.deltaTime);
+        computeShaderSpiritBrush.SetFloat("_InvGridScale", fluidManager.invGridScale);
+        computeShaderSpiritBrush.SetFloat("_Time", Time.realtimeSinceStartup);
+        computeShaderSpiritBrush.SetVector("_ParticleColor", uiManager.worldSpiritHubUI.curIconColor);
+        computeShaderSpiritBrush.SetFloat("_ParticleSpawnRadius", (0.515f + isBrushing * 0.075f) * 5.3065f);
+        computeShaderSpiritBrush.SetVector("_CursorWorldPosition", new Vector4(theCursorCzar.cursorParticlesWorldPos.x,
+                                                                              theCursorCzar.cursorParticlesWorldPos.y,
+                                                                              theCursorCzar.cursorParticlesWorldPos.z,
+                                                                              0f));
+        computeShaderSpiritBrush.SetBool("_SpawnOn", isSpawn);
+        computeShaderSpiritBrush.SetFloat("_IsBrushing", isBrushing);
+        //computeShaderSpiritBrush.SetFloat("_CursorWorldPosX", simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.x);
+        //computeShaderSpiritBrush.SetFloat("_CursorWorldPosY", simManager.uiManager.theCursorCzar.curMousePositionOnWaterPlane.y);
+        computeShaderSpiritBrush.SetBuffer(kernelCSSimulateCursorParticles, "_CursorParticlesRead", cursorParticlesCBuffer0);
+        computeShaderSpiritBrush.SetBuffer(kernelCSSimulateCursorParticles, "_CursorParticlesWrite", cursorParticlesCBuffer1);
+        computeShaderSpiritBrush.Dispatch(kernelCSSimulateCursorParticles, 1, 1, 1);
+
+        int kernelCSCopyBufferCursorParticles = computeShaderSpiritBrush.FindKernel("CSCopyBufferCursorParticles");   // Copy back to original buffer0
+        computeShaderSpiritBrush.SetBuffer(kernelCSCopyBufferCursorParticles, "_CursorParticlesRead", cursorParticlesCBuffer1);
+        computeShaderSpiritBrush.SetBuffer(kernelCSCopyBufferCursorParticles, "_CursorParticlesWrite", cursorParticlesCBuffer0);
+        computeShaderSpiritBrush.Dispatch(kernelCSCopyBufferCursorParticles, 1, 1, 1);
+        
+        //==========================================================================================================
+        int kernelCSSimulateBrushQuads = computeShaderSpiritBrush.FindKernel("CSSimulateBrushQuads");
+
+        computeShaderSpiritBrush.SetFloat("_TextureResolution", (float)fluidManager.resolution);
+        computeShaderSpiritBrush.SetFloat("_DeltaTime", fluidManager.deltaTime);
+        computeShaderSpiritBrush.SetFloat("_InvGridScale", fluidManager.invGridScale);
+        computeShaderSpiritBrush.SetFloat("_Time", Time.realtimeSinceStartup);
+        computeShaderSpiritBrush.SetBuffer(kernelCSSimulateBrushQuads, "_SpiritBrushQuadsRead", spiritBrushQuadDataCBuffer0);
+        computeShaderSpiritBrush.SetBuffer(kernelCSSimulateBrushQuads, "_SpiritBrushQuadsWrite", spiritBrushQuadDataCBuffer1);
+        computeShaderSpiritBrush.Dispatch(kernelCSSimulateBrushQuads, 1, 1, 1);
+
+        int kernelCSCopyBuffer = computeShaderSpiritBrush.FindKernel("CSCopyBuffer");   // Copy back to original buffer0
+        computeShaderSpiritBrush.SetBuffer(kernelCSCopyBuffer, "_SpiritBrushQuadsRead", spiritBrushQuadDataCBuffer1);
+        computeShaderSpiritBrush.SetBuffer(kernelCSCopyBuffer, "_SpiritBrushQuadsWrite", spiritBrushQuadDataCBuffer0);
+        computeShaderSpiritBrush.Dispatch(kernelCSCopyBuffer, 1, 1, 1);
     }
 
     // **** revisit
@@ -3306,6 +3332,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
             Render();
         }
     }
+    
+    #endregion
 
     private void OnDisable() {
         if (mainRenderCam != null) {
