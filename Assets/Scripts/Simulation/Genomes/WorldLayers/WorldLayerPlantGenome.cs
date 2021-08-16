@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class WorldLayerPlantGenome {
-
+public class WorldLayerPlantGenome 
+{
     public string name;
     public string textDescriptionMutation;
     public float growthRate;
@@ -13,16 +11,19 @@ public class WorldLayerPlantGenome {
     public int patternRowID;
     public int patternColumnID;
     public float patternThreshold;
-    public VegetationManager.PlantParticleData plantRepData;
+    public PlantParticleData plantRepData;
    
-    public WorldLayerPlantGenome() {   // construction
-        growthRate = 1f;
-
+    public WorldLayerPlantGenome(string name, PlantParticleData plantRepData, float growthRate = 1f) 
+    {
+        this.name = name;   
+        this.growthRate = growthRate;
+        this.plantRepData = plantRepData;
+        
+        textDescriptionMutation = "Growth Rate: " + growthRate.ToString("F2");
         displayColorPri = Color.white;
         displayColorSec = Color.black;
-
-        patternRowID = UnityEngine.Random.Range(0, 8);
-        patternColumnID = UnityEngine.Random.Range(0, 8);
-        patternThreshold = UnityEngine.Random.Range(0f, 1f);
+        patternRowID = Random.Range(0, 8);
+        patternColumnID = Random.Range(0, 8);
+        patternThreshold = Random.Range(0f, 1f);
     }
 }
