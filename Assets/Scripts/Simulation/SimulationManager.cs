@@ -17,10 +17,10 @@ public class SimulationManager : Singleton<SimulationManager>
     AudioManager audioManager => AudioManager.instance;
     TheCursorCzar theCursorCzar => TheCursorCzar.instance;
     SettingsManager settingsManager => SettingsManager.instance;
+    EnvironmentFluidManager fluidManager => EnvironmentFluidManager.instance;
     
     public QualitySettingData qualitySettings;
     public LoadingPanelUI loadingPanel;
-    public EnvironmentFluidManager environmentFluidManager;
     public SimulationStateData simStateData;
     public StartPositionsPresetLists startPositionsPresets;
     public ComputeShader computeShaderResourceGrid;    // algae grid
@@ -150,7 +150,7 @@ public class SimulationManager : Singleton<SimulationManager>
         // Fitness Stuffs:::
         startTime = Time.realtimeSinceStartup;
         
-        statsHistory = new StatsHistory(simResourceManager, environmentFluidManager);
+        statsHistory = new StatsHistory(simResourceManager);
         statsHistory.Initialize();
         
         Logger.Log("LoadingSetUpFitnessStorage: " + (Time.realtimeSinceStartup - startTime), debugLogStartup);
@@ -246,7 +246,7 @@ public class SimulationManager : Singleton<SimulationManager>
         
         //yield return new WaitForSeconds(5f); // TEMP!!!
         Logger.Log("End Total: " + (Time.realtimeSinceStartup - masterStartTime), debugLogStartup);
-        environmentFluidManager.UpdateSimulationClimate();
+        fluidManager.UpdateSimulationClimate();
         
         loadingComplete = true;
         loadingPanel.SetCursorActive(true);
@@ -308,7 +308,7 @@ public class SimulationManager : Singleton<SimulationManager>
     }
     
     private void LoadingInitializeFluidSim() {
-        environmentFluidManager.InitializeFluidSystem();
+        fluidManager.InitializeFluidSystem();
     }
     
     private void GentlyRouseTheRenderMonarchHisHighnessLordOfPixels() {
@@ -380,7 +380,7 @@ public class SimulationManager : Singleton<SimulationManager>
     
     private void LoadingHookUpFluidAndRenderKing() {
         // **** NEED TO ADDRESS THIS!!!!!! ************************
-        theRenderKing.fluidObstaclesRenderCamera.targetTexture = environmentFluidManager._ObstaclesRT; // *** See if this works **
+        theRenderKing.fluidObstaclesRenderCamera.targetTexture = fluidManager._ObstaclesRT; // *** See if this works **
 
         //theRenderKing.fluidColorRenderCamera.targetTexture = environmentFluidManager._SourceColorRT;
         
@@ -555,24 +555,24 @@ public class SimulationManager : Singleton<SimulationManager>
         theRenderKing.Tick(); // updates all renderData, buffers, brushStrokes etc.
         // Simulate timestep of fluid Sim - update density/velocity maps:
         // Or should this be right at beginning of frame????? ***************** revisit...
-        environmentFluidManager.Tick(vegetationManager); // ** Clean this up, but generally OK
+        fluidManager.Tick(vegetationManager); // ** Clean this up, but generally OK
 
         //vegetationManager.ApplyDiffusionOnResourceGrid(environmentFluidManager);
         //vegetationManager.AdvectResourceGrid(environmentFluidManager);
         //if(curSimYear < 4) {  // stop simulating after certain point !! TEMPORARY!!!
-        vegetationManager.SimResourceGrid(ref environmentFluidManager, ref theRenderKing.baronVonTerrain);
+        vegetationManager.SimResourceGrid(ref theRenderKing.baronVonTerrain);
         //}
         
         if(trophicLayersManager.IsLayerOn(KnowledgeMapId.Plants)) {
             vegetationManager.EatSelectedFoodParticles(simStateData); // 
             // How much light/nutrients available?
-            vegetationManager.SimulatePlantParticles(environmentFluidManager, theRenderKing, simStateData, simResourceManager);
+            vegetationManager.SimulatePlantParticles(simStateData, simResourceManager);
         }
         
         if(trophicLayersManager.IsLayerOn(KnowledgeMapId.Microbes)) {
             zooplanktonManager.EatSelectedAnimalParticles(simStateData);        
             // Send back information about how much growth/photosynthesis there was?
-            zooplanktonManager.SimulateAnimalParticles(environmentFluidManager, theRenderKing, simStateData, simResourceManager);
+            zooplanktonManager.SimulateAnimalParticles(simStateData, simResourceManager);
             // how much oxygen used? How much eaten? How much growth? How much waste/detritus?
         }
               
@@ -761,10 +761,10 @@ public class SimulationManager : Singleton<SimulationManager>
 
         //Debug.Log("PlayerToolStir pos: " + origin.ToString() + ", forceVec: [" + forceVector.x.ToString() + "," + forceVector.y.ToString() + "]  mag: " + magnitude.ToString());
 
-        environmentFluidManager.StirWaterOn(origin, forceVector, radiusMult);
+        fluidManager.StirWaterOn(origin, forceVector, radiusMult);
     }
     public void PlayerToolStirOff() {        
-        environmentFluidManager.StirWaterOff();
+        fluidManager.StirWaterOff();
     }
     
     
@@ -1236,7 +1236,7 @@ public class SimulationManager : Singleton<SimulationManager>
     
     /// Change force of turbulence, damping, other fluidSim parameters
     private void UpdateSimulationClimate() {
-        environmentFluidManager.UpdateSimulationClimate();
+        fluidManager.UpdateSimulationClimate();
     }
     
     private void AddNewSpeciesDataEntry(int year) {
@@ -1389,7 +1389,7 @@ public class SimulationManager : Singleton<SimulationManager>
         numAgents = qualitySettings.GetAgentCount(simulationComplexity);
         numEggSacks = qualitySettings.GetEggSackCount(simulationComplexity);
         numInitialHiddenNeurons = qualitySettings.GetHiddenNeuronCont(simulationComplexity);
-        environmentFluidManager.SetResolution(fluidPhysicsQuality);
+        fluidManager.SetResolution(fluidPhysicsQuality);
 
         Debug.Log("ApplyQualitySettings() numAgents: " + numAgents);
     }

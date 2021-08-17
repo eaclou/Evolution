@@ -7,6 +7,7 @@ public class MinimapPanel : MonoBehaviour
     CameraManager cameraManager => CameraManager.instance;
     TrophicLayersManager trophicLayers => simulationManager.trophicLayersManager;
     TheRenderKing theRenderKing => TheRenderKing.instance;
+    EnvironmentFluidManager fluidManager => EnvironmentFluidManager.instance;
     //Lookup lookup => Lookup.instance;
     
 
@@ -50,9 +51,9 @@ public class MinimapPanel : MonoBehaviour
         {
             case KnowledgeMapId.Decomposers: return simulationManager.vegetationManager.resourceGridRT1;
             case KnowledgeMapId.Algae: return simulationManager.vegetationManager.resourceGridRT1;
-            case KnowledgeMapId.Plants: return simulationManager.environmentFluidManager._SourceColorRT;
-            case KnowledgeMapId.Microbes: return simulationManager.environmentFluidManager._SourceColorRT;
-            case KnowledgeMapId.Animals: return simulationManager.environmentFluidManager._SourceColorRT;
+            case KnowledgeMapId.Plants: return fluidManager._SourceColorRT;
+            case KnowledgeMapId.Microbes: return fluidManager._SourceColorRT;
+            case KnowledgeMapId.Animals: return fluidManager._SourceColorRT;
             case KnowledgeMapId.World: return theRenderKing.baronVonTerrain.terrainHeightDataRT;
             case KnowledgeMapId.Stone: return theRenderKing.baronVonTerrain.terrainHeightDataRT;
             case KnowledgeMapId.Pebbles: return theRenderKing.baronVonTerrain.terrainHeightDataRT;

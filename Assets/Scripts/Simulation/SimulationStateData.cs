@@ -3,6 +3,7 @@
 public class SimulationStateData {
     SimulationManager simManager => SimulationManager.instance;
     TheRenderKing theRenderKing => TheRenderKing.instance;
+    EnvironmentFluidManager fluidManager => EnvironmentFluidManager.instance;
 
     // Stores data about the current simulation to be shared with RenderKing and FluidManager:
 
@@ -358,8 +359,8 @@ public class SimulationStateData {
         eggSackSimDataCBuffer.SetData(eggSackSimDataArray); // send data to GPU for Rendering
         
         // Grab data from GPU FluidSim!        
-        fluidVelocitiesAtAgentPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(agentFluidPositionsArray);
-        fluidVelocitiesAtEggSackPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(eggSackFluidPositionsArray);
+        fluidVelocitiesAtAgentPositionsArray = fluidManager.GetFluidVelocityAtObjectPositions(agentFluidPositionsArray);
+        fluidVelocitiesAtEggSackPositionsArray = fluidManager.GetFluidVelocityAtObjectPositions(eggSackFluidPositionsArray);
         //fluidVelocitiesAtPredatorPositionsArray = simManager.environmentFluidManager.GetFluidVelocityAtObjectPositions(predatorFluidPositionsArray);
         //Debug.Log("agentFluidPositionsArray: " + agentFluidPositionsArray.Length.ToString());
         depthAtAgentPositionsArray = theRenderKing.GetDepthAtObjectPositions(agentFluidPositionsArray);

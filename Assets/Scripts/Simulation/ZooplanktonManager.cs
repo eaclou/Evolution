@@ -7,6 +7,8 @@
 public class ZooplanktonManager {
     SimulationManager simManager => SimulationManager.instance;
     SettingsManager settingsRef => SettingsManager.instance;
+    TheRenderKing renderKing => TheRenderKing.instance;
+    EnvironmentFluidManager fluidManager => EnvironmentFluidManager.instance;
     
     public SimResourceManager resourceManagerRef;
     
@@ -226,25 +228,23 @@ public class ZooplanktonManager {
         selectRespawnAnimalParticleIndicesCBuffer.Release();
     }*/
     
-    public void SimulateAnimalParticles(EnvironmentFluidManager fluidManagerRef, TheRenderKing renderKingRef, SimulationStateData simStateDataRef, SimResourceManager resourcesManager) { // Sim
-        // Go through animalParticleData and check for inactive
-        // determined by current total animal -- done!
-        // if flag on shader for Respawn is on, set to active and initialize
-
-        //float maxAnimalParticleTotal = 2048f; // *** Revisit this! Arbitrary! // settingsRef.maxAnimalParticleTotalAmount;
-
+    // Go through animalParticleData and check for inactive
+    // determined by current total animal -- done!
+    // if flag on shader for Respawn is on, set to active and initialize
+    public void SimulateAnimalParticles(SimulationStateData simStateDataRef, SimResourceManager resourcesManager) 
+    {
         int kernelCSSimulateAnimalParticles = computeShaderAnimalParticles.FindKernel("CSSimulateAnimalParticles");
         computeShaderAnimalParticles.SetBuffer(kernelCSSimulateAnimalParticles, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
         computeShaderAnimalParticles.SetBuffer(kernelCSSimulateAnimalParticles, "animalParticlesRead", animalParticlesCBuffer);
         computeShaderAnimalParticles.SetBuffer(kernelCSSimulateAnimalParticles, "animalParticlesWrite", animalParticlesCBufferSwap);
-        computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "velocityRead", fluidManagerRef._VelocityPressureDivergenceMain);        
-        computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "altitudeRead", renderKingRef.baronVonTerrain.terrainHeightDataRT);
-        computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "_SpawnDensityMap", renderKingRef.spiritBrushRT);
+        computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "velocityRead", fluidManager._VelocityPressureDivergenceMain);        
+        computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "altitudeRead", renderKing.baronVonTerrain.terrainHeightDataRT);
+        computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "_SpawnDensityMap", renderKing.spiritBrushRT);
         computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "_ResourceGridRead", simManager.vegetationManager.resourceGridRT1);
         //computeShaderAnimalParticles.SetTexture(kernelCSSimulateAnimalParticles, "_SpawnDensityMap", algaeGridRT1);        
         computeShaderAnimalParticles.SetFloat("_GlobalOxygenLevel", resourcesManager.curGlobalOxygen); // needed?
         computeShaderAnimalParticles.SetFloat("_GlobalAlgaeLevel", resourceManagerRef.curGlobalPlantParticles);
-        computeShaderAnimalParticles.SetFloat("_SpiritBrushPosNeg", renderKingRef.spiritBrushPosNeg);
+        computeShaderAnimalParticles.SetFloat("_SpiritBrushPosNeg", renderKing.spiritBrushPosNeg);
         computeShaderAnimalParticles.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);   
         // Movement Params:
         computeShaderAnimalParticles.SetFloat("_MasterSwimSpeed", settingsRef.zooplanktonSettings._MasterSwimSpeed * Mathf.Lerp(0.01f, 5f, zooplanktonSlotGenomeCurrent.swimSpeed01)); // = 0.35;

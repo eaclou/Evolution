@@ -7,6 +7,7 @@ using Random = UnityEngine.Random;
 public class BrushesUI : MonoBehaviour {
     UIManager uiManagerRef => UIManager.instance;
     WorldSpiritHubUI worldSpiritHubUI => uiManagerRef.worldSpiritHubUI;
+    EnvironmentFluidManager fluidManager => EnvironmentFluidManager.instance;
     
     public bool isUnlocked;
     public bool isOpen;
@@ -371,7 +372,7 @@ public class BrushesUI : MonoBehaviour {
                     theCursorCzar.isDraggingMouse &&
                     Random.Range(0f, 1f) < 0.1f) 
             {
-                simulationManager.environmentFluidManager.curTierWaterCurrents = Mathf.Clamp((simulationManager.environmentFluidManager.curTierWaterCurrents + 1), 0, 10);
+                fluidManager.curTierWaterCurrents = Mathf.Clamp(fluidManager.curTierWaterCurrents + 1, 0, 10);
             }
         }
 

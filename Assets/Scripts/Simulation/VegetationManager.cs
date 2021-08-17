@@ -3,8 +3,9 @@
 public class VegetationManager {
     SimulationManager simManager => SimulationManager.instance;
     UIManager uiManager => UIManager.instance;
-    TheRenderKing theRenderKing => TheRenderKing.instance;
+    TheRenderKing renderKing => TheRenderKing.instance;
     SettingsManager settingsRef => SettingsManager.instance;
+    EnvironmentFluidManager fluidManager => EnvironmentFluidManager.instance;
 
     public SimResourceManager resourceManagerRef;
     
@@ -345,7 +346,7 @@ public class VegetationManager {
         computeShaderResourceGrid.Dispatch(kernelCSInitResourceGrid, resourceGridTexResolution / 32, resourceGridTexResolution / 32, 1);
     }
 
-    // WPP: this is a highly unusual way to initialize a class
+    // WPP: this is a highly unusual way to initialize a class, moved to constructor
     /*private void WorldLayerDecomposerGenomeStuff(ref WorldLayerDecomposerGenome genome, float mutationSizeLerp) 
     {
         float minIntakeRate = tempSharedIntakeRate * 0.1f;
@@ -361,41 +362,47 @@ public class VegetationManager {
         genome.growthEfficiency = Random.Range(0.1f, 2f); 
     }*/
 
-    // * WPP: use object initializers, see WorldLayerDecomposerGenome for example
+    // WPP: applied object initializer
     public void GenerateWorldLayerAlgaeGridGenomeMutationOptions() {
         for(int j = 0; j < algaeSlotGenomeMutations.Length; j++) {
-            float jLerp = Mathf.Clamp01((float)j / 3f + 0.015f); 
-            jLerp = jLerp * jLerp;
-            jLerp = 0.3f;
-            WorldLayerAlgaeGenome mutatedGenome = new WorldLayerAlgaeGenome();
-
+            // WPP: result of calculation overridden by hardcoded value
+            //float jLerp = Mathf.Clamp01((float)j / 3f + 0.015f); 
+            //jLerp = jLerp * jLerp;
+            
+            WorldLayerAlgaeGenome mutatedGenome = new WorldLayerAlgaeGenome(algaeSlotGenomeCurrent, tempSharedIntakeRate);
+            
+            // WPP: moved to constructor
+            /*float jLerp = 0.3f;
             Color randColorPri = Random.ColorHSV();
             Color randColorSec = Random.ColorHSV();
-            
             Color mutatedColorPri = Color.Lerp(algaeSlotGenomeCurrent.displayColorPri, randColorPri, jLerp);
             Color mutatedColorSec = Color.Lerp(algaeSlotGenomeCurrent.displayColorSec, randColorSec, jLerp);
+            bool useAlgaeSlotPattern = Random.Range(0f, 1f) < jLerp * 1f;
+            int patternRowID = useAlgaeSlotPattern ? algaeSlotGenomeCurrent.patternRowID : Random.Range(0, 8);
+            int patternColumnID = useAlgaeSlotPattern ? algaeSlotGenomeCurrent.patternColumnID : Random.Range(0, 8);
+            float minIntakeRate = tempSharedIntakeRate * 0.1f;
+            float maxIntakeRate = tempSharedIntakeRate * 10f; // init around 1?
+            float lnLerp = Mathf.Pow(Random.Range(0f, 1f), 2);
+            
             mutatedGenome.displayColorPri = mutatedColorPri;
             mutatedGenome.displayColorSec = mutatedColorSec;
+            mutatedGenome.patternRowID = patternRowID;
+            mutatedGenome.patternColumnID = patternColumnID;
+            mutatedGenome.patternThreshold = Mathf.Lerp(algaeSlotGenomeCurrent.patternThreshold, Random.Range(0f, 1f), jLerp);
+            mutatedGenome.metabolicRate = Mathf.Lerp(minIntakeRate, maxIntakeRate, lnLerp);
+            mutatedGenome.metabolicRate = Mathf.Lerp(algaeSlotGenomeCurrent.metabolicRate, mutatedGenome.metabolicRate, jLerp);
+            mutatedGenome.growthEfficiency = Random.Range(0.1f, 2f);*/
             
-            if(Random.Range(0f, 1f) < jLerp * 1f) {
+            // WPP: collapsed with ternary
+            /*if(Random.Range(0f, 1f) < jLerp * 1f) {
                 mutatedGenome.patternRowID = Random.Range(0, 8);
                 mutatedGenome.patternColumnID = Random.Range(0, 8);
             }
             else {
                 mutatedGenome.patternRowID = algaeSlotGenomeCurrent.patternRowID;
                 mutatedGenome.patternColumnID = algaeSlotGenomeCurrent.patternColumnID;
-            }
-            
-            mutatedGenome.patternThreshold = Mathf.Lerp(algaeSlotGenomeCurrent.patternThreshold, Random.Range(0f, 1f), jLerp);
-            
-            float minIntakeRate = tempSharedIntakeRate * 0.1f;
-            float maxIntakeRate = tempSharedIntakeRate * 10f; // init around 1?
-            float lnLerp = Random.Range(0f, 1f);
-            lnLerp *= lnLerp;
-            mutatedGenome.metabolicRate = Mathf.Lerp(minIntakeRate, maxIntakeRate, lnLerp);
-            mutatedGenome.metabolicRate = Mathf.Lerp(algaeSlotGenomeCurrent.metabolicRate, mutatedGenome.metabolicRate, jLerp);
-            mutatedGenome.growthEfficiency = Random.Range(0.1f, 2f);
-            
+            }*/
+
             algaeSlotGenomeMutations[j] = mutatedGenome;
         }
     }
@@ -516,21 +523,21 @@ public class VegetationManager {
         
     }*/
     
-    public void SimulatePlantParticles(EnvironmentFluidManager fluidManagerRef, TheRenderKing renderKingRef, SimulationStateData simStateDataRef, SimResourceManager resourcesManager) { // Sim
-        // Go through foodParticleData and check for inactive
-        // determined by current total food -- done!
-        // if flag on shader for Respawn is on, set to active and initialize
+    // Go through foodParticleData and check for inactive
+    // determined by current total food -- done!
+    // if flag on shader for Respawn is on, set to active and initialize
+    public void SimulatePlantParticles(SimulationStateData simStateDataRef, SimResourceManager resourcesManager) 
+    {
         //float maxFoodParticleTotal = settingsRef.maxFoodParticleTotalAmount;
-
         //Debug.Log("SimulatePlantParticles");
 
         int kernelCSSimulateAlgaeParticles = computeShaderPlantParticles.FindKernel("CSSimulateAlgaeParticles");
         computeShaderPlantParticles.SetBuffer(kernelCSSimulateAlgaeParticles, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
         computeShaderPlantParticles.SetBuffer(kernelCSSimulateAlgaeParticles, "foodParticlesRead", plantParticlesCBuffer);
         computeShaderPlantParticles.SetBuffer(kernelCSSimulateAlgaeParticles, "foodParticlesWrite", plantParticlesCBufferSwap);
-        computeShaderPlantParticles.SetTexture(kernelCSSimulateAlgaeParticles, "velocityRead", fluidManagerRef._VelocityPressureDivergenceMain);        
-        computeShaderPlantParticles.SetTexture(kernelCSSimulateAlgaeParticles, "altitudeRead", renderKingRef.baronVonTerrain.terrainHeightDataRT);
-        computeShaderPlantParticles.SetTexture(kernelCSSimulateAlgaeParticles, "_SpawnDensityMap", renderKingRef.spiritBrushRT);
+        computeShaderPlantParticles.SetTexture(kernelCSSimulateAlgaeParticles, "velocityRead", fluidManager._VelocityPressureDivergenceMain);        
+        computeShaderPlantParticles.SetTexture(kernelCSSimulateAlgaeParticles, "altitudeRead", renderKing.baronVonTerrain.terrainHeightDataRT);
+        computeShaderPlantParticles.SetTexture(kernelCSSimulateAlgaeParticles, "_SpawnDensityMap", renderKing.spiritBrushRT);
         computeShaderPlantParticles.SetTexture(kernelCSSimulateAlgaeParticles, "_ResourceGridRead", resourceGridRT1);
         computeShaderPlantParticles.SetFloat("_MapSize", SimulationManager._MapSize);   
         computeShaderPlantParticles.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
@@ -993,7 +1000,7 @@ public class VegetationManager {
         eatAmountsCBuffer.Release();
     }*/
        
-    public void SimResourceGrid(ref EnvironmentFluidManager fluidManagerRef, ref BaronVonTerrain baronTerrainRef) {
+    public void SimResourceGrid(ref BaronVonTerrain baronTerrainRef) {
         int kernelCSSimRD = computeShaderResourceGrid.FindKernel("CSSimResourceGrid"); 
         computeShaderResourceGrid.SetTexture(kernelCSSimRD, "_AltitudeTex", baronTerrainRef.terrainHeightRT0);        
         computeShaderResourceGrid.SetFloat("_TextureResolution", (float)resourceGridTexResolution);
@@ -1006,8 +1013,8 @@ public class VegetationManager {
         int kernelCSAdvectRD = computeShaderResourceGrid.FindKernel("CSAdvectResourceGrid");
         computeShaderResourceGrid.SetFloat("_TextureResolution", (float)resourceGridTexResolution);        
         computeShaderResourceGrid.SetFloat("_Time", Time.realtimeSinceStartup);
-        computeShaderResourceGrid.SetFloat("_DeltaTime", fluidManagerRef.deltaTime);
-        computeShaderResourceGrid.SetFloat("_InvGridScale", fluidManagerRef.invGridScale);
+        computeShaderResourceGrid.SetFloat("_DeltaTime", fluidManager.deltaTime);
+        computeShaderResourceGrid.SetFloat("_InvGridScale", fluidManager.invGridScale);
         computeShaderResourceGrid.SetFloat("_MapSize", SimulationManager._MapSize);
         
         float brushDecomposersOn = 0f;  // eventually make this more elegant during next refactor ***
@@ -1035,7 +1042,7 @@ public class VegetationManager {
         computeShaderResourceGrid.SetFloat("_IsSpiritBrushDecomposersOn", brushDecomposersOn);
         computeShaderResourceGrid.SetFloat("_IsSpiritBrushAlgaeOn", brushAlgaeOn);
         computeShaderResourceGrid.SetFloat("_IsSpiritBrushMineralsOn", brushMineralsOn);
-        computeShaderResourceGrid.SetFloat("_SpiritBrushPosNeg", theRenderKing.spiritBrushPosNeg);
+        computeShaderResourceGrid.SetFloat("_SpiritBrushPosNeg", renderKing.spiritBrushPosNeg);
         //computeShaderResourceGrid.SetFloat("_RD_FeedRate", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.feedRate);
         //computeShaderResourceGrid.SetFloat("_RD_KillRate", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.killRate);            
         //computeShaderResourceGrid.SetFloat("_RD_Scale", theRenderKingRef.simManager.vegetationManager.decomposerSlotGenomeCurrent.scale);
@@ -1050,10 +1057,10 @@ public class VegetationManager {
         computeShaderResourceGrid.SetFloat("_DecomposerMaxIntakeRate", 0.013f);
         computeShaderResourceGrid.SetFloat("_DecomposerEnergyGenerationEfficiency", 1.47f);
         
-        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "VelocityRead", fluidManagerRef._VelocityPressureDivergenceMain);
+        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "VelocityRead", fluidManager._VelocityPressureDivergenceMain);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_ResourceGridRead", resourceGridRT2);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_ResourceGridWrite", resourceGridRT1);
-        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_SpiritBrushTex", theRenderKing.spiritBrushRT);
+        computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_SpiritBrushTex", renderKing.spiritBrushRT);
         computeShaderResourceGrid.SetTexture(kernelCSAdvectRD, "_ResourceSimTransferRead", resourceSimTransferRT);
         computeShaderResourceGrid.Dispatch(kernelCSAdvectRD, resourceGridTexResolution / 32, resourceGridTexResolution / 32, 1);
         //back into 1

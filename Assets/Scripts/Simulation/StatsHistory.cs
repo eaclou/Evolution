@@ -6,6 +6,7 @@ using UnityEngine;
 public class StatsHistory
 {
     SettingsManager settings => SettingsManager.instance;
+    EnvironmentFluidManager fluid => EnvironmentFluidManager.instance;
 
     // 0 == decay nutrients  .x
     // 1 == plant food  .y
@@ -40,12 +41,10 @@ public class StatsHistory
     public List<float> eggSacksList;
     
     SimResourceManager resources;
-    EnvironmentFluidManager fluid;
     
-    public StatsHistory(SimResourceManager resources, EnvironmentFluidManager fluid)
+    public StatsHistory(SimResourceManager resources)
     {
         this.resources = resources;
-        this.fluid = fluid;
     }
     
     public void Initialize()

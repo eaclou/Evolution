@@ -4,6 +4,7 @@ public class CreatureBrainActivityUI : MonoBehaviour
 {
     SimulationManager simulationManager => SimulationManager.instance;
     CameraManager cameraManager => CameraManager.instance;
+    EnvironmentFluidManager fluidManager => EnvironmentFluidManager.instance;
 
     public AgentBehaviorOneHot agentBehaviorOneHot;
 
@@ -28,7 +29,7 @@ public class CreatureBrainActivityUI : MonoBehaviour
         newInspectAgentCurActivityMat.SetInt("_CurActivityID", curActivityID);
         newInspectAgentThrottleMat.SetFloat("_ThrottleX", Mathf.Clamp01(agent.smoothedThrottle.x));
         newInspectAgentThrottleMat.SetFloat("_ThrottleY", Mathf.Clamp01(agent.smoothedThrottle.y));
-        newInspectAgentThrottleMat.SetTexture("_VelocityTex", simulationManager.environmentFluidManager._VelocityPressureDivergenceMain);
+        newInspectAgentThrottleMat.SetTexture("_VelocityTex", fluidManager._VelocityPressureDivergenceMain);
         newInspectAgentThrottleMat.SetFloat("_AgentCoordX", agent.ownPos.x / SimulationManager._MapSize);
         newInspectAgentThrottleMat.SetFloat("_AgentCoordY", agent.ownPos.y / SimulationManager._MapSize);
         

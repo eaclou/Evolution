@@ -741,7 +741,7 @@ public class BaronVonTerrain : RenderBaron
         Matrix4x4 matrix = Matrix4x4.TRS(Vector3.one * 0.5f * SimulationManager._MapSize, Quaternion.identity, Vector3.one * SimulationManager._MapSize);
         terrainObstaclesHeightMaskMat.SetTexture("_MainTex", terrainHeightDataRT);
         terrainObstaclesHeightMaskMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
-        terrainObstaclesHeightMaskMat.SetFloat("_TexResolution", (float)simulation.environmentFluidManager.resolution);
+        terrainObstaclesHeightMaskMat.SetFloat("_TexResolution", (float)fluidManager.resolution);
         terrainObstaclesHeightMaskMat.SetFloat("_MapSize", SimulationManager._MapSize);
         fluidObstacles.DrawMesh(quadMesh, matrix, terrainObstaclesHeightMaskMat); // Masks out areas above the fluid "Sea Level"
     }
