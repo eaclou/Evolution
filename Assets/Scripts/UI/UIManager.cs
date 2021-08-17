@@ -33,7 +33,8 @@ public class UIManager : Singleton<UIManager> {
     public CreatureBrainActivityUI creatureBrainActivityUI;
     public CreaturePaperDollUI creaturePaperDollUI;
     public CreatureLifeEventsLogUI creatureLifeEventsLogUI;
-    public MinimapPanel minimapUI;      
+    public MinimapPanel minimapUI;
+    public SelectionManager selectionManager;
         
     public GameOptionsManager gameOptionsManager;    
     
@@ -193,7 +194,8 @@ public class UIManager : Singleton<UIManager> {
 
         worldSpiritHubUI.ClickButtonWorldSpiritHubAgent(lookup.GetTrophicSlotData(KnowledgeMapId.Animals));
 
-        historyPanelUI.InitializeSpeciesIcons();
+        historyPanelUI.InitializePanel(); //.InitializeSpeciesIcons();
+        //historyPanelUI.InitializeCreatureEventIcons();
     }
     
     public void TransitionToNewGameState(GameState gameState) {

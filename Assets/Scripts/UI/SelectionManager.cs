@@ -4,15 +4,11 @@ using UnityEngine;
 
 public class SelectionManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    UIManager uiManager => UIManager.instance;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+
+
+    public void Tick() {
+
     }
 }
