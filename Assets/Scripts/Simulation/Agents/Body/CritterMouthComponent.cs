@@ -174,6 +174,7 @@ public class CritterMouthComponent : MonoBehaviour
         
         preyAgent.InitiateBeingSwallowed(agent);            
         agent.InitiateSwallowingPrey(preyAgent);
+        agent.RegisterAgentEvent(Time.frameCount, "Swallowed Animal[" + preyAgent.index + "] Whole!", 1f);
         // Credit food:
         //float flow = preyAgent.sizePercentage * (preyAgent.fullSizeBoundingBox.x + preyAgent.fullSizeBoundingBox.z) * preyAgent.fullSizeBoundingBox.y * 0.5f; // + preyAgent.coreModule.stomachContents;
         //agentRef.EatFoodMeat(flow); // assumes all foodAmounts are equal !! *****    
@@ -184,6 +185,7 @@ public class CritterMouthComponent : MonoBehaviour
         float foodEaten = eggSack.foodAmount * 10f * agent.coreModule.digestEfficiencyDecay;
         agent.EatEggsWhole(foodEaten);
         eggSack.ConsumedByPredatorAgent();
+        agent.RegisterAgentEvent(Time.frameCount, "Swallowed Egg Sack Whole!", 1f);
     }
     
     void BiteAnimal(Agent preyAgent, float targetArea) 
@@ -197,7 +199,7 @@ public class CritterMouthComponent : MonoBehaviour
         //agentRef.coreModule.energy += 5f;
 
         preyAgent.ProcessBiteDamageReceived(damage, agent);
-        agent.RegisterAgentEvent(Time.frameCount, "Bit Vertebrate! (" + (damage * 100f).ToString("F0") + ") candID: " + preyAgent.candidateRef.candidateID, 1f);
+        agent.RegisterAgentEvent(Time.frameCount, "Bit Vertebrate! (" + (damage * 100f).ToString("F0") + ")", 1f);
         //if(agentRef.coreModule.foodEfficiencyMeat > 0.5f) { // ** // damage bonus -- provided has the required specialization level:::::
         //    agentRef.GainExperience(damage * 0.5f);  
         //}
@@ -219,6 +221,7 @@ public class CritterMouthComponent : MonoBehaviour
             0f;
 
         agent.EatEggs(foodEaten);
+        agent.RegisterAgentEvent(Time.frameCount, "Bit EggSack! (" + foodEaten.ToString("F0") + ")", 1f);
     }
     
     public void BiteCorpse(Agent corpseAgent)
@@ -228,6 +231,7 @@ public class CritterMouthComponent : MonoBehaviour
         
         agent.EatCorpse(foodEaten, biteSize);
         corpseAgent.ProcessBeingEaten(foodEaten);
+        agent.RegisterAgentEvent(Time.frameCount, "Bit Corpse! (" + foodEaten.ToString("F0") + ")", 1f);
     }
 }
 

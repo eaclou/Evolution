@@ -1044,6 +1044,11 @@ public class Agent : MonoBehaviour {
             }
             curActionState = AgentActionState.Resting;
         }
+
+        if(coreModule.mouthFeedEffector[0] >= mostActiveEffectorValue) {
+            curActionState = AgentActionState.Feeding;
+            UseAbility(feed);
+        }
         
         if (!isFreeToAct) {
             curActionState = AgentActionState.Cooldown;
