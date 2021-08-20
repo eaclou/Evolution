@@ -51,12 +51,14 @@ public class CandidateAgentData {
         public int eventFrame;
         public string eventText;
         public float goodness;
+        public int type;
         
-        public CandidateEventData(int eventFrame, string eventText, float goodness)
+        public CandidateEventData(int eventFrame, string eventText, float goodness, int type)
         {
             this.eventFrame = eventFrame;
             this.eventText = eventText;
             this.goodness = goodness;
+            this.type = type;
         }
     }
     
@@ -89,9 +91,9 @@ public class CandidateAgentData {
         isBeingEvaluated = false;
     }
 
-    public void RegisterCandidateEvent(int frame, string textString, float goodness) {        
+    public void RegisterCandidateEvent(int frame, string textString, float goodness, int type) {        
         // WPP: use object initializer
-        CandidateEventData newEvent = new CandidateEventData(frame, textString, goodness);
+        CandidateEventData newEvent = new CandidateEventData(frame, textString, goodness, type);
         candidateEventDataList.Add(newEvent);
     }
 

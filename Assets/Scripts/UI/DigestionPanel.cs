@@ -2,7 +2,7 @@
 
 public class DigestionPanel : MonoBehaviour
 {
-    CritterModuleCoreGenome coreGenome => UIManager.instance.focusedCandidate.candidateGenome.bodyGenome.coreGenome;
+    CritterModuleCoreGenome coreGenome => UIManager.instance.selectionManager.focusedCandidate.candidateGenome.bodyGenome.coreGenome;
     
     [SerializeField] StatUI plant;
     [SerializeField] StatUI meat;

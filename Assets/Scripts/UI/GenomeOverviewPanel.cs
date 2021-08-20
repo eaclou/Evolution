@@ -4,7 +4,7 @@ using UnityEngine.UI;
 public class GenomeOverviewPanel : MonoBehaviour
 {
     SimulationManager simulation => SimulationManager.instance;
-    CandidateAgentData agent => UIManager.instance.focusedCandidate;
+    CandidateAgentData agent => UIManager.instance.selectionManager.focusedCandidate;
  
     public Text textGeneration;
     public Text textBodySize;

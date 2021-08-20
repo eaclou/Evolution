@@ -1,6 +1,7 @@
 ﻿using Playcraft;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class TheCursorCzar : Singleton<TheCursorCzar> 
 {
@@ -97,9 +98,7 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
 
         cameraManager.SetMouseHoverAgent(null, false);
         isHoverClickableSpirit = false;
-
-        //Debug.Log("MouseRaycastCheckAgents");
-        
+                
         if (!hit.collider) return;
 
         Agent agent = hit.collider.gameObject.GetComponentInParent<Agent>();
@@ -108,7 +107,7 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
             cameraManager.MouseOverAgent(agent, clicked);
         
             if (clicked)
-                uiManagerRef.SetFocusedCandidateGenome(agent.candidateRef);
+                uiManagerRef.selectionManager.SetFocusedCandidateGenome(agent.candidateRef);
         }
         else if (!clicked) 
         {
@@ -121,7 +120,12 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
 	public void Tick() {
         SetCursorTexture();
         RefreshMouseInput();
-        MouseRaycastCheckAgents(leftClickThisFrame);
+        if (EventSystem.current.IsPointerOverGameObject()) {
+
+        }
+        else {
+            MouseRaycastCheckAgents(leftClickThisFrame);
+        }
         MouseRaycastWaterPlane(Input.mousePosition);
         
         Vector4[] dataArray = new Vector4[1];

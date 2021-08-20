@@ -2,7 +2,7 @@
 
 public class FoodEatenPanel : MonoBehaviour
 {
-    PerformanceData data => UIManager.instance.focusedCandidate.performanceData;
+    PerformanceData data => UIManager.instance.selectionManager.focusedCandidate.performanceData;
     
     [SerializeField] StatUI plants;
     [SerializeField] StatUI microbes;

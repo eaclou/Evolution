@@ -20,7 +20,11 @@ public class CreatureEventIconUI : MonoBehaviour
         index = eventIndex;
         eventData = data;
         tooltip.tooltipString = "Event[" + eventIndex + "] " + eventData.eventText;
-        targetCoords = new Vector2((float)eventIndex / 32f + 0.1f, 0.5f);
+        
+    }
+    public void SetTargetCoords(Vector2 newCoords) {
+        //targetCoords = new Vector2((float)eventIndex / 32f + 0.1f, 0.5f);
+        targetCoords = newCoords;
     }
 
     public void Clicked() {

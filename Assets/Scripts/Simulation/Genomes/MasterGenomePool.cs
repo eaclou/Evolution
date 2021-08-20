@@ -27,7 +27,7 @@ public class MasterGenomePool {
 
     UIManager uiManager => UIManager.instance;
     PanelNotificationsUI panelPendingClickPrompt => uiManager.panelNotificationsUI;
-    public SpeciesGenomePool selectedPool => completeSpeciesPoolsList[uiManager.selectedSpeciesID];
+    public SpeciesGenomePool selectedPool => completeSpeciesPoolsList[uiManager.selectionManager.selectedSpeciesID];
     public int speciesPoolCount => completeSpeciesPoolsList.Count;   
    
     public MasterGenomePool() { }

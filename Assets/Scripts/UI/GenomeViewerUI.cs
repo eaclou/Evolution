@@ -5,6 +5,7 @@ using UnityEngine.UI;
 public class GenomeViewerUI : MonoBehaviour {
     UIManager uiManager => UIManager.instance;
 
+    public BrainGenomeImage brainGenomeImage;
     public GameObject panelGenomeSensors;    
     public GameObject panelPerformanceBehavior;
     public GameObject panelEaten;

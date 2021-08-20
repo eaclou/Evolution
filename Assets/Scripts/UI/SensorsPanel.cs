@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class SensorsPanel : MonoBehaviour
 {
-    AgentGenome genome => UIManager.instance.focusedCandidate.candidateGenome;
+    AgentGenome genome => UIManager.instance.selectionManager.focusedCandidate.candidateGenome;
     Agent agent => CameraManager.instance.targetAgent;
 
     [SerializeField] Sensor internals;

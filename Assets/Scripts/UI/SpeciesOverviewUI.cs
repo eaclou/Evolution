@@ -134,7 +134,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
 
     public void ChangeSelectedGenome(SelectionGroup group, int index) {
         SpeciesGenomePool pool = simulationManager.GetSelectedGenomePool();
-        uiManager.SetFocusedCandidateGenome(pool, group, index);
+        uiManager.selectionManager.SetFocusedCandidateGenome(pool, group, index);
         selectedButtonData = GetSelectionGroupData(group);
 
         uiManager.historyPanelUI.buttonSelCreatureEventsLink.gameObject.transform.localPosition = new Vector3(360f, 180f, 0f);

@@ -20,7 +20,7 @@ public class UIManager : Singleton<UIManager> {
     public SpeciesOverviewUI speciesOverviewUI;  
     public SpeciesGraphPanelUI speciesGraphPanelUI; 
     public GenomeViewerUI genomeViewerUI;
-    public BrainGenomeImage brainGenomeImage;
+    
     public CreaturePanelUI creaturePanelUI;
     public HistoryPanelUI historyPanelUI;
     public BigBangPanelUI bigBangPanelUI;
@@ -65,14 +65,6 @@ public class UIManager : Singleton<UIManager> {
     public GameObject panelLoading;
     public GameObject panelPlaying;
 
-    //public GameObject panelHallOfFameGenomes;
-    
-    //private int[] displaySpeciesIndicesArray;
-      
-    public CandidateAgentData focusedCandidate; // *** TRANSITION TO THIS?
-    public int selectedSpeciesID;
-    //public int hoverAgentID;
-
     private const int maxDisplaySpecies = 32;
 
     private float curSpeciesStatValue;
@@ -86,11 +78,11 @@ public class UIManager : Singleton<UIManager> {
     SpeciesGenomePool pool;
     const string ANIM_FINISHED = "_AnimFinished";
     List<SpeciesGenomePool> speciesPools => genomePool.completeSpeciesPoolsList;
-    bool isRebuildTimeStep => simulationManager.simAgeTimeSteps % timeStepsToRebuildGenomeButtons == 1;
+    public bool isRebuildTimeStep => simulationManager.simAgeTimeSteps % timeStepsToRebuildGenomeButtons == 1;
 
     
     #endregion
-    
+    /*
     public void CycleFocusedCandidateGenome()
     {
         int curSpeciesID = selectedSpeciesID + 1;
@@ -101,35 +93,9 @@ public class UIManager : Singleton<UIManager> {
     
         var candidate = simulationManager.masterGenomePool.completeSpeciesPoolsList[curSpeciesID].representativeCandidate;
         SetFocusedCandidateGenome(candidate);
-    }
+    }*/
     
-    public void ResetCurrentFocusedCandidateGenome() { SetFocusedCandidateGenome(focusedCandidate); }
     
-    public void SetFocusedCandidateGenome(SpeciesGenomePool selectedPool, SelectionGroup group, int index) {
-        var candidate = selectedPool.GetFocusedCandidate(group, index);
-        SetFocusedCandidateGenome(candidate);
-    }
-
-    public void SetFocusedCandidateGenome(CandidateAgentData candidate) {
-        focusedCandidate = candidate;
-        
-        theRenderKing.InitializeCreaturePortrait(focusedCandidate.candidateGenome);
-        
-        speciesOverviewUI.RebuildGenomeButtons();
-        brainGenomeImage.SetTexture(focusedCandidate.candidateGenome.brainGenome);
-
-        SetSelectedSpeciesUI(focusedCandidate.speciesID);
-
-
-    }
-    
-    public bool IsFocus(CandidateAgentData candidate) { return candidate.candidateID == focusedCandidate.candidateID; }
-    
-    public void SetSelectedSpeciesUI(int id) {
-        
-        selectedSpeciesID = id;
-        speciesOverviewUI.RebuildGenomeButtons();
-    }
 
     public void BeginAnnouncement()
     {
@@ -143,7 +109,7 @@ public class UIManager : Singleton<UIManager> {
     public void InitialUnlocks() {
         Debug.Log("InitialUnlocks WATER UNLOCKED!!! " + unlockCooldownCounter); // + ", " + BigBangPanelUI.bigBangFramesCounter.ToString());
 
-        focusedCandidate = simulationManager.masterGenomePool.completeSpeciesPoolsList[0].candidateGenomesList[0];
+        selectionManager.focusedCandidate = simulationManager.masterGenomePool.completeSpeciesPoolsList[0].candidateGenomesList[0];
         
         theRenderKing.baronVonTerrain.IncrementWorldRadius(5.7f);
 
@@ -252,7 +218,7 @@ public class UIManager : Singleton<UIManager> {
         theCursorCzar.Tick();  // this will assume a larger role
         brushesUI.UpdateBrushesUI(); 
         
-        if(focusedCandidate != null && focusedCandidate.candidateGenome != null) {
+        if(selectionManager.focusedCandidate != null && selectionManager.focusedCandidate.candidateGenome != null) {
 
             creaturePanelUI.Tick();
             // --- Move these into CreaturePanel?
@@ -261,7 +227,7 @@ public class UIManager : Singleton<UIManager> {
             creaturePaperDollUI.Tick();            
             // ---
 
-            creatureLifeEventsLogUI.Tick(focusedCandidate);
+            creatureLifeEventsLogUI.Tick(selectionManager.focusedCandidate);
 
             if(simulationManager.simAgeTimeSteps % 37 == 11) { //***EAC still needed? answer: yes :(
                 speciesOverviewUI.RebuildGenomeButtons();  
@@ -274,19 +240,6 @@ public class UIManager : Singleton<UIManager> {
         debugPanelUI.UpdateDebugUI();
     }
 
-    public void SetFocus()
-    {
-        pool = speciesPools[selectedSpeciesID];
-        
-        if(focusedCandidate != null && focusedCandidate.candidateGenome != null) {
-            genomeViewerUI.UpdateUI();
-
-            if(isRebuildTimeStep) {
-                speciesOverviewUI.RebuildGenomeButtons();  
-            }
-        } 
-    }
-     
     public void CheckForAnnouncements() {
     
         // ***WPP: replace nested conditions with early exit 

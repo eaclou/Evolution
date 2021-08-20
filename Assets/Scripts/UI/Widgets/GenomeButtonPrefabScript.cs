@@ -35,7 +35,7 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
         // updates focusedCandidate in uiManager
         uiManager.speciesOverviewUI.ChangeSelectedGenome(group, index);  
         
-        if(!uiManager.focusedCandidate.isBeingEvaluated) 
+        if(!uiManager.selectionManager.focusedCandidate.isBeingEvaluated) 
             return;
 
         FindCorrespondingAgent();
@@ -47,7 +47,7 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
         if (agentIndex == -1) return;
         
         cameraManager.SetTargetAgent(simulationManager.agents[agentIndex], agentIndex);
-        uiManager.ResetCurrentFocusedCandidateGenome();
+        uiManager.selectionManager.ResetCurrentFocusedCandidateGenome();
         cameraManager.isFollowingAgent = true; 
     }
 
@@ -70,7 +70,7 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
         if (candidate.isBeingEvaluated) 
         {
             Agent matchingAgent = simulationManager.GetAgent(candidate);
-            bool isFocus = uiManager.IsFocus(candidate);
+            bool isFocus = uiManager.selectionManager.IsFocus(candidate);
             
             ColorBlock block = button.colors;
             block.colorMultiplier = isFocus ? 2f : 1f;

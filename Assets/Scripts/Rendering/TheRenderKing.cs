@@ -1207,11 +1207,11 @@ public class TheRenderKing : Singleton<TheRenderKing>
 
             Vector4 hue = Vector4.one * 0.695f;
             if (agents[i].candidateRef != null) {
-                if (agents[i].candidateRef.speciesID == uiManager.focusedCandidate.speciesID) {
+                if (agents[i].candidateRef.speciesID == uiManager.selectionManager.focusedCandidate.speciesID) {
                     hue = new Vector4(1f, 1f, 0f, 1f);
                     colorInjectionStrokeDataArray[baseIndex + i].scale = Vector2.one * 5f;
                 }
-                if (agents[i].candidateRef.candidateID == uiManager.focusedCandidate.candidateID) {
+                if (agents[i].candidateRef.candidateID == uiManager.selectionManager.focusedCandidate.candidateID) {
                     hue = new Vector4(1f, 1f, 1f, 1f);
                     colorInjectionStrokeDataArray[baseIndex + i].scale = Vector2.one * 10f;
                 }
@@ -2161,11 +2161,11 @@ public class TheRenderKing : Singleton<TheRenderKing>
         CritterSimData[] toolbarPortraitCritterSimDataArray = new CritterSimData[6];
 
         bool isDead = true;
-        if(simManager.GetAgent(uiManager.focusedCandidate)) {
-            isDead = (simManager.GetAgent(uiManager.focusedCandidate).curLifeStage == Agent.AgentLifeStage.Dead);
+        if(simManager.GetAgent(uiManager.selectionManager.focusedCandidate)) {
+            isDead = (simManager.GetAgent(uiManager.selectionManager.focusedCandidate).curLifeStage == Agent.AgentLifeStage.Dead);
         }
         
-        bool evaluationsComplete = uiManager.focusedCandidate.allEvaluationsComplete;
+        bool evaluationsComplete = uiManager.selectionManager.focusedCandidate.allEvaluationsComplete;
         CritterSimData simData = new CritterSimData(isDead, evaluationsComplete);
 
         toolbarPortraitCritterSimDataArray[0] = simData;

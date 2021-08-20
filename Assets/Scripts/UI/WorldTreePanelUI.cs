@@ -60,7 +60,7 @@ public class WorldTreePanelUI : MonoBehaviour
         //UpdateSpeciesIconsTargetCoords();
         //textSelectedSpeciesTitle.text = "Selected Species: #" + uiManagerRef.selectedSpeciesID;
 
-        Vector3 hue = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectedSpeciesID].foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+        Vector3 hue = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectionManager.selectedSpeciesID].foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
         imageSelectedSpeciesBG.color = new Color(hue.x, hue.y, hue.z);
     }
     
