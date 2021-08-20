@@ -121,29 +121,7 @@ public class VegetationManager {
         float maxParticleSize = settingsRef.avgAlgaeParticleRadius * settingsRef.algaeParticleRadiusVariance;
 
         for(int i = 0; i < plantParticlesCBuffer.count; i++) {
-            // WPP: using object initializer
             PlantParticleData data = new PlantParticleData(i, minParticleSize, maxParticleSize);
-            /*data.index = i;            
-            data.worldPos = new Vector2(Random.Range(0f, SimulationManager._MapSize), Random.Range(0f, SimulationManager._MapSize));
-            data.radius = Random.Range(minParticleSize, maxParticleSize);
-            data.biomass = 0f; // data.radius * data.radius * Mathf.PI * settingsRef.algaeParticleNutrientDensity;
-            data.isActive = 0f;
-            data.isDecaying = 0f;
-            data.age = Random.Range(1f, 2f);
-            data.colorA = new Vector3(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
-            data.colorB = new Vector3(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
-            data.health = 0f;
-            data.typeID = 0f;
-	        data.rootedness = Random.Range(0f, 1f);
-	        data.radiusAxisOne = Random.Range(0f, 1f);
-	        data.radiusAxisTwo = Random.Range(0f, 1f);
-	        data.leafDensity = Random.Range(0f, 1f);
-	        data.angleInc = Random.Range(0f, 1f);
-	        data.leafLength = Random.Range(0f, 1f);
-	        data.leafWidth = Random.Range(0f, 1f);
-	        data.leafRoundness = Random.Range(0f, 1f);
-	        data.brushTypeX = 0;*/
-
             plantParticlesArray[i] = data;
         }
         //Debug.Log("Fill Initial Particle Array Data CPU: " + (Time.realtimeSinceStartup - startTime).ToString());
@@ -189,23 +167,15 @@ public class VegetationManager {
         plantParticlesMeasure32 = new ComputeBuffer(32, GetPlantParticleDataSize());
         plantParticlesMeasure1 = new ComputeBuffer(1, GetPlantParticleDataSize());
         //Debug.Log("End: " + (Time.realtimeSinceStartup - startTime).ToString());
-       
         
         InitializeResourceTexture(out critterNearestPlants32, 32, numAgents, FilterMode.Point);
-        // WPP: condensed into function
-        /*critterNearestPlants32 = new RenderTexture(32, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        critterNearestPlants32.wrapMode = TextureWrapMode.Clamp;
-        critterNearestPlants32.filterMode = FilterMode.Point;
-        critterNearestPlants32.enableRandomWrite = true;        
-        critterNearestPlants32.Create(); */
-
+        
         closestPlantIndexCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
         closestPlantIndexArray = new Vector4[numAgents];
                 
 
         var growthRate = Mathf.Lerp(.5f, 1.75f, Random.Range(0f, 1f));
         
-        // WPP: moved most of initialization to constructor
         plantSlotGenomeCurrent = new WorldLayerPlantGenome("Plant Particles!", plantParticlesArray[0], growthRate);        
         plantSlotGenomeCurrent.displayColorPri = Random.ColorHSV();
         plantSlotGenomeCurrent.displayColorPri.a = 1f;
@@ -228,20 +198,7 @@ public class VegetationManager {
     public void InitializeResourceGrid(int numAgents, ComputeShader computeShader) 
     {
         computeShaderResourceGrid = computeShader;
-              
-        // WPP: eliminated duplicate logic by delegating to InitializeResourceTexture
-        /*
-        resourceGridRT1 = new RenderTexture(resourceGridTexResolution, resourceGridTexResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        resourceGridRT1.wrapMode = TextureWrapMode.Clamp;
-        resourceGridRT1.filterMode = FilterMode.Bilinear;
-        resourceGridRT1.enableRandomWrite = true;
-        resourceGridRT1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***    
-
-        resourceGridRT2 = new RenderTexture(resourceGridTexResolution, resourceGridTexResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        resourceGridRT2.wrapMode = TextureWrapMode.Clamp;
-        resourceGridRT2.enableRandomWrite = true;
-        resourceGridRT2.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***  
-        */
+        
         InitializeResourceTexture(out resourceGridRT1, resourceGridTexResolution, resourceGridTexResolution, FilterMode.Bilinear);
         InitializeResourceTexture(out resourceGridRT2, resourceGridTexResolution, resourceGridTexResolution);
         
@@ -254,44 +211,6 @@ public class VegetationManager {
         InitializeResourceTexture(out tempTex4, 4, 4, FilterMode.Point);
         InitializeResourceTexture(out tempTex2, 2, 2, FilterMode.Point);
         InitializeResourceTexture(out tempTex1, 1, 1, FilterMode.Point);
-        
-        // WPP: delegated to InitializeResourceTexture
-        /*   
-        resourceSimTransferRT = new RenderTexture(resourceGridTexResolution, resourceGridTexResolution, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        resourceSimTransferRT.wrapMode = TextureWrapMode.Clamp;
-        resourceSimTransferRT.enableRandomWrite = true;
-        resourceSimTransferRT.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***  
-     
-        tempTex32 = new RenderTexture(32, 32, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        tempTex32.wrapMode = TextureWrapMode.Clamp;
-        tempTex32.filterMode = FilterMode.Point;
-        tempTex32.enableRandomWrite = true;
-        tempTex32.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
-
-        tempTex8 = new RenderTexture(8, 8, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        tempTex8.wrapMode = TextureWrapMode.Clamp;
-        tempTex8.filterMode = FilterMode.Point;
-        tempTex8.enableRandomWrite = true;
-        tempTex8.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
-
-        tempTex4 = new RenderTexture(4, 4, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        tempTex4.wrapMode = TextureWrapMode.Clamp;
-        tempTex4.filterMode = FilterMode.Point;
-        tempTex4.enableRandomWrite = true;
-        tempTex4.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
-
-        tempTex2 = new RenderTexture(2, 2, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        tempTex2.wrapMode = TextureWrapMode.Clamp;
-        tempTex2.filterMode = FilterMode.Point;
-        tempTex2.enableRandomWrite = true;
-        tempTex2.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
-
-        tempTex1 = new RenderTexture(1, 1, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        tempTex1.wrapMode = TextureWrapMode.Clamp;
-        tempTex1.filterMode = FilterMode.Point;
-        tempTex1.enableRandomWrite = true;
-        tempTex1.Create();  // actually creates the renderTexture -- don't forget this!!!!! ***
-        */
 
         resourceGridAgentSamplesCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
 
@@ -330,11 +249,7 @@ public class VegetationManager {
         float lnLerp = Mathf.Pow(Random.Range(0f, 1f), 2);
         float metabolicRate = Mathf.Lerp(minIntakeRate, maxIntakeRate, lnLerp);
         
-        // WPP: object initializer
         decomposerSlotGenomeCurrent = new WorldLayerDecomposerGenome("Decomposers", metabolicRate, Random.Range(0.9f, 1.1f));
-        //decomposerSlotGenomeCurrent.name = "Decomposers";
-        //decomposerSlotGenomeCurrent.metabolicRate = metabolicRate;
-        //decomposerSlotGenomeCurrent.growthEfficiency = Random.Range(0.9f, 1.1f);
 
         GenerateWorldLayerDecomposersGenomeMutationOptions();
         
@@ -345,64 +260,10 @@ public class VegetationManager {
         computeShaderResourceGrid.SetTexture(kernelCSInitResourceGrid, "_ResourceGridWrite", resourceGridRT1);
         computeShaderResourceGrid.Dispatch(kernelCSInitResourceGrid, resourceGridTexResolution / 32, resourceGridTexResolution / 32, 1);
     }
-
-    // WPP: this is a highly unusual way to initialize a class, moved to constructor
-    /*private void WorldLayerDecomposerGenomeStuff(ref WorldLayerDecomposerGenome genome, float mutationSizeLerp) 
-    {
-        float minIntakeRate = tempSharedIntakeRate * 0.1f;
-        float maxIntakeRate = tempSharedIntakeRate * 4f;
-        float lnLerp = Random.Range(0f, 1f);
-        lnLerp *= lnLerp;
-        genome.metabolicRate = Mathf.Lerp(minIntakeRate, maxIntakeRate, lnLerp);
-        genome.metabolicRate = Mathf.Lerp(decomposerSlotGenomeCurrent.metabolicRate, genome.metabolicRate, mutationSizeLerp);
-
-        genome.name = decomposerSlotGenomeCurrent.name;
-        genome.textDescriptionMutation = "Metabolic Rate: " + (genome.metabolicRate * 100f).ToString("F2"); // + ", GrowthEfficiency: " + mutatedGenome.algaeGrowthEfficiency.ToString("F2") + ", IntakeRate: " + mutatedGenome.algaeIntakeRate.ToString("F4");
-            
-        genome.growthEfficiency = Random.Range(0.1f, 2f); 
-    }*/
-
-    // WPP: applied object initializer
+    
     public void GenerateWorldLayerAlgaeGridGenomeMutationOptions() {
         for(int j = 0; j < algaeSlotGenomeMutations.Length; j++) {
-            // WPP: result of calculation overridden by hardcoded value
-            //float jLerp = Mathf.Clamp01((float)j / 3f + 0.015f); 
-            //jLerp = jLerp * jLerp;
-            
             WorldLayerAlgaeGenome mutatedGenome = new WorldLayerAlgaeGenome(algaeSlotGenomeCurrent, tempSharedIntakeRate);
-            
-            // WPP: moved to constructor
-            /*float jLerp = 0.3f;
-            Color randColorPri = Random.ColorHSV();
-            Color randColorSec = Random.ColorHSV();
-            Color mutatedColorPri = Color.Lerp(algaeSlotGenomeCurrent.displayColorPri, randColorPri, jLerp);
-            Color mutatedColorSec = Color.Lerp(algaeSlotGenomeCurrent.displayColorSec, randColorSec, jLerp);
-            bool useAlgaeSlotPattern = Random.Range(0f, 1f) < jLerp * 1f;
-            int patternRowID = useAlgaeSlotPattern ? algaeSlotGenomeCurrent.patternRowID : Random.Range(0, 8);
-            int patternColumnID = useAlgaeSlotPattern ? algaeSlotGenomeCurrent.patternColumnID : Random.Range(0, 8);
-            float minIntakeRate = tempSharedIntakeRate * 0.1f;
-            float maxIntakeRate = tempSharedIntakeRate * 10f; // init around 1?
-            float lnLerp = Mathf.Pow(Random.Range(0f, 1f), 2);
-            
-            mutatedGenome.displayColorPri = mutatedColorPri;
-            mutatedGenome.displayColorSec = mutatedColorSec;
-            mutatedGenome.patternRowID = patternRowID;
-            mutatedGenome.patternColumnID = patternColumnID;
-            mutatedGenome.patternThreshold = Mathf.Lerp(algaeSlotGenomeCurrent.patternThreshold, Random.Range(0f, 1f), jLerp);
-            mutatedGenome.metabolicRate = Mathf.Lerp(minIntakeRate, maxIntakeRate, lnLerp);
-            mutatedGenome.metabolicRate = Mathf.Lerp(algaeSlotGenomeCurrent.metabolicRate, mutatedGenome.metabolicRate, jLerp);
-            mutatedGenome.growthEfficiency = Random.Range(0.1f, 2f);*/
-            
-            // WPP: collapsed with ternary
-            /*if(Random.Range(0f, 1f) < jLerp * 1f) {
-                mutatedGenome.patternRowID = Random.Range(0, 8);
-                mutatedGenome.patternColumnID = Random.Range(0, 8);
-            }
-            else {
-                mutatedGenome.patternRowID = algaeSlotGenomeCurrent.patternRowID;
-                mutatedGenome.patternColumnID = algaeSlotGenomeCurrent.patternColumnID;
-            }*/
-
             algaeSlotGenomeMutations[j] = mutatedGenome;
         }
     }
@@ -415,17 +276,7 @@ public class VegetationManager {
             var growthRate = Mathf.Lerp(.05f, 5f, Random.Range(0f, 1f));
             growthRate = Mathf.Lerp(plantSlotGenomeCurrent.growthRate, growthRate, jLerp);
             
-            // WPP: moved most of initialization to constructor
             WorldLayerPlantGenome mutatedGenome = new WorldLayerPlantGenome(plantSlotGenomeCurrent.name, plantSlotGenomeCurrent.plantRepData, growthRate);
-            /*
-            float minRate = 0.05f;
-            float maxRate = 5f;
-            mutatedGenome.growthRate = Mathf.Lerp(minRate, maxRate, Random.Range(0f, 1f));
-            mutatedGenome.growthRate = Mathf.Lerp(plantSlotGenomeCurrent.growthRate, mutatedGenome.growthRate, jLerp);
-            mutatedGenome.name = plantSlotGenomeCurrent.name;
-            mutatedGenome.textDescriptionMutation = "Growth Rate: " + mutatedGenome.growthRate.ToString("F2");
-            mutatedGenome.plantRepData = plantSlotGenomeCurrent.plantRepData;
-             */           
             mutatedGenome.plantRepData.colorA = Vector3.Lerp(mutatedGenome.plantRepData.colorA, Random.insideUnitSphere, 0.1f);
             
             plantSlotGenomeMutations[j] = mutatedGenome;
@@ -438,54 +289,7 @@ public class VegetationManager {
 
     public void GenerateWorldLayerDecomposersGenomeMutationOptions() {
         for(int j = 0; j < decomposerSlotGenomeMutations.Length; j++) {
-        
-            // WPP: value overwritten by hardcoded value (0.3f) after calculated
-            //float jLerp = Mathf.Clamp01((float)j / 3f + 0.015f);
-            //jLerp = jLerp * jLerp;
-            
-            // WPP: moved to constructor
-            /*float mutationSizeLerp = 0.3f;
-            Color randColorPri = Random.ColorHSV();
-            Color randColorSec = Random.ColorHSV();
-            Color mutatedColorPri = Color.Lerp(decomposerSlotGenomeCurrent.displayColorPri, randColorPri, mutationSizeLerp);
-            Color mutatedColorSec = Color.Lerp(decomposerSlotGenomeCurrent.displayColorSec, randColorSec, mutationSizeLerp);
-            bool useRandomID = Random.Range(0f, 1f) < mutationSizeLerp;
-            int rowID = useRandomID ? Random.Range(0, 8) : decomposerSlotGenomeCurrent.patternRowID;
-            int columnID = useRandomID ? Random.Range(0, 8) : decomposerSlotGenomeCurrent.patternColumnID;
-            float minIntakeRate = tempSharedIntakeRate * 0.1f;
-            float maxIntakeRate = tempSharedIntakeRate * 4f;
-            float lnLerp = Mathf.Pow(Random.Range(0f, 1f), 2);
-            float baseMetabolicRate = Mathf.Lerp(minIntakeRate, maxIntakeRate, lnLerp);
-            float metabolicRate = Mathf.Lerp(decomposerSlotGenomeCurrent.metabolicRate, baseMetabolicRate, mutationSizeLerp);*/
-            
             WorldLayerDecomposerGenome mutatedGenome = new WorldLayerDecomposerGenome(decomposerSlotGenomeCurrent, tempSharedIntakeRate);
-            /*mutatedGenome.name = decomposerSlotGenomeCurrent.name;
-            mutatedGenome.metabolicRate = metabolicRate;
-            mutatedGenome.growthEfficiency = Random.Range(0.1f, 2f);
-            //mutatedGenome.textDescriptionMutation = "Metabolic Rate: " + (metabolicRate * 100f).ToString("F2");
-            mutatedGenome.displayColorPri = mutatedColorPri;
-            mutatedGenome.displayColorSec = mutatedColorSec;
-            mutatedGenome.patternRowID = rowID;
-            mutatedGenome.patternColumnID = columnID;
-            mutatedGenome.patternThreshold = Mathf.Lerp(decomposerSlotGenomeCurrent.patternThreshold, Random.Range(0f, 1f), mutationSizeLerp);*/
-             
-            
-            // WPP: collapsed with ternary
-            /*if (Random.Range(0f, 1f) < jLerp * 1f) 
-            {
-                mutatedGenome.patternRowID = Random.Range(0, 8);
-                mutatedGenome.patternColumnID = Random.Range(0, 8);
-            }
-            else {
-                mutatedGenome.patternRowID = decomposerSlotGenomeCurrent.patternRowID;
-                mutatedGenome.patternColumnID = decomposerSlotGenomeCurrent.patternColumnID;
-            }*/
-
-            // WPP: removed obfuscating method
-            //WorldLayerDecomposerGenomeStuff(ref mutatedGenome, jLerp);
-
-            //mutatedGenome.name = decomposerSlotGenomeCurrent.name;
-            
             decomposerSlotGenomeMutations[j] = mutatedGenome;
         }
     }
@@ -908,38 +712,6 @@ public class VegetationManager {
         CompressResourceGrid(kernelCSMeasureTotalResources2, outputValuesCBuffer, tempTex8, tempTex4, 4, 4);
         CompressResourceGrid(kernelCSMeasureTotalResources2, outputValuesCBuffer, tempTex4, tempTex2, 2, 2);
         CompressResourceGrid(kernelCSMeasureTotalResources2, outputValuesCBuffer, tempTex2, tempTex1, 1, 1);
-        // WPP: repetitive logic condensed into function
-        /*
-        // 128 --> 32:
-        computeShaderResourceGrid.SetBuffer(kernelCSMeasureTotalResources4, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources4, "measureValuesTex", resourceGridRT1);
-        computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources4, "pooledResultTex", tempTex32);
-        computeShaderResourceGrid.Dispatch(kernelCSMeasureTotalResources4, 32, 32, 1);
-        
-        // 32 --> 8:
-        computeShaderResourceGrid.SetBuffer(kernelCSMeasureTotalResources4, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources4, "measureValuesTex", tempTex32);
-        computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources4, "pooledResultTex", tempTex8);
-        computeShaderResourceGrid.Dispatch(kernelCSMeasureTotalResources4, 8, 8, 1);
-        
-        // 8 --> 4:
-        computeShaderResourceGrid.SetBuffer(kernelCSMeasureTotalResources2, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources2, "measureValuesTex", tempTex8);
-        computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources2, "pooledResultTex", tempTex4);
-        computeShaderResourceGrid.Dispatch(kernelCSMeasureTotalResources2, 4, 4, 1);
-            
-        // 4 --> 2:
-        computeShaderResourceGrid.SetBuffer(kernelCSMeasureTotalResources2, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources2, "measureValuesTex", tempTex4);
-        computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources2, "pooledResultTex", tempTex2);
-        computeShaderResourceGrid.Dispatch(kernelCSMeasureTotalResources2, 2, 2, 1);
-        
-        // 2 --> 1:
-        computeShaderResourceGrid.SetBuffer(kernelCSMeasureTotalResources2, "outputValuesCBuffer", outputValuesCBuffer);
-        computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources2, "measureValuesTex", tempTex2);
-        computeShaderResourceGrid.SetTexture(kernelCSMeasureTotalResources2, "pooledResultTex", tempTex1);
-        computeShaderResourceGrid.Dispatch(kernelCSMeasureTotalResources2, 1, 1, 1);
-        */       
         
         outputValuesCBuffer.GetData(outputValuesArray);
         curGlobalNutrientGridValues = outputValuesArray[0];

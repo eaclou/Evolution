@@ -120,6 +120,7 @@ public class HistoryPanelUI : MonoBehaviour
         } 
     }
     
+    // * Rename to suggest this is a per-frame update, break out the initialization logic
     public void InitializeRenderBuffers() {
         //**** TEMP!!! TESTING!!!
         float cursorCoordsX = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().x) / 360f);
