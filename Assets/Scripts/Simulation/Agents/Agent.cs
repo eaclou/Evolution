@@ -1,5 +1,16 @@
 ﻿using UnityEngine;
 
+public enum AgentActionState {
+    Default,  // swimming, no actions
+    Resting,
+    Feeding,
+    Attacking,
+    Dashing,
+    Defending,
+    Cooldown,
+    Decaying
+}
+
 public class Agent : MonoBehaviour {
     Lookup lookup => Lookup.instance;
     SettingsManager settingsRef => SettingsManager.instance;
@@ -70,17 +81,7 @@ public class Agent : MonoBehaviour {
         Null
     }
     public AgentActionState curActionState;
-    public enum AgentActionState {
-        Default,  // swimming, no actions
-        Resting,
-        Feeding,
-        Attacking,
-        Dashing,
-        Defending,
-        Cooldown,
-        Decaying
-    }
-    
+
     private int gestationDurationTimeSteps = 120;
     public int _GestationDurationTimeSteps => gestationDurationTimeSteps;
     

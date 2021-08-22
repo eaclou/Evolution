@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,10 +7,13 @@ public class CreaturePanelUI : MonoBehaviour
 {
     SimulationManager simulationManager => SimulationManager.instance;
     CameraManager cameraManager => CameraManager.instance;
-    UIManager uiManagerRef => UIManager.instance;
     TheRenderKing theRenderKing => TheRenderKing.instance;
+    
+    Agent agent => simulationManager.agents[cameraManager.targetAgentIndex];
+    float totalTicksAlive => simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].avgCandidateData.performanceData.totalTicksAlive;
 
-    [SerializeField]
+    // WPP: moved to PanelModeData
+    /*[SerializeField]
     GameObject panelPortrait;
     [SerializeField]
     GameObject panelGenome;
@@ -25,7 +27,10 @@ public class CreaturePanelUI : MonoBehaviour
     [SerializeField]
     Image imageGenomeIcon;
     [SerializeField]
-    Image imageBrainIcon;
+    Image imageBrainIcon;*/
+    
+    [SerializeField] Color onColor = Color.white;
+    [SerializeField] Color offColor = Color.gray;
 
     [SerializeField]
     Image imageCurAction;
@@ -39,31 +44,48 @@ public class CreaturePanelUI : MonoBehaviour
     [SerializeField]
     Text textPanelStateDebug;
 
+    // * WPP: move to Lookup
     public Sprite spriteIconCreatureStateEgg;
     public Sprite spriteIconCreatureStateYoung;
     public Sprite spriteIconCreatureStateMature;
     public Sprite spriteIconCreatureStateDecaying;
     public Sprite spriteIconCreatureStateFossil;
+    
+    [SerializeField] AgentActionStateData[] actionStates;
+    [SerializeField] AgentActionStateData defaultActionState;
+    
+    [SerializeField] PanelModeData[] panelModes;
+    [SerializeField] StringSO startingPanelMode;
 
-    public Sprite spriteIconCreatureActionAttack;
+    // WPP: moved to AgentActionStateData
+    /*public Sprite spriteIconCreatureActionAttack;
     public Sprite spriteIconCreatureActionDefend;
     public Sprite spriteIconCreatureActionDash;
     public Sprite spriteIconCreatureActionRest;
-    public Sprite spriteIconCreatureActionFeed;
+    public Sprite spriteIconCreatureActionFeed;*/
 
     public Sprite spriteBrainButton;
 
-    private CreaturePanelMode curPanelMode;
-    public enum CreaturePanelMode {
+    // WPP: replaced with ScriptableObjects to eliminate mapping int to enum values
+    /*public enum CreaturePanelMode {
         Portrait,
         Genome,
         Brain
-    }
+    }*/
+    private StringSO curPanelMode;
 
     // PORTRAIT!!!!
     public ComputeBuffer portraitCritterInitDataCBuffer;
     public ComputeBuffer portraitCritterSimDataCBuffer;
     public ComputeBuffer critterPortraitStrokesCBuffer;
+    
+    void Start()
+    {
+        SetPanelMode(startingPanelMode);
+    
+        foreach (var panelMode in panelModes)
+            panelMode.Initialize(onColor, offColor);
+    }
 
     public void InitializeRenderBuffers() 
     {
@@ -74,40 +96,45 @@ public class CreaturePanelUI : MonoBehaviour
     }
     
     public void Tick() {
-        textPanelStateDebug.text = "MODE: " + curPanelMode;
+        textPanelStateDebug.text = "MODE: " + curPanelMode.value;
 
-        Color onColor = Color.gray;
-        Color offColor = Color.white;
+        //Color onColor = Color.gray;
+        //Color offColor = Color.white;
         //imageCurAction.sprite = spriteBrainButton;
-        Agent agent = simulationManager.agents[cameraManager.targetAgentIndex];
-        if(agent.curActionState == Agent.AgentActionState.Attacking) {
+        
+        // WPP: replaced with nested struct pattern -> AgentActionStateData
+        /*Agent agent = simulationManager.agents[cameraManager.targetAgentIndex];
+        if(agent.curActionState == AgentActionState.Attacking) {
             imageCurAction.sprite = spriteIconCreatureActionAttack;
             tooltipCurrentAction.tooltipString = "Action: ATTACKING";
         }
-        if(agent.curActionState == Agent.AgentActionState.Defending) {
+        if(agent.curActionState == AgentActionState.Defending) {
             imageCurAction.sprite = spriteIconCreatureActionDefend;
             tooltipCurrentAction.tooltipString = "Action: DEFENDING";
         }
-        if(agent.curActionState == Agent.AgentActionState.Dashing) {
+        if(agent.curActionState == AgentActionState.Dashing) {
             imageCurAction.sprite = spriteIconCreatureActionDash;
             tooltipCurrentAction.tooltipString = "Action: DASHING";
         }
-        if(agent.curActionState == Agent.AgentActionState.Resting) {
+        if(agent.curActionState == AgentActionState.Resting) {
             imageCurAction.sprite = spriteIconCreatureActionRest;
             tooltipCurrentAction.tooltipString = "Action: RESTING";
         }
-        if(agent.curActionState == Agent.AgentActionState.Default) {
+        if(agent.curActionState == AgentActionState.Default) {
             imageCurAction.sprite = spriteIconCreatureActionFeed;
             tooltipCurrentAction.tooltipString = "Action: FEEDING";
-        }
+        }*/
+        var actionState = GetAgentActionStateData(agent.curActionState);
+        imageCurAction.sprite = actionState.sprite;
+        tooltipCurrentAction.tooltipString = actionState.text;
 
-        tooltipSpeciesIcon.tooltipString = "Species #" + agent.speciesIndex + "\nAvg Life: " + simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].avgCandidateData.performanceData.totalTicksAlive.ToString("F0");;
+        tooltipSpeciesIcon.tooltipString = "Species #" + agent.speciesIndex + "\nAvg Life: " + totalTicksAlive.ToString("F0");
 
-                
-        if (curPanelMode == CreaturePanelMode.Portrait) {
+        // WPP: replaced with nested class pattern -> PanelModeData
+        /*if (curPanelMode == CreaturePanelMode.Portrait) {
             panelPortrait.SetActive(true);
             imageAppearanceIcon.color = onColor;
-
+            
             panelGenome.SetActive(false);
             panelBrain.SetActive(false);
             imageGenomeIcon.color = offColor;
@@ -116,9 +143,8 @@ public class CreaturePanelUI : MonoBehaviour
         else if(curPanelMode == CreaturePanelMode.Genome) {
             panelGenome.SetActive(true);
             imageGenomeIcon.color = onColor;
-
+            
             panelPortrait.SetActive(false);////
-
             panelBrain.SetActive(false);
             imageAppearanceIcon.color = offColor;
             imageBrainIcon.color = offColor;
@@ -126,16 +152,15 @@ public class CreaturePanelUI : MonoBehaviour
         else if(curPanelMode == CreaturePanelMode.Brain) {
             panelBrain.SetActive(true);
             imageBrainIcon.color = onColor;
-
+            
             panelGenome.SetActive(false);
-
             panelPortrait.SetActive(false);/////
-
             imageGenomeIcon.color = offColor;
             imageAppearanceIcon.color = offColor;
-        }
+        }*/
+        foreach (var panelMode in panelModes)
+            panelMode.SetActive(curPanelMode);
 
-        
         if (agent.coreModule == null) return;
 
         tooltipBrain.tooltipString = "BRAIN";//\nAction: " + agent.curActionState;
@@ -145,14 +170,57 @@ public class CreaturePanelUI : MonoBehaviour
         tooltipGenome.tooltipString = "GENOME";//\nGen#" + agent.candidateRef.candidateGenome.generationCount + ", DNA length: " + (agent.candidateRef.candidateGenome.brainGenome.linkList.Count + agent.candidateRef.candidateGenome.brainGenome.bodyNeuronList.Count);
         tooltipAppearance.tooltipString = "APPEARANCE";
     }
-
-    public void SetPanelMode(int modeID) {
-        curPanelMode = (CreaturePanelMode)modeID;
+    
+    public void SetPanelMode(StringSO mode) {
+        //Debug.Log($"CreaturePanelUI.SetPanelMode({mode})");
+        curPanelMode = mode;
     }
 
     private void OnDisable() {
         critterPortraitStrokesCBuffer?.Release();
         portraitCritterInitDataCBuffer?.Release();
         portraitCritterSimDataCBuffer?.Release();
+    }
+    
+    AgentActionStateData GetAgentActionStateData(AgentActionState id)
+    {
+        foreach (var actionState in actionStates)
+            if (actionState.id == id)
+                return actionState;
+                
+        return defaultActionState;
+    }
+    
+    [Serializable]
+    public struct AgentActionStateData
+    {
+        public AgentActionState id;
+        public Sprite sprite;
+        public string text;
+    }
+    
+    [Serializable]
+    public class PanelModeData
+    {
+        [SerializeField] ScriptableObject id;
+        [SerializeField] GameObject panel;
+        [SerializeField] Image icon;
+        
+        Color onColor;
+        Color offColor;
+        
+        public void Initialize(Color onColor, Color offColor)
+        {
+            this.onColor = onColor;
+            this.offColor=  offColor;
+        }
+        
+        public void SetActive(ScriptableObject id) { SetActive(this.id == id); }
+        
+        public void SetActive(bool value)
+        {
+            panel.SetActive(value);
+            icon.color = value ? onColor : offColor;
+        }
     }
 }
