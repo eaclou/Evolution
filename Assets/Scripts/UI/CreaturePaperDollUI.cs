@@ -3,18 +3,28 @@ using UnityEngine.UI;
 
 public class CreaturePaperDollUI : MonoBehaviour
 {
-    UIManager uiManager => UIManager.instance;
     SimulationManager simulationManager => SimulationManager.instance;
     CameraManager cameraManager => CameraManager.instance;
+    Lookup lookup => Lookup.instance;
+    
+    Agent agent => simulationManager.agents[cameraManager.targetAgentIndex];
+    CritterModuleCore coreModule => agent.coreModule;
 
     public WidgetAgentStatus widgetAgentStatus;
 
-    public TooltipUI tooltipState;
-    public TooltipUI tooltipHealth;
-    public TooltipUI tooltipEnergy;
-    public TooltipUI tooltipStomachFood;
-    public TooltipUI tooltipWaste;
+    [SerializeField]
+    TooltipUI tooltipState;
+    [SerializeField]
+    TooltipUI tooltipHealth;
+    [SerializeField]
+    TooltipUI tooltipEnergy;
+    [SerializeField]
+    TooltipUI tooltipStomachFood;
+    [SerializeField]
+    TooltipUI tooltipWaste;
 
+    [SerializeField]
+    Image tooltipImage;
     [SerializeField]
     Image imageMeterBarHealth;
     [SerializeField]
@@ -25,14 +35,13 @@ public class CreaturePaperDollUI : MonoBehaviour
     Image imageMeterBarWaste;
     
     public void Tick() {
-        Agent agent = simulationManager.agents[cameraManager.targetAgentIndex];
-        Sprite creatureStateSprite = uiManager.creaturePanelUI.spriteIconCreatureStateEgg;
-        if (agent.coreModule == null) return;
+        if (coreModule == null) return;
         
         widgetAgentStatus.UpdateBars(agent); 
         
-        string lifeStage = agent.curLifeStage.ToString();
-        if(agent.curLifeStage == Agent.AgentLifeStage.Mature) {
+        // WPP: moved to lookup
+        //var lifeStage = agent.curLifeStage.ToString();
+        /*if(agent.curLifeStage == AgentLifeStage.Mature) {
             if(agent.isSexuallyMature) {
                 lifeStage = "Mature";
                 creatureStateSprite = uiManager.creaturePanelUI.spriteIconCreatureStateMature;
@@ -42,23 +51,26 @@ public class CreaturePaperDollUI : MonoBehaviour
                 creatureStateSprite = uiManager.creaturePanelUI.spriteIconCreatureStateYoung;
             }
         }
-        else if(agent.curLifeStage == Agent.AgentLifeStage.Dead) {
+        else if(agent.curLifeStage == AgentLifeStage.Dead) {
             creatureStateSprite = uiManager.creaturePanelUI.spriteIconCreatureStateDecaying;
-        }
+        }*/
+        var lifeStageData = lookup.GetAgentLifeStageData(agent.curLifeStage, agent.isYoung);
 
-        tooltipState.tooltipString = lifeStage + ", Age: " + agent.ageCounter + ", Size: " + agent.currentBiomass.ToString("F3");
+        tooltipState.tooltipString = lifeStageData.stateName + ", Age: " + agent.ageCounter + ", Size: " + agent.currentBiomass.ToString("F3");
+        tooltipImage.sprite = lifeStageData.icon;
 
-        tooltipState.gameObject.GetComponent<Image>().sprite = creatureStateSprite;
-
-        tooltipHealth.tooltipString = "Health: " + (agent.coreModule.health * 100f).ToString("F0") + "%";
+        tooltipHealth.tooltipString = "Health: " + (coreModule.health * 100f).ToString("F0") + "%";
         //Rect rect = imageMeterBarHealth.GetComponent<RectTransform>().rect;
         //rect.height = Mathf.RoundToInt(32f * agent.coreModule.health);
-        imageMeterBarHealth.GetComponent<RectTransform>().transform.localScale = new Vector3(1f, agent.coreModule.health, 1f);
-        tooltipEnergy.tooltipString = "Energy: " + agent.coreModule.energy.ToString("F0");
-        imageMeterBarEnergy.GetComponent<RectTransform>().transform.localScale = new Vector3(1f, Mathf.Clamp01(agent.coreModule.energy * 0.05f), 1f);
-        tooltipStomachFood.tooltipString = "Stomach: " + (agent.coreModule.stomachContentsPercent * 100f).ToString("F0");
-        imageMeterBarStomach.GetComponent<RectTransform>().transform.localScale = new Vector3(1f, agent.coreModule.stomachContentsPercent, 1f);
+        imageMeterBarHealth.transform.localScale = new Vector3(1f, coreModule.health, 1f);
+        
+        tooltipEnergy.tooltipString = "Energy: " + coreModule.energy.ToString("F0");
+        imageMeterBarEnergy.transform.localScale = new Vector3(1f, Mathf.Clamp01(coreModule.energy * 0.05f), 1f);
+        
+        tooltipStomachFood.tooltipString = "Stomach: " + (coreModule.stomachContentsPercent * 100f).ToString("F0");
+        imageMeterBarStomach.transform.localScale = new Vector3(1f, coreModule.stomachContentsPercent, 1f);
+        
         tooltipWaste.tooltipString = "Waste: (tbd)"; // + agent.coreModule.was.ToString("F0");
-        imageMeterBarWaste.GetComponent<RectTransform>().transform.localScale = new Vector3(1f, 0f, 1f);
+        imageMeterBarWaste.transform.localScale = new Vector3(1f, 0f, 1f);
     }
 }

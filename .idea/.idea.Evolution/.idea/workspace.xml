@@ -2,29 +2,23 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e5216a40-1993-4f7b-88ca-3d6aa0d75e16" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Panels.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Panels/Brain.asset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Panels/Brain.asset.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Panels/Genome.asset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Panels/Genome.asset.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Panels/Portrait.asset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Panels/Portrait.asset.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Settings.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Settings/Quality Settings.asset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Settings/Quality Settings.asset.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Settings/UI Refresh Rate.asset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Settings/UI Refresh Rate.asset.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/CreaturePanelUI.prefab" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/CreaturePanelUI.prefab.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/CreaturePaperDollUI.prefab" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/CreaturePaperDollUI.prefab.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Quality Settings.asset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Quality Settings.asset.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/UI Refresh Rate.asset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/UI Refresh Rate.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Panels/Brain.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Panels/Brain.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Panels/Genome.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Panels/Genome.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Panels/Portrait.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Panels/Portrait.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/PanelPlaying.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/PanelPlaying.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Lookup.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Lookup.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/CreaturePanelUI.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/CreaturePanelUI.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePanelUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePanelUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePaperDollUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePaperDollUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButtonPrefabScript.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButtonPrefabScript.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/TooltipUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/TooltipUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/WidgetAgentStatus.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/WidgetAgentStatus.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,11 +76,6 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/PanelTopLeftUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/CursorInRectBoundsMono.cs" />
-      <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/EnterExitRectBounds.cs" />
-      <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/CursorInRectBounds.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/GenomeViewerUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButtonTooltipSource.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimEventsManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/WatcherUI.cs" />
@@ -128,11 +117,16 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/MinimapPanel.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/HistoryPanelUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/VegetationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/OLD/KnowledgeUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/WidgetAgentStatus.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButtonPrefabScript.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePanelUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/TooltipUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePaperDollUI.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1owaWgGpM80xkcfA3szn5iw9YkG" />
@@ -244,7 +238,8 @@
       <workItem from="1629091638784" duration="5780000" />
       <workItem from="1629231262642" duration="6692000" />
       <workItem from="1629493317143" duration="3958000" />
-      <workItem from="1629588752313" duration="3795000" />
+      <workItem from="1629588752313" duration="6978000" />
+      <workItem from="1629705308263" duration="3064000" />
     </task>
     <servers />
   </component>

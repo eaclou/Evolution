@@ -6,6 +6,7 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
     SimulationManager simulationManager => SimulationManager.instance;
     CameraManager cameraManager => CameraManager.instance;
     UIManager uiManager => UIManager.instance;
+    Lookup lookup => Lookup.instance;
 
     public int index = -1;
     private SelectionGroup group;
@@ -58,7 +59,7 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
     // * Consider Refactor: move life stage to candidate    
     public void SetDisplay(CandidateAgentData candidate)
     {
-        Sprite iconSprite = uiManager.creaturePanelUI.spriteIconCreatureStateFossil;
+        var iconSprite = lookup.GetAgentLifeStageIcon(AgentLifeStage.Dead, true);   // Fossil
         
         // POSITION
         currentCoords = Vector2.Lerp(currentCoords, targetCoords, 0.75f);
@@ -77,11 +78,12 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
             button.colors = block;
             
             statusStr = isFocus ? SetBackground(selectedState) : SetBackgroundByLifeStage(matchingAgent);
-
-            if(matchingAgent.curLifeStage == Agent.AgentLifeStage.Egg) {
+            
+            // WPP: moved to lookup
+            /*if(matchingAgent.curLifeStage == AgentLifeStage.Egg) {
                 iconSprite = uiManager.creaturePanelUI.spriteIconCreatureStateEgg;
             }
-            else if(matchingAgent.curLifeStage == Agent.AgentLifeStage.Mature) {
+            else if(matchingAgent.curLifeStage == AgentLifeStage.Mature) {
                 if(matchingAgent.isSexuallyMature) {
                     iconSprite = uiManager.creaturePanelUI.spriteIconCreatureStateMature;
                 }
@@ -89,9 +91,10 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
                     iconSprite = uiManager.creaturePanelUI.spriteIconCreatureStateYoung;
                 }
             }
-            else if(matchingAgent.curLifeStage == Agent.AgentLifeStage.Dead) {
+            else if(matchingAgent.curLifeStage == AgentLifeStage.Dead) {
                 iconSprite = uiManager.creaturePanelUI.spriteIconCreatureStateDecaying;
-            }
+            }*/
+            iconSprite = lookup.GetAgentLifeStageIcon(matchingAgent.curLifeStage, matchingAgent.isYoung);
         }
         else 
         {
@@ -127,7 +130,7 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
     [Serializable]
     public struct BackgroundState
     {
-        public Agent.AgentLifeStage lifeStage;
+        public AgentLifeStage lifeStage;
         public float scale;
         public Color color;
         public string status;

@@ -11,6 +11,14 @@ public enum AgentActionState {
     Decaying
 }
 
+public enum AgentLifeStage {
+    AwaitingRespawn,  // can i merge this in with null?
+    Egg,
+    Mature,
+    Dead,
+    Null
+}
+
 public class Agent : MonoBehaviour {
     Lookup lookup => Lookup.instance;
     SettingsManager settingsRef => SettingsManager.instance;
@@ -73,13 +81,8 @@ public class Agent : MonoBehaviour {
     public CandidateAgentData candidateRef;
 
     public AgentLifeStage curLifeStage;
-    public enum AgentLifeStage {
-        AwaitingRespawn,  // can i merge this in with null?
-        Egg,
-        Mature,
-        Dead,
-        Null
-    }
+    public bool isYoung => curLifeStage == AgentLifeStage.Mature && !isSexuallyMature;
+
     public AgentActionState curActionState;
 
     private int gestationDurationTimeSteps = 120;

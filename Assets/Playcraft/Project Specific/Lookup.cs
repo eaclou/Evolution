@@ -57,6 +57,43 @@ public class Lookup : ScriptableObject
     }
 
     #endregion
+    
+    #region Agent State Icons
+    
+    [SerializeField] AgentLifeStageMetaData[] agentLifeStageData;
+    [SerializeField] AgentLifeStageMetaData defaultLifeStage;
+    
+    public Sprite GetAgentLifeStageIcon(AgentLifeStage id, bool useSecondary = false) { return GetAgentLifeStageData(id, useSecondary).icon; }
+
+    public AgentLifeStageData GetAgentLifeStageData(AgentLifeStage id, bool useSecondary = false)
+    {
+		foreach (var metadata in agentLifeStageData)
+			if (metadata.id == id)
+				return metadata.GetData(useSecondary);
+				
+	    return defaultLifeStage.GetData(useSecondary);
+    }
+    
+    [Serializable]
+    public class AgentLifeStageMetaData
+    {
+		public AgentLifeStage id;
+		public AgentLifeStageData[] substages;
+		
+		public AgentLifeStageData GetData(bool useSecondary = false) 
+		{ 
+			return useSecondary && substages.Length > 1 ? substages[1] : substages[0]; 
+	    }
+    }
+    
+    [Serializable]
+    public struct AgentLifeStageData
+    {
+		public Sprite icon;
+		public string stateName;
+    }
+    
+    #endregion
 }
 
 #region Resource Lookup Containers

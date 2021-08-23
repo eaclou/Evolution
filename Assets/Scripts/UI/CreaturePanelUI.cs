@@ -45,11 +45,11 @@ public class CreaturePanelUI : MonoBehaviour
     Text textPanelStateDebug;
 
     // * WPP: move to Lookup
-    public Sprite spriteIconCreatureStateEgg;
+    /*public Sprite spriteIconCreatureStateEgg;
     public Sprite spriteIconCreatureStateYoung;
     public Sprite spriteIconCreatureStateMature;
     public Sprite spriteIconCreatureStateDecaying;
-    public Sprite spriteIconCreatureStateFossil;
+    public Sprite spriteIconCreatureStateFossil;*/
     
     [SerializeField] AgentActionStateData[] actionStates;
     [SerializeField] AgentActionStateData defaultActionState;

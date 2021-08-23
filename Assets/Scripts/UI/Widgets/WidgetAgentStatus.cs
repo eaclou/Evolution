@@ -1,29 +1,22 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class WidgetAgentStatus : MonoBehaviour {
-        
+// * WPP: this script does nothing, consider deletion
+public class WidgetAgentStatus : MonoBehaviour 
+{
     //public Text textValHealth;
     //public Text textValEnergy;
     //public Text textValFood;
-    
-    	
-    public void UpdateBars(Agent agent) {
-        
+
+    public void UpdateBars(Agent agent) 
+    {
         //textValHealth.text = (agent.coreModule.health * 100f).ToString("F0") + "%";      
         //textValEnergy.text = agent.coreModule.energy.ToString("F0");        
         //textValFood.text = (agent.coreModule.stomachContentsPercent * 100f).ToString("F0");
         //textValBiomass.text = "Biomass: " + agent.currentBiomass.ToString("F3");
         string lifeStage = agent.curLifeStage.ToString();
-        if(agent.curLifeStage == Agent.AgentLifeStage.Mature) {
-            if(agent.isSexuallyMature) {
-                lifeStage = "Mature";
-            }
-            else {
-                lifeStage = "Young";
-            }
+        if(agent.curLifeStage == AgentLifeStage.Mature) {
+            lifeStage = agent.isSexuallyMature ? "Mature" : "Young";
         }
         //textValAge.text = lifeStage + ", Age: " + agent.ageCounter;
         //textCurBehavior.text = agent.curActionState.ToString();

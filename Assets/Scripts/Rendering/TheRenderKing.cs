@@ -2056,7 +2056,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
 
         bool isDead = true;
         if(simManager.GetAgent(uiManager.selectionManager.focusedCandidate)) {
-            isDead = (simManager.GetAgent(uiManager.selectionManager.focusedCandidate).curLifeStage == Agent.AgentLifeStage.Dead);
+            isDead = simManager.GetAgent(uiManager.selectionManager.focusedCandidate).curLifeStage == AgentLifeStage.Dead;
         }
         
         bool evaluationsComplete = uiManager.selectionManager.focusedCandidate.allEvaluationsComplete;
