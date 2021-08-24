@@ -22,6 +22,7 @@ public class SelectionManager : MonoBehaviour
     }
 
     public void SetFocusedCandidateGenome(CandidateAgentData candidate) {
+        
         focusedCandidate = candidate;
         
         theRenderKing.InitializeCreaturePortrait(focusedCandidate.candidateGenome);
@@ -30,8 +31,6 @@ public class SelectionManager : MonoBehaviour
         uiManager.genomeViewerUI.brainGenomeImage.SetTexture(focusedCandidate.candidateGenome.brainGenome);
 
         SetSelectedSpeciesUI(focusedCandidate.speciesID);
-
-
     }
 
     public void SetFocus()

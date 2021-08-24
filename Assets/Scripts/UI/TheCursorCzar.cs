@@ -106,8 +106,34 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
         {
             cameraManager.MouseOverAgent(agent, clicked);
         
-            if (clicked)
+            if (clicked) {
+                if(uiManagerRef.selectionManager.focusedCandidate.candidateID == agent.candidateRef.candidateID) { // Same species
+                    HistoryPanelUI.HistoryPanelMode panelMode = uiManagerRef.historyPanelUI.GetCurPanelMode();
+                    if(panelMode == HistoryPanelUI.HistoryPanelMode.AllSpecies) {
+                        uiManagerRef.historyPanelUI.SetCurPanelMode(HistoryPanelUI.HistoryPanelMode.SpeciesPopulation); 
+                    }
+                    else if(panelMode == HistoryPanelUI.HistoryPanelMode.SpeciesPopulation) {
+                        uiManagerRef.historyPanelUI.SetCurPanelMode(HistoryPanelUI.HistoryPanelMode.CreatureTimeline); 
+                    }
+                }
+                else {  // different species
+                    HistoryPanelUI.HistoryPanelMode panelMode = uiManagerRef.historyPanelUI.GetCurPanelMode();
+                    if(panelMode == HistoryPanelUI.HistoryPanelMode.AllSpecies) {
+                        uiManagerRef.historyPanelUI.SetCurPanelMode(HistoryPanelUI.HistoryPanelMode.SpeciesPopulation); 
+                    }
+                    else if(panelMode == HistoryPanelUI.HistoryPanelMode.SpeciesPopulation) {
+                        //uiManagerRef.historyPanelUI.SetCurPanelMode(HistoryPanelUI.HistoryPanelMode.CreatureTimeline); 
+                    }
+                    else if(panelMode == HistoryPanelUI.HistoryPanelMode.CreatureTimeline) {
+                        uiManagerRef.historyPanelUI.SetCurPanelMode(HistoryPanelUI.HistoryPanelMode.SpeciesPopulation); 
+                    }
+                }
                 uiManagerRef.selectionManager.SetFocusedCandidateGenome(agent.candidateRef);
+                
+                //uiManagerRef.historyPanelUI.SetCurPanelMode(HistoryPanelUI.HistoryPanelMode.CreatureTimeline); 
+            }
+                
+
         }
         else if (!clicked) 
         {

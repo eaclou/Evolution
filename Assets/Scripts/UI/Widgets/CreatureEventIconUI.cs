@@ -15,6 +15,8 @@ public class CreatureEventIconUI : MonoBehaviour
 
     CandidateAgentData.CandidateEventData eventData;
     //public bool isSelected = false;
+    [SerializeField]
+    public Color[] eventTypeColors;
 
     public void UpdateIconPrefabData(CandidateAgentData.CandidateEventData data, int eventIndex) {
         index = eventIndex;
@@ -38,7 +40,13 @@ public class CreatureEventIconUI : MonoBehaviour
 
         gameObject.transform.localPosition = new Vector3(currentCoords.x * 360f, currentCoords.y * 360f, 0f);
         
-        imageBG.color = Color.Lerp(Color.red, Color.green, eventData.goodness);
+        if(eventTypeColors != null) {
+            imageBG.color = eventTypeColors[this.eventData.type];
+        }
+        else {
+            imageBG.color = Color.Lerp(Color.red, Color.green, eventData.goodness);
+        }
+        
         
     }
 }
