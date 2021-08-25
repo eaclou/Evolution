@@ -33,7 +33,7 @@ public class HistoryPanelUI : MonoBehaviour
     private GameObject tempPanelGraph;
     [SerializeField]
     private GameObject tempPanelLifeEvents;
-    [SerializeField] int maxNumCreatureEventIcons = 64;
+    [SerializeField] int maxNumCreatureEventIcons = 128;
 
     private HistoryPanelMode curPanelMode;
     
@@ -114,7 +114,7 @@ public class HistoryPanelUI : MonoBehaviour
                     Vector2 eventCoords = Vector2.zero;
                     eventCoords.x = (float)(candidate.candidateEventDataList[i].eventFrame - candidate.performanceData.timeStepHatched) / (float)(simManager.simAgeTimeSteps - candidate.performanceData.timeStepHatched);
                     eventCoords.x = eventCoords.x * 0.8f + 0.1f;
-                    eventCoords.y = (1f - ( (float)candidate.candidateEventDataList[i].type / 12f)) * 0.77f + 0.035f;
+                    eventCoords.y = (1f - ( (float)candidate.candidateEventDataList[i].type / 12f)) * 0.75f;
                     creatureEventIconsList[i].UpdateIconPrefabData(candidate.candidateEventDataList[i], i);
                     creatureEventIconsList[i].SetTargetCoords(eventCoords);
                     creatureEventIconsList[i].SetDisplay();

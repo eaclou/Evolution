@@ -533,7 +533,7 @@ public class Agent : MonoBehaviour {
         coreModule.stomachContentsMeat += amount;
         
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.digestEfficiencyMeat * 1f); // Exp for appropriate food
-
+        
         RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Ate Microbe! (" + (amount * 100f).ToString("F0") + ")", 1f, 1);
     }
     
@@ -939,7 +939,7 @@ public class Agent : MonoBehaviour {
                 
                 //Debug.Log("Agent[" + index.ToString() + "], Ate Zooplankton: " + animalParticleEatAmount.ToString());
                 EatFoodMeat(animalParticleEatAmount); // * sizeEfficiencyPlant);    
-                RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Ate Microbe! (+" + (animalParticleEatAmount * 100).ToString("F0") + " food)", 1f, 1);
+                
             }
 
             mouthRef.lastBiteFoodAmount += foodParticleEatAmount + animalParticleEatAmount;
@@ -974,25 +974,8 @@ public class Agent : MonoBehaviour {
             currentBiomass = fullsizeBiomass;
         }
         
-        // WPP: delegated to CritterModuleCore
         coreModule.TickDigestion(digestedAmountTotal);
-        /*float digestedPlantMass = digestedAmountTotal * coreModule.plantEatenPercent;
-        float digestedMeatMass = digestedAmountTotal * coreModule.meatEatenPercent;
-        float digestedDecayMass = digestedAmountTotal * coreModule.decayEatenPercent; 
-        
-        float createdEnergyTotal = coreModule.GetEnergyCreatedFromDigestion(digestedPlantMass, digestedMeatMass, digestedDecayMass) * settingsRef.agentSettings._DigestionEnergyEfficiency;
-        coreModule.stomachContentsPlant -= digestedPlantMass;        
-        coreModule.stomachContentsMeat -= digestedMeatMass;
-        coreModule.stomachContentsDecay -= digestedDecayMass;
-        //coreModule.energy += createdEnergyTotal; */
-        
-        if(index == 1) {
-            //Debug.Log(createdEnergyTotal + "  GetEnergyCreatedFromDigestion: " + coreModule.stomachContentsPlant + ", " + coreModule.stomachContentsMeat + ", " + coreModule.stomachContentsDecay);
-        }
-        
-        //float spentEnergyTotal = 
-        //(plantToEnergyAmount * coreModule.dietSpecPlantNorm + meatToEnergyAmount * coreModule.dietSpecMeatNorm + decayToEnergyAmount * coreModule.dietSpecDecayNorm)
-
+      
         coreModule.Regenerate(healRate, energyToHealth);
 
         //float oxygenMask = Mathf.Clamp01(simManager.simResourceManager.curGlobalOxygen * settingsRef.agentSettings._OxygenEnergyMask);
@@ -1062,14 +1045,18 @@ public class Agent : MonoBehaviour {
         if(coreModule.mouthAttackEffector[0] >= mostActiveEffectorValue) {
             curActionState = AgentActionState.Attacking;
             UseAbility(attack);
+            RegisterAgentEvent(simManager.simAgeTimeSteps, "Attacked!", 1f, 6);
+            
         }
         if(coreModule.dashEffector[0] >= mostActiveEffectorValue) {
             curActionState = AgentActionState.Dashing;
             UseAbility(dash);
+            RegisterAgentEvent(simManager.simAgeTimeSteps, "Dashed!", 1f, 8);
         }
         if(coreModule.defendEffector[0] >= mostActiveEffectorValue) {
             curActionState = AgentActionState.Defending;
             UseAbility(defend);
+            RegisterAgentEvent(simManager.simAgeTimeSteps, "Defended!", 1f, 7);
         }    
     }
     

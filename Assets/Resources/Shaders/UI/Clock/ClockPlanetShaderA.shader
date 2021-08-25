@@ -34,6 +34,7 @@
 				float2 uv0 : TEXCOORD0;
 				float2 uv1 : TEXCOORD1;
 				float4 vertex : SV_POSITION;
+				float4 color : COLOR;
 			};
 
 			sampler2D _MainTex;
@@ -54,6 +55,7 @@
 				newUV.x += column * (1.0 / cols);
 				newUV.y += row * (1.0 / rows);
 
+
 				return newUV;
 			}
 
@@ -68,6 +70,7 @@
 				o.uv0 = uv0; // full texture
 				o.uv1 = uv1;
 				//o.uv0 = TRANSFORM_TEX(v.uv, _MainTex);
+				o.color = float4(1,1,1,v.uv.y);
 				return o;
 			}
 			
@@ -80,6 +83,7 @@
 				//col.rgb = lerp(_TintPri.rgb, _TintSec.rgb, i.uv.y);
 				fixed4 finalCol = lerp(col0, col1, frac(_CurFrame));
 				finalCol.rgb = lerp(finalCol.rgb, float3(0, 0.61, 0.95), 0.2);
+
 				return finalCol;
 			}
 			ENDCG

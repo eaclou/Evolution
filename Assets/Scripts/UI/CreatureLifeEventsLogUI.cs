@@ -16,7 +16,7 @@ public class CreatureLifeEventsLogUI : MonoBehaviour
     public void Tick(CandidateAgentData agentData) {
         if (agentData.candidateEventDataList == null)
             return;
-                 
+         /*        
         // Agent Event Log:
         int maxEventsToDisplayLog = 16;
         //int numEventsLog = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplayLog);
@@ -35,7 +35,7 @@ public class CreatureLifeEventsLogUI : MonoBehaviour
         }
         
         //eventsLog += eventLogString;
-        textEventsLog.text = eventLogString;       
+        textEventsLog.text = eventLogString;  */     
     }
     
     string EventColorString(bool isDim, bool isGood)

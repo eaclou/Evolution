@@ -34,6 +34,7 @@
 				float2 uv0 : TEXCOORD0;
 				float2 uv1 : TEXCOORD1;
 				float4 vertex : SV_POSITION;
+				float4 color : COLOR;
 			};
 
 			sampler2D _MainTex;
@@ -68,18 +69,20 @@
 				o.uv0 = uv0; // full texture
 				o.uv1 = uv1;
 				//o.uv0 = TRANSFORM_TEX(v.uv, _MainTex);
+				o.color = float4(1,1,1,v.uv.y);
 				return o;
 			}
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
 				//return float4(i.uv0, 0, 1);
+				
 				// sample the texture
 				fixed4 col0 = tex2D(_MainTex, i.uv0);
 				fixed4 col1 = tex2D(_MainTex, i.uv1);
-				//col.rgb = lerp(_TintPri.rgb, _TintSec.rgb, i.uv.y);
+				fixed4 finalCol = lerp(col0, col1, frac(_CurFrame)) * 2;
 				
-				return lerp(col0, col1, frac(_CurFrame)) * 2;
+				return finalCol;
 			}
 			ENDCG
 		}

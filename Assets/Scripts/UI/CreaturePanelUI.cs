@@ -66,12 +66,6 @@ public class CreaturePanelUI : MonoBehaviour
 
     public Sprite spriteBrainButton;
 
-    // WPP: replaced with ScriptableObjects to eliminate mapping int to enum values
-    /*public enum CreaturePanelMode {
-        Portrait,
-        Genome,
-        Brain
-    }*/
     private StringSO curPanelMode;
 
     // PORTRAIT!!!!
@@ -98,66 +92,12 @@ public class CreaturePanelUI : MonoBehaviour
     public void Tick() {
         textPanelStateDebug.text = "MODE: " + curPanelMode.value;
 
-        //Color onColor = Color.gray;
-        //Color offColor = Color.white;
-        //imageCurAction.sprite = spriteBrainButton;
-        
-        // WPP: replaced with nested struct pattern -> AgentActionStateData
-        /*Agent agent = simulationManager.agents[cameraManager.targetAgentIndex];
-        if(agent.curActionState == AgentActionState.Attacking) {
-            imageCurAction.sprite = spriteIconCreatureActionAttack;
-            tooltipCurrentAction.tooltipString = "Action: ATTACKING";
-        }
-        if(agent.curActionState == AgentActionState.Defending) {
-            imageCurAction.sprite = spriteIconCreatureActionDefend;
-            tooltipCurrentAction.tooltipString = "Action: DEFENDING";
-        }
-        if(agent.curActionState == AgentActionState.Dashing) {
-            imageCurAction.sprite = spriteIconCreatureActionDash;
-            tooltipCurrentAction.tooltipString = "Action: DASHING";
-        }
-        if(agent.curActionState == AgentActionState.Resting) {
-            imageCurAction.sprite = spriteIconCreatureActionRest;
-            tooltipCurrentAction.tooltipString = "Action: RESTING";
-        }
-        if(agent.curActionState == AgentActionState.Default) {
-            imageCurAction.sprite = spriteIconCreatureActionFeed;
-            tooltipCurrentAction.tooltipString = "Action: FEEDING";
-        }*/
         var actionState = GetAgentActionStateData(agent.curActionState);
         imageCurAction.sprite = actionState.sprite;
         tooltipCurrentAction.tooltipString = actionState.text;
 
         tooltipSpeciesIcon.tooltipString = "Species #" + agent.speciesIndex + "\nAvg Life: " + totalTicksAlive.ToString("F0");
 
-        // WPP: replaced with nested class pattern -> PanelModeData
-        /*if (curPanelMode == CreaturePanelMode.Portrait) {
-            panelPortrait.SetActive(true);
-            imageAppearanceIcon.color = onColor;
-            
-            panelGenome.SetActive(false);
-            panelBrain.SetActive(false);
-            imageGenomeIcon.color = offColor;
-            imageBrainIcon.color = offColor;
-        }
-        else if(curPanelMode == CreaturePanelMode.Genome) {
-            panelGenome.SetActive(true);
-            imageGenomeIcon.color = onColor;
-            
-            panelPortrait.SetActive(false);////
-            panelBrain.SetActive(false);
-            imageAppearanceIcon.color = offColor;
-            imageBrainIcon.color = offColor;
-        }
-        else if(curPanelMode == CreaturePanelMode.Brain) {
-            panelBrain.SetActive(true);
-            imageBrainIcon.color = onColor;
-            
-            panelGenome.SetActive(false);
-            panelPortrait.SetActive(false);/////
-            imageGenomeIcon.color = offColor;
-            imageAppearanceIcon.color = offColor;
-        }*/
         foreach (var panelMode in panelModes)
             panelMode.SetActive(curPanelMode);
 

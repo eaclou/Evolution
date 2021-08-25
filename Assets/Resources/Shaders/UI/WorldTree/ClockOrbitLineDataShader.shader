@@ -92,6 +92,10 @@
 				o.uv = newUV;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.color = data.color;
+				if(worldPosition.y < 0.75) {
+					o.color.a = 0;
+				}
+				
 								
 				return o;
 			}
@@ -99,7 +103,8 @@
 			fixed4 frag (v2f i) : SV_Target
 			{
 				float4 col = tex2D(_BrushTex, i.uv);
-				col.a *= 0.67f;
+				col.a *= 0.67f * i.color.a;
+				
 				return col;
 
 			}

@@ -9,6 +9,7 @@ public class StatUI
     public Image bar;
     public TooltipUI tip;
     public string name;
+    public string category;
         
     public void RefreshPercent(float value, float scale)
     {
@@ -21,6 +22,6 @@ public class StatUI
         if(percent) {
             percent.text = useDecimal ? numericValue.ToString("F2") : numericValue.ToString("F0");
         }
-        tip.tooltipString = this.name + ": " + numericValue.ToString("F0");
+        tip.tooltipString = category + "\n" + this.name + ": " + numericValue.ToString("F0");
     }
 }
