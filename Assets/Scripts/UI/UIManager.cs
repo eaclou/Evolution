@@ -94,18 +94,19 @@ public class UIManager : Singleton<UIManager> {
         var candidate = simulationManager.masterGenomePool.completeSpeciesPoolsList[curSpeciesID].representativeCandidate;
         SetFocusedCandidateGenome(candidate);
     }*/
-    
-    
 
     public void BeginAnnouncement()
     {
         isAnnouncementTextOn = true;
         timerAnnouncementTextCounter = 0;        
     }
+    
+    public void RefreshFocusedAgent(Agent agent) { historyPanelUI.RefreshFocusedAgent(AgentIsFocus(agent)); }
+    
+    public bool AgentIsFocus(Agent agent) { return selectionManager.IsFocus(agent.candidateRef); }
 
     #region Initialization Functions:::
-    
-    
+
     public void InitialUnlocks() {
         Debug.Log("InitialUnlocks WATER UNLOCKED!!! " + unlockCooldownCounter); // + ", " + BigBangPanelUI.bigBangFramesCounter.ToString());
 
@@ -118,7 +119,6 @@ public class UIManager : Singleton<UIManager> {
 
         UnlockBrushes();   
         
-        
         // get slot from manager, set status directly
         var algae = trophicLayersManager.GetSlot(KnowledgeMapId.Algae);
         worldSpiritHubUI.selectedWorldSpiritSlot = algae;//trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
@@ -127,6 +127,13 @@ public class UIManager : Singleton<UIManager> {
         algae.status = TrophicSlotStatus.On;
         worldSpiritHubUI.ClickWorldCreateNewSpecies(algae);
 
+        
+        InitializeTrophicSlot(KnowledgeMapId.Decomposers);
+        InitializeTrophicSlot(KnowledgeMapId.Plants);
+        InitializeTrophicSlot(KnowledgeMapId.Microbes);
+        InitializeTrophicSlot(KnowledgeMapId.Animals);
+        // WPP: delegated repetitive code to InitializeTrophicSlot
+        /*
         var decomposers = trophicLayersManager.GetSlot(KnowledgeMapId.Decomposers);
         decomposers.status = TrophicSlotStatus.On;
         worldSpiritHubUI.ClickWorldCreateNewSpecies(decomposers);
@@ -142,15 +149,13 @@ public class UIManager : Singleton<UIManager> {
         var animals = trophicLayersManager.GetSlot(KnowledgeMapId.Animals);
         animals.status = TrophicSlotStatus.On;
         worldSpiritHubUI.ClickWorldCreateNewSpecies(animals);
+        */
                 
         theRenderKing.InitializeCreaturePortrait(simulationManager.masterGenomePool.completeSpeciesPoolsList[0].foundingCandidate.candidateGenome); //, gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][mutationUI.selectedToolbarMutationID].representativeGenome);
         
         trophicLayersManager.SetSlotStatus(KnowledgeMapId.Nutrients, TrophicSlotStatus.On);
-
         trophicLayersManager.SetSlotStatus(KnowledgeMapId.Pebbles, TrophicSlotStatus.On);
-
         trophicLayersManager.SetSlotStatus(KnowledgeMapId.Sand, TrophicSlotStatus.On);
-
         trophicLayersManager.SetSlotStatus(KnowledgeMapId.Wind, TrophicSlotStatus.On);
         
         isUnlockCooldown = true;
@@ -164,10 +169,15 @@ public class UIManager : Singleton<UIManager> {
         //historyPanelUI.InitializeCreatureEventIcons();
     }
     
+    void InitializeTrophicSlot(KnowledgeMapId id) {
+        var trophicSlot = trophicLayersManager.GetSlot(id);
+        trophicSlot.status = TrophicSlotStatus.On;
+        worldSpiritHubUI.ClickWorldCreateNewSpecies(trophicSlot);
+    }
+    
     public void TransitionToNewGameState(GameState gameState) {
         mainMenu.gameObject.SetActive(gameState == GameState.MainMenu);
     
-        // * Remove: replace with delegation
         switch (gameState) {
             case GameState.MainMenu: break;
             case GameState.Loading:
@@ -189,37 +199,38 @@ public class UIManager : Singleton<UIManager> {
         panelPlaying.SetActive(false);
     }
     
-    private void EnterPlayingUI() {   //// ******* this happens everytime quit to menu and resume.... *** needs to change!!! ***
+    //// ******* this happens everytime quit to menu and resume.... *** needs to change!!! ***
+    private void EnterPlayingUI() {   
         panelLoading.SetActive(false);
         panelPlaying.SetActive(true);
 
         simulationManager._BigBangOn = true;
         
-        SimEventData newEventData = new SimEventData();
-        newEventData.name = "New Simulation Start!";
-        newEventData.category = SimEventData.SimEventCategories.NPE;
-        newEventData.timeStepActivated = 0;
+        SimEventData newEventData = new SimEventData("New Simulation Start!", 0);
+
         simulationManager.simEventsManager.completeEventHistoryList.Add(newEventData);
 
         panelNotificationsUI.Narrate("... And Then There Was Not Nothing ...", new Color(0.75f, 0.75f, 0.75f));
-        
-
     }
     #endregion
 
     #region UPDATE UI PANELS FUNCTIONS!!! :::
-    void Update() {                                        // ***EC CLEAN THIS CRAP UP
-        if(!simulationManager.loadingComplete) return;
-        bigBangPanelUI.Tick();
-        if(simulationManager._BigBangOn) return;
+    // ***EC CLEAN THIS CRAP UP
+    void Update() 
+    {                                        
+        if (!simulationManager.loadingComplete) return;
+        // WPP: used return statement to merge Tick() with running check
+        if (bigBangPanelUI.Tick()) return;
+        //bigBangPanelUI.Tick();
+        //if (simulationManager._BigBangOn) return;
         
         observerModeUI.Tick();  // <== this is the big one *******  
         // ^^^  Need to Clean this up and replace with better approach ***********************        
         theCursorCzar.Tick();  // this will assume a larger role
         brushesUI.UpdateBrushesUI(); 
         
-        if(selectionManager.focusedCandidate != null && selectionManager.focusedCandidate.candidateGenome != null) {
-
+        if (selectionManager.focusedCandidate?.candidateGenome != null) 
+        {
             creaturePanelUI.Tick();
             // --- Move these into CreaturePanel?
             genomeViewerUI.UpdateUI(); 
@@ -229,7 +240,9 @@ public class UIManager : Singleton<UIManager> {
 
             creatureLifeEventsLogUI.Tick(selectionManager.focusedCandidate);
 
-            if(simulationManager.simAgeTimeSteps % 37 == 11) { //***EAC still needed? answer: yes :(
+            //***EAC still needed? answer: yes :(
+            // * WPP: expose magic numbers, create variable names describing purpose
+            if(simulationManager.simAgeTimeSteps % 37 == 11) { 
                 speciesOverviewUI.RebuildGenomeButtons();  
             }
         }
@@ -241,23 +254,20 @@ public class UIManager : Singleton<UIManager> {
     }
 
     public void CheckForAnnouncements() {
-    
-        // ***WPP: replace nested conditions with early exit 
-        if(!announceAlgaeCollapseOccurred) {
-            if(announceAlgaeCollapsePossible) {
-                if(simulationManager.simResourceManager.curGlobalPlantParticles < 10f) {
-                    announceAlgaeCollapsePossible = false;
-                    announceAlgaeCollapseOccurred = true;
+        if (announceAlgaeCollapseOccurred || !announceAlgaeCollapsePossible ||
+            simulationManager.simResourceManager.curGlobalPlantParticles >= 10f) 
+            return;
+        
+        announceAlgaeCollapsePossible = false;
+        announceAlgaeCollapseOccurred = true;
 
-                    var decomposersColor = lookup.GetTrophicSlotData(KnowledgeMapId.Decomposers).color;
-                    panelNotificationsUI.Narrate("<color=#DDDDDDFF>Algae Died from lack of Nutrients!</color>\nAdd Decomposers to recycle waste", decomposersColor);
-                    isAnnouncementTextOn = true;
-                }
-            }
-        }
+        var decomposersColor = lookup.GetTrophicSlotData(KnowledgeMapId.Decomposers).color;
+        panelNotificationsUI.Narrate("<color=#DDDDDDFF>Algae Died from lack of Nutrients!</color>\nAdd Decomposers to recycle waste", decomposersColor);
+        isAnnouncementTextOn = true;
     }
 
-    public Vector4 SampleTexture(RenderTexture tex, Vector2 uv) {
+    // WPP: Moved to SimulationManager
+    /*public Vector4 SampleTexture(RenderTexture tex, Vector2 uv) {
         Vector4[] sample = new Vector4[1];
 
         ComputeBuffer outputBuffer = new ComputeBuffer(1, sizeof(float) * 4);
@@ -274,11 +284,11 @@ public class UIManager : Singleton<UIManager> {
         outputBuffer.Release();
 
         return sample[0];
-    }
+    }*/
     
     #endregion
 
-    #region UTILITY & EVENT FUNCTIONS
+    #region UTILITY & EVENT FUNCTIONS - Dead Code
 
     /*private void RemoveSpeciesSlot() {
                 

@@ -6,7 +6,6 @@ public class BigBangPanelUI : MonoBehaviour
     UIManager manager => UIManager.instance;
     
     public GameObject panelBigBang;
-    //public WorldSpiritHubUI worldSpiritHubUI;
     public Image imageBigBangStrokes01;
     public Image imageBigBangStrokes02;
     public Image imageBigBangStrokes03;
@@ -18,10 +17,11 @@ public class BigBangPanelUI : MonoBehaviour
     
     public int bigBangFramesCounter = 0;
 
-    public void Tick() {
+    public bool Tick() {
         //Debug.Log("IS THIS RUNNING!?!?!? " + bigBangFramesCounter.ToString());
 
-        if (!simulationManager._BigBangOn) return;
+        if (!simulationManager._BigBangOn) 
+            return false;
 
         panelBigBang.SetActive(true);
         bigBangFramesCounter += 1;
@@ -55,5 +55,7 @@ public class BigBangPanelUI : MonoBehaviour
             imageBigBangStrokes03.gameObject.SetActive(true);
             curActiveTool = ToolType.Stir;
         }
+        
+        return true;
     }
 }

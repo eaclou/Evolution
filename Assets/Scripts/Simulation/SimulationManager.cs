@@ -865,7 +865,6 @@ public class SimulationManager : Singleton<SimulationManager>
     }
     
     public void AttemptToBrushSpawnAgent(int speciesIndex) {
-        
         for (int a = 0; a < agents.Length; a++) 
         {
             if (agents[a].isAwaitingRespawn)
@@ -889,7 +888,7 @@ public class SimulationManager : Singleton<SimulationManager>
             
             Vector2 spawnWorldPos = new Vector2(cursorWorldPos.x, cursorWorldPos.y); 
             
-            Vector4 altitudeSample = uiManager.SampleTexture(theRenderKing.baronVonTerrain.terrainHeightDataRT, spawnWorldPos / _MapSize);
+            Vector4 altitudeSample = SampleTexture(theRenderKing.baronVonTerrain.terrainHeightDataRT, spawnWorldPos / _MapSize);
 
             if(IsValidSpawnLoc(altitudeSample)) {
                 SpawnAgentImmaculate(candidateData, a, speciesIndex, spawnWorldPos);
@@ -945,7 +944,7 @@ public class SimulationManager : Singleton<SimulationManager>
             Vector3 randWorldPos = new Vector3(Random.Range(_MapSize * 0.4f, _MapSize * 0.6f), Random.Range(_MapSize * 0.4f, _MapSize * 0.6f), 0f);// GetRandomFoodSpawnPosition().startPosition;
             
             Vector2 spawnWorldPos = new Vector2(randWorldPos.x, randWorldPos.y);
-            Vector4 altitudeSample = uiManager.SampleTexture(theRenderKing.baronVonTerrain.terrainHeightDataRT, spawnWorldPos / _MapSize);
+            Vector4 altitudeSample = SampleTexture(theRenderKing.baronVonTerrain.terrainHeightDataRT, spawnWorldPos / _MapSize);
 
             if (IsValidSpawnLoc(altitudeSample)) {
                 SpawnAgentImmaculate(candidateData, agentIndex, speciesIndex, spawnWorldPos);
@@ -970,6 +969,26 @@ public class SimulationManager : Singleton<SimulationManager>
         }
         
         return validEggSackIndicesList;
+    }
+    
+    public Vector4 SampleTexture(RenderTexture tex, Vector2 uv) 
+    {
+        Vector4[] sample = new Vector4[1];
+
+        ComputeBuffer outputBuffer = new ComputeBuffer(1, sizeof(float) * 4);
+        outputBuffer.SetData(sample);
+        int kernelCSSampleTexture = computeShaderResourceGrid.FindKernel("CSSampleTexture");
+        computeShaderResourceGrid.SetTexture(kernelCSSampleTexture, "_CommonSampleTex", tex);
+        computeShaderResourceGrid.SetBuffer(kernelCSSampleTexture, "outputValuesCBuffer", outputBuffer);
+        computeShaderResourceGrid.SetFloat("_CoordX", uv.x);
+        computeShaderResourceGrid.SetFloat("_CoordY", uv.y); 
+        // DISPATCH !!!
+        computeShaderResourceGrid.Dispatch(kernelCSSampleTexture, 1, 1, 1);
+        
+        outputBuffer.GetData(sample);
+        outputBuffer.Release();
+
+        return sample[0];
     }
        
     #endregion

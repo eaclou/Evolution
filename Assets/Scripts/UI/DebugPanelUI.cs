@@ -231,8 +231,8 @@ public class DebugPanelUI : MonoBehaviour
         debugTxtResources += "\nDead Agents: " + simResourceManager.curGlobalCarrionVolume;
         debugTxtResources += "\nEggSacks: " + simResourceManager.curGlobalEggSackVolume;
         debugTxtResources += "\nGlobal Mass: " + simResourceManager.curTotalMass;
-        Vector4 resourceGridSample = uiManager.SampleTexture(vegetationManager.resourceGridRT1, theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize);
-        Vector4 simTansferSample = uiManager.SampleTexture(vegetationManager.resourceSimTransferRT, theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 100f;
+        Vector4 resourceGridSample = simulation.SampleTexture(vegetationManager.resourceGridRT1, theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize);
+        Vector4 simTansferSample = simulation.SampleTexture(vegetationManager.resourceSimTransferRT, theCursorCzar.curMousePositionOnWaterPlane / SimulationManager._MapSize) * 100f;
         //Debug.Log("curMousePositionOnWaterPlane: " + curMousePositionOnWaterPlane.ToString());
         debugTxtResources += "\nresourceGridSample: (" + resourceGridSample.x.ToString("F4") + ", " + resourceGridSample.y.ToString("F4") + ", " + resourceGridSample.z.ToString("F4") + ", " + resourceGridSample.w.ToString("F4") + ")";
         debugTxtResources += "\nsimTansferSample: (" + simTansferSample.x.ToString("F4") + ", " + simTansferSample.y.ToString("F4") + ", " + simTansferSample.z.ToString("F4") + ", " + simTansferSample.w.ToString("F4") + ")";

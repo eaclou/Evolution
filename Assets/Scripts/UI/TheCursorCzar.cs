@@ -62,9 +62,6 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
     
     [SerializeField] RectTransform speciesHistoryRect;
 
-    // WPP: magic numbers, replaced with CursorInRectBounds
-    //public bool cursorInTopLeftWindow => curMousePixelPos.x <= 360 && curMousePixelPos.y > 720;
-
     /// Get position of mouse on water plane:
     private void MouseRaycastWaterPlane(Vector3 screenPos) {
         mouseRaycastWaterPlane.SetActive(true);
@@ -88,7 +85,6 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
         }
     }    
     
-    // WPP: simplified conditionals, moved camera logic to CameraManager, removed GetComponent calls to Camera
     /// Check for player clicking on an animal in the world
     private void MouseRaycastCheckAgents(bool clicked) {
         Ray ray = cam.ScreenPointToRay(Input.mousePosition);
@@ -106,34 +102,39 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
         {
             cameraManager.MouseOverAgent(agent, clicked);
         
-            if (clicked) {
-                if(uiManagerRef.selectionManager.focusedCandidate.candidateID == agent.candidateRef.candidateID) { // Same species
-                    HistoryPanelUI.HistoryPanelMode panelMode = uiManagerRef.historyPanelUI.GetCurPanelMode();
-                    if(panelMode == HistoryPanelUI.HistoryPanelMode.AllSpecies) {
-                        uiManagerRef.historyPanelUI.SetCurPanelMode(HistoryPanelUI.HistoryPanelMode.SpeciesPopulation); 
-                    }
-                    else if(panelMode == HistoryPanelUI.HistoryPanelMode.SpeciesPopulation) {
-                        uiManagerRef.historyPanelUI.SetCurPanelMode(HistoryPanelUI.HistoryPanelMode.CreatureTimeline); 
-                    }
+            if (!clicked)
+                return; 
+            
+            uiManagerRef.RefreshFocusedAgent(agent);
+            
+            // WPP: delegated to HistoryPanelUI
+            /*
+            if (uiManagerRef.selectionManager.focusedCandidate.candidateID == agent.candidateRef.candidateID)
+            { 
+                HistoryPanelMode panelMode = uiManagerRef.historyPanelUI.GetCurPanelMode();
+                if(panelMode == HistoryPanelMode.AllSpecies) {
+                    uiManagerRef.historyPanelUI.SetCurPanelMode(HistoryPanelMode.SpeciesPopulation); 
                 }
-                else {  // different species
-                    HistoryPanelUI.HistoryPanelMode panelMode = uiManagerRef.historyPanelUI.GetCurPanelMode();
-                    if(panelMode == HistoryPanelUI.HistoryPanelMode.AllSpecies) {
-                        uiManagerRef.historyPanelUI.SetCurPanelMode(HistoryPanelUI.HistoryPanelMode.SpeciesPopulation); 
-                    }
-                    else if(panelMode == HistoryPanelUI.HistoryPanelMode.SpeciesPopulation) {
-                        //uiManagerRef.historyPanelUI.SetCurPanelMode(HistoryPanelUI.HistoryPanelMode.CreatureTimeline); 
-                    }
-                    else if(panelMode == HistoryPanelUI.HistoryPanelMode.CreatureTimeline) {
-                        uiManagerRef.historyPanelUI.SetCurPanelMode(HistoryPanelUI.HistoryPanelMode.SpeciesPopulation); 
-                    }
+                else if(panelMode == HistoryPanelMode.SpeciesPopulation) {
+                    uiManagerRef.historyPanelUI.SetCurPanelMode(HistoryPanelMode.CreatureTimeline); 
                 }
-                uiManagerRef.selectionManager.SetFocusedCandidateGenome(agent.candidateRef);
-                
-                //uiManagerRef.historyPanelUI.SetCurPanelMode(HistoryPanelUI.HistoryPanelMode.CreatureTimeline); 
             }
-                
-
+            // different species
+            else 
+            {  
+                HistoryPanelMode panelMode = uiManagerRef.historyPanelUI.GetCurPanelMode();
+                if(panelMode == HistoryPanelMode.AllSpecies) {
+                    uiManagerRef.historyPanelUI.SetCurPanelMode(HistoryPanelMode.SpeciesPopulation); 
+                }
+                else if(panelMode == HistoryPanelMode.SpeciesPopulation) {
+                    //uiManagerRef.historyPanelUI.SetCurPanelMode(HistoryPanelUI.HistoryPanelMode.CreatureTimeline); 
+                }
+                else if(panelMode == HistoryPanelMode.CreatureTimeline) {
+                    uiManagerRef.historyPanelUI.SetCurPanelMode(HistoryPanelMode.SpeciesPopulation); 
+                }
+            }
+            */
+            uiManagerRef.selectionManager.SetFocusedCandidateGenome(agent.candidateRef);
         }
         else if (!clicked) 
         {
@@ -146,12 +147,11 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
 	public void Tick() {
         SetCursorTexture();
         RefreshMouseInput();
-        if (EventSystem.current.IsPointerOverGameObject()) {
-
-        }
-        else {
+        
+        if (!EventSystem.current.IsPointerOverGameObject()) {
             MouseRaycastCheckAgents(leftClickThisFrame);
         }
+        
         MouseRaycastWaterPlane(Input.mousePosition);
         
         Vector4[] dataArray = new Vector4[1];
@@ -193,6 +193,7 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
 	{
         Cursor.SetCursor(cursorTexWatcher, Vector2.zero, CursorMode.Auto);
         
+        // WPP: all conditions yield the same result
         /*//cursor sprite:
         if(uiManagerRef.panelFocus == PanelFocus.Brushes) {
             Cursor.SetCursor(cursorTexBrush, Vector2.zero, CursorMode.Auto);

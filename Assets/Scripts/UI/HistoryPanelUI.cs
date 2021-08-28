@@ -34,8 +34,6 @@ public class HistoryPanelUI : MonoBehaviour
     [SerializeField]
     private GameObject tempPanelLifeEvents;
     [SerializeField] int maxNumCreatureEventIcons = 128;
-
-    private HistoryPanelMode curPanelMode;
     
     public enum HistoryPanelMode {
         AllSpecies,
@@ -43,7 +41,9 @@ public class HistoryPanelUI : MonoBehaviour
         SpeciesPopulation,
         CreatureTimeline
     }
-    
+
+    private HistoryPanelMode curPanelMode;
+
     public HistoryPanelMode GetCurPanelMode() {
         return curPanelMode;
     }
@@ -77,18 +77,18 @@ public class HistoryPanelUI : MonoBehaviour
         speciesIconsList = new List<SpeciesIconUI>();
         creatureEventIconsList = new List<CreatureEventIconUI>();
     }
+    
     public void InitializePanel() {
-        
         InitializeSpeciesIcons();
         GenerateCreatureEventIcons();
     }
-    private void GenerateCreatureEventIcons() {        
-        
+    
+    private void GenerateCreatureEventIcons() {
         for(int i = 0; i < maxNumCreatureEventIcons; i++) {
             CreateCreatureEventIcon();
-            
         }
     }
+    
     private void CreateCreatureEventIcon() 
     {
         GameObject icon = Instantiate(prefabCreatureEventIconUI, Vector3.zero, Quaternion.identity);
@@ -98,7 +98,6 @@ public class HistoryPanelUI : MonoBehaviour
         //iconScript.imageBG = 
         icon.gameObject.SetActive(false);
         creatureEventIconsList.Add(iconScript);
-         
     }
     
     private void UpdateCreatureEventIcons(CandidateAgentData candidate) {
@@ -126,7 +125,35 @@ public class HistoryPanelUI : MonoBehaviour
         } 
     }
     
+    public void RefreshFocusedAgent(bool focusHasChanged)
+    {
+        HistoryPanelMode panelMode = GetCurPanelMode();
+    
+        // * WPP: comment suggests checking for matching species, but code is checking candidate ID, not species ID
+        // + design goals of this if/else branch unclear
+        // Same species
+        if (focusHasChanged)
+        {
+            switch (panelMode)
+            {
+                case HistoryPanelMode.AllSpecies: SetCurPanelMode(HistoryPanelMode.SpeciesPopulation); break;
+                case HistoryPanelMode.SpeciesPopulation: SetCurPanelMode(HistoryPanelMode.CreatureTimeline); break;
+            }
+        }
+        // different species
+        else 
+        {
+            switch (panelMode)
+            {
+                case HistoryPanelMode.AllSpecies: SetCurPanelMode(HistoryPanelMode.SpeciesPopulation); break;
+                case HistoryPanelMode.SpeciesPopulation: break;
+                case HistoryPanelMode.CreatureTimeline: SetCurPanelMode(HistoryPanelMode.SpeciesPopulation); break;
+            }
+        }
+    }
+    
     // * Rename to suggest this is a per-frame update, break out the initialization logic
+    // * APPLICATION BOTTLENECK: focus optimization efforts here!
     public void InitializeRenderBuffers() {
         //**** TEMP!!! TESTING!!!
         float cursorCoordsX = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().x) / 360f);
@@ -348,6 +375,7 @@ public class HistoryPanelUI : MonoBehaviour
         iconScript.Initialize(speciesIconsList.Count - 1, masterGenomePool.completeSpeciesPoolsList[pool.speciesID]);
  
     }
+    
     public void InitializeSpeciesIcons() {
         //Debug.Log("InitializeSpeciesListBars");
         int numSpecies = masterGenomePool.completeSpeciesPoolsList.Count;
@@ -365,8 +393,8 @@ public class HistoryPanelUI : MonoBehaviour
             CreateSpeciesIcon(masterGenomePool.completeSpeciesPoolsList[speciesID]);
         }
     }
+    
     public void ClickSpeciesIcon(SpeciesIconUI iconUI) {
-
         if(iconUI.linkedPool.speciesID == uiManagerRef.selectionManager.selectedSpeciesID) {
             Debug.Log("ClickSpeciesIcon(SpeciesIconUI iconUI) " + curPanelMode);
             if (curPanelMode == HistoryPanelMode.SpeciesPopulation) {
@@ -386,13 +414,12 @@ public class HistoryPanelUI : MonoBehaviour
         else {
             uiManagerRef.selectionManager.SetSelectedSpeciesUI(iconUI.linkedPool.speciesID);  
         }
-        
-
-        
     }
+    
     public void ClickButtonToggleGraphMode() {
         isGraphMode = !isGraphMode;
     }
+    
     public void ClickButtonToggleExtinct() {
         /*if(curPanelMode == HistoryPanelMode.AllSpecies) {
             curPanelMode = HistoryPanelMode.ActiveSpecies;
@@ -401,20 +428,24 @@ public class HistoryPanelUI : MonoBehaviour
             curPanelMode = HistoryPanelMode.AllSpecies;
         }*/
     }
+    
     public void ClickButtonBack() {
         if(curPanelMode == HistoryPanelMode.CreatureTimeline) {
             curPanelMode = HistoryPanelMode.SpeciesPopulation;
         }        
     }
+    
     public void ClickButtonModeCycle() {
         curPanelMode++;
         if((int)curPanelMode >= 4) {
             curPanelMode = 0;
         }
     }
+    
     public void ClickedSelectedCreatureEvents() {
         curPanelMode = HistoryPanelMode.CreatureTimeline;
     }
+    
     public void Tick() {
         textPanelStateDebug.text = "MODE: " + curPanelMode;
         buttonToggleExtinct.gameObject.SetActive(false);
@@ -494,6 +525,7 @@ public class HistoryPanelUI : MonoBehaviour
             speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
         }
     }
+    
     private void UpdateSpeciesIconsGraphMode() {
         if (speciesIconsList[0].linkedPool.avgCandidateDataYearList.Count < 1) {
             UpdateSpeciesIconsDefault();
@@ -529,6 +561,7 @@ public class HistoryPanelUI : MonoBehaviour
             
         }
     }
+    
     private void UpdateSpeciesIconsDefault() {
         for (int s = 0; s < speciesIconsList.Count; s++) {        // simple list, evenly spaced    
             float xCoord = 1f;
@@ -539,6 +572,7 @@ public class HistoryPanelUI : MonoBehaviour
             speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
         }
     }
+    
     private void UpdateSpeciesIconsSinglePop() {
         for (int s = 0; s < speciesIconsList.Count; s++) {        // simple list, evenly spaced    
             float xCoord = -0.2f;
@@ -567,7 +601,6 @@ public class HistoryPanelUI : MonoBehaviour
 
             speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
         }
-
         
         SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectionManager.selectedSpeciesID];
         int numAgentsDisplayed = 0;
@@ -604,6 +637,7 @@ public class HistoryPanelUI : MonoBehaviour
             
         }
     }
+    
     private void UpdateSpeciesIconsCreatureEvents() {
         for (int s = 0; s < speciesIconsList.Count; s++) {        // simple list, evenly spaced    
             float xCoord = 0f;            

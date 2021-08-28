@@ -1,4 +1,12 @@
-﻿
+﻿using UnityEngine;
+
+public enum SimEventCategories {
+    Minor,
+    Major,
+    Extreme,
+    NPE
+}
+
 public class SimEventData {
 
     public string name = "Null Event";
@@ -14,13 +22,6 @@ public class SimEventData {
     public bool isPositive;
     public bool polarity;
     public int timeStepActivated;
-
-    public enum SimEventCategories {
-        Minor,
-        Major,
-        Extreme,
-        NPE
-    }
 
     /*public enum SimEventType {
         FoodDecay,
@@ -96,10 +97,17 @@ public class SimEventData {
         SpecMeat
     }
 
-	public SimEventData() {
-
-    }
+	public SimEventData() { }
     
+    public SimEventData(int cost, int quantity, SimEventCategories category)
+    {
+        this.cost = cost;
+        this.category = category;
+        this.quantity = quantity;
+        isPositive = Random.Range(0f, 1f) >= 0.5f;
+        polarity = Random.Range(0f, 1f) >= 0.5f;
+    }
+
     public SimEventData(string name, int timeStepActivated, SimEventCategories category = SimEventCategories.NPE) {
         this.name = name;
         this.category = category;

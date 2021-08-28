@@ -382,13 +382,21 @@ public class SimEventsManager
     } 
 
     public SimEventData GenerateNewRandomMinorEvent(List<SimEventData> eventList) {
-        SimEventData newEventData = new SimEventData();
+        SimEventData newEventData = new SimEventData(3, 1, SimEventCategories.Minor);
+        // WPP: delegated to constructor
+        /*
         newEventData.cost = 3;
         newEventData.category = SimEventData.SimEventCategories.Minor;
         newEventData.quantity = 1;
-
+        newEventData.isPositive = Random.Range(0f, 1f) >= 0.5f;
+        newEventData.polarity = Random.Range(0f, 1f) >= 0.5f;
+        */
+        
+        // Simplified with assignment logic
+        /*
         newEventData.isPositive = true;
         newEventData.polarity = true;
+        
         float randPolarity = Random.Range(0f, 1f);
         
         if(randPolarity < 0.5f) {
@@ -399,14 +407,16 @@ public class SimEventsManager
         if(randSign < 0.5f) {
             newEventData.isPositive = false;
         }
+        */
 
+        // * WPP: simplify logic, remove repeat blocks in other GenerateNewRandom___Event methods
         // Avoid Duplicates????
         SimEventData.SimEventTypeMinor randType = (SimEventData.SimEventTypeMinor)Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeMinor)).Length);
         for(int i = 0; i < 8; i++) {
             
             // Check if impossible:
             
-            // check for DUPES:
+            // Check for duplicates:
             if (eventList.Count > 0) {  // if not the first selection:
                 randType = (SimEventData.SimEventTypeMinor)Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeMinor)).Length);
                 // reroll isPositive?
@@ -553,21 +563,7 @@ public class SimEventsManager
     }
 
     public SimEventData GenerateNewRandomMajorEvent(List<SimEventData> eventList) {
-        SimEventData newEventData = new SimEventData();
-        newEventData.cost = 15;
-        newEventData.category = SimEventData.SimEventCategories.Major;
-        newEventData.quantity = 1; // needed??
-        
-        newEventData.isPositive = true;
-        newEventData.polarity = true;
-        float randPolarity = Random.Range(0f, 1f);
-        if(randPolarity < 0.5f) {
-            newEventData.polarity = false;
-        }
-        float randSign = Random.Range(0f, 1f);
-        if(randSign < 0.5f) {
-            newEventData.isPositive = false;
-        }
+        SimEventData newEventData = new SimEventData(15, 1, SimEventCategories.Major);
 
         // Avoid Duplicates????
         SimEventData.SimEventTypeMajor randType = (SimEventData.SimEventTypeMajor)Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeMajor)).Length);
@@ -777,21 +773,7 @@ public class SimEventsManager
     }
 
     public SimEventData GenerateNewRandomExtremeEvent(List<SimEventData> eventList) {
-        SimEventData newEventData = new SimEventData();
-        newEventData.cost = 75;
-        newEventData.category = SimEventData.SimEventCategories.Extreme;
-        newEventData.quantity = 3; // needed??
-       
-        newEventData.isPositive = true;
-        newEventData.polarity = true;
-        float randPolarity = Random.Range(0f, 1f);
-        if(randPolarity < 0.5f) {
-            newEventData.polarity = false;
-        }
-        float randSign = Random.Range(0f, 1f);
-        if(randSign < 0.5f) {
-            newEventData.isPositive = false;
-        }
+        SimEventData newEventData = new SimEventData(75, 3, SimEventCategories.Extreme);
 
         // Avoid Duplicates????
         SimEventData.SimEventTypeExtreme randType = (SimEventData.SimEventTypeExtreme)Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeExtreme)).Length);

@@ -22,7 +22,6 @@ public class SelectionManager : MonoBehaviour
     }
 
     public void SetFocusedCandidateGenome(CandidateAgentData candidate) {
-        
         focusedCandidate = candidate;
         
         theRenderKing.InitializeCreaturePortrait(focusedCandidate.candidateGenome);
