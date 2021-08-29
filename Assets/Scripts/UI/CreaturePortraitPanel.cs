@@ -16,7 +16,7 @@ public class CreaturePortraitPanel : MonoBehaviour
 
     public void SetTitleText()
     {
-        title = "<size=18>Critter</size> " + GetCreatureNameFromID(candidate.candidateID) + "<size=18>";
+        title = "<size=18>Critter</size> " + GetCreatureNameFromCandidate(candidate) + "<size=18>";
         
         if(candidate.isBeingEvaluated) 
             title += "\n(following)";
@@ -29,8 +29,8 @@ public class CreaturePortraitPanel : MonoBehaviour
         SetColors(candidate.candidateGenome.bodyGenome.appearanceGenome);
     }
 
-    private string GetCreatureNameFromID(int candID) {
-        string name = "";
+    private string GetCreatureNameFromCandidate(CandidateAgentData cand) {
+        
         string[] letters = new string[26];
         letters[0] = "A";
         letters[1] = "B";
@@ -59,27 +59,29 @@ public class CreaturePortraitPanel : MonoBehaviour
         letters[24] = "Y";
         letters[25] = "Z";
 
-        if (candID < 0)
+        if (cand.candidateID < 0)
             return "-1";
 
-        int onesColumn = candID % 26;
-        name = letters[onesColumn] + name;
-        if(candID > 26) {
-            int tensColummn = Mathf.FloorToInt((float)candID / 26f) % 26;
+        string name = "";// letters[cand.speciesID % 26];
+
+        int onesColumn = cand.candidateID % 26;
+        name = letters[onesColumn];
+        if(cand.candidateID > 26) {
+            int tensColummn = Mathf.FloorToInt((float)cand.candidateID / 26f) % 26;
             name = letters[tensColummn] + name;
 
-            if(candID > 26 * 26) {
-                int hundredsColummn = Mathf.FloorToInt((float)candID / (26f * 26f)) % 26;
+            if(cand.candidateID > 26 * 26) {
+                int hundredsColummn = Mathf.FloorToInt((float)cand.candidateID / (26f * 26f)) % 26;
                 name = letters[hundredsColummn] + name;
 
-                if (candID > 26 * 26 * 26) {
-                    int thousandsColummn = Mathf.FloorToInt((float)candID / (26f * 26f * 26f)) % 26;
+                if (cand.candidateID > 26 * 26 * 26) {
+                    int thousandsColummn = Mathf.FloorToInt((float)cand.candidateID / (26f * 26f * 26f)) % 26;
                     name = letters[thousandsColummn] + name;
                 }
             }
         }
 
-        return name;
+        return letters[cand.speciesID % 26] + "'" + name;
     }
     
     public void SetColors(CritterModuleAppearanceGenome appearance)

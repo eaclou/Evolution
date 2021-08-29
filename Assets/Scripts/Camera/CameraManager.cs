@@ -222,7 +222,16 @@ public class CameraManager : Singleton<CameraManager>
         Vector2 f = pastPosition - pastTargetPosition + v;
         return targetPosition - v + f * Mathf.Exp(-t);
     } 
-    
+    public void DidFollowedCreatureDie(Agent agentRef) {
+
+        if(agentRef == targetAgent) {
+            isFollowingAgent = false;
+            Logger.Log("followed creature died!", true);
+        }
+        else {
+
+        }
+    }
     public Vector4 Get4DFocusBox(Vector2 boxSizeHalf)
     {
         return new Vector4(curCameraFocusPivotPos.x - boxSizeHalf.x,

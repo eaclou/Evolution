@@ -1063,6 +1063,7 @@ public class SimulationManager : Singleton<SimulationManager>
             // and remove it from the ToBeEvaluated pool
             speciesPool.ProcessCompletedCandidate(candidateData, masterGenomePool);
         }
+
      
         // &&&&& *****  HERE!!!! **** &&&&&&   --- Select a species first to serve as parentGenome !! ***** &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
         // Can be random selection (unbiased), or proportional to species avg Fitnesses?
@@ -1081,7 +1082,8 @@ public class SimulationManager : Singleton<SimulationManager>
             // i.e. Set curLifecycle to .AwaitingRespawn ^
             // then new Agents should use the next available genome from the updated ToBeEvaluated pool      
         
-        agentRef.SetToAwaitingRespawn(); 
+        agentRef.SetToAwaitingRespawn();
+        cameraManager.DidFollowedCreatureDie(agentRef);
 
         ProcessAgentScores(agentRef);  // *** CLEAN THIS UP!!! ***
     }

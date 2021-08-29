@@ -1123,8 +1123,8 @@ public class Agent : MonoBehaviour {
         // get size in 0-1 range from minSize to maxSize: // **** NOT ACCURATE!!!!
         //float sizeValue = Mathf.Clamp01(coreModule.speedBonus * (candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength - 0.2f) / 2f);  // Mathf.Clamp01((fullSizeBoundingBox.x - 0.1f) / 2.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
 
-        float swimSpeed = 48f * coreModule.speedBonus; // Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
-        float turnRate = 20f * coreModule.speedBonus; //10 // Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
+        float swimSpeed = 120f * coreModule.speedBonus; // Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
+        float turnRate = 30f * coreModule.speedBonus; //10 // Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
         
         /*float dashBonus = 1f;
         if(isDashing) {                
@@ -1136,7 +1136,7 @@ public class Agent : MonoBehaviour {
 
         speed = swimSpeed * dashBonus * forcePenalty; // * movementModule.speedBonus ; // * restingPenalty;
         Vector2 segmentForwardDir = new Vector2(bodyRigidbody.transform.up.x, bodyRigidbody.transform.up.y).normalized;
-        Vector2 forwardThrustDir = Vector2.Lerp(segmentForwardDir, throttleDir, 0.1f).normalized;
+        Vector2 forwardThrustDir = Vector2.Lerp(segmentForwardDir, throttleDir, 0.2f).normalized;
         bodyRigidbody.AddForce(forwardThrustDir * (1f - turnSharpness * 0.25f) * speed * bodyRigidbody.mass * Time.deltaTime * fatigueMultiplier * bitingPenalty, ForceMode2D.Impulse);
 
         // modify turning rate based on body proportions:
@@ -1230,7 +1230,7 @@ public class Agent : MonoBehaviour {
         //}                
             
         bodyRigidbody.mass = 0.01f; // min mass
-        bodyRigidbody.drag = 13.75f; // bodyDrag;
+        bodyRigidbody.drag = 10;// 3.75f; // bodyDrag;
         bodyRigidbody.angularDrag = 15.5f;
         
         // Collision!

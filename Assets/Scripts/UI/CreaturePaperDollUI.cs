@@ -36,41 +36,49 @@ public class CreaturePaperDollUI : MonoBehaviour
     
     public void Tick() {
         if (coreModule == null) return;
+        CandidateAgentData candidate = UIManager.instance.selectionManager.focusedCandidate;
+        if(agent.candidateRef.candidateID == candidate.candidateID) {
+            widgetAgentStatus.UpdateBars(agent); 
         
-        widgetAgentStatus.UpdateBars(agent); 
+            var lifeStageData = lookup.GetAgentLifeStageData(agent.curLifeStage, agent.isYoung);
+
+            tooltipState.tooltipString = lifeStageData.stateName + ", Lifespan: " + agent.ageCounter + ", Size: " + agent.currentBiomass.ToString("F3");
+            tooltipImage.sprite = lifeStageData.icon;
+
+            tooltipHealth.tooltipString = "Health: " + (coreModule.health * 100f).ToString("F0") + "%";          
+            imageMeterBarHealth.transform.localScale = new Vector3(1f, coreModule.health, 1f);
         
-        // WPP: moved to lookup
-        //var lifeStage = agent.curLifeStage.ToString();
-        /*if(agent.curLifeStage == AgentLifeStage.Mature) {
-            if(agent.isSexuallyMature) {
-                lifeStage = "Mature";
-                creatureStateSprite = uiManager.creaturePanelUI.spriteIconCreatureStateMature;
-            }
-            else {
-                lifeStage = "Young";
-                creatureStateSprite = uiManager.creaturePanelUI.spriteIconCreatureStateYoung;
-            }
+            tooltipEnergy.tooltipString = "Energy: " + coreModule.energy.ToString("F0");
+            imageMeterBarEnergy.transform.localScale = new Vector3(1f, Mathf.Clamp01(coreModule.energy * 0.0025f), 1f);
+        
+            tooltipStomachFood.tooltipString = "Stomach: " + (coreModule.stomachContentsPercent * 100f).ToString("F0");
+            imageMeterBarStomach.transform.localScale = new Vector3(1f, coreModule.stomachContentsPercent, 1f);
+        
+            tooltipWaste.tooltipString = "Waste: (tbd)"; // + agent.coreModule.was.ToString("F0");
+            imageMeterBarWaste.transform.localScale = new Vector3(1f, 0f, 1f);
         }
-        else if(agent.curLifeStage == AgentLifeStage.Dead) {
-            creatureStateSprite = uiManager.creaturePanelUI.spriteIconCreatureStateDecaying;
-        }*/
-        var lifeStageData = lookup.GetAgentLifeStageData(agent.curLifeStage, agent.isYoung);
+        else {
+            //widgetAgentStatus.UpdateBars(agent); 
+            
+            var lifeStageData = lookup.GetAgentLifeStageData(AgentLifeStage.Dead);
+            tooltipState.tooltipString = lifeStageData.stateName + ", Age: " + candidate.performanceData.totalTicksAlive + ", Size: "; // + candidate.performanceData.si.ToString("F3");
+            tooltipImage.sprite = lifeStageData.icon;
 
-        tooltipState.tooltipString = lifeStageData.stateName + ", Age: " + agent.ageCounter + ", Size: " + agent.currentBiomass.ToString("F3");
-        tooltipImage.sprite = lifeStageData.icon;
-
-        tooltipHealth.tooltipString = "Health: " + (coreModule.health * 100f).ToString("F0") + "%";
-        //Rect rect = imageMeterBarHealth.GetComponent<RectTransform>().rect;
-        //rect.height = Mathf.RoundToInt(32f * agent.coreModule.health);
-        imageMeterBarHealth.transform.localScale = new Vector3(1f, coreModule.health, 1f);
+            tooltipHealth.tooltipString = "Health:";
+            imageMeterBarHealth.transform.localScale = new Vector3(1f, 0f, 1f);
         
-        tooltipEnergy.tooltipString = "Energy: " + coreModule.energy.ToString("F0");
-        imageMeterBarEnergy.transform.localScale = new Vector3(1f, Mathf.Clamp01(coreModule.energy * 0.05f), 1f);
+            tooltipEnergy.tooltipString = "Energy:";
+            imageMeterBarEnergy.transform.localScale = new Vector3(1f, 0f, 1f);
         
-        tooltipStomachFood.tooltipString = "Stomach: " + (coreModule.stomachContentsPercent * 100f).ToString("F0");
-        imageMeterBarStomach.transform.localScale = new Vector3(1f, coreModule.stomachContentsPercent, 1f);
+            tooltipStomachFood.tooltipString = "Stomach:";
+            imageMeterBarStomach.transform.localScale = new Vector3(1f, 0f, 1f);
         
-        tooltipWaste.tooltipString = "Waste: (tbd)"; // + agent.coreModule.was.ToString("F0");
-        imageMeterBarWaste.transform.localScale = new Vector3(1f, 0f, 1f);
+            tooltipWaste.tooltipString = "Waste: (tbd)";
+            imageMeterBarWaste.transform.localScale = new Vector3(1f, 0f, 1f);
+        
+            
+        }
+        
+        
     }
 }

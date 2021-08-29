@@ -238,7 +238,7 @@ public class HistoryPanelUI : MonoBehaviour
                         float zCoord = 0f;
                                         
                         Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-
+                        float alpha = 1f;
                         int timeStepStart = Mathf.RoundToInt(timelineStartTimeStep);
 
                         float xStart01 = (float)(pool.timeStepCreated - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
@@ -249,12 +249,13 @@ public class HistoryPanelUI : MonoBehaviour
 
                         if(xStart01 > xCoord || xEnd01 < xCoord) {
                             hue = Vector3.zero;
+                            alpha = 0f;
                         }
                         if(pool.speciesID == uiManagerRef.selectionManager.selectedSpeciesID) {
                             hue = Vector3.one;
                             zCoord = -0.1f;
                         }                        
-                        data.color = new Color(hue.x, hue.y, hue.z); // Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
+                        data.color = new Color(hue.x, hue.y, hue.z, alpha); // Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
 
                         xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
                         yCoord = yCoord * 0.67f + 0.1f;
@@ -407,8 +408,8 @@ public class HistoryPanelUI : MonoBehaviour
                 //int indexLast = Mathf.Max(0, iconUI.linkedPool.candidateGenomesList.Count - 1);
                 if (iconUI.linkedPool.candidateGenomesList.Count == 0) return;
 
-                uiManagerRef.selectionManager.SetFocusedCandidateGenome(iconUI.linkedPool.candidateGenomesList[0]);
-                uiManagerRef.speciesOverviewUI.buttons[0].ClickedThisButton();
+                //uiManagerRef.selectionManager.SetFocusedCandidateGenome(iconUI.linkedPool.candidateGenomesList[0]);
+                //uiManagerRef.speciesOverviewUI.buttons[0].ClickedThisButton();
             }
         }
         else {
