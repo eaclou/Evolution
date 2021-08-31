@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Playcraft;
 
 public enum SimEventCategories {
     Minor,
@@ -7,6 +8,7 @@ public enum SimEventCategories {
     NPE
 }
 
+[System.Serializable]
 public class SimEventData {
 
     public string name = "Null Event";
@@ -53,6 +55,7 @@ public class SimEventData {
         BodyModules,
         CalmWaters        
     }
+    
     public enum SimEventTypeMajor {
         FoodDecay,
         FoodPlant,
@@ -67,6 +70,7 @@ public class SimEventData {
         BodyModules,
         Gale 
     }
+    
     public enum SimEventTypeExtreme {
         FoodDecay,
         FoodPlant,
@@ -113,4 +117,6 @@ public class SimEventData {
         this.category = category;
         this.timeStepActivated = timeStepActivated;
     }
+    
+    public static SimEventTypeMinor GetRandomMinorEventType() { return RandomStatics.RandomEnumValue<SimEventTypeMinor>(); }
 }

@@ -58,7 +58,7 @@ public class SimulationManager : Singleton<SimulationManager>
     private int agentGridCellResolution = 1;  // How much to subdivide the map in order to detect nearest-neighbors more efficiently --> to not be O(n^2)
     public MapGridCell[][] mapGridCellArray;
 
-    // * rename to maxAgents (use array size to calculate numAgents if helpful)
+    // * WPP Rename to maxAgents (use array size to calculate numAgents if helpful)
     // * or remove the hard cap entirely and scale down the pond to create a soft cap
     [NonSerialized]
     public int numAgents = 64;
@@ -68,7 +68,7 @@ public class SimulationManager : Singleton<SimulationManager>
     
     public EggSack[] eggSacks;
     
-    // WPP: see comment above re numAgents
+    // * See comment above re numAgents
     public int numEggSacks = 48;
 
     public int numAgentsBorn = 0;

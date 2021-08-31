@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 // * WPP: Refactor -> repetition, overly-nested conditionals, expose values, remove dead code, shorten reference chains
@@ -34,12 +35,13 @@ public class SimEventsManager
         RegenerateAvailableExtremeEvents();
     }
 
-    public void Tick() {
+    public void Tick() 
+    {
         if (!isCooldown) return;
 
         curCooldownCounter++;
 
-        if(curCooldownCounter > cooldownDurationTicks) 
+        if (curCooldownCounter > cooldownDurationTicks) 
         {
             curCooldownCounter = 0;
             isCooldown = false;
@@ -307,79 +309,95 @@ public class SimEventsManager
     }
     */
     
-    private int GetEventSpeciesID(SimEventData data) {
+    private int GetEventSpeciesID(SimEventData data) 
+    {
         int speciesID = 0; // -1;
         float recordLow = 9999999f;
         float recordHigh = -9999999f;
-        for (int i = 0; i < simManager.masterGenomePool.currentlyActiveSpeciesIDList.Count; i++) {
-            if (data.speciesQualifier == SimEventData.SpeciesQualifier.Age) {
-                float val = 0f;// (float)simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[i]].yearCreated;
-
-                if(data.polarity) {
-                    if (val < recordLow) {
-                        recordLow = val;
-                        speciesID = simManager.masterGenomePool.currentlyActiveSpeciesIDList[i];
+        bool positivePolaritySetsHighRecord = true;
+        
+        // WPP: simplified conditionals -> boolean logic to remove nesting, 
+        //switch statement, foreach loop, and merged repeat blocks 
+        foreach (var id in simManager.masterGenomePool.currentlyActiveSpeciesIDList)
+        {
+            //var activeSpeciesID = simManager.masterGenomePool.currentlyActiveSpeciesIDList[i];
+            var value = 0f;
+        
+            switch (data.speciesQualifier)
+            {
+                case SimEventData.SpeciesQualifier.Age:
+                    // value = (float)simManager.masterGenomePool.completeSpeciesPoolsList[id].yearCreated;
+                    /*if (data.polarity && value < recordLow) 
+                    {
+                        recordLow = value;
+                        speciesID = id;
                     }
-                }
-                else {
-                    if (val > recordHigh) {
-                        recordHigh = val;
-                        speciesID = simManager.masterGenomePool.currentlyActiveSpeciesIDList[i];
+                    else if (!data.polarity && value > recordHigh)
+                    {
+                        recordHigh = value;
+                        speciesID = id;
+                    }*/
+                    positivePolaritySetsHighRecord = false;
+                    break;
+                case SimEventData.SpeciesQualifier.BodySize:
+                    // value = (float)simManager.masterGenomePool.completeSpeciesPoolsList[id].avgBodySize;
+                    /*if (data.polarity && value > recordHigh) 
+                    {
+                        recordHigh = value;
+                        speciesID = id;
                     }
-                }
+                    else if (!data.polarity && value < recordLow)
+                    {
+                        recordLow = value;
+                        speciesID = id;
+                    }*/
+                    break;
+                case SimEventData.SpeciesQualifier.Fitness:
+                    value = simManager.masterGenomePool.completeSpeciesPoolsList[id].avgCandidateData.performanceData.totalTicksAlive;
+                    /*if (data.polarity && value > recordHigh) 
+                    {
+                        recordHigh = value;
+                        speciesID = id;
+                    }
+                    else if (!data.polarity && value < recordLow) 
+                    {
+                        recordLow = value;
+                        speciesID = id;
+                    }*/
+                    break;
+                 // **** IMPLEMENT ACTUAL NOVELTY SCORE!!!! ****   
+                 case SimEventData.SpeciesQualifier.Novelty:
+                    value = Random.Range(0f, 1f); 
+                    // (float)simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[i]].av;
+                    /*if (data.polarity && value > recordHigh) 
+                    {
+                        recordHigh = value;
+                        speciesID = id;
+                    }
+                    else if (!data.polarity && value < recordLow) 
+                    {
+                        recordLow = value;
+                        speciesID = id;
+                    }*/
+                    break;
             }
-            else if(data.speciesQualifier == SimEventData.SpeciesQualifier.BodySize) {
-                float val = 0f;// (float)simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[i]].avgBodySize;
-
-                if(data.polarity) {
-                    if (val > recordHigh) {
-                        recordHigh = val;
-                        speciesID = simManager.masterGenomePool.currentlyActiveSpeciesIDList[i];
-                    }
-                }
-                else {
-                    if (val < recordLow) {
-                        recordLow = val;
-                        speciesID = simManager.masterGenomePool.currentlyActiveSpeciesIDList[i];
-                    }
-                }
+            
+            bool checkHighRecord = positivePolaritySetsHighRecord == data.polarity;
+            
+            if (checkHighRecord && value > recordHigh)
+            {
+                recordHigh = value;
+                speciesID = id;
             }
-            else if(data.speciesQualifier == SimEventData.SpeciesQualifier.Fitness) {
-                float val = (float)simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[i]].avgCandidateData.performanceData.totalTicksAlive;
-
-                if(data.polarity) {
-                    if (val > recordHigh) {
-                        recordHigh = val;
-                        speciesID = simManager.masterGenomePool.currentlyActiveSpeciesIDList[i];
-                    }
-                }
-                else {
-                    if (val < recordLow) {
-                        recordLow = val;
-                        speciesID = simManager.masterGenomePool.currentlyActiveSpeciesIDList[i];
-                    }
-                }
+            else if (!checkHighRecord && value < recordLow)
+            {
+                recordLow = value;
+                speciesID = id;
             }
-            else if(data.speciesQualifier == SimEventData.SpeciesQualifier.Novelty) {  // **** IMPLEMENT ACTUAL NOVELTY SCORE!!!! ****
-                float val = Random.Range(0f, 1f); // (float)simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[i]].av;
-
-                if(data.polarity) {
-                    if (val > recordHigh) {
-                        recordHigh = val;
-                        speciesID = simManager.masterGenomePool.currentlyActiveSpeciesIDList[i];
-                    }
-                }
-                else {
-                    if (val < recordLow) {
-                        recordLow = val;
-                        speciesID = simManager.masterGenomePool.currentlyActiveSpeciesIDList[i];
-                    }
-                }
-            }
-        }       
+        }
 
         return speciesID;
-    } 
+    }
 
     public SimEventData GenerateNewRandomMinorEvent(List<SimEventData> eventList) {
         SimEventData newEventData = new SimEventData(3, 1, SimEventCategories.Minor);
@@ -392,7 +410,7 @@ public class SimEventsManager
         newEventData.polarity = Random.Range(0f, 1f) >= 0.5f;
         */
         
-        // Simplified with assignment logic
+        // WPP: Simplified with assignment logic
         /*
         newEventData.isPositive = true;
         newEventData.polarity = true;
@@ -409,53 +427,52 @@ public class SimEventsManager
         }
         */
 
-        // * WPP: simplify logic, remove repeat blocks in other GenerateNewRandom___Event methods
         // Avoid Duplicates????
-        SimEventData.SimEventTypeMinor randType = (SimEventData.SimEventTypeMinor)Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeMinor)).Length);
-        for(int i = 0; i < 8; i++) {
-            
-            // Check if impossible:
-            
-            // Check for duplicates:
-            if (eventList.Count > 0) {  // if not the first selection:
-                randType = (SimEventData.SimEventTypeMinor)Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeMinor)).Length);
-                // reroll isPositive?
+        //SimEventData.SimEventTypeMinor randType = (SimEventData.SimEventTypeMinor)Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeMinor)).Length);
+        var randType = SimEventData.GetRandomMinorEventType();
+        
+        for(int i = 0; i < 8; i++) 
+        {
+            // Check if impossible or duplicates present
+            if (eventList.Count <= 0 || eventList.Any(e => e.typeMinor == randType))
+                break;
 
-                bool duplicateDetected = false;
-                for(int j = 0; j < eventList.Count; j++) {
-                    if(randType == eventList[j].typeMinor) {
-                        //if(newEventData.isPositive == eventList[j].isPositive) {                            
-                        duplicateDetected = true;                            
-                        //}
-                        //if(newEventData.polarity == eventList[j].polarity) {
-                        //    duplicateDetected = true;
-                        //}
-                        break;
-                    }
-                }
-                if(duplicateDetected) {
-                    //Debug.Log("Duplicate detected! iter: " + i.ToString());
-                    // try again (up to 8 times)
-                }
-                else {
+            randType = SimEventData.GetRandomMinorEventType();
+            // WPP: this will always break after first execution
+            /*
+            //(SimEventData.SimEventTypeMinor)Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeMinor)).Length);
+            // reroll isPositive?
+
+            bool duplicateDetected = false;
+            
+            for (int j = 0; j < eventList.Count; j++) 
+            {
+                if (randType == eventList[j].typeMinor) 
+                {
+                    //if(newEventData.isPositive == eventList[j].isPositive) {                            
+                    duplicateDetected = true;                            
+                    //}
+                    //if(newEventData.polarity == eventList[j].polarity) {
+                    //    duplicateDetected = true;
+                    //}
                     break;
                 }
             }
-            else {  // first One
+            if (duplicateDetected) {
+            }
+            else {
                 break;
             }
+            */
         }
         
         newEventData.typeMinor = randType;
         
-        string qualifierTxt = "DECREASE";
-        if(newEventData.isPositive) {
-            qualifierTxt = "INCREASE";
-        }
-        
+        string qualifierTxt = newEventData.isPositive ? "INCREASE" : "DECREASE";
+
+        // * WPP: use SO-based lookup
         switch(randType) {
             case SimEventData.SimEventTypeMinor.BodyModules:
-                //
                 if (newEventData.isPositive) {
                     newEventData.name = "Differentiate Senses I";
                     newEventData.description = " Slightly " + qualifierTxt + " the chance of altering the creatures' sensory capabilities";       
@@ -496,7 +513,6 @@ public class SimEventsManager
                 }                
                 break;
             case SimEventData.SimEventTypeMinor.CalmWaters:
-                
                 newEventData.name = "Calm Waters";                 
                 newEventData.description = "Set the speed of water currents to a slow tranquil state";  
                 break;

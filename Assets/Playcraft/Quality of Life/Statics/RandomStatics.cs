@@ -6,6 +6,14 @@ namespace Playcraft
 {
     public static class RandomStatics
     {
+        // NEW
+        public static T RandomEnumValue<T>()
+        {
+            var values = Enum.GetValues(typeof(T));
+            var random = Random.Range(0, values.Length);
+            return (T)values.GetValue(random);
+        }
+    
         public static int RandomNoRepeat(int min, int max, int prior)
         {
             if (max - min < 1)
@@ -48,8 +56,7 @@ namespace Playcraft
             }
         }
     }
-    
-    
+
     [Serializable] public struct MinMaxVector3
     {
         public Vector3 min;
