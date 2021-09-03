@@ -132,25 +132,7 @@ public class UIManager : Singleton<UIManager> {
         InitializeTrophicSlot(KnowledgeMapId.Plants);
         InitializeTrophicSlot(KnowledgeMapId.Microbes);
         InitializeTrophicSlot(KnowledgeMapId.Animals);
-        // WPP: delegated repetitive code to InitializeTrophicSlot
-        /*
-        var decomposers = trophicLayersManager.GetSlot(KnowledgeMapId.Decomposers);
-        decomposers.status = TrophicSlotStatus.On;
-        worldSpiritHubUI.ClickWorldCreateNewSpecies(decomposers);
 
-        var plants = trophicLayersManager.GetSlot(KnowledgeMapId.Plants);
-        plants.status = TrophicSlotStatus.On;
-        worldSpiritHubUI.ClickWorldCreateNewSpecies(plants);
-           
-        var microbes = trophicLayersManager.GetSlot(KnowledgeMapId.Microbes);
-        microbes.status = TrophicSlotStatus.On;
-        worldSpiritHubUI.ClickWorldCreateNewSpecies(microbes);
-        
-        var animals = trophicLayersManager.GetSlot(KnowledgeMapId.Animals);
-        animals.status = TrophicSlotStatus.On;
-        worldSpiritHubUI.ClickWorldCreateNewSpecies(animals);
-        */
-                
         theRenderKing.InitializeCreaturePortrait(simulationManager.masterGenomePool.completeSpeciesPoolsList[0].foundingCandidate.candidateGenome); //, gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][mutationUI.selectedToolbarMutationID].representativeGenome);
         
         trophicLayersManager.SetSlotStatus(KnowledgeMapId.Nutrients, TrophicSlotStatus.On);
@@ -219,11 +201,8 @@ public class UIManager : Singleton<UIManager> {
     void Update() 
     {                                        
         if (!simulationManager.loadingComplete) return;
-        // WPP: used return statement to merge Tick() with running check
         if (bigBangPanelUI.Tick()) return;
-        //bigBangPanelUI.Tick();
-        //if (simulationManager._BigBangOn) return;
-        
+
         observerModeUI.Tick();  // <== this is the big one *******  
         // ^^^  Need to Clean this up and replace with better approach ***********************        
         theCursorCzar.Tick();  // this will assume a larger role
@@ -266,26 +245,6 @@ public class UIManager : Singleton<UIManager> {
         isAnnouncementTextOn = true;
     }
 
-    // WPP: Moved to SimulationManager
-    /*public Vector4 SampleTexture(RenderTexture tex, Vector2 uv) {
-        Vector4[] sample = new Vector4[1];
-
-        ComputeBuffer outputBuffer = new ComputeBuffer(1, sizeof(float) * 4);
-        outputBuffer.SetData(sample);
-        int kernelCSSampleTexture = simulationManager.computeShaderResourceGrid.FindKernel("CSSampleTexture");
-        simulationManager.computeShaderResourceGrid.SetTexture(kernelCSSampleTexture, "_CommonSampleTex", tex);
-        simulationManager.computeShaderResourceGrid.SetBuffer(kernelCSSampleTexture, "outputValuesCBuffer", outputBuffer);
-        simulationManager.computeShaderResourceGrid.SetFloat("_CoordX", uv.x);
-        simulationManager.computeShaderResourceGrid.SetFloat("_CoordY", uv.y); 
-        // DISPATCH !!!
-        simulationManager.computeShaderResourceGrid.Dispatch(kernelCSSampleTexture, 1, 1, 1);
-        
-        outputBuffer.GetData(sample);
-        outputBuffer.Release();
-
-        return sample[0];
-    }*/
-    
     #endregion
 
     #region UTILITY & EVENT FUNCTIONS - Dead Code

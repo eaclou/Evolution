@@ -316,69 +316,23 @@ public class SimEventsManager
         float recordHigh = -9999999f;
         bool positivePolaritySetsHighRecord = true;
         
-        // WPP: simplified conditionals -> boolean logic to remove nesting, 
-        //switch statement, foreach loop, and merged repeat blocks 
         foreach (var id in simManager.masterGenomePool.currentlyActiveSpeciesIDList)
         {
-            //var activeSpeciesID = simManager.masterGenomePool.currentlyActiveSpeciesIDList[i];
             var value = 0f;
         
             switch (data.speciesQualifier)
             {
                 case SpeciesQualifier.Age:
-                    // value = (float)simManager.masterGenomePool.completeSpeciesPoolsList[id].yearCreated;
-                    /*if (data.polarity && value < recordLow) 
-                    {
-                        recordLow = value;
-                        speciesID = id;
-                    }
-                    else if (!data.polarity && value > recordHigh)
-                    {
-                        recordHigh = value;
-                        speciesID = id;
-                    }*/
                     positivePolaritySetsHighRecord = false;
                     break;
                 case SpeciesQualifier.BodySize:
-                    // value = (float)simManager.masterGenomePool.completeSpeciesPoolsList[id].avgBodySize;
-                    /*if (data.polarity && value > recordHigh) 
-                    {
-                        recordHigh = value;
-                        speciesID = id;
-                    }
-                    else if (!data.polarity && value < recordLow)
-                    {
-                        recordLow = value;
-                        speciesID = id;
-                    }*/
                     break;
                 case SpeciesQualifier.Fitness:
                     value = simManager.masterGenomePool.completeSpeciesPoolsList[id].avgCandidateData.performanceData.totalTicksAlive;
-                    /*if (data.polarity && value > recordHigh) 
-                    {
-                        recordHigh = value;
-                        speciesID = id;
-                    }
-                    else if (!data.polarity && value < recordLow) 
-                    {
-                        recordLow = value;
-                        speciesID = id;
-                    }*/
                     break;
                  // **** IMPLEMENT ACTUAL NOVELTY SCORE!!!! ****   
                  case SpeciesQualifier.Novelty:
-                    value = Random.Range(0f, 1f); 
-                    // (float)simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[i]].av;
-                    /*if (data.polarity && value > recordHigh) 
-                    {
-                        recordHigh = value;
-                        speciesID = id;
-                    }
-                    else if (!data.polarity && value < recordLow) 
-                    {
-                        recordLow = value;
-                        speciesID = id;
-                    }*/
+                    value = Random.Range(0f, 1f);
                     break;
             }
             
@@ -401,182 +355,19 @@ public class SimEventsManager
 
     public SimEventData GenerateNewRandomMinorEvent(List<SimEventData> eventList) {
         SimEventData newEventData = new SimEventData(3, 1, SimEventCategories.Minor);
-        // WPP: delegated to constructor
-        /*
-        newEventData.cost = 3;
-        newEventData.category = SimEventData.SimEventCategories.Minor;
-        newEventData.quantity = 1;
-        newEventData.isPositive = Random.Range(0f, 1f) >= 0.5f;
-        newEventData.polarity = Random.Range(0f, 1f) >= 0.5f;
-        */
-        
-        // WPP: Simplified with assignment logic
-        /*
-        newEventData.isPositive = true;
-        newEventData.polarity = true;
-        
-        float randPolarity = Random.Range(0f, 1f);
-        
-        if(randPolarity < 0.5f) {
-            newEventData.polarity = false;
-        }
-        
-        float randSign = Random.Range(0f, 1f);
-        if(randSign < 0.5f) {
-            newEventData.isPositive = false;
-        }
-        */
-
-        // Avoid Duplicates????
-        //SimEventData.SimEventTypeMinor randType = (SimEventData.SimEventTypeMinor)Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeMinor)).Length);
-        // WPP: delegated complex calculation to static
         var randType = SimEventData.GetRandomMinorEventType();
         
+        // Check if impossible or duplicates present
         for (int i = 0; i < 8; i++) 
         {
-            // Check if impossible or duplicates present
             if (eventList.Count <= 0 || eventList.Any(e => e.typeMinor == randType))
                 break;
 
             randType = SimEventData.GetRandomMinorEventType();
-            // WPP: this will always break after first execution
-            /*
-            //(SimEventData.SimEventTypeMinor)Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeMinor)).Length);
-            // reroll isPositive?
-
-            bool duplicateDetected = false;
-            
-            for (int j = 0; j < eventList.Count; j++) 
-            {
-                if (randType == eventList[j].typeMinor) 
-                {
-                    //if(newEventData.isPositive == eventList[j].isPositive) {                            
-                    duplicateDetected = true;                            
-                    //}
-                    //if(newEventData.polarity == eventList[j].polarity) {
-                    //    duplicateDetected = true;
-                    //}
-                    break;
-                }
-            }
-            if (duplicateDetected) {
-            }
-            else {
-                break;
-            }
-            */
         }
         
         newEventData.typeMinor = randType;
         newEventData.Refresh();
-        // WPP: SO-based lookup
-        /*
-        var qualifierTxt = newEventData.isPositive ? "INCREASE" : "DECREASE";
-        
-        switch(randType) {
-            case SimEventTypeMinor.BodyModules:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Differentiate Senses I";
-                    newEventData.description = " Slightly INCREASE the chance of altering the creatures' sensory capabilities";       
-                }
-                else {
-                    newEventData.name = "Settle Senses I"; 
-                    newEventData.description = " Slightly DECREASE the chance of altering creature sensors";       
-                }       
-                break;
-            case SimEventTypeMinor.BodyMutation:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Tweak Proportions";
-                    newEventData.description = " Slightly INCREASE the global mutation rate for creature bodies";         
-                }
-                else {
-                    newEventData.name = "Stabilize Forms"; 
-                    newEventData.description = " Slightly DECREASE the global mutation rate for creature bodies";       
-                }           
-                break;
-            case SimEventTypeMinor.BrainMutation:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Neural Plasticity I";
-                    newEventData.description = " Slightly INCREASE the mutation rate for creature brain wirings"; 
-                }
-                else {
-                    newEventData.name = "Harden Axons I"; 
-                    newEventData.description = " Slightly DECREASE the chance of rewiring creature brain"; 
-                }
-                break;
-            case SimEventTypeMinor.BrainSize:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Inflate Brain I";
-                    newEventData.description = "Slightly INCREASE the chance for new Neurons and connections between them within creatures' brains";  
-                }
-                else {
-                    newEventData.name = "Shrink Brain I"; 
-                    newEventData.description = "Slightly DECREASE the chance for new Neurons and connections between them within creatures' brains";  
-                }                
-                break;
-            case SimEventTypeMinor.CalmWaters:
-                newEventData.name = "Calm Waters";                 
-                newEventData.description = "Set the speed of water currents to a slow tranquil state";  
-                break;
-            case SimEventTypeMinor.CreateSpecies:                
-                newEventData.speciesQualifier = SpeciesQualifier.Random;  // only random allowed for minor events
-                newEventData.name = "New Random Species";
-                newEventData.description = "A new species emerges, originating from a random current creature";
-                break;
-
-            case SimEventTypeMinor.FoodCorpse:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Slow Decomposition I";
-                    newEventData.description = "Slightly Slow the rate at which dead creatures' bodies break down into nutrients";  
-                }
-                else {
-                    newEventData.name = "Recycled Material I"; 
-                    newEventData.description = "Slightly Slow the rate at which dead creatures' bodies are broken down into their component parts";  
-                }
-                //newEventData.name = "Detritus";
-                //newEventData.description = qualifierTxt + " the global levels of decayed organic matter";  
-                break;
-            case SimEventTypeMinor.FoodEgg:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Fertility I";
-                    newEventData.description = "Slightly INCREASE the global frequency of egg-laying and increases durability of egg sacks";  
-                }
-                else {
-                    newEventData.name = "Barren I"; 
-                    newEventData.description = "Slightly DECREASE the global frequency of egg-laying and lower durability of egg sacks";   
-                }
-                break;
-            case SimEventTypeMinor.FoodDecay:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Nutrient Increase I";
-                    newEventData.description = "Slightly INCREASE the global levels of basic nutrients";  
-                }
-                else {
-                    newEventData.name = "Nutrient Shortage I"; 
-                    newEventData.description = "Slightly DECREASE the global levels of basic nutrients";   
-                }
-                break;
-            case SimEventTypeMinor.FoodPlant:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Algae Bloom I";
-                    newEventData.description = "Slightly INCREASE the global levels of plants";  
-                }
-                else {
-                    newEventData.name = "Algae Shortage I"; 
-                    newEventData.description = "Slightly DECREASE the global levels of plants";   
-                }
-                break;
-            case SimEventTypeMinor.KillSpecies:
-                newEventData.speciesQualifier = SpeciesQualifier.Random;  // only random allowed for minor events
-                newEventData.name = "Kill Random Species";
-                newEventData.description = "A species chosen at random goes extinct";                                
-                break;            
-            default:
-                break;
-        }
-
-        //GetRandomSimEventType(ref newEventData);
-        */
         return newEventData;
     }
 

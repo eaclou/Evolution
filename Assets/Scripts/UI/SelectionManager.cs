@@ -48,7 +48,6 @@ public class SelectionManager : MonoBehaviour
     public bool IsFocus(CandidateAgentData candidate) { return candidate.candidateID == focusedCandidate.candidateID; }
     
     public void SetSelectedSpeciesUI(int id) {
-        
         selectedSpeciesID = id;
         uiManager.speciesOverviewUI.RebuildGenomeButtons();
     }
