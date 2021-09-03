@@ -17,6 +17,10 @@ public class Lookup : ScriptableObject
 	[Header("Prefabs")]
 	public GameObject agent;
 	public GameObject eggSack;
+	public GameObject genomeIcon;
+	
+    [Header("Scriptable Objects")]
+    public SimEventLookup simEvents;
 
 	[Header("Colors")]
     public Color buttonActiveColor = new Color(1f, 1f, 1f, 1f);
@@ -24,11 +28,9 @@ public class Lookup : ScriptableObject
     public Color colorSpiritBrushLight;
     public Color colorSpiritBrushDark;
 
-    [Header("Prefabs")]
-    public GameObject genomeIcon;
-
     #endregion
 	
+	[Header("Internal Lookups")]
 	#region Resource Lookups
 
 	[SerializeField] CauseOfDeathData[] causesOfDeath;

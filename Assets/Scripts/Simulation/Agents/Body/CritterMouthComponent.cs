@@ -138,10 +138,10 @@ public class CritterMouthComponent : MonoBehaviour
 
     void ActiveAttackBiteCheck() 
     {
-        foreach (var edible in edibleObjectsInRange)
+        for (int i = edibleObjectsInRange.Count - 1; i > 0; i--)
         {
-            RequestAttackBiteAgent(edible);
-            RequestBiteEggSack(edible);
+            RequestAttackBiteAgent(edibleObjectsInRange[i]);
+            RequestBiteEggSack(edibleObjectsInRange[i]);
         }
     }
     

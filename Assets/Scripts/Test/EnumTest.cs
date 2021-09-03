@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class EnumTest : MonoBehaviour
 {
-    [SerializeField] SimEventData.SimEventTypeMinor minorEvent;
+    [SerializeField] SimEventTypeMinor minorEvent;
     [SerializeField] bool containedInList;
     [SerializeField] List<SimEventData> simEvents;
 

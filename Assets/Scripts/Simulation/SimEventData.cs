@@ -1,15 +1,12 @@
-﻿using UnityEngine;
+﻿using System;
 using Playcraft;
+using Random = UnityEngine.Random;
 
-public enum SimEventCategories {
-    Minor,
-    Major,
-    Extreme,
-    NPE
-}
-
-[System.Serializable]
-public class SimEventData {
+[Serializable]
+public class SimEventData 
+{
+    Lookup lookup => Lookup.instance;
+    SimEventLookup events => lookup.simEvents;
 
     public string name = "Null Event";
     public string description = "This is the longer description";
@@ -42,66 +39,7 @@ public class SimEventData {
         WaterCurrents
     }*/
 
-    public enum SimEventTypeMinor {
-        FoodDecay,
-        FoodPlant,
-        FoodEgg,
-        FoodCorpse,
-        CreateSpecies,
-        KillSpecies,
-        BrainMutation,
-        BrainSize,        
-        BodyMutation,
-        BodyModules,
-        CalmWaters        
-    }
-    
-    public enum SimEventTypeMajor {
-        FoodDecay,
-        FoodPlant,
-        FoodEgg,
-        FoodCorpse,
-        //FoodAll,
-        CreateSpecies,
-        KillSpecies,
-        BrainMutation,
-        BrainSize,        
-        BodyMutation,
-        BodyModules,
-        Gale 
-    }
-    
-    public enum SimEventTypeExtreme {
-        FoodDecay,
-        FoodPlant,
-        FoodEgg,
-        FoodCorpse,
-        FoodAll,
-        CreateSpecies,
-        KillSpecies,
-        BrainMutation,
-        BrainSize,        
-        BodyMutation,
-        BodyModules,
-        Hurricane 
-    }
-    
-    public enum SpeciesQualifier {
-        Random,  // Minor cutoff
-        Fitness,
-        Novelty,
-        BodySize, 
-        Age,   // Major Cutoff
-        SpecAttack,
-        SpecDefend,
-        SpecSpeed,
-        SpecUtility,
-        SpecDecay,
-        SpecPlant,
-        SpecMeat
-    }
-
-	public SimEventData() { }
+    public SimEventData() { }
     
     public SimEventData(int cost, int quantity, SimEventCategories category)
     {
@@ -119,4 +57,78 @@ public class SimEventData {
     }
     
     public static SimEventTypeMinor GetRandomMinorEventType() { return RandomStatics.RandomEnumValue<SimEventTypeMinor>(); }
+    
+    public void Refresh()
+    {
+        var data = events.GetEventData(this);
+        name = data.GetName(isPositive);
+        description = data.GetDescription(isPositive);
+        if (data.setQualifier) speciesQualifier = data.speciesQualifier;
+    }
+}
+
+public enum SimEventCategories {
+    Minor,
+    Major,
+    Extreme,
+    NPE
+}
+
+public enum SimEventTypeMinor {
+    FoodDecay,
+    FoodPlant,
+    FoodEgg,
+    FoodCorpse,
+    CreateSpecies,
+    KillSpecies,
+    BrainMutation,
+    BrainSize,        
+    BodyMutation,
+    BodyModules,
+    CalmWaters        
+}
+    
+public enum SimEventTypeMajor {
+    FoodDecay,
+    FoodPlant,
+    FoodEgg,
+    FoodCorpse,
+    //FoodAll,
+    CreateSpecies,
+    KillSpecies,
+    BrainMutation,
+    BrainSize,        
+    BodyMutation,
+    BodyModules,
+    Gale 
+}
+    
+public enum SimEventTypeExtreme {
+    FoodDecay,
+    FoodPlant,
+    FoodEgg,
+    FoodCorpse,
+    FoodAll,
+    CreateSpecies,
+    KillSpecies,
+    BrainMutation,
+    BrainSize,        
+    BodyMutation,
+    BodyModules,
+    Hurricane 
+}
+
+public enum SpeciesQualifier {
+    Random,  // Minor cutoff
+    Fitness,
+    Novelty,
+    BodySize, 
+    Age,   // Major Cutoff
+    SpecAttack,
+    SpecDefend,
+    SpecSpeed,
+    SpecUtility,
+    SpecDecay,
+    SpecPlant,
+    SpecMeat
 }
