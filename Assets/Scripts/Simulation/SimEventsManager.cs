@@ -429,6 +429,7 @@ public class SimEventsManager
 
         // Avoid Duplicates????
         //SimEventData.SimEventTypeMinor randType = (SimEventData.SimEventTypeMinor)Random.Range(0, System.Enum.GetValues(typeof(SimEventData.SimEventTypeMinor)).Length);
+        // WPP: delegated complex calculation to static
         var randType = SimEventData.GetRandomMinorEventType();
         
         for (int i = 0; i < 8; i++) 
@@ -579,6 +580,7 @@ public class SimEventsManager
         return newEventData;
     }
 
+    // * WPP: apply changes from Minor events to Major and Extreme events
     public SimEventData GenerateNewRandomMajorEvent(List<SimEventData> eventList) {
         SimEventData newEventData = new SimEventData(15, 1, SimEventCategories.Major);
 
@@ -625,7 +627,6 @@ public class SimEventsManager
         
         switch(randType) {
             case SimEventTypeMajor.BodyModules:
-                //
                 if (newEventData.isPositive) {
                     newEventData.name = "Differentiate Senses II";
                     newEventData.description = " Moderately " + qualifierTxt + " the chance of altering the creatures' sensory capabilities";       
@@ -752,7 +753,6 @@ public class SimEventsManager
                 }
                 break;*/
             case SimEventTypeMajor.KillSpecies:
-                
                 newEventData.speciesQualifier = randQualifier; // SimEventData.SpeciesQualifier.Random;  // only random allowed for minor events                
                 qualityString = "";
                 if(randQualifier == SpeciesQualifier.Age) {
@@ -797,7 +797,7 @@ public class SimEventsManager
         for(int i = 0; i < 8; i++) {
             // Check if impossible:
             
-            // check for DUPES:
+            // check for duplicates:
             if (eventList.Count > 0) {  // if not the first selection:
                 randType = (SimEventTypeExtreme)Random.Range(0, System.Enum.GetValues(typeof(SimEventTypeExtreme)).Length);
                 // reroll isPositive?
@@ -908,7 +908,6 @@ public class SimEventsManager
                 newEventData.name = "New Species\n(" + qualityString + ")";
                 newEventData.description = "Up to " + newEventData.quantity + " new lineages emerge, originating from the current " + qualityString + " species";
                 break;
-
             case SimEventTypeExtreme.FoodCorpse:
                 if (newEventData.isPositive) {
                     newEventData.name = "Slow Decomposition III";
@@ -997,6 +996,7 @@ public class SimEventsManager
         return newEventData;
     }
 
+    // * WPP: condense into RegenerateAvailableEvents(List<SimEventData>, delegate{SimEventData GenerateEvent(List<SimEventData)})
     public void RegenerateAvailableMinorEvents() {
         availableMinorEventsList.Clear();
 

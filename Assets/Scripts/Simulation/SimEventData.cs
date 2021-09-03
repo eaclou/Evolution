@@ -61,6 +61,8 @@ public class SimEventData
     public void Refresh()
     {
         var data = events.GetEventData(this);
+        if (data == null) return;
+        
         name = data.GetName(isPositive);
         description = data.GetDescription(isPositive);
         if (data.setQualifier) speciesQualifier = data.speciesQualifier;

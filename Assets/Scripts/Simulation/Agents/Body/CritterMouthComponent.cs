@@ -52,8 +52,6 @@ public class CritterMouthComponent : MonoBehaviour
     {
         if (IsEdible(other))
             edibleObjectsInRange.Add(other);
-     
-        //TriggerCheck(other); 
     }
     
     void OnTriggerExit2D(Collider2D other) 
@@ -66,29 +64,7 @@ public class CritterMouthComponent : MonoBehaviour
     { 
         return !other.gameObject.CompareTag("HazardCollider") && agent != null; 
     }
-    
-    // WPP: replaced OnTriggerStay with list tracking on Enter/Exit for efficiency
-    // Logic moved to Tick
-    /*
-    void OnTriggerStay2D(Collider2D collider) { TriggerCheck(collider); }
 
-    void TriggerCheck()//(Collider2D other) 
-    {
-        // Creature OutputNeuron controls mouthEffector[0] = (intention to feed) --> enables collider trigger
-        // when collider enabled, OnTriggerEnter/Stay --> attempt to start a bite
-        // when bite reaches execution frame, process bite action & consequences
-        if (!collider.gameObject.CompareTag("HazardCollider") && agent != null)
-            agent.coreModule.objectInRangeOfMouth = true;
-
-        // is the current frame the Damage-Frame?
-        if (isFeeding && agent.feedingFrameCounter == agent.feedAnimDuration / 2 && !agent.isDead)
-            ActiveFeedBiteCheck(other);
-
-        if(isAttacking && agent.isAttackBiteFrame && !agent.isDead)
-            ActiveAttackBiteCheck(other);
-    }
-    */
-    
     void ActiveFeedBiteCheck() 
     {
         foreach (var edible in edibleObjectsInRange)
