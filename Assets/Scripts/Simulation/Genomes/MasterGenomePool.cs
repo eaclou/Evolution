@@ -45,7 +45,7 @@ public class MasterGenomePool {
         //currentlyActiveSpeciesIDList.Add(0);
         //completeSpeciesPoolsList.Add(rootSpecies);
 
-        int numInitSpecies = 4;
+        int numInitSpecies = 2;
         for(int i = 0; i < numInitSpecies; i++) {
             float lerpV = Mathf.Clamp01(((float)i + 0.1f) / (float)(numInitSpecies + 1) + 0.06f) * 0.8f + 0.1f;
             lerpV = 0.65f;

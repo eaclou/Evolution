@@ -522,7 +522,7 @@ public struct CritterSimData
         worldPos = Vector3.one * 128f * 0.034f;
         float theta = isDead ? 0f : Time.realtimeSinceStartup;
         float angle = Mathf.Cos(theta * 0.67f) * 2f;
-        Vector2 facingDir = new Vector2(Mathf.Cos(angle + Mathf.PI * 0.75f), Mathf.Sin(angle + Mathf.PI * 0.75f));
+        Vector2 facingDir = new Vector2(0f, -1f); // new Vector2(Mathf.Cos(angle + Mathf.PI * 0.75f), Mathf.Sin(angle + Mathf.PI * 0.75f));
         heading = facingDir.normalized;
         float embryo = 1f; 
         embryoPercentage = embryo;

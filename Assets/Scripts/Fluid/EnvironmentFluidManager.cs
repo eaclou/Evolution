@@ -102,7 +102,7 @@ public class EnvironmentFluidManager : Singleton<EnvironmentFluidManager>
     }
     
     public void RerollForcePoints() {
-        CreateForcePoints(4.4f, 64f, 128f);
+        CreateForcePoints(44f, 64f, 128f);
     }
     
     public void Tick(VegetationManager vegetationManagerRef) {

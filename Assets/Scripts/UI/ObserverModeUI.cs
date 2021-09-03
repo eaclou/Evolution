@@ -209,11 +209,11 @@ public class ObserverModeUI : MonoBehaviour
                 //}
             }
             case TooltipId.Time: return "TIME: " + ((float)simulationManager.simAgeTimeSteps * cursorX / 360f).ToString("F0");
-            case TooltipId.Agent: return "Critter #" + cameraManager.mouseHoverAgentRef.candidateRef.candidateID;
+            case TooltipId.Agent: return "Critter " + cameraManager.mouseHoverAgentRef.candidateRef.name + "\nBiomass: " + cameraManager.mouseHoverAgentRef.currentBiomass.ToString("F2");
             case TooltipId.Algae: return "Algae #" + vegetationManager.closestPlantParticleData.index;
             case TooltipId.Microbe: return "Microbe #" + zooplanktonManager.closestAnimalParticleData.index;
             case TooltipId.Sensor: return "Sensor #" + (simulationManager.simAgeTimeSteps * cursorX / 360f).ToString("F0");
-            case TooltipId.Specialization: return "Specializations";
+            case TooltipId.Specialization: return "Specializations"; //***EAC EGGSACK???
             case TooltipId.Status: return "STATUS";
             default: return "";
         }

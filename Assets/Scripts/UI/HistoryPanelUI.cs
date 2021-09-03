@@ -629,6 +629,8 @@ public class HistoryPanelUI : MonoBehaviour
             float xEnd = 1f;
             if(pool.isExtinct || cand.performanceData.timeStepDied > 1) {
                 xEnd = (float)(cand.performanceData.timeStepDied - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
+
+                xCoord = xEnd;
             }
             
             xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust

@@ -107,7 +107,8 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
 
         backgroundImage.sprite = iconSprite;
         //tooltip.genomeViewerUIRef = uiManagerRef.genomeViewerUI;
-        tooltip.tooltipString ="Creature #" + candidate.candidateID + "\n" + statusStr;
+        
+        tooltip.tooltipString ="Critter " + candidate.name + "\nAge " + candidate.performanceData.totalTicksAlive + ", " + statusStr;
         //uiManagerRef.speciesOverviewUI.leaderboardGenomeButtonsList.Add(buttonScript);
     }
     

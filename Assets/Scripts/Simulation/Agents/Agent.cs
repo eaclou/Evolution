@@ -409,7 +409,9 @@ public class Agent : MonoBehaviour {
     // rather than polling in the update loop -> efficiency and natural flow
     // (would also eliminate conditional)
     private void CheckForLifeStageTransition() {
-        switch(curLifeStage) {
+        candidateRef.performanceData.totalTicksAlive = ageCounter;
+
+        switch (curLifeStage) {
             case AgentLifeStage.AwaitingRespawn:
                 break;
             case AgentLifeStage.Egg:
@@ -487,7 +489,7 @@ public class Agent : MonoBehaviour {
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.digestEfficiencyPlant * 1f);     
 
         //Debug.Log("EatFoodPlant " + amount.ToString());
-        RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Ate Plant! (+" + (amount * 100).ToString("F0") + " food)", 1f, 0);
+        RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Ate Plant! (+" + (amount * 1000f).ToString("F0") + " food)", 1f, 0);
     }
     
     // * WPP: combine below two methods (were extracted from CritterMouthComponent)
@@ -495,14 +497,14 @@ public class Agent : MonoBehaviour {
     {
         candidateRef.performanceData.totalFoodEatenEgg += amount;
         EatFoodMeat(amount); // assumes all foodAmounts are equal
-        RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Ate Egg Bit! (" + (amount * 100f).ToString("F0") + ")", 1f, 3);
+        RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Ate Egg Bit! (" + (amount * 1000f).ToString("F0") + ")", 1f, 3);
     }
     
     public void EatEggsWhole(float amount)
     {
         candidateRef.performanceData.totalFoodEatenEgg += amount;
         EatFoodDecay(amount);
-        RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Ate Egg! (" + (amount * 100f).ToString("F0") + ")", 1f, 3);
+        RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Ate Egg! (" + (amount * 1000f).ToString("F0") + ")", 1f, 3);
     }
     
     public void EatCorpse(float amount, float biteSize)
@@ -534,7 +536,7 @@ public class Agent : MonoBehaviour {
         
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.digestEfficiencyMeat * 1f); // Exp for appropriate food
         
-        RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Ate Microbe! (" + (amount * 100f).ToString("F0") + ")", 1f, 1);
+        RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Ate Microbe! (" + (amount * 1000f).ToString("F0") + ")", 1f, 1);
     }
     
     public void EatFoodDecay(float amount) {
@@ -1101,9 +1103,9 @@ public class Agent : MonoBehaviour {
             bitingPenalty = 0.5f;
         }*/
 
-        float fatigueMultiplier = Mathf.Clamp01(coreModule.energy * 5f + 0.05f); // * Mathf.Clamp01(coreModule.stamina[0] * 4f + 0.05f);
+        float fatigueMultiplier = Mathf.Clamp01(coreModule.energy * 5f + 0.25f); // * Mathf.Clamp01(coreModule.stamina[0] * 4f + 0.05f);
         float lowHealthPenalty = Mathf.Clamp01(coreModule.health * 5f) * 0.5f + 0.5f;
-        fatigueMultiplier *= lowHealthPenalty;
+        fatigueMultiplier += lowHealthPenalty;
         
         turningAmount = Mathf.Lerp(turningAmount, bodyRigidbody.angularVelocity * Mathf.Deg2Rad * 0.03f, 0.28f);
 
@@ -1123,7 +1125,7 @@ public class Agent : MonoBehaviour {
         // get size in 0-1 range from minSize to maxSize: // **** NOT ACCURATE!!!!
         //float sizeValue = Mathf.Clamp01(coreModule.speedBonus * (candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength - 0.2f) / 2f);  // Mathf.Clamp01((fullSizeBoundingBox.x - 0.1f) / 2.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
 
-        float swimSpeed = 120f * coreModule.speedBonus; // Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
+        float swimSpeed = 60f * coreModule.speedBonus; // Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
         float turnRate = 30f * coreModule.speedBonus; //10 // Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
         
         /*float dashBonus = 1f;
@@ -1143,8 +1145,8 @@ public class Agent : MonoBehaviour {
         //float turnRatePenalty = Mathf.Lerp(0.25f, 1f, 1f - sizeValue);
 
         // Head turn:
-        float torqueForce = Mathf.Lerp(headTurn, headTurnSign, 0.35f) * forcePenalty * turnRate * this.bodyRigidbody.mass * fatigueMultiplier * bitingPenalty * Time.deltaTime;
-        torqueForce = Mathf.Min(torqueForce, 50000.55f) * 3f;
+        float torqueForce = Mathf.Lerp(headTurn, headTurnSign, 0.05f) * forcePenalty * turnRate * this.bodyRigidbody.mass * fatigueMultiplier * bitingPenalty * Time.deltaTime;
+        torqueForce = Mathf.Min(torqueForce, 50000.55f);
         bodyRigidbody.AddTorque(torqueForce, ForceMode2D.Impulse); 
     }
 
