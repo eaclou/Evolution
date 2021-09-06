@@ -1,0 +1,152 @@
+﻿#include "Assets/Shaders/Inc/CoreBrainDataShared.cginc"
+
+struct AxonBallAttachData {
+    int axonID;
+    float t;  // how far along the spline
+    float angle;  // angle of rotation around the axis
+	float baseScale;
+};
+struct NeuronBallAttachData {
+    int neuronID;
+    float3 direction;  // where on the neuron???
+	float baseScale;
+};
+struct BallData {
+	float3 worldPos;
+	float value;
+	float inOut;  // 0 = inColor, 1 = outColor;
+	float scale;
+};
+
+RWStructuredBuffer<BallData> extraBallsCBuffer;  // display struct used by display shader
+RWStructuredBuffer<AxonBallAttachData> axonBallCBuffer;
+RWStructuredBuffer<NeuronBallAttachData> neuronBallCBuffer;
+
+
+float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
+	return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
+}
+
+
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSInitializeAxonBallData    // Generate and Populate axonBallAttachCBuffer semi-randomly, distributing among & along axons
+[numthreads(1,1,1)]
+void CSInitializeAxonBallData (uint3 id : SV_DispatchThreadID, uint3 grpID : SV_GroupThreadID)
+{
+	// Set up initial settings for AxonBalls, based on axon data
+
+	uint elements;
+	uint stride;
+	axonInitDataCBuffer.GetDimensions(elements, stride);
+	float axonCount = (float)elements;
+
+	AxonBallAttachData axonBall;
+
+	// Generate randomID (which Axon this should attach to)
+	float randomID = rand(float2(id.x, grpID.x)) * (axonCount - 1.0);
+	int axonID = round(randomID);
+	axonBall.axonID = axonID;
+
+	float rand1 = rand(float2(grpID.x * 64 + id.x, randomID));
+	float rand2 = rand(float2(rand1, grpID.x * 64 + id.x));
+	float rand3 = rand(float2(rand1, rand2));
+	axonBall.t = rand1;
+	axonBall.angle = rand2 * 10.0 * 3.141592;  // spread around more than 2pi
+	axonBall.baseScale = lerp(1, 1.4, rand(float2(rand2, rand2)));
+	
+	axonBallCBuffer[id.x] = axonBall;
+}
+
+
+
+
+
+#pragma kernel CSInitializeNeuronBallData    // Generate and Populate neuronBallAttachCBuffer semi-randomly, distributing among & on neurons
+[numthreads(1,1,1)]
+void CSInitializeNeuronBallData (uint3 id : SV_DispatchThreadID, uint3 grpID : SV_GroupThreadID)
+{
+	// Set up initial settings for NeuronBalls, based on neuron data:
+
+	uint elements;
+	uint stride;
+	neuronInitDataCBuffer.GetDimensions(elements, stride);
+	float neuronCount = (float)elements;
+
+	NeuronBallAttachData neuronBall;
+
+	// Generate randomID (which Neuron this should attach to)
+	float randomID = rand(float2(id.x, grpID.x)) * (neuronCount - 1.0);
+	int neuronID = round(randomID);
+	neuronBall.neuronID = neuronID;
+
+	float rand1 = rand(float2(randomID, randomID)) * 2 - 1;
+	float rand2 = rand(float2(rand1, rand1)) * 2 - 1;
+	float rand3 = rand(float2(rand2, rand2)) * 2 - 1;
+	
+	neuronBall.direction = normalize(float3(rand1, rand2, rand3));
+	neuronBall.baseScale = lerp(0.5, 0.9, rand(float2(rand1, rand3)));
+	
+	neuronBallCBuffer[id.x] = neuronBall;
+}
+
+
+
+
+
+#pragma kernel CSUpdateAxonBallPositions
+[numthreads(1,1,1)]
+void CSUpdateAxonBallPositions (uint3 id : SV_DispatchThreadID)
+{	
+	int axonID = axonBallCBuffer[id.x].axonID;
+	int ballID = id.x;
+	
+	CurveSample sample = GetAxonSample(axonID, axonBallCBuffer[ballID].t, axonBallCBuffer[id.x].angle);
+	float radius = GetAxonRadius(axonID, axonBallCBuffer[ballID].t, axonBallCBuffer[id.x].angle);
+	float scale = axonBallCBuffer[ballID].baseScale * radius; // * clamp(radius, 0.5, 2);
+	
+	BallData ballData;
+	ballData.scale = scale;
+	ballData.worldPos = sample.origin + sample.normal * (radius + scale * 0.4);
+	float startOrEnd = round(axonBallCBuffer[ballID].t);
+	//float inValue
+	float pulseDistance = abs(axonSimDataCBuffer[axonID].pulsePos - axonBallCBuffer[ballID].t);
+	//1.0 - smoothstep(0, 0.2, pulseDistance)
+	ballData.value = (1.0 - smoothstep(0, 0.4, pulseDistance)) * abs(neuronFeedDataCBuffer[axonInitDataCBuffer[axonID].fromID].curValue) * abs(axonInitDataCBuffer[axonID].weight);
+	ballData.inOut = axonBallCBuffer[ballID].t;
+	extraBallsCBuffer[ballID] = ballData;
+}
+
+
+
+
+
+#pragma kernel CSUpdateNeuronBallPositions
+[numthreads(1,1,1)]
+void CSUpdateNeuronBallPositions (uint3 id : SV_DispatchThreadID)
+{
+	uint elements;
+	uint stride;
+	axonBallCBuffer.GetDimensions(elements, stride);
+	float axonBallCount = (float)elements;
+	int ballID = id.x + axonBallCount;
+
+	int neuronID = neuronBallCBuffer[id.x].neuronID;
+
+	float randX = rand(float2(id.x, id.x)) * 2.0 - 1.0;
+	float randY = rand(float2(randX, randX)) * 2.0 - 1.0;
+	float randZ = rand(float2(randY, randY)) * 2.0 - 1.0;
+	float randRad = lerp(0.5, 0.5,rand(float2(randZ, randZ)));
+	float3 randomPosition = float3(randX, randY, randZ) * randRad;
+
+	float3 dir = neuronBallCBuffer[id.x].direction;
+	float3 origin = neuronSimDataCBuffer[neuronID].pos;
+	float radius = GetNeuronRadius(neuronID, dir);
+	float scale = neuronBallCBuffer[id.x].baseScale * radius;
+
+	BallData ballData;
+	ballData.scale = scale;	
+	ballData.worldPos = origin + dir * (radius + scale * 0.4);
+	ballData.value = abs(neuronFeedDataCBuffer[neuronID].curValue);
+	ballData.inOut = neuronInitDataCBuffer[neuronID].type;
+	extraBallsCBuffer[ballID] = ballData;	
+}
