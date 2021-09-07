@@ -1,0 +1,172 @@
+﻿#include "Assets/Shaders/Inc/NoiseShared.cginc"
+
+struct VertexData {
+    float3 worldPos;
+	float3 normal;
+    float2 uv;
+    float3 color;
+};
+struct GenomeNoiseOctaveData {
+    float amplitude;
+    float frequency;
+    float3 offset;
+};
+struct TriangleIndexData {
+    int v1;
+    int v2;
+    int v3;
+};
+
+int texturePixelsX = 8;
+int texturePixelsY = 8;
+int meshResolutionX = 8;
+int meshResolutionZ = 8;
+float xStart = 0;
+float xEnd = 8;
+float zStart = 0;
+float zEnd = 8;
+float terrainHeightDisplayMultiplier = 0.5;
+
+StructuredBuffer<GenomeNoiseOctaveData> terrainGenomeCBuffer;
+RWStructuredBuffer<VertexData> terrainVertexDataCBuffer;
+RWStructuredBuffer<TriangleIndexData> terrainTriangleIndexDataCBuffer;
+
+RWTexture2D<float4> mainHeightTexture;
+Texture2D<float4> mainHeightTextureRead;
+SamplerState _LinearClamp;
+SamplerState _LinearRepeat;
+SamplerState _PointClamp;
+SamplerState _PointRepeat;
+
+
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSInitializeTextureHeightData
+[numthreads(1,1,1)]
+void CSInitializeTextureHeightData (uint3 id : SV_DispatchThreadID)
+{
+	// TODO: insert actual code here!
+	
+	uint elements;
+	uint stride;
+	terrainGenomeCBuffer.GetDimensions(elements, stride);	
+	float noiseOctaveCount = (float)elements;
+
+	//int index = id.x * texturePixelsX + id.y;
+
+	float xRange = xEnd - xStart;
+	float zRange = zEnd - zStart;
+	float xPart = float(id.x) / (float)texturePixelsX;
+	float zPart = float(id.y) / (float)texturePixelsY;
+	float x = xPart * xRange + xStart;
+	float z = zPart * zRange + zStart;
+
+	float accumulatedAltitude = 0;
+	float maxValue = 0;
+
+	// NOISE!!!!
+	for(int i = 0; i < 4; i++) {
+		if(i < noiseOctaveCount) {			
+			float3 noiseSample = Value2D(float2(x,z) + terrainGenomeCBuffer[i].offset.xz, terrainGenomeCBuffer[i].frequency);
+			accumulatedAltitude += noiseSample.x * terrainGenomeCBuffer[i].amplitude;
+			maxValue += terrainGenomeCBuffer[i].amplitude;
+		}	
+	}
+	
+	//float2 uv = float2(xPart,zPart);
+	float colorValue = accumulatedAltitude;
+	mainHeightTexture[float2(id.x,id.y)] = float4(colorValue,colorValue,colorValue,1);
+}
+
+// GENERATE VERTEX DATA:::::
+#pragma kernel CSTest
+[numthreads(1,1,1)]
+void CSTest (uint3 id : SV_DispatchThreadID)
+{
+	//float h, w;
+	//tex.GetDimensions(w, h);
+
+	float xRange = xEnd - xStart;
+	float zRange = zEnd - zStart;
+	float xPart = float(id.x) / (float)meshResolutionX;
+	float zPart = float(id.y) / (float)meshResolutionZ;
+	float x = xPart * xRange + xStart;
+	float z = zPart * zRange + zStart;
+
+	int cBufferIndex = id.x * meshResolutionZ + id.y;
+	float2 textureIndex = float2(0,0); //float2(round(xPart * (float)texturePixelsX), round(zPart * (float)texturePixelsY));
+
+	float texScale = 0.0675;
+	//float4 texLoad = mainHeightTexture.Load(uint3(id.x, id.y,0));
+	//float4 readRenderTexCC = mainHeightTextureRead.SampleLevel(_LinearRepeat, float2(xPart, zPart) * texScale, 0);
+	//float4 readRenderTexCL = mainHeightTextureRead.SampleLevel(_LinearClamp, float2(float(id.x - 1.5) / (float)meshResolutionX, zPart), 0);
+	//float4 readRenderTexTC = mainHeightTextureRead.SampleLevel(_LinearClamp, float2(xPart, float(id.y + 1.5) / (float)meshResolutionZ), 0);
+	//float4 readRenderTexCR = mainHeightTextureRead.SampleLevel(_LinearClamp, float2(float(id.x + 1.5) / (float)meshResolutionX, zPart), 0);
+	//float4 readRenderTexBC = mainHeightTextureRead.SampleLevel(_LinearClamp, float2(xPart, float(id.y - 1.5) / (float)meshResolutionZ), 0);
+	//float height = (readRenderTexCC.x + readRenderTexCC.y + readRenderTexCC.z) +
+	//			   (readRenderTexCL.x + readRenderTexCL.y + readRenderTexCL.z) +	
+	//			   (readRenderTexTC.x + readRenderTexTC.y + readRenderTexTC.z) +	
+	//			   (readRenderTexCR.x + readRenderTexCR.y + readRenderTexCR.z) +	
+	//			   (readRenderTexBC.x + readRenderTexBC.y + readRenderTexBC.z);		
+	//height = height / 3 / 5 * terrainHeightDisplayMultiplier;
+	//float height = (readRenderTexCC.x + readRenderTexCC.y + readRenderTexCC.z) / 3;
+
+	VertexData vertexData;
+	
+	vertexData.normal = float3(0,1,0);
+	vertexData.uv = float2(xPart, zPart);
+
+	float4 texSample0 = mainHeightTextureRead.SampleLevel(_LinearRepeat, float2(xPart, zPart) * 0.25 * texScale, 0);
+	float4 texSample1 = mainHeightTextureRead.SampleLevel(_LinearRepeat, float2(xPart, zPart) * 0.5 * texScale, 0);
+	float4 texSample2 = mainHeightTextureRead.SampleLevel(_LinearRepeat, float2(xPart, zPart) * 1 * texScale, 0);
+	float4 texSample3 = mainHeightTextureRead.SampleLevel(_LinearRepeat, float2(xPart, zPart) * 2 * texScale, 0);
+	float4 texSample4 = mainHeightTextureRead.SampleLevel(_LinearRepeat, float2(xPart, zPart) * 4 * texScale, 0);
+	float4 texSample5 = mainHeightTextureRead.SampleLevel(_LinearRepeat, float2(xPart, zPart) * 8 * texScale, 0);
+	float4 texSample6 = mainHeightTextureRead.SampleLevel(_LinearRepeat, float2(xPart, zPart) * 16 * texScale, 0);
+
+	float3 compositeColor = texSample0.xyz * 1 +
+							texSample1.xyz * 1 + 
+							texSample2.xyz * 0.5 + 
+							texSample3.xyz * 0.25 + 
+							texSample4.xyz * 0.25 + 
+							texSample5.xyz * 0.125 + 
+							texSample6.xyz * 0.125;
+	float val = (compositeColor.x + compositeColor.y + compositeColor.z) / 3 * terrainHeightDisplayMultiplier;
+	
+	vertexData.worldPos = float3(x, val, z);
+	vertexData.color = 0.9;
+
+	//float4 textureValue = mainHeightTexture.Sample(_LinearClamp, float2(xPart, zPart));
+	
+
+	terrainVertexDataCBuffer[cBufferIndex] = vertexData;
+
+}
+
+
+#pragma kernel CSGenerateTriangleIndices
+
+[numthreads(1,1,1)]
+void CSGenerateTriangleIndices (uint3 id : SV_DispatchThreadID)
+{
+	TriangleIndexData triangleIndexData0;
+	TriangleIndexData triangleIndexData1;
+
+	int index0 = (id.x * (meshResolutionZ - 1) + id.z) * 2;
+	int index1 = index0 + 1;
+
+	int v00 = id.x * meshResolutionZ + id.z;
+	int v10 = (id.x + 1) * meshResolutionZ + id.z;
+	int v01 = id.x * meshResolutionZ + (id.z + 1);
+	int v11 = (id.x + 1) * meshResolutionZ + (id.z + 1);
+
+	triangleIndexData0.v1 = v00;
+	triangleIndexData0.v2 = v01;
+	triangleIndexData0.v3 = v11;
+
+	triangleIndexData1.v1 = v00;
+	triangleIndexData1.v2 = v11;
+	triangleIndexData1.v3 = v10;
+
+	terrainTriangleIndexDataCBuffer[index0] = triangleIndexData0;
+	terrainTriangleIndexDataCBuffer[index1] = triangleIndexData1;
+}

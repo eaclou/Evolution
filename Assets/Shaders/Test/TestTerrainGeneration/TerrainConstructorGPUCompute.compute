@@ -1,0 +1,169 @@
+﻿#include "Assets/Shaders/Inc/NoiseShared.cginc"
+
+struct GenomeNoiseOctaveData {
+    float3 amplitude;
+    float3 frequency;
+    float3 offset;
+    float rotation;
+    float use_ridged_noise;
+};
+struct TriangleIndexData {
+    int v1;
+    int v2;
+    int v3;
+};
+
+int resolutionX = 8;
+int resolutionZ = 8;
+
+float4 _QuadBounds;
+float4 _GlobalBounds;
+
+//float _MaxAltitude;
+//float _MinAltitude;
+//float _AvgAltitude;
+
+int _NumStrata;
+
+float _WorldX;
+float _WorldZ;
+RWStructuredBuffer<float> altitudeCBuffer;
+
+RWStructuredBuffer<float3> altitudeMeasurementsCBuffer;
+//groupshared float sharedMaxAltitude = -100;
+//groupshared float sharedMinAltitude = 100;
+//groupshared float sharedTotalAltitude = 0;
+
+//StructuredBuffer<GenomeNoiseOctaveData> terrainGenomeCBuffer;
+//RWTexture2D<float4> mainRenderTexture;
+//RWTexture2D<float4> strataRemapTexture;
+
+RWTexture2D<float4> heightTextureWrite0;
+RWTexture2D<float4> heightTextureWrite1;
+RWTexture2D<float4> heightTextureWrite2;
+RWTexture2D<float4> heightTextureWrite3;
+
+Texture2D<float4> heightTexture0;
+Texture2D<float4> heightTexture1;
+Texture2D<float4> heightTexture2;
+Texture2D<float4> heightTexture3;
+
+SamplerState _LinearClamp;
+SamplerState _PointClamp;
+
+RWStructuredBuffer<float3> terrainVertexCBuffer;
+RWStructuredBuffer<float2> terrainUVCBuffer;
+RWStructuredBuffer<float3> terrainNormalCBuffer;
+RWStructuredBuffer<float4> terrainColorCBuffer;
+RWStructuredBuffer<TriangleIndexData> terrainTriangleCBuffer;
+
+
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSGenerateMeshData
+[numthreads(1,1,1)]
+void CSGenerateMeshData (uint3 id : SV_DispatchThreadID)
+{	
+	int index = id.x * resolutionZ + id.z;
+
+	float xRange = _QuadBounds.y - _QuadBounds.x;
+	float zRange = _QuadBounds.w - _QuadBounds.z;
+	float xPart = float(id.x) / (float)(resolutionX - 1);
+	float zPart = float(id.z) / (float)(resolutionZ - 1);
+	float x = xPart * xRange + _QuadBounds.x;
+	float z = zPart * zRange + _QuadBounds.z;  // worldCoords
+
+	// figure out which LOD level to sample:
+	float taxiDistance = max(abs(x / 680), abs(z / 680)) + 0.000001;  // 0 - 1  // can't equal 0
+	float log = max(0, abs(log2(1.0 / taxiDistance)) - 1.0);  // hacky magic to figure out how many subdivisions at this location
+	float lowerLOD = floor(log);
+	float upperLOD = ceil(log);
+	float blendLOD = frac(log);
+
+	float2 globalRange = float2(_GlobalBounds.y - _GlobalBounds.x, _GlobalBounds.w - _GlobalBounds.z);
+	float2 uv0 = float2(x,z) / 680 * 0.5 + 0.5; //float2(x * globalRange.x + _GlobalBounds.x, z * globalRange.y + _GlobalBounds.z) / (680 * 2);
+	float2 uv1 = uv0 * 2 - 0.5;
+	float2 uv2 = uv1 * 2 - 0.5;
+	float2 uv3 = uv2 * 2 - 0.5;
+	
+	// Better way to do this with TextureArrays, 3D RenderTexture or something else so I can use an index, but fuck it for now:
+	float4 textureSample0 =  heightTexture0.SampleLevel(_LinearClamp, uv0, 0);
+	float4 textureSample1 =  heightTexture1.SampleLevel(_LinearClamp, uv1, 0);
+	float4 textureSample2 =  heightTexture2.SampleLevel(_LinearClamp, uv2, 0);
+	float4 textureSample3 =  heightTexture3.SampleLevel(_LinearClamp, uv3, 0);
+
+	float weight0 = (1.0 - saturate(log - 0));
+	float weight1 = frac(1.0 - saturate(log - 1)) + frac(saturate(log - 0));
+	float weight2 = frac(1.0 - saturate(log - 2)) + frac(saturate(log - 1));
+	float weight3 = saturate(log - 2);
+
+	float4 sampleValue = textureSample0 * weight0 + textureSample1 * weight1 + textureSample2 * weight2 + textureSample3 * weight3;
+
+	terrainVertexCBuffer[index] = float3(x, sampleValue.x + sampleValue.y + sampleValue.z, z);
+	terrainUVCBuffer[index] = (float2(x, z) * 1 / 680);
+	terrainNormalCBuffer[index] = float3(0,1,0);
+
+	//COLOR:	
+	terrainColorCBuffer[index] = float4(sampleValue.x, sampleValue.y, sampleValue.z, 1);	
+}
+
+#pragma kernel CSGenerateTriangleIndices
+[numthreads(1,1,1)]
+void CSGenerateTriangleIndices (uint3 id : SV_DispatchThreadID)
+{
+	TriangleIndexData triangleIndexData0;
+	TriangleIndexData triangleIndexData1;
+
+	int index0 = (id.x * (resolutionZ - 1) + id.z) * 2;
+	int index1 = index0 + 1;
+
+	int v00 = id.x * resolutionZ + id.z;
+	int v10 = (id.x + 1) * resolutionZ + id.z;
+	int v01 = id.x * resolutionZ + (id.z + 1);
+	int v11 = (id.x + 1) * resolutionZ + (id.z + 1);
+
+	triangleIndexData0.v1 = v00;
+	triangleIndexData0.v2 = v01;
+	triangleIndexData0.v3 = v11;
+
+	triangleIndexData1.v1 = v00;
+	triangleIndexData1.v2 = v11;
+	triangleIndexData1.v3 = v10;
+
+	terrainTriangleCBuffer[index0] = triangleIndexData0;
+	terrainTriangleCBuffer[index1] = triangleIndexData1;
+}
+
+#pragma kernel CSClearRenderTextures
+[numthreads(1,1,1)]
+void CSClearRenderTextures (uint3 id : SV_DispatchThreadID)
+{
+	heightTextureWrite0[id.xy] = float4(0,0,0,0);
+	heightTextureWrite1[id.xy] = float4(0,0,0,0);
+	heightTextureWrite2[id.xy] = float4(0,0,0,0);
+	heightTextureWrite3[id.xy] = float4(0,0,0,0);
+}
+
+
+#pragma kernel CSMeasureHeights
+[numthreads(1,1,1)]
+void CSMeasureHeights (uint3 id : SV_DispatchThreadID)
+{
+	float4 texSample = heightTexture0.SampleLevel(_PointClamp, (float)id.xy / 512, 0);
+
+	//altitudeMeasurementsCBuffer[0] = float3(texSample.x,-40,10002);
+	altitudeMeasurementsCBuffer[0] = float3(max(altitudeMeasurementsCBuffer[0].x, texSample.x + texSample.y + texSample.z), min(altitudeMeasurementsCBuffer[0].y, texSample.x + texSample.y + texSample.z), altitudeMeasurementsCBuffer[0].z + texSample.x + texSample.y + texSample.z);
+}
+
+#pragma kernel CSGetAltitude
+[numthreads(1,1,1)]
+void CSGetAltitude (uint3 id : SV_DispatchThreadID)
+{
+	
+				// Figure out where start Position is in UV-space
+	float2 worldPos = float2(_WorldX, _WorldZ);		
+	float2 sampleUV = (worldPos - float2(-85, -85)) / (float2(85, 85) - float2(-85, -85));
+		
+	float4 texSample = heightTexture3.SampleLevel(_PointClamp, sampleUV, 0);
+		
+	altitudeCBuffer[0] = texSample.x + texSample.y + texSample.z;
+}

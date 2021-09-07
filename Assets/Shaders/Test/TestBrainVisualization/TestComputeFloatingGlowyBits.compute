@@ -1,0 +1,95 @@
+﻿#include "Assets/Shaders/Inc/CoreBrainDataShared.cginc"
+
+
+struct GlowyBitData {
+    float3 worldPos;
+    float3 color;
+};
+
+
+RWStructuredBuffer<GlowyBitData> floatingGlowyBitsCBuffer;
+
+static const float3 inNeuronsBaseColor = float3(0.25, 0.9, 1) * 0.5;
+static const float3 outNeuronsBaseColor = float3(1, 0.8, 0.25) * 0.5;
+
+float minRadius = 0.0;
+float maxRadius = 0.8;
+
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSInitializePositions
+
+float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
+	return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
+}
+
+[numthreads(64,1,1)]
+void CSInitializePositions (uint3 id : SV_DispatchThreadID, uint3 grpID : SV_GroupThreadID)
+{
+	// Set up initial positions / settings for Axons, based on neuron and other data
+	//id.x == particleID
+
+	GlowyBitData data;
+
+	float randX = rand(float2(id.x * 3, grpID.x)) * 2.0 - 1.0;
+	float randY = rand(float2(id.x, grpID.x * 6.79)) * 2.0 - 1.0;
+	float randZ = rand(float2(id.x - 108.225, grpID.x)) * 2.0 - 1.0;
+	float randRad = rand(float2(randZ, randZ));
+	float3 randomPosition = float3(randX, randY, randZ);
+
+	float3 noiseSample = Value2D(float2(time * 0.33, time * 0.00679) * 0.15 + randomPosition.xy, 3.7);
+
+
+	float radius = length(randomPosition);
+
+	data.worldPos = randomPosition + noiseSample * 0.1; // * randRad;
+	data.color = float3(0,0,0);
+
+	floatingGlowyBitsCBuffer[id.x] = data;	
+}
+
+
+
+
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSUpdateColor
+
+
+[numthreads(64,1,1)]
+void CSUpdateColor (uint3 id : SV_DispatchThreadID, uint3 grpID : SV_GroupThreadID)
+{
+	// Set up initial positions / settings for Axons, based on neuron and other data
+	//id.x == particleID
+	//id.y = neuronID???
+
+	
+
+	float3 glowyBitToNeuronVec = neuronSimDataCBuffer[id.y].pos - floatingGlowyBitsCBuffer[id.x].worldPos;
+	float neuronRadius = GetNeuronRadius(id.y, normalize(glowyBitToNeuronVec));	
+	float distSqr = glowyBitToNeuronVec.x * glowyBitToNeuronVec.x + glowyBitToNeuronVec.y * glowyBitToNeuronVec.y + glowyBitToNeuronVec.z * glowyBitToNeuronVec.z;
+	distSqr = pow(distSqr, 1.5);
+	//distSqr = sqrt(distSqr);
+
+	float dist = distSqr; // - neuronRadius * neuronRadius; // both in squared space
+
+	float lightIntensity = 0.002;
+	float light = lightIntensity / max(0.0001, dist);
+
+	//GlowyBitData data;
+
+	float randX = rand(float2(id.x * 3 + time * 0.001, grpID.x)) * 2.0 - 1.0;
+	float randY = rand(float2(id.x, grpID.x * 6 + time * 0.001)) * 2.0 - 1.0;
+	float randZ = rand(float2(id.x * 0.127 + time * 0.001, grpID.x)) * 2.0 - 1.0;
+	float randRad = rand(float2(randZ, randZ + time * 0.001));
+	float3 randomPosition = float3(randX, randY, randZ);
+	float radius = length(floatingGlowyBitsCBuffer[id.x].worldPos);
+	//floatingGlowyBitsCBuffer[id.x].worldPos; // = randomPosition / radius * randRad;
+
+	if(radius > 0.975) {
+		floatingGlowyBitsCBuffer[id.x].worldPos = floatingGlowyBitsCBuffer[id.x].worldPos / radius * 0.975;
+		//light = 0;
+	}
+
+
+	float3 hue = lerp(inNeuronsBaseColor, outNeuronsBaseColor, neuronInitDataCBuffer[id.y].type);	
+	floatingGlowyBitsCBuffer[id.x].color += light * abs(neuronFeedDataCBuffer[id.y].curValue) * hue;
+}

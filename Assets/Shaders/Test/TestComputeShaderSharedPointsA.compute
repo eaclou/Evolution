@@ -1,0 +1,24 @@
+﻿
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMainGrid
+
+#define thread_group_size_x 8
+#define thread_group_size_y 8
+#define thread_group_size_z 1
+
+#define group_size_x 1
+#define group_size_y 1
+#define group_size_z 1
+
+struct positionStruct {
+	float3 pos;
+};
+
+RWStructuredBuffer<positionStruct> outputBuffer;
+
+[numthreads(thread_group_size_x, thread_group_size_y, thread_group_size_z)]
+void CSMainGrid (uint3 grpID : SV_GroupID, uint3 id : SV_DispatchThreadID, uint3 grpTID : SV_GroupThreadID, uint grpIdx : SV_GroupIndex)
+{	
+	int idx = id.x + (id.y * 8);
+	outputBuffer[idx].pos = float3(id.x, id.y, 0.0) * 1;
+}

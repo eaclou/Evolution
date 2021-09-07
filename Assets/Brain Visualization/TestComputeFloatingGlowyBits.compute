@@ -6,7 +6,6 @@ struct GlowyBitData {
     float3 color;
 };
 
-
 RWStructuredBuffer<GlowyBitData> floatingGlowyBitsCBuffer;
 
 static const float3 inNeuronsBaseColor = float3(0.25, 0.9, 1) * 0.5;
@@ -47,12 +46,8 @@ void CSInitializePositions (uint3 id : SV_DispatchThreadID, uint3 grpID : SV_Gro
 	floatingGlowyBitsCBuffer[id.x] = data;	
 }
 
-
-
-
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CSUpdateColor
-
 
 [numthreads(64,1,1)]
 void CSUpdateColor (uint3 id : SV_DispatchThreadID, uint3 grpID : SV_GroupThreadID)
@@ -60,8 +55,6 @@ void CSUpdateColor (uint3 id : SV_DispatchThreadID, uint3 grpID : SV_GroupThread
 	// Set up initial positions / settings for Axons, based on neuron and other data
 	//id.x == particleID
 	//id.y = neuronID???
-
-	
 
 	float3 glowyBitToNeuronVec = neuronSimDataCBuffer[id.y].pos - floatingGlowyBitsCBuffer[id.x].worldPos;
 	float neuronRadius = GetNeuronRadius(id.y, normalize(glowyBitToNeuronVec));	
@@ -88,7 +81,6 @@ void CSUpdateColor (uint3 id : SV_DispatchThreadID, uint3 grpID : SV_GroupThread
 		floatingGlowyBitsCBuffer[id.x].worldPos = floatingGlowyBitsCBuffer[id.x].worldPos / radius * 0.975;
 		//light = 0;
 	}
-
 
 	float3 hue = lerp(inNeuronsBaseColor, outNeuronsBaseColor, neuronInitDataCBuffer[id.y].type);	
 	floatingGlowyBitsCBuffer[id.x].color += light * abs(neuronFeedDataCBuffer[id.y].curValue) * hue;

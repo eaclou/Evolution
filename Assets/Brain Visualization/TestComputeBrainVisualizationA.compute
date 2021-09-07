@@ -41,15 +41,12 @@ float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
 	return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
 }
 
+// Set up initial positions / settings for Axons, based on neuron and other data
 [numthreads(1,1,1)]
 void CSInitializeAxonSimData (uint3 id : SV_DispatchThreadID)
 {
-	// Set up initial positions / settings for Axons, based on neuron and other data
-
 	//id.x == axonID
-
 	AxonSimData axonData;
-	
 	axonData.pulsePos = 0.5;
 
 	float rand1 = rand(float2(id.x, axonInitDataCBuffer[id.x].toID)) * 2.0 - 1.0;

@@ -1,0 +1,41 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+
+//RWStructuredBuffer<float3> positionsBuffer;
+//AppendStructuredBuffer<float3> positionsBuffer;
+
+struct Triangle {
+	float3 vertA;
+	float3 vertB;
+	float3 vertC;
+};
+
+StructuredBuffer<float3> sourceDataBuffer;
+AppendStructuredBuffer<Triangle> appendTrianglesBuffer;
+
+
+[numthreads(1,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+	// APPEND!!!::::
+	
+	Triangle tri;
+	tri.vertA = sourceDataBuffer[id.x] + float3(0.5, 0, 0);
+	tri.vertB = sourceDataBuffer[id.x] + float3(-0.5, 0, 0);
+	tri.vertC = sourceDataBuffer[id.x] + float3(0, 0.5, 0);
+	appendTrianglesBuffer.Append(tri);
+
+
+
+	//positionsBuffer.Append(sourceDataBuffer[id.x] + float3(1, 0, 0));
+	//positionsBuffer.Append(sourceDataBuffer[id.x] + float3(-1, 0, 0));
+	//positionsBuffer.Append(sourceDataBuffer[id.x] + float3(0, 1, 0));
+	
+	//positionsBuffer[0] = sourceDataBuffer[0] + float3(1, 0, 0);  // vert A
+	//positionsBuffer[1] = sourceDataBuffer[0] + float3(-1, 0, 0);  // vert B
+	//positionsBuffer[2] = sourceDataBuffer[0] + float3(0, 1, 0);  // vert C
+
+	// TODO: insert actual code here!
+	//Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
+}

@@ -1,0 +1,95 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+#define resolution_height 16
+#define resolution_ring 8
+
+
+
+struct Schematic {
+	float3 p0;
+	float3 p1;
+	float3 p2;
+	float3 p3;
+	float radius;
+};
+
+struct Triangle {
+	float3 vertA;
+	float3 normA;
+	float3 vertB;
+	float3 normB;
+	float3 vertC;
+	float3 normC;
+};
+
+
+StructuredBuffer<Schematic> schematicsBuffer;
+AppendStructuredBuffer<Triangle> appendTrianglesBuffer;
+
+
+// CUBIC:
+float3 GetPoint (float3 p0, float3 p1, float3 p2, float3 p3, float t) {
+	t = saturate(t);
+	float oneMinusT = 1.0 - t;
+	return oneMinusT * oneMinusT * oneMinusT * p0 +	3.0 * oneMinusT * oneMinusT * t * p1 + 3.0 * oneMinusT * t * t * p2 +	t * t * t * p3;
+}
+// CUBIC
+float3 GetFirstDerivative (float3 p0, float3 p1, float3 p2, float3 p3, float t) {
+	t = saturate(t);
+	float oneMinusT = 1.0 - t;
+	return 3.0 * oneMinusT * oneMinusT * (p1 - p0) + 6.0 * oneMinusT * t * (p2 - p1) + 3.0 * t * t * (p3 - p2);
+}
+
+[numthreads(1,resolution_height,resolution_ring)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+	float idy = (float)id.y;  // along curve
+	float idz = (float)id.z;  // around curve (rings)
+	float radius = schematicsBuffer[id.x].radius;
+	float tInc = 1.0 / (float)resolution_height;
+
+	float3 ringOrigin0 = GetPoint(schematicsBuffer[id.x].p0, schematicsBuffer[id.x].p1, schematicsBuffer[id.x].p2, schematicsBuffer[id.x].p3, tInc * idy);
+	float3 forward0 = normalize(GetFirstDerivative(schematicsBuffer[id.x].p0, schematicsBuffer[id.x].p1, schematicsBuffer[id.x].p2, schematicsBuffer[id.x].p3, tInc * idy));
+	float3 right0 = normalize(cross(forward0, float3(0.0, 1.0, 0.0)));
+	float3 up0 = normalize(cross(right0, forward0));
+
+	float3 ringOrigin1 = GetPoint(schematicsBuffer[id.x].p0, schematicsBuffer[id.x].p1, schematicsBuffer[id.x].p2, schematicsBuffer[id.x].p3, tInc * (idy + 1.0));
+	float3 forward1 = normalize(GetFirstDerivative(schematicsBuffer[id.x].p0, schematicsBuffer[id.x].p1, schematicsBuffer[id.x].p2, schematicsBuffer[id.x].p3, tInc * (idy + 1.0)));
+	float3 right1 = normalize(cross(forward1, float3(0.0, 1.0, 0.0)));
+	float3 up1 = normalize(cross(right1, forward1));
+		
+	float xStart = cos((idz / (float)resolution_ring) * 2.0 * 3.14159);
+	float xNext = cos(((idz + 1.0) / (float)resolution_ring) * 2.0 * 3.14159);
+	float yStart = sin((idz / (float)resolution_ring) * 2.0 * 3.14159);
+	float yNext = sin(((idz + 1.0) / (float)resolution_ring) * 2.0 * 3.14159);
+
+	float3 normalBottomLeft = right0 * xStart + up0 * yStart;
+	float3 normalBottomRight = right0 * xNext + up0 * yNext;
+	float3 normalTopLeft = right1 * xStart + up1 * yStart;
+	float3 normalTopRight = right1 * xNext + up1 * yNext;
+
+	float3 bottomLeft = right0 * xStart * radius + up0 * yStart * radius + ringOrigin0;
+	float3 bottomRight = right0 * xNext * radius + up0 * yNext * radius + ringOrigin0;
+	float3 topLeft = right1 * xStart * radius + up1 * yStart * radius + ringOrigin1;
+	float3 topRight = right1 * xNext * radius + up1 * yNext * radius + ringOrigin1;
+		
+	Triangle triTop;
+	triTop.vertA = bottomLeft;
+	triTop.normA = normalBottomLeft;
+	triTop.vertB = topLeft;
+	triTop.normB = normalTopLeft;
+	triTop.vertC = topRight;
+	triTop.normC = normalTopRight;
+	appendTrianglesBuffer.Append(triTop);
+
+	Triangle triBottom;
+	triBottom.vertA = bottomRight;
+	triBottom.normA = normalBottomRight;
+	triBottom.vertB = bottomLeft;
+	triBottom.normB = normalBottomLeft;
+	triBottom.vertC = topRight;
+	triBottom.normC = normalTopRight;
+	appendTrianglesBuffer.Append(triBottom);
+
+}

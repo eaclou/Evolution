@@ -6,11 +6,13 @@ struct AxonBallAttachData {
     float angle;  // angle of rotation around the axis
 	float baseScale;
 };
+
 struct NeuronBallAttachData {
     int neuronID;
     float3 direction;  // where on the neuron???
 	float baseScale;
 };
+
 struct BallData {
 	float3 worldPos;
 	float value;
@@ -22,19 +24,18 @@ RWStructuredBuffer<BallData> extraBallsCBuffer;  // display struct used by displ
 RWStructuredBuffer<AxonBallAttachData> axonBallCBuffer;
 RWStructuredBuffer<NeuronBallAttachData> neuronBallCBuffer;
 
-
-float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
+// OUTPUT is in [0,1] RANGE!!!
+float rand(float2 co){   
 	return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
 }
 
-
 // Each #kernel tells which function to compile; you can have many kernels
-#pragma kernel CSInitializeAxonBallData    // Generate and Populate axonBallAttachCBuffer semi-randomly, distributing among & along axons
+// Generate and Populate axonBallAttachCBuffer semi-randomly, distributing among & along axons
+#pragma kernel CSInitializeAxonBallData    
 [numthreads(1,1,1)]
 void CSInitializeAxonBallData (uint3 id : SV_DispatchThreadID, uint3 grpID : SV_GroupThreadID)
 {
 	// Set up initial settings for AxonBalls, based on axon data
-
 	uint elements;
 	uint stride;
 	axonInitDataCBuffer.GetDimensions(elements, stride);
@@ -57,16 +58,12 @@ void CSInitializeAxonBallData (uint3 id : SV_DispatchThreadID, uint3 grpID : SV_
 	axonBallCBuffer[id.x] = axonBall;
 }
 
-
-
-
-
-#pragma kernel CSInitializeNeuronBallData    // Generate and Populate neuronBallAttachCBuffer semi-randomly, distributing among & on neurons
+// Generate and Populate neuronBallAttachCBuffer semi-randomly, distributing among & on neurons
+#pragma kernel CSInitializeNeuronBallData    
 [numthreads(1,1,1)]
 void CSInitializeNeuronBallData (uint3 id : SV_DispatchThreadID, uint3 grpID : SV_GroupThreadID)
 {
 	// Set up initial settings for NeuronBalls, based on neuron data:
-
 	uint elements;
 	uint stride;
 	neuronInitDataCBuffer.GetDimensions(elements, stride);
@@ -88,10 +85,6 @@ void CSInitializeNeuronBallData (uint3 id : SV_DispatchThreadID, uint3 grpID : S
 	
 	neuronBallCBuffer[id.x] = neuronBall;
 }
-
-
-
-
 
 #pragma kernel CSUpdateAxonBallPositions
 [numthreads(1,1,1)]
@@ -115,10 +108,6 @@ void CSUpdateAxonBallPositions (uint3 id : SV_DispatchThreadID)
 	ballData.inOut = axonBallCBuffer[ballID].t;
 	extraBallsCBuffer[ballID] = ballData;
 }
-
-
-
-
 
 #pragma kernel CSUpdateNeuronBallPositions
 [numthreads(1,1,1)]

@@ -1,0 +1,67 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+#define resolution_height 4
+#define resolution_ring 8
+
+
+
+struct Schematic {
+	float3 pos;
+	float height;
+	float radius;
+};
+
+struct Triangle {
+	float3 vertA;
+	float3 vertB;
+	float3 vertC;
+};
+
+
+StructuredBuffer<Schematic> schematicsBuffer;
+AppendStructuredBuffer<Triangle> appendTrianglesBuffer;
+
+
+
+
+[numthreads(1,resolution_height,resolution_ring)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+	// APPEND!!!::::
+	float totalHeight = (float)resolution_height;
+	float idy = (float)id.y;
+	float idz = (float)id.z;
+	float radius = schematicsBuffer[id.x].radius;
+
+	
+	float xStart = cos((idz / (float)resolution_ring) * 2.0 * 3.14159) * radius;
+	float xNext = cos(((idz + 1.0) / (float)resolution_ring) * 2.0 * 3.14159) * radius;
+	float zStart = sin((idz / (float)resolution_ring) * 2.0 * 3.14159) * radius;
+	float zNext = sin(((idz + 1.0) / (float)resolution_ring) * 2.0 * 3.14159) * radius;
+	
+	Triangle triTop;
+	triTop.vertA = schematicsBuffer[id.x].pos + float3(xStart, schematicsBuffer[id.x].height * (idy / totalHeight), zStart);
+	triTop.vertB = schematicsBuffer[id.x].pos + float3(xStart, schematicsBuffer[id.x].height * ((idy + 1.0) / totalHeight), zStart);
+	triTop.vertC = schematicsBuffer[id.x].pos + float3(xNext, schematicsBuffer[id.x].height * ((idy + 1.0) / totalHeight), zNext);
+	appendTrianglesBuffer.Append(triTop);
+
+	Triangle triBottom;
+	triBottom.vertA = schematicsBuffer[id.x].pos + float3(xNext, schematicsBuffer[id.x].height * (idy / totalHeight), zNext);
+	triBottom.vertB = schematicsBuffer[id.x].pos + float3(xStart, schematicsBuffer[id.x].height * (idy / totalHeight), zStart);
+	triBottom.vertC = schematicsBuffer[id.x].pos + float3(xNext, schematicsBuffer[id.x].height * ((idy + 1.0) / totalHeight), zNext);
+	appendTrianglesBuffer.Append(triBottom);
+
+
+
+	//positionsBuffer.Append(sourceDataBuffer[id.x] + float3(1, 0, 0));
+	//positionsBuffer.Append(sourceDataBuffer[id.x] + float3(-1, 0, 0));
+	//positionsBuffer.Append(sourceDataBuffer[id.x] + float3(0, 1, 0));
+	
+	//positionsBuffer[0] = sourceDataBuffer[0] + float3(1, 0, 0);  // vert A
+	//positionsBuffer[1] = sourceDataBuffer[0] + float3(-1, 0, 0);  // vert B
+	//positionsBuffer[2] = sourceDataBuffer[0] + float3(0, 1, 0);  // vert C
+
+	// TODO: insert actual code here!
+	//Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
+}
