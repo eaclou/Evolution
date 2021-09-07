@@ -2,155 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e5216a40-1993-4f7b-88ca-3d6aa0d75e16" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Agents.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Agents/Doodads.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Agents/Doodads/Eyes.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Agents/Doodads/Eyes/doodadViewDirLight.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Agents/Doodads/Eyes/doodadViewDirLight.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Agents/Doodads/Eyes/doodadViewDirLightTransparent.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Agents/Doodads/Eyes/doodadViewDirLightTransparent.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Agents/Doodads/Misc.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Agents/Doodads/Misc/doodadTVWalkerBScreen.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Agents/Doodads/Misc/doodadTVWalkerBScreen.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Agents/Doodads/Misc/testScreenImage.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Agents/Doodads/Misc/testScreenImage.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Inc.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Inc/CoreBrainDataShared.cginc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Inc/CoreBrainDataShared.cginc.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Inc/DistanceFuncs.cginc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Inc/DistanceFuncs.cginc.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Inc/NoiseShared.cginc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Inc/NoiseShared.cginc.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Inc/SimplexShared.cginc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Inc/SimplexShared.cginc.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Inc/StrataRemap.cginc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Inc/StrataRemap.cginc.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Inc/TestShared.cginc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Inc/TestShared.cginc.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/NewSurfaceShader.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/NewSurfaceShader.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Particle.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Particle/ParticleMax.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Particle/ParticleMax.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Terrain.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Terrain/IndirectInstanceObstacleRockShader.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Terrain/IndirectInstanceObstacleRockShader.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Terrain/IndirectInstancePebbleShader.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Terrain/IndirectInstancePebbleShader.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Terrain/IndirectInstanceRockCliffsShader.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Terrain/IndirectInstanceRockCliffsShader.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Terrain/IndirectInstanceRockReliefArenaShader.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Terrain/IndirectInstanceRockReliefArenaShader.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Terrain/IndirectInstanceRockShader.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Terrain/IndirectInstanceRockShader.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Terrain/IndirectInstanceVistaRockClusterShader.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Terrain/IndirectInstanceVistaRockClusterShader.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Terrain/computeTerrainInstanceMeshes.compute" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Terrain/computeTerrainInstanceMeshes.compute.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/BlitSolidColor.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/BlitSolidColor.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitAddHeight.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitAddHeight.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitArenaAdjustments.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitArenaAdjustments.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitCenterHeightTextures.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitCenterHeightTextures.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitFakeErosion.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitFakeErosion.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitGeneratePaletteNoise.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitGeneratePaletteNoise.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitHeightStamp.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitHeightStamp.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitMakeTileableX.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitMakeTileableX.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitMakeTileableY.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitMakeTileableY.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitModifyDebrisHeightGlobal.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitModifyDebrisHeightGlobal.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitModifyHeight.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitModifyHeight.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitModifyRockHeightGlobal.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitModifyRockHeightGlobal.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitModifySnowHeightGlobal.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitModifySnowHeightGlobal.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitSmooth.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitSmooth.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitStrataAdjustments.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitStrataAdjustments.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitTectonicWarp.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/TerrainBlit/TerrainBlitTectonicWarp.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestBrainVisualization.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestBrainVisualization/TestComputeBrainVisualizationA.compute" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestBrainVisualization/TestComputeBrainVisualizationA.compute.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestBrainVisualization/TestComputeExtraBalls.compute" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestBrainVisualization/TestComputeExtraBalls.compute.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestBrainVisualization/TestComputeFloatingGlowyBits.compute" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestBrainVisualization/TestComputeFloatingGlowyBits.compute.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestBrainVisualization/TestDisplayExtraBallsA.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestBrainVisualization/TestDisplayExtraBallsA.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestBrainVisualization/TestDisplayFloatingGlowyBitsA.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestBrainVisualization/TestDisplayFloatingGlowyBitsA.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestBrainVisualization/TestDisplayShaderBrainVisualizationA.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestBrainVisualization/TestDisplayShaderBrainVisualizationA.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestBrainVisualization/TestDisplayShaderBrainVisualizationCables.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestBrainVisualization/TestDisplayShaderBrainVisualizationCables.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestComputeBrain.compute" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestComputeBrain.compute.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestComputeDrawProceduralIndirectA.compute" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestComputeDrawProceduralIndirectA.compute.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestComputeGenerateCylinder.compute" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestComputeGenerateCylinder.compute.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestComputeGenerateSpline.compute" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestComputeGenerateSpline.compute.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestComputeShaderSharedPointsA.compute" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestComputeShaderSharedPointsA.compute.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestDisplayShaderBrainBasic.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestDisplayShaderBrainBasic.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestDisplayShaderDrawProceduralIndirectA.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestDisplayShaderDrawProceduralIndirectA.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestDisplayShaderSpline.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestDisplayShaderSpline.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestInstancedCustomShader.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestInstancedCustomShader.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestInstancedSurfaceShader.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestInstancedSurfaceShader.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestPointShaderA.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestPointShaderA.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/DisplayTerrainSurfaceB.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/DisplayTerrainSurfaceB.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/DisplayTerrainSurfaceC.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/DisplayTerrainSurfaceC.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/RenderTextureBlitTest.renderTexture" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/RenderTextureBlitTest.renderTexture.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/TerrainConstructorGPUCompute.compute" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/TerrainConstructorGPUCompute.compute.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/TestBlitImageEffectShader.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/TestBlitImageEffectShader.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/TestComputeTerrainA.compute" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/TestComputeTerrainA.compute.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/TestComputeTerrainB.compute" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/TestComputeTerrainB.compute.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/TestComputeTerrainTextures.compute" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/TestComputeTerrainTextures.compute.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/TestDisplayBlit.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/TestDisplayBlit.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/TestDisplayTerrainUnlitA.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/TestDisplayTerrainUnlitA.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/TestErosionBlitShader.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/Test/TestTerrainGeneration/TestErosionBlitShader.shader.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/shad_FitnessGraphBasic.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Shaders/shad_FitnessGraphBasic.shader.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/Brain Visualization.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/Brain Visualization.prefab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/TestComputeBrainVisualizationA.compute" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/TestComputeBrainVisualizationA.compute" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/TestComputeExtraBalls.compute" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/TestComputeExtraBalls.compute" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/TestComputeFloatingGlowyBits.compute" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/TestComputeFloatingGlowyBits.compute" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/Neuron.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/Neuron.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -210,7 +64,6 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Scripts/Camera/CameraManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/ClockPanelUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/SettingsManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimResourceManager.cs" />
@@ -260,6 +113,7 @@
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/TestComputeBrainVisualizationA.compute" />
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/TestComputeExtraBalls.compute" />
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/TestComputeFloatingGlowyBits.compute" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/Neuron.cs" />
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" />
     </changedPaths>
   </component>
@@ -378,7 +232,7 @@
       <workItem from="1630390636569" duration="5277000" />
       <workItem from="1630646450850" duration="6633000" />
       <workItem from="1630702327775" duration="3121000" />
-      <workItem from="1630961939069" duration="9248000" />
+      <workItem from="1630961939069" duration="10414000" />
     </task>
     <servers />
   </component>
