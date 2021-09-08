@@ -3,17 +3,10 @@ using UnityEngine;
 
 public class GenerateBrainVisualization : MonoBehaviour 
 {
-    public List<Neuron> tempNeuronList;
-    public List<Axon> tempAxonList;
-
-    public ComputeShader shaderComputeBrain;
-    public ComputeShader shaderComputeFloatingGlowyBits;
-    public ComputeShader shaderComputeExtraBalls;  // quads w/ nml maps to like like extra blobs attached to neurons & axons
-    //public Shader shaderDisplayBrain;
-    public Material displayMaterialCore;
-    public Material displayMaterialCables;
-    public Material floatingGlowyBitsMaterial;
-    public Material extraBallsMaterial;
+    public List<Neuron> neurons;
+    public List<Axon> axons;
+    
+    #region Internal data
 
     private ComputeBuffer quadVerticesCBuffer;  // holds information for a 2-triangle Quad mesh (6 vertices)
     private ComputeBuffer floatingGlowyBitsCBuffer;  // holds information for placement and attributes of each instance of quadVertices to draw
@@ -37,10 +30,13 @@ public class GenerateBrainVisualization : MonoBehaviour
     // will likely split these out into seperate ones later to support multiple materials/layers, but all-in-one for now...
     private ComputeBuffer appendTrianglesCablesCBuffer; 
     private ComputeBuffer appendTrianglesCoreCBuffer;
-    
     private ComputeBuffer argsCablesCBuffer;
     
     private uint[] argsCables = new uint[5] { 0, 0, 0, 0, 0 };
+    
+    #endregion
+    
+    #region Structs
     
     public struct NeuronInitData 
     {
@@ -148,18 +144,34 @@ public class GenerateBrainVisualization : MonoBehaviour
         public Vector3 uvwC;
         public Vector3 colorC;
     }
-
-    int numNeurons = 33; // refBrain.neuronList.Count;
-    int numAxons = 270; // refBrain.axonList.Count;
-    int maxTrisPerNeuron = 1024;
-    int maxTrisPerSubNeuron = 8 * 8 * 2 * 2;
-    int maxTrisPerAxon = 2048;
-    int maxTrisPerCable = 2048;
-    int numFloatingGlowyBits = 8192 * 8;
-    int numAxonBalls = 8 * 128;
-    int numNeuronBalls = 128;
     
-    // Core Sizes:
+    #endregion
+
+    // * WPP: move each block of variables to a SO, stored in a general SO
+    #region Settings (exposed)
+    
+    [Header("Display Resources")]
+    public ComputeShader shaderComputeBrain;
+    public ComputeShader shaderComputeFloatingGlowyBits;
+    public ComputeShader shaderComputeExtraBalls;  // quads w/ nml maps to like like extra blobs attached to neurons & axons
+    //public Shader shaderDisplayBrain;
+    public Material displayMaterialCore;
+    public Material displayMaterialCables;
+    public Material floatingGlowyBitsMaterial;
+    public Material extraBallsMaterial;
+
+    [Header("General Settings")]
+    [SerializeField] int numNeurons = 33; 
+    [SerializeField] int numAxons = 270; 
+    [SerializeField] int maxTrisPerNeuron = 1024;
+    [SerializeField] int maxTrisPerSubNeuron = 8 * 8 * 2 * 2;
+    [SerializeField] int maxTrisPerAxon = 2048;
+    [SerializeField] int maxTrisPerCable = 2048;
+    [SerializeField] int numFloatingGlowyBits = 8192 * 8;
+    [SerializeField] int numAxonBalls = 8 * 128;
+    [SerializeField] int numNeuronBalls = 128;
+    
+    [Header("Size")]
     public float minNeuronRadius = 0.05f;
     public float maxNeuronRadius = 0.5f;
     public float minAxonRadius = 0.05f;
@@ -172,8 +184,9 @@ public class GenerateBrainVisualization : MonoBehaviour
     public float axonFlareWidth = 0.08f;
     public float axonMaxPulseMultiplier = 2.0f;
     public float cableRadius = 0.05f;
+    public float neuronBallMaxScale = 1f;
 
-    // Noise Parameters:
+    [Header("Noise")]
     public float neuronExtrudeNoiseFreq = 1.5f;
     public float neuronExtrudeNoiseAmp = 0.0f;
     public float neuronExtrudeNoiseScrollSpeed = 0.6f;
@@ -186,7 +199,7 @@ public class GenerateBrainVisualization : MonoBehaviour
     public float axonPosSpiralFreq = 20.0f;
     public float axonPosSpiralAmp = 0f;
 
-    // Forces:
+    [Header("Forces")]
     public float neuronAttractForce = 0.004f;
     public float neuronRepelForce = 2.0f;
     public float axonPerpendicularityForce = 0.01f;
@@ -195,8 +208,7 @@ public class GenerateBrainVisualization : MonoBehaviour
     public float axonRepelForce = 0.2f;
     public float cableAttractForce = 0.01f;
 
-    // Extra Balls:
-    public float neuronBallMaxScale = 1f;
+    #endregion
 
     // Use this for initialization
     void Start () 
@@ -253,7 +265,7 @@ public class GenerateBrainVisualization : MonoBehaviour
     private void InitializeComputeBuffers() 
     {
         // first-time setup for compute buffers (assume new brain)
-        if(tempNeuronList == null || tempAxonList == null) {
+        if(neurons == null || axons == null) {
             CreateDummyBrain();
         }
         
@@ -276,8 +288,8 @@ public class GenerateBrainVisualization : MonoBehaviour
         SocketInitData[] socketInitDataArray = new SocketInitData[numNeurons];
         
         for (int i = 0; i < numNeurons; i++) {
-            var list = tempNeuronList[i].neuronType == NeuronGenome.NeuronType.In ? inputNeurons : outputNeurons;
-            list.Add(tempNeuronList[i]);
+            var list = neurons[i].neuronType == NeuronGenome.NeuronType.In ? inputNeurons : outputNeurons;
+            list.Add(neurons[i]);
         }
         
         AssignNeuralPositions(ref socketInitDataArray, inputNeurons.Count, 0, -.9f);
@@ -298,7 +310,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         cableSimDataCBuffer?.Release();
         cableSimDataCBuffer = new ComputeBuffer(numNeurons, sizeof(float) * 12);
         
-        int maxTriangles = numNeurons * maxTrisPerNeuron + tempAxonList.Count * maxTrisPerAxon + maxTrisPerSubNeuron * tempAxonList.Count * 2;
+        int maxTriangles = numNeurons * maxTrisPerNeuron + axons.Count * maxTrisPerAxon + maxTrisPerSubNeuron * axons.Count * 2;
         AppendTriangles(ref appendTrianglesCoreCBuffer, maxTriangles);
         
         maxTriangles = numNeurons * maxTrisPerCable;
@@ -367,7 +379,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         shaderComputeBrain.SetBuffer(neuronTrianglesKernelID, "appendTrianglesCoreCBuffer", appendTrianglesCoreCBuffer);
         shaderComputeBrain.Dispatch(neuronTrianglesKernelID, numNeurons, 1, 1); // create all triangles from Neurons
 
-        SetTrianglesBuffer("CSGenerateSubNeuronTriangles", tempAxonList.Count * 2);
+        SetTrianglesBuffer("CSGenerateSubNeuronTriangles", axons.Count * 2);
         SetTrianglesBuffer("CSGenerateAxonTriangles", numAxons);
 
         displayMaterialCore.SetPass(0);
@@ -472,8 +484,8 @@ public class GenerateBrainVisualization : MonoBehaviour
             shaderComputeBrain.SetBuffer(kernelID, "axonInitDataCBuffer", axonInitDataCBuffer);
             shaderComputeBrain.SetBuffer(kernelID, "axonSimDataCBuffer", axonSimDataCBuffer);
         }
-        shaderComputeBrain.SetBuffer(kernelID, "appendTrianglesCoreCBuffer", appendTrianglesCoreCBuffer);
         
+        shaderComputeBrain.SetBuffer(kernelID, "appendTrianglesCoreCBuffer", appendTrianglesCoreCBuffer);
         shaderComputeBrain.Dispatch(kernelID, x, y, z); // create all triangles for SubNeurons
     }
 
@@ -486,7 +498,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         NeuronInitData[] neuronInitDataArray = new NeuronInitData[numNeurons]; 
         
         for (int x = 0; x < neuronInitDataArray.Length; x++) {
-            NeuronInitData neuronData = new NeuronInitData((float)tempNeuronList[x].neuronType / 2.0f);
+            NeuronInitData neuronData = new NeuronInitData((float)neurons[x].neuronType / 2.0f);
             neuronInitDataArray[x] = neuronData;
         }
         
@@ -501,7 +513,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         Debug.Log(neuronValuesArray.Length + ", numNeurons: " + numNeurons);
         
         for(int i = 0; i < neuronValuesArray.Length; i++) {
-            neuronValuesArray[i].curValue = tempNeuronList[i].currentValue[0];
+            neuronValuesArray[i].curValue = neurons[i].currentValue[0];
         }
         
         neuronFeedDataCBuffer.SetData(neuronValuesArray);
@@ -514,7 +526,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         for (int i = 0; i < neuronSimDataArray.Length; i++) 
         {
             neuronSimDataArray[i].pos = Random.insideUnitSphere * 1f;
-            var polarity = tempNeuronList[i].neuronType == NeuronGenome.NeuronType.In ? -1f : 1f;
+            var polarity = neurons[i].neuronType == NeuronGenome.NeuronType.In ? -1f : 1f;
             neuronSimDataArray[i].pos.z = polarity * Mathf.Abs(neuronSimDataArray[i].pos.z);
         }
         
@@ -525,19 +537,18 @@ public class GenerateBrainVisualization : MonoBehaviour
     void InitializeAxons()
     {
         axonInitDataCBuffer?.Release();
-        axonInitDataCBuffer = new ComputeBuffer(tempAxonList.Count, sizeof(float) * 1 + sizeof(int) * 2);
+        axonInitDataCBuffer = new ComputeBuffer(axons.Count, sizeof(float) * 1 + sizeof(int) * 2);
         
-        AxonInitData[] axonInitDataArray = new AxonInitData[tempAxonList.Count]; 
+        AxonInitData[] axonInitDataArray = new AxonInitData[axons.Count]; 
         
         for (int x = 0; x < axonInitDataArray.Length; x++) {
-            AxonInitData axonData = new AxonInitData(tempAxonList[x]);
+            AxonInitData axonData = new AxonInitData(axons[x]);
             axonInitDataArray[x] = axonData;
         }
         
         axonInitDataCBuffer.SetData(axonInitDataArray);
-
         axonSimDataCBuffer?.Release();
-        axonSimDataCBuffer = new ComputeBuffer(tempAxonList.Count, sizeof(float) * 13);
+        axonSimDataCBuffer = new ComputeBuffer(axons.Count, sizeof(float) * 13);
     }
     
     void UpdateNeuronBuffer(string kernelName, int x, int y)
@@ -550,12 +561,12 @@ public class GenerateBrainVisualization : MonoBehaviour
 
     private void UpdateBrainDataAndBuffers() 
     {
-        if (tempNeuronList == null || tempAxonList == null)
+        if (neurons == null || axons == null)
             return;
 
-        NeuronFeedData[] neuronValuesArray = new NeuronFeedData[tempNeuronList.Count];
+        NeuronFeedData[] neuronValuesArray = new NeuronFeedData[neurons.Count];
         for (int i = 0; i < neuronValuesArray.Length; i++) {
-            neuronValuesArray[i].curValue = Mathf.Sin(Time.fixedTime * 1.25f + tempNeuronList[i].currentValue[0]);
+            neuronValuesArray[i].curValue = Mathf.Sin(Time.fixedTime * 1.25f + neurons[i].currentValue[0]);
         }
         neuronFeedDataCBuffer.SetData(neuronValuesArray);
 
@@ -588,18 +599,18 @@ public class GenerateBrainVisualization : MonoBehaviour
         // Regenerate triangles
         appendTrianglesCoreCBuffer?.Release();
         //appendTrianglesCBuffer = new ComputeBuffer(numNeurons * maxTrisPerNeuron + numAxons * maxTrisPerAxon, sizeof(float) * 45, ComputeBufferType.Append); // vector3 position * 3 verts
-        int maxTris = numNeurons * maxTrisPerNeuron + tempAxonList.Count * maxTrisPerAxon + maxTrisPerSubNeuron * tempAxonList.Count * 2;
+        int maxTris = numNeurons * maxTrisPerNeuron + axons.Count * maxTrisPerAxon + maxTrisPerSubNeuron * axons.Count * 2;
         appendTrianglesCoreCBuffer = new ComputeBuffer(maxTris, sizeof(float) * 45, ComputeBufferType.Append); 
         appendTrianglesCoreCBuffer.SetCounterValue(0);
         appendTrianglesCablesCBuffer?.Release();
         
-        int maxTrisCable = numNeurons * maxTrisPerNeuron + tempAxonList.Count * maxTrisPerAxon + maxTrisPerSubNeuron * tempAxonList.Count * 2;
+        int maxTrisCable = numNeurons * maxTrisPerNeuron + axons.Count * maxTrisPerAxon + maxTrisPerSubNeuron * axons.Count * 2;
         appendTrianglesCablesCBuffer = new ComputeBuffer(maxTrisCable, sizeof(float) * 45, ComputeBufferType.Append); 
         appendTrianglesCablesCBuffer.SetCounterValue(0);
         
-        SetTrianglesBuffer("CSGenerateNeuronTriangles", tempNeuronList.Count, 1, 1, false);
-        SetTrianglesBuffer("CSGenerateSubNeuronTriangles", tempAxonList.Count * 2);
-        SetTrianglesBuffer("CSGenerateAxonTriangles", tempAxonList.Count);
+        SetTrianglesBuffer("CSGenerateNeuronTriangles", neurons.Count, 1, 1, false);
+        SetTrianglesBuffer("CSGenerateSubNeuronTriangles", axons.Count * 2);
+        SetTrianglesBuffer("CSGenerateAxonTriangles", axons.Count);
 
         displayMaterialCore.SetPass(0);
         displayMaterialCore.SetBuffer("appendTrianglesCoreCBuffer", appendTrianglesCoreCBuffer);
@@ -655,28 +666,30 @@ public class GenerateBrainVisualization : MonoBehaviour
         shaderComputeFloatingGlowyBits.Dispatch(kernelID, numFloatingGlowyBits / 64, yCount, 1);
     }
 
+    // * WPP: extract to new MonoBehaviour
     // Create a random small genome brain to test
     private void CreateDummyBrain() 
     {
-        tempNeuronList = new List<Neuron>();
-        int numInputs = Random.Range(Mathf.RoundToInt((float)numNeurons * 0.2f), Mathf.RoundToInt((float)numNeurons * 0.8f));
+        neurons = new List<Neuron>();
+        int inputCount = Random.Range(Mathf.RoundToInt((float)numNeurons * 0.2f), Mathf.RoundToInt((float)numNeurons * 0.8f));
+        
         for (int i = 0; i < numNeurons; i++) 
         {
-            Neuron neuron = new Neuron(i, numInputs);
-            tempNeuronList.Add(neuron);
+            Neuron neuron = new Neuron(i, inputCount);
+            neurons.Add(neuron);
         }
         
-        tempAxonList = new List<Axon>();
-        for (int i = 0; i < numInputs; i++) {
-            for(int j = 0; j < numNeurons - numInputs; j++) {
-                if (j + i * numInputs < numAxons) {
-                    Axon axon = new Axon(i, numInputs + j, Random.Range(-1f, 1f));
-                    tempAxonList.Add(axon);
-                }                
+        axons = new List<Axon>();
+        for (int i = 0; i < inputCount; i++) {
+            for(int j = 0; j < numNeurons - inputCount; j++) {
+                if (j + i * inputCount < numAxons) {
+                    Axon axon = new Axon(i, inputCount + j, Random.Range(-1f, 1f));
+                    axons.Add(axon);
+                }
             }
         }
 
-        numAxons = tempAxonList.Count;
+        numAxons = axons.Count;
     }
 
     private void OnRenderObject() 
