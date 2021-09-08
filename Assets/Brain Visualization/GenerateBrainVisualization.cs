@@ -35,6 +35,7 @@ public class GenerateBrainVisualization : MonoBehaviour
     private uint[] argsCables = new uint[5] { 0, 0, 0, 0, 0 };
     
     int numAxons = 270;
+    bool initialized;
     
     #endregion
     
@@ -209,16 +210,16 @@ public class GenerateBrainVisualization : MonoBehaviour
 
     #endregion
 
-    void Start () 
+    /*void Start () 
     {
         //Debug.Log(Quaternion.identity.w.ToString() + ", " + Quaternion.identity.x.ToString() + ", " + Quaternion.identity.y.ToString() + ", " + Quaternion.identity.z.ToString() + ", ");
         argsCoreCBuffer = new ComputeBuffer(1, argsCore.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
         argsCablesCBuffer = new ComputeBuffer(1, argsCables.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
         
         InitializeComputeBuffers();
-    }
+    }*/
 
-    private void SetCoreBrainDataSharedParameters(ComputeShader computeShader) 
+    void SetCoreBrainDataSharedParameters(ComputeShader computeShader) 
     {
         // Core Sizes:
         computeShader.SetFloat("minNeuronRadius", minNeuronRadius);
@@ -258,13 +259,22 @@ public class GenerateBrainVisualization : MonoBehaviour
 
         computeShader.SetFloat("time", Time.fixedTime);
     }
-
-    private void InitializeComputeBuffers() 
+    
+    public void Initialize()
     {
+        InitializeComputeBuffers();
+        initialized = true;
+    }
+
+    void InitializeComputeBuffers() 
+    {
+        argsCoreCBuffer = new ComputeBuffer(1, argsCore.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+        argsCablesCBuffer = new ComputeBuffer(1, argsCables.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+
         // first-time setup for compute buffers (assume new brain)
-        if(neurons == null || axons == null) {
-            CreateDummyBrain();
-        }
+        //if(neurons == null || axons == null) {
+        //    CreateDummyBrain();
+        //}
         
         InitializeNeuronCBufferData();
         InitializeNeuronFeedDataCBuffer();
@@ -530,10 +540,11 @@ public class GenerateBrainVisualization : MonoBehaviour
         neuronSimDataCBuffer.SetData(neuronSimDataArray);
     }
     
-    // for now only one seed data
+    // For now only one seed data
     void InitializeAxons()
     {
         axonInitDataCBuffer?.Release();
+        Debug.Log($"Initializing {axons.Count} axons");
         axonInitDataCBuffer = new ComputeBuffer(axons.Count, sizeof(float) * 1 + sizeof(int) * 2);
         
         AxonInitData[] axonInitDataArray = new AxonInitData[axons.Count]; 
@@ -556,7 +567,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         shaderComputeBrain.Dispatch(kernelID, x, y, 1);
     }
 
-    private void UpdateBrainDataAndBuffers() 
+    void UpdateBrainDataAndBuffers() 
     {
         if (neurons == null || axons == null)
             return;
@@ -663,12 +674,9 @@ public class GenerateBrainVisualization : MonoBehaviour
         shaderComputeFloatingGlowyBits.Dispatch(kernelID, numFloatingGlowyBits / 64, yCount, 1);
     }
 
-    // * WPP: extract to new MonoBehaviour
-    // Create a random small genome brain to test
-    private void CreateDummyBrain() 
+    public void CreateBrain(int inputCount) 
     {
         neurons = new List<Neuron>();
-        int inputCount = Random.Range(Mathf.RoundToInt((float)numNeurons * 0.2f), Mathf.RoundToInt((float)numNeurons * 0.8f));
         
         for (int i = 0; i < numNeurons; i++) 
         {
@@ -677,9 +685,12 @@ public class GenerateBrainVisualization : MonoBehaviour
         }
         
         axons = new List<Axon>();
-        for (int i = 0; i < inputCount; i++) {
-            for(int j = 0; j < numNeurons - inputCount; j++) {
-                if (j + i * inputCount < numAxons) {
+        for (int i = 0; i < inputCount; i++) 
+        {
+            for(int j = 0; j < numNeurons - inputCount; j++) 
+            {
+                if (j + i * inputCount < numAxons) 
+                {
                     Axon axon = new Axon(i, inputCount + j, Random.Range(-1f, 1f));
                     axons.Add(axon);
                 }
@@ -687,10 +698,21 @@ public class GenerateBrainVisualization : MonoBehaviour
         }
 
         numAxons = axons.Count;
+        
+        if (numAxons <= 0)
+        {
+            Debug.LogError($"Invalid input count {inputCount}, cannot create brain." +
+                           $"Input count must be greater than 0 and less than the number of neurons ({numNeurons})");
+            return;
+        }
+        
+        Initialize();
     }
 
-    private void OnRenderObject() 
+    void OnRenderObject() 
     {
+        if (!initialized) return;
+    
         displayMaterialCables.SetPass(0);
         // not sure why at this used to work with Triangles but now requires Points....
         Graphics.DrawProceduralIndirectNow(MeshTopology.Points, argsCablesCBuffer, 0);  
@@ -709,10 +731,11 @@ public class GenerateBrainVisualization : MonoBehaviour
 
     void Update () 
     {
+        if (!initialized) return;
         UpdateBrainDataAndBuffers();
     }
 
-    private void OnDestroy() 
+    void OnDestroy() 
     {
         neuronInitDataCBuffer?.Release();
         neuronFeedDataCBuffer?.Release();

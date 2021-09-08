@@ -5,6 +5,9 @@
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/Brain Visualization.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/Brain Visualization.prefab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/Test Brain Settings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/Test Brain Settings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Quality of Life/Type Based/Int/GetRandomInt.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Playcraft/Quality of Life/Type Based/Int/GetRandomInt.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,6 +29,7 @@
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/DigestionPanel.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Brain Visualization/CameraFacingQuadA.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Abilities/Cooldown.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Brain Visualization/CreateDummyBrain.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Test/EnumTest.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/17AD9609-AE06-4F2C-9315-931FF97ADCF1/bc/60ffa67a/RenderTextureFormat.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Perception/FindNearestEggSack.cs" root0="FORCE_HIGHLIGHTING" />
@@ -66,8 +70,6 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimResourceManager.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/WorldLayers/WorldLayerPlantGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Core/GameManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/WorldLayers/WorldLayerDecomposerGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/WorldLayers/WorldLayerAlgaeGenome.cs" />
@@ -116,7 +118,9 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/Neuron.cs" />
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/BrainSO.cs" />
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/BrainSettings.cs" />
+      <option value="$PROJECT_DIR$/Assets/Brain Visualization/CreateDummyBrain.cs" />
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/Quality of Life/Type Based/Int/GetRandomInt.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1owaWgGpM80xkcfA3szn5iw9YkG" />
@@ -236,7 +240,7 @@
       <workItem from="1630702327775" duration="3121000" />
       <workItem from="1630961939069" duration="11404000" />
       <workItem from="1631055677002" duration="5791000" />
-      <workItem from="1631134809634" duration="1941000" />
+      <workItem from="1631134809634" duration="3879000" />
     </task>
     <servers />
   </component>
@@ -269,10 +273,10 @@
           <line>641</line>
           <properties documentPath="D:\Unity Projects\Freelance\Evolution\Assets\Scripts\UI\HistoryPanelUI.cs" initialLine="613" containingFunctionPresentation="method 'UpdateSpeciesIconsCreatureEvents'">
             <startOffsets>
-              <option value="29789" />
+              <option value="29785" />
             </startOffsets>
             <endOffsets>
-              <option value="29790" />
+              <option value="29786" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="1" />
