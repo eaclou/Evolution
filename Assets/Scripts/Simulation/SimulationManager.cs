@@ -1064,10 +1064,10 @@ public class SimulationManager : Singleton<SimulationManager>
             speciesPool.ProcessCompletedCandidate(candidateData, masterGenomePool);
         }
 
-     
+
         // &&&&& *****  HERE!!!! **** &&&&&&   --- Select a species first to serve as parentGenome !! ***** &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
         // Can be random selection (unbiased), or proportional to species avg Fitnesses?
-        SpeciesGenomePool sourceSpeciesPool = masterGenomePool.SelectNewGenomeSourceSpecies(false, 0.33f); // select at random
+        SpeciesGenomePool sourceSpeciesPool = masterGenomePool.GetSmallestSpecies(); // masterGenomePool.SelectNewGenomeSourceSpecies(false, 0.33f); // select at random
                 
         // -- Select a ParentGenome from the leaderboardList and create a mutated copy (childGenome):  
         AgentGenome newGenome = sourceSpeciesPool.GetGenomeFromFitnessLottery();

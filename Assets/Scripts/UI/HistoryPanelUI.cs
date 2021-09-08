@@ -33,7 +33,7 @@ public class HistoryPanelUI : MonoBehaviour
     private GameObject tempPanelGraph;
     [SerializeField]
     private GameObject tempPanelLifeEvents;
-    [SerializeField] int maxNumCreatureEventIcons = 128;
+    [SerializeField] int maxNumCreatureEventIcons;
     
     public enum HistoryPanelMode {
         AllSpecies,
@@ -224,7 +224,7 @@ public class HistoryPanelUI : MonoBehaviour
                         if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
                             //data.color = Color.white;
                             hue = Vector3.Lerp(hue, Vector3.one, 0.8f);
-                            alpha = 1f;
+                            //alpha = 1f;
                         }
 
                         data.worldPos = new Vector3(xCoord, yCoord, zCoord);

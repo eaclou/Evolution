@@ -215,7 +215,26 @@ public class MasterGenomePool {
             return completeSpeciesPoolsList[speciesIndex];
         }
     }
+    public SpeciesGenomePool GetSmallestSpecies() {
 
+        int targetSpeciesID = 0;
+        // filter flagged extinct species:
+        List<int> eligibleSpeciesIDList = new List<int>();
+        for(int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
+            if(completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].isFlaggedForExtinction || completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].isExtinct) {
+
+            }
+            else {
+                eligibleSpeciesIDList.Add(currentlyActiveSpeciesIDList[i]);
+                if(completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].candidateGenomesList.Count < completeSpeciesPoolsList[targetSpeciesID].candidateGenomesList.Count) {
+                    targetSpeciesID = currentlyActiveSpeciesIDList[i];
+                }
+                
+            }
+        }        
+        return completeSpeciesPoolsList[targetSpeciesID];
+        
+    }
     public void AssignNewMutatedGenomeToSpecies(AgentGenome newGenome, int parentSpeciesID, SimulationManager simManagerRef) {
         // *** Gross code organization btw this and SimManager ***
         int closestSpeciesID = -1;

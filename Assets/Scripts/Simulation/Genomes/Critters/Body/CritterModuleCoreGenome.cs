@@ -328,7 +328,7 @@ public class CritterModuleCoreGenome
         initModifier.maskIndicesList.Add(masksList.Count - 1); // reference mask by index to allow re-use by other shape modifiers    
         shapeModifiersList.Add(initModifier);
 
-        creatureBaseLength = Random.Range(0.2f, 0.4f) * 2f; //********** TEMPORARY BOOST!!!! ***********
+        creatureBaseLength = Random.Range(0.4f, 0.4f);
         creatureAspectRatio = Random.Range(0.2f, 0.3f);
 
         //creatureComplexShapeLerp = 0f;
@@ -602,7 +602,7 @@ public class CritterModuleCoreGenome
         }        
         
         // Or start with deformed sphere???? *****
-        creatureBaseLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureBaseLength, settings.bodyCoreSizeMutationChance, settings.bodyCoreMutationStepSize, 0.2f * 2f, 0.4f * 2f);
+        creatureBaseLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureBaseLength, settings.bodyCoreSizeMutationChance, settings.bodyCoreMutationStepSize, 0.4f, 0.4f);
         creatureAspectRatio = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureAspectRatio, settings.bodyCoreSizeMutationChance, settings.bodyCoreMutationStepSize, 0.2f, 0.3f);
         
         // Mouth/Snout:
