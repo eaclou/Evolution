@@ -34,8 +34,11 @@ public class GenerateBrainVisualization : MonoBehaviour
     
     private uint[] argsCables = new uint[5] { 0, 0, 0, 0, 0 };
     
+    int numAxons = 270;
+    
     #endregion
     
+    // Data sent into compute buffers through arrays
     #region Structs
     
     public struct NeuronInitData 
@@ -147,77 +150,71 @@ public class GenerateBrainVisualization : MonoBehaviour
     
     #endregion
 
-    // * WPP: move each block of variables to a SO, stored in a general SO
-    #region Settings (exposed)
+    #region Settings
     
-    [Header("Display Resources")]
-    public ComputeShader shaderComputeBrain;
-    public ComputeShader shaderComputeFloatingGlowyBits;
-    public ComputeShader shaderComputeExtraBalls;  // quads w/ nml maps to like like extra blobs attached to neurons & axons
+    [SerializeField] BrainSettings settings;
+    
+    ComputeShader shaderComputeBrain => settings.shaderComputeBrain;
+    ComputeShader shaderComputeFloatingGlowyBits => settings.shaderComputeFloatingGlowyBits;
+    ComputeShader shaderComputeExtraBalls => settings.shaderComputeExtraBalls;  // quads w/ nml maps to like like extra blobs attached to neurons & axons
     //public Shader shaderDisplayBrain;
-    public Material displayMaterialCore;
-    public Material displayMaterialCables;
-    public Material floatingGlowyBitsMaterial;
-    public Material extraBallsMaterial;
+    Material displayMaterialCore => settings.displayMaterialCore;
+    Material displayMaterialCables => settings.displayMaterialCables;
+    Material floatingGlowyBitsMaterial => settings.floatingGlowyBitsMaterial;
+    Material extraBallsMaterial => settings.extraBallsMaterial;
 
-    [Header("General Settings")]
-    [SerializeField] int numNeurons = 33; 
-    [SerializeField] int numAxons = 270; 
-    [SerializeField] int maxTrisPerNeuron = 1024;
-    [SerializeField] int maxTrisPerSubNeuron = 8 * 8 * 2 * 2;
-    [SerializeField] int maxTrisPerAxon = 2048;
-    [SerializeField] int maxTrisPerCable = 2048;
-    [SerializeField] int numFloatingGlowyBits = 8192 * 8;
-    [SerializeField] int numAxonBalls = 8 * 128;
-    [SerializeField] int numNeuronBalls = 128;
+    int numNeurons => settings.numNeurons; 
+
+    int maxTrisPerNeuron => settings.maxTrisPerNeuron;
+    int maxTrisPerSubNeuron => settings.maxTrisPerSubNeuron;
+    int maxTrisPerAxon => settings.maxTrisPerAxon;
+    int maxTrisPerCable => settings.maxTrisPerCable;
+    int numFloatingGlowyBits => settings.numFloatingGlowyBits;
+    int numAxonBalls => settings.numAxonBalls;
+    int numNeuronBalls => settings.numNeuronBalls;
     
-    [Header("Size")]
-    public float minNeuronRadius = 0.05f;
-    public float maxNeuronRadius = 0.5f;
-    public float minAxonRadius = 0.05f;
-    public float maxAxonRadius = 0.5f;
-    public float minSubNeuronScale = 0.25f;
-    public float maxSubNeuronScale = 0.75f;  // max size relative to parent Neuron
-    public float maxAxonFlareScale = 0.9f;  // max axon flare size relative to SubNeuron
-    public float minAxonFlareScale = 0.2f;
-    public float axonFlarePos = 0.92f;
-    public float axonFlareWidth = 0.08f;
-    public float axonMaxPulseMultiplier = 2.0f;
-    public float cableRadius = 0.05f;
-    public float neuronBallMaxScale = 1f;
+    float minNeuronRadius => settings.minNeuronRadius;
+    float maxNeuronRadius => settings.maxNeuronRadius;
+    float minAxonRadius => settings.minAxonRadius;
+    float maxAxonRadius => settings.maxAxonRadius;
+    float minSubNeuronScale => settings.minSubNeuronScale;
+    float maxSubNeuronScale => settings.maxSubNeuronScale;  // max size relative to parent Neuron
+    float maxAxonFlareScale => settings.maxAxonFlareScale;  // max axon flare size relative to SubNeuron
+    float minAxonFlareScale => settings.minAxonFlareScale;
+    float axonFlarePos => settings.axonFlarePos;
+    float axonFlareWidth => settings.axonFlareWidth;
+    float axonMaxPulseMultiplier => settings.axonMaxPulseMultiplier;
+    float cableRadius => settings.cableRadius;
+    float neuronBallMaxScale => settings.neuronBallMaxScale;
 
-    [Header("Noise")]
-    public float neuronExtrudeNoiseFreq = 1.5f;
-    public float neuronExtrudeNoiseAmp = 0.0f;
-    public float neuronExtrudeNoiseScrollSpeed = 0.6f;
-    public float axonExtrudeNoiseFreq = 0.33f;
-    public float axonExtrudeNoiseAmp = 0.33f;
-    public float axonExtrudeNoiseScrollSpeed = 1.0f;
-    public float axonPosNoiseFreq = 0.14f;
-    public float axonPosNoiseAmp = 0f;
-    public float axonPosNoiseScrollSpeed = 10f;
-    public float axonPosSpiralFreq = 20.0f;
-    public float axonPosSpiralAmp = 0f;
+    float neuronExtrudeNoiseFreq => settings.neuronExtrudeNoiseFreq;
+    float neuronExtrudeNoiseAmp => settings.neuronExtrudeNoiseAmp;
+    float neuronExtrudeNoiseScrollSpeed => settings.neuronExtrudeNoiseScrollSpeed;
+    float axonExtrudeNoiseFreq => settings.axonExtrudeNoiseFreq;
+    float axonExtrudeNoiseAmp => settings.axonExtrudeNoiseAmp;
+    float axonExtrudeNoiseScrollSpeed => settings.axonExtrudeNoiseScrollSpeed;
+    float axonPosNoiseFreq => settings.axonPosNoiseFreq;
+    float axonPosNoiseAmp => settings.axonPosNoiseAmp;
+    float axonPosNoiseScrollSpeed => settings.axonPosNoiseScrollSpeed;
+    float axonPosSpiralFreq => settings.axonPosSpiralFreq;
+    float axonPosSpiralAmp => settings.axonPosSpiralAmp;
 
-    [Header("Forces")]
-    public float neuronAttractForce = 0.004f;
-    public float neuronRepelForce = 2.0f;
-    public float axonPerpendicularityForce = 0.01f;
-    public float axonAttachStraightenForce = 0.01f;
-    public float axonAttachSpreadForce = 0.025f;
-    public float axonRepelForce = 0.2f;
-    public float cableAttractForce = 0.01f;
+    float neuronAttractForce => settings.neuronAttractForce;
+    float neuronRepelForce => settings.neuronRepelForce;
+    float axonPerpendicularityForce => settings.axonPerpendicularityForce;
+    float axonAttachStraightenForce => settings.axonAttachStraightenForce;
+    float axonAttachSpreadForce => settings.axonAttachSpreadForce;
+    float axonRepelForce => settings.axonRepelForce;
+    float cableAttractForce => settings.cableAttractForce;
 
     #endregion
 
-    // Use this for initialization
     void Start () 
     {
         //Debug.Log(Quaternion.identity.w.ToString() + ", " + Quaternion.identity.x.ToString() + ", " + Quaternion.identity.y.ToString() + ", " + Quaternion.identity.z.ToString() + ", ");
         argsCoreCBuffer = new ComputeBuffer(1, argsCore.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
         argsCablesCBuffer = new ComputeBuffer(1, argsCables.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
         
-        //UpdateBuffers();
         InitializeComputeBuffers();
     }
 
@@ -337,7 +334,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         
         UpdateGlowyBits("CSInitializePositions", 0f, 0.8f, 1, false);
 
-        //  EXTRA BALLS NORMAL-MAPPED CAMERA-FACING QUADS:::::::::::
+        // EXTRA BALLS NORMAL-MAPPED CAMERA-FACING QUADS
         extraBallsCBuffer?.Release();
         extraBallsCBuffer = new ComputeBuffer(numAxonBalls + numNeuronBalls, sizeof(float) * 6);
         extraBallsMaterial.SetPass(0);

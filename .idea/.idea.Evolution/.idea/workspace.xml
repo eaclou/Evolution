@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="e5216a40-1993-4f7b-88ca-3d6aa0d75e16" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/Brain Visualization.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/Brain Visualization.prefab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -53,6 +54,7 @@
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/BehaviorPanel.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/17AD9609-AE06-4F2C-9315-931FF97ADCF1/5e/7303bde5/RenderTexture.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/CauseOfDeathSO.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Brain Visualization/BrainSettings.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Playcraft/_NEW/CursorInRectBounds.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/SensorsPanel.cs" root0="FORCE_HIGHLIGHTING" />
@@ -64,8 +66,6 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/ClockPanelUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/SettingsManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimResourceManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/WorldLayers/WorldLayerPlantGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Core/GameManager.cs" />
@@ -114,6 +114,8 @@
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/TestComputeExtraBalls.compute" />
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/TestComputeFloatingGlowyBits.compute" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/Neuron.cs" />
+      <option value="$PROJECT_DIR$/Assets/Brain Visualization/BrainSO.cs" />
+      <option value="$PROJECT_DIR$/Assets/Brain Visualization/BrainSettings.cs" />
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" />
     </changedPaths>
   </component>
@@ -233,7 +235,8 @@
       <workItem from="1630646450850" duration="6633000" />
       <workItem from="1630702327775" duration="3121000" />
       <workItem from="1630961939069" duration="11404000" />
-      <workItem from="1631055677002" duration="5344000" />
+      <workItem from="1631055677002" duration="5791000" />
+      <workItem from="1631134809634" duration="1941000" />
     </task>
     <servers />
   </component>
