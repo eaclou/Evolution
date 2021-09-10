@@ -26,6 +26,20 @@ public class HistoryPanelUI : MonoBehaviour
     public float timelineStartTimeStep = 0f;
 
     [SerializeField]
+    private const int panelSizePixels = 360;
+    [SerializeField]
+    private const float marginLeft = 0.1f;
+    [SerializeField]
+    private const float marginRight = 0.1f;
+    [SerializeField]
+    private const float marginTop = 0.05f;
+    [SerializeField]
+    private const float marginMiddle = 0.025f;
+    [SerializeField]
+    private const float marginBottom = 0.1f;
+    [SerializeField]
+    private const float clockHeight = 0.2f;
+    [SerializeField]
     Text textPanelStateDebug;
     [SerializeField]
     private GameObject tempPanelSpeciesPop;
@@ -34,7 +48,13 @@ public class HistoryPanelUI : MonoBehaviour
     [SerializeField]
     private GameObject tempPanelLifeEvents;
     [SerializeField] int maxNumCreatureEventIcons;
+
+    private float displayWidth => 1f - marginLeft - marginRight;
+    private float displayHeight => 1f - marginTop - marginMiddle - marginBottom - clockHeight;
     
+    public static int GetPanelSizePixels() {
+        return panelSizePixels;
+    }
     public enum HistoryPanelMode {
         AllSpecies,
         //ActiveSpecies,
@@ -95,7 +115,7 @@ public class HistoryPanelUI : MonoBehaviour
         icon.transform.SetParent(anchorGO.transform, false);
         icon.transform.localPosition = Vector3.zero;
         CreatureEventIconUI iconScript = icon.GetComponent<CreatureEventIconUI>();
-        //iconScript.imageBG = 
+        
         icon.gameObject.SetActive(false);
         creatureEventIconsList.Add(iconScript);
     }
@@ -112,8 +132,8 @@ public class HistoryPanelUI : MonoBehaviour
                 if (active) {
                     Vector2 eventCoords = Vector2.zero;
                     eventCoords.x = (float)(candidate.candidateEventDataList[i].eventFrame - candidate.performanceData.timeStepHatched) / (float)(simManager.simAgeTimeSteps - candidate.performanceData.timeStepHatched);
-                    eventCoords.x = eventCoords.x * 0.8f + 0.1f;
-                    eventCoords.y = (1f - ( (float)candidate.candidateEventDataList[i].type / 12f)) * 0.75f;
+                    eventCoords.x = eventCoords.x * displayWidth + marginLeft;
+                    eventCoords.y = (1f - ( (float)candidate.candidateEventDataList[i].type / 12f)) * displayHeight + marginBottom;
                     creatureEventIconsList[i].UpdateIconPrefabData(candidate.candidateEventDataList[i], i);
                     creatureEventIconsList[i].SetTargetCoords(eventCoords);
                     creatureEventIconsList[i].SetDisplay();
@@ -218,8 +238,8 @@ public class HistoryPanelUI : MonoBehaviour
                             alpha = 0f;
                         }
 
-                        xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
-                        yCoord = yCoord * 0.67f + 0.1f;
+                        xCoord = xCoord * displayWidth + marginLeft;  // rescaling --> make this more robust
+                        yCoord = yCoord * displayHeight + marginBottom;
 
                         if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
                             //data.color = Color.white;
@@ -257,8 +277,8 @@ public class HistoryPanelUI : MonoBehaviour
                         }                        
                         data.color = new Color(hue.x, hue.y, hue.z, alpha); // Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
 
-                        xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
-                        yCoord = yCoord * 0.67f + 0.1f;
+                        xCoord = xCoord * displayWidth + marginLeft;  // rescaling --> make this more robust
+                        yCoord = yCoord * displayHeight + marginBottom;
                         if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) {
                             data.color = Color.white;
                         }
@@ -336,8 +356,8 @@ public class HistoryPanelUI : MonoBehaviour
                 }
 
                 data.color = col; // new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
-                xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
-                yCoord = yCoord * 0.67f + 0.1f;
+                xCoord = xCoord * displayWidth + marginLeft;  // rescaling --> make this more robust
+                yCoord = yCoord * displayHeight + marginBottom;
                                 
                 data.worldPos = new Vector3(xCoord, yCoord, 0f);                     
                 if((new Vector2(xCoord, yCoord) - new Vector2(cursorCoordsX, cursorCoordsY)).magnitude < 0.05f) { // Mouse hover highlight
@@ -424,12 +444,7 @@ public class HistoryPanelUI : MonoBehaviour
     }
     
     public void ClickButtonToggleExtinct() {
-        /*if(curPanelMode == HistoryPanelMode.AllSpecies) {
-            curPanelMode = HistoryPanelMode.ActiveSpecies;
-        }
-        else if(curPanelMode == HistoryPanelMode.ActiveSpecies) {
-            curPanelMode = HistoryPanelMode.AllSpecies;
-        }*/
+        
     }
     
     public void ClickButtonBack() {
@@ -450,7 +465,7 @@ public class HistoryPanelUI : MonoBehaviour
     }
     
     public void Tick() {
-        textPanelStateDebug.text = "MODE: " + UIManager.instance.selectionManager.selectedSpeciesID;
+        textPanelStateDebug.text = "MODE: " + UIManager.instance.selectionManager.selectedSpeciesID + UIManager.instance.selectionManager.focusedCandidate.speciesID;
         buttonToggleExtinct.gameObject.SetActive(false);
         float targetStartTimeStep = 0f;
         tempPanelSpeciesPop.SetActive(false);
@@ -500,7 +515,7 @@ public class HistoryPanelUI : MonoBehaviour
                 isSelected = true;
                 icon.gameObject.transform.SetAsLastSibling();
             }
-            icon.UpdateSpeciesIconDisplay(360, isSelected);
+            icon.UpdateSpeciesIconDisplay(panelSizePixels, isSelected);
         }
 
         if(uiManagerRef.selectionManager.focusedCandidate != null) UpdateCreatureEventIcons(uiManagerRef.selectionManager.focusedCandidate);
@@ -523,8 +538,8 @@ public class HistoryPanelUI : MonoBehaviour
 
             //float indent = 0.05f;           
 
-            xCoord = xCoord * 0.8f + 0.1f;
-            yCoord = yCoord * 0.67f + 0.1f;
+            xCoord = xCoord * displayWidth + marginLeft;
+            yCoord = yCoord * displayHeight + marginBottom;
             speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
         }
     }
@@ -558,8 +573,9 @@ public class HistoryPanelUI : MonoBehaviour
                 bestScore = 1f;
             }
             float yCoord = Mathf.Clamp01(valStat / bestScore);
-            xCoord = xCoord * 0.8f + 0.1f;
-            yCoord = yCoord * 0.67f + 0.1f;
+            
+            xCoord = xCoord * displayWidth + marginLeft;
+            yCoord = yCoord * displayHeight + marginBottom;
             speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
             
         }
@@ -570,8 +586,9 @@ public class HistoryPanelUI : MonoBehaviour
             float xCoord = 1f;
             
             float yCoord = (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);      
-            xCoord = xCoord * 0.8f + 0.1f;
-            yCoord = yCoord * 0.67f + 0.1f;
+            
+            xCoord = xCoord * displayWidth + marginLeft;
+            yCoord = yCoord * displayHeight + marginBottom;
             speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
         }
     }
@@ -599,8 +616,8 @@ public class HistoryPanelUI : MonoBehaviour
                 yCoord = 0f;
             }
             
-            xCoord = xCoord * 0.8f + 0.1f;
-            yCoord = yCoord * 0.67f + 0.1f;
+            xCoord = xCoord * displayWidth + marginLeft;
+            yCoord = yCoord * displayHeight + marginBottom;
 
             speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
         }
@@ -636,10 +653,11 @@ public class HistoryPanelUI : MonoBehaviour
                 xCoord = xEnd;
             }
             
-            xCoord = xCoord * 0.8f + 0.1f;  // rescaling --> make this more robust
-            yCoord = yCoord * 0.67f + 0.1f;
+            xCoord = xCoord * displayWidth + marginLeft;
+            yCoord = yCoord * displayHeight + marginBottom;
 
-            uiManagerRef.speciesOverviewUI.SetButtonPos(line, new Vector3(xCoord * 360f, yCoord * 360f, 0f));      
+            //***EAC FIX!
+            uiManagerRef.speciesOverviewUI.SetButtonPos(line, new Vector3(xCoord * (float)panelSizePixels, yCoord * (float)panelSizePixels, 0f));      
             
         }
     }
