@@ -49,9 +49,9 @@ public class SpeciesOverviewUI : MonoBehaviour {
         
     public void RebuildGenomeButtons() 
     {
-        SpeciesGenomePool pool = simulationManager.GetSelectedGenomePool(); 
+        SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManager.selectionManager.focusedCandidate.speciesID]; 
         
-        SetLineageColors(pool.appearanceGenome);
+        SetSpeciesIconColors(pool.appearanceGenome);
 
         textSpeciesLineage.gameObject.SetActive(true);
         textSpeciesLineage.text = GetLineageText(pool);
@@ -61,7 +61,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
         RebuildGenomeButtonsCurrent(pool);        
     }
     
-    private void SetLineageColors(CritterModuleAppearanceGenome appearance) {
+    private void SetSpeciesIconColors(CritterModuleAppearanceGenome appearance) {
         imageLineageA.color = ColorFloor(appearance.huePrimary, hueMin);
         imageLineageB.color = ColorFloor(appearance.hueSecondary, hueMin);
     }

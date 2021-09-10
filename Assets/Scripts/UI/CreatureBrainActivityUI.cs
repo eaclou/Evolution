@@ -20,10 +20,21 @@ public class CreatureBrainActivityUI : MonoBehaviour
     public void Tick() {
         critterIndex = cameraManager.targetAgentIndex;
         agent = simulationManager.agents[critterIndex];
-
+        
         if (agent.coreModule == null || agent.communicationModule == null)
             return;
 
+        if(agent.candidateRef.candidateID == UIManager.instance.selectionManager.focusedCandidate.candidateID) {
+            UpdateBrainLive(agent);
+        }
+        else {
+            UpdateBrainFossil(UIManager.instance.selectionManager.focusedCandidate);
+        }
+
+        
+    
+    }
+    private void UpdateBrainLive(Agent agent) {
         int curActivityID = agent.GetActivityID();
 
         newInspectAgentCurActivityMat.SetInt("_CurActivityID", curActivityID);
@@ -41,7 +52,23 @@ public class CreatureBrainActivityUI : MonoBehaviour
             Mathf.Max(0, callTickCounter--);
         
         agentBehaviorOneHot.UpdateExtras(agent);
-    
+    }
+    private void UpdateBrainFossil(CandidateAgentData candidate) {
+        newInspectAgentCurActivityMat.SetInt("_CurActivityID", 0);
+        newInspectAgentThrottleMat.SetFloat("_ThrottleX", 0f);
+        newInspectAgentThrottleMat.SetFloat("_ThrottleY", 0f);
+        newInspectAgentThrottleMat.SetTexture("_VelocityTex", fluidManager._VelocityPressureDivergenceMain);
+        newInspectAgentThrottleMat.SetFloat("_AgentCoordX", 0f);
+        newInspectAgentThrottleMat.SetFloat("_AgentCoordY", 0f);
+        
+        agentBehaviorOneHot.UpdateBars(candidate);
+
+        // * WPP: what concept does this condition represent? -> convert to getter in Agent
+        callTickCounter = agent.communicationModule.outComm3[0] > 0.25f ? 
+            Mathf.Min(200, callTickCounter++) : 
+            Mathf.Max(0, callTickCounter--);
+        
+        agentBehaviorOneHot.UpdateExtras(candidate);
     }
 
     public void TickTooltips() {

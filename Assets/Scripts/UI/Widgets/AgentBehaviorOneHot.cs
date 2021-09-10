@@ -45,7 +45,43 @@ public class AgentBehaviorOneHot : MonoBehaviour {
 	void Update () {
 		
 	}
+    public void UpdateExtras(CandidateAgentData candidate) {
+        textRest.gameObject.SetActive(false);
+        textDash.gameObject.SetActive(false);
+        textGuard.gameObject.SetActive(false);
+        textBite.gameObject.SetActive(false);
+        textAttack.gameObject.SetActive(false);
+        textOther.gameObject.SetActive(false);
+        outComm0.GetComponent<Image>().color = Color.Lerp(Color.black, Color.white, 0f);
+        outComm0.GetComponent<TooltipUI>().tooltipString = "OutComm0";
+        outComm1.GetComponent<Image>().color = Color.Lerp(Color.black, Color.white, 0f);
+        outComm1.GetComponent<TooltipUI>().tooltipString = "OutComm1";
+        outComm2.GetComponent<Image>().color = Color.Lerp(Color.black, Color.white, 0f);
+        outComm2.GetComponent<TooltipUI>().tooltipString = "OutComm2";
+        outComm3.GetComponent<Image>().color = Color.Lerp(Color.black, Color.white, 0f);
+        outComm3.GetComponent<TooltipUI>().tooltipString = "OutComm3";
+        
+        float sigma = 0f;
+        throttleGO.transform.rotation = Quaternion.Euler(0f, 0f, sigma);
+        throttleGO.transform.localScale = Vector3.zero;
 
+        float sigmaWater = 0f;
+        waterVelGO.transform.rotation = Quaternion.Euler(0f, 0f, sigmaWater);
+        waterVelGO.transform.localScale = Vector3.zero;
+
+        contactForceGO.SetActive(false);
+        
+        float sigmaFood0 = 0f;
+        food0.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood0);
+
+        float sigmaFood1 = 0f;
+        food1.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood1);
+
+        float sigmaFood2 = 0f;
+        food2.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood2);
+        
+        
+    }
     public void UpdateExtras(Agent agentRef) {
         /*
         waterDepthGO.GetComponent<Text>().text = "Water Depth: " + agentRef.waterDepth.ToString() + 
@@ -107,6 +143,37 @@ public class AgentBehaviorOneHot : MonoBehaviour {
         food2.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood2);
         
         
+    }
+    public void UpdateBars(CandidateAgentData candidate) {
+        
+        Color activeColor = Color.white;
+        Color inactiveColor = Color.clear;
+
+        behaviorBarRest.transform.localScale = Vector3.one;
+        UpdateBarColor(behaviorBarRest.GetComponent<Image>(), 0f, false);
+        behaviorBarRest.GetComponent<TooltipUI>().tooltipString = "Rest";
+
+        behaviorBarDash.transform.localScale = Vector3.one;
+        UpdateBarColor(behaviorBarDash.GetComponent<Image>(), 0f, false);
+        behaviorBarDash.GetComponent<TooltipUI>().tooltipString = "Dash";
+
+        behaviorBarGuard.transform.localScale = Vector3.one; 
+        UpdateBarColor(behaviorBarGuard.GetComponent<Image>(), 0f, false);
+        behaviorBarGuard.GetComponent<TooltipUI>().tooltipString = "Guard";
+
+        behaviorBarBite.transform.localScale = Vector3.one; 
+        UpdateBarColor(behaviorBarBite.GetComponent<Image>(), 0f, false);
+        behaviorBarBite.GetComponent<TooltipUI>().tooltipString = "Bite";
+
+        behaviorBarAttack.transform.localScale = Vector3.one;
+        UpdateBarColor(behaviorBarAttack.GetComponent<Image>(), 0f, false);
+        behaviorBarAttack.GetComponent<TooltipUI>().tooltipString = "Attack";
+
+        UpdateBarColor(behaviorBarOther.GetComponent<Image>(), 0f, false);
+
+        textOther.gameObject.SetActive(false);
+        throttleGO.gameObject.SetActive(false);
+                
     }
     public void UpdateBars(Agent agent) { //float rest, float dash, float guard, float bite, float attack, float other, bool isCooldown) {
 

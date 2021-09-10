@@ -79,21 +79,6 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
             
             statusStr = isFocus ? SetBackground(selectedState) : SetBackgroundByLifeStage(matchingAgent);
             
-            // WPP: moved to lookup
-            /*if(matchingAgent.curLifeStage == AgentLifeStage.Egg) {
-                iconSprite = uiManager.creaturePanelUI.spriteIconCreatureStateEgg;
-            }
-            else if(matchingAgent.curLifeStage == AgentLifeStage.Mature) {
-                if(matchingAgent.isSexuallyMature) {
-                    iconSprite = uiManager.creaturePanelUI.spriteIconCreatureStateMature;
-                }
-                else {
-                    iconSprite = uiManager.creaturePanelUI.spriteIconCreatureStateYoung;
-                }
-            }
-            else if(matchingAgent.curLifeStage == AgentLifeStage.Dead) {
-                iconSprite = uiManager.creaturePanelUI.spriteIconCreatureStateDecaying;
-            }*/
             iconSprite = lookup.GetAgentLifeStageIcon(matchingAgent.curLifeStage, matchingAgent.isYoung);
         }
         else 
@@ -107,8 +92,8 @@ public class GenomeButtonPrefabScript : MonoBehaviour {
 
         backgroundImage.sprite = iconSprite;
         //tooltip.genomeViewerUIRef = uiManagerRef.genomeViewerUI;
-        
-        tooltip.tooltipString ="Critter " + candidate.name + "\nAge " + candidate.performanceData.totalTicksAlive + ", " + statusStr;
+
+        tooltip.tooltipString = "" + candidate.name + "\nAge " + candidate.performanceData.totalTicksAlive;// + ", " + statusStr;
         //uiManagerRef.speciesOverviewUI.leaderboardGenomeButtonsList.Add(buttonScript);
     }
     

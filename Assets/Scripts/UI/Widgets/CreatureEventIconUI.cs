@@ -21,7 +21,7 @@ public class CreatureEventIconUI : MonoBehaviour
     public void UpdateIconPrefabData(CandidateAgentData.CandidateEventData data, int eventIndex) {
         index = eventIndex;
         eventData = data;
-        tooltip.tooltipString = "Event[" + eventIndex + "] " + eventData.eventText;
+        tooltip.tooltipString = eventData.eventText;
         
     }
     public void SetTargetCoords(Vector2 newCoords) {

@@ -39,9 +39,9 @@ public class SpeciesIconUI : MonoBehaviour {
     }
     public void UpdateSpeciesIconDisplay(int panelPixelSize, bool isSelected) {
 
-        string toolString = "Species " + linkedPool.speciesID;
+        string toolString = "Species " + linkedPool.representativeCandidate.name.Substring(0, 1);
         // POSITION
-        currentCoords = Vector2.Lerp(currentCoords, targetCoords, 0.75f);
+        currentCoords = Vector2.Lerp(currentCoords, targetCoords, 0.67f);
 
         gameObject.transform.localPosition = new Vector3(currentCoords.x * (float)panelPixelSize, currentCoords.y * (float)panelPixelSize, 0f);
 

@@ -45,10 +45,10 @@ public class MasterGenomePool {
         //currentlyActiveSpeciesIDList.Add(0);
         //completeSpeciesPoolsList.Add(rootSpecies);
 
-        int numInitSpecies = 2;
+        int numInitSpecies = 4;
         for(int i = 0; i < numInitSpecies; i++) {
             float lerpV = Mathf.Clamp01(((float)i + 0.1f) / (float)(numInitSpecies + 1) + 0.06f) * 0.8f + 0.1f;
-            lerpV = 0.65f;
+            lerpV = 0.5f;
             SpeciesGenomePool newSpecies = new SpeciesGenomePool(i, -1, 0, 0, mutationSettingsRef);
             AgentGenome seedGenome = new AgentGenome();
             seedGenome.GenerateInitialRandomBodyGenome();
