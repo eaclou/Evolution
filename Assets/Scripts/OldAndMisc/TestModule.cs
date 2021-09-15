@@ -1,8 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 
-[System.Serializable]
+[Serializable]
 public class TestModule {
     //public int parentID;
     //public int inno;
@@ -291,216 +290,220 @@ public class TestModule {
         outComm2 = new float[1]; // 5
         outComm3 = new float[1]; // 6 
         */
-        if (inno == nid.moduleID) {
-            if (nid.neuronID == 0) {
-                neuron.currentValue = bias;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 1) {
-                neuron.currentValue = foodPosX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 2) {
-                neuron.currentValue = foodPosY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 3) {
-                neuron.currentValue = foodDirX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 4) {
-                neuron.currentValue = foodDirY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 5) {
-                neuron.currentValue = foodTypeR;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 6) {
-                neuron.currentValue = foodTypeG;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 7) {
-                neuron.currentValue = foodTypeB;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 8) {
-                neuron.currentValue = friendPosX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 9) {
-                neuron.currentValue = friendPosY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 10) {
-                neuron.currentValue = friendVelX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 11) {
-                neuron.currentValue = friendVelY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 12) {
-                neuron.currentValue = friendDirX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 13) {
-                neuron.currentValue = friendDirY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 14) {
-                neuron.currentValue = enemyPosX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 15) {
-                neuron.currentValue = enemyPosY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 16) {
-                neuron.currentValue = enemyVelX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 17) {
-                neuron.currentValue = enemyVelY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 18) {
-                neuron.currentValue = enemyDirX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 19) {
-                neuron.currentValue = enemyDirY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 20) {
-                neuron.currentValue = ownVelX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 21) {
-                neuron.currentValue = ownVelY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 22) {
-                neuron.currentValue = temperature;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 23) {
-                neuron.currentValue = pressure;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 24) {
-                neuron.currentValue = isContact;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 25) {
-                neuron.currentValue = contactForceX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 26) {
-                neuron.currentValue = contactForceY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 27) {
-                neuron.currentValue = hitPoints;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 28) {
-                neuron.currentValue = stamina;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 29) {
-                neuron.currentValue = foodAmountR;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 30) {
-                neuron.currentValue = foodAmountG;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 31) {
-                neuron.currentValue = foodAmountB;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 32) {
-                neuron.currentValue = distUp;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 33) {
-                neuron.currentValue = distTopRight;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 34) {
-                neuron.currentValue = distRight;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 35) {
-                neuron.currentValue = distBottomRight;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 36) {
-                neuron.currentValue = distDown;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 37) {
-                neuron.currentValue = distBottomLeft;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 38) {
-                neuron.currentValue = distLeft;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 39) {
-                neuron.currentValue = distTopLeft;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 40) {
-                neuron.currentValue = inComm0;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 41) {
-                neuron.currentValue = inComm1;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 42) {
-                neuron.currentValue = inComm2;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-            if (nid.neuronID == 43) {
-                neuron.currentValue = inComm3;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
-            }
-
-
-
-
-            if (nid.neuronID == 100) {
-                neuron.currentValue = throttleX;
-                neuron.neuronType = NeuronGenome.NeuronType.Out;
-            }
-            if (nid.neuronID == 101) {
-                neuron.currentValue = throttleY;
-                neuron.neuronType = NeuronGenome.NeuronType.Out;
-            }
-            if (nid.neuronID == 102) {
-                neuron.currentValue = dash;
-                neuron.neuronType = NeuronGenome.NeuronType.Out;
-            }
-            if (nid.neuronID == 103) {
-                neuron.currentValue = outComm0;
-                neuron.neuronType = NeuronGenome.NeuronType.Out;
-            }
-            if (nid.neuronID == 104) {
-                neuron.currentValue = outComm1;
-                neuron.neuronType = NeuronGenome.NeuronType.Out;
-            }
-            if (nid.neuronID == 105) {
-                neuron.currentValue = outComm2;
-                neuron.neuronType = NeuronGenome.NeuronType.Out;
-            }
-            if (nid.neuronID == 106) {
-                neuron.currentValue = outComm3;
-                neuron.neuronType = NeuronGenome.NeuronType.Out;
-            }
+        
+        // * WPP: refactor -> use switch statement, consider exposing as lookup table
+        if (inno != nid.moduleID) 
+            return;
+        
+        #region Inputs
+        if (nid.neuronID == 0) {
+            neuron.currentValue = bias;
+            neuron.neuronType = NeuronType.In;
         }
+        if (nid.neuronID == 1) {
+            neuron.currentValue = foodPosX;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 2) {
+            neuron.currentValue = foodPosY;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 3) {
+            neuron.currentValue = foodDirX;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 4) {
+            neuron.currentValue = foodDirY;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 5) {
+            neuron.currentValue = foodTypeR;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 6) {
+            neuron.currentValue = foodTypeG;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 7) {
+            neuron.currentValue = foodTypeB;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 8) {
+            neuron.currentValue = friendPosX;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 9) {
+            neuron.currentValue = friendPosY;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 10) {
+            neuron.currentValue = friendVelX;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 11) {
+            neuron.currentValue = friendVelY;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 12) {
+            neuron.currentValue = friendDirX;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 13) {
+            neuron.currentValue = friendDirY;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 14) {
+            neuron.currentValue = enemyPosX;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 15) {
+            neuron.currentValue = enemyPosY;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 16) {
+            neuron.currentValue = enemyVelX;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 17) {
+            neuron.currentValue = enemyVelY;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 18) {
+            neuron.currentValue = enemyDirX;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 19) {
+            neuron.currentValue = enemyDirY;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 20) {
+            neuron.currentValue = ownVelX;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 21) {
+            neuron.currentValue = ownVelY;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 22) {
+            neuron.currentValue = temperature;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 23) {
+            neuron.currentValue = pressure;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 24) {
+            neuron.currentValue = isContact;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 25) {
+            neuron.currentValue = contactForceX;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 26) {
+            neuron.currentValue = contactForceY;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 27) {
+            neuron.currentValue = hitPoints;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 28) {
+            neuron.currentValue = stamina;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 29) {
+            neuron.currentValue = foodAmountR;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 30) {
+            neuron.currentValue = foodAmountG;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 31) {
+            neuron.currentValue = foodAmountB;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 32) {
+            neuron.currentValue = distUp;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 33) {
+            neuron.currentValue = distTopRight;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 34) {
+            neuron.currentValue = distRight;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 35) {
+            neuron.currentValue = distBottomRight;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 36) {
+            neuron.currentValue = distDown;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 37) {
+            neuron.currentValue = distBottomLeft;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 38) {
+            neuron.currentValue = distLeft;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 39) {
+            neuron.currentValue = distTopLeft;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 40) {
+            neuron.currentValue = inComm0;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 41) {
+            neuron.currentValue = inComm1;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 42) {
+            neuron.currentValue = inComm2;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 43) {
+            neuron.currentValue = inComm3;
+            neuron.neuronType = NeuronType.In;
+        }
+        #endregion
+        
+        #region Outputs
+        if (nid.neuronID == 100) {
+            neuron.currentValue = throttleX;
+            neuron.neuronType = NeuronType.Out;
+        }
+        if (nid.neuronID == 101) {
+            neuron.currentValue = throttleY;
+            neuron.neuronType = NeuronType.Out;
+        }
+        if (nid.neuronID == 102) {
+            neuron.currentValue = dash;
+            neuron.neuronType = NeuronType.Out;
+        }
+        if (nid.neuronID == 103) {
+            neuron.currentValue = outComm0;
+            neuron.neuronType = NeuronType.Out;
+        }
+        if (nid.neuronID == 104) {
+            neuron.currentValue = outComm1;
+            neuron.neuronType = NeuronType.Out;
+        }
+        if (nid.neuronID == 105) {
+            neuron.currentValue = outComm2;
+            neuron.neuronType = NeuronType.Out;
+        }
+        if (nid.neuronID == 106) {
+            neuron.currentValue = outComm3;
+            neuron.neuronType = NeuronType.Out;
+        }
+        #endregion
     }
 
     public void Tick(bool isPlayer) {        

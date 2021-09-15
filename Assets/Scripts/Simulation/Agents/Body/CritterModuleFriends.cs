@@ -1,10 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class CritterModuleFriends {
-
-	public int parentID;
+public class CritterModuleFriends 
+{
+    public int parentID;
     public int inno;
 
     public float[] friendPosX;
@@ -34,27 +32,27 @@ public class CritterModuleFriends {
         if (inno == nid.moduleID) {
             if (nid.neuronID == 8) {
                 neuron.currentValue = friendPosX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 9) {
                 neuron.currentValue = friendPosY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 10) {
                 neuron.currentValue = friendVelX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 11) {
                 neuron.currentValue = friendVelY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 12) {
                 neuron.currentValue = friendDirX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 13) {
                 neuron.currentValue = friendDirY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
         }
     }

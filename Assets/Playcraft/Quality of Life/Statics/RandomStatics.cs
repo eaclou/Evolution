@@ -6,14 +6,20 @@ namespace Playcraft
 {
     public static class RandomStatics
     {
-        // NEW
+        #region NEW
         public static T RandomEnumValue<T>()
         {
             var values = Enum.GetValues(typeof(T));
             var random = Random.Range(0, values.Length);
             return (T)values.GetValue(random);
         }
+        
+        public static bool CoinToss(float chance = 0.5f) { return Random.Range(0, 1) < chance; }
+        
+        public static bool RandomFlip(float chance, bool defaultValue) { return CoinToss(chance) ? !defaultValue : defaultValue; }
     
+        #endregion
+        
         public static int RandomNoRepeat(int min, int max, int prior)
         {
             if (max - min < 1)

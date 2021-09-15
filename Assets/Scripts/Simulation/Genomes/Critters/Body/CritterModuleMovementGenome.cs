@@ -1,10 +1,9 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
-[System.Serializable]
-public class CritterModuleMovementGenome {
-
+[Serializable]
+public class CritterModuleMovementGenome 
+{
     public int parentID;
     public int inno;
 
@@ -18,15 +17,15 @@ public class CritterModuleMovementGenome {
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
 
-        NeuronGenome ownVelX = new NeuronGenome("ownVelX", NeuronGenome.NeuronType.In, inno, 20); // 20
-        NeuronGenome ownVelY = new NeuronGenome("ownVelY", NeuronGenome.NeuronType.In, inno, 21); // 21
+        NeuronGenome ownVelX = new NeuronGenome("ownVelX", NeuronType.In, inno, 20); // 20
+        NeuronGenome ownVelY = new NeuronGenome("ownVelY", NeuronType.In, inno, 21); // 21
 
-        NeuronGenome facingDirX = new NeuronGenome("facingDirX", NeuronGenome.NeuronType.In, inno, 207); // 20
-        NeuronGenome facingDirY = new NeuronGenome("facingDirY", NeuronGenome.NeuronType.In, inno, 208); // 21
+        NeuronGenome facingDirX = new NeuronGenome("facingDirX", NeuronType.In, inno, 207); // 20
+        NeuronGenome facingDirY = new NeuronGenome("facingDirY", NeuronType.In, inno, 208); // 21
 
-        NeuronGenome throttleX = new NeuronGenome("throttleX", NeuronGenome.NeuronType.Out, inno, 100); // 100
-        NeuronGenome throttleY = new NeuronGenome("throttleY", NeuronGenome.NeuronType.Out, inno, 101); // 101
-        NeuronGenome dash = new NeuronGenome("dash", NeuronGenome.NeuronType.Out, inno, 102); // 102
+        NeuronGenome throttleX = new NeuronGenome("throttleX", NeuronType.Out, inno, 100); // 100
+        NeuronGenome throttleY = new NeuronGenome("throttleY", NeuronType.Out, inno, 101); // 101
+        NeuronGenome dash = new NeuronGenome("dash", NeuronType.Out, inno, 102); // 102
 
         neuronList.Add(ownVelX); // 20
         neuronList.Add(ownVelY); // 21
@@ -43,7 +42,6 @@ public class CritterModuleMovementGenome {
     }
 
     public void GenerateRandomInitialGenome() {
-        // Do stuff:
         horsepower = 140f;
         turnRate = 55f;
     }

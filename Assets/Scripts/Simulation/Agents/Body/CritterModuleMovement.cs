@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class CritterModuleMovement {
-
+public class CritterModuleMovement 
+{
     public int parentID;
     public int inno;
 
@@ -63,32 +61,32 @@ public class CritterModuleMovement {
         if (inno == nid.moduleID) {            
             if (nid.neuronID == 20) {
                 neuron.currentValue = ownVelX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 21) {
                 neuron.currentValue = ownVelY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 207) {
                 neuron.currentValue = facingDirX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 208) {
                 neuron.currentValue = facingDirY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
 
             if (nid.neuronID == 100) {
                 neuron.currentValue = throttleX;
-                neuron.neuronType = NeuronGenome.NeuronType.Out;
+                neuron.neuronType = NeuronType.Out;
             }
             if (nid.neuronID == 101) {
                 neuron.currentValue = throttleY;
-                neuron.neuronType = NeuronGenome.NeuronType.Out;
+                neuron.neuronType = NeuronType.Out;
             }
             if (nid.neuronID == 102) {
                 neuron.currentValue = dash;
-                neuron.neuronType = NeuronGenome.NeuronType.Out;
+                neuron.neuronType = NeuronType.Out;
             }
         }
     }

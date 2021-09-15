@@ -1,11 +1,11 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
+using Random = UnityEngine.Random;
 
-[System.Serializable]
-public class CritterModuleEnvironmentSensorsGenome {
-
-	public int parentID;
+[Serializable]
+public class CritterModuleEnvironmentSensorsGenome 
+{
+    public int parentID;
     public int inno;
 
     public bool useWaterStats;
@@ -20,26 +20,24 @@ public class CritterModuleEnvironmentSensorsGenome {
     }
 
     public void GenerateRandomInitialGenome() {
-        // Do stuff:
-        // Do stuff:
-        float randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < 0.5f) {
+        float randChance = Random.Range(0f, 1f);
+        if (randChance < 0.5f) {
             useCardinals = false;
         }
         else {
             useCardinals = true;
         }
 
-        randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < 0.5f) {
+        randChance = Random.Range(0f, 1f);
+        if (randChance < 0.5f) {
             useDiagonals = false;
         }
         else {
             useDiagonals = true;
         }
 
-        randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < 0.5f) {
+        randChance = Random.Range(0f, 1f);
+        if (randChance < 0.5f) {
             useWaterStats = false;
         }
         else {
@@ -50,16 +48,16 @@ public class CritterModuleEnvironmentSensorsGenome {
     }
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
-        if(useWaterStats) {
-            NeuronGenome depth = new NeuronGenome("depth", NeuronGenome.NeuronType.In, inno, 1); 
-            NeuronGenome velX = new NeuronGenome("velX", NeuronGenome.NeuronType.In, inno, 2); 
-            NeuronGenome velY = new NeuronGenome("velY", NeuronGenome.NeuronType.In, inno, 3); 
+        if (useWaterStats) {
+            NeuronGenome depth = new NeuronGenome("depth", NeuronType.In, inno, 1); 
+            NeuronGenome velX = new NeuronGenome("velX", NeuronType.In, inno, 2); 
+            NeuronGenome velY = new NeuronGenome("velY", NeuronType.In, inno, 3); 
             neuronList.Add(depth);      
             neuronList.Add(velX);      
             neuronList.Add(velY);   
             
-            NeuronGenome depthGradX = new NeuronGenome("depthGradX", NeuronGenome.NeuronType.In, inno, 4); 
-            NeuronGenome depthGradY = new NeuronGenome("depthGradY", NeuronGenome.NeuronType.In, inno, 5); 
+            NeuronGenome depthGradX = new NeuronGenome("depthGradX", NeuronType.In, inno, 4); 
+            NeuronGenome depthGradY = new NeuronGenome("depthGradY", NeuronType.In, inno, 5); 
             neuronList.Add(depthGradX);   
             neuronList.Add(depthGradY); 
             /*
@@ -98,19 +96,19 @@ public class CritterModuleEnvironmentSensorsGenome {
     public void SetToMutatedCopyOfParentGenome(CritterModuleEnvironmentSensorsGenome parentGenome, MutationSettings settings) {
         this.useWaterStats = parentGenome.useWaterStats;
         
-        float randChance = UnityEngine.Random.Range(0f, 1f);
+        float randChance = Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleInternalMutationChance) {
             this.useWaterStats = !this.useWaterStats;
         }
 
         this.useCardinals = parentGenome.useCardinals;
-        randChance = UnityEngine.Random.Range(0f, 1f);
+        randChance = Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleInternalMutationChance) {
             this.useCardinals = !this.useCardinals;
         }
 
         this.useDiagonals = parentGenome.useDiagonals;
-        randChance = UnityEngine.Random.Range(0f, 1f);
+        randChance = Random.Range(0f, 1f);
         if(randChance < settings.bodyModuleInternalMutationChance) {
             this.useDiagonals = !this.useDiagonals;
         }

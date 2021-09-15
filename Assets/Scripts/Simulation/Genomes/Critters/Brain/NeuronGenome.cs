@@ -1,22 +1,14 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System;
 
-[System.Serializable]
-public class NeuronGenome {
-
+[Serializable]
+public class NeuronGenome 
+{
     public NeuronType neuronType;
-    public enum NeuronType {
-        In,
-        Hid,
-        Out
-    }
+
     public string name = "none";
     public NID nid; // Neuron ID
 
-    public NeuronGenome() {
-
-    }
+    public NeuronGenome() { }
 
     public NeuronGenome(string name, NeuronType type, int moduleID, int neuronID) {
         neuronType = type;
@@ -31,8 +23,14 @@ public class NeuronGenome {
     }
 
     public NeuronGenome(NeuronGenome template) {
-        this.neuronType = template.neuronType;
-        this.name = template.name;
-        this.nid = template.nid;
+        neuronType = template.neuronType;
+        name = template.name;
+        nid = template.nid;
     }
+}
+
+public enum NeuronType {
+    In,
+    Hid,
+    Out
 }

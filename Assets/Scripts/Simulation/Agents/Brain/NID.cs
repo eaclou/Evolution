@@ -1,10 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System;
 
-[System.Serializable]
+/// Neuron Identifier
+[Serializable]
 public struct NID {
-    // Neuron Identifier
+    
     public int moduleID;
     public int neuronID;
 

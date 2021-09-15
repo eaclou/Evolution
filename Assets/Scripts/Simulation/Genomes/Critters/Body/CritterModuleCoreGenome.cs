@@ -425,21 +425,21 @@ public class CritterModuleCoreGenome
     }
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
-        NeuronGenome bias = new NeuronGenome("Bias", NeuronGenome.NeuronType.In, inno, 0);
+        NeuronGenome bias = new NeuronGenome("Bias", NeuronType.In, inno, 0);
 
-        NeuronGenome isMouthTrigger = new NeuronGenome("isMouthTrigger", NeuronGenome.NeuronType.In, inno, 21);
+        NeuronGenome isMouthTrigger = new NeuronGenome("isMouthTrigger", NeuronType.In, inno, 21);
         //NeuronGenome temperature = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 22); // 22
         //NeuronGenome pressure = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 23); // 23
-        NeuronGenome isContact = new NeuronGenome("isContact", NeuronGenome.NeuronType.In, inno, 24); // 24
-        NeuronGenome contactForceX = new NeuronGenome("contactForceX", NeuronGenome.NeuronType.In, inno, 25); // 25
-        NeuronGenome contactForceY = new NeuronGenome("contactForceY", NeuronGenome.NeuronType.In, inno, 26); // 26
+        NeuronGenome isContact = new NeuronGenome("isContact", NeuronType.In, inno, 24); // 24
+        NeuronGenome contactForceX = new NeuronGenome("contactForceX", NeuronType.In, inno, 25); // 25
+        NeuronGenome contactForceY = new NeuronGenome("contactForceY", NeuronType.In, inno, 26); // 26
         
-        NeuronGenome hitPoints = new NeuronGenome("hitPoints", NeuronGenome.NeuronType.In, inno, 27); // 27
-        NeuronGenome stamina = new NeuronGenome("stamina", NeuronGenome.NeuronType.In, inno, 28); // 28
-        NeuronGenome energyStored = new NeuronGenome("energyStored", NeuronGenome.NeuronType.In, inno, 204); // 27
-        NeuronGenome foodStored = new NeuronGenome("foodStored", NeuronGenome.NeuronType.In, inno, 205); // 28
+        NeuronGenome hitPoints = new NeuronGenome("hitPoints", NeuronType.In, inno, 27); // 27
+        NeuronGenome stamina = new NeuronGenome("stamina", NeuronType.In, inno, 28); // 28
+        NeuronGenome energyStored = new NeuronGenome("energyStored", NeuronType.In, inno, 204); // 27
+        NeuronGenome foodStored = new NeuronGenome("foodStored", NeuronType.In, inno, 205); // 28
         
-        NeuronGenome mouthFeedEffector = new NeuronGenome("mouthFeedEffector", NeuronGenome.NeuronType.Out, inno, 206); // 106
+        NeuronGenome mouthFeedEffector = new NeuronGenome("mouthFeedEffector", NeuronType.Out, inno, 206); // 106
 
         neuronList.Add(bias);   //0
 
@@ -458,19 +458,19 @@ public class CritterModuleCoreGenome
         neuronList.Add(mouthFeedEffector); // 206
 
         if(talentSpecAttackNorm > 0.2f) {
-            NeuronGenome mouthAttackEffector = new NeuronGenome("mouthAttackEffector", NeuronGenome.NeuronType.Out, inno, 207);
+            NeuronGenome mouthAttackEffector = new NeuronGenome("mouthAttackEffector", NeuronType.Out, inno, 207);
             neuronList.Add(mouthAttackEffector);
         }
         if(talentSpecDefenseNorm > 0.2f) {
-            NeuronGenome defendEffector = new NeuronGenome("defendEffector", NeuronGenome.NeuronType.Out, inno, 208);
+            NeuronGenome defendEffector = new NeuronGenome("defendEffector", NeuronType.Out, inno, 208);
             neuronList.Add(defendEffector);
         }
         if(talentSpecSpeedNorm > 0.2f) {
-            NeuronGenome dashEffector = new NeuronGenome("dashEffector", NeuronGenome.NeuronType.Out, inno, 209);
+            NeuronGenome dashEffector = new NeuronGenome("dashEffector", NeuronType.Out, inno, 209);
             neuronList.Add(dashEffector);
         }
         if(talentSpecUtilityNorm > 0.2f) {
-            NeuronGenome healEffector = new NeuronGenome("healEffector", NeuronGenome.NeuronType.Out, inno, 210);
+            NeuronGenome healEffector = new NeuronGenome("healEffector", NeuronType.Out, inno, 210);
             neuronList.Add(healEffector);
         }
     }

@@ -158,113 +158,113 @@ public class CritterModuleFood
         if (inno == nid.moduleID) {
             if (nid.neuronID == 1) {
                 neuron.currentValue = nutrientDensity;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 2) {
                 neuron.currentValue = nutrientGradX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 3) {
                 neuron.currentValue = nutrientGradY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 4) {
                 neuron.currentValue = foodPlantPosX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 5) {
                 neuron.currentValue = foodPlantPosY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 6) {
                 neuron.currentValue = foodPlantDistance;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 7) {
                 neuron.currentValue = foodPlantVelX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 8) {
                 neuron.currentValue = foodPlantVelY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 9) {
                 neuron.currentValue = foodPlantDirX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 10) {
                 neuron.currentValue = foodPlantDirY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 11) {
                 neuron.currentValue = foodPlantQuality;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 12) {
                 neuron.currentValue = foodPlantRelSize;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
 
             if (nid.neuronID == 13) {
                 neuron.currentValue = foodEggDistance;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 14) {
                 neuron.currentValue = foodEggDirX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 15) {
                 neuron.currentValue = foodEggDirY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 16) {
                 neuron.currentValue = foodCorpseDistance;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 17) {
                 neuron.currentValue = foodCorpseDirX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 18) {
                 neuron.currentValue = foodCorpseDirY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
 
             if (nid.neuronID == 24) {
                 neuron.currentValue = foodAnimalPosX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 25) {
                 neuron.currentValue = foodAnimalPosY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 26) {
                 neuron.currentValue = foodAnimalDistance;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 27) {
                 neuron.currentValue = foodAnimalVelX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 28) {
                 neuron.currentValue = foodAnimalVelY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 29) {
                 neuron.currentValue = foodAnimalDirX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 30) {
                 neuron.currentValue = foodAnimalDirY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 31) {
                 neuron.currentValue = foodAnimalQuality;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 32) {
                 neuron.currentValue = foodAnimalRelSize;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
         }
     }

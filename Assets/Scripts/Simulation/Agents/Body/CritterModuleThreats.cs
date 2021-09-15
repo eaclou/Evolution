@@ -1,10 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class CritterModuleThreats {
-
-	public int parentID;
+public class CritterModuleThreats 
+{
+    public int parentID;
     public int inno;
 
     public float[] enemyPosX;
@@ -44,44 +42,44 @@ public class CritterModuleThreats {
         if (inno == nid.moduleID) {
             if (nid.neuronID == 14) {
                 neuron.currentValue = enemyPosX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 15) {
                 neuron.currentValue = enemyPosY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 16) {
                 neuron.currentValue = enemyVelX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 17) {
                 neuron.currentValue = enemyVelY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 18) {
                 neuron.currentValue = enemyDirX;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 19) {
                 neuron.currentValue = enemyDirY;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
 
             if (nid.neuronID == 200) {
                 neuron.currentValue = enemyRelSize;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 201) {
                 neuron.currentValue = enemyHealth;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 202) {
                 neuron.currentValue = enemyGrowthStage;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 203) {
                 neuron.currentValue = enemyThreatRating;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
         }
     }

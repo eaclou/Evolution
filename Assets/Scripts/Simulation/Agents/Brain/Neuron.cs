@@ -2,7 +2,7 @@
 
 public class Neuron 
 {
-    public NeuronGenome.NeuronType neuronType;
+    public NeuronType neuronType;
     public string name;
     public float inputTotal;
     public float[] currentValue;
@@ -12,7 +12,7 @@ public class Neuron
     
     public Neuron(int index, int inputCount)
     {
-        neuronType = index < inputCount ? NeuronGenome.NeuronType.In : NeuronGenome.NeuronType.Out;
+        neuronType = index < inputCount ? NeuronType.In : NeuronType.Out;
         currentValue = new float[1];
         currentValue[0] = Random.Range(-2f, 2f);
     }

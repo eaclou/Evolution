@@ -196,59 +196,59 @@ public class CritterModuleCore
 
         if (nid.neuronID == 0) {
             neuron.currentValue = bias;
-            neuron.neuronType = NeuronGenome.NeuronType.In;
+            neuron.neuronType = NeuronType.In;
         }            
         if (nid.neuronID == 21) {
             neuron.currentValue = mouthTriggerOutputs;
-            neuron.neuronType = NeuronGenome.NeuronType.In;
+            neuron.neuronType = NeuronType.In;
         }
         if (nid.neuronID == 24) {
             neuron.currentValue = isContact;
-            neuron.neuronType = NeuronGenome.NeuronType.In;
+            neuron.neuronType = NeuronType.In;
         }
         if (nid.neuronID == 25) {
             neuron.currentValue = contactForceX;
-            neuron.neuronType = NeuronGenome.NeuronType.In;
+            neuron.neuronType = NeuronType.In;
         }
         if (nid.neuronID == 26) {
             neuron.currentValue = contactForceY;
-            neuron.neuronType = NeuronGenome.NeuronType.In;
+            neuron.neuronType = NeuronType.In;
         }
         if (nid.neuronID == 27) {
             neuron.currentValue = hitPoints;
-            neuron.neuronType = NeuronGenome.NeuronType.In;
+            neuron.neuronType = NeuronType.In;
         }
         if (nid.neuronID == 28) {
             neuron.currentValue = stamina;
-            neuron.neuronType = NeuronGenome.NeuronType.In;
+            neuron.neuronType = NeuronType.In;
         }
         if (nid.neuronID == 204) {
             neuron.currentValue = energyStored;
-            neuron.neuronType = NeuronGenome.NeuronType.In;
+            neuron.neuronType = NeuronType.In;
         }
         if (nid.neuronID == 205) {
             neuron.currentValue = foodStored;
-            neuron.neuronType = NeuronGenome.NeuronType.In;
+            neuron.neuronType = NeuronType.In;
         }
         if (nid.neuronID == 206) {
             neuron.currentValue = mouthFeedEffector;
-            neuron.neuronType = NeuronGenome.NeuronType.Out;
+            neuron.neuronType = NeuronType.Out;
         }
         if (nid.neuronID == 207) {
             neuron.currentValue = mouthAttackEffector;
-            neuron.neuronType = NeuronGenome.NeuronType.Out;
+            neuron.neuronType = NeuronType.Out;
         }
         if (nid.neuronID == 208) {
             neuron.currentValue = defendEffector;
-            neuron.neuronType = NeuronGenome.NeuronType.Out;
+            neuron.neuronType = NeuronType.Out;
         }
         if (nid.neuronID == 209) {
             neuron.currentValue = dashEffector;
-            neuron.neuronType = NeuronGenome.NeuronType.Out;
+            neuron.neuronType = NeuronType.Out;
         }
         if (nid.neuronID == 210) {
             neuron.currentValue = healEffector;
-            neuron.neuronType = NeuronGenome.NeuronType.Out;
+            neuron.neuronType = NeuronType.Out;
         }
     }
 

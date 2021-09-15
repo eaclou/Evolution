@@ -41,55 +41,59 @@ public class CritterModuleCommunication {
         if (inno == nid.moduleID) {
             if (nid.neuronID == 40) {
                 neuron.currentValue = inComm0;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 41) {
                 neuron.currentValue = inComm1;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 42) {
                 neuron.currentValue = inComm2;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
             if (nid.neuronID == 43) {
                 neuron.currentValue = inComm3;
-                neuron.neuronType = NeuronGenome.NeuronType.In;
+                neuron.neuronType = NeuronType.In;
             }
 
             if (nid.neuronID == 103) {
                 neuron.currentValue = outComm0;
-                neuron.neuronType = NeuronGenome.NeuronType.Out;
+                neuron.neuronType = NeuronType.Out;
             }
             if (nid.neuronID == 104) {
                 neuron.currentValue = outComm1;
-                neuron.neuronType = NeuronGenome.NeuronType.Out;
+                neuron.neuronType = NeuronType.Out;
             }
             if (nid.neuronID == 105) {
                 neuron.currentValue = outComm2;
-                neuron.neuronType = NeuronGenome.NeuronType.Out;
+                neuron.neuronType = NeuronType.Out;
             }
             if (nid.neuronID == 106) {
                 neuron.currentValue = outComm3;
-                neuron.neuronType = NeuronGenome.NeuronType.Out;
+                neuron.neuronType = NeuronType.Out;
             }
         }
     }
 
-    public void Tick(Agent agent) {
-        if(genome.useComms) {
-            if(agent.coreModule.nearestFriendAgent) { // && agent.coreModule.nearestFriendAgent.isDefending) {
-                //Debug.Log("does this happen? yes");
-                inComm0[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm0[0]); 
-                inComm1[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm1[0]);
-                inComm2[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm2[0]);
-                inComm3[0] = Mathf.Round(agent.coreModule.nearestFriendAgent.communicationModule.outComm3[0]);   
-            } 
-            else {
-                inComm0[0] = 0f;
-                inComm1[0] = 0f;
-                inComm2[0] = 0f;
-                inComm3[0] = 0f; 
-            }
+    public void Tick(Agent agent) 
+    {
+        if (!genome.useComms) 
+            return;
+
+        if (agent.coreModule.nearestFriendAgent) // && agent.coreModule.nearestFriendAgent.isDefending) {
+        {
+            var communication = agent.coreModule.nearestFriendAgent.communicationModule;
+            inComm0[0] = Mathf.Round(communication.outComm0[0]); 
+            inComm1[0] = Mathf.Round(communication.outComm1[0]);
+            inComm2[0] = Mathf.Round(communication.outComm2[0]);
+            inComm3[0] = Mathf.Round(communication.outComm3[0]);   
+        } 
+        else 
+        {
+            inComm0[0] = 0f;
+            inComm1[0] = 0f;
+            inComm2[0] = 0f;
+            inComm3[0] = 0f; 
         }
     }
 }

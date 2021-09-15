@@ -295,7 +295,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         SocketInitData[] socketInitDataArray = new SocketInitData[numNeurons];
         
         for (int i = 0; i < numNeurons; i++) {
-            var list = neurons[i].neuronType == NeuronGenome.NeuronType.In ? inputNeurons : outputNeurons;
+            var list = neurons[i].neuronType == NeuronType.In ? inputNeurons : outputNeurons;
             list.Add(neurons[i]);
         }
         
@@ -533,7 +533,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         for (int i = 0; i < neuronSimDataArray.Length; i++) 
         {
             neuronSimDataArray[i].pos = Random.insideUnitSphere * 1f;
-            var polarity = neurons[i].neuronType == NeuronGenome.NeuronType.In ? -1f : 1f;
+            var polarity = neurons[i].neuronType == NeuronType.In ? -1f : 1f;
             neuronSimDataArray[i].pos.z = polarity * Mathf.Abs(neuronSimDataArray[i].pos.z);
         }
         

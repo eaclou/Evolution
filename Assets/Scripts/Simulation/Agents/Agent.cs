@@ -292,7 +292,7 @@ public class Agent : MonoBehaviour {
         // Hidden nodes!
         if (nid.moduleID == -1) {
             neuron.currentValue = new float[1];
-            neuron.neuronType = NeuronGenome.NeuronType.Hid;
+            neuron.neuronType = NeuronType.Hid;
             neuron.previousValue = 0f;
         }
         else {  // In/Out nodes:::
