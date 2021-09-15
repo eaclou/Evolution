@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Random = UnityEngine.Random;
+using Playcraft;
 
 [Serializable]
 public class CritterModuleEnvironmentSensorsGenome 
@@ -20,30 +21,9 @@ public class CritterModuleEnvironmentSensorsGenome
     }
 
     public void GenerateRandomInitialGenome() {
-        float randChance = Random.Range(0f, 1f);
-        if (randChance < 0.5f) {
-            useCardinals = false;
-        }
-        else {
-            useCardinals = true;
-        }
-
-        randChance = Random.Range(0f, 1f);
-        if (randChance < 0.5f) {
-            useDiagonals = false;
-        }
-        else {
-            useDiagonals = true;
-        }
-
-        randChance = Random.Range(0f, 1f);
-        if (randChance < 0.5f) {
-            useWaterStats = false;
-        }
-        else {
-            useWaterStats = true;
-        }
-
+        useCardinals = RandomStatics.CoinToss();
+        useDiagonals = RandomStatics.CoinToss();
+        useWaterStats = RandomStatics.CoinToss();
         maxRange = 20f;
     }
 
@@ -94,24 +74,12 @@ public class CritterModuleEnvironmentSensorsGenome
     }
 	
     public void SetToMutatedCopyOfParentGenome(CritterModuleEnvironmentSensorsGenome parentGenome, MutationSettings settings) {
-        this.useWaterStats = parentGenome.useWaterStats;
-        
-        float randChance = Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleInternalMutationChance) {
-            this.useWaterStats = !this.useWaterStats;
-        }
-
-        this.useCardinals = parentGenome.useCardinals;
-        randChance = Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleInternalMutationChance) {
-            this.useCardinals = !this.useCardinals;
-        }
-
-        this.useDiagonals = parentGenome.useDiagonals;
-        randChance = Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleInternalMutationChance) {
-            this.useDiagonals = !this.useDiagonals;
-        }
-        
+        useWaterStats = RequestMutation(settings, parentGenome.useWaterStats);
+        useCardinals = RequestMutation(settings, parentGenome.useCardinals);
+        useDiagonals = RequestMutation(settings, parentGenome.useDiagonals);
+    }
+    
+    bool RequestMutation(MutationSettings settings, bool defaultValue) {
+        return RandomStatics.RandomFlip(settings.bodyModuleInternalMutationChance, defaultValue);
     }
 }

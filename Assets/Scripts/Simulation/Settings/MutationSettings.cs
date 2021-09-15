@@ -1,8 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System;
 
-[System.Serializable]
+// * WPP: convert to Scriptable Object to enable multiple test configurations,
+// Make globally accessible via Lookup.cs so not necessary to pass around as parameter
+[Serializable]
 public class MutationSettings {
     public float brainInitialConnectionChance;
     public float brainWeightMutationChance;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Playcraft;
 
 [Serializable]
 public class CritterModuleThreatSensorsGenome 
@@ -17,40 +18,11 @@ public class CritterModuleThreatSensorsGenome
         this.inno = inno;
     }
 
-    // * WPP: Replace repeat temp variables & Playcraft.RandomChance static method
     public void GenerateRandomInitialGenome() {
-        float randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < 0.5f) {
-            usePos = false;
-        }
-        else {
-            usePos = true;
-        }
-
-        randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < 0.5f) {
-            useVel = false;
-        }
-        else {
-            useVel = true;
-        }
-
-        randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < 0.5f) {
-            useDir = false;
-        }
-        else {
-            useDir = true;
-        }
-
-        randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < 0.5f) {
-            useStats = false;
-        }
-        else {
-            useStats = true;
-        }
-        
+        usePos = RandomStatics.CoinToss();
+        useVel = RandomStatics.CoinToss();
+        useDir = RandomStatics.CoinToss();
+        useStats = RandomStatics.CoinToss();
     }
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
@@ -85,28 +57,13 @@ public class CritterModuleThreatSensorsGenome
     }
 	
     public void SetToMutatedCopyOfParentGenome(CritterModuleThreatSensorsGenome parentGenome, MutationSettings settings) {
-        this.usePos = parentGenome.usePos;
-        float randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleInternalMutationChance) {
-            this.usePos = !this.usePos;
-        }
-
-        this.useVel = parentGenome.useVel;
-        randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleInternalMutationChance) {
-            this.useVel = !this.useVel;
-        }
-
-        this.useDir = parentGenome.useDir;
-        randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleInternalMutationChance) {
-            this.useDir = !this.useDir;
-        }
-
-        this.useStats = parentGenome.useStats;
-        randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleInternalMutationChance) {
-            this.useStats = !this.useStats;
-        }
+        usePos = RequestMutation(settings, parentGenome.usePos);
+        useVel = RequestMutation(settings, parentGenome.useVel);
+        useDir = RequestMutation(settings, parentGenome.useDir);
+        useStats = RequestMutation(settings, parentGenome.useStats);
+    }
+    
+    bool RequestMutation(MutationSettings settings, bool defaultValue) {
+        return RandomStatics.RandomFlip(settings.bodyModuleInternalMutationChance, defaultValue);
     }
 }

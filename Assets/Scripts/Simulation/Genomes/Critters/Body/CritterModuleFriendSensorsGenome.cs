@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Random = UnityEngine.Random;
+using Playcraft;
 
 [Serializable]
 public class CritterModuleFriendSensorsGenome
@@ -20,29 +21,9 @@ public class CritterModuleFriendSensorsGenome
     }
 
     public void GenerateRandomInitialGenome() {
-        float randChance = Random.Range(0f, 1f);
-        if(randChance < 0.5f) {
-            usePos = false;
-        }
-        else {
-            usePos = true;
-        }
-
-        randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < 0.5f) {
-            useVel = false;
-        }
-        else {
-            useVel = true;
-        }
-
-        randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < 0.5f) {
-            useDir = false;
-        }
-        else {
-            useDir = true;
-        }
+        usePos = RandomStatics.CoinToss();
+        useVel = RandomStatics.CoinToss();
+        useDir = RandomStatics.CoinToss();
     }
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
@@ -67,22 +48,12 @@ public class CritterModuleFriendSensorsGenome
     }
 	
     public void SetToMutatedCopyOfParentGenome(CritterModuleFriendSensorsGenome parentGenome, MutationSettings settings) {
-        this.usePos = parentGenome.usePos;
-        float randChance = Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleInternalMutationChance) {
-            this.usePos = !this.usePos;
-        }
-
-        this.useVel = parentGenome.useVel;
-        randChance = Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleInternalMutationChance) {
-            this.useVel = !this.useVel;
-        }
-
-        this.useDir = parentGenome.useDir;
-        randChance = Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleInternalMutationChance) {
-            this.useDir = !this.useDir;
-        }
+        usePos = RequestMutation(settings, parentGenome.usePos);
+        useVel = RequestMutation(settings, parentGenome.useVel);
+        useDir = RequestMutation(settings, parentGenome.useDir);
+    }
+    
+    bool RequestMutation(MutationSettings settings, bool defaultValue) {
+        return RandomStatics.RandomFlip(settings.bodyModuleInternalMutationChance, defaultValue);
     }
 }

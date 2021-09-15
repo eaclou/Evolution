@@ -1,10 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class BodyGenome {
-    
+public class BodyGenome 
+{
     // BRAIN:
     public TestModuleGenome testModuleGenome;
 
@@ -25,14 +24,12 @@ public class BodyGenome {
     }
     
     public static float GetBodySizeScore01(BodyGenome genome) {
-
-        float normalizedSizeScore = Mathf.Clamp01(((genome.GetFullsizeBoundingBox().x + genome.GetFullsizeBoundingBox().z) / genome.GetFullsizeBoundingBox().y) / 25f); // *** Remember to redo this more robustly! 25f is hardcoded approximate!
-
+        // Refactor: 25f is hardcoded approximate!
+        float normalizedSizeScore = Mathf.Clamp01(((genome.GetFullsizeBoundingBox().x + genome.GetFullsizeBoundingBox().z) / genome.GetFullsizeBoundingBox().y) / 25f); 
         return normalizedSizeScore;
     }
     
     public void FirstTimeInitializeCritterModuleGenomes() {
-
         // ID and inno# needed???? ***** should only be required to keep track of evolving body functions
         appearanceGenome = new CritterModuleAppearanceGenome(0, 0);
         communicationGenome = new CritterModuleCommunicationGenome(0, 1);
@@ -43,11 +40,9 @@ public class BodyGenome {
         friendGenome = new CritterModuleFriendSensorsGenome(0, 6);
         movementGenome = new CritterModuleMovementGenome(0, 7);
         threatGenome = new CritterModuleThreatSensorsGenome(0, 8);
-         
     }
         
     public Vector3 GetFullsizeBoundingBox() {
-        
         float fullLength = coreGenome.creatureBaseLength * (coreGenome.mouthLength + coreGenome.headLength + coreGenome.bodyLength + coreGenome.tailLength);
         float approxAvgRadius = fullLength * coreGenome.creatureAspectRatio;
 
@@ -68,7 +63,6 @@ public class BodyGenome {
     }
     
     public void InitializeBrainGenome(List<NeuronGenome> neuronList) {
-
         // Go through each of the Body's Modules and add In/Out neurons based on module upgrades and settings:
         appearanceGenome.AppendModuleNeuronsToMasterList(ref neuronList);
         communicationGenome.AppendModuleNeuronsToMasterList(ref neuronList);
@@ -96,9 +90,5 @@ public class BodyGenome {
         friendGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.friendGenome, settings);        
         movementGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.movementGenome, settings);
         threatGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.threatGenome, settings);
-      
     }
-
-
-    
 }

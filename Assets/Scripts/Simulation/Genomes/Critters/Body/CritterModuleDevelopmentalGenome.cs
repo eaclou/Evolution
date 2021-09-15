@@ -1,8 +1,7 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
-[System.Serializable]
+[Serializable]
 public class CritterModuleDevelopmentalGenome {
 
     public int parentID;
@@ -17,7 +16,6 @@ public class CritterModuleDevelopmentalGenome {
     }
 
     public void GenerateRandomInitialGenome() {
-        // Do stuff:
         gestationTimeMult = 1f;
         quantityQualityRatio = 1f;
     }
