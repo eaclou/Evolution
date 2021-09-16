@@ -13,6 +13,36 @@ public class AudioManager : Singleton<AudioManager> {
 
     public AudioSource audioSourcePlayerSwimLoop;
     public AudioSource audioSourcePlayerSwimStart;
+    public AudioSource audioSourceCritterSpawn01;
+    public AudioSource audioSourceCritterDeath01;
+    public AudioSource audioSourceCritterBite01;
+    public AudioSource audioSourceCritterAttack01;
+    public AudioSource audioSourceCritterDefend01;
+    public AudioSource audioSourceCritterDash01;
+    public AudioSource audioSourceCritterDamage01;
+
+    public void PlayCritterDeath() {
+        audioSourceCritterDeath01.Play();
+    }
+    public void PlayCritterDamage() {
+        audioSourceCritterDamage01.Play();
+    }
+    public void PlayCritterDash() {
+        audioSourceCritterDash01.Play();
+    }
+    public void PlayCritterSpawn() {
+        audioSourceCritterSpawn01.Play();
+    }
+    public void PlayCritterBite() {
+        audioSourceCritterBite01.Play();
+    }
+    public void PlayCritterAttack() {
+        audioSourceCritterAttack01.Play();
+    }
+    public void PlayCritterDefend() {
+        audioSourceCritterDefend01.Play();
+    }
+    
 
     private float Range01toDecibels(float value) {
         return 20f * Mathf.Log10(value);

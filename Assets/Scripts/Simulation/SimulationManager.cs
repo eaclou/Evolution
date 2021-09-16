@@ -459,40 +459,8 @@ public class SimulationManager : Singleton<SimulationManager>
         agentRespawnCounter++;
         masterGenomePool.Tick(); // keep track of when species created so can't create multiple per frame?
 
-        //trophicLayersManager.Tick(this);
-
-        /*private bool recentlyAddedSpeciesOn = false;// = true;
-        private Vector2 recentlyAddedSpeciesWorldPos; // = new Vector2(spawnPos.x, spawnPos.y);
-        private int recentlyAddedSpeciesID; // = masterGenomePool.completeSpeciesPoolsList.Count - 1;
-        private int recentlyAddedSpeciesTimeCounter = 0;*/
-
-        /*
-        if(recentlyAddedSpeciesOn) {
-            recentlyAddedSpeciesTimeCounter++;
-
-            if(recentlyAddedSpeciesTimeCounter > 300) {
-                recentlyAddedSpeciesOn = false;
-                recentlyAddedSpeciesTimeCounter = 0;
-
-                Debug.Log("recentlyAddedSpeciesOn  TIMED OUT!!!");
-            }
-        }
-        */
-
-        // Go through each Trophic Layer:
-            // Measure resources used/produced
-            // send current data to GPU
-
-        // simulation ticks per layer
-        
-        // MEASURE GLOBAL RESOURCES:
-        //if(trophicLayersManager.GetAlgaeOnOff()) {
-            //vegetationManager.FindClosestAlgaeParticleToCritters(simStateData);
-            //vegetationManager.MeasureTotalAlgaeParticlesAmount();
-
         vegetationManager.MeasureTotalResourceGridAmount();
-        //}
-        
+              
         vegetationManager.MeasureTotalPlantParticlesAmount();
 
         if(trophicLayersManager.IsLayerOn(KnowledgeMapId.Microbes)) {
@@ -590,8 +558,8 @@ public class SimulationManager : Singleton<SimulationManager>
         }        
 
         // TEMP AUDIO EFFECTS!!!!        
-        float volume = agents[0].smoothedThrottle.magnitude * 0.24f;
-        audioManager.SetPlayerSwimLoopVolume(volume);      
+        //float volume = agents[0].smoothedThrottle.magnitude * 0.24f;
+        //audioManager.SetPlayerSwimLoopVolume(volume);      
 
         // OLD ALGAE GRID:
         /*
@@ -1105,6 +1073,8 @@ public class SimulationManager : Singleton<SimulationManager>
         agents[agentIndex].InitializeSpawnAgentImmaculate(agentIndex, sourceCandidate, new Vector3(spawnPos2D.x, spawnPos2D.y, 0f), _GlobalWaterLevel); 
         theRenderKing.UpdateCritterGenericStrokesData(agents[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);
         numAgentsBorn++;
+
+        //audioManager.PlayCritterSpawn(); 
     }
     
     public void ProcessDeadEggSack(int eggSackIndex) {

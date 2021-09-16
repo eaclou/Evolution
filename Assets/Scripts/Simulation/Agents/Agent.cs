@@ -286,6 +286,8 @@ public class Agent : MonoBehaviour {
         colliderBody.enabled = false;
         springJoint.enabled = false;
         springJoint.connectedBody = null;
+
+        AudioManager.instance.PlayCritterBite();
     }
 
     public void MapNeuronToModule(NID nid, Neuron neuron) {
@@ -403,6 +405,9 @@ public class Agent : MonoBehaviour {
         candidateRef.performanceData.timeStepDied = SimulationManager.instance.simAgeTimeSteps;
         biomassAtDeath = currentBiomass;
         mouthRef.Disable();
+
+        
+        //AudioManager.instance.PlayCritterDeath();
     }
     
     // *** WPP: trigger state changes & processes when conditions met

@@ -104,9 +104,6 @@ public class CreaturePanelUI : MonoBehaviour
         if (agent.coreModule == null) return;
 
         tooltipBrain.tooltipString = "BRAIN";//\nAction: " + agent.curActionState;
-        //textGeneration.text = "Gen: " + genome.generationCount;
-        //textBodySize.text = "Size: " + (100f * core.creatureBaseLength).ToString("F0") + ", Aspect 1:" + (1f / core.creatureAspectRatio).ToString("F0");
-        //textBrainSize.text = "Brain Size: " + brain.bodyNeuronList.Count + "--" + brain.linkList.Count;
         tooltipGenome.tooltipString = "GENOME";//\nGen#" + agent.candidateRef.candidateGenome.generationCount + ", DNA length: " + (agent.candidateRef.candidateGenome.brainGenome.linkList.Count + agent.candidateRef.candidateGenome.brainGenome.bodyNeuronList.Count);
         tooltipAppearance.tooltipString = "APPEARANCE";
     }
