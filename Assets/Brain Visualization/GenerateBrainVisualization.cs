@@ -1,6 +1,10 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+public struct SocketInitData {
+    public Vector3 pos;
+}
+
 public class GenerateBrainVisualization : MonoBehaviour 
 {
     // * WPP: Set externally or get via interface
@@ -99,11 +103,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         public Vector3 p2;
         public Vector3 p3;
     }
-    
-    public struct SocketInitData {
-        public Vector3 pos;
-    }
-    
+
     public struct ExtraBallsAxonsData {
         public int axonID;
         public float t;  // how far along the spline
@@ -258,16 +258,16 @@ public class GenerateBrainVisualization : MonoBehaviour
         computeShader.SetFloat("time", Time.fixedTime);
     }
     
-    public void Initialize(List<Neuron> neurons, List<Axon> axons)
+    public void Initialize(List<Neuron> neurons, List<Axon> axons, ref SocketInitData[] sockets, int inputCount, int outputCount)
     {
         this.neurons = neurons;
         this.axons = axons;
-        
-        InitializeComputeBuffers();
+
+        InitializeComputeBuffers(ref sockets, inputCount, outputCount);
         initialized = true;
     }
 
-    void InitializeComputeBuffers() 
+    void InitializeComputeBuffers(ref SocketInitData[] socketInitDataArray, int inputNeuronCount, int outputNeuronCount) 
     {
         argsCoreCBuffer = new ComputeBuffer(1, argsCore.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
         argsCablesCBuffer = new ComputeBuffer(1, argsCables.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
@@ -278,26 +278,12 @@ public class GenerateBrainVisualization : MonoBehaviour
         neuronSimDataCBuffer?.Release();
         neuronSimDataCBuffer = new ComputeBuffer(numNeurons, sizeof(float) * 3);
         
-        InitializeNeuralPositions();
+        //InitializeNeuralPositions();
         InitializeAxons();
-
-        // SOCKET LOCATIONS DATA:::::
+        
         socketInitDataCBuffer?.Release();
         socketInitDataCBuffer = new ComputeBuffer(numNeurons, sizeof(float) * 3);
-        // One-time initialization of positions::::
-        List<Neuron> inputNeurons = new List<Neuron>();
-        List<Neuron> outputNeurons = new List<Neuron>();
         
-        SocketInitData[] socketInitDataArray = new SocketInitData[numNeurons];
-        
-        for (int i = 0; i < numNeurons; i++) {
-            var list = neurons[i].neuronType == NeuronType.In ? inputNeurons : outputNeurons;
-            list.Add(neurons[i]);
-        }
-        
-        AssignNeuralPositions(ref socketInitDataArray, inputNeurons.Count, 0, -.9f);
-        AssignNeuralPositions(ref socketInitDataArray, outputNeurons.Count, inputNeurons.Count, 0.9f);
-
         socketInitDataCBuffer.SetData(socketInitDataArray);
         socketInitDataCBuffer.GetData(socketInitDataArray);
 
@@ -356,7 +342,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         int simNeuronAttractKernelID = SetComputeBrainBuffer("CSSimNeuronAttract");
 
         if (enableCables)
-            InitializeCables(inputNeurons.Count, outputNeurons.Count);
+            InitializeCables(inputNeuronCount, outputNeuronCount);
         
         int neuronTrianglesKernelID = SetShaderBuffer(shaderComputeBrain, "CSGenerateNeuronTriangles");
         shaderComputeBrain.SetBuffer(neuronTrianglesKernelID, "appendTrianglesCoreCBuffer", appendTrianglesCoreCBuffer);
@@ -411,17 +397,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         shaderComputeBrain.Dispatch(initCablesKernelID, numNeurons, 1, 1); // initialize axon positions and attributes
         shaderComputeBrain.Dispatch(generateCablesTrianglesKernelID, numNeurons, 1, 1); // create all geometry for Axons
     }
-    
-    // * WPP: Extract to generalize
-    void AssignNeuralPositions(ref SocketInitData[] data,int count, int offsetIndex, float zPosition)
-    {
-        for(int i = 0; i < count; i++) {
-            float x = 0.6f * (float)i / (float)count - 0.3f;
-            int tier = Random.Range(0, 5);
-            data[i + offsetIndex].pos = new Vector3(x, (float)(tier - 2) * 0.12f, zPosition);
-        }
-    }
-    
+
     CableInitData[] InitializeCableArray(int full, int inputs, int outputs)
     {
         var data = new CableInitData[full];
@@ -524,6 +500,8 @@ public class GenerateBrainVisualization : MonoBehaviour
         neuronFeedDataCBuffer.SetData(neuronValuesArray);
     }
     
+    // * WPP: What is this for?  Removing it has no apparent effect.
+    // Consider moving to TestBrainVisualization
     void InitializeNeuralPositions()
     {
         NeuronSimData[] neuronSimDataArray = new NeuronSimData[numNeurons];

@@ -2,39 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e5216a40-1993-4f7b-88ca-3d6aa0d75e16" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Assets/Brain Visualization/Test Brain Settings No Physics.asset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Brain Visualization/Test Brain Settings No Physics.asset.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Brain Visualization/TestBrainVisualization.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/Music/Pond Water_Birth_D3_9.13.21.mp3.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/Music/Pond-Water_Birth_D3_9.13.21.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Ambient/Ambient_Water_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Critters/Attack_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Critters/Bite_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Critters/Dash_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Critters/Death_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Critters/Defend_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Critters/Spawn_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Critters/TakeDamage_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_02.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_03.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_04.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_05.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_06.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_07.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_08.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_09.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_10.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_11.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_12.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/Brain Visualization.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/Brain Visualization.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/BrainSettings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/BrainSettings.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/Test Brain Settings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/Test Brain Settings.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/CritterModuleFoodSensorsGenome.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/CritterModuleFoodSensorsGenome.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/packages-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/packages-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/TestBrainVisualization.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/TestBrainVisualization.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -145,8 +115,8 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/CritterModuleDevelopmentalGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/BodyGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/CritterModuleFoodSensorsGenome.cs" />
-      <option value="$PROJECT_DIR$/Assets/Brain Visualization/TestBrainVisualization.cs" />
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/BrainSettings.cs" />
+      <option value="$PROJECT_DIR$/Assets/Brain Visualization/TestBrainVisualization.cs" />
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" />
     </changedPaths>
   </component>
@@ -279,7 +249,7 @@
       <workItem from="1631660417449" duration="5524000" />
       <workItem from="1631666684435" duration="2325000" />
       <workItem from="1631739852499" duration="2939000" />
-      <workItem from="1631829202587" duration="3208000" />
+      <workItem from="1631829202587" duration="5525000" />
     </task>
     <servers />
   </component>
