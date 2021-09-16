@@ -35,63 +35,7 @@ public class CritterModuleFoodSensorsGenome
         useNutrients = RandomStatics.CoinToss();
         useEggs = RandomStatics.CoinToss();
         useCorpse = RandomStatics.CoinToss();
-        // WPP: delegated repetitive logic to static function
-        /*
-        float randChance = Random.Range(0f, 1f);
-        if(randChance < 0.5f) {
-            usePos = false;
-        }
-        else {
-            usePos = true;
-        }
 
-        randChance = Random.Range(0f, 1f);
-        if(randChance < 0.5f) {
-            useVel = false;
-        }
-        else {
-            useVel = true;
-        }
-
-        randChance = Random.Range(0f, 1f);
-        if(randChance < 0.5f) {
-            useDir = false;
-        }
-        else {
-            useDir = true;
-        }
-
-        randChance = Random.Range(0f, 1f);
-        if(randChance < 0.5f) {
-            useStats = false;
-        }
-        else {
-            useStats = true;
-        }
-
-        randChance = Random.Range(0f, 1f);
-        if(randChance < 0.5f) {
-            useNutrients = false;
-        }
-        else {
-            useNutrients = true;
-        }
-        randChance = Random.Range(0f, 1f);
-        if(randChance < 0.5f) {
-            useEggs = false;
-        }
-        else {
-            useEggs = true;
-        }
-        randChance = Random.Range(0f, 1f);
-        if(randChance < 0.5f) {
-            useCorpse = false;
-        }
-        else {
-            useCorpse = true;
-        }
-        */
-        
         preferredSize = 0.5f;
         sensorRangeMult = 1f;
     }
@@ -179,50 +123,6 @@ public class CritterModuleFoodSensorsGenome
         useStats = RequestMutation(settings, parentGenome.useStats);
         useEggs = RequestMutation(settings, parentGenome.useEggs);
         useCorpse = RequestMutation(settings, parentGenome.useCorpse);
-        // WPP: delegated repetitive logic to static function (with local interface)
-        /*
-        this.useNutrients = parentGenome.useNutrients;
-        float randChance = Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleInternalMutationChance) {
-            this.useNutrients = !this.useNutrients;
-       }
-
-        this.usePos = parentGenome.usePos;
-        randChance = Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleInternalMutationChance) {
-            this.usePos = !this.usePos;
-        }
-
-        this.useVel = parentGenome.useVel;
-        randChance = Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleInternalMutationChance) {
-            this.useVel = !this.useVel;
-        }
-
-        this.useDir = parentGenome.useDir;
-        randChance = Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleInternalMutationChance) {
-            this.useDir = !this.useDir;
-        }
-
-        this.useStats = parentGenome.useStats;
-        randChance = UnityEngine.Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleInternalMutationChance) {
-            this.useStats = !this.useStats;
-        }
-
-        this.useEggs = parentGenome.useEggs;
-        randChance = Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleInternalMutationChance) {
-            this.useEggs = !this.useEggs;
-        }
-
-        this.useCorpse = parentGenome.useCorpse;
-        randChance = Random.Range(0f, 1f);
-        if(randChance < settings.bodyModuleInternalMutationChance) {
-            this.useCorpse = !this.useCorpse;
-        }
-        */
 
         //preferenceParticles = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.preferenceParticles, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);
         //preferenceEggs = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.preferenceEggs, settings.defaultBodyMutationChance, settings.defaultBodyMutationStepSize, 0f, 1f);

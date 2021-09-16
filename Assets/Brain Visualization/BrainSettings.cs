@@ -2,7 +2,7 @@
 
 // Contains static data for brain visualization settings
 // Fields that change per individual agent at runtime should be moved to GenerateBrainVisualization.cs
-// * Consider breaking field blocks into sub-categories (based on what varies between instances)
+// Quality-setting based groups of fields will be in separate ScriptableObjects
 [CreateAssetMenu(menuName = "Pond Water/Brain Visualization/Brain Data", fileName = "Brain Data")]
 public class BrainSettings : ScriptableObject
 {
@@ -16,7 +16,7 @@ public class BrainSettings : ScriptableObject
     public Material extraBallsMaterial;
 
     [Header("General Settings")]
-    public int numNeurons = 33; 
+    public int numNeurons = 33; // Set by Agent 
     //public int numAxons = 270; 
     public int maxTrisPerNeuron = 1024;
     public int maxTrisPerSubNeuron = 8 * 8 * 2 * 2;
@@ -62,4 +62,8 @@ public class BrainSettings : ScriptableObject
     public float axonAttachSpreadForce = 0.025f;
     public float axonRepelForce = 0.2f;
     public float cableAttractForce = 0.01f;
+    
+    [Header("Other Options")]
+    public bool disablePhysics;
+    public bool disableCables;
 }
