@@ -458,6 +458,7 @@ public class SimulationManager : Singleton<SimulationManager>
         eggSackRespawnCounter++;
         agentRespawnCounter++;
         masterGenomePool.Tick(); // keep track of when species created so can't create multiple per frame?
+        audioManager.Tick();
 
         vegetationManager.MeasureTotalResourceGridAmount();
               
@@ -1064,6 +1065,7 @@ public class SimulationManager : Singleton<SimulationManager>
         //currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounter;
         agents[agentIndex].InitializeSpawnAgentFromEggSack(agentIndex, sourceCandidate, parentEggSack, _GlobalWaterLevel); // Spawn that genome in dead Agent's body and revive it!
         theRenderKing.UpdateCritterGenericStrokesData(agents[agentIndex]); // agentIndex, sourceCandidate.candidateGenome);
+        audioManager.PlayCritterSpawn(new Vector2(parentEggSack.gameObject.transform.position.x, parentEggSack.gameObject.transform.position.y)); 
     }
     
     private void SpawnAgentImmaculate(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex, Vector2 spawnPos2D) {
@@ -1074,7 +1076,7 @@ public class SimulationManager : Singleton<SimulationManager>
         theRenderKing.UpdateCritterGenericStrokesData(agents[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);
         numAgentsBorn++;
 
-        //audioManager.PlayCritterSpawn(); 
+        audioManager.PlayCritterSpawn(spawnPos2D); 
     }
     
     public void ProcessDeadEggSack(int eggSackIndex) {
