@@ -7,10 +7,11 @@ public struct SocketInitData {
 
 public class GenerateBrainVisualization : MonoBehaviour 
 {
-    // * WPP: Set externally or get via interface
-    public List<Neuron> neurons;
-    public List<Axon> axons;
+    List<Neuron> neurons;
+    List<Axon> axons;
     
+    int numNeurons => neurons.Count;
+
     #region Internal data
 
     private ComputeBuffer quadVerticesCBuffer;  // holds information for a 2-triangle Quad mesh (6 vertices)
@@ -164,10 +165,7 @@ public class GenerateBrainVisualization : MonoBehaviour
     Material displayMaterialCables => settings.displayMaterialCables;
     Material floatingGlowyBitsMaterial => settings.floatingGlowyBitsMaterial;
     Material extraBallsMaterial => settings.extraBallsMaterial;
-
-    // * Generalize this so it can be set by the selected agent
-    int numNeurons => settings.numNeurons; 
-
+    
     int maxTrisPerNeuron => settings.maxTrisPerNeuron;
     int maxTrisPerSubNeuron => settings.maxTrisPerSubNeuron;
     int maxTrisPerAxon => settings.maxTrisPerAxon;
@@ -279,7 +277,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         neuronSimDataCBuffer?.Release();
         neuronSimDataCBuffer = new ComputeBuffer(numNeurons, sizeof(float) * 3);
         
-        //InitializeNeuralPositions();
+        InitializeNeuralPositions();
         InitializeAxons();
         
         socketInitDataCBuffer?.Release();
@@ -501,8 +499,6 @@ public class GenerateBrainVisualization : MonoBehaviour
         neuronFeedDataCBuffer.SetData(neuronValuesArray);
     }
     
-    // * WPP: What is this for?  Removing it has no apparent effect.
-    // Consider moving to TestBrainVisualization
     void InitializeNeuralPositions()
     {
         NeuronSimData[] neuronSimDataArray = new NeuronSimData[numNeurons];
@@ -521,7 +517,7 @@ public class GenerateBrainVisualization : MonoBehaviour
     void InitializeAxons()
     {
         axonInitDataCBuffer?.Release();
-        Debug.Log($"Initializing {axons.Count} axons");
+        //Debug.Log($"Initializing {axons.Count} axons");
         axonInitDataCBuffer = new ComputeBuffer(axons.Count, sizeof(float) * 1 + sizeof(int) * 2);
         
         AxonInitData[] axonInitDataArray = new AxonInitData[axons.Count]; 

@@ -4,14 +4,13 @@ using UnityEngine;
 // Assumes full connectivity
 public class TestBrainVisualization : MonoBehaviour
 {
+    [SerializeField] int neuronCount = 33;
     [SerializeField] int minInputs = 10;
     [SerializeField] int maxInputs = 20;
-    [SerializeField] BrainSettings settings;
     [SerializeField] GenerateBrainVisualization brainVisualization;
     [SerializeField] float inputZ = -.9f;
     [SerializeField] float outputZ = .9f;
     
-    int neuronCount => settings.numNeurons;
     const int MAX_AXON_COUNT = 270;
     
     List<Neuron> inputNeurons = new List<Neuron>();

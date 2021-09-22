@@ -16,8 +16,6 @@ public class BrainSettings : ScriptableObject
     public Material extraBallsMaterial;
 
     [Header("General Settings")]
-    public int numNeurons = 33; // Set by Agent 
-    //public int numAxons = 270; 
     public int maxTrisPerNeuron = 1024;
     public int maxTrisPerSubNeuron = 8 * 8 * 2 * 2;
     public int maxTrisPerAxon = 2048;

@@ -2,59 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e5216a40-1993-4f7b-88ca-3d6aa0d75e16" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/Music/Pond Water_Birth_D3_9.13.21.mp3.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/Music/Pond-Water_AmbientTheme_A1_9.16.21.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/Music/Pond-Water_Birth_D3_9.13.21.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/Music/Pond-Water_Birth_D4_9.16.21.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/Music/Pond-Water_StormyTheme_A1_9.16.21.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/Music/Pond-Water_Wildlife_A1_9.16.21.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Ambient/Ambient_Water_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Critters/Attack_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Critters/Bite_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Critters/Dash_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Critters/Death_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Critters/Defend_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Critters/Spawn_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Critters/TakeDamage_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_02.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_03.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_04.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_05.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_06.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_07.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_08.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_09.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_10.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_11.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_12.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/Brain Visualization.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/Brain Visualization.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/BrainSettings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/BrainSettings.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/Test Brain Settings No Physics.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/Test Brain Settings No Physics.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/TestBrainVisualization.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/TestBrainVisualization.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/VisualizeSelectedBrain.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/VisualizeSelectedBrain.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Rendering/BaronVonWater.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Rendering/BaronVonWater.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/MasterGenomePool.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/MasterGenomePool.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/BehaviorPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/BehaviorPanel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/CreatureBrainActivityUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/CreatureBrainActivityUI.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePaperDollUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePaperDollUI.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePortraitPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePortraitPanel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/DigestionPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/DigestionPanel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/FoodEatenPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/FoodEatenPanel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/GenomeOverviewPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/GenomeOverviewPanel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/HistoryPanelUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/HistoryPanelUI.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/SelectionManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/SelectionManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/SensorsPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/SensorsPanel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/SpecializationPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/SpecializationPanel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesGraphPanelUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesGraphPanelUI.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesOverviewUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesOverviewUI.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/TheCursorCzar.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/TheCursorCzar.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButtonPrefabScript.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButtonPrefabScript.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/WorldTreePanelUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/WorldTreePanelUI.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/packages-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/packages-lock.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -144,8 +97,6 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/CritterModuleDevelopmentalGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/BodyGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/CritterModuleFoodSensorsGenome.cs" />
-      <option value="$PROJECT_DIR$/Assets/Brain Visualization/BrainSettings.cs" />
-      <option value="$PROJECT_DIR$/Assets/Brain Visualization/TestBrainVisualization.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/BaronVonWater.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/MasterGenomePool.cs" />
@@ -164,10 +115,12 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/WorldTreePanelUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesGraphPanelUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/SelectionManager.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/HistoryPanelUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/TheCursorCzar.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Brain Visualization/BrainSettings.cs" />
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" />
+      <option value="$PROJECT_DIR$/Assets/Brain Visualization/TestBrainVisualization.cs" />
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/VisualizeSelectedBrain.cs" />
     </changedPaths>
   </component>
@@ -301,7 +254,7 @@
       <workItem from="1631666684435" duration="2325000" />
       <workItem from="1631739852499" duration="2939000" />
       <workItem from="1631829202587" duration="5616000" />
-      <workItem from="1632296713120" duration="3652000" />
+      <workItem from="1632296713120" duration="5366000" />
     </task>
     <servers />
   </component>
