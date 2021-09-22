@@ -8,7 +8,7 @@ public class BaronVonWater : RenderBaron
     TheRenderKing renderKing => TheRenderKing.instance;
     BaronVonTerrain terrain => renderKing.baronVonTerrain;
     CommandBuffer cmdBufferMain => renderKing.cmdBufferMain;
-    VegetationManager vegetation => renderKing.vegetationManager;
+    VegetationManager vegetation => simulation.vegetationManager;
 
     //public ComputeShader computeShaderBrushStrokes;
     public ComputeShader computeShaderWaterRender;

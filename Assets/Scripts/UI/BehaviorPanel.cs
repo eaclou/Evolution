@@ -2,7 +2,8 @@
 
 public class BehaviorPanel : MonoBehaviour
 {
-    PerformanceData data => UIManager.instance.selectionManager.focusedCandidate.performanceData;
+    SelectionManager selectionManager => SelectionManager.instance;
+    PerformanceData data => selectionManager.focusedCandidate.performanceData;
     
     [SerializeField] StatUI attack;
     [SerializeField] StatUI defend;

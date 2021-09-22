@@ -4,6 +4,12 @@ using UnityEngine.UI;
 
 public class WorldTreePanelUI : MonoBehaviour
 {
+    TheCursorCzar theCursorCzar => TheCursorCzar.instance;
+    SimulationManager simulationManager => SimulationManager.instance;
+    MasterGenomePool masterGenomePool => simulationManager.masterGenomePool;
+    UIManager uiManagerRef => UIManager.instance;
+    SelectionManager selectionManager => SelectionManager.instance;
+
     [SerializeField] GameObject panelSpeciesTree;
     public bool isShowingExtinct = false;
     public Image imageSelectedSpeciesBG;    
@@ -15,11 +21,6 @@ public class WorldTreePanelUI : MonoBehaviour
 
     private List<SpeciesIconUI> speciesIconsList;  // keeping track of spawned buttons
     private List<CreatureIconUI> creatureIconsList;
-
-    TheCursorCzar theCursorCzar => TheCursorCzar.instance;
-    SimulationManager simulationManager => SimulationManager.instance;
-    MasterGenomePool masterGenomePool => simulationManager.masterGenomePool;
-    UIManager uiManagerRef => UIManager.instance;
 
     //private int focusLevel = 0;  // ***TEMP!!!   0==species, 1==creatures, 2==selectedCreature
 
@@ -60,7 +61,7 @@ public class WorldTreePanelUI : MonoBehaviour
         //UpdateSpeciesIconsTargetCoords();
         //textSelectedSpeciesTitle.text = "Selected Species: #" + uiManagerRef.selectedSpeciesID;
 
-        Vector3 hue = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManagerRef.selectionManager.selectedSpeciesID].foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+        Vector3 hue = simulationManager.masterGenomePool.completeSpeciesPoolsList[selectionManager.selectedSpeciesID].foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
         imageSelectedSpeciesBG.color = new Color(hue.x, hue.y, hue.z);
     }
     

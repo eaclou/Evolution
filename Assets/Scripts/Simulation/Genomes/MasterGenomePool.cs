@@ -2,8 +2,11 @@
 using UnityEngine;
 
 [System.Serializable]
-public class MasterGenomePool {
+public class MasterGenomePool 
+{
     //public TreeOfLifeManager treeOfLifeManager;
+    UIManager uiManager => UIManager.instance;
+    SelectionManager selectionManager => SelectionManager.instance;
 
     public static int nextCandidateIndex = 0;
 
@@ -25,9 +28,8 @@ public class MasterGenomePool {
 
     public List<int> debugRecentlyDeletedCandidateIDsList;
 
-    UIManager uiManager => UIManager.instance;
     PanelNotificationsUI panelPendingClickPrompt => uiManager.panelNotificationsUI;
-    public SpeciesGenomePool selectedPool => completeSpeciesPoolsList[uiManager.selectionManager.selectedSpeciesID];
+    public SpeciesGenomePool selectedPool => completeSpeciesPoolsList[selectionManager.selectedSpeciesID];
     public int speciesPoolCount => completeSpeciesPoolsList.Count;   
    
     public MasterGenomePool() { }

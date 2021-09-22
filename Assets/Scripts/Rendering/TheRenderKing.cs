@@ -24,7 +24,9 @@ public class TheRenderKing : Singleton<TheRenderKing>
     UIManager uiManager => UIManager.instance;
     EnvironmentFluidManager fluidManager => EnvironmentFluidManager.instance;
     ZooplanktonManager zooplanktonManager => simManager.zooplanktonManager;
-    public VegetationManager vegetationManager => simManager.vegetationManager;
+    VegetationManager vegetationManager => simManager.vegetationManager;
+    SelectionManager selectionManager => SelectionManager.instance;
+    CandidateAgentData focusedCandidate => selectionManager.focusedCandidate;
     
     WorldSpiritHubUI worldSpiritHubUI => uiManager.worldSpiritHubUI;
     TrophicSlot selectedWorldSpiritSlot => worldSpiritHubUI.selectedWorldSpiritSlot;
@@ -1178,11 +1180,11 @@ public class TheRenderKing : Singleton<TheRenderKing>
 
             Vector4 hue = Vector4.one * 0.695f;
             if (agents[i].candidateRef != null) {
-                if (agents[i].candidateRef.speciesID == uiManager.selectionManager.focusedCandidate.speciesID) {
+                if (agents[i].candidateRef.speciesID == focusedCandidate.speciesID) {
                     hue = new Vector4(1f, 1f, 0f, 1f);
                     colorInjectionStrokeDataArray[baseIndex + i].scale = Vector2.one * 5f;
                 }
-                if (agents[i].candidateRef.candidateID == uiManager.selectionManager.focusedCandidate.candidateID) {
+                if (agents[i].candidateRef.candidateID == focusedCandidate.candidateID) {
                     hue = new Vector4(1f, 1f, 1f, 1f);
                     colorInjectionStrokeDataArray[baseIndex + i].scale = Vector2.one * 10f;
                 }
@@ -2056,11 +2058,11 @@ public class TheRenderKing : Singleton<TheRenderKing>
         CritterSimData[] toolbarPortraitCritterSimDataArray = new CritterSimData[6];
 
         bool isDead = true;
-        if(simManager.GetAgent(uiManager.selectionManager.focusedCandidate)) {
-            isDead = simManager.GetAgent(uiManager.selectionManager.focusedCandidate).curLifeStage == AgentLifeStage.Dead;
+        if(simManager.GetAgent(focusedCandidate)) {
+            isDead = simManager.GetAgent(focusedCandidate).curLifeStage == AgentLifeStage.Dead;
         }
         
-        bool evaluationsComplete = uiManager.selectionManager.focusedCandidate.allEvaluationsComplete;
+        bool evaluationsComplete = focusedCandidate.allEvaluationsComplete;
         CritterSimData simData = new CritterSimData(isDead, evaluationsComplete);
 
         toolbarPortraitCritterSimDataArray[0] = simData;

@@ -9,7 +9,8 @@ public class SpeciesOverviewUI : MonoBehaviour {
     Lookup lookup => Lookup.instance;
     GameObject genomeIcon => lookup.genomeIcon;
     CameraManager cameraManager => CameraManager.instance;
-    
+    SelectionManager selectionManager => SelectionManager.instance;
+
     Color CLEAR => Color.black;
 
     private int selectedHallOfFameIndex = 0;
@@ -49,7 +50,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
         
     public void RebuildGenomeButtons() 
     {
-        SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[uiManager.selectionManager.focusedCandidate.speciesID]; 
+        SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[selectionManager.focusedCandidate.speciesID]; 
         
         SetSpeciesIconColors(pool.appearanceGenome);
 
@@ -134,7 +135,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
 
     public void ChangeSelectedGenome(SelectionGroup group, int index) {
         SpeciesGenomePool pool = simulationManager.GetSelectedGenomePool();
-        uiManager.selectionManager.SetFocusedCandidateGenome(pool, group, index);
+        selectionManager.SetFocusedCandidateGenome(pool, group, index);
         selectedButtonData = GetSelectionGroupData(group);
 
         uiManager.historyPanelUI.buttonSelCreatureEventsLink.gameObject.transform.localPosition = new Vector3(360f, 180f, 0f);

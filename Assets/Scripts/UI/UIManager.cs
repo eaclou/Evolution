@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Playcraft;
 using UnityEngine;
 
@@ -8,14 +9,16 @@ public enum ToolType {
     Stir
 }
 
-public class UIManager : Singleton<UIManager> {
-
+public class UIManager : Singleton<UIManager> 
+{
     #region attributes
     SimulationManager simulationManager => SimulationManager.instance;
     MasterGenomePool genomePool => simulationManager.masterGenomePool;
     TrophicLayersManager trophicLayersManager => simulationManager.trophicLayersManager;
     TheRenderKing theRenderKing => TheRenderKing.instance;
     TheCursorCzar theCursorCzar => TheCursorCzar.instance;
+    SelectionManager selectionManager => SelectionManager.instance;
+
 
     public SpeciesOverviewUI speciesOverviewUI;  
     public SpeciesGraphPanelUI speciesGraphPanelUI; 
@@ -34,7 +37,6 @@ public class UIManager : Singleton<UIManager> {
     public CreaturePaperDollUI creaturePaperDollUI;
     public CreatureLifeEventsLogUI creatureLifeEventsLogUI;
     public MinimapPanel minimapUI;
-    public SelectionManager selectionManager;
         
     public GameOptionsManager gameOptionsManager;    
     
@@ -80,6 +82,7 @@ public class UIManager : Singleton<UIManager> {
     List<SpeciesGenomePool> speciesPools => genomePool.completeSpeciesPoolsList;
     public bool isRebuildTimeStep => simulationManager.simAgeTimeSteps % timeStepsToRebuildGenomeButtons == 1;
 
+    public Action<Agent> OnAgentSelected;
     
     #endregion
     /*
@@ -101,9 +104,15 @@ public class UIManager : Singleton<UIManager> {
         timerAnnouncementTextCounter = 0;        
     }
     
-    public void RefreshFocusedAgent(Agent agent) { historyPanelUI.RefreshFocusedAgent(AgentIsFocus(agent)); }
+    // WPP: replaced with C# event
+    /*
+    public void RefreshFocusedAgent(Agent agent) 
+    { 
+        historyPanelUI.RefreshFocusedAgent(AgentIsFocus(agent)); 
+    }
     
     public bool AgentIsFocus(Agent agent) { return selectionManager.IsFocus(agent.candidateRef); }
+    */
 
     #region Initialization Functions:::
 

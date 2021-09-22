@@ -165,6 +165,7 @@ public class GenerateBrainVisualization : MonoBehaviour
     Material floatingGlowyBitsMaterial => settings.floatingGlowyBitsMaterial;
     Material extraBallsMaterial => settings.extraBallsMaterial;
 
+    // * Generalize this so it can be set by the selected agent
     int numNeurons => settings.numNeurons; 
 
     int maxTrisPerNeuron => settings.maxTrisPerNeuron;
@@ -216,7 +217,7 @@ public class GenerateBrainVisualization : MonoBehaviour
     
     void SetCoreBrainDataSharedParameters(ComputeShader computeShader) 
     {
-        // Core Sizes:
+        // Core Sizes
         computeShader.SetFloat("minNeuronRadius", minNeuronRadius);
         computeShader.SetFloat("maxNeuronRadius", maxNeuronRadius);
         computeShader.SetFloat("minAxonRadius", minAxonRadius);
@@ -230,7 +231,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         computeShader.SetFloat("axonMaxPulseMultiplier", axonMaxPulseMultiplier);
         computeShader.SetFloat("cableRadius", cableRadius);
 
-        // Noise Parameters:
+        // Noise Parameters
         computeShader.SetFloat("neuronExtrudeNoiseFreq", neuronExtrudeNoiseFreq);
         computeShader.SetFloat("neuronExtrudeNoiseAmp", neuronExtrudeNoiseAmp);
         computeShader.SetFloat("neuronExtrudeNoiseScrollSpeed", neuronExtrudeNoiseScrollSpeed);
@@ -245,7 +246,7 @@ public class GenerateBrainVisualization : MonoBehaviour
             
         if (enablePhysics)
         {
-            // Forces:
+            // Forces
             computeShader.SetFloat("neuronAttractForce", neuronAttractForce);
             computeShader.SetFloat("neuronRepelForce", neuronRepelForce);
             computeShader.SetFloat("axonPerpendicularityForce", axonPerpendicularityForce);
@@ -477,7 +478,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         neuronInitDataCBuffer?.Release();
         neuronInitDataCBuffer = new ComputeBuffer(numNeurons, sizeof(float) * 3);
         
-        NeuronInitData[] neuronInitDataArray = new NeuronInitData[numNeurons]; 
+        NeuronInitData[] neuronInitDataArray = new NeuronInitData[neurons.Count]; //[numNeurons]; 
         
         for (int x = 0; x < neuronInitDataArray.Length; x++) {
             NeuronInitData neuronData = new NeuronInitData((float)neurons[x].neuronType / 2.0f);

@@ -6,6 +6,8 @@ public class CreaturePaperDollUI : MonoBehaviour
     SimulationManager simulationManager => SimulationManager.instance;
     CameraManager cameraManager => CameraManager.instance;
     Lookup lookup => Lookup.instance;
+    SelectionManager selectionManager => SelectionManager.instance;
+
     
     Agent agent => simulationManager.agents[cameraManager.targetAgentIndex];
     CritterModuleCore coreModule => agent.coreModule;
@@ -36,7 +38,7 @@ public class CreaturePaperDollUI : MonoBehaviour
     
     public void Tick() {
         if (coreModule == null) return;
-        CandidateAgentData candidate = UIManager.instance.selectionManager.focusedCandidate;
+        CandidateAgentData candidate = selectionManager.focusedCandidate;
         if(agent.candidateRef.candidateID == candidate.candidateID) {
             widgetAgentStatus.UpdateBars(agent); 
         

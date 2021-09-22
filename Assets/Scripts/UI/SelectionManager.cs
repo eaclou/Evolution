@@ -1,15 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using Playcraft;
 
-public class SelectionManager : MonoBehaviour
+public class SelectionManager : Singleton<SelectionManager>
 {
     UIManager uiManager => UIManager.instance;
-    SimulationManager simulationManager => SimulationManager.instance;
-    MasterGenomePool genomePool => simulationManager.masterGenomePool;
-    //TrophicLayersManager trophicLayersManager => simulationManager.trophicLayersManager;
     TheRenderKing theRenderKing => TheRenderKing.instance;
-    //TheCursorCzar theCursorCzar => TheCursorCzar.instance;
 
     public CandidateAgentData focusedCandidate; // *** TRANSITION TO THIS?
     public int selectedSpeciesID;
@@ -36,13 +30,14 @@ public class SelectionManager : MonoBehaviour
     {
         //pool = genomePool.completeSpeciesPoolsList[selectedSpeciesID];
         
-        if(focusedCandidate != null && focusedCandidate.candidateGenome != null) {
-            uiManager.genomeViewerUI.UpdateUI();
+        if (focusedCandidate?.candidateGenome == null) 
+            return;
+        
+        uiManager.genomeViewerUI.UpdateUI();
 
-            if(uiManager.isRebuildTimeStep) {
-                uiManager.speciesOverviewUI.RebuildGenomeButtons();  
-            }
-        } 
+        if(uiManager.isRebuildTimeStep) {
+            uiManager.speciesOverviewUI.RebuildGenomeButtons();  
+        }
     }
     
     public bool IsFocus(CandidateAgentData candidate) { return candidate.candidateID == focusedCandidate.candidateID; }
@@ -50,9 +45,5 @@ public class SelectionManager : MonoBehaviour
     public void SetSelectedSpeciesUI(int id) {
         selectedSpeciesID = id;
         uiManager.speciesOverviewUI.RebuildGenomeButtons();
-    }
-
-    public void Tick() {
-
     }
 }

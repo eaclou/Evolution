@@ -5,6 +5,7 @@ public class CreatureBrainActivityUI : MonoBehaviour
     SimulationManager simulationManager => SimulationManager.instance;
     CameraManager cameraManager => CameraManager.instance;
     EnvironmentFluidManager fluidManager => EnvironmentFluidManager.instance;
+    SelectionManager selectionManager => SelectionManager.instance;
 
     public AgentBehaviorOneHot agentBehaviorOneHot;
 
@@ -24,16 +25,14 @@ public class CreatureBrainActivityUI : MonoBehaviour
         if (agent.coreModule == null || agent.communicationModule == null)
             return;
 
-        if(agent.candidateRef.candidateID == UIManager.instance.selectionManager.focusedCandidate.candidateID) {
+        if(agent.candidateRef.candidateID == selectionManager.focusedCandidate.candidateID) {
             UpdateBrainLive(agent);
         }
         else {
-            UpdateBrainFossil(UIManager.instance.selectionManager.focusedCandidate);
+            UpdateBrainFossil(selectionManager.focusedCandidate);
         }
-
-        
-    
     }
+    
     private void UpdateBrainLive(Agent agent) {
         int curActivityID = agent.GetActivityID();
 
@@ -53,6 +52,7 @@ public class CreatureBrainActivityUI : MonoBehaviour
         
         agentBehaviorOneHot.UpdateExtras(agent);
     }
+    
     private void UpdateBrainFossil(CandidateAgentData candidate) {
         newInspectAgentCurActivityMat.SetInt("_CurActivityID", 0);
         newInspectAgentThrottleMat.SetFloat("_ThrottleX", 0f);

@@ -8,7 +8,8 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
     CameraManager cameraManager => CameraManager.instance;
     UIManager uiManagerRef => UIManager.instance;
     TheRenderKing theRenderKing => TheRenderKing.instance;
-    
+    SelectionManager selectionManager => SelectionManager.instance;
+
     Camera cam => cameraManager.cameraRef;
     
     float mapSize => SimulationManager._MapSize;
@@ -104,8 +105,8 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
             if (!clicked)
                 return; 
             
-            uiManagerRef.RefreshFocusedAgent(agent);
-            uiManagerRef.selectionManager.SetFocusedCandidateGenome(agent.candidateRef);
+            uiManagerRef.OnAgentSelected?.Invoke(agent);
+            selectionManager.SetFocusedCandidateGenome(agent.candidateRef);
         }
         else if (!clicked) 
         {

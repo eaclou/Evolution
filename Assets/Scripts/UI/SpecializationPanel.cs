@@ -2,7 +2,8 @@
 
 public class SpecializationPanel : MonoBehaviour
 {
-    CritterModuleCoreGenome coreGenome => UIManager.instance.selectionManager.focusedCandidate.candidateGenome.bodyGenome.coreGenome;
+    SelectionManager selectionManager => SelectionManager.instance;
+    CritterModuleCoreGenome coreGenome => selectionManager.focusedCandidate.candidateGenome.bodyGenome.coreGenome;
     
     [SerializeField] StatUI attack;
     [SerializeField] StatUI defense;

@@ -3,7 +3,8 @@ using UnityEngine.UI;
 
 public class CreaturePortraitPanel : MonoBehaviour
 {
-    CandidateAgentData candidate => UIManager.instance.selectionManager.focusedCandidate;
+    SelectionManager selectionManager => SelectionManager.instance;
+    CandidateAgentData candidate => selectionManager.focusedCandidate;
     
     [SerializeField] Text candidateName;
     [SerializeField] Image background;

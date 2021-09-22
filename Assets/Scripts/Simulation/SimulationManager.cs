@@ -18,7 +18,8 @@ public class SimulationManager : Singleton<SimulationManager>
     TheCursorCzar theCursorCzar => TheCursorCzar.instance;
     SettingsManager settingsManager => SettingsManager.instance;
     EnvironmentFluidManager fluidManager => EnvironmentFluidManager.instance;
-    
+    SelectionManager selectionManager => SelectionManager.instance;
+
     public QualitySettingData qualitySettings;
     public LoadingPanelUI loadingPanel;
     public SimulationStateData simStateData;
@@ -95,7 +96,7 @@ public class SimulationManager : Singleton<SimulationManager>
         return numStepsInSimYear;
     }
     public SpeciesGenomePool GetSelectedGenomePool() {
-        return GetGenomePoolBySpeciesID(uiManager.selectionManager.selectedSpeciesID);
+        return GetGenomePoolBySpeciesID(selectionManager.selectedSpeciesID);
     }
     
     public SpeciesGenomePool GetGenomePoolBySpeciesID(int id) {
@@ -446,7 +447,7 @@ public class SimulationManager : Singleton<SimulationManager>
         return -1;
     }
     
-    public bool IsAgentUIFocus(int index) { return GetAgentID(index) == uiManager.selectionManager.focusedCandidate.candidateID; }
+    public bool IsAgentUIFocus(int index) { return GetAgentID(index) == selectionManager.focusedCandidate.candidateID; }
     public int GetAgentID(int agentIndex) { return agents[agentIndex].candidateRef.candidateID; }
 
     // * WPP: break into sections -> comments (minimum) or functions (better)
@@ -494,10 +495,10 @@ public class SimulationManager : Singleton<SimulationManager>
         // Try to make sure AlgaeReservoir and AlgaeParticles share same mechanics!!! *********************************************
         simResourceManager.Tick(trophicLayersManager, vegetationManager);  // Resource Flows Here
         
-        if(targetAgent && uiManager.selectionManager.focusedCandidate != null &&
+        if(targetAgent && selectionManager.focusedCandidate != null &&
            targetAgent.candidateRef != null &&
            targetAgent.isAwaitingRespawn && 
-           targetAgent.candidateRef.candidateID == uiManager.selectionManager.focusedCandidate.candidateID) 
+           targetAgent.candidateRef.candidateID == selectionManager.focusedCandidate.candidateID) 
         {
            cameraManager.isFollowingAgent = false;        
         }
