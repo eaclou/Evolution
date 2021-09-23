@@ -78,7 +78,7 @@ public class SimEventLookup : ScriptableObject
         public string negativeName;
         public string negativeDescription;
         
-        public string GetName(bool positive) { return positive ? positiveName : negativeName; }
-        public string GetDescription(bool positive) { return positive ? positiveDescription : negativeDescription; }
+        public string GetName(bool positive = true) { return positive ? positiveName : negativeName; }
+        public string GetDescription(bool positive = true) { return positive ? positiveDescription : negativeDescription; }
     }
 }

@@ -27,7 +27,6 @@ public class SimEventsManager
         availableMinorEventsList = new List<SimEventData>();
         availableMajorEventsList = new List<SimEventData>();
         availableExtremeEventsList = new List<SimEventData>();
-
         completeEventHistoryList = new List<SimEventData>();
 
         RegenerateAvailableMinorEvents();
@@ -309,7 +308,7 @@ public class SimEventsManager
     }
     */
     
-    private int GetEventSpeciesID(SimEventData data) 
+    int GetEventSpeciesID(SimEventData data) 
     {
         int speciesID = 0; // -1;
         float recordLow = 9999999f;
@@ -353,8 +352,8 @@ public class SimEventsManager
         return speciesID;
     }
 
-    public SimEventData GenerateNewRandomMinorEvent(List<SimEventData> eventList) {
-        SimEventData newEventData = new SimEventData(3, 1, SimEventCategories.Minor);
+    SimEventData GenerateNewRandomMinorEvent(List<SimEventData> eventList) {
+        var newEventData = new SimEventData(3, 1, SimEventCategories.Minor);
         var randType = SimEventData.GetRandomMinorEventType();
         
         // Check if impossible or duplicates present
@@ -371,444 +370,61 @@ public class SimEventsManager
         return newEventData;
     }
 
-    // * WPP: apply changes from Minor events to Major and Extreme events
-    public SimEventData GenerateNewRandomMajorEvent(List<SimEventData> eventList) {
-        SimEventData newEventData = new SimEventData(15, 1, SimEventCategories.Major);
-
-        // Avoid Duplicates????
-        SimEventTypeMajor randType = (SimEventTypeMajor)Random.Range(0, System.Enum.GetValues(typeof(SimEventTypeMajor)).Length);
-        for(int i = 0; i < 8; i++) {
-            // Check if impossible:
-            
-            // check for DUPES:
-            if (eventList.Count > 0) {  // if not the first selection:
-                randType = (SimEventTypeMajor)Random.Range(0, System.Enum.GetValues(typeof(SimEventTypeMajor)).Length);
-                // reroll isPositive?
-
-                bool duplicateDetected = false;
-                for(int j = 0; j < eventList.Count; j++) {
-                    if(randType == eventList[j].typeMajor) {
-                        //if(newEventData.isPositive == eventList[j].isPositive) {                            
-                        duplicateDetected = true;                            
-                        //}
-                        break;
-                    }
-                }
-                if(duplicateDetected) {
-                    //Debug.Log("Duplicate detected! iter: " + i.ToString());
-                    // try again (up to 8 times)
-                }
-                else {
-                    break;
-                }
-            }
-            else {  // first One
+    SimEventData GenerateNewRandomMajorEvent(List<SimEventData> eventList) {
+        var newEventData = new SimEventData(15, 1, SimEventCategories.Major);
+        var randType = SimEventData.GetRandomMajorEventType();
+        
+        for (int i = 0; i < 8; i++) 
+        {
+            if (eventList.Count <= 0 || eventList.Any(e => e.typeMajor == randType))
                 break;
-            }
+
+            randType = SimEventData.GetRandomMajorEventType();
         }
         
+        var randQualifier = (SpeciesQualifier)Random.Range(1, 5);
         newEventData.typeMajor = randType;
-
-        string qualifierTxt = "DECREASE";
-        if(newEventData.isPositive) {
-            qualifierTxt = "INCREASE";
-        }
-
-        SpeciesQualifier randQualifier = (SpeciesQualifier)Random.Range(1, 5);
-        
-        switch(randType) {
-            case SimEventTypeMajor.BodyModules:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Differentiate Senses II";
-                    newEventData.description = " Moderately " + qualifierTxt + " the chance of altering the creatures' sensory capabilities";       
-                }
-                else {
-                    newEventData.name = "Settle Senses II"; 
-                    newEventData.description = " Moderately " + qualifierTxt + " the chance of altering creature sensors";       
-                }       
-                break;
-            case SimEventTypeMajor.BodyMutation:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Morph Proportions";
-                    newEventData.description = " Moderately INCREASE the global mutation rate for creature bodies";         
-                }
-                else {
-                    newEventData.name = "Stabilize Forms"; 
-                    newEventData.description = " Moderately DECREASE the global mutation rate for creature bodies";       
-                }           
-                break;
-            case SimEventTypeMajor.BrainMutation:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Neural Plasticity II";
-                    newEventData.description = " Moderately " + qualifierTxt + " the mutation rate for creature brain wirings"; 
-                }
-                else {
-                    newEventData.name = "Harden Axons II"; 
-                    newEventData.description = " Moderately " + qualifierTxt + " the chance of rewiring creature brain"; 
-                }
-                break;
-            case SimEventTypeMajor.BrainSize:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Inflate Brain II";
-                    newEventData.description = "Moderately INCREASE the chance for new Neurons and connections between them within creatures' brains";  
-                }
-                else {
-                    newEventData.name = "Shrink Brain II"; 
-                    newEventData.description = "Moderately DECREASE the chance for new Neurons and connections between them within creatures' brains";  
-                }                
-                break;
-            case SimEventTypeMajor.Gale:
-                
-                newEventData.name = "Gale";                 
-                newEventData.description = "Set the speed of water currents to a steady flow";  
-                break;
-            case SimEventTypeMajor.CreateSpecies:                
-                newEventData.speciesQualifier = randQualifier; // SimEventData.SpeciesQualifier.Random;  // only random allowed for minor events                
-                string qualityString = "";
-                if(randQualifier == SpeciesQualifier.Age) {
-                    qualityString = "Youngest";
-                    if(newEventData.polarity) {
-                        qualityString = "Oldest";
-                    }
-                }
-                else if(randQualifier == SpeciesQualifier.BodySize) {
-                    qualityString = "Smallest";
-                    if(newEventData.polarity) {
-                        qualityString = "Largest";
-                    }
-                }
-                else if(randQualifier == SpeciesQualifier.Fitness) {
-                    qualityString = "Least Fit";
-                    if(newEventData.polarity) {
-                        qualityString = "Most Fit";
-                    }
-                }
-                else if(randQualifier == SpeciesQualifier.Novelty) {
-                    qualityString = "Most Average";
-                    if(newEventData.polarity) {
-                        qualityString = "Most Unique";
-                    }
-                }
-                newEventData.name = "New Species\n(" + qualityString + ")";
-                newEventData.description = "A new lineage emerges, originating from the current " + qualityString + " species";
-                break;
-
-            case SimEventTypeMajor.FoodCorpse:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Slow Decomposition II";
-                    newEventData.description = "Slow the rate at which dead creatures' bodies break down into nutrients";  
-                }
-                else {
-                    newEventData.name = "Recycled Material II"; 
-                    newEventData.description = "Increase the rate at which dead creatures' bodies are broken down into their component parts";  
-                } 
-                break;
-            case SimEventTypeMajor.FoodEgg:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Fertility II";
-                    newEventData.description = "Moderately INCREASE the global frequency of egg-laying and increases durability of egg sacks";  
-                }
-                else {
-                    newEventData.name = "Barren II"; 
-                    newEventData.description = "Moderately DECREASE the global frequency of egg-laying and lower durability of egg sacks";   
-                }
-                break;
-            case SimEventTypeMajor.FoodDecay:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Nutrient Increase II";
-                    newEventData.description = "Moderately INCREASE the global levels of basic nutrients";  
-                }
-                else {
-                    newEventData.name = "Nutrient Shortage II"; 
-                    newEventData.description = "Moderately DECREASE the global levels of basic nutrients";   
-                }
-                break;
-            case SimEventTypeMajor.FoodPlant:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Algae Bloom II";
-                    newEventData.description = "Moderately INCREASE the global levels of plants";  
-                }
-                else {
-                    newEventData.name = "Algae Decrease II"; 
-                    newEventData.description = "Moderately DECREASE the global levels of plants";   
-                }
-                break;
-            /*case SimEventData.SimEventTypeMajor.FoodAll:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Feast";
-                    newEventData.description = "Greatly INCREASE the global levels of all food types";  
-                }
-                else {
-                    newEventData.name = "Famine"; 
-                    newEventData.description = "Greatly DECREASE the global levels of all food types";   
-                }
-                break;*/
-            case SimEventTypeMajor.KillSpecies:
-                newEventData.speciesQualifier = randQualifier; // SimEventData.SpeciesQualifier.Random;  // only random allowed for minor events                
-                qualityString = "";
-                if(randQualifier == SpeciesQualifier.Age) {
-                    qualityString = "Youngest";
-                    if(newEventData.polarity) {
-                        qualityString = "Oldest";
-                    }
-                }
-                else if(randQualifier == SpeciesQualifier.BodySize) {
-                    qualityString = "Smallest";
-                    if(newEventData.polarity) {
-                        qualityString = "Largest";
-                    }
-                }
-                else if(randQualifier == SpeciesQualifier.Fitness) {
-                    qualityString = "Least Fit";
-                    if(newEventData.polarity) {
-                        qualityString = "Most Fit";
-                    }
-                }
-                else if(randQualifier == SpeciesQualifier.Novelty) {
-                    qualityString = "Most Average";
-                    if(newEventData.polarity) {
-                        qualityString = "Most Unique";
-                    }
-                }
-                newEventData.name = "Kill " + qualityString + " Species";
-                newEventData.description = "The current " + qualityString + " species goes extinct";
-                break;            
-            default:
-                break;
-        }
-
+        newEventData.Refresh(randQualifier);
         return newEventData;
     }
 
-    public SimEventData GenerateNewRandomExtremeEvent(List<SimEventData> eventList) {
+    SimEventData GenerateNewRandomExtremeEvent(List<SimEventData> eventList) {
         SimEventData newEventData = new SimEventData(75, 3, SimEventCategories.Extreme);
-
-        // Avoid Duplicates????
-        SimEventTypeExtreme randType = (SimEventTypeExtreme)Random.Range(0, System.Enum.GetValues(typeof(SimEventTypeExtreme)).Length);
-        for(int i = 0; i < 8; i++) {
-            // Check if impossible:
-            
-            // check for duplicates:
-            if (eventList.Count > 0) {  // if not the first selection:
-                randType = (SimEventTypeExtreme)Random.Range(0, System.Enum.GetValues(typeof(SimEventTypeExtreme)).Length);
-                // reroll isPositive?
-
-                bool duplicateDetected = false;
-                for(int j = 0; j < eventList.Count; j++) {
-                    if(randType == eventList[j].typeExtreme) {
-                        //if(newEventData.isPositive == eventList[j].isPositive) {                            
-                        duplicateDetected = true;                            
-                        //}
-                        break;
-                    }
-                }
-                if(duplicateDetected) {
-                    //Debug.Log("Duplicate detected! iter: " + i.ToString());
-                    // try again (up to 8 times)
-                }
-                else {
-                    break;
-                }
-            }
-            else {  // first One
-                break;
-            }
-        }
+        var randType = SimEventData.GetRandomExtremeEventType();
         
+        for (int i = 0; i < 8; i++) 
+        {
+            if (eventList.Count <= 0 || eventList.Any(e => e.typeExtreme == randType))
+                break;
+
+            randType = SimEventData.GetRandomExtremeEventType();
+        }
+
+        var randQualifier = (SpeciesQualifier)Random.Range(1, 5);
         newEventData.typeExtreme = randType;
-
-        string qualifierTxt = "DECREASE";
-        if(newEventData.isPositive) {
-            qualifierTxt = "INCREASE";
-        }
-
-        SpeciesQualifier randQualifier = (SpeciesQualifier)Random.Range(1, 5);
-        
-        switch(randType) {
-            case SimEventTypeExtreme.BodyModules:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Differentiate Senses III";
-                    newEventData.description = " Greatly " + qualifierTxt + " the chance of altering the creatures' sensory capabilities";       
-                }
-                else {
-                    newEventData.name = "Settle Senses III"; 
-                    newEventData.description = " Greatly " + qualifierTxt + " the chance of altering creature sensors";       
-                }       
-                break;
-            case SimEventTypeExtreme.BodyMutation:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Exaggerate Proportions";
-                    newEventData.description = " Greatly INCREASE the global mutation rate for creature bodies";         
-                }
-                else {
-                    newEventData.name = "Preserve Forms"; 
-                    newEventData.description = " Greatly DECREASE the global mutation rate for creature bodies";       
-                }           
-                break;
-            case SimEventTypeExtreme.BrainMutation:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Neural Plasticity III";
-                    newEventData.description = " Greatly " + qualifierTxt + " the mutation rate for creature brain wirings"; 
-                }
-                else {
-                    newEventData.name = "Harden Axons III"; 
-                    newEventData.description = " Greatly " + qualifierTxt + " the chance of rewiring creature brain"; 
-                }
-                break;
-            case SimEventTypeExtreme.BrainSize:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Inflate Brain III";
-                    newEventData.description = "Greatly INCREASE the chance for new Neurons and connections between them within creatures' brains";  
-                }
-                else {
-                    newEventData.name = "Shrink Brain III"; 
-                    newEventData.description = "Greatly DECREASE the chance for new Neurons and connections between them within creatures' brains";  
-                }                
-                break;
-            case SimEventTypeExtreme.Hurricane:                
-                newEventData.name = "Maelstrom";                 
-                newEventData.description = "Greatly increase the magnitude and turbulence of the water's currents";  
-                break;
-            case SimEventTypeExtreme.CreateSpecies:                
-                newEventData.speciesQualifier = randQualifier; // SimEventData.SpeciesQualifier.Random;  // only random allowed for minor events                
-                string qualityString = "";
-                if(randQualifier == SpeciesQualifier.Age) {
-                    qualityString = "Youngest";
-                    if(newEventData.polarity) {
-                        qualityString = "Oldest";
-                    }
-                }
-                else if(randQualifier == SpeciesQualifier.BodySize) {
-                    qualityString = "Smallest";
-                    if(newEventData.polarity) {
-                        qualityString = "Largest";
-                    }
-                }
-                else if(randQualifier == SpeciesQualifier.Fitness) {
-                    qualityString = "Least Fit";
-                    if(newEventData.polarity) {
-                        qualityString = "Most Fit";
-                    }
-                }
-                else if(randQualifier == SpeciesQualifier.Novelty) {
-                    qualityString = "Most Average";
-                    if(newEventData.polarity) {
-                        qualityString = "Most Unique";
-                    }
-                }
-                newEventData.name = "New Species\n(" + qualityString + ")";
-                newEventData.description = "Up to " + newEventData.quantity + " new lineages emerge, originating from the current " + qualityString + " species";
-                break;
-            case SimEventTypeExtreme.FoodCorpse:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Slow Decomposition III";
-                    newEventData.description = "Slow the rate at which dead creatures' bodies break down into nutrients";  
-                }
-                else {
-                    newEventData.name = "Recycled Material III"; 
-                    newEventData.description = "Increase the rate at which dead creatures' bodies are broken down into their component parts";  
-                } 
-                break;
-            case SimEventTypeExtreme.FoodEgg:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Fertility III";
-                    newEventData.description = "Greatly INCREASE the global frequency of egg-laying and increases durability of egg sacks";  
-                }
-                else {
-                    newEventData.name = "Barren III"; 
-                    newEventData.description = "Greatly DECREASE the global frequency of egg-laying and lower durability of egg sacks";   
-                }
-                break;
-            case SimEventTypeExtreme.FoodDecay:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Nutrient Increase III";
-                    newEventData.description = "Greatly INCREASE the global levels of basic nutrients";  
-                }
-                else {
-                    newEventData.name = "Nutrient Shortage III"; 
-                    newEventData.description = "Greatly DECREASE the global levels of basic nutrients";   
-                }
-                break;
-            case SimEventTypeExtreme.FoodPlant:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Algae Bloom III";
-                    newEventData.description = "Greatly INCREASE the global levels of plants";  
-                }
-                else {
-                    newEventData.name = "Algae Decrease III"; 
-                    newEventData.description = "Greatly DECREASE the global levels of plants";   
-                }
-                break;
-            case SimEventTypeExtreme.FoodAll:
-                if (newEventData.isPositive) {
-                    newEventData.name = "Feast";
-                    newEventData.description = "Greatly INCREASE the global levels of all food types";  
-                }
-                else {
-                    newEventData.name = "Famine"; 
-                    newEventData.description = "Greatly DECREASE the global levels of all food types";   
-                }
-                break;
-            case SimEventTypeExtreme.KillSpecies:
-                newEventData.speciesQualifier = randQualifier; // SimEventData.SpeciesQualifier.Random;  // only random allowed for minor events                
-                qualityString = "";
-                if(randQualifier == SpeciesQualifier.Age) {
-                    qualityString = "Youngest";
-                    if(newEventData.polarity) {
-                        qualityString = "Oldest";
-                    }
-                }
-                else if(randQualifier == SpeciesQualifier.BodySize) {
-                    qualityString = "Smallest";
-                    if(newEventData.polarity) {
-                        qualityString = "Largest";
-                    }
-                }
-                else if(randQualifier == SpeciesQualifier.Fitness) {
-                    qualityString = "Least Fit";
-                    if(newEventData.polarity) {
-                        qualityString = "Most Fit";
-                    }
-                }
-                else if(randQualifier == SpeciesQualifier.Novelty) {
-                    qualityString = "Most Average";
-                    if(newEventData.polarity) {
-                        qualityString = "Most Unique";
-                    }
-                }
-                newEventData.name = "Mass Extinction";
-                newEventData.description = "All but one species suffer extinction";
-                break;            
-            default:
-                newEventData.name = "DEFAULT ERROR";
-                break;
-        }
-
+        newEventData.Refresh(randQualifier);
         return newEventData;
     }
-
+    
     // * WPP: condense into RegenerateAvailableEvents(List<SimEventData>, delegate{SimEventData GenerateEvent(List<SimEventData)})
-    public void RegenerateAvailableMinorEvents() {
+    void RegenerateAvailableMinorEvents() {
         availableMinorEventsList.Clear();
-
         for(int i = 0; i < numAvailableEventsPerMenu; i++) {
             SimEventData newEventData = GenerateNewRandomMinorEvent(availableMinorEventsList);           
             availableMinorEventsList.Add(newEventData);
         }
     }
 
-    public void RegenerateAvailableMajorEvents() {
+    void RegenerateAvailableMajorEvents() {
         availableMajorEventsList.Clear();
-
         for(int i = 0; i < numAvailableEventsPerMenu; i++) {
             SimEventData newEventData = GenerateNewRandomMajorEvent(availableMajorEventsList);           
             availableMajorEventsList.Add(newEventData);
         }
     }
 
-    public void RegenerateAvailableExtremeEvents() {
+    void RegenerateAvailableExtremeEvents() {
         availableExtremeEventsList.Clear();
-
         for(int i = 0; i < numAvailableEventsPerMenu; i++) {
             SimEventData newEventData = GenerateNewRandomExtremeEvent(availableExtremeEventsList);           
             availableExtremeEventsList.Add(newEventData);

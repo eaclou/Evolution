@@ -4,7 +4,6 @@
 public class NeuronGenome 
 {
     public NeuronType neuronType;
-
     public string name = "none";
     public NID nid; // Neuron ID
 

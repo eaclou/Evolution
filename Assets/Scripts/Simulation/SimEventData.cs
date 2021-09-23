@@ -57,15 +57,37 @@ public class SimEventData
     }
     
     public static SimEventTypeMinor GetRandomMinorEventType() { return RandomStatics.RandomEnumValue<SimEventTypeMinor>(); }
+    public static SimEventTypeMajor GetRandomMajorEventType() { return RandomStatics.RandomEnumValue<SimEventTypeMajor>(); }
+    public static SimEventTypeExtreme GetRandomExtremeEventType() { return RandomStatics.RandomEnumValue<SimEventTypeExtreme>(); }
     
-    public void Refresh()
+    public void Refresh(SpeciesQualifier qualifier = SpeciesQualifier.Random)
     {
         var data = events.GetEventData(this);
         if (data == null) return;
         
-        name = data.GetName(isPositive);
-        description = data.GetDescription(isPositive);
+        name = data.setQualifier ? GetQualifiedText(data.GetName(), qualifier, isPositive) : data.GetName(isPositive);
+        description = data.setQualifier ? GetQualifiedText(data.GetDescription(), qualifier, isPositive, quantity) : data.GetDescription(isPositive);
         if (data.setQualifier) speciesQualifier = data.speciesQualifier;
+    }
+    
+    public static string GetQualifiedText(string original, SpeciesQualifier qualifierId, bool polarity, int quantity = -1)
+    {
+        var qualification = GetQualifier(qualifierId, polarity);
+        var modified = original.Replace("{*}", qualification);
+        modified = modified.Replace("{*1}", quantity.ToString());
+        return modified;
+    }
+    
+    public static string GetQualifier(SpeciesQualifier qualifier, bool polarity)
+    {
+        switch (qualifier)
+        {
+            case SpeciesQualifier.Age: return polarity ? "Oldest" : "Youngest";
+            case SpeciesQualifier.BodySize: return polarity ? "Largest" : "Smallest";
+            case SpeciesQualifier.Fitness: return polarity ? "Most Fit" : "Least Fit";
+            case SpeciesQualifier.Novelty: return polarity ? "Most Unique" : "Most Average";
+            default: return "";
+        }
     }
 }
 

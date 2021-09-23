@@ -2,8 +2,8 @@
 
 /// Neuron Identifier
 [Serializable]
-public struct NID {
-    
+public struct NID 
+{
     public int moduleID;
     public int neuronID;
 

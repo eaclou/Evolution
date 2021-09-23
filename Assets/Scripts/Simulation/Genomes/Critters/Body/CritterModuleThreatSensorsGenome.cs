@@ -6,7 +6,7 @@ using Playcraft;
 public class CritterModuleThreatSensorsGenome 
 {
     public int parentID;
-    public int inno;
+    public int inno;    // * WPP: what is this?  (NEVER use abbreviations!)
 
     public bool usePos;
     public bool useVel;
