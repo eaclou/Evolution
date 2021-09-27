@@ -46,7 +46,7 @@ public class CritterModuleCommunicationGenome
         
     }
 
-    public void SetToMutatedCopyOfParentGenome(CritterModuleCommunicationGenome parentGenome, MutationSettings settings) {
+    public void SetToMutatedCopyOfParentGenome(CritterModuleCommunicationGenome parentGenome, MutationSettingsInstance settings) {
         var mutate = RandomStatics.CoinToss(settings.bodyModuleInternalMutationChance);
         useComms = mutate ? !parentGenome.useComms : parentGenome.useComms;
     }

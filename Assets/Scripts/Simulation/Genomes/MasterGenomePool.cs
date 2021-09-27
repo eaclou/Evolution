@@ -24,7 +24,7 @@ public class MasterGenomePool
 
     public bool speciesCreatedOrDestroyedThisFrame = false;
 
-    public MutationSettings mutationSettingsRef;
+    public MutationSettingsInstance mutationSettingsRef;
 
     public List<int> debugRecentlyDeletedCandidateIDsList;
 
@@ -34,7 +34,7 @@ public class MasterGenomePool
    
     public MasterGenomePool() { }
 
-    public void FirstTimeInitialize(MutationSettings mutationSettingsRef) {
+    public void FirstTimeInitialize(MutationSettingsInstance mutationSettingsRef) {
         debugRecentlyDeletedCandidateIDsList = new List<int>();
 
         nextCandidateIndex = 0;

@@ -73,13 +73,13 @@ public class CritterModuleEnvironmentSensorsGenome
         } */       
     }
 	
-    public void SetToMutatedCopyOfParentGenome(CritterModuleEnvironmentSensorsGenome parentGenome, MutationSettings settings) {
+    public void SetToMutatedCopyOfParentGenome(CritterModuleEnvironmentSensorsGenome parentGenome, MutationSettingsInstance settings) {
         useWaterStats = RequestMutation(settings, parentGenome.useWaterStats);
         useCardinals = RequestMutation(settings, parentGenome.useCardinals);
         useDiagonals = RequestMutation(settings, parentGenome.useDiagonals);
     }
     
-    bool RequestMutation(MutationSettings settings, bool defaultValue) {
+    bool RequestMutation(MutationSettingsInstance settings, bool defaultValue) {
         return RandomStatics.RandomFlip(settings.bodyModuleInternalMutationChance, defaultValue);
     }
 }

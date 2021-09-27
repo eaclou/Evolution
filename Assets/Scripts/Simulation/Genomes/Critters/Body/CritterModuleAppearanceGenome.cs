@@ -55,7 +55,7 @@ public class CritterModuleAppearanceGenome {
         eyeGenome.eyeBrushType = Random.Range(0, 8);        
     }
 
-    public void SetToMutatedCopyOfParentGenome(CritterModuleAppearanceGenome parentGenome, MutationSettings settings) 
+    public void SetToMutatedCopyOfParentGenome(CritterModuleAppearanceGenome parentGenome, MutationSettingsInstance settings) 
     {
         //float mutationChanceMultiplier = 1f; // ******* settings.mutationStrengthSlot;
         huePrimary = UtilityMutationFunctions.GetMutatedVector3Additive(parentGenome.huePrimary, settings.bodyColorsMutationChance, settings.bodyColorsMutationStepSize, 0f, 1f);

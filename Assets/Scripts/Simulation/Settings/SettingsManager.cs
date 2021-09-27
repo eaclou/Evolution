@@ -1,10 +1,17 @@
 ﻿using Playcraft;
 
+public enum MutationSettingsId
+{
+    None,
+    Vertebrate,
+    Supervised,
+}
+
 public class SettingsManager : Singleton<SettingsManager> 
 {
     //public MutationSettings mutationSettingsSupervised;
-    public MutationSettings mutationSettingsVertebrates;
-    public MutationSettings mutationSettingsNoneCopy;
+    //public MutationSettings mutationSettingsVertebrates;
+    //public MutationSettings mutationSettingsNoneCopy;
 
     public SettingsEnvironment environmentSettings;
     public SettingsAlgaeParticles algaeSettings;
@@ -51,7 +58,7 @@ public class SettingsManager : Singleton<SettingsManager>
     public int curTierBrainMutationNewHiddenNeuron = 4;
     public int curTierBrainMutationWeightDecay = 8;
     
-    public int curTierFoodDecay = 5;  // these will need to be replacedwith new system
+    public int curTierFoodDecay = 5;  // these will need to be replaced with new system
     public int curTierFoodPlant = 5;
     public int curTierFoodEgg = 6;
     public int curTierFoodCorpse = 6;
@@ -122,16 +129,17 @@ public class SettingsManager : Singleton<SettingsManager>
         float lerp = (float)curTierFoodCorpse / 10f;
     }
     */
-    public void UpdateValuesFromCurTiers() {
-        
-    }
-
+    
+    public void UpdateValuesFromCurTiers() { }
+    
+    // WPP: hardcoded values exposed in SOs, this function is no longer needed
     public void Initialize() {
         //mutationSettingsSupervised = new MutationSettings(0.5f, 0.015f, 1f, 0.005f, 1f, 0.1f, 0.001f);
-        // * WPP: expose hardcoded values
-        mutationSettingsVertebrates = new MutationSettings(0.5f, 0.5f, 0.05f, 0.025f, 0.995f, 0.95f, 0.1f, 1f);
-        mutationSettingsNoneCopy = new MutationSettings();
-/*
+        
+        //mutationSettingsVertebrates = new MutationSettings(0.5f, 0.5f, 0.05f, 0.025f, 0.995f, 0.95f, 0.1f, 1f);
+        //mutationSettingsNoneCopy = new MutationSettings();
+        
+        /*
         ChangeTierFoodDecay(0);
         ChangeTierFoodPlant(0);
         ChangeTierFoodEgg(0);

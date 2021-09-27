@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class SpeciesGenomePool {
+public class SpeciesGenomePool 
+{
+    Lookup lookup => Lookup.instance;
 
     public int speciesID;
     public int parentSpeciesID;  // keep track of tree of life
@@ -11,7 +13,7 @@ public class SpeciesGenomePool {
     public int depthLevel;
 
     [System.NonSerialized]
-    public MutationSettings mutationSettingsRef;  // Or remove this later to keep everything saveable?
+    public MutationSettingsInstance mutationSettings;  // Or remove this later to keep everything saveable?
 
     public string identifier;
     public CandidateAgentData representativeCandidate;
@@ -57,12 +59,16 @@ public class SpeciesGenomePool {
     
     public CritterModuleAppearanceGenome appearanceGenome => 
         foundingCandidate.candidateGenome.bodyGenome.appearanceGenome;
+        
+    MutationSettingsInstance _cachedNoneMutationSettings;
+    MutationSettingsInstance cachedNoneMutationSettings => _cachedNoneMutationSettings ?? GetSetNoneMutationSettings();
+    MutationSettingsInstance GetSetNoneMutationSettings() { return _cachedNoneMutationSettings = lookup.GetMutationSettingsCopy(MutationSettingsId.None); }
 
-    public SpeciesGenomePool(int ID, int parentID, int year, int timeStep, MutationSettings settings) {
+    public SpeciesGenomePool(int ID, int parentID, int year, int timeStep, MutationSettingsInstance settings) {
         yearCreated = year;
         speciesID = ID;
         parentSpeciesID = parentID;
-        mutationSettingsRef = settings;
+        mutationSettings = settings;
         timeStepCreated = timeStep;
         timeStepExtinct = 2000000000;  
     }
@@ -146,8 +152,8 @@ public class SpeciesGenomePool {
         string debugTxt = "";
         for (int i = 0; i < 64; i++) {
             
-            mutationSettingsRef.bodyCoreSizeMutationChance = 0.5f;
-            mutationSettingsRef.bodyCoreMutationStepSize = 0.1f;
+            mutationSettings.bodyCoreSizeMutationChance = 0.5f;
+            mutationSettings.bodyCoreMutationStepSize = 0.1f;
             //mutationSettingsRef.mutationStrengthSlot = 0.15f;
 
             AgentGenome agentGenome = Mutate(foundingGenome.candidateGenome, true, true);            
@@ -379,6 +385,8 @@ public class SpeciesGenomePool {
         return parentGenome;
     }
 
+    // Avoid use of local variables in Mutate() for efficiency
+    MutationSettingsInstance tempMutationSettings;
 
     public AgentGenome Mutate(AgentGenome parentGenome, bool bodySettings, bool brainSettings) {
         //AgentGenome parentGenome = leaderboardGenomesList[selectedIndex].candidateGenome;
@@ -390,21 +398,12 @@ public class SpeciesGenomePool {
         BodyGenome parentBodyGenome = parentGenome.bodyGenome;
         BrainGenome parentBrainGenome = parentGenome.brainGenome;
 
-        MutationSettings mutationSettingsNoneCopy = new MutationSettings();
-        if(bodySettings) {
-            newBodyGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome, mutationSettingsRef);
-        }
-        else {
-            newBodyGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome, mutationSettingsNoneCopy);
-        }
-        if(brainSettings) {
-            newBrainGenome.SetToMutatedCopyOfParentGenome(parentBrainGenome, newBodyGenome, mutationSettingsRef);
-        }
-        else {
-            newBrainGenome.SetToMutatedCopyOfParentGenome(parentBrainGenome, newBodyGenome, mutationSettingsNoneCopy);
-        }
-        //Debug.Log("Mutate() " + mutationSettingsRef.mutationStrengthSlot.ToString("F2"));
-        
+        tempMutationSettings = bodySettings ? mutationSettings : cachedNoneMutationSettings;
+        newBodyGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome, tempMutationSettings);
+
+        tempMutationSettings = brainSettings ? mutationSettings : cachedNoneMutationSettings;
+        newBrainGenome.SetToMutatedCopyOfParentGenome(parentBrainGenome, newBodyGenome, tempMutationSettings);
+
         childGenome.bodyGenome = newBodyGenome; 
         childGenome.brainGenome = newBrainGenome;
 

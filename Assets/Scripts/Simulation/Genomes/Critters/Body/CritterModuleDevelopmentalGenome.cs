@@ -24,7 +24,7 @@ public class CritterModuleDevelopmentalGenome {
 
     }
 	
-    public void SetToMutatedCopyOfParentGenome(CritterModuleDevelopmentalGenome parentGenome, MutationSettings settings) {
+    public void SetToMutatedCopyOfParentGenome(CritterModuleDevelopmentalGenome parentGenome, MutationSettingsInstance settings) {
 
     }
 }

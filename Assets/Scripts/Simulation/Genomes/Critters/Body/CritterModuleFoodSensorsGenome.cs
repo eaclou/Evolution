@@ -115,7 +115,7 @@ public class CritterModuleFoodSensorsGenome
         }
     }
 	
-    public void SetToMutatedCopyOfParentGenome(CritterModuleFoodSensorsGenome parentGenome, MutationSettings settings) {
+    public void SetToMutatedCopyOfParentGenome(CritterModuleFoodSensorsGenome parentGenome, MutationSettingsInstance settings) {
         useNutrients = RequestMutation(settings, parentGenome.useNutrients);
         usePos = RequestMutation(settings, parentGenome.usePos);
         useVel = RequestMutation(settings, parentGenome.useVel);
@@ -131,7 +131,7 @@ public class CritterModuleFoodSensorsGenome
         sensorRangeMult = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.sensorRangeMult, settings.bodyModuleInternalMutationChance, settings.bodyModuleInternalMutationStepSize, 0f, 1f);
     }
     
-    bool RequestMutation(MutationSettings settings, bool defaultValue) {
+    bool RequestMutation(MutationSettingsInstance settings, bool defaultValue) {
         return RandomStatics.RandomFlip(settings.bodyModuleInternalMutationChance, defaultValue);
     }
 }

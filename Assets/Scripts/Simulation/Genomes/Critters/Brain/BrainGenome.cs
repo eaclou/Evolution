@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using Playcraft;
 
+// * WPP: refactor -> simplify conditionals & loops, merge logic into methods, cleanup formatting, remove dead comments
 [Serializable]
 public class BrainGenome 
 {
     public List<NeuronGenome> bodyNeuronList;
     public List<NeuronGenome> hiddenNeuronList;
     public List<LinkGenome> linkList;
-
-    public BrainGenome() { }
-
+    
     public void InitializeNewBrainGenomeLists() {
         bodyNeuronList = new List<NeuronGenome>();
         hiddenNeuronList = new List<NeuronGenome>();
@@ -40,25 +40,38 @@ public class BrainGenome
     }
 
     public void InitializeAxons(float initialWeightMultiplier, float initialConnectionDensity, int numInitHiddenNeurons) {                
-        // Create initial connections -- :
+        // Create initial connections
         List<NeuronGenome> inputNeuronList = new List<NeuronGenome>();
         List<NeuronGenome> outputNeuronList = new List<NeuronGenome>();
+        
         for (int i = 0; i < bodyNeuronList.Count; i++) {
+            switch (bodyNeuronList[i].neuronType) {
+                case NeuronType.In: inputNeuronList.Add(bodyNeuronList[i]); break;
+                case NeuronType.Out: outputNeuronList.Add(bodyNeuronList[i]); break;
+            }
+            // WPP: abridged with switch statement
+            /*    
+            }
             if (bodyNeuronList[i].neuronType == NeuronType.In) {
                 inputNeuronList.Add(bodyNeuronList[i]);
             }
             if (bodyNeuronList[i].neuronType == NeuronType.Out) {
                 outputNeuronList.Add(bodyNeuronList[i]);
             }
+            */
         }
+        
+        // * WPP: why isn't this a case in the above conditional?
         //Create Hidden nodes TEMP!!!!
         for (int i = 0; i < numInitHiddenNeurons; i++) {
             NeuronGenome neuron = new NeuronGenome("Hid" + i, NeuronType.Hid, -1, i);
             hiddenNeuronList.Add(neuron);
         }
+        LinkLayers(inputNeuronList, outputNeuronList, initialConnectionDensity, initialWeightMultiplier);
+        // WPP: simplified repetitive code with method
         // Initialize partially connected with all weights Random
-        
-        for (int i = 0; i < outputNeuronList.Count; i++) {  // Direct Skip connection In to Out:
+        // Direct Skip connection In to Out:
+        /*for (int i = 0; i < outputNeuronList.Count; i++) {  
             for (int j = 0; j < inputNeuronList.Count; j++) {
                 if (Random.Range(0f, 1f) < initialConnectionDensity) {  // 0-1 % chance of link
                     float randomWeight = Gaussian.GetRandomGaussian() * initialWeightMultiplier;
@@ -66,8 +79,10 @@ public class BrainGenome
                     linkList.Add(linkGenome);
                 }                
             }
-        }
-        for (int i = 0; i < hiddenNeuronList.Count; i++) {  // Input to Hidden Layer:
+        }*/
+        LinkLayers(inputNeuronList, hiddenNeuronList, initialConnectionDensity, initialWeightMultiplier);
+        // Input to Hidden Layer:
+        /*for (int i = 0; i < hiddenNeuronList.Count; i++) {  
             for (int j = 0; j < inputNeuronList.Count; j++) {
                 if(Random.Range(0f, 1f) < initialConnectionDensity) {
                     float randomWeight = Gaussian.GetRandomGaussian() * initialWeightMultiplier;
@@ -76,8 +91,10 @@ public class BrainGenome
                 }
                 
             }
-        }
-        for (int i = 0; i < outputNeuronList.Count; i++) {   // Hidden Layer to Output:
+        }*/
+        LinkLayers(hiddenNeuronList, outputNeuronList, initialConnectionDensity, initialWeightMultiplier);
+        // Hidden Layer to Output:
+        /*for (int i = 0; i < outputNeuronList.Count; i++) {   
             for (int j = 0; j < hiddenNeuronList.Count; j++) {
                 if (Random.Range(0f, 1f) < initialConnectionDensity) {
                     float randomWeight = Gaussian.GetRandomGaussian() * initialWeightMultiplier;
@@ -85,14 +102,25 @@ public class BrainGenome
                     linkList.Add(linkGenome);
                 }
             }
-        }        
+        } */       
 
         //PrintBrainGenome();
         //Debug.Log("numAxons: " + linkList.Count.ToString());
     }
+    
+    void LinkLayers(List<NeuronGenome> fromList, List<NeuronGenome> toList, float initialConnectionDensity, float initialWeightMultiplier) {
+        foreach (var toElement in toList) {
+            foreach (var fromElement in fromList) {
+                if (!RandomStatics.CoinToss(initialConnectionDensity)) continue;
+                var randomWeight = Gaussian.GetRandomGaussian() * initialWeightMultiplier;
+                var linkGenome = new LinkGenome(fromElement.nid.moduleID, fromElement.nid.neuronID, toElement.nid.moduleID, toElement.nid.neuronID, randomWeight, true);
+                linkList.Add(linkGenome);
+            }
+        }          
+    }
 
-    public void SetToMutatedCopyOfParentGenome(BrainGenome parentGenome, BodyGenome bodyGenome, MutationSettings settings) {
-
+    public void SetToMutatedCopyOfParentGenome(BrainGenome parentGenome, BodyGenome bodyGenome, MutationSettingsInstance settings) 
+    {
         //this.bodyNeuronList = parentGenome.bodyNeuronList; // UNSUSTAINABLE!!! might work now since all neuronLists are identical ******
 
         // Copy from parent brain or rebuild neurons from scratch based on the new mutated bodyGenome???? --- ******
@@ -102,13 +130,13 @@ public class BrainGenome
         }*/
         // Alternate: SetBodyNeuronsFromTemplate(BodyGenome templateBody);
         // Rebuild BodyNeuronGenomeList from scratch based on bodyGenome!!!!
-        if(this.bodyNeuronList != null) {
-            this.bodyNeuronList.Clear();
+        if(bodyNeuronList != null) {
+            bodyNeuronList.Clear();
         }
         else {
-            this.bodyNeuronList = new List<NeuronGenome>();
+            bodyNeuronList = new List<NeuronGenome>();
         }
-        bodyGenome.InitializeBrainGenome(this.bodyNeuronList);
+        bodyGenome.InitializeBrainGenome(bodyNeuronList);
 
         // Existing Hidden Neurons!!
         hiddenNeuronList = new List<NeuronGenome>();
@@ -142,8 +170,8 @@ public class BrainGenome
 
         // Add Brand New Link:
         float randLink = Random.Range(0f, 1f);
-        if (randLink < settings.brainCreateNewLinkChance) {
-
+        if (randLink < settings.brainCreateNewLinkChance) 
+        {
             List<NeuronGenome> inputNeuronList = new List<NeuronGenome>(); // **** Make these Global ??? avoids traversing them multiple times....            
             List<NeuronGenome> outputNeuronList = new List<NeuronGenome>();
             for (int j = 0; j < bodyNeuronList.Count; j++) {
@@ -179,17 +207,13 @@ public class BrainGenome
                     }
                 }
 
-                if (linkExists) {
+                if (linkExists) continue;
+                float randomWeight = Gaussian.GetRandomGaussian() * settings.brainWeightMutationStepSize;
+                LinkGenome linkGenome = new LinkGenome(fromNID.moduleID, fromNID.neuronID, toNID.moduleID, toNID.neuronID, randomWeight, true);                    
+                linkList.Add(linkGenome);
 
-                }
-                else {
-                    float randomWeight = Gaussian.GetRandomGaussian() * settings.brainWeightMutationStepSize;
-                    LinkGenome linkGenome = new LinkGenome(fromNID.moduleID, fromNID.neuronID, toNID.moduleID, toNID.neuronID, randomWeight, true);                    
-                    linkList.Add(linkGenome);
-
-                    //Debug.Log("New Link! from: [" + fromNID.moduleID.ToString() + ", " + fromNID.neuronID.ToString() + "], to: [" + toNID.moduleID.ToString() + ", " + toNID.neuronID.ToString() + "]");
-                    break;
-                }
+                //Debug.Log("New Link! from: [" + fromNID.moduleID.ToString() + ", " + fromNID.neuronID.ToString() + "], to: [" + toNID.moduleID.ToString() + ", " + toNID.neuronID.ToString() + "]");
+                break;
             }
         }
 

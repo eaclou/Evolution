@@ -56,14 +56,14 @@ public class CritterModuleThreatSensorsGenome
         }
     }
 	
-    public void SetToMutatedCopyOfParentGenome(CritterModuleThreatSensorsGenome parentGenome, MutationSettings settings) {
+    public void SetToMutatedCopyOfParentGenome(CritterModuleThreatSensorsGenome parentGenome, MutationSettingsInstance settings) {
         usePos = RequestMutation(settings, parentGenome.usePos);
         useVel = RequestMutation(settings, parentGenome.useVel);
         useDir = RequestMutation(settings, parentGenome.useDir);
         useStats = RequestMutation(settings, parentGenome.useStats);
     }
     
-    bool RequestMutation(MutationSettings settings, bool defaultValue) {
+    bool RequestMutation(MutationSettingsInstance settings, bool defaultValue) {
         return RandomStatics.RandomFlip(settings.bodyModuleInternalMutationChance, defaultValue);
     }
 }

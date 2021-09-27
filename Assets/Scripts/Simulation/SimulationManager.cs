@@ -92,6 +92,13 @@ public class SimulationManager : Singleton<SimulationManager>
     private int numStepsInSimYear = 4096;
     private int simAgeYearCounter = 0;
     public int curSimYear = 0;
+    
+    MutationSettingsInstance _cachedVertebrateMutationSettings;
+    MutationSettingsInstance cachedVertebrateMutationSettings => _cachedVertebrateMutationSettings ?? GetSetVertebrateMutationSettings();
+    MutationSettingsInstance GetSetVertebrateMutationSettings() { return _cachedVertebrateMutationSettings = lookup.GetMutationSettingsCopy(MutationSettingsId.Vertebrate); }
+
+    
+    
     public int GetNumTimeStepsPerYear() {
         return numStepsInSimYear;
     }
@@ -296,7 +303,7 @@ public class SimulationManager : Singleton<SimulationManager>
     
     private void LoadingInitializePopulationGenomes() {
         masterGenomePool = new MasterGenomePool();
-        masterGenomePool.FirstTimeInitialize(settingsManager.mutationSettingsVertebrates);   
+        masterGenomePool.FirstTimeInitialize(cachedVertebrateMutationSettings);  //(settingsManager.mutationSettingsVertebrates);   
 
         // EGGSACKS:
         eggSackGenomes = new EggSackGenome[numEggSacks];
@@ -1134,7 +1141,7 @@ public class SimulationManager : Singleton<SimulationManager>
                 // RespawnFood
                 // *** REFACTOR -- Need to sync egg and agent genomes to match each other
                 EggSackGenome newEggSackGenome = new EggSackGenome(eggSackIndex);
-                newEggSackGenome.SetToMutatedCopyOfParentGenome(eggSackGenomes[eggSackIndex], settingsManager.mutationSettingsVertebrates);
+                newEggSackGenome.SetToMutatedCopyOfParentGenome(eggSackGenomes[eggSackIndex], cachedVertebrateMutationSettings);
                 eggSackGenomes[eggSackIndex] = newEggSackGenome;
                 
                 // Transfer Energy from ParentAgent to childEggSack!!! ******
@@ -1248,7 +1255,7 @@ public class SimulationManager : Singleton<SimulationManager>
     public void AddNewSpecies(AgentGenome newGenome, int parentSpeciesID) {  
         int newSpeciesID = masterGenomePool.completeSpeciesPoolsList.Count;
                
-        SpeciesGenomePool newSpecies = new SpeciesGenomePool(newSpeciesID, parentSpeciesID, curSimYear, simAgeTimeSteps, settingsManager.mutationSettingsVertebrates);
+        SpeciesGenomePool newSpecies = new SpeciesGenomePool(newSpeciesID, parentSpeciesID, curSimYear, simAgeTimeSteps, cachedVertebrateMutationSettings);
         AgentGenome foundingGenome = newGenome; // newSpecies.Mutate(newGenome, true, true); //
         SpeciesGenomePool parentSpeciesPool = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID];
         

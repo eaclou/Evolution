@@ -56,7 +56,7 @@ public class EggSackGenome {
         fruitScale = VectorMath.RandomVector2(fruitScaleRange);
     }
 
-    public void SetToMutatedCopyOfParentGenome(EggSackGenome parentFoodGenome, MutationSettings settings) {
+    public void SetToMutatedCopyOfParentGenome(EggSackGenome parentFoodGenome, MutationSettingsInstance settings) {
         // *** Result needs to be fully independent copy and share no references!!!
         
         fullSize = UtilityMutationFunctions.GetMutatedVector2Additive(parentFoodGenome.fullSize, settings.defaultFoodMutationChance, settings.defaultFoodMutationStepSize, 0.25f, 4.5f);

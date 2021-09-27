@@ -475,7 +475,7 @@ public class CritterModuleCoreGenome
         }
     }
 
-    public void SetToMutatedCopyOfParentGenome(CritterModuleCoreGenome parentGenome, MutationSettings settings) {
+    public void SetToMutatedCopyOfParentGenome(CritterModuleCoreGenome parentGenome, MutationSettingsInstance settings) {
         string parentName = parentGenome.name;
         //int parentNameLength = parentName;
         int randIndex = Random.Range(0, parentName.Length - 1);

@@ -47,13 +47,13 @@ public class CritterModuleFriendSensorsGenome
         }
     }
 	
-    public void SetToMutatedCopyOfParentGenome(CritterModuleFriendSensorsGenome parentGenome, MutationSettings settings) {
+    public void SetToMutatedCopyOfParentGenome(CritterModuleFriendSensorsGenome parentGenome, MutationSettingsInstance settings) {
         usePos = RequestMutation(settings, parentGenome.usePos);
         useVel = RequestMutation(settings, parentGenome.useVel);
         useDir = RequestMutation(settings, parentGenome.useDir);
     }
     
-    bool RequestMutation(MutationSettings settings, bool defaultValue) {
+    bool RequestMutation(MutationSettingsInstance settings, bool defaultValue) {
         return RandomStatics.RandomFlip(settings.bodyModuleInternalMutationChance, defaultValue);
     }
 }

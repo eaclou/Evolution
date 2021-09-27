@@ -75,7 +75,8 @@ public class BodyGenome
         threatGenome.AppendModuleNeuronsToMasterList(ref neuronList);        
     }
 
-    public void SetToMutatedCopyOfParentGenome(BodyGenome parentBodyGenome, MutationSettings settings) {   // Mutable by Player
+    // Mutable by Player
+    public void SetToMutatedCopyOfParentGenome(BodyGenome parentBodyGenome, MutationSettingsInstance settings) {   
         // *** Result needs to be fully independent copy and share no references!!!
         // *** OPTIMIZATION:  convert this to use pooling rather than using new memory alloc every mutation
         FirstTimeInitializeCritterModuleGenomes(); // Re-constructs all modules as new() 

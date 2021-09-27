@@ -1,9 +1,12 @@
 ﻿using System;
+using UnityEngine;
 
 // * WPP: convert to Scriptable Object to enable multiple test configurations,
 // Make globally accessible via Lookup.cs so not necessary to pass around as parameter
-[Serializable]
-public class MutationSettings {
+[CreateAssetMenu(menuName = "Pond Water/Mutation Settings", fileName = "Mutation Settings")]
+public class MutationSettings : ScriptableObject
+{
+    /*
     public float brainInitialConnectionChance;
     public float brainWeightMutationChance;
     public float brainWeightMutationStepSize;
@@ -31,20 +34,23 @@ public class MutationSettings {
 
     public float defaultFoodMutationChance;
     public float defaultFoodMutationStepSize;
+    */
+    
+    public MutationSettingsInstance data;
     //public float mutationStrengthSlot;
 
-
+    // WPP: variations stored in SO instances
+    /*
     public MutationSettings(float initialConnectionChance, float mutationChance, float mutationStepSize, float removeLinkChance, float weightDecayAmount, float newLinkChance, float newHiddenNodeChance, float mutationStrengthSlot) {
-        this.brainInitialConnectionChance = initialConnectionChance;
-        this.brainWeightMutationChance = mutationChance;
-        this.brainWeightMutationStepSize = mutationStepSize;
-        this.brainRemoveLinkChance = removeLinkChance;
-        this.brainWeightDecayAmount = weightDecayAmount;
-        this.brainCreateNewLinkChance = newLinkChance;
-        this.brainCreateNewHiddenNodeChance = newHiddenNodeChance;
+        brainInitialConnectionChance = initialConnectionChance;
+        brainWeightMutationChance = mutationChance;
+        brainWeightMutationStepSize = mutationStepSize;
+        brainRemoveLinkChance = removeLinkChance;
+        brainWeightDecayAmount = weightDecayAmount;
+        brainCreateNewLinkChance = newLinkChance;
+        brainCreateNewHiddenNodeChance = newHiddenNodeChance;
         //this.mutationStrengthSlot = mutationStrengthSlot;
-        
-              
+
         bodyColorsMutationChance = 0.15f;
         bodyColorsMutationStepSize = 0.02f;
         bodyCoreSizeMutationChance = 0.25f;
@@ -67,15 +73,15 @@ public class MutationSettings {
         //mutationStrengthSlot = 0f;
     }
 
+    /// Zero-chance settings init
     public MutationSettings() {
-        // Zero-chance settings init
-        this.brainInitialConnectionChance = 0f;
-        this.brainWeightMutationChance = 0f;
-        this.brainWeightMutationStepSize = 0f;
-        this.brainRemoveLinkChance = 0f;
-        this.brainWeightDecayAmount = 1f;
-        this.brainCreateNewLinkChance = 0f;
-        this.brainCreateNewHiddenNodeChance = 0f;        
+        brainInitialConnectionChance = 0f;
+        brainWeightMutationChance = 0f;
+        brainWeightMutationStepSize = 0f;
+        brainRemoveLinkChance = 0f;
+        brainWeightDecayAmount = 1f;
+        brainCreateNewLinkChance = 0f;
+        brainCreateNewHiddenNodeChance = 0f;        
               
         bodyColorsMutationChance = 0f;
         bodyColorsMutationStepSize = 0f;
@@ -97,4 +103,70 @@ public class MutationSettings {
         defaultFoodMutationChance = 0f;
         defaultFoodMutationStepSize = 0f;
     }
+    */
+}
+
+[Serializable]
+public class MutationSettingsInstance
+{
+    public float brainInitialConnectionChance;
+    public float brainWeightMutationChance;
+    public float brainWeightMutationStepSize;
+    public float brainRemoveLinkChance;
+    public float brainWeightDecayAmount;
+    public float brainCreateNewLinkChance;
+    public float brainCreateNewHiddenNodeChance;
+
+    public float bodyColorsMutationChance;
+    public float bodyColorsMutationStepSize;
+    public float bodyCoreSizeMutationChance;
+    public float bodyCoreMutationStepSize;
+    public float bodyProportionsMutationChance;
+    public float bodyProportionsMutationStepSize;
+    public float bodyEyeProportionsMutationChance;
+    public float bodyEyeProportionsMutationStepSize;    
+    public float bodyModuleCreateNewChance;
+    public float bodyModuleInternalMutationChance;
+    public float bodyModuleInternalMutationStepSize;
+    public float bodyModuleRemoveExistingChance;
+    public float bodyTalentSpecMutationChance;
+    public float bodyTalentSpecMutationStepSize;
+    public float bodyDietSpecMutationChance;
+    public float bodyDietSpecMutationStepSize;
+
+    public float defaultFoodMutationChance;
+    public float defaultFoodMutationStepSize; 
+    
+    public MutationSettingsInstance(MutationSettings template) { CopyFromTemplate(template); }
+    
+    public void CopyFromTemplate(MutationSettings template)
+    {
+        brainInitialConnectionChance = template.data.brainInitialConnectionChance;
+        brainWeightMutationChance = template.data.brainWeightMutationChance;
+        brainWeightMutationStepSize = template.data.brainWeightMutationStepSize;
+        brainRemoveLinkChance = template.data.brainRemoveLinkChance;
+        brainWeightDecayAmount = template.data.brainWeightDecayAmount;
+        brainCreateNewLinkChance = template.data.brainCreateNewLinkChance;
+        brainCreateNewHiddenNodeChance = template.data.brainCreateNewHiddenNodeChance;
+
+        bodyColorsMutationChance = template.data.bodyColorsMutationChance;
+        bodyColorsMutationStepSize = template.data.brainWeightMutationStepSize;
+        bodyCoreSizeMutationChance = template.data.bodyCoreSizeMutationChance;
+        bodyCoreMutationStepSize = template.data.bodyCoreMutationStepSize;
+        bodyProportionsMutationChance = template.data.bodyProportionsMutationChance;
+        bodyProportionsMutationStepSize = template.data.bodyProportionsMutationStepSize;
+        bodyEyeProportionsMutationChance = template.data.bodyEyeProportionsMutationChance;
+        bodyEyeProportionsMutationStepSize = template.data.bodyEyeProportionsMutationStepSize;
+        bodyModuleCreateNewChance = template.data.bodyModuleCreateNewChance;
+        bodyModuleInternalMutationChance = template.data.bodyModuleInternalMutationChance;
+        bodyModuleInternalMutationStepSize = template.data.bodyModuleInternalMutationStepSize;
+        bodyModuleRemoveExistingChance = template.data.bodyModuleRemoveExistingChance;
+        bodyTalentSpecMutationChance = template.data.bodyTalentSpecMutationChance;
+        bodyTalentSpecMutationStepSize = template.data.bodyTalentSpecMutationStepSize;
+        bodyDietSpecMutationChance = template.data.bodyDietSpecMutationChance;
+        bodyDietSpecMutationStepSize = template.data.bodyDietSpecMutationStepSize;
+
+        defaultFoodMutationChance = template.data.defaultFoodMutationChance;
+        defaultFoodMutationStepSize = template.data.defaultFoodMutationStepSize; 
+    }   
 }

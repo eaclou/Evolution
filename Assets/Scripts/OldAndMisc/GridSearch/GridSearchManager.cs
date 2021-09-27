@@ -1,12 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 
 [CreateAssetMenu(fileName = "GridSearchManager", menuName = "GridSearchManager", order = 1)]
-public class GridSearchManager : ScriptableObject {
-    
-    private MutationSettings settings;
+public class GridSearchManager : ScriptableObject 
+{
+    private MutationSettingsInstance settings;
     private bool biggerIsBetter;
 
     //public int resolution = 2;  // how to split each dimension    
@@ -46,7 +45,7 @@ public class GridSearchManager : ScriptableObject {
         return numGens;
     }
 
-    public void InitializeGridSearch(MutationSettings settings, bool biggerIsBetter) {
+    public void InitializeGridSearch(MutationSettingsInstance settings, bool biggerIsBetter) {
         this.biggerIsBetter = biggerIsBetter;
         this.settings = settings;
 

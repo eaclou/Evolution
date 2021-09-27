@@ -22,7 +22,7 @@ public class Lookup : ScriptableObject
     [Header("Scriptable Objects")]
     public SimEventLookup simEvents;
 
-	[Header("Colors")]
+    [Header("Colors")]
     public Color buttonActiveColor = new Color(1f, 1f, 1f, 1f);
     public Color buttonDisabledColor = new Color(0.7f, 0.7f, 0.7f, 1f);
     public Color colorSpiritBrushLight;
@@ -32,7 +32,33 @@ public class Lookup : ScriptableObject
 	
 	[Header("Internal Lookups")]
 	#region Resource Lookups
+	
+	[SerializeField] MutationSettingsData[] mutationSettings;
+	
+	public MutationSettingsInstance GetMutationSettingsCopy(MutationSettingsId id)
+	{
+		var template = GetMutationSettingsTemplate(id);
+		return new MutationSettingsInstance(template);
+	}
+	
+	public MutationSettings GetMutationSettingsTemplate(MutationSettingsId id)
+	{
+		foreach (var setting in mutationSettings)
+			if (setting.id == id)
+				return setting.value;
+		
+		Debug.LogError($"{id} Mutation Settings not found in resource lookup");	
+		return null;
+	}
+	
+	[Serializable]
+	public struct MutationSettingsData
+	{
+		public MutationSettingsId id;
+		public MutationSettings value;
+	}
 
+	// * Refactor to Serialized Dictionary
 	[SerializeField] CauseOfDeathData[] causesOfDeath;
 
 	public CauseOfDeathSO GetCauseOfDeath(CauseOfDeathId id)
@@ -45,6 +71,7 @@ public class Lookup : ScriptableObject
         return causesOfDeath[0].value;
     }
     
+    // * Refactor to Serialized Dictionary
     public TrophicLayerSO[] knowledgeMaps;
     
     // TBD: cache specific elements for faster lookup
