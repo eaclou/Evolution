@@ -1192,11 +1192,11 @@ public class Agent : MonoBehaviour {
 
         mouthRef.Initialize(genome.bodyGenome.coreGenome);
 
-        environmentModule = new CritterModuleEnvironment(genome.bodyGenome.environmentalGenome, this);
-        foodModule = new CritterModuleFood(genome.bodyGenome.foodGenome, this);
-        friendModule = new CritterModuleFriends(genome.bodyGenome.friendGenome, this);
+        environmentModule = new CritterModuleEnvironment(genome.bodyGenome.environmentalGenome);
+        foodModule = new CritterModuleFood(genome.bodyGenome.foodGenome);
+        friendModule = new CritterModuleFriends(genome.bodyGenome.friendGenome);
         movementModule = new CritterModuleMovement(genome, genome.bodyGenome.movementGenome);
-        threatsModule = new CritterModuleThreats(genome.bodyGenome.threatGenome, this);
+        threatsModule = new CritterModuleThreats(genome.bodyGenome.threatGenome);
     }
     
     public void FirstTimeInitialize() { 

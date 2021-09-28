@@ -23,11 +23,11 @@ public class CritterModuleEnvironment
     public float[] velBottomLeftX;
     public float[] velBottomRightY;
     
-    public CritterModuleEnvironment(CritterModuleEnvironmentSensorsGenome genome, Agent agent) {
-        Initialize(genome, agent);
+    public CritterModuleEnvironment(CritterModuleEnvironmentSensorsGenome genome) {
+        Initialize(genome);
     }
 
-    public void Initialize(CritterModuleEnvironmentSensorsGenome genome, Agent agent) {
+    public void Initialize(CritterModuleEnvironmentSensorsGenome genome) {
         this.genome = genome;
 
         waterDepth = new float[1];
@@ -44,57 +44,56 @@ public class CritterModuleEnvironment
         velBottomLeftX = new float[1];
         velBottomRightY = new float[1]; 
         
-        this.parentID = genome.parentID;
-        this.inno = genome.inno;
+        parentID = genome.parentID;
+        inno = genome.inno;
     }
 
     public void MapNeuron(NID nid, Neuron neuron) {
-        if (inno == nid.moduleID) {
-            if (nid.neuronID == 1) {                
-                neuron.currentValue = waterDepth;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 2) {
-                neuron.currentValue = waterVelX;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 3) {
-                neuron.currentValue = waterVelY;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 4) {
-                neuron.currentValue = depthGradX;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 5) {
-                neuron.currentValue = depthGradY;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 6) {
-                neuron.currentValue = depthSouth;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 7) {
-                neuron.currentValue = depthWest;
-                neuron.neuronType = NeuronType.In;
-            }
-
-            if (nid.neuronID == 8) {
-                neuron.currentValue = velTopRightX;
-                neuron.neuronType = NeuronType.In;
-            }            
-            if (nid.neuronID == 9) {
-                neuron.currentValue = velTopLeftY;
-                neuron.neuronType = NeuronType.In;
-            }            
-            if (nid.neuronID == 10) {
-                neuron.currentValue = velBottomLeftX;
-                neuron.neuronType = NeuronType.In;
-            }            
-            if (nid.neuronID == 11) {
-                neuron.currentValue = velBottomRightY;
-                neuron.neuronType = NeuronType.In;
-            }
+        if (inno != nid.moduleID) return;
+        
+        if (nid.neuronID == 1) {                
+            neuron.currentValue = waterDepth;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 2) {
+            neuron.currentValue = waterVelX;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 3) {
+            neuron.currentValue = waterVelY;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 4) {
+            neuron.currentValue = depthGradX;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 5) {
+            neuron.currentValue = depthGradY;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 6) {
+            neuron.currentValue = depthSouth;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 7) {
+            neuron.currentValue = depthWest;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 8) {
+            neuron.currentValue = velTopRightX;
+            neuron.neuronType = NeuronType.In;
+        }            
+        if (nid.neuronID == 9) {
+            neuron.currentValue = velTopLeftY;
+            neuron.neuronType = NeuronType.In;
+        }            
+        if (nid.neuronID == 10) {
+            neuron.currentValue = velBottomLeftX;
+            neuron.neuronType = NeuronType.In;
+        }            
+        if (nid.neuronID == 11) {
+            neuron.currentValue = velBottomRightY;
+            neuron.neuronType = NeuronType.In;
         }
     }
 

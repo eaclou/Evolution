@@ -42,8 +42,7 @@ public class CritterModuleCommunicationGenome
         neuronList.Add(outComm0); // 103
         neuronList.Add(outComm1); // 104
         neuronList.Add(outComm2); // 105
-        neuronList.Add(outComm3); // 106 
-        
+        neuronList.Add(outComm3); // 106
     }
 
     public void SetToMutatedCopyOfParentGenome(CritterModuleCommunicationGenome parentGenome, MutationSettingsInstance settings) {

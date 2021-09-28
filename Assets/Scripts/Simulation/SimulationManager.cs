@@ -298,7 +298,7 @@ public class SimulationManager : Singleton<SimulationManager>
             LoadTrainingData();
         }
 
-        simStateData = new SimulationStateData(this);    
+        simStateData = new SimulationStateData();
     }
     
     private void LoadingInitializePopulationGenomes() {
@@ -977,7 +977,7 @@ public class SimulationManager : Singleton<SimulationManager>
 
         // Need to connect UI slotID to speciesID
         if(masterGenomePool.currentlyActiveSpeciesIDList.Count > 1) {
-            masterGenomePool.ExtinctifySpecies(this, masterGenomePool.currentlyActiveSpeciesIDList[0]);
+            masterGenomePool.ExtinctifySpecies(masterGenomePool.currentlyActiveSpeciesIDList[0]);
         }
     }
     
@@ -1053,7 +1053,7 @@ public class SimulationManager : Singleton<SimulationManager>
 
         // -- Check which species this new childGenome should belong to (most likely its parent, but maybe it creates a new species or better fits in with a diff existing species)        
         //sourceSpeciesPool.AddNewCandidateGenome(newGenome);
-        masterGenomePool.AssignNewMutatedGenomeToSpecies(newGenome, sourceSpeciesPool.speciesID, this); // Checks which species this new genome should belong to and adds it to queue / does necessary processing   
+        masterGenomePool.AssignNewMutatedGenomeToSpecies(newGenome, sourceSpeciesPool.speciesID); // Checks which species this new genome should belong to and adds it to queue / does necessary processing   
                 
         // -- Clear Agent object so that it's ready to be reused
             // i.e. Set curLifecycle to .AwaitingRespawn ^

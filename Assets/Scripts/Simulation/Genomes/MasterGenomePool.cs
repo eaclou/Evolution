@@ -7,6 +7,7 @@ public class MasterGenomePool
     //public TreeOfLifeManager treeOfLifeManager;
     UIManager uiManager => UIManager.instance;
     SelectionManager selectionManager => SelectionManager.instance;
+    SimulationManager simulation => SimulationManager.instance;
 
     public static int nextCandidateIndex = 0;
 
@@ -72,7 +73,7 @@ public class MasterGenomePool
         speciesCreatedOrDestroyedThisFrame = false;
     }
 
-    private void CheckForExtinction(SimulationManager simManagerRef) {
+    private void CheckForExtinction() {
         if(currentlyActiveSpeciesIDList.Count > targetNumSpecies) {
             int leastFitSpeciesID = -1;
             float worstFitness = 99999f;
@@ -87,7 +88,7 @@ public class MasterGenomePool
                     noCurrentlyExtinctFlaggedSpecies = false;
 
                     if(completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].candidateGenomesList.Count < 1) {
-                        ExtinctifySpecies(simManagerRef, currentlyActiveSpeciesIDList[i]);
+                        ExtinctifySpecies(currentlyActiveSpeciesIDList[i]);
                     }
                 }
             }
@@ -108,7 +109,7 @@ public class MasterGenomePool
         Debug.Log("FLAG EXTINCT: " + speciesID.ToString());
     }
     
-    public void ExtinctifySpecies(SimulationManager simManagerRef, int speciesID) {
+    public void ExtinctifySpecies(int speciesID) {
         //Debug.Log("REMOVE SPECIES " + speciesID.ToString());
 
         // find and remove from active list:
@@ -120,7 +121,7 @@ public class MasterGenomePool
         }
 
         currentlyActiveSpeciesIDList.RemoveAt(listIndex);
-        completeSpeciesPoolsList[speciesID].ProcessExtinction(simManagerRef.simAgeTimeSteps);
+        completeSpeciesPoolsList[speciesID].ProcessExtinction(simulation.simAgeTimeSteps);
 
         //Signal RenderKing/TreeOfLifeManager to update:
         //simManagerRef.uiManager.treeOfLifeManager.RemoveExtinctSpecies(speciesID);
@@ -177,7 +178,7 @@ public class MasterGenomePool
 
             int selectedIndex = 0;
             // generate random lottery value between 0f and totalFitness:
-            float lotteryValue = UnityEngine.Random.Range(0f, 1f);
+            float lotteryValue = Random.Range(0f, 1f);
             float currentValue = 0f;
             for (int i = 0; i < rankedEvalIndices.Length; i++) {
                 if (lotteryValue >= currentValue && lotteryValue < (currentValue + rankedEvalScoresArray[i])) {
@@ -203,13 +204,13 @@ public class MasterGenomePool
                 }
             }
             //int randomTableIndex = UnityEngine.Random.Range(0, currentlyActiveSpeciesIDList.Count);
-            int randomTableIndex = UnityEngine.Random.Range(0, eligibleSpeciesIDList.Count);
+            int randomTableIndex = Random.Range(0, eligibleSpeciesIDList.Count);
 
             // temp minor penalty to oldest species:
             float oldestSpeciesRerollChance = 0.33f;
             if(randomTableIndex == 0) {
-                if(UnityEngine.Random.Range(0f, 1f) < oldestSpeciesRerollChance) {
-                    randomTableIndex = UnityEngine.Random.Range(0, eligibleSpeciesIDList.Count);
+                if(Random.Range(0f, 1f) < oldestSpeciesRerollChance) {
+                    randomTableIndex = Random.Range(0, eligibleSpeciesIDList.Count);
                 }
             }
             int speciesIndex = eligibleSpeciesIDList[randomTableIndex];
@@ -231,17 +232,16 @@ public class MasterGenomePool
                 if(completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].candidateGenomesList.Count < completeSpeciesPoolsList[targetSpeciesID].candidateGenomesList.Count) {
                     targetSpeciesID = currentlyActiveSpeciesIDList[i];
                 }
-                
             }
         }        
         return completeSpeciesPoolsList[targetSpeciesID];
-        
     }
-    public void AssignNewMutatedGenomeToSpecies(AgentGenome newGenome, int parentSpeciesID, SimulationManager simManagerRef) {
-        // *** Gross code organization btw this and SimManager ***
+    
+    // *** Gross code organization btw this and SimManager ***
+    public void AssignNewMutatedGenomeToSpecies(AgentGenome newGenome, int parentSpeciesID) {
         int closestSpeciesID = -1;
-
         float closestDistance = 99999f;
+        
         for(int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
             if(!completeSpeciesPoolsList[ currentlyActiveSpeciesIDList[i] ].isFlaggedForExtinction) {  // Dying species not allowed?
                 float similarityDistance = GetSimilarityScore(newGenome, completeSpeciesPoolsList[ currentlyActiveSpeciesIDList[i] ].representativeCandidate.candidateGenome);
@@ -267,7 +267,7 @@ public class MasterGenomePool
 
                     int seedSpeciesID = closestSpeciesID; // simManagerRef.masterGenomePool.currentlyActiveSpeciesIDList[ UnityEngine.Random.Range(0, currentlyActiveSpeciesIDList.Count) ];
                     //AgentGenome seedGenome =
-                    simManagerRef.AddNewSpecies(newGenome, seedSpeciesID);
+                    simulation.AddNewSpecies(newGenome, seedSpeciesID);
 
                     speciesSimilarityDistanceThreshold += 70f;
 
@@ -276,7 +276,7 @@ public class MasterGenomePool
                 }               
             }
             else {
-                Debug.Log("speciesCreatedOrDestroyedThisFrame closestDistanceSpeciesID: " + closestSpeciesID.ToString() + ", score: " + closestDistance.ToString());
+                Debug.Log("speciesCreatedOrDestroyedThisFrame closestDistanceSpeciesID: " + closestSpeciesID + ", score: " + closestDistance);
             }
         }
         else {
@@ -316,7 +316,7 @@ public class MasterGenomePool
             speciesSimilarityDistanceThreshold = Mathf.Min(speciesSimilarityDistanceThreshold, 6f); // cap
         }
 
-        CheckForExtinction(simManagerRef); // *** TEMPORARILLY (UN)DISABLED!!!!! *************
+        CheckForExtinction(); // *** TEMPORARILLY (UN)DISABLED!!!!! *************
     }
 
     public void GlobalFindCandidateID(int ID) {
@@ -332,14 +332,13 @@ public class MasterGenomePool
                 if(refID == ID) {
                     foundCandidate = true;
                     foundSpeciesID = completeSpeciesPoolsList[completeSpeciesIndex].speciesID;
-                    Debug.Log("FOUND! " + ID.ToString() + ", species: " + foundSpeciesID.ToString() + ", CDSID: " + refID.ToString());
+                    Debug.Log("FOUND! " + ID + ", species: " + foundSpeciesID + ", CDSID: " + refID);
                 }
             }
         } 
         
         if(foundCandidate == false) {
             // look through ALL species?
-
             for(int a = 0; a < completeSpeciesPoolsList.Count; a++) {
                 for(int b = 0; b < completeSpeciesPoolsList[a].candidateGenomesList.Count; b++) {
                     int refID = completeSpeciesPoolsList[a].candidateGenomesList[b].candidateID;
@@ -347,7 +346,7 @@ public class MasterGenomePool
                     if(refID == ID) {
                         foundCandidate = true;
                         foundSpeciesID = completeSpeciesPoolsList[a].speciesID;
-                        Debug.Log("FOUND COMPLETE! " + ID.ToString() + ", species: " + foundSpeciesID.ToString() + ", CDSID: " + refID.ToString());
+                        Debug.Log("FOUND COMPLETE! " + ID + ", species: " + foundSpeciesID + ", CDSID: " + refID);
                     }
                 }                
             }
@@ -359,16 +358,15 @@ public class MasterGenomePool
                     foundCandidate = true;
                     //foundSpeciesID = completeSpeciesPoolsList[a].speciesID;
                     // It was somehow deleted twice?  Or simply looking in the wrong SpeciesPool?
-                    Debug.Log("FOUND COMPLETE! " + ID.ToString() + ", CDSID: " + debugRecentlyDeletedCandidateIDsList[k].ToString());
+                    Debug.Log("FOUND COMPLETE! " + ID + ", CDSID: " + debugRecentlyDeletedCandidateIDsList[k]);
                 }
             }
         }
     }
      
-    public float GetSimilarityScore(AgentGenome newGenome, AgentGenome repGenome) {
-
-        // DUE FOR UPGRADE / OVERHAUL!!!!  ******
-
+    // DUE FOR UPGRADE / OVERHAUL!!!!  ****** 
+    public float GetSimilarityScore(AgentGenome newGenome, AgentGenome repGenome) 
+    {
         // *** need to normalize all to 0-1 for more fair comparison? ***
         // have centralized min/max values for each attribute?
         float dBaseSize = Mathf.Abs(newGenome.bodyGenome.coreGenome.creatureBaseLength - repGenome.bodyGenome.coreGenome.creatureBaseLength);

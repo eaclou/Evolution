@@ -12,11 +12,11 @@ public class CritterModuleFriends
     public float[] friendDirX;
     public float[] friendDirY;
 
-    public CritterModuleFriends(CritterModuleFriendSensorsGenome genome, Agent agent) {
-        Initialize(genome, agent);
+    public CritterModuleFriends(CritterModuleFriendSensorsGenome genome) {
+        Initialize(genome);
     }
 
-    public void Initialize(CritterModuleFriendSensorsGenome genome, Agent agent) {
+    public void Initialize(CritterModuleFriendSensorsGenome genome) {
         friendPosX = new float[1]; // 8
         friendPosY = new float[1]; // 9
         friendVelX = new float[1]; // 10

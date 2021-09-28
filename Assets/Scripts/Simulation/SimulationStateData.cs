@@ -125,8 +125,8 @@ public class SimulationStateData {
 
     public Vector4[] depthAtAgentPositionsArray;
     
-    public SimulationStateData(SimulationManager simManager) {
-        InitializeData(simManager);
+    public SimulationStateData() {
+        InitializeData();
     }
 
     public static int GetCritterInitDataSize() {
@@ -136,7 +136,7 @@ public class SimulationStateData {
         return sizeof(float) * 22;
     }
 	
-    private void InitializeData(SimulationManager simManager) {
+    private void InitializeData() {
         /*agentSimDataArray = new AgentSimData[simManager._NumAgents];
         for(int i = 0; i < agentSimDataArray.Length; i++) {
             agentSimDataArray[i] = new AgentSimData();

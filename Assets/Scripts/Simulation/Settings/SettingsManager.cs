@@ -1,12 +1,5 @@
 ﻿using Playcraft;
 
-public enum MutationSettingsId
-{
-    None,
-    Vertebrate,
-    Supervised,
-}
-
 public class SettingsManager : Singleton<SettingsManager> 
 {
     //public MutationSettings mutationSettingsSupervised;

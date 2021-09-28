@@ -33,8 +33,8 @@ public class CritterModuleCommunication {
         outComm2 = new float[1]; // 5
         outComm3 = new float[1]; // 6 
 
-        this.parentID = genome.parentID;
-        this.inno = genome.inno; 
+        parentID = genome.parentID;
+        inno = genome.inno; 
     }
 
     public void MapNeuron(NID nid, Neuron neuron) {

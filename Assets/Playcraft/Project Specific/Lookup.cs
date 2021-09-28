@@ -21,6 +21,7 @@ public class Lookup : ScriptableObject
 	
     [Header("Scriptable Objects")]
     public SimEventLookup simEvents;
+    public NeuralMap neuralMap;
 
     [Header("Colors")]
     public Color buttonActiveColor = new Color(1f, 1f, 1f, 1f);
@@ -37,8 +38,7 @@ public class Lookup : ScriptableObject
 	
 	public MutationSettingsInstance GetMutationSettingsCopy(MutationSettingsId id)
 	{
-		var template = GetMutationSettingsTemplate(id);
-		return new MutationSettingsInstance(template);
+		return GetMutationSettingsTemplate(id).GetCopy();
 	}
 	
 	public MutationSettings GetMutationSettingsTemplate(MutationSettingsId id)

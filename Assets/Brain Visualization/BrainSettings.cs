@@ -3,7 +3,7 @@
 // Contains static data for brain visualization settings
 // Fields that change per individual agent at runtime should be moved to GenerateBrainVisualization.cs
 // Quality-setting based groups of fields will be in separate ScriptableObjects
-[CreateAssetMenu(menuName = "Pond Water/Brain Visualization/Brain Data", fileName = "Brain Data")]
+[CreateAssetMenu(menuName = "Pond Water/Brain/Brain Visualization Data", fileName = "Brain Visualization Data")]
 public class BrainSettings : ScriptableObject
 {
     [Header("Display Resources")]

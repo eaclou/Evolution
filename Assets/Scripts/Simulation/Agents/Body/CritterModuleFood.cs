@@ -1,8 +1,11 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
-[System.Serializable]
+[Serializable]
 public class CritterModuleFood 
 {
+    Lookup lookup => Lookup.instance;
+    NeuralMap neuralMap => lookup.neuralMap;
     SimulationManager simulation => SimulationManager.instance;
     VegetationManager vegetation => simulation.vegetationManager;
     ZooplanktonManager microbes => simulation.zooplanktonManager;
@@ -58,13 +61,13 @@ public class CritterModuleFood
 
     public CritterModuleFoodSensorsGenome genome;
 
-    public CritterModuleFood(CritterModuleFoodSensorsGenome genome, Agent agent) {
-        Initialize(genome, agent);
+    public CritterModuleFood(CritterModuleFoodSensorsGenome genome) {
+        Initialize(genome);
     }
 
-    public void Initialize(CritterModuleFoodSensorsGenome genome, Agent agent) {
+    public void Initialize(CritterModuleFoodSensorsGenome genome) {
         this.genome = genome;
-
+        
         if(genome.useNutrients) {
             nutrientDensity = new float[1];
             nutrientGradX = new float[1];
@@ -76,7 +79,6 @@ public class CritterModuleFood
             
             foodAnimalPosX = new float[1];
             foodAnimalPosY = new float[1];
-            
         }
         if(genome.useVel) {
             foodPlantVelX = new float[1];
@@ -84,7 +86,6 @@ public class CritterModuleFood
             foodAnimalVelX = new float[1];
             foodAnimalVelY = new float[1];
         }
-        //if(genome.useDir) {
         foodPlantDistance = new float[1];
         foodPlantDirX = new float[1];
         foodPlantDirY = new float[1];
@@ -100,15 +101,13 @@ public class CritterModuleFood
         foodCorpseDistance = new float[1];
         foodCorpseDirX = new float[1];
         foodCorpseDirY = new float[1];
-        //}
         if(genome.useStats) {
             foodPlantQuality = new float[1];
             foodPlantRelSize = new float[1];
             foodAnimalQuality = new float[1];
             foodAnimalRelSize = new float[1];
         }
-                
-
+        
         sensorRange = 16f; // TEMP HARDCODED *****
         preferredSize = genome.preferredSize;
 
@@ -150,122 +149,159 @@ public class CritterModuleFood
             }
         }*/
 
-        this.parentID = genome.parentID;
-        this.inno = genome.inno;
+        parentID = genome.parentID;
+        inno = genome.inno;
     }
 
     public void MapNeuron(NID nid, Neuron neuron) {
-        if (inno == nid.moduleID) {
-            if (nid.neuronID == 1) {
-                neuron.currentValue = nutrientDensity;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 2) {
-                neuron.currentValue = nutrientGradX;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 3) {
-                neuron.currentValue = nutrientGradY;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 4) {
-                neuron.currentValue = foodPlantPosX;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 5) {
-                neuron.currentValue = foodPlantPosY;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 6) {
-                neuron.currentValue = foodPlantDistance;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 7) {
-                neuron.currentValue = foodPlantVelX;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 8) {
-                neuron.currentValue = foodPlantVelY;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 9) {
-                neuron.currentValue = foodPlantDirX;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 10) {
-                neuron.currentValue = foodPlantDirY;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 11) {
-                neuron.currentValue = foodPlantQuality;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 12) {
-                neuron.currentValue = foodPlantRelSize;
-                neuron.neuronType = NeuronType.In;
-            }
+        if (inno != nid.moduleID) 
+            return;
 
-            if (nid.neuronID == 13) {
-                neuron.currentValue = foodEggDistance;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 14) {
-                neuron.currentValue = foodEggDirX;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 15) {
-                neuron.currentValue = foodEggDirY;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 16) {
-                neuron.currentValue = foodCorpseDistance;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 17) {
-                neuron.currentValue = foodCorpseDirX;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 18) {
-                neuron.currentValue = foodCorpseDirY;
-                neuron.neuronType = NeuronType.In;
-            }
-
-            if (nid.neuronID == 24) {
-                neuron.currentValue = foodAnimalPosX;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 25) {
-                neuron.currentValue = foodAnimalPosY;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 26) {
-                neuron.currentValue = foodAnimalDistance;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 27) {
-                neuron.currentValue = foodAnimalVelX;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 28) {
-                neuron.currentValue = foodAnimalVelY;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 29) {
-                neuron.currentValue = foodAnimalDirX;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 30) {
-                neuron.currentValue = foodAnimalDirY;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 31) {
-                neuron.currentValue = foodAnimalQuality;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 32) {
-                neuron.currentValue = foodAnimalRelSize;
-                neuron.neuronType = NeuronType.In;
-            }
+        // WPP: conditionals replaced with switch and lookup
+        neuron.neuronType = neuralMap.GetIO(nid.neuronID);    
+        neuron.currentValue = GetNeuralValue(nid.neuronID);
+        /*if (nid.neuronID == 1) {
+            neuron.currentValue = nutrientDensity;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 2) {
+            neuron.currentValue = nutrientGradX;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 3) {
+            neuron.currentValue = nutrientGradY;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 4) {
+            neuron.currentValue = foodPlantPosX;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 5) {
+            neuron.currentValue = foodPlantPosY;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 6) {
+            neuron.currentValue = foodPlantDistance;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 7) {
+            neuron.currentValue = foodPlantVelX;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 8) {
+            neuron.currentValue = foodPlantVelY;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 9) {
+            neuron.currentValue = foodPlantDirX;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 10) {
+            neuron.currentValue = foodPlantDirY;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 11) {
+            neuron.currentValue = foodPlantQuality;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 12) {
+            neuron.currentValue = foodPlantRelSize;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 13) {
+            neuron.currentValue = foodEggDistance;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 14) {
+            neuron.currentValue = foodEggDirX;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 15) {
+            neuron.currentValue = foodEggDirY;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 16) {
+            neuron.currentValue = foodCorpseDistance;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 17) {
+            neuron.currentValue = foodCorpseDirX;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 18) {
+            neuron.currentValue = foodCorpseDirY;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 24) {
+            neuron.currentValue = foodAnimalPosX;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 25) {
+            neuron.currentValue = foodAnimalPosY;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 26) {
+            neuron.currentValue = foodAnimalDistance;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 27) {
+            neuron.currentValue = foodAnimalVelX;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 28) {
+            neuron.currentValue = foodAnimalVelY;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 29) {
+            neuron.currentValue = foodAnimalDirX;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 30) {
+            neuron.currentValue = foodAnimalDirY;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 31) {
+            neuron.currentValue = foodAnimalQuality;
+            neuron.neuronType = NeuronType.In;
+        }
+        if (nid.neuronID == 32) {
+            neuron.currentValue = foodAnimalRelSize;
+            neuron.neuronType = NeuronType.In;
+        }*/
+    }
+    
+    float[] GetNeuralValue(int neuronID)
+    {
+        switch(neuronID)
+        {
+            case 1: return nutrientDensity;
+            case 2: return nutrientGradX;
+            case 3: return nutrientGradY;
+            case 4: return foodPlantPosX;
+            case 5: return foodPlantPosY;
+            case 6: return foodPlantDistance;
+            case 7: return foodPlantVelX;
+            case 8: return foodPlantVelY;
+            case 9: return foodPlantDirX;
+            case 10: return foodPlantDirY;
+            case 11: return foodPlantQuality;
+            case 12: return foodPlantRelSize;
+            case 13: return foodEggDistance;
+            case 14: return foodEggDirX;
+            case 15: return foodEggDirY;
+            case 16: return foodCorpseDistance;
+            case 17: return foodCorpseDirX;
+            case 18: return foodCorpseDirY;
+            case 24: return foodAnimalPosX;
+            case 25: return foodAnimalPosY;
+            case 26: return foodAnimalDistance;
+            case 27: return foodAnimalVelX;
+            case 28: return foodAnimalVelY;
+            case 29: return foodAnimalDirX;
+            case 30: return foodAnimalDirY;
+            case 31: return foodAnimalQuality;
+            case 32: return foodAnimalRelSize;
+            default: return null;
         }
     }
 

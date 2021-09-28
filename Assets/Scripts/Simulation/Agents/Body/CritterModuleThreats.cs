@@ -17,11 +17,11 @@ public class CritterModuleThreats
     public float[] enemyGrowthStage;
     public float[] enemyThreatRating;
 
-    public CritterModuleThreats(CritterModuleThreatSensorsGenome genome, Agent agent) {
-        Initialize(genome, agent);
+    public CritterModuleThreats(CritterModuleThreatSensorsGenome genome) {
+        Initialize(genome);
     }
 
-    public void Initialize(CritterModuleThreatSensorsGenome genome, Agent agent) {
+    public void Initialize(CritterModuleThreatSensorsGenome genome) {
         enemyPosX = new float[1]; // 14
         enemyPosY = new float[1]; // 15
         enemyVelX = new float[1]; // 16
@@ -34,8 +34,8 @@ public class CritterModuleThreats
         enemyGrowthStage = new float[1]; // 202
         enemyThreatRating = new float[1]; // 203
 
-        this.parentID = genome.parentID;
-        this.inno = genome.inno; 
+        parentID = genome.parentID;
+        inno = genome.inno; 
     }
 
     public void MapNeuron(NID nid, Neuron neuron) {
