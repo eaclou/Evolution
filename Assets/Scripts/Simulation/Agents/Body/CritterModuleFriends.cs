@@ -2,6 +2,9 @@
 
 public class CritterModuleFriends 
 {
+    Lookup lookup => Lookup.instance;
+    NeuralMap neuralMap => lookup.neuralMap;
+
     public int parentID;
     public int inno;
 
@@ -28,32 +31,24 @@ public class CritterModuleFriends
         inno = genome.inno; 
     }
 
-    public void MapNeuron(NID nid, Neuron neuron) {
-        if (inno == nid.moduleID) {
-            if (nid.neuronID == 8) {
-                neuron.currentValue = friendPosX;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 9) {
-                neuron.currentValue = friendPosY;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 10) {
-                neuron.currentValue = friendVelX;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 11) {
-                neuron.currentValue = friendVelY;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 12) {
-                neuron.currentValue = friendDirX;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 13) {
-                neuron.currentValue = friendDirY;
-                neuron.neuronType = NeuronType.In;
-            }
+    public void MapNeuron(NID nid, Neuron neuron) 
+    {
+        if (inno != nid.moduleID) return;
+        neuron.neuronType = neuralMap.GetIO(nid.neuronID);    
+        neuron.currentValue = GetNeuralValue(nid.neuronID);
+    }
+    
+    float[] GetNeuralValue(int neuronID)
+    {
+        switch(neuronID)
+        {
+            case 8: return friendPosX;
+            case 9: return friendPosY;
+            case 10: return friendVelX;
+            case 11: return friendVelY;
+            case 12: return friendDirX;
+            case 13: return friendDirY;
+            default: return null;
         }
     }
 

@@ -153,11 +153,10 @@ public class CritterModuleFood
         inno = genome.inno;
     }
 
-    public void MapNeuron(NID nid, Neuron neuron) {
-        if (inno != nid.moduleID) 
-            return;
-
-        // WPP: conditionals replaced with switch and lookup
+    // WPP: conditionals replaced with switch and lookup
+    public void MapNeuron(NID nid, Neuron neuron) 
+    {
+        if (inno != nid.moduleID) return;
         neuron.neuronType = neuralMap.GetIO(nid.neuronID);    
         neuron.currentValue = GetNeuralValue(nid.neuronID);
         /*if (nid.neuronID == 1) {

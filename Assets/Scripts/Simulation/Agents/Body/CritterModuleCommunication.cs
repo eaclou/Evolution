@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 
-public class CritterModuleCommunication {
+public class CritterModuleCommunication 
+{
+    Lookup lookup => Lookup.instance;
+    NeuralMap neuralMap => lookup.neuralMap;
 
     public CritterModuleCommunicationGenome genome;
 	public int parentID;
@@ -15,11 +18,7 @@ public class CritterModuleCommunication {
     public float[] outComm1;
     public float[] outComm2;
     public float[] outComm3;  // 7 Out?
-
-    public CritterModuleCommunication() {
-               
-    }
-
+    
     public void Initialize(CritterModuleCommunicationGenome genome) {
         this.genome = genome;
 
@@ -37,41 +36,26 @@ public class CritterModuleCommunication {
         inno = genome.inno; 
     }
 
-    public void MapNeuron(NID nid, Neuron neuron) {
-        if (inno == nid.moduleID) {
-            if (nid.neuronID == 40) {
-                neuron.currentValue = inComm0;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 41) {
-                neuron.currentValue = inComm1;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 42) {
-                neuron.currentValue = inComm2;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 43) {
-                neuron.currentValue = inComm3;
-                neuron.neuronType = NeuronType.In;
-            }
-
-            if (nid.neuronID == 103) {
-                neuron.currentValue = outComm0;
-                neuron.neuronType = NeuronType.Out;
-            }
-            if (nid.neuronID == 104) {
-                neuron.currentValue = outComm1;
-                neuron.neuronType = NeuronType.Out;
-            }
-            if (nid.neuronID == 105) {
-                neuron.currentValue = outComm2;
-                neuron.neuronType = NeuronType.Out;
-            }
-            if (nid.neuronID == 106) {
-                neuron.currentValue = outComm3;
-                neuron.neuronType = NeuronType.Out;
-            }
+    public void MapNeuron(NID nid, Neuron neuron) 
+    {
+        if (inno != nid.moduleID) return;
+        neuron.currentValue = GetNeuralValue(nid.neuronID);
+        neuron.neuronType = neuralMap.GetIO(nid.neuronID);
+    }
+    
+    float[] GetNeuralValue(int neuronID)
+    {
+        switch (neuronID)
+        {
+            case 40: return inComm0;
+            case 41: return inComm1;
+            case 42: return inComm2;
+            case 43: return inComm3;
+            case 103: return outComm0;
+            case 104: return outComm1;
+            case 105: return outComm2;
+            case 106: return outComm3;
+            default: return null;
         }
     }
 

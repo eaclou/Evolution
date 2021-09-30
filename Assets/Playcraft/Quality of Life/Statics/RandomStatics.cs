@@ -14,6 +14,7 @@ namespace Playcraft
             return (T)values.GetValue(random);
         }
         
+        /// Input percent chance of returning true (default is 0.5)
         public static bool CoinToss(float chance = 0.5f) { return Random.Range(0, 1) < chance; }
         
         public static bool RandomFlip(float chance, bool defaultValue) { return CoinToss(chance) ? !defaultValue : defaultValue; }

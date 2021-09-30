@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using UnityEngine;
 
 /// Maps neuron IDs to IO types, extend to include other static & centralized mappings
@@ -10,7 +11,7 @@ public class NeuralMap : ScriptableObject
     public NeuronType GetIO(int id)
     {
         foreach (var mapping in mappings)
-            if (mapping.id == id)
+            if (mapping.ids.Contains(id))
                 return mapping.io;
                 
         Debug.LogError($"No mapping found for id {id}");
@@ -20,7 +21,7 @@ public class NeuralMap : ScriptableObject
     [Serializable]
     public struct NeuronMap
     {
-        public int id;
         public NeuronType io;
+        public int[] ids;
     }
 }

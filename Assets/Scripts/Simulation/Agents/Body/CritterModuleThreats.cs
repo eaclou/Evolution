@@ -2,6 +2,9 @@
 
 public class CritterModuleThreats 
 {
+    Lookup lookup => Lookup.instance;
+    NeuralMap neuralMap => lookup.neuralMap;
+
     public int parentID;
     public int inno;
 
@@ -38,49 +41,28 @@ public class CritterModuleThreats
         inno = genome.inno; 
     }
 
-    public void MapNeuron(NID nid, Neuron neuron) {
-        if (inno == nid.moduleID) {
-            if (nid.neuronID == 14) {
-                neuron.currentValue = enemyPosX;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 15) {
-                neuron.currentValue = enemyPosY;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 16) {
-                neuron.currentValue = enemyVelX;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 17) {
-                neuron.currentValue = enemyVelY;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 18) {
-                neuron.currentValue = enemyDirX;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 19) {
-                neuron.currentValue = enemyDirY;
-                neuron.neuronType = NeuronType.In;
-            }
-
-            if (nid.neuronID == 200) {
-                neuron.currentValue = enemyRelSize;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 201) {
-                neuron.currentValue = enemyHealth;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 202) {
-                neuron.currentValue = enemyGrowthStage;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 203) {
-                neuron.currentValue = enemyThreatRating;
-                neuron.neuronType = NeuronType.In;
-            }
+    public void MapNeuron(NID nid, Neuron neuron) 
+    {
+        if (inno != nid.moduleID) return;
+        neuron.currentValue = GetNeuralValue(nid.neuronID);
+        neuron.neuronType = neuralMap.GetIO(nid.neuronID);
+    }
+    
+    float[] GetNeuralValue(int neuronID)
+    {
+        switch (neuronID)
+        {
+            case 14: return enemyPosX;
+            case 15: return enemyPosY;
+            case 16: return enemyVelX;
+            case 17: return enemyVelY;
+            case 18: return enemyDirX;
+            case 19: return enemyDirY;
+            case 200: return enemyRelSize;
+            case 201: return enemyHealth;
+            case 202: return enemyGrowthStage;
+            case 203: return enemyThreatRating;
+            default: return null;
         }
     }
 

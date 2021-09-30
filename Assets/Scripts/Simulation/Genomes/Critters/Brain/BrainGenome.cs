@@ -4,7 +4,6 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 using Playcraft;
 
-// * WPP: refactor -> simplify conditionals & loops, merge logic into methods, cleanup formatting, remove dead comments
 [Serializable]
 public class BrainGenome 
 {
@@ -19,13 +18,7 @@ public class BrainGenome
     }
 
     public void SetBodyNeuronsFromTemplate(BodyGenome templateBody) {
-        if (bodyNeuronList == null) {
-            bodyNeuronList = new List<NeuronGenome>();
-        }
-        else {
-            bodyNeuronList.Clear();
-        }
-
+        InitializeBodyNeuronList();
         InitializeBodyNeurons(templateBody);
     }
 
@@ -34,80 +27,50 @@ public class BrainGenome
         InitializeBodyNeurons(bodyGenome);
         InitializeAxons(initialWeightMultiplier, initialConnectionDensity, numInitHiddenNeurons);
     }
+    
+    void InitializeBodyNeuronList() {
+        if (bodyNeuronList == null) bodyNeuronList = new List<NeuronGenome>();
+        else bodyNeuronList.Clear();
+    }
 
     public void InitializeBodyNeurons(BodyGenome bodyGenome) {
         bodyGenome.InitializeBrainGenome(bodyNeuronList);        
     }
 
-    public void InitializeAxons(float initialWeightMultiplier, float initialConnectionDensity, int numInitHiddenNeurons) {                
-        // Create initial connections
-        List<NeuronGenome> inputNeuronList = new List<NeuronGenome>();
-        List<NeuronGenome> outputNeuronList = new List<NeuronGenome>();
-        
-        for (int i = 0; i < bodyNeuronList.Count; i++) {
-            switch (bodyNeuronList[i].neuronType) {
-                case NeuronType.In: inputNeuronList.Add(bodyNeuronList[i]); break;
-                case NeuronType.Out: outputNeuronList.Add(bodyNeuronList[i]); break;
-            }
-            // WPP: abridged with switch statement
-            /*    
-            }
-            if (bodyNeuronList[i].neuronType == NeuronType.In) {
-                inputNeuronList.Add(bodyNeuronList[i]);
-            }
-            if (bodyNeuronList[i].neuronType == NeuronType.Out) {
-                outputNeuronList.Add(bodyNeuronList[i]);
-            }
-            */
-        }
-        
-        // * WPP: why isn't this a case in the above conditional?
-        //Create Hidden nodes TEMP!!!!
+    public void InitializeAxons(float initialWeightMultiplier, float initialConnectionDensity, int numInitHiddenNeurons) {
+        var (inputNeuronList, outputNeuronList) = GetIOLists();
+
+        // Create Hidden nodes TEMP!!!!
         for (int i = 0; i < numInitHiddenNeurons; i++) {
             NeuronGenome neuron = new NeuronGenome("Hid" + i, NeuronType.Hid, -1, i);
             hiddenNeuronList.Add(neuron);
         }
+        
         LinkLayers(inputNeuronList, outputNeuronList, initialConnectionDensity, initialWeightMultiplier);
-        // WPP: simplified repetitive code with method
-        // Initialize partially connected with all weights Random
-        // Direct Skip connection In to Out:
-        /*for (int i = 0; i < outputNeuronList.Count; i++) {  
-            for (int j = 0; j < inputNeuronList.Count; j++) {
-                if (Random.Range(0f, 1f) < initialConnectionDensity) {  // 0-1 % chance of link
-                    float randomWeight = Gaussian.GetRandomGaussian() * initialWeightMultiplier;
-                    LinkGenome linkGenome = new LinkGenome(inputNeuronList[j].nid.moduleID, inputNeuronList[j].nid.neuronID, outputNeuronList[i].nid.moduleID, outputNeuronList[i].nid.neuronID, randomWeight, true);
-                    linkList.Add(linkGenome);
-                }                
-            }
-        }*/
         LinkLayers(inputNeuronList, hiddenNeuronList, initialConnectionDensity, initialWeightMultiplier);
-        // Input to Hidden Layer:
-        /*for (int i = 0; i < hiddenNeuronList.Count; i++) {  
-            for (int j = 0; j < inputNeuronList.Count; j++) {
-                if(Random.Range(0f, 1f) < initialConnectionDensity) {
-                    float randomWeight = Gaussian.GetRandomGaussian() * initialWeightMultiplier;
-                    LinkGenome linkGenome = new LinkGenome(inputNeuronList[j].nid.moduleID, inputNeuronList[j].nid.neuronID, hiddenNeuronList[i].nid.moduleID, hiddenNeuronList[i].nid.neuronID, randomWeight, true);
-                    linkList.Add(linkGenome);
-                }
-                
-            }
-        }*/
         LinkLayers(hiddenNeuronList, outputNeuronList, initialConnectionDensity, initialWeightMultiplier);
-        // Hidden Layer to Output:
-        /*for (int i = 0; i < outputNeuronList.Count; i++) {   
-            for (int j = 0; j < hiddenNeuronList.Count; j++) {
-                if (Random.Range(0f, 1f) < initialConnectionDensity) {
-                    float randomWeight = Gaussian.GetRandomGaussian() * initialWeightMultiplier;
-                    LinkGenome linkGenome = new LinkGenome(hiddenNeuronList[j].nid.moduleID, hiddenNeuronList[j].nid.neuronID, outputNeuronList[i].nid.moduleID, outputNeuronList[i].nid.neuronID, randomWeight, true);
-                    linkList.Add(linkGenome);
-                }
-            }
-        } */       
 
         //PrintBrainGenome();
         //Debug.Log("numAxons: " + linkList.Count.ToString());
     }
     
+    // WPP: delegated function used in multiple locations
+    // * consider moving to global static
+    (List<NeuronGenome>, List<NeuronGenome>) GetIOLists() {
+        List<NeuronGenome> inputNeuronList = new List<NeuronGenome>();
+        List<NeuronGenome> outputNeuronList = new List<NeuronGenome>();
+        
+        foreach (var neuron in bodyNeuronList) {
+            switch (neuron.neuronType) {
+                case NeuronType.In: inputNeuronList.Add(neuron); break;
+                case NeuronType.Out: outputNeuronList.Add(neuron); break;
+            }
+        }
+        
+        return (inputNeuronList, outputNeuronList);        
+    }
+    
+    // WPP: simplified repetitive code with method
     void LinkLayers(List<NeuronGenome> fromList, List<NeuronGenome> toList, float initialConnectionDensity, float initialWeightMultiplier) {
         foreach (var toElement in toList) {
             foreach (var fromElement in fromList) {
@@ -130,18 +93,15 @@ public class BrainGenome
         }*/
         // Alternate: SetBodyNeuronsFromTemplate(BodyGenome templateBody);
         // Rebuild BodyNeuronGenomeList from scratch based on bodyGenome!!!!
-        if(bodyNeuronList != null) {
-            bodyNeuronList.Clear();
-        }
-        else {
-            bodyNeuronList = new List<NeuronGenome>();
-        }
+        InitializeBodyNeuronList();
         bodyGenome.InitializeBrainGenome(bodyNeuronList);
 
         // Existing Hidden Neurons!!
         hiddenNeuronList = new List<NeuronGenome>();
         for (int i = 0; i < parentGenome.hiddenNeuronList.Count; i++) {
-            NeuronGenome newHiddenNeuronGenome = new NeuronGenome(parentGenome.hiddenNeuronList[i]);  // create new neuron as a copy of parent neuron
+            // Create new neuron as a copy of parent neuron
+            NeuronGenome newHiddenNeuronGenome = new NeuronGenome(parentGenome.hiddenNeuronList[i]);  
+            
             // Might be able to simply copy hiddenNeuronList or individual hiddenNeuronGenomes from parent if they are functionally identical...
             // for now going with the thorough approach of a reference-less copy
             hiddenNeuronList.Add(newHiddenNeuronGenome);
@@ -151,16 +111,14 @@ public class BrainGenome
         linkList = new List<LinkGenome>();
         for (int i = 0; i < parentGenome.linkList.Count; i++) {
             LinkGenome newLinkGenome = new LinkGenome(parentGenome.linkList[i].fromModuleID, parentGenome.linkList[i].fromNeuronID, parentGenome.linkList[i].toModuleID, parentGenome.linkList[i].toNeuronID, parentGenome.linkList[i].weight, true);
-
-            float randZeroChance = Random.Range(0f, 1f);
-            if (randZeroChance < settings.brainRemoveLinkChance) {
+            
+            if (RandomStatics.CoinToss(settings.brainRemoveLinkChance)) {
                 newLinkGenome.weight = 0f;  // Remove fully??? *****
             }
 
-            float randMutationChance = Random.Range(0f, 1f);
-            if (randMutationChance < settings.brainWeightMutationChance) {
+            if (RandomStatics.CoinToss(settings.brainWeightMutationChance)) {
                 float randomWeight = Gaussian.GetRandomGaussian();
-                newLinkGenome.weight = newLinkGenome.weight + Mathf.Lerp(0f, randomWeight, settings.brainWeightMutationStepSize);
+                newLinkGenome.weight += Mathf.Lerp(0f, randomWeight, settings.brainWeightMutationStepSize);
             }
 
             newLinkGenome.weight *= settings.brainWeightDecayAmount;
@@ -168,23 +126,15 @@ public class BrainGenome
             linkList.Add(newLinkGenome);
         }
 
-        // Add Brand New Link:
-        float randLink = Random.Range(0f, 1f);
-        if (randLink < settings.brainCreateNewLinkChance) 
+        // Add new link:
+        if (RandomStatics.CoinToss(settings.brainCreateNewLinkChance))
         {
-            List<NeuronGenome> inputNeuronList = new List<NeuronGenome>(); // **** Make these Global ??? avoids traversing them multiple times....            
-            List<NeuronGenome> outputNeuronList = new List<NeuronGenome>();
-            for (int j = 0; j < bodyNeuronList.Count; j++) {
-                if (bodyNeuronList[j].neuronType == NeuronType.In) {
-                    inputNeuronList.Add(bodyNeuronList[j]);
-                }
-                if (bodyNeuronList[j].neuronType == NeuronType.Out) {
-                    outputNeuronList.Add(bodyNeuronList[j]);
-                }
-            }
-            for (int j = 0; j < hiddenNeuronList.Count; j++) {
-                inputNeuronList.Add(hiddenNeuronList[j]);
-                outputNeuronList.Add(hiddenNeuronList[j]);
+            var (inputNeuronList, outputNeuronList) = GetIOLists();
+
+            foreach (var neuron in hiddenNeuronList)
+            {
+                inputNeuronList.Add(neuron);
+                outputNeuronList.Add(neuron);
             }
 
             // Try x times to find new connection -- random scattershot approach at first:
@@ -218,10 +168,10 @@ public class BrainGenome
         }
 
         // Add Brand New Hidden Neuron:
-        float randNeuronChance = Random.Range(0f, 1f);
-        if (randNeuronChance < settings.brainCreateNewHiddenNodeChance) {
+        if (RandomStatics.CoinToss(settings.brainCreateNewHiddenNodeChance)) {
             // find a link and expand it:
             int randLinkID = Random.Range(0, linkList.Count);
+            
             // create new neuron
             NeuronGenome newNeuronGenome = new NeuronGenome("HidNew", NeuronType.Hid, -1, hiddenNeuronList.Count);
             hiddenNeuronList.Add(newNeuronGenome);
@@ -242,55 +192,38 @@ public class BrainGenome
         RemoveVestigialLinks();
     }
 
-    public void RemoveVestigialLinks() {
-
-        //create a master list of all neurons:
+    public void RemoveVestigialLinks() 
+    {
+        // Create a master list of all neurons:
         List<NeuronGenome> allNeuronsList = new List<NeuronGenome>();
-        for (int j = 0; j < bodyNeuronList.Count; j++) {
-            allNeuronsList.Add(bodyNeuronList[j]);
-        }
-        for (int j = 0; j < hiddenNeuronList.Count; j++) {
-            allNeuronsList.Add(hiddenNeuronList[j]);
-        }
+        foreach (var neuron in bodyNeuronList)
+            allNeuronsList.Add(neuron);
+        foreach (var neuron in hiddenNeuronList)
+            allNeuronsList.Add(neuron);
 
         List<int> axonsToRemoveIndicesList = new List<int>();
 
-        // keep table of linearIndex positions for all neuron 2-dimensional ID's
+        // Keep a table of linearIndex positions for all neuron 2-dimensional ID's
         Dictionary<NID, int> IDs = new Dictionary<NID, int>();
         for (int j = 0; j < allNeuronsList.Count; j++) {
             IDs.Add(allNeuronsList[j].nid, j);
         }
-        for (int j = 0; j < linkList.Count; j++) {
-            bool remove = false;
-            // find out neuronIDs:
-            int fromID = -1;
-            if (IDs.TryGetValue(new NID(linkList[j].fromModuleID, linkList[j].fromNeuronID), out fromID)) {
+        
+        for (int j = 0; j < linkList.Count; j++) 
+        {
+            bool remove = !IDs.TryGetValue(new NID(linkList[j].fromModuleID, linkList[j].fromNeuronID), out int fromID) ||
+                          !IDs.TryGetValue(new NID(linkList[j].toModuleID, linkList[j].toNeuronID), out int toID);
+            
+            //Debug.LogError("fromNID NOT FOUND " + linkList[j].fromModuleID.ToString() + ", " + linkList[j].fromNeuronID.ToString());
 
-            }
-            else {
-                remove = true;
-                //Debug.LogError("fromNID NOT FOUND " + linkList[j].fromModuleID.ToString() + ", " + linkList[j].fromNeuronID.ToString());
-            }
-            int toID = -1;
-            if (IDs.TryGetValue(new NID(linkList[j].toModuleID, linkList[j].toNeuronID), out toID)) {
-
-            }
-            else {
-                remove = true;
-                //Debug.LogError("toNID NOT FOUND " + linkList[j].fromModuleID.ToString() + ", " + linkList[j].fromNeuronID.ToString());
-            }
-
-            if(remove) {
+            if (remove) {
                 axonsToRemoveIndicesList.Add(j);
             }
         }
 
-        if (axonsToRemoveIndicesList.Count > 0) {
-            for(int k = (axonsToRemoveIndicesList.Count - 1); k >= 0; k--) {  // traverse backwards to preserve indices as they are removed
+        if (axonsToRemoveIndicesList.Count > 0)
+            for(int k = axonsToRemoveIndicesList.Count - 1; k >= 0; k--)
                 linkList.RemoveAt(axonsToRemoveIndicesList[k]);
-            }
-        }
-        
     }
 
     /*public void MutateRandomly(float mutationChance) {

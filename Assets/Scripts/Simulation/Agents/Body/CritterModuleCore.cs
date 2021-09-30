@@ -4,6 +4,8 @@
 public class CritterModuleCore 
 {
     SettingsManager settings => SettingsManager.instance;
+    Lookup lookup => Lookup.instance;
+    NeuralMap neuralMap => lookup.neuralMap;
 
     public int parentID;
     public int inno;
@@ -188,67 +190,33 @@ public class CritterModuleCore
         speedBonus = Mathf.Lerp(0.33f, 2f, talentSpecSpeedNorm);        
         energyBonus = Mathf.Lerp(0.75f, 1.5f, talentSpecUtilityNorm);
     }
-
-    // * WPP: move to Neuron, 
-    // use lookup table to set NeuronType and switch to set currentValue
-    public void MapNeuron(NID nid, Neuron neuron) {
+    
+    public void MapNeuron(NID nid, Neuron neuron) 
+    {
         if (inno != nid.moduleID) return;
-
-        if (nid.neuronID == 0) {
-            neuron.currentValue = bias;
-            neuron.neuronType = NeuronType.In;
-        }            
-        if (nid.neuronID == 21) {
-            neuron.currentValue = mouthTriggerOutputs;
-            neuron.neuronType = NeuronType.In;
-        }
-        if (nid.neuronID == 24) {
-            neuron.currentValue = isContact;
-            neuron.neuronType = NeuronType.In;
-        }
-        if (nid.neuronID == 25) {
-            neuron.currentValue = contactForceX;
-            neuron.neuronType = NeuronType.In;
-        }
-        if (nid.neuronID == 26) {
-            neuron.currentValue = contactForceY;
-            neuron.neuronType = NeuronType.In;
-        }
-        if (nid.neuronID == 27) {
-            neuron.currentValue = hitPoints;
-            neuron.neuronType = NeuronType.In;
-        }
-        if (nid.neuronID == 28) {
-            neuron.currentValue = stamina;
-            neuron.neuronType = NeuronType.In;
-        }
-        if (nid.neuronID == 204) {
-            neuron.currentValue = energyStored;
-            neuron.neuronType = NeuronType.In;
-        }
-        if (nid.neuronID == 205) {
-            neuron.currentValue = foodStored;
-            neuron.neuronType = NeuronType.In;
-        }
-        if (nid.neuronID == 206) {
-            neuron.currentValue = mouthFeedEffector;
-            neuron.neuronType = NeuronType.Out;
-        }
-        if (nid.neuronID == 207) {
-            neuron.currentValue = mouthAttackEffector;
-            neuron.neuronType = NeuronType.Out;
-        }
-        if (nid.neuronID == 208) {
-            neuron.currentValue = defendEffector;
-            neuron.neuronType = NeuronType.Out;
-        }
-        if (nid.neuronID == 209) {
-            neuron.currentValue = dashEffector;
-            neuron.neuronType = NeuronType.Out;
-        }
-        if (nid.neuronID == 210) {
-            neuron.currentValue = healEffector;
-            neuron.neuronType = NeuronType.Out;
+        neuron.neuronType = neuralMap.GetIO(nid.neuronID);    
+        neuron.currentValue = GetNeuralValue(nid.neuronID);
+    }
+    
+    float[] GetNeuralValue(int neuronID)
+    {
+        switch(neuronID)
+        {
+            case 0: return bias;
+            case 21: return mouthTriggerOutputs;
+            case 24: return isContact;
+            case 25: return contactForceX;
+            case 26: return contactForceY;
+            case 27: return hitPoints;
+            case 28: return stamina;
+            case 204: return energyStored;
+            case 205: return foodStored;
+            case 206: return mouthFeedEffector;
+            case 207: return mouthAttackEffector;
+            case 208: return defendEffector;
+            case 209: return dashEffector;
+            case 210: return healEffector;
+            default: return null;
         }
     }
 

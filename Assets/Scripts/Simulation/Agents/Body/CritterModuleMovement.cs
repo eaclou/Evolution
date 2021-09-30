@@ -2,6 +2,9 @@
 
 public class CritterModuleMovement 
 {
+    Lookup lookup => Lookup.instance;
+    NeuralMap neuralMap => lookup.neuralMap;
+
     public int parentID;
     public int inno;
 
@@ -56,9 +59,13 @@ public class CritterModuleMovement
         speedBonus = Mathf.Lerp(0.7f, 1.4f, 1f - invAspectRatio);
     }
 
-    public void MapNeuron(NID nid, Neuron neuron) {
-
-        if (inno == nid.moduleID) {            
+    public void MapNeuron(NID nid, Neuron neuron) 
+    {
+        if (inno != nid.moduleID) return;
+        neuron.neuronType = GetIO(nid.neuronID);    
+        neuron.currentValue = GetNeuralValue(nid.neuronID);
+        
+        /*if (inno == nid.moduleID) {            
             if (nid.neuronID == 20) {
                 neuron.currentValue = ownVelX;
                 neuron.neuronType = NeuronType.In;
@@ -88,6 +95,32 @@ public class CritterModuleMovement
                 neuron.currentValue = dash;
                 neuron.neuronType = NeuronType.Out;
             }
+        }*/
+    }
+    
+    // WPP: some assignments break pattern established in other modules
+    NeuronType GetIO(int neuronID)
+    {
+        switch (neuronID)
+        {
+            case 207: return NeuronType.In;
+            case 208: return NeuronType.In;
+            default: return neuralMap.GetIO(neuronID);
+        }
+    }
+    
+    float[] GetNeuralValue(int neuronID)
+    {
+        switch(neuronID)
+        {
+            case 20: return ownVelX;
+            case 21: return ownVelY;
+            case 207: return facingDirX;
+            case 208: return facingDirY;
+            case 100: return throttleX;
+            case 101: return throttleY;
+            case 102: return dash;
+            default: return null;
         }
     }
 

@@ -1,6 +1,9 @@
 ﻿
 public class CritterModuleEnvironment 
 {
+    Lookup lookup => Lookup.instance;
+    NeuralMap neuralMap => lookup.neuralMap;
+
     public int parentID;
     public int inno;
 
@@ -48,52 +51,29 @@ public class CritterModuleEnvironment
         inno = genome.inno;
     }
 
-    public void MapNeuron(NID nid, Neuron neuron) {
+    public void MapNeuron(NID nid, Neuron neuron) 
+    {
         if (inno != nid.moduleID) return;
-        
-        if (nid.neuronID == 1) {                
-            neuron.currentValue = waterDepth;
-            neuron.neuronType = NeuronType.In;
-        }
-        if (nid.neuronID == 2) {
-            neuron.currentValue = waterVelX;
-            neuron.neuronType = NeuronType.In;
-        }
-        if (nid.neuronID == 3) {
-            neuron.currentValue = waterVelY;
-            neuron.neuronType = NeuronType.In;
-        }
-        if (nid.neuronID == 4) {
-            neuron.currentValue = depthGradX;
-            neuron.neuronType = NeuronType.In;
-        }
-        if (nid.neuronID == 5) {
-            neuron.currentValue = depthGradY;
-            neuron.neuronType = NeuronType.In;
-        }
-        if (nid.neuronID == 6) {
-            neuron.currentValue = depthSouth;
-            neuron.neuronType = NeuronType.In;
-        }
-        if (nid.neuronID == 7) {
-            neuron.currentValue = depthWest;
-            neuron.neuronType = NeuronType.In;
-        }
-        if (nid.neuronID == 8) {
-            neuron.currentValue = velTopRightX;
-            neuron.neuronType = NeuronType.In;
-        }            
-        if (nid.neuronID == 9) {
-            neuron.currentValue = velTopLeftY;
-            neuron.neuronType = NeuronType.In;
-        }            
-        if (nid.neuronID == 10) {
-            neuron.currentValue = velBottomLeftX;
-            neuron.neuronType = NeuronType.In;
-        }            
-        if (nid.neuronID == 11) {
-            neuron.currentValue = velBottomRightY;
-            neuron.neuronType = NeuronType.In;
+        neuron.neuronType = neuralMap.GetIO(nid.neuronID);    
+        neuron.currentValue = GetNeuralValue(nid.neuronID);
+    }
+    
+    float[] GetNeuralValue(int neuronID)
+    {
+        switch (neuronID)
+        {
+            case 1: return waterDepth;
+            case 2: return waterVelX;
+            case 3: return waterVelY;
+            case 4: return depthGradX;
+            case 5: return depthGradY;
+            case 6: return depthSouth;
+            case 7: return depthWest;
+            case 8: return velTopRightX;
+            case 9: return velTopLeftY;
+            case 10: return velBottomLeftX;
+            case 11: return velBottomRightY;
+            default: return null;
         }
     }
 

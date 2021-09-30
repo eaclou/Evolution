@@ -2,55 +2,18 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e5216a40-1993-4f7b-88ca-3d6aa0d75e16" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Neuron Map.asset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Data Containers/Neuron Map.asset.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/Music/Pond Water_Birth_D3_9.13.21.mp3.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/Music/Pond-Water_AmbientTheme_A1_9.16.21.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/Music/Pond-Water_Birth_D3_9.13.21.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/Music/Pond-Water_Birth_D4_9.16.21.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/Music/Pond-Water_StormyTheme_A1_9.16.21.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/Music/Pond-Water_Wildlife_A1_9.16.21.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Ambient/Ambient_Water_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Critters/Attack_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Critters/Bite_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Critters/Dash_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Critters/Death_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Critters/Defend_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Critters/Spawn_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Critters/TakeDamage_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_01.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_02.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_03.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_04.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_05.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_06.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_07.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_08.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_09.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_10.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_11.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_12.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/BrainSettings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/BrainSettings.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Mutation Settings/Supervised.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Mutation Settings/Supervised.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Mutation Settings/Vertebrate.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Mutation Settings/Vertebrate.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Mutation Settings/Zero.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Mutation Settings/Zero.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Lookup.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Lookup.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Quality of Life/Statics/RandomStatics.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Playcraft/Quality of Life/Statics/RandomStatics.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCommunication.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCommunication.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCore.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCore.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleEnvironment.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleEnvironment.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleFood.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleFood.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleFriends.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleFriends.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleMovement.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleMovement.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleTarget.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleTarget.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleThreats.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleThreats.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/CritterModuleCommunicationGenome.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/CritterModuleCommunicationGenome.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/MasterGenomePool.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/MasterGenomePool.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/MutationSettings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/MutationSettings.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/SettingsManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/SettingsManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationStateData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationStateData.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/NeuralMap.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/NeuralMap.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/BrainGenome.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/BrainGenome.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -116,11 +79,6 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePaperDollUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/FoodEatenPanel.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/GenomeOverviewPanel.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/SensorsPanel.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/SpecializationPanel.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesOverviewUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButtonPrefabScript.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/WorldTreePanelUI.cs" />
@@ -151,7 +109,6 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/EggSackGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/BodyGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/SpeciesGenomePool.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/BrainGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/SettingsManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/MutationSettings.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationStateData.cs" />
@@ -159,14 +116,20 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/MasterGenomePool.cs" />
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/BrainSettings.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/CritterModuleCommunicationGenome.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCommunication.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/NeuronMap.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleFood.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/NeuralMap.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleThreats.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCommunication.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleEnvironment.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleFriends.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleThreats.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCore.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleTarget.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleMovement.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/Quality of Life/Statics/RandomStatics.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/BrainGenome.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1owaWgGpM80xkcfA3szn5iw9YkG" />
@@ -304,7 +267,8 @@
       <workItem from="1632779068097" duration="11640000" />
       <workItem from="1632804486209" duration="1082000" />
       <workItem from="1632807868276" duration="4878000" />
-      <workItem from="1632813117803" duration="796000" />
+      <workItem from="1632813117803" duration="1143000" />
+      <workItem from="1633032174012" duration="5744000" />
     </task>
     <servers />
   </component>
