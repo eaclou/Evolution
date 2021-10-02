@@ -6,7 +6,7 @@ public class TestModule {
     //public int parentID;
     //public int inno;
     public int parentID;
-    public int inno;
+    public BrainModuleID inno;
     //public bool isVisible;
 
         // INPUTS

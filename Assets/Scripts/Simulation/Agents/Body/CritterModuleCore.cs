@@ -8,7 +8,7 @@ public class CritterModuleCore
     NeuralMap neuralMap => lookup.neuralMap;
 
     public int parentID;
-    public int inno;
+    BrainModuleID moduleID => genome.moduleID;
 
     // **** LOOK INTO::: close in its own class or store in bigger array rather than all individual length-one arrays? 
     public float[] bias;
@@ -182,7 +182,6 @@ public class CritterModuleCore
         foodStored[0] = 0f;
         
         parentID = genome.parentID;
-        inno = genome.inno;
 
         // * WPP: expose magic numbers
         damageBonus = Mathf.Lerp(0.33f, 2f, talentSpecAttackNorm);
@@ -193,7 +192,7 @@ public class CritterModuleCore
     
     public void MapNeuron(NID nid, Neuron neuron) 
     {
-        if (inno != nid.moduleID) return;
+        if (moduleID != nid.moduleID) return;
         neuron.neuronType = neuralMap.GetIO(nid.neuronID);    
         neuron.currentValue = GetNeuralValue(nid.neuronID);
     }

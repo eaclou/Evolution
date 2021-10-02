@@ -7,7 +7,7 @@ using Playcraft;
 public class CritterModuleEnvironmentSensorsGenome 
 {
     public int parentID;
-    public int inno;
+    public readonly BrainModuleID moduleID = BrainModuleID.EnvironmentSensors;
 
     public bool useWaterStats;
     public bool useCardinals;
@@ -15,9 +15,8 @@ public class CritterModuleEnvironmentSensorsGenome
 
     public float maxRange;
 
-    public CritterModuleEnvironmentSensorsGenome(int parentID, int inno) {
+    public CritterModuleEnvironmentSensorsGenome(int parentID) {
         this.parentID = parentID;
-        this.inno = inno;
     }
 
     public void GenerateRandomInitialGenome() {
@@ -29,17 +28,12 @@ public class CritterModuleEnvironmentSensorsGenome
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
         if (useWaterStats) {
-            NeuronGenome depth = new NeuronGenome("depth", NeuronType.In, inno, 1); 
-            NeuronGenome velX = new NeuronGenome("velX", NeuronType.In, inno, 2); 
-            NeuronGenome velY = new NeuronGenome("velY", NeuronType.In, inno, 3); 
-            neuronList.Add(depth);      
-            neuronList.Add(velX);      
-            neuronList.Add(velY);   
-            
-            NeuronGenome depthGradX = new NeuronGenome("depthGradX", NeuronType.In, inno, 4); 
-            NeuronGenome depthGradY = new NeuronGenome("depthGradY", NeuronType.In, inno, 5); 
-            neuronList.Add(depthGradX);   
-            neuronList.Add(depthGradY); 
+            neuronList.Add(new NeuronGenome("depth", NeuronType.In, moduleID, 1)); 
+            neuronList.Add(new NeuronGenome("velX", NeuronType.In, moduleID, 2)); 
+            neuronList.Add(new NeuronGenome("velY", NeuronType.In, moduleID, 3));
+            neuronList.Add(new NeuronGenome("depthGradX", NeuronType.In, moduleID, 4)); 
+            neuronList.Add(new NeuronGenome("depthGradY", NeuronType.In, moduleID, 5)); 
+
             /*
             NeuronGenome depthSouth = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 6);  // 36        
             NeuronGenome depthWest = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 7);  // 38       

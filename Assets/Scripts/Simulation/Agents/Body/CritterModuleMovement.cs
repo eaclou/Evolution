@@ -6,7 +6,7 @@ public class CritterModuleMovement
     NeuralMap neuralMap => lookup.neuralMap;
 
     public int parentID;
-    public int inno;
+    BrainModuleID moduleID;
 
     public float horsepower;
     public float turnRate;
@@ -52,7 +52,7 @@ public class CritterModuleMovement
         dash = new float[1]; // 2
         
         parentID = genome.parentID;
-        inno = genome.inno;
+        moduleID = genome.moduleID;
 
         float invAspectRatio = agentGenome.bodyGenome.coreGenome.creatureAspectRatio;
 
@@ -61,7 +61,7 @@ public class CritterModuleMovement
 
     public void MapNeuron(NID nid, Neuron neuron) 
     {
-        if (inno != nid.moduleID) return;
+        if (moduleID != nid.moduleID) return;
         neuron.neuronType = GetIO(nid.neuronID);    
         neuron.currentValue = GetNeuralValue(nid.neuronID);
         

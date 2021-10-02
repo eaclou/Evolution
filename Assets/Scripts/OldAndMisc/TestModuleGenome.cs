@@ -1,11 +1,10 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
-[System.Serializable]
+[Serializable]
 public class TestModuleGenome {
     public int parentID;
-    public int inno;
+    public BrainModuleID inno;
 
     public float maxSpeed;
     public float accel;
@@ -13,7 +12,7 @@ public class TestModuleGenome {
 
     // This class "holds" the various input/output channels for use in the Agent's Brain
 
-    public TestModuleGenome(int parentID, int inno) {
+    public TestModuleGenome(int parentID, BrainModuleID inno) {
         this.parentID = parentID;
         this.inno = inno;
 

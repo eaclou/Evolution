@@ -45,7 +45,6 @@ public class VisualizeSelectedBrain : MonoBehaviour
         {
             var neuron = neurons[i];
             var IO = neuron.neuronType;
-            
         }*/
         
         return sockets;

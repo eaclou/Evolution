@@ -11,7 +11,7 @@ public class CritterModuleFood
     ZooplanktonManager microbes => simulation.zooplanktonManager;
 
 	public int parentID;
-    public int inno;
+    BrainModuleID moduleID => genome.moduleID;
 
     public int nearestFoodParticleIndex = -1;  // debugging ** TEMP
     public Vector2 nearestFoodParticlePos;
@@ -150,13 +150,12 @@ public class CritterModuleFood
         }*/
 
         parentID = genome.parentID;
-        inno = genome.inno;
     }
 
     // WPP: conditionals replaced with switch and lookup
     public void MapNeuron(NID nid, Neuron neuron) 
     {
-        if (inno != nid.moduleID) return;
+        if (moduleID != nid.moduleID) return;
         neuron.neuronType = neuralMap.GetIO(nid.neuronID);    
         neuron.currentValue = GetNeuralValue(nid.neuronID);
         /*if (nid.neuronID == 1) {

@@ -6,7 +6,7 @@ public class CritterModuleThreats
     NeuralMap neuralMap => lookup.neuralMap;
 
     public int parentID;
-    public int inno;
+    BrainModuleID moduleID;
 
     public float[] enemyPosX;
     public float[] enemyPosY;
@@ -38,12 +38,12 @@ public class CritterModuleThreats
         enemyThreatRating = new float[1]; // 203
 
         parentID = genome.parentID;
-        inno = genome.inno; 
+        moduleID = genome.moduleID; 
     }
 
     public void MapNeuron(NID nid, Neuron neuron) 
     {
-        if (inno != nid.moduleID) return;
+        if (moduleID != nid.moduleID) return;
         neuron.currentValue = GetNeuralValue(nid.neuronID);
         neuron.neuronType = neuralMap.GetIO(nid.neuronID);
     }

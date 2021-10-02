@@ -5,7 +5,7 @@ public class CritterModuleEnvironment
     NeuralMap neuralMap => lookup.neuralMap;
 
     public int parentID;
-    public int inno;
+    BrainModuleID moduleID => genome.moduleID;
 
     public CritterModuleEnvironmentSensorsGenome genome;
 
@@ -48,12 +48,11 @@ public class CritterModuleEnvironment
         velBottomRightY = new float[1]; 
         
         parentID = genome.parentID;
-        inno = genome.inno;
     }
 
     public void MapNeuron(NID nid, Neuron neuron) 
     {
-        if (inno != nid.moduleID) return;
+        if (moduleID != nid.moduleID) return;
         neuron.neuronType = neuralMap.GetIO(nid.neuronID);    
         neuron.currentValue = GetNeuralValue(nid.neuronID);
     }

@@ -6,16 +6,15 @@ using Playcraft;
 public class CritterModuleThreatSensorsGenome 
 {
     public int parentID;
-    public int inno;    // * WPP: what is this?  (NEVER use abbreviations!)
+    public readonly BrainModuleID moduleID = BrainModuleID.ThreatSensors;
 
     public bool usePos;
     public bool useVel;
     public bool useDir;
     public bool useStats;
 
-    public CritterModuleThreatSensorsGenome(int parentID, int inno) {
+    public CritterModuleThreatSensorsGenome(int parentID) {
         this.parentID = parentID;
-        this.inno = inno;
     }
 
     public void GenerateRandomInitialGenome() {
@@ -27,32 +26,22 @@ public class CritterModuleThreatSensorsGenome
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
         if(usePos) {
-            NeuronGenome enemyPosX = new NeuronGenome("enemyPosX", NeuronType.In, inno, 14);
-            NeuronGenome enemyPosY = new NeuronGenome("enemyPosY", NeuronType.In, inno, 15);
-            neuronList.Add(enemyPosX); // 14
-            neuronList.Add(enemyPosY); // 15
+            neuronList.Add(new NeuronGenome("enemyPosX", NeuronType.In, moduleID, 14));
+            neuronList.Add(new NeuronGenome("enemyPosY", NeuronType.In, moduleID, 15));
         }
         if(useVel) {
-            NeuronGenome enemyVelX = new NeuronGenome("enemyVelX", NeuronType.In, inno, 16);
-            NeuronGenome enemyVelY = new NeuronGenome("enemyVelY", NeuronType.In, inno, 17);
-            neuronList.Add(enemyVelX); // 16
-            neuronList.Add(enemyVelY); // 17
+            neuronList.Add(new NeuronGenome("enemyVelX", NeuronType.In, moduleID, 16));
+            neuronList.Add(new NeuronGenome("enemyVelY", NeuronType.In, moduleID, 17));
         }
         if(useDir) {
-            NeuronGenome enemyDirX = new NeuronGenome("enemyDirX", NeuronType.In, inno, 18);
-            NeuronGenome enemyDirY = new NeuronGenome("enemyDirY",NeuronType.In, inno, 19);
-            neuronList.Add(enemyDirX); // 18
-            neuronList.Add(enemyDirY); // 19
+            neuronList.Add(new NeuronGenome("enemyDirX", NeuronType.In, moduleID, 18));
+            neuronList.Add(new NeuronGenome("enemyDirY",NeuronType.In, moduleID, 19));
         }
         if(useStats) {
-            NeuronGenome enemyRelSize = new NeuronGenome("enemyRelSize", NeuronType.In, inno, 200);
-            NeuronGenome enemyHealth = new NeuronGenome("enemyHealth", NeuronType.In, inno, 201);
-            NeuronGenome enemyGrowthStage = new NeuronGenome("enemyGrowthStage", NeuronType.In, inno, 202);
-            NeuronGenome enemyThreatRating = new NeuronGenome("enemyThreatRating", NeuronType.In, inno, 203);
-            neuronList.Add(enemyRelSize); // 200
-            neuronList.Add(enemyHealth); // 201
-            neuronList.Add(enemyGrowthStage); // 202
-            neuronList.Add(enemyThreatRating); // 203
+            neuronList.Add(new NeuronGenome("enemyRelSize", NeuronType.In, moduleID, 200));
+            neuronList.Add(new NeuronGenome("enemyHealth", NeuronType.In, moduleID, 201));
+            neuronList.Add(new NeuronGenome("enemyGrowthStage", NeuronType.In, moduleID, 202));
+            neuronList.Add(new NeuronGenome("enemyThreatRating", NeuronType.In, moduleID, 203));
         }
     }
 	

@@ -292,7 +292,7 @@ public class Agent : MonoBehaviour {
 
     public void MapNeuronToModule(NID nid, Neuron neuron) {
         // Hidden nodes!
-        if (nid.moduleID == -1) {
+        if (nid.moduleID == BrainModuleID.Undefined) {
             neuron.currentValue = new float[1];
             neuron.neuronType = NeuronType.Hid;
             neuron.previousValue = 0f;

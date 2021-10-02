@@ -18,13 +18,9 @@ public class BodyGenome
     public CritterModuleThreatSensorsGenome threatGenome;
 
     //public Vector3 fullsizeBoundingBox;   // Z = forward, Y = up
-    
-    public BodyGenome() {
-        //Debug.Log("BodyGenome() EMPTY CONSTRUCTOR");
-    }
-    
+
     public static float GetBodySizeScore01(BodyGenome genome) {
-        // Refactor: 25f is hardcoded approximate!
+        // Refactor: 25f is hardcoded approximate! // * WPP: approximate of what? (use a constant or exposed value)
         float normalizedSizeScore = Mathf.Clamp01(((genome.GetFullsizeBoundingBox().x + genome.GetFullsizeBoundingBox().z) / genome.GetFullsizeBoundingBox().y) / 25f); 
         return normalizedSizeScore;
     }
@@ -32,14 +28,14 @@ public class BodyGenome
     public void FirstTimeInitializeCritterModuleGenomes() {
         // ID and inno# needed???? ***** should only be required to keep track of evolving body functions
         appearanceGenome = new CritterModuleAppearanceGenome(0, 0);
-        communicationGenome = new CritterModuleCommunicationGenome(0, 1);
-        coreGenome = new CritterModuleCoreGenome(0, 2);
+        communicationGenome = new CritterModuleCommunicationGenome(0); // 1
+        coreGenome = new CritterModuleCoreGenome(0);  // 2
         developmentalGenome = new CritterModuleDevelopmentalGenome(0, 3);
-        environmentalGenome = new CritterModuleEnvironmentSensorsGenome(0, 4);
-        foodGenome = new CritterModuleFoodSensorsGenome(0, 5);
-        friendGenome = new CritterModuleFriendSensorsGenome(0, 6);
-        movementGenome = new CritterModuleMovementGenome(0, 7);
-        threatGenome = new CritterModuleThreatSensorsGenome(0, 8);
+        environmentalGenome = new CritterModuleEnvironmentSensorsGenome(0); // 4
+        foodGenome = new CritterModuleFoodSensorsGenome(0); // 5
+        friendGenome = new CritterModuleFriendSensorsGenome(0); // 6
+        movementGenome = new CritterModuleMovementGenome(0); // 7
+        threatGenome = new CritterModuleThreatSensorsGenome(0); // 8
     }
         
     public Vector3 GetFullsizeBoundingBox() {

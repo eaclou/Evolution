@@ -42,7 +42,7 @@ public class BrainGenome
 
         // Create Hidden nodes TEMP!!!!
         for (int i = 0; i < numInitHiddenNeurons; i++) {
-            NeuronGenome neuron = new NeuronGenome("Hid" + i, NeuronType.Hid, -1, i);
+            NeuronGenome neuron = new NeuronGenome("Hid" + i, NeuronType.Hid, BrainModuleID.Undefined, i);
             hiddenNeuronList.Add(neuron);
         }
         
@@ -173,7 +173,7 @@ public class BrainGenome
             int randLinkID = Random.Range(0, linkList.Count);
             
             // create new neuron
-            NeuronGenome newNeuronGenome = new NeuronGenome("HidNew", NeuronType.Hid, -1, hiddenNeuronList.Count);
+            NeuronGenome newNeuronGenome = new NeuronGenome("HidNew", NeuronType.Hid, BrainModuleID.Undefined, hiddenNeuronList.Count);
             hiddenNeuronList.Add(newNeuronGenome);
             // create 2 new links
             LinkGenome linkGenome1 = new LinkGenome(linkList[randLinkID].fromModuleID, linkList[randLinkID].fromNeuronID, newNeuronGenome.nid.moduleID, newNeuronGenome.nid.neuronID, 1f, true);

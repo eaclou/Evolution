@@ -5,38 +5,27 @@ using System.Collections.Generic;
 public class CritterModuleMovementGenome 
 {
     public int parentID;
-    public int inno;
+    public readonly BrainModuleID moduleID = BrainModuleID.Movement;
 
     public float horsepower;
     public float turnRate;
 
-    public CritterModuleMovementGenome(int parentID, int inno) {
+    public CritterModuleMovementGenome(int parentID) {
         this.parentID = parentID;
-        this.inno = inno;
     }	
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
 
-        NeuronGenome ownVelX = new NeuronGenome("ownVelX", NeuronType.In, inno, 20); // 20
-        NeuronGenome ownVelY = new NeuronGenome("ownVelY", NeuronType.In, inno, 21); // 21
+        neuronList.Add(new NeuronGenome("ownVelX", NeuronType.In, moduleID, 20));
+        neuronList.Add(new NeuronGenome("ownVelY", NeuronType.In, moduleID, 21)); 
 
-        NeuronGenome facingDirX = new NeuronGenome("facingDirX", NeuronType.In, inno, 207); // 20
-        NeuronGenome facingDirY = new NeuronGenome("facingDirY", NeuronType.In, inno, 208); // 21
+        neuronList.Add(new NeuronGenome("facingDirX", NeuronType.In, moduleID, 207)); 
+        neuronList.Add(new NeuronGenome("facingDirY", NeuronType.In, moduleID, 208));
 
-        NeuronGenome throttleX = new NeuronGenome("throttleX", NeuronType.Out, inno, 100); // 100
-        NeuronGenome throttleY = new NeuronGenome("throttleY", NeuronType.Out, inno, 101); // 101
-        NeuronGenome dash = new NeuronGenome("dash", NeuronType.Out, inno, 102); // 102
+        neuronList.Add(new NeuronGenome("throttleX", NeuronType.Out, moduleID, 100)); 
+        neuronList.Add(new NeuronGenome("throttleY", NeuronType.Out, moduleID, 101)); 
+        neuronList.Add(new NeuronGenome("dash", NeuronType.Out, moduleID, 102)); 
 
-        neuronList.Add(ownVelX); // 20
-        neuronList.Add(ownVelY); // 21
-
-        neuronList.Add(facingDirX); // 207
-        neuronList.Add(facingDirY); // 208
-
-        neuronList.Add(throttleX); // 100
-        neuronList.Add(throttleY); // 101
-        neuronList.Add(dash); // 102
-        
         // Should give this module Throttle & Dash output neurons?
         // currently, all within COREmoduleGenome
     }

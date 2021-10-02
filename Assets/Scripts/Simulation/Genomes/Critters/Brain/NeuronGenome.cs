@@ -9,7 +9,7 @@ public class NeuronGenome
 
     public NeuronGenome() { }
 
-    public NeuronGenome(string name, NeuronType type, int moduleID, int neuronID) {
+    public NeuronGenome(string name, NeuronType type, BrainModuleID moduleID, int neuronID) {
         neuronType = type;
         this.name = name;
         nid = new NID(moduleID, neuronID);

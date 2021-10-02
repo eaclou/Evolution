@@ -1,24 +1,18 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System;
 
-[System.Serializable]
-public class LinkGenome {
-
-    public int fromModuleID;  // id of node from which this connection originates
+[Serializable]
+public class LinkGenome 
+{
+    public BrainModuleID fromModuleID; // id of node from which this connection originates
     public int fromNeuronID;
-    public int toModuleID;  // id of node to which this connection flows
+    public BrainModuleID toModuleID;  // id of node to which this connection flows
     public int toNeuronID;
-    public float weight;  // multiplier on signal
+    public float weight;    // multiplier on signal
     public bool enabled;
     
     public float normalizedWeight => weight * 0.5f + 0.5f;
 
-    public LinkGenome() {
-
-    }
-
-    public LinkGenome(int fromModuleID, int fromNeuronID, int toModuleID, int toNeuronID, float weight, bool enabled) {
+    public LinkGenome(BrainModuleID fromModuleID, int fromNeuronID, BrainModuleID toModuleID, int toNeuronID, float weight, bool enabled) {
         this.fromModuleID = fromModuleID;
         this.fromNeuronID = fromNeuronID;
         this.toModuleID = toModuleID;

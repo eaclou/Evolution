@@ -49,7 +49,7 @@ public class MasterGenomePool
         //completeSpeciesPoolsList.Add(rootSpecies);
 
         int numInitSpecies = 4;
-        for(int i = 0; i < numInitSpecies; i++) {
+        for (int i = 0; i < numInitSpecies; i++) {
             float lerpV = Mathf.Clamp01(((float)i + 0.1f) / (float)(numInitSpecies + 1) + 0.06f) * 0.8f + 0.1f;
             lerpV = 0.5f;
             SpeciesGenomePool newSpecies = new SpeciesGenomePool(i, -1, 0, 0, mutationSettingsRef);
@@ -64,8 +64,8 @@ public class MasterGenomePool
     }
 
     public void AddNewYearlySpeciesStats(int year) {
-        for(int i = 0; i < completeSpeciesPoolsList.Count; i++) {
-            completeSpeciesPoolsList[i].AddNewYearlyStats(year);
+        foreach (var speciesPool in completeSpeciesPoolsList) {
+            speciesPool.AddNewYearlyStats(year);
         }
     }        
 
@@ -74,39 +74,41 @@ public class MasterGenomePool
     }
 
     private void CheckForExtinction() {
-        if(currentlyActiveSpeciesIDList.Count > targetNumSpecies) {
-            int leastFitSpeciesID = -1;
-            float worstFitness = 99999f;
-            bool noCurrentlyExtinctFlaggedSpecies = true;
-            for(int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
-                float fitness = completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].avgCandidateData.performanceData.totalTicksAlive;
-                if(fitness < worstFitness) {
-                    worstFitness = fitness;
-                    leastFitSpeciesID = currentlyActiveSpeciesIDList[i];
-                }
-                if(completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].isFlaggedForExtinction) {
-                    noCurrentlyExtinctFlaggedSpecies = false;
+        if (currentlyActiveSpeciesIDList.Count <= targetNumSpecies)
+            return; 
+        
+        int leastFitSpeciesID = -1;
+        float worstFitness = 99999f;
+        bool noCurrentlyExtinctFlaggedSpecies = true;
+        
+        foreach (var idList in currentlyActiveSpeciesIDList) {
+            float fitness = completeSpeciesPoolsList[idList].avgCandidateData.performanceData.totalTicksAlive;
+            if (fitness < worstFitness) {
+                worstFitness = fitness;
+                leastFitSpeciesID = idList;
+            }
+            if (completeSpeciesPoolsList[idList].isFlaggedForExtinction) {
+                noCurrentlyExtinctFlaggedSpecies = false;
 
-                    if(completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].candidateGenomesList.Count < 1) {
-                        ExtinctifySpecies(currentlyActiveSpeciesIDList[i]);
-                    }
+                if(completeSpeciesPoolsList[idList].candidateGenomesList.Count < 1) {
+                    ExtinctifySpecies(idList);
                 }
             }
+        }
 
-            if(noCurrentlyExtinctFlaggedSpecies) {
-                if(completeSpeciesPoolsList[leastFitSpeciesID].numAgentsEvaluated > minNumGuaranteedEvalsForNewSpecies) {
-                    // OK to KILL!!!
-                    FlagSpeciesExtinct(leastFitSpeciesID);
-                    //completeSpeciesPoolsList[leastFitSpeciesID].isFlaggedForExtinction = true;
-                    //Debug.Log("FLAG EXTINCT: " + leastFitSpeciesID.ToString());
-                }
+        if (noCurrentlyExtinctFlaggedSpecies) {
+            if(completeSpeciesPoolsList[leastFitSpeciesID].numAgentsEvaluated > minNumGuaranteedEvalsForNewSpecies) {
+                // OK to KILL!!!
+                FlagSpeciesExtinct(leastFitSpeciesID);
+                //completeSpeciesPoolsList[leastFitSpeciesID].isFlaggedForExtinction = true;
+                //Debug.Log("FLAG EXTINCT: " + leastFitSpeciesID.ToString());
             }
         }
     }
 
     public void FlagSpeciesExtinct(int speciesID) {
         completeSpeciesPoolsList[speciesID].isFlaggedForExtinction = true;
-        Debug.Log("FLAG EXTINCT: " + speciesID.ToString());
+        Debug.Log("FLAG EXTINCT: " + speciesID);
     }
     
     public void ExtinctifySpecies(int speciesID) {
@@ -114,7 +116,7 @@ public class MasterGenomePool
 
         // find and remove from active list:
         int listIndex = -1;
-        for(int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
+        for (int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
             if(speciesID == completeSpeciesPoolsList[ currentlyActiveSpeciesIDList[i] ].speciesID) {
                 listIndex = i;
             }
@@ -129,14 +131,15 @@ public class MasterGenomePool
     }
 
     public SpeciesGenomePool SelectNewGenomeSourceSpecies(bool weighted, float weightedAmount) {
-        if(weighted) {
+        if(weighted) 
+        {
             // Filter Out species which are flagged for extinction?!?!?!
             
             // figure out which species has most evals
             int totalNumActiveEvals = 0;
             //int evalLeaderActiveIndex = 0;
             int recordNumEvals = 0;            
-            for(int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
+            for (int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
                 int numEvals = completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].numAgentsEvaluated + 1;
                 totalNumActiveEvals += numEvals;
                 if(numEvals > recordNumEvals) {
@@ -191,32 +194,32 @@ public class MasterGenomePool
 
             return completeSpeciesPoolsList[currentlyActiveSpeciesIDList[selectedIndex]];        
         }
-        else {
-            // NAIVE RANDOM AT FIRST:
-            // filter flagged extinct species:
-            List<int> eligibleSpeciesIDList = new List<int>();
-            for(int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
-                if(completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].isFlaggedForExtinction) {
+        
 
-                }
-                else {
-                    eligibleSpeciesIDList.Add(currentlyActiveSpeciesIDList[i]);
-                }
+        // NAIVE RANDOM AT FIRST:
+        // filter flagged extinct species:
+        List<int> eligibleSpeciesIDList = new List<int>();
+        for(int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
+            if(completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].isFlaggedForExtinction) {
+
             }
-            //int randomTableIndex = UnityEngine.Random.Range(0, currentlyActiveSpeciesIDList.Count);
-            int randomTableIndex = Random.Range(0, eligibleSpeciesIDList.Count);
-
-            // temp minor penalty to oldest species:
-            float oldestSpeciesRerollChance = 0.33f;
-            if(randomTableIndex == 0) {
-                if(Random.Range(0f, 1f) < oldestSpeciesRerollChance) {
-                    randomTableIndex = Random.Range(0, eligibleSpeciesIDList.Count);
-                }
+            else {
+                eligibleSpeciesIDList.Add(currentlyActiveSpeciesIDList[i]);
             }
-            int speciesIndex = eligibleSpeciesIDList[randomTableIndex];
-
-            return completeSpeciesPoolsList[speciesIndex];
         }
+        //int randomTableIndex = UnityEngine.Random.Range(0, currentlyActiveSpeciesIDList.Count);
+        int randomTableIndex = Random.Range(0, eligibleSpeciesIDList.Count);
+
+        // temp minor penalty to oldest species:
+        float oldestSpeciesRerollChance = 0.33f;
+        if(randomTableIndex == 0) {
+            if(Random.Range(0f, 1f) < oldestSpeciesRerollChance) {
+                randomTableIndex = Random.Range(0, eligibleSpeciesIDList.Count);
+            }
+        }
+        int speciesIndex = eligibleSpeciesIDList[randomTableIndex];
+
+        return completeSpeciesPoolsList[speciesIndex];
     }
     public SpeciesGenomePool GetSmallestSpecies() {
 
@@ -242,7 +245,7 @@ public class MasterGenomePool
         int closestSpeciesID = -1;
         float closestDistance = 99999f;
         
-        for(int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
+        for (int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
             if(!completeSpeciesPoolsList[ currentlyActiveSpeciesIDList[i] ].isFlaggedForExtinction) {  // Dying species not allowed?
                 float similarityDistance = GetSimilarityScore(newGenome, completeSpeciesPoolsList[ currentlyActiveSpeciesIDList[i] ].representativeCandidate.candidateGenome);
                 if(similarityDistance < closestDistance) {
@@ -258,9 +261,9 @@ public class MasterGenomePool
 
         bool assignedToNewSpecies = false;
             
-        if(closestDistance > speciesSimilarityDistanceThreshold) {
-            if(!speciesCreatedOrDestroyedThisFrame) {
-                if(currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies) {
+        if (closestDistance > speciesSimilarityDistanceThreshold) {
+            if (!speciesCreatedOrDestroyedThisFrame) {
+                if (currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies) {
                     
                     // Create new species!::::     
                     assignedToNewSpecies = true;
@@ -324,9 +327,9 @@ public class MasterGenomePool
         int foundSpeciesID = -1;
         bool foundCandidate = false;
 
-        for(int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
+        for (int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
             int completeSpeciesIndex = currentlyActiveSpeciesIDList[i];
-            for(int j = 0; j < completeSpeciesPoolsList[completeSpeciesIndex].candidateGenomesList.Count; j++) {
+            for (int j = 0; j < completeSpeciesPoolsList[completeSpeciesIndex].candidateGenomesList.Count; j++) {
                 int refID = completeSpeciesPoolsList[completeSpeciesIndex].candidateGenomesList[j].candidateID;
 
                 if(refID == ID) {
@@ -337,7 +340,7 @@ public class MasterGenomePool
             }
         } 
         
-        if(foundCandidate == false) {
+        if (foundCandidate == false) {
             // look through ALL species?
             for(int a = 0; a < completeSpeciesPoolsList.Count; a++) {
                 for(int b = 0; b < completeSpeciesPoolsList[a].candidateGenomesList.Count; b++) {

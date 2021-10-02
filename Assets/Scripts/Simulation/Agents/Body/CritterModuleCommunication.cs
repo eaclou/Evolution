@@ -7,7 +7,7 @@ public class CritterModuleCommunication
 
     public CritterModuleCommunicationGenome genome;
 	public int parentID;
-    public int inno;
+    BrainModuleID moduleID => genome.moduleID;
 
     public float[] inComm0;
     public float[] inComm1;
@@ -33,12 +33,11 @@ public class CritterModuleCommunication
         outComm3 = new float[1]; // 6 
 
         parentID = genome.parentID;
-        inno = genome.inno; 
     }
 
     public void MapNeuron(NID nid, Neuron neuron) 
     {
-        if (inno != nid.moduleID) return;
+        if (moduleID != nid.moduleID) return;
         neuron.currentValue = GetNeuralValue(nid.neuronID);
         neuron.neuronType = neuralMap.GetIO(nid.neuronID);
     }
