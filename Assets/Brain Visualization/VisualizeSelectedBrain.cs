@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class VisualizeSelectedBrain : MonoBehaviour
 {
     UIManager ui => UIManager.instance;
     
     [SerializeField] GenerateBrainVisualization visualization;
+    [SerializeField] PlaceNeuronsAtUI placement;
 
     void Start()
     {
@@ -21,7 +23,7 @@ public class VisualizeSelectedBrain : MonoBehaviour
     {
         neurons = agent.brain.neuronList;
         axons = agent.brain.axonList;
-    
+        
         //Debug.Log($"Selected agent brain has {neurons.Count} neurons and {axons.Count} axons");
         var sockets = CreateSockets();
         visualization.Initialize(neurons, axons, ref sockets, inputNeurons.Count, outputNeurons.Count);
@@ -35,19 +37,19 @@ public class VisualizeSelectedBrain : MonoBehaviour
     SocketInitData[] CreateSockets()
     {
         SortNeuronsByIO(neurons);
+        
         SocketInitData[] sockets = new SocketInitData[neurons.Count];
 
         //Debug.Log($"Of {neurons.Count} neurons, {inputNeurons.Count} are input and {outputNeurons.Count} are output");
         AssignNeuralPositions(ref sockets, inputNeurons.Count, 0, 0f);
         AssignNeuralPositions(ref sockets, outputNeurons.Count, inputNeurons.Count, 0f);
         
-        /*for (int i = 0; i < sockets.Length; i++)
-        {
-            var neuron = neurons[i];
-            var IO = neuron.neuronType;
-        }*/
-        
+        // *** Success!!! Now use this to assign position (instead of above method based on IO type)
+        //foreach (var neuron in neurons)
+        //    Debug.Log(neuron.moduleID);
+
         return sockets;
+        //return placement.AssignNeuralPositions(neurons);
     }
     
     void SortNeuronsByIO(List<Neuron> neurons)

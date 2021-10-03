@@ -25,19 +25,19 @@ public class CritterModuleThreatSensorsGenome
     }
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
-        if(usePos) {
+        if (usePos) {
             neuronList.Add(new NeuronGenome("enemyPosX", NeuronType.In, moduleID, 14));
             neuronList.Add(new NeuronGenome("enemyPosY", NeuronType.In, moduleID, 15));
         }
-        if(useVel) {
+        if (useVel) {
             neuronList.Add(new NeuronGenome("enemyVelX", NeuronType.In, moduleID, 16));
             neuronList.Add(new NeuronGenome("enemyVelY", NeuronType.In, moduleID, 17));
         }
-        if(useDir) {
+        if (useDir) {
             neuronList.Add(new NeuronGenome("enemyDirX", NeuronType.In, moduleID, 18));
             neuronList.Add(new NeuronGenome("enemyDirY",NeuronType.In, moduleID, 19));
         }
-        if(useStats) {
+        if (useStats) {
             neuronList.Add(new NeuronGenome("enemyRelSize", NeuronType.In, moduleID, 200));
             neuronList.Add(new NeuronGenome("enemyHealth", NeuronType.In, moduleID, 201));
             neuronList.Add(new NeuronGenome("enemyGrowthStage", NeuronType.In, moduleID, 202));

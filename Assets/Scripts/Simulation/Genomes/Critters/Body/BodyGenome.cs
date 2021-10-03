@@ -58,8 +58,8 @@ public class BodyGenome
         threatGenome.GenerateRandomInitialGenome();
     }
     
+    // Go through each of the Body's Modules and add In/Out neurons based on module upgrades and settings:
     public void InitializeBrainGenome(List<NeuronGenome> neuronList) {
-        // Go through each of the Body's Modules and add In/Out neurons based on module upgrades and settings:
         appearanceGenome.AppendModuleNeuronsToMasterList(ref neuronList);
         communicationGenome.AppendModuleNeuronsToMasterList(ref neuronList);
         coreGenome.AppendModuleNeuronsToMasterList(ref neuronList);

@@ -7,8 +7,14 @@ public class Neuron
     public float inputTotal;
     public float[] currentValue;
     public float previousValue;
+    
+    public BrainModuleID moduleID;
 
-    public Neuron() { }
+    public Neuron(string name, BrainModuleID moduleID) 
+    {
+        this.name = name; 
+        this.moduleID = moduleID;
+    }
     
     public Neuron(int index, int inputCount)
     {

@@ -45,8 +45,7 @@ public class Brain {
     void RebuildNeurons(List<NeuronGenome> neurons, Agent agent)
     {
         for (int i = 0; i < neurons.Count; i++) {
-            Neuron neuron = new Neuron();
-            neuron.name = neurons[i].name;
+            Neuron neuron = new Neuron(neurons[i].name, neurons[i].nid.moduleID);
             agent.MapNeuronToModule(neurons[i].nid, neuron);
             IDs.Add(neurons[i].nid, i);
             neuronList.Add(neuron);
