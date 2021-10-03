@@ -28,6 +28,9 @@ public class Lookup : ScriptableObject
     public Color buttonDisabledColor = new Color(0.7f, 0.7f, 0.7f, 1f);
     public Color colorSpiritBrushLight;
     public Color colorSpiritBrushDark;
+    public Color sensorEnabled = Color.white;
+    public Color sensorDisabled = Color.gray * 0.75f;
+    public Color GetSensorColor(bool enabled) { return enabled ? sensorEnabled : sensorDisabled; }
 
     #endregion
 	

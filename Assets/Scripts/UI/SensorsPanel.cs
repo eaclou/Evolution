@@ -24,7 +24,10 @@ public class SensorsPanel : MonoBehaviour
     AgentGenome genome => selectionManager.focusedCandidate.candidateGenome;
     Agent agent => CameraManager.instance.targetAgent;
 
-    // WPP: convert to array, iterate through elements in Refresh
+    // WPP: converted to array, iterate through elements in Refresh
+    [SerializeField] Sensor[] sensors;
+    
+    [Header("Obsolete: delete on confirm")]
     [SerializeField] Sensor internals;
     [SerializeField] Sensor contact;    
     [SerializeField] Sensor plantFood;
@@ -55,8 +58,12 @@ public class SensorsPanel : MonoBehaviour
         threat = body.threatGenome;
         environment = body.environmentalGenome;
         communication = body.communicationGenome;
+        
+        foreach (var sensor in sensors)
+            sensor.SetSensorEnabled(IsSensorEnabled(sensor.id));
                 
-        plantFood.SetSensorEnabled(food.useNutrients || food.useStats);                
+        // WPP: replaced with foreach loop + switch statement for condition
+        /*plantFood.SetSensorEnabled(food.useNutrients || food.useStats);                
         microbeFood.SetSensorEnabled(food.usePos);
         eggsFood.SetSensorEnabled(food.useEggs);
         meatFood.SetSensorEnabled(food.useVel); //***EAC FIX THESE!!!!
@@ -67,23 +74,13 @@ public class SensorsPanel : MonoBehaviour
         wallSensor.SetSensorEnabled(false); // environment.useCardinals || environment.useDiagonals);
         commSensor.SetSensorEnabled(communication.useComms);
         internals.SetSensorEnabled(true);        
-        contact.SetSensorEnabled(true);
+        contact.SetSensorEnabled(true);*/
         
         if (!agent) return;
         
-        SetSensorTooltip(plantFood, agent.foodModule.nutrientGradX != null);
-        microbeFood.SetSensorTooltip("Microbes: " + agent.foodModule.nearestAnimalParticlePos);
-        SetSensorTooltip(eggsFood, food.useEggs);
-        SetSensorTooltip(meatFood, agent.foodModule.foodAnimalVelX != null);
-        SetSensorTooltip(corpseFood, food.useCorpse);
-        SetSensorTooltip(friendSensor, agent.friendModule.friendDirX != null);
-        SetSensorTooltip(foeSensor, agent.threatsModule.enemyDirX != null);
-        SetSensorTooltip(waterSensor, agent.environmentModule.waterDepth != null);
-        wallSensor.SetSensorTooltip("Walls (disabled)");
-        SetSensorTooltip(wallSensor, communication.useComms);
-        internals.SetSensorTooltip("Health: " + agent.coreModule.hitPoints[0].ToString("F2") + ", Energy: " + agent.coreModule.energyStored[0].ToString("F2"));
-        contact.SetSensorTooltip("Contact Force [" + agent.coreModule.contactForceX[0].ToString("F2") + "," + agent.coreModule.contactForceY[0].ToString("F2") + "]");
-        
+        foreach (var sensor in sensors)
+            sensor.SetSensorTooltip(GetSensorTooltipText(sensor));
+
         // WPP: replaced with SetSensorTooltip
         /*
         string txt = "Nutrients (disabled)";
@@ -144,10 +141,48 @@ public class SensorsPanel : MonoBehaviour
         */
     }
     
-    void SetSensorTooltip(Sensor sensor, bool isActive)
+    bool IsSensorEnabled(SensorID id)
     {
-        var text = isActive ? GetSensorEnabledText(sensor.id) : sensor.disabledText;
-        commSensor.SetSensorTooltip(text);        
+        switch (id)
+        {
+            case SensorID.Plants: return food.useNutrients || food.useStats;
+            case SensorID.Microbes: return food.usePos;
+            case SensorID.Eggs: return food.useEggs;
+            case SensorID.Meat: return food.useVel;
+            case SensorID.Corpse: return food.useCorpse;
+            case SensorID.Friend: return friend.usePos || friend.useVel || friend.useDir;
+            case SensorID.Foe: return threat.usePos || threat.useVel || threat.useDir;
+            case SensorID.Water: return environment.useWaterStats;
+            case SensorID.Wall: return false;
+            case SensorID.Internals: return true;
+            case SensorID.Communication: return communication.useComms;
+            case SensorID.Contact: return true;
+            default: return false;
+        }        
+    }
+    
+    string GetSensorTooltipText(Sensor sensor) 
+    { 
+        return IsSensorInActiveState(sensor.id) ? GetSensorEnabledText(sensor.id) : sensor.disabledText; 
+    }
+
+    bool IsSensorInActiveState(SensorID id)
+    {
+        switch (id)
+        {
+            case SensorID.Plants: return agent.foodModule.nutrientGradX != null;
+            case SensorID.Microbes: return true;
+            case SensorID.Eggs: return food.useEggs;
+            case SensorID.Meat: return agent.foodModule.foodAnimalVelX != null;
+            case SensorID.Corpse: return food.useCorpse;
+            case SensorID.Friend: return agent.friendModule.friendDirX != null;
+            case SensorID.Foe: return agent.threatsModule.enemyDirX != null;
+            case SensorID.Water: return agent.environmentModule.waterDepth != null;
+            case SensorID.Internals: return true;
+            case SensorID.Communication: return communication.useComms;
+            case SensorID.Contact: return true;
+            default: return false;
+        }        
     }
     
     string GetSensorEnabledText(SensorID id)
@@ -156,6 +191,7 @@ public class SensorsPanel : MonoBehaviour
         {
             case SensorID.Plants: return "nutrientDir [" + agent.foodModule.nutrientGradX[0].ToString("F2") + 
                 "," + agent.foodModule.nutrientGradY[0].ToString("F2");
+            case SensorID.Microbes: return "Microbes: " + agent.foodModule.nearestAnimalParticlePos;
             case SensorID.Eggs: return "Eggs [" + agent.foodModule.foodEggDirX[0].ToString("F2") + 
                 "," + agent.foodModule.foodEggDirY[0].ToString("F2") + 
                 "] d: " + agent.foodModule.foodEggDistance[0].ToString("F2");
@@ -173,10 +209,14 @@ public class SensorsPanel : MonoBehaviour
             case SensorID.Water: return "Water: " + agent.environmentModule.waterDepth[0].ToString("F2") + 
                 ", vel [" + agent.environmentModule.waterVelX[0].ToString("F2") + 
                 "," + agent.environmentModule.waterVelY[0].ToString("F2") + "]";
+            case SensorID.Internals: return "Health: " + agent.coreModule.hitPoints[0].ToString("F2") + 
+                ", Energy: " + agent.coreModule.energyStored[0].ToString("F2");
             case SensorID.Communication: return "CommsIn " + agent.communicationModule.inComm0[0].ToString("F2") + 
                 ", " + agent.communicationModule.inComm1[0].ToString("F2") + 
                 ", " + agent.communicationModule.inComm2[0].ToString("F2") + 
                 ", " + agent.communicationModule.inComm3[0].ToString("F2");
+            case SensorID.Contact: return "Contact Force [" + agent.coreModule.contactForceX[0].ToString("F2") + 
+                "," + agent.coreModule.contactForceY[0].ToString("F2") + "]";
             default: return "";
         }
     }
@@ -184,19 +224,17 @@ public class SensorsPanel : MonoBehaviour
     [Serializable] 
     public class Sensor
     {
+        Lookup lookup => Lookup.instance;
+
         public SensorID id;    
         [SerializeField] Image image;
         [SerializeField] TooltipUI tooltip;
         public string disabledText;
-        
-        // * Move to central location (lookup?)
-        [SerializeField] Color enabledColor = Color.white;
-        [SerializeField] Color disabledColor = Color.gray * 0.75f;
-        
+
         public void SetSensorEnabled(bool value) 
         { 
             //tooltip.isSensorEnabled = value; //***EAC re-implement this later
-            image.color = value ? enabledColor : disabledColor;     
+            image.color = lookup.GetSensorColor(value);
         }
         public void SetSensorTooltip(string txt) {
             tooltip.tooltipString = txt;
