@@ -4,7 +4,6 @@ using Playcraft;
 public class CritterModuleFoodSensorsGenome 
 {
     public int parentID;
-    //public int inno;    // * WPP: rename or comment (module ID?)
     public readonly BrainModuleID moduleID = BrainModuleID.FoodSensors;
 
     public bool useNutrients;
@@ -41,12 +40,12 @@ public class CritterModuleFoodSensorsGenome
     }
 
     public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
-        if(useNutrients) {
+        if (useNutrients) {
             neuronList.Add(new NeuronGenome("nutrientDensity", NeuronType.In, moduleID, 1));
             neuronList.Add(new NeuronGenome("nutrientGradX", NeuronType.In, moduleID, 2));
             neuronList.Add(new NeuronGenome("nutrientGradY", NeuronType.In, moduleID, 3));
         }
-        if(usePos) {
+        if (usePos) {
             neuronList.Add(new NeuronGenome("foodPosX", NeuronType.In, moduleID, 4));
             neuronList.Add(new NeuronGenome("foodPosY", NeuronType.In, moduleID, 5));
             neuronList.Add(new NeuronGenome("distance", NeuronType.In, moduleID, 6));
@@ -54,38 +53,37 @@ public class CritterModuleFoodSensorsGenome
             neuronList.Add(new NeuronGenome("animalPosY", NeuronType.In, moduleID, 25));
             neuronList.Add(new NeuronGenome("animalDistance",NeuronType.In, moduleID, 26));
         }
-        if(useVel) {
+        if (useVel) {
             neuronList.Add(new NeuronGenome("foodVelX", NeuronType.In, moduleID, 7));
             neuronList.Add(new NeuronGenome("foodVelY", NeuronType.In, moduleID, 8));
             neuronList.Add(new NeuronGenome("animalVelX", NeuronType.In, moduleID, 27));
             neuronList.Add(new NeuronGenome("animalVelY", NeuronType.In, moduleID, 28));
         }
-        if(useDir) {
+        if (useDir) {
             neuronList.Add(new NeuronGenome("foodDirX", NeuronType.In, moduleID, 9));
             neuronList.Add(new NeuronGenome("foodDirY", NeuronType.In, moduleID, 10));
 
             neuronList.Add(new NeuronGenome("animalDirX", NeuronType.In, moduleID, 29));
             neuronList.Add(new NeuronGenome("animalDirY", NeuronType.In, moduleID, 30));
         }
-        if(useStats) {
+        if (useStats) {
             neuronList.Add(new NeuronGenome("foodQuality", NeuronType.In, moduleID, 11));
             neuronList.Add(new NeuronGenome("foodRelSize", NeuronType.In, moduleID, 12));
             neuronList.Add(new NeuronGenome("animalQuality", NeuronType.In, moduleID, 31));
             neuronList.Add(new NeuronGenome("animalRelSize", NeuronType.In, moduleID, 32));
         }
-        if(useEggs) {
+        if (useEggs) {
             neuronList.Add(new NeuronGenome("distance", NeuronType.In, moduleID, 13));
             neuronList.Add(new NeuronGenome("eggDirX", NeuronType.In, moduleID, 14));
             neuronList.Add(new NeuronGenome("eggDirY", NeuronType.In, moduleID, 15));
         }
-        if(useCorpse) {
+        if (useCorpse) {
             neuronList.Add(new NeuronGenome("distance", NeuronType.In, moduleID, 16));
             neuronList.Add(new NeuronGenome("corpseDirX", NeuronType.In, moduleID, 17));
             neuronList.Add(new NeuronGenome("corpseDirY", NeuronType.In, moduleID, 18));
         }
     }
     
-	
     public void SetToMutatedCopyOfParentGenome(CritterModuleFoodSensorsGenome parentGenome, MutationSettingsInstance settings) {
         useNutrients = RequestMutation(settings, parentGenome.useNutrients);
         usePos = RequestMutation(settings, parentGenome.usePos);

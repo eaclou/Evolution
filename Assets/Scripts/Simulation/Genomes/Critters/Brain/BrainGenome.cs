@@ -54,8 +54,7 @@ public class BrainGenome
         //Debug.Log("numAxons: " + linkList.Count.ToString());
     }
     
-    // WPP: delegated function used in multiple locations
-    // * consider moving to global static
+    // * Consider moving to global static
     (List<NeuronGenome>, List<NeuronGenome>) GetIOLists() {
         List<NeuronGenome> inputNeuronList = new List<NeuronGenome>();
         List<NeuronGenome> outputNeuronList = new List<NeuronGenome>();
@@ -70,7 +69,6 @@ public class BrainGenome
         return (inputNeuronList, outputNeuronList);        
     }
     
-    // WPP: simplified repetitive code with method
     void LinkLayers(List<NeuronGenome> fromList, List<NeuronGenome> toList, float initialConnectionDensity, float initialWeightMultiplier) {
         foreach (var toElement in toList) {
             foreach (var fromElement in fromList) {

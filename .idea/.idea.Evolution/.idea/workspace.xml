@@ -29,8 +29,14 @@
       <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_10.ogg.meta" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_11.ogg.meta" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_12.ogg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/CreatureBrainActivityUI.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/CreatureBrainActivityUI.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleMovement.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleMovement.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/NID.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/NID.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/CritterModuleFoodSensorsGenome.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/CritterModuleFoodSensorsGenome.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/BrainGenome.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/BrainGenome.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/NeuronGenome.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/NeuronGenome.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/MasterGenomePool.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/MasterGenomePool.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/MutationSettings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/MutationSettings.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/SensorsPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/SensorsPanel.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -111,7 +117,6 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/EggSackGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/SpeciesGenomePool.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/SettingsManager.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/MutationSettings.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationStateData.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/BrainSettings.cs" />
@@ -119,13 +124,9 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/NeuralMap.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleTarget.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/Quality of Life/Statics/RandomStatics.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/MasterGenomePool.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/AgentGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/BrainModuleID.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/NeuronGenome.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/NID.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/LinkGenome.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/BrainGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/OldAndMisc/TestModule.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/OldAndMisc/TestModuleGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/CritterModuleCommunicationGenome.cs" />
@@ -134,10 +135,8 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleFriends.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleFood.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCore.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleMovement.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/CritterModuleCoreGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/CritterModuleFriendSensorsGenome.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/CritterModuleFoodSensorsGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/CritterModuleMovementGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleThreats.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" />
@@ -149,7 +148,14 @@
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/PlaceNeuronsAtUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/VisualizeSelectedBrain.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/NeuronGenome.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/NID.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/MutationSettings.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/BrainGenome.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleMovement.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/SensorsPanel.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/CritterModuleFoodSensorsGenome.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/MasterGenomePool.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1owaWgGpM80xkcfA3szn5iw9YkG" />
@@ -290,7 +296,8 @@
       <workItem from="1632813117803" duration="1143000" />
       <workItem from="1633032174012" duration="6211000" />
       <workItem from="1633130928419" duration="5835000" />
-      <workItem from="1633231801710" duration="6158000" />
+      <workItem from="1633231801710" duration="6384000" />
+      <workItem from="1633312879300" duration="4416000" />
     </task>
     <servers />
   </component>

@@ -322,19 +322,18 @@ public class MasterGenomePool
         CheckForExtinction(); // *** TEMPORARILLY (UN)DISABLED!!!!! *************
     }
 
-    public void GlobalFindCandidateID(int ID) {
-        
+    public void GlobalFindCandidateID(int ID) 
+    {
         int foundSpeciesID = -1;
         bool foundCandidate = false;
 
-        for (int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
-            int completeSpeciesIndex = currentlyActiveSpeciesIDList[i];
-            for (int j = 0; j < completeSpeciesPoolsList[completeSpeciesIndex].candidateGenomesList.Count; j++) {
-                int refID = completeSpeciesPoolsList[completeSpeciesIndex].candidateGenomesList[j].candidateID;
+        foreach (var speciesID in currentlyActiveSpeciesIDList) {
+            foreach (var candidate in completeSpeciesPoolsList[speciesID].candidateGenomesList) {
+                int refID = candidate.candidateID;
 
                 if(refID == ID) {
                     foundCandidate = true;
-                    foundSpeciesID = completeSpeciesPoolsList[completeSpeciesIndex].speciesID;
+                    foundSpeciesID = completeSpeciesPoolsList[speciesID].speciesID;
                     Debug.Log("FOUND! " + ID + ", species: " + foundSpeciesID + ", CDSID: " + refID);
                 }
             }
@@ -342,21 +341,19 @@ public class MasterGenomePool
         
         if (foundCandidate == false) {
             // look through ALL species?
-            for(int a = 0; a < completeSpeciesPoolsList.Count; a++) {
-                for(int b = 0; b < completeSpeciesPoolsList[a].candidateGenomesList.Count; b++) {
-                    int refID = completeSpeciesPoolsList[a].candidateGenomesList[b].candidateID;
-
-                    if(refID == ID) {
+            foreach (var pool in completeSpeciesPoolsList) {
+                foreach (var candidate in pool.candidateGenomesList) {
+                    if (candidate.candidateID == ID) {
                         foundCandidate = true;
-                        foundSpeciesID = completeSpeciesPoolsList[a].speciesID;
-                        Debug.Log("FOUND COMPLETE! " + ID + ", species: " + foundSpeciesID + ", CDSID: " + refID);
+                        foundSpeciesID = pool.speciesID;
+                        Debug.Log($"FOUND COMPLETE! {ID}, species: {foundSpeciesID}, CDSID: {candidate.candidateID}");
                     }
                 }                
             }
         }
 
-        if(foundCandidate == false) {
-            for(int k = 0; k < debugRecentlyDeletedCandidateIDsList.Count; k++) {
+        if (foundCandidate == false) {
+            for (int k = 0; k < debugRecentlyDeletedCandidateIDsList.Count; k++) {
                 if(debugRecentlyDeletedCandidateIDsList[k] == ID) {
                     foundCandidate = true;
                     //foundSpeciesID = completeSpeciesPoolsList[a].speciesID;

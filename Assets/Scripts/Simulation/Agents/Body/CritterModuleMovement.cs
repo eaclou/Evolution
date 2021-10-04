@@ -64,41 +64,8 @@ public class CritterModuleMovement
         if (moduleID != nid.moduleID) return;
         neuron.neuronType = GetIO(nid.neuronID);    
         neuron.currentValue = GetNeuralValue(nid.neuronID);
-        
-        /*if (inno == nid.moduleID) {            
-            if (nid.neuronID == 20) {
-                neuron.currentValue = ownVelX;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 21) {
-                neuron.currentValue = ownVelY;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 207) {
-                neuron.currentValue = facingDirX;
-                neuron.neuronType = NeuronType.In;
-            }
-            if (nid.neuronID == 208) {
-                neuron.currentValue = facingDirY;
-                neuron.neuronType = NeuronType.In;
-            }
-
-            if (nid.neuronID == 100) {
-                neuron.currentValue = throttleX;
-                neuron.neuronType = NeuronType.Out;
-            }
-            if (nid.neuronID == 101) {
-                neuron.currentValue = throttleY;
-                neuron.neuronType = NeuronType.Out;
-            }
-            if (nid.neuronID == 102) {
-                neuron.currentValue = dash;
-                neuron.neuronType = NeuronType.Out;
-            }
-        }*/
     }
     
-    // WPP: some assignments break pattern established in other modules
     NeuronType GetIO(int neuronID)
     {
         switch (neuronID)

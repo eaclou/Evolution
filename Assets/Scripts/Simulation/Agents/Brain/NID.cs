@@ -5,6 +5,8 @@
 public struct NID 
 {
     public BrainModuleID moduleID;
+    
+    /// Unique identifier for neurons within a module
     public int neuronID;
 
     public NID(BrainModuleID moduleID, int neuronID) {

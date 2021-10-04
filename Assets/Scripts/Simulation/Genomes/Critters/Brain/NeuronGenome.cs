@@ -1,5 +1,6 @@
 ﻿using System;
 
+/// Template from which Neurons are created
 [Serializable]
 public class NeuronGenome 
 {
