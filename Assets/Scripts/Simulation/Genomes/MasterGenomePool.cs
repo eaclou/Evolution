@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using Playcraft;
+using Random = UnityEngine.Random;
 
-[System.Serializable]
+[Serializable]
 public class MasterGenomePool 
 {
-    //public TreeOfLifeManager treeOfLifeManager;
     UIManager uiManager => UIManager.instance;
     SelectionManager selectionManager => SelectionManager.instance;
     SimulationManager simulation => SimulationManager.instance;
@@ -15,6 +17,8 @@ public class MasterGenomePool
     private int targetNumSpecies = 3;
     public float speciesSimilarityDistanceThreshold = 12f;
     private int minNumGuaranteedEvalsForNewSpecies = 128;
+    
+    [SerializeField] float oldestSpeciesRerollChance = 0.33f;
 
     public int curNumAliveAgents;
 
@@ -50,7 +54,7 @@ public class MasterGenomePool
 
         int numInitSpecies = 4;
         for (int i = 0; i < numInitSpecies; i++) {
-            float lerpV = Mathf.Clamp01(((float)i + 0.1f) / (float)(numInitSpecies + 1) + 0.06f) * 0.8f + 0.1f;
+            float lerpV = Mathf.Clamp01((i + 0.1f) / (numInitSpecies + 1) + 0.06f) * 0.8f + 0.1f;
             lerpV = 0.5f;
             SpeciesGenomePool newSpecies = new SpeciesGenomePool(i, -1, 0, 0, mutationSettingsRef);
             AgentGenome seedGenome = new AgentGenome();
@@ -78,7 +82,7 @@ public class MasterGenomePool
             return; 
         
         int leastFitSpeciesID = -1;
-        float worstFitness = 99999f;
+        float worstFitness = Mathf.Infinity;
         bool noCurrentlyExtinctFlaggedSpecies = true;
         
         foreach (var idList in currentlyActiveSpeciesIDList) {
@@ -139,10 +143,10 @@ public class MasterGenomePool
             int totalNumActiveEvals = 0;
             //int evalLeaderActiveIndex = 0;
             int recordNumEvals = 0;            
-            for (int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
-                int numEvals = completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].numAgentsEvaluated + 1;
+            foreach (var idList in currentlyActiveSpeciesIDList) {
+                int numEvals = completeSpeciesPoolsList[idList].numAgentsEvaluated + 1;
                 totalNumActiveEvals += numEvals;
-                if(numEvals > recordNumEvals) {
+                if (numEvals > recordNumEvals) {
                     recordNumEvals = numEvals;
                     //evalLeaderActiveIndex = i;
                 }
@@ -155,7 +159,7 @@ public class MasterGenomePool
             //float weightedAmount = 0.5f;
             float avgFractionVal = 1f / currentlyActiveSpeciesIDList.Count;
 
-            for(int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
+            for (int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
                 float rawEvalFraction = 1f - (((float)completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].numAgentsEvaluated + 1f) / (float)totalNumActiveEvals);
                 unsortedEvalScoresArray[i] = Mathf.Lerp(avgFractionVal, rawEvalFraction, weightedAmount);
                 rankedEvalScoresArray[i] = unsortedEvalScoresArray[i];
@@ -169,8 +173,9 @@ public class MasterGenomePool
                     float swapFitB = rankedEvalScoresArray[j + 1];
                     int swapIdA = rankedEvalIndices[j];
                     int swapIdB = rankedEvalIndices[j + 1];
-
-                    if (swapFitA < swapFitB) {  // bigger is better now after inversion
+                    
+                    // bigger is better now after inversion
+                    if (swapFitA < swapFitB) {  
                         rankedEvalScoresArray[j] = swapFitB;
                         rankedEvalScoresArray[j + 1] = swapFitA;
                         rankedEvalIndices[j] = swapIdB;
@@ -199,44 +204,37 @@ public class MasterGenomePool
         // NAIVE RANDOM AT FIRST:
         // filter flagged extinct species:
         List<int> eligibleSpeciesIDList = new List<int>();
-        for(int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
-            if(completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].isFlaggedForExtinction) {
+        foreach (var id in currentlyActiveSpeciesIDList)
+            if (!completeSpeciesPoolsList[id].isFlaggedForExtinction) 
+                eligibleSpeciesIDList.Add(id);
 
-            }
-            else {
-                eligibleSpeciesIDList.Add(currentlyActiveSpeciesIDList[i]);
-            }
-        }
-        //int randomTableIndex = UnityEngine.Random.Range(0, currentlyActiveSpeciesIDList.Count);
         int randomTableIndex = Random.Range(0, eligibleSpeciesIDList.Count);
 
         // temp minor penalty to oldest species:
-        float oldestSpeciesRerollChance = 0.33f;
-        if(randomTableIndex == 0) {
-            if(Random.Range(0f, 1f) < oldestSpeciesRerollChance) {
-                randomTableIndex = Random.Range(0, eligibleSpeciesIDList.Count);
-            }
+        if (randomTableIndex == 0 && RandomStatics.CoinToss(oldestSpeciesRerollChance)) {
+            randomTableIndex = Random.Range(0, eligibleSpeciesIDList.Count);
         }
         int speciesIndex = eligibleSpeciesIDList[randomTableIndex];
 
         return completeSpeciesPoolsList[speciesIndex];
     }
-    public SpeciesGenomePool GetSmallestSpecies() {
-
+    
+    public SpeciesGenomePool GetSmallestSpecies() 
+    {
         int targetSpeciesID = 0;
         // filter flagged extinct species:
         List<int> eligibleSpeciesIDList = new List<int>();
-        for(int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
-            if(completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].isFlaggedForExtinction || completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].isExtinct) {
-
-            }
-            else {
-                eligibleSpeciesIDList.Add(currentlyActiveSpeciesIDList[i]);
-                if(completeSpeciesPoolsList[currentlyActiveSpeciesIDList[i]].candidateGenomesList.Count < completeSpeciesPoolsList[targetSpeciesID].candidateGenomesList.Count) {
-                    targetSpeciesID = currentlyActiveSpeciesIDList[i];
+        
+        foreach (var id in currentlyActiveSpeciesIDList) {
+            if (!completeSpeciesPoolsList[id].isFlaggedForExtinction && !completeSpeciesPoolsList[id].isExtinct) {
+                eligibleSpeciesIDList.Add(id);
+                
+                if(completeSpeciesPoolsList[id].candidateGenomesList.Count < completeSpeciesPoolsList[targetSpeciesID].candidateGenomesList.Count) {
+                    targetSpeciesID = id;
                 }
             }
-        }        
+        }  
+              
         return completeSpeciesPoolsList[targetSpeciesID];
     }
     
@@ -245,48 +243,39 @@ public class MasterGenomePool
         int closestSpeciesID = -1;
         float closestDistance = 99999f;
         
-        for (int i = 0; i < currentlyActiveSpeciesIDList.Count; i++) {
-            if(!completeSpeciesPoolsList[ currentlyActiveSpeciesIDList[i] ].isFlaggedForExtinction) {  // Dying species not allowed?
-                float similarityDistance = GetSimilarityScore(newGenome, completeSpeciesPoolsList[ currentlyActiveSpeciesIDList[i] ].representativeCandidate.candidateGenome);
-                if(similarityDistance < closestDistance) {
-                    closestDistance = similarityDistance;
-                    closestSpeciesID = currentlyActiveSpeciesIDList[i];
-                }
-            }            
+        foreach (var id in currentlyActiveSpeciesIDList) {
+            // Dying species not allowed?
+            if (completeSpeciesPoolsList[id].isFlaggedForExtinction) 
+                continue;
+             
+            float similarityDistance = GetSimilarityScore(newGenome, completeSpeciesPoolsList[id].representativeCandidate.candidateGenome);
+            if (similarityDistance >= closestDistance) 
+                continue;
+            
+            closestDistance = similarityDistance;
+            closestSpeciesID = id;
         }
-
-        // *********** AUTO SPECIES CREATION DISABLED FOR NOW!!! ***************************** 
-        //*** RE-ENABLED!!!!!!
+        
         // CHECK IF NEW SPECIES CREATED:
-
         bool assignedToNewSpecies = false;
             
-        if (closestDistance > speciesSimilarityDistanceThreshold) {
-            if (!speciesCreatedOrDestroyedThisFrame) {
-                if (currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies) {
-                    
-                    // Create new species!::::     
-                    assignedToNewSpecies = true;
+        if (closestDistance > speciesSimilarityDistanceThreshold && !speciesCreatedOrDestroyedThisFrame && currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies) 
+        {
+            // Create new species!::::     
+            assignedToNewSpecies = true;
 
-                    int seedSpeciesID = closestSpeciesID; // simManagerRef.masterGenomePool.currentlyActiveSpeciesIDList[ UnityEngine.Random.Range(0, currentlyActiveSpeciesIDList.Count) ];
-                    //AgentGenome seedGenome =
-                    simulation.AddNewSpecies(newGenome, seedSpeciesID);
+            int seedSpeciesID = closestSpeciesID; // simManagerRef.masterGenomePool.currentlyActiveSpeciesIDList[ UnityEngine.Random.Range(0, currentlyActiveSpeciesIDList.Count) ];
+            //AgentGenome seedGenome =
+            simulation.AddNewSpecies(newGenome, seedSpeciesID);
 
-                    speciesSimilarityDistanceThreshold += 70f;
+            speciesSimilarityDistanceThreshold += 70f;
 
-                    Color colo = new Color(newGenome.bodyGenome.appearanceGenome.huePrimary.x, newGenome.bodyGenome.appearanceGenome.huePrimary.y, newGenome.bodyGenome.appearanceGenome.huePrimary.z);
-                    panelPendingClickPrompt.Narrate("A new species has emerged! " + newGenome.bodyGenome.coreGenome.name, colo); 
-                }               
-            }
-            else {
-                Debug.Log("speciesCreatedOrDestroyedThisFrame closestDistanceSpeciesID: " + closestSpeciesID + ", score: " + closestDistance);
-            }
-        }
-        else {
-            //Debug.Log("closestDistanceSpeciesID: " + closestSpeciesID.ToString() + ", score: " + closestDistance.ToString());
+            Color color = new Color(newGenome.bodyGenome.appearanceGenome.huePrimary.x, newGenome.bodyGenome.appearanceGenome.huePrimary.y, newGenome.bodyGenome.appearanceGenome.huePrimary.z);
+            panelPendingClickPrompt.Narrate("A new species has emerged! " + newGenome.bodyGenome.coreGenome.name, color);
         }
 
-        if(!assignedToNewSpecies) {
+        if (!assignedToNewSpecies) 
+        {
             // *** maybe something fishy here??
             // **********************
 
@@ -305,9 +294,10 @@ public class MasterGenomePool
             // OLD:::
             //completeSpeciesPoolsList[closestSpeciesID].AddNewCandidateGenome(newGenome);
         }
-        else {
+        else 
+        {
             // *** ???
-            Debug.Log("assignedToNewSpecies closestDistanceSpeciesID: " + closestSpeciesID.ToString() + ", score: " + closestDistance.ToString());
+            Debug.Log($"assignedToNewSpecies closestDistanceSpeciesID: {closestSpeciesID}, score: {closestDistance}");
             completeSpeciesPoolsList[closestSpeciesID].AddNewCandidateGenome(newGenome);
         }
         
@@ -319,7 +309,7 @@ public class MasterGenomePool
             speciesSimilarityDistanceThreshold = Mathf.Min(speciesSimilarityDistanceThreshold, 6f); // cap
         }
 
-        CheckForExtinction(); // *** TEMPORARILLY (UN)DISABLED!!!!! *************
+        CheckForExtinction();
     }
 
     public void GlobalFindCandidateID(int ID) 
@@ -327,23 +317,28 @@ public class MasterGenomePool
         int foundSpeciesID = -1;
         bool foundCandidate = false;
 
-        foreach (var speciesID in currentlyActiveSpeciesIDList) {
-            foreach (var candidate in completeSpeciesPoolsList[speciesID].candidateGenomesList) {
-                int refID = candidate.candidateID;
-
-                if(refID == ID) {
-                    foundCandidate = true;
-                    foundSpeciesID = completeSpeciesPoolsList[speciesID].speciesID;
-                    Debug.Log("FOUND! " + ID + ", species: " + foundSpeciesID + ", CDSID: " + refID);
-                }
+        foreach (var speciesID in currentlyActiveSpeciesIDList) 
+        {
+            foreach (var candidate in completeSpeciesPoolsList[speciesID].candidateGenomesList) 
+            {
+                if (candidate.candidateID != ID) 
+                    continue; 
+                    
+                foundCandidate = true;
+                foundSpeciesID = completeSpeciesPoolsList[speciesID].speciesID;
+                Debug.Log("FOUND! " + ID + ", species: " + foundSpeciesID + ", CDSID: " + candidate.candidateID);
             }
         } 
         
-        if (foundCandidate == false) {
+        if (!foundCandidate) 
+        {
             // look through ALL species?
-            foreach (var pool in completeSpeciesPoolsList) {
-                foreach (var candidate in pool.candidateGenomesList) {
-                    if (candidate.candidateID == ID) {
+            foreach (var pool in completeSpeciesPoolsList) 
+            {
+                foreach (var candidate in pool.candidateGenomesList) 
+                {
+                    if (candidate.candidateID == ID) 
+                    {
                         foundCandidate = true;
                         foundSpeciesID = pool.speciesID;
                         Debug.Log($"FOUND COMPLETE! {ID}, species: {foundSpeciesID}, CDSID: {candidate.candidateID}");
@@ -352,74 +347,90 @@ public class MasterGenomePool
             }
         }
 
-        if (foundCandidate == false) {
-            for (int k = 0; k < debugRecentlyDeletedCandidateIDsList.Count; k++) {
-                if(debugRecentlyDeletedCandidateIDsList[k] == ID) {
-                    foundCandidate = true;
-                    //foundSpeciesID = completeSpeciesPoolsList[a].speciesID;
-                    // It was somehow deleted twice?  Or simply looking in the wrong SpeciesPool?
-                    Debug.Log("FOUND COMPLETE! " + ID + ", CDSID: " + debugRecentlyDeletedCandidateIDsList[k]);
-                }
+        if (!foundCandidate) {
+            //for (int k = 0; k < debugRecentlyDeletedCandidateIDsList.Count; k++) 
+            foreach (var id in debugRecentlyDeletedCandidateIDsList) {
+                if (id != ID) continue;
+                
+                foundCandidate = true;
+                //foundSpeciesID = completeSpeciesPoolsList[a].speciesID;
+                // It was somehow deleted twice?  Or simply looking in the wrong SpeciesPool?
+                Debug.Log("FOUND COMPLETE! " + ID + ", CDSID: " + id);
             }
         }
     }
      
-    // DUE FOR UPGRADE / OVERHAUL!!!!  ****** 
+    // UPGRADE / OVERHAUL!!!!  ****** 
+    // *** need to normalize all to 0-1 for more fair comparison? ***
+    // have centralized min/max values for each attribute?
     public float GetSimilarityScore(AgentGenome newGenome, AgentGenome repGenome) 
     {
-        // *** need to normalize all to 0-1 for more fair comparison? ***
-        // have centralized min/max values for each attribute?
-        float dBaseSize = Mathf.Abs(newGenome.bodyGenome.coreGenome.creatureBaseLength - repGenome.bodyGenome.coreGenome.creatureBaseLength);
-        float dBaseAspectRatio = Mathf.Abs(newGenome.bodyGenome.coreGenome.creatureAspectRatio - repGenome.bodyGenome.coreGenome.creatureAspectRatio);
+        var newBody = newGenome.bodyGenome;
+        var newCore = newBody.coreGenome;
+        var newAppearance = newBody.appearanceGenome;
+        var newCommunication = newBody.communicationGenome;
+        var newThreat = newBody.threatGenome;
+        var newFriend = newBody.friendGenome;
+        var newFood = newBody.foodGenome;
+        var newEnvironment = newBody.environmentalGenome;
+        
+        var repBody = repGenome.bodyGenome;
+        var repCore = repBody.coreGenome;
+        var repAppearance = repBody.appearanceGenome;
+        var repCommunication = repBody.communicationGenome;
+        var repThreat = repBody.threatGenome;
+        var repFriend = repBody.friendGenome;
+        var repFood = repBody.foodGenome;
+        var repEnvironment = repBody.environmentalGenome;
+    
+        float dBaseSize = Mathf.Abs(newCore.creatureBaseLength - repCore.creatureBaseLength);
+        float dBaseAspectRatio = Mathf.Abs(newCore.creatureAspectRatio - repCore.creatureAspectRatio);
 
-        float mouthA = 1f;
-        if (newGenome.bodyGenome.coreGenome.isPassive)
-            mouthA = 0f;
-        float mouthB = 1f;
-        if (repGenome.bodyGenome.coreGenome.isPassive)
-            mouthB = 0f;
+        float mouthA = newCore.isPassive ? 0f : 1f;
+        float mouthB = repCore.isPassive ? 0f : 1f;
+
         float dMouthType = Mathf.Abs(mouthA - mouthB);
 
-        float dPriColor = Mathf.Abs((newGenome.bodyGenome.appearanceGenome.huePrimary - repGenome.bodyGenome.appearanceGenome.huePrimary).sqrMagnitude);
-        float dSecColor = Mathf.Abs((newGenome.bodyGenome.appearanceGenome.hueSecondary - repGenome.bodyGenome.appearanceGenome.hueSecondary).sqrMagnitude);
+        float dPriColor = Mathf.Abs((newAppearance.huePrimary - repAppearance.huePrimary).sqrMagnitude);
+        float dSecColor = Mathf.Abs((newAppearance.hueSecondary - repAppearance.hueSecondary).sqrMagnitude);
 
         // proportions:
-        float dMouthLength = Mathf.Abs(newGenome.bodyGenome.coreGenome.mouthLength - repGenome.bodyGenome.coreGenome.mouthLength);
-        float dHeadLength = Mathf.Abs(newGenome.bodyGenome.coreGenome.headLength - repGenome.bodyGenome.coreGenome.headLength);
-        float dBodyLength = Mathf.Abs(newGenome.bodyGenome.coreGenome.bodyLength - repGenome.bodyGenome.coreGenome.bodyLength);
-        float dTailLength = Mathf.Abs(newGenome.bodyGenome.coreGenome.tailLength - repGenome.bodyGenome.coreGenome.tailLength);
+        float dMouthLength = Mathf.Abs(newCore.mouthLength - repCore.mouthLength);
+        float dHeadLength = Mathf.Abs(newCore.headLength - repCore.headLength);
+        float dBodyLength = Mathf.Abs(newCore.bodyLength - repCore.bodyLength);
+        float dTailLength = Mathf.Abs(newCore.tailLength - repCore.tailLength);
         
         // eyes
-        float dEyeSize = Mathf.Abs(newGenome.bodyGenome.coreGenome.socketRadius - repGenome.bodyGenome.coreGenome.socketRadius);
-        float dEyeHeight = Mathf.Abs(newGenome.bodyGenome.coreGenome.socketHeight - repGenome.bodyGenome.coreGenome.socketHeight);
+        float dEyeSize = Mathf.Abs(newCore.socketRadius - repCore.socketRadius);
+        float dEyeHeight = Mathf.Abs(newCore.socketHeight - repCore.socketHeight);
 
         // tail
-        float dTailFinLength = Mathf.Abs(newGenome.bodyGenome.coreGenome.tailFinBaseLength - repGenome.bodyGenome.coreGenome.tailFinBaseLength);
-        float dTailFinSpread = Mathf.Abs(newGenome.bodyGenome.coreGenome.tailFinSpreadAngle - repGenome.bodyGenome.coreGenome.tailFinSpreadAngle);
+        float dTailFinLength = Mathf.Abs(newCore.tailFinBaseLength - repCore.tailFinBaseLength);
+        float dTailFinSpread = Mathf.Abs(newCore.tailFinSpreadAngle - repCore.tailFinSpreadAngle);
 
-        // sensors & shit:
-        float dFoodSpecDecay = Mathf.Abs(newGenome.bodyGenome.coreGenome.dietSpecializationDecay - repGenome.bodyGenome.coreGenome.dietSpecializationDecay);
-        float dFoodSpecPlant = Mathf.Abs(newGenome.bodyGenome.coreGenome.dietSpecializationPlant - repGenome.bodyGenome.coreGenome.dietSpecializationPlant);
-        float dFoodSpecMeat = Mathf.Abs(newGenome.bodyGenome.coreGenome.dietSpecializationMeat - repGenome.bodyGenome.coreGenome.dietSpecializationMeat);
+        // sensors:
+        float dFoodSpecDecay = Mathf.Abs(newCore.dietSpecializationDecay - repCore.dietSpecializationDecay);
+        float dFoodSpecPlant = Mathf.Abs(newCore.dietSpecializationPlant - repCore.dietSpecializationPlant);
+        float dFoodSpecMeat = Mathf.Abs(newCore.dietSpecializationMeat - repCore.dietSpecializationMeat);
                 
-        float dUseComms = newGenome.bodyGenome.communicationGenome.useComms == repGenome.bodyGenome.communicationGenome.useComms ? 0f : 1f;
-        float dUseWaterStats = newGenome.bodyGenome.environmentalGenome.useWaterStats == repGenome.bodyGenome.environmentalGenome.useWaterStats ? 0f : 1f;
-        float dUseCardinals = newGenome.bodyGenome.environmentalGenome.useCardinals == repGenome.bodyGenome.environmentalGenome.useCardinals ? 0f : 1f;
-        float dUseDiagonals = newGenome.bodyGenome.environmentalGenome.useDiagonals == repGenome.bodyGenome.environmentalGenome.useDiagonals ? 0f : 1f;
-        float dUseNutrients = newGenome.bodyGenome.foodGenome.useNutrients == repGenome.bodyGenome.foodGenome.useNutrients ? 0f : 1f;
-        float dUseFoodPos = newGenome.bodyGenome.foodGenome.usePos == repGenome.bodyGenome.foodGenome.usePos ? 0f : 1f;
-        float dUseFoodVel = newGenome.bodyGenome.foodGenome.useVel == repGenome.bodyGenome.foodGenome.useVel ? 0f : 1f;
-        float dUseFoodDir = newGenome.bodyGenome.foodGenome.useDir == repGenome.bodyGenome.foodGenome.useDir ? 0f : 1f;
-        float dUseFoodStats = newGenome.bodyGenome.foodGenome.useStats == repGenome.bodyGenome.foodGenome.useStats ? 0f : 1f;
-        float dUseFoodEgg = newGenome.bodyGenome.foodGenome.useEggs == repGenome.bodyGenome.foodGenome.useEggs ? 0f : 1f;
-        float dUseFoodCorpse = newGenome.bodyGenome.foodGenome.useCorpse == repGenome.bodyGenome.foodGenome.useCorpse ? 0f : 1f;
-        float dUseFriendPos = newGenome.bodyGenome.friendGenome.usePos == repGenome.bodyGenome.friendGenome.usePos ? 0f : 1f;
-        float dUseFriendVel = newGenome.bodyGenome.friendGenome.useVel == repGenome.bodyGenome.friendGenome.useVel ? 0f : 1f;
-        float dUseFriendDir = newGenome.bodyGenome.friendGenome.useDir == repGenome.bodyGenome.friendGenome.useDir ? 0f : 1f;
-        float dUseThreatPos = newGenome.bodyGenome.threatGenome.usePos == repGenome.bodyGenome.threatGenome.usePos ? 0f : 1f;
-        float dUseThreatVel = newGenome.bodyGenome.threatGenome.useVel == repGenome.bodyGenome.threatGenome.useVel ? 0f : 1f;
-        float dUseThreatDir = newGenome.bodyGenome.threatGenome.useDir == repGenome.bodyGenome.threatGenome.useDir ? 0f : 1f;
-        float dUseThreatStats = newGenome.bodyGenome.threatGenome.useStats == repGenome.bodyGenome.threatGenome.useStats ? 0f : 1f;
+        float dUseComms = newCommunication.useComms == repCommunication.useComms ? 0f : 1f;
+        float dUseWaterStats = newEnvironment.useWaterStats == repEnvironment.useWaterStats ? 0f : 1f;
+        float dUseCardinals = newEnvironment.useCardinals == repEnvironment.useCardinals ? 0f : 1f;
+        float dUseDiagonals = newEnvironment.useDiagonals == repEnvironment.useDiagonals ? 0f : 1f;
+        float dUseNutrients = newFood.useNutrients == repFood.useNutrients ? 0f : 1f;
+        float dUseFoodPos = newFood.usePos == repFood.usePos ? 0f : 1f;
+        float dUseFoodVel = newFood.useVel == repFood.useVel ? 0f : 1f;
+        float dUseFoodDir = newFood.useDir == repFood.useDir ? 0f : 1f;
+        float dUseFoodStats = newFood.useStats == repFood.useStats ? 0f : 1f;
+        float dUseFoodEgg = newFood.useEggs == repFood.useEggs ? 0f : 1f;
+        float dUseFoodCorpse = newFood.useCorpse == repFood.useCorpse ? 0f : 1f;
+        float dUseFriendPos = newFriend.usePos == repFriend.usePos ? 0f : 1f;
+        float dUseFriendVel = newFriend.useVel == repFriend.useVel ? 0f : 1f;
+        float dUseFriendDir = newFriend.useDir == repFriend.useDir ? 0f : 1f;
+        float dUseThreatPos = newThreat.usePos == repThreat.usePos ? 0f : 1f;
+        float dUseThreatVel = newThreat.useVel == repThreat.useVel ? 0f : 1f;
+        float dUseThreatDir = newThreat.useDir == repThreat.useDir ? 0f : 1f;
+        float dUseThreatStats = newThreat.useStats == repThreat.useStats ? 0f : 1f;
 
         float dSensory = dFoodSpecDecay + dFoodSpecPlant + dFoodSpecMeat + dUseComms + dUseWaterStats + dUseCardinals + dUseDiagonals +
                          dUseNutrients + dUseFoodPos + dUseFoodVel + dUseFoodDir + dUseFoodStats + dUseFoodEgg + dUseFoodCorpse + dUseFriendPos + dUseFriendVel + dUseFriendDir +
@@ -427,8 +438,8 @@ public class MasterGenomePool
         float dNeurons = Mathf.Abs(newGenome.brainGenome.hiddenNeuronList.Count - repGenome.brainGenome.hiddenNeuronList.Count);
         float dAxons = Mathf.Abs(newGenome.brainGenome.linkList.Count - repGenome.brainGenome.linkList.Count) / (float)repGenome.brainGenome.bodyNeuronList.Count;
 
-        float dSpecialization = (new Vector4(newGenome.bodyGenome.coreGenome.talentSpecializationAttack, newGenome.bodyGenome.coreGenome.talentSpecializationDefense, newGenome.bodyGenome.coreGenome.talentSpecializationSpeed, newGenome.bodyGenome.coreGenome.talentSpecializationUtility).normalized - 
-                                 new Vector4(repGenome.bodyGenome.coreGenome.talentSpecializationAttack, repGenome.bodyGenome.coreGenome.talentSpecializationDefense, repGenome.bodyGenome.coreGenome.talentSpecializationSpeed, repGenome.bodyGenome.coreGenome.talentSpecializationUtility).normalized).magnitude;
+        float dSpecialization = (new Vector4(newCore.talentSpecializationAttack, newCore.talentSpecializationDefense, newCore.talentSpecializationSpeed, newCore.talentSpecializationUtility).normalized - 
+                                 new Vector4(repCore.talentSpecializationAttack, repCore.talentSpecializationDefense, repCore.talentSpecializationSpeed, repCore.talentSpecializationUtility).normalized).magnitude;
 
         dSensory *= 0.2f;
         
