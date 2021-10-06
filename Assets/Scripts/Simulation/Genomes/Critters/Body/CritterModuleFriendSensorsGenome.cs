@@ -5,6 +5,9 @@ using Playcraft;
 [Serializable]
 public class CritterModuleFriendSensorsGenome
 {
+    Lookup lookup => Lookup.instance;
+    NeuralMap map => lookup.neuralMap;
+
     public int parentID;
     public readonly BrainModuleID moduleID = BrainModuleID.FriendSensors;
 
@@ -23,28 +26,34 @@ public class CritterModuleFriendSensorsGenome
         useVel = RandomStatics.CoinToss();
         useDir = RandomStatics.CoinToss();
     }
+    
+    List<NeuronGenome> neuronList;
 
-    public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
-        if(usePos) {
-            NeuronGenome friendPosX = new NeuronGenome("friendPosX", NeuronType.In, moduleID, 8);
-            NeuronGenome friendPosY = new NeuronGenome("friendPosY", NeuronType.In, moduleID, 9);
-            neuronList.Add(friendPosX); // 8
-            neuronList.Add(friendPosY); // 9
+    public void AppendModuleNeuronsToMasterList(List<NeuronGenome> neuronList) {
+        this.neuronList = neuronList;
+
+        if (usePos) {
+            AddNeuron("friendPosX");
+            AddNeuron("friendPosY");
+            //neuronList.Add(new NeuronGenome("friendPosX", NeuronType.In, moduleID, 8));
+            //neuronList.Add(new NeuronGenome("friendPosY", NeuronType.In, moduleID, 9));
         }
-        if(useVel) {
-            NeuronGenome friendVelX = new NeuronGenome("friendVelX", NeuronType.In, moduleID, 10);
-            NeuronGenome friendVelY = new NeuronGenome("friendVelY", NeuronType.In, moduleID, 11);
-            neuronList.Add(friendVelX); // 10
-            neuronList.Add(friendVelY); // 11
+        if (useVel) {
+            AddNeuron("friendVelX");
+            AddNeuron("friendVelY");
+            //neuronList.Add(new NeuronGenome("friendVelX", NeuronType.In, moduleID, 10));
+            //neuronList.Add(new NeuronGenome("friendVelY", NeuronType.In, moduleID, 11));
         }
-        if(useDir) {
-            NeuronGenome friendDirX = new NeuronGenome("friendDirX", NeuronType.In, moduleID, 12);
-            NeuronGenome friendDirY = new NeuronGenome("friendDirY", NeuronType.In, moduleID, 13);
-            neuronList.Add(friendDirX); // 12
-            neuronList.Add(friendDirY); // 13
+        if (useDir) {
+            AddNeuron("friendDirX");
+            AddNeuron("friendDirY");
+            //neuronList.Add(new NeuronGenome("friendDirX", NeuronType.In, moduleID, 12));
+            //neuronList.Add(new NeuronGenome("friendDirY", NeuronType.In, moduleID, 13));
         }
     }
-	
+    
+    void AddNeuron(string name) { neuronList.Add(map.GetGenome(name)); }
+
     public void SetToMutatedCopyOfParentGenome(CritterModuleFriendSensorsGenome parentGenome, MutationSettingsInstance settings) {
         usePos = RequestMutation(settings, parentGenome.usePos);
         useVel = RequestMutation(settings, parentGenome.useVel);

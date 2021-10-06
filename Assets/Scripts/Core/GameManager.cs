@@ -39,6 +39,7 @@ public class GameManager : Singleton<GameManager> {
         simulationManager.BeginLoadingNewSimulation();    
     }
     	
+	/*
 	void Update () {
         //simulationManager.UpdateDebugUI();
 
@@ -51,6 +52,7 @@ public class GameManager : Singleton<GameManager> {
         //distortionCommandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, renderedSceneID);  // save contents of Standard Rendering Pipeline        
         //distortionCommandBuffer.Blit(renderedSceneID, BuiltinRenderTextureType.CameraTarget, rippleDistortUIMat);  // apply ripple shit  
     }
+    */
 
     // $$$$$$ THIS IS THE MAIN CODE THREAD HOOK!!! $$$$$$$$$
     private void FixedUpdate() {        
@@ -73,7 +75,7 @@ public class GameManager : Singleton<GameManager> {
                 simulationManager.TickSimulation();
                 break;
             default:
-                Debug.LogError("No Enum Type Found! (" + currentGameState.ToString() + ")");
+                Debug.LogError("No Enum Type Found! (" + currentGameState + ")");
                 break;
         }
     }

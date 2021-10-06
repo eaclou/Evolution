@@ -42,6 +42,8 @@ public class CritterModuleCommunication
         neuron.neuronType = neuralMap.GetIO(nid.neuronID);
     }
     
+    // * Use name from MetaNeuron
+    // + consider using Reflection (match SO name field to variable name) to eliminate switch statement
     float[] GetNeuralValue(int neuronID)
     {
         switch (neuronID)

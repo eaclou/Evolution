@@ -1,9 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using Playcraft;
+using Random = UnityEngine.Random;
 
-[System.Serializable]
+[Serializable]
 public class CritterModuleCoreGenome 
 {
+    Lookup lookup => Lookup.instance;
+    NeuralMap map => lookup.neuralMap;
+
     public int parentID;
     public readonly BrainModuleID moduleID = BrainModuleID.Core;
 
@@ -199,13 +205,13 @@ public class CritterModuleCoreGenome
     // List of Shape/Form modifiers here???:::
     //public CritterGenomeInterpretor.MaskDataSin maskDataSinTemp;
 
-    [System.Serializable]
+    [Serializable]
     public enum ShapeModifierType {
         Extrude,  // shift vertex along major normal
         UniformScale
     }
     
-    [System.Serializable]
+    [Serializable]
     public enum MaskCoordinateType {
         Lengthwise,
         //Radial,  // uv distance
@@ -213,14 +219,14 @@ public class CritterModuleCoreGenome
         Polygonize  // facet body circumference        
     }
     
-    [System.Serializable]
+    [Serializable]
     public enum MaskFunctionType {
         Linear,
         Sin,
         Cos      
     }
 
-    [System.Serializable]
+    [Serializable]
     public struct MaskData {
         public MaskCoordinateType coordinateTypeID;
         public MaskFunctionType functionTypeID;     
@@ -233,13 +239,14 @@ public class CritterModuleCoreGenome
         public bool repeat;       
     }
     
-    [System.Serializable]
+    [Serializable]
     public struct ShapeModifierData {  // each modifer gets interpreted by script, picks from correct maskData list
         public ShapeModifierType modifierTypeID;  // extrude; axis-aligned scale; twist/pinch/etc?
         public List<int> maskIndicesList;  // method of falloff
         public float taperDistance; // keep/remove?
         public float amplitude;  // move to Range of mult like (0.8 to 1.25)?
     }
+    
     // or should I keep masks as separate list and refer to them through indices to allow for mask re-use?
     public List<ShapeModifierData> shapeModifiersList;  // holds list of all modifiers to overall critter shape/structure, in order of application
     public List<MaskData> masksList;
@@ -261,8 +268,8 @@ public class CritterModuleCoreGenome
     
     public void GenerateRandomInitialGenome() {
         generation = 0;
-        // Do stuff:
-        //Debug.Log("GenerateRandomGenome()");
+
+        // * WPP: store these in a ScriptableObject
         string[] namesList = new string[29];
         namesList[0] = "ALBERT";
         namesList[1] = "BORT";
@@ -293,13 +300,11 @@ public class CritterModuleCoreGenome
         namesList[26] = "THE CHOSEN ONE";
         namesList[27] = "EXCALIBUR";
         namesList[28] = "HAM";
+        
         int randomNameIndex = Random.Range(0, namesList.Length);
         name = namesList[randomNameIndex];
 
-        isPassive = true;  // mouth type -- change later
-        if(Random.Range(0f, 1f) < 0.5f) {
-            isPassive = false;
-        }
+        isPassive = RandomStatics.CoinToss();
 
         shapeModifiersList = new List<ShapeModifierData>();  // empty
         masksList = new List<MaskData>();
@@ -315,11 +320,11 @@ public class CritterModuleCoreGenome
         MaskData maskData = new MaskData();
         maskData.coordinateTypeID = MaskCoordinateType.Polygonize;
         maskData.functionTypeID = MaskFunctionType.Cos;
-        maskData.origin = Random.Range(0f, 1f); //0.5f; // normalized along length of creature
-        maskData.amplitude = Random.Range(0f, 1f); //0.5f;
-        maskData.cycleDistance = Random.Range(0f, 1f); //0.5f;
-        maskData.phase = Random.Range(0f, 1f); //0f;
-        maskData.numPolyEdges = Random.Range(1, 7); // 1;
+        maskData.origin = Random.Range(0f, 1f); // normalized along length of creature
+        maskData.amplitude = Random.Range(0f, 1f); 
+        maskData.cycleDistance = Random.Range(0f, 1f); 
+        maskData.phase = Random.Range(0f, 1f); 
+        maskData.numPolyEdges = Random.Range(1, 7); 
         maskData.axisDir = new Vector2(Random.Range(0f, 1f), Random.Range(0f, 1f));
         maskData.repeat = true;
 
@@ -337,26 +342,26 @@ public class CritterModuleCoreGenome
         creatureBackTaperSize = 0.4f;
 
         //mouthComplexShapeLerp = 0f;
-        mouthLength = Random.Range(0.75f, 1.25f);  //1f;
+        mouthLength = Random.Range(0.75f, 1.25f); 
         mouthFrontWidth = Random.Range(0.75f, 1.25f);  // width of snout at front of critter
         mouthFrontHeight = Random.Range(0.75f, 1.25f); // height of snout at front of critter
-        mouthFrontVerticalOffset = Random.Range(-0.25f, 0.25f); //0f; // shift up/down pivot/cylinder center
-        mouthBackWidth = Random.Range(0.75f, 1.25f); //1f; 
-        mouthBackHeight = Random.Range(0.75f, 1.25f); //1f;
-        mouthBackVerticalOffset = Random.Range(-0.25f, 0.25f); //0f;        
+        mouthFrontVerticalOffset = Random.Range(-0.25f, 0.25f); // shift up/down pivot/cylinder center
+        mouthBackWidth = Random.Range(0.75f, 1.25f);  
+        mouthBackHeight = Random.Range(0.75f, 1.25f); 
+        mouthBackVerticalOffset = Random.Range(-0.25f, 0.25f);         
 
-        mouthToHeadTransitionSize = Random.Range(0.35f, 0.65f); //0.5f;  // 0-1 normalized
+        mouthToHeadTransitionSize = Random.Range(0.35f, 0.65f);  // 0-1 normalized
         // Head
         //headComplexShapeLerp = 0f;
-        headLength = Random.Range(0.75f, 1.25f);  //1f;
-        headFrontWidth = Random.Range(0.75f, 1.25f);  //1f;
-        headFrontHeight = Random.Range(0.75f, 1.25f);  //1f;
-        headFrontVerticalOffset = Random.Range(-0.25f, 0.25f); //0f;
-        headBackWidth = Random.Range(0.75f, 1.25f);  //1f; 
-        headBackHeight = Random.Range(0.75f, 1.25f);  //1f;
-        headBackVerticalOffset = Random.Range(-0.25f, 0.25f); //0f;
+        headLength = Random.Range(0.75f, 1.25f);  
+        headFrontWidth = Random.Range(0.75f, 1.25f);  
+        headFrontHeight = Random.Range(0.75f, 1.25f); 
+        headFrontVerticalOffset = Random.Range(-0.25f, 0.25f);
+        headBackWidth = Random.Range(0.75f, 1.25f);   
+        headBackHeight = Random.Range(0.75f, 1.25f); 
+        headBackVerticalOffset = Random.Range(-0.25f, 0.25f);
 
-        headToBodyTransitionSize = Random.Range(0.35f, 0.65f); //0.5f;  // 0-1 normalized
+        headToBodyTransitionSize = Random.Range(0.35f, 0.65f);  // 0-1 normalized
         // Body:
         //bodyComplexShapeLerp = 0f;
         bodyLength = Random.Range(0.75f, 1.25f);  //1f;
@@ -423,52 +428,55 @@ public class CritterModuleCoreGenome
         mouthAttackAmplitude = 1f;
     }
 
-    public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
-        NeuronGenome bias = new NeuronGenome("Bias", NeuronType.In, moduleID, 0);
-
-        NeuronGenome isMouthTrigger = new NeuronGenome("isMouthTrigger", NeuronType.In, moduleID, 21);
-        //NeuronGenome temperature = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 22); // 22
-        //NeuronGenome pressure = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 23); // 23
-        NeuronGenome isContact = new NeuronGenome("isContact", NeuronType.In, moduleID, 24); // 24
-        NeuronGenome contactForceX = new NeuronGenome("contactForceX", NeuronType.In, moduleID, 25); // 25
-        NeuronGenome contactForceY = new NeuronGenome("contactForceY", NeuronType.In, moduleID, 26); // 26
+    List<NeuronGenome> neuronList;
+    
+    public void AppendModuleNeuronsToMasterList(List<NeuronGenome> neuronList) {
+        // WPP: Lists are ref parameters by default
+        this.neuronList = neuronList;
+        //NeuronGenome temperature = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 22);
+        //NeuronGenome pressure = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 23);        
         
-        NeuronGenome hitPoints = new NeuronGenome("hitPoints", NeuronType.In, moduleID, 27); // 27
-        NeuronGenome stamina = new NeuronGenome("stamina", NeuronType.In, moduleID, 28); // 28
-        NeuronGenome energyStored = new NeuronGenome("energyStored", NeuronType.In, moduleID, 204); // 27
-        NeuronGenome foodStored = new NeuronGenome("foodStored", NeuronType.In, moduleID, 205); // 28
-        
-        NeuronGenome mouthFeedEffector = new NeuronGenome("mouthFeedEffector", NeuronType.Out, moduleID, 206); // 106
-
-        neuronList.Add(bias);   //0
-
-        neuronList.Add(isMouthTrigger); // 21
-        neuronList.Add(isContact); // 24
-        neuronList.Add(contactForceX); // 25
-        neuronList.Add(contactForceY); // 26 
-
-        //neuronList.Add(temperature); // 22
-        //neuronList.Add(pressure); // 23
-        neuronList.Add(hitPoints); // 27
-        neuronList.Add(stamina); // 28
-        neuronList.Add(energyStored); // 204
-        neuronList.Add(foodStored); // 205
-           
-        neuronList.Add(mouthFeedEffector); // 206
+        // WPP: static data stored in NeuralMap
+        AddNeuron("Bias");
+        AddNeuron("isMouthTrigger");
+        AddNeuron("isContact");
+        AddNeuron("contactForceX");
+        AddNeuron("contactForceY");
+        AddNeuron("hitPoints");
+        AddNeuron("stamina");
+        AddNeuron("energyStored");
+        AddNeuron("foodStored");
+        AddNeuron("mouthFeedEffector");
+        //neuronList.Add(new NeuronGenome("Bias", NeuronType.In, moduleID, 0));
+        //neuronList.Add(new NeuronGenome("isMouthTrigger", NeuronType.In, moduleID, 21));
+        //neuronList.Add(new NeuronGenome("isContact", NeuronType.In, moduleID, 24));
+        //neuronList.Add(new NeuronGenome("contactForceX", NeuronType.In, moduleID, 25));
+        //neuronList.Add(new NeuronGenome("contactForceY", NeuronType.In, moduleID, 26));
+        //neuronList.Add(new NeuronGenome("hitPoints", NeuronType.In, moduleID, 27)); 
+        //neuronList.Add(new NeuronGenome("stamina", NeuronType.In, moduleID, 28));
+        //neuronList.Add(new NeuronGenome("energyStored", NeuronType.In, moduleID, 204));
+        //neuronList.Add(new NeuronGenome("foodStored", NeuronType.In, moduleID, 205));
+        //neuronList.Add(new NeuronGenome("mouthFeedEffector", NeuronType.Out, moduleID, 206));
 
         if(talentSpecAttackNorm > 0.2f) {
-            neuronList.Add(new NeuronGenome("mouthAttackEffector", NeuronType.Out, moduleID, 207));
+            AddNeuron("mouthAttackEffector");
+            //neuronList.Add(new NeuronGenome("mouthAttackEffector", NeuronType.Out, moduleID, 207));
         }
         if(talentSpecDefenseNorm > 0.2f) {
-            neuronList.Add(new NeuronGenome("defendEffector", NeuronType.Out, moduleID, 208));
+            AddNeuron("defendEffector");
+            //neuronList.Add(new NeuronGenome("defendEffector", NeuronType.Out, moduleID, 208));
         }
         if(talentSpecSpeedNorm > 0.2f) {
-            neuronList.Add(new NeuronGenome("dashEffector", NeuronType.Out, moduleID, 209));
+            AddNeuron("dashEffector");
+            //neuronList.Add(new NeuronGenome("dashEffector", NeuronType.Out, moduleID, 209));
         }
         if(talentSpecUtilityNorm > 0.2f) {
-            neuronList.Add(new NeuronGenome("healEffector", NeuronType.Out, moduleID, 210));
+            AddNeuron("healEffector");
+            //neuronList.Add(new NeuronGenome("healEffector", NeuronType.Out, moduleID, 210));
         }
     }
+    
+    void AddNeuron(string name) { neuronList.Add(map.GetGenome(name)); }
 
     public void SetToMutatedCopyOfParentGenome(CritterModuleCoreGenome parentGenome, MutationSettingsInstance settings) {
         string parentName = parentGenome.name;
@@ -483,6 +491,8 @@ public class CritterModuleCoreGenome
         float randChance1 = Random.Range(0f, 1f);
         if(randChance1 < 0.05) {
             int randLetterIndex = Random.Range(0, 26);
+            
+            // * WPP: store in ScriptableObject
             string[] lettersArray = new string[26];
             lettersArray[0] = "A";
             lettersArray[1] = "B";
@@ -516,15 +526,10 @@ public class CritterModuleCoreGenome
 
         frontHalf = frontHalf + middleChar;
 
-        float randChance2 = Random.Range(0f, 1f);
-        if(randChance2 < 0.025) {
-            name = backHalf + frontHalf;
-        }
-        else {
-            name = frontHalf + backHalf;
-        }
+        name = RandomStatics.CoinToss(.025f) ? backHalf + frontHalf : frontHalf + backHalf;
 
-        generation = parentGenome.generation; // This is incremented elsewhere (simManager at time of reproduction)
+        // This is incremented elsewhere (simManager at time of reproduction)
+        generation = parentGenome.generation; 
 
         isPassive = UtilityMutationFunctions.GetMutatedBool(parentGenome.isPassive, 0.033f, settings.bodyCoreMutationStepSize);
 
@@ -564,36 +569,31 @@ public class CritterModuleCoreGenome
             masksList.Add(newMask);
         }
         // Mutate Add New Modifiers Here:?
-        if(shapeModifiersList.Count < 6) {
-            float randRoll = Random.Range(0f, 1f);
-            if(randRoll < 0.02f) {
-                // Add new shapeModifier:
-                ShapeModifierData initModifier = new ShapeModifierData();
-                initModifier.modifierTypeID = ShapeModifierType.Extrude;
-                initModifier.maskIndicesList = new List<int>();
-                initModifier.amplitude = 0.4f;
-                initModifier.taperDistance = 0.2f;
+        if(shapeModifiersList.Count < 6 && RandomStatics.CoinToss(.02f)) {
+            // Add new shapeModifier:
+            ShapeModifierData initModifier = new ShapeModifierData();
+            initModifier.modifierTypeID = ShapeModifierType.Extrude;
+            initModifier.maskIndicesList = new List<int>();
+            initModifier.amplitude = 0.4f;
+            initModifier.taperDistance = 0.2f;
 
-                shapeModifiersList.Add(initModifier);
-            }
+            shapeModifiersList.Add(initModifier);
         }
-        if(masksList.Count < 4) {
-            float randRoll = Random.Range(0f, 1f);
-            if(randRoll < 0.04f) {
-                // Add new MASK:
-                MaskData maskData = new MaskData();
-                maskData.coordinateTypeID = MaskCoordinateType.Polygonize;
-                maskData.functionTypeID = MaskFunctionType.Cos;
-                maskData.origin = 0.5f; // normalized along length of creature
-                maskData.amplitude = 1f;
-                maskData.cycleDistance = 0.5f;
-                maskData.phase = 0f;
-                maskData.numPolyEdges = 1;
-                maskData.axisDir = new Vector2(0f, 1f);
-                maskData.repeat = true;
+        if(masksList.Count < 4 && RandomStatics.CoinToss(.04f)) {
+            // * WPP: use constructor
+            // Add new mask:
+            MaskData maskData = new MaskData();
+            maskData.coordinateTypeID = MaskCoordinateType.Polygonize;
+            maskData.functionTypeID = MaskFunctionType.Cos;
+            maskData.origin = 0.5f; // normalized along length of creature
+            maskData.amplitude = 1f;
+            maskData.cycleDistance = 0.5f;
+            maskData.phase = 0f;
+            maskData.numPolyEdges = 1;
+            maskData.axisDir = new Vector2(0f, 1f);
+            maskData.repeat = true;
 
-                masksList.Add(maskData);
-            }
+            masksList.Add(maskData);
         }        
         
         // Or start with deformed sphere???? *****

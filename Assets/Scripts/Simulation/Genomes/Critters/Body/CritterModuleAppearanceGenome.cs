@@ -34,9 +34,8 @@ public class CritterModuleAppearanceGenome {
         this.inno = inno;
     }
 
-    public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
-
-    }
+    // Future use
+    public void AppendModuleNeuronsToMasterList(List<NeuronGenome> neuronList) { }
 
     public void GenerateRandomInitialGenome() 
     {

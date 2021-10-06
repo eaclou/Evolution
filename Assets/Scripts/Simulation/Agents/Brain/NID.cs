@@ -1,5 +1,6 @@
 ﻿using System;
 
+// * WPP: Obsolete
 /// Neuron Identifier
 [Serializable]
 public struct NID 

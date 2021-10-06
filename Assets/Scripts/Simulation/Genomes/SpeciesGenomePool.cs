@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
@@ -86,7 +85,7 @@ public class SpeciesGenomePool
     }
     
     public void FirstTimeInitialize(CandidateAgentData foundingGenome, int depth) {
-        this.foundingCandidate = foundingGenome;        
+        foundingCandidate = foundingGenome;        
         longestLivedCandidate = foundingGenome;
         mostEatenCandidate = foundingGenome;
 
@@ -124,13 +123,13 @@ public class SpeciesGenomePool
                 lettersArray[25] = "Z";
 
         for(int i = 0; i < foundingGenome.candidateGenome.bodyGenome.coreGenome.name.Length; i++) {
-            float randChance1 = UnityEngine.Random.Range(0f, 1f);
+            float randChance1 = Random.Range(0f, 1f);
             if(randChance1 < 0.35) {
-                int randLetterIndex = UnityEngine.Random.Range(0, 26);
+                int randLetterIndex = Random.Range(0, 26);
                 newName += lettersArray[randLetterIndex];  
                 
                 if(randChance1 < 0.05) {
-                    randLetterIndex = UnityEngine.Random.Range(0, 26);
+                    randLetterIndex = Random.Range(0, 26);
                     newName += lettersArray[randLetterIndex];            
                 }
             }            
@@ -188,8 +187,8 @@ public class SpeciesGenomePool
         RecalculateAverageCandidate();
     }
     
-    private void RecalculateAverageCandidate() {
-        
+    private void RecalculateAverageCandidate() 
+    {
         //calculate avg candidate:
         avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.huePrimary = Vector3.zero;
         avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.hueSecondary = Vector3.zero;
@@ -209,7 +208,7 @@ public class SpeciesGenomePool
         //avgCandidateData.performanceData = avgPerformanceData;
         
                 
-        for(int i = 0; i < leaderboardGenomesList.Count; i++) {
+        for (int i = 0; i < leaderboardGenomesList.Count; i++) {
             float norm = 1f / (float)(leaderboardGenomesList.Count - 1);
             
             avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.huePrimary += leaderboardGenomesList[i].candidateGenome.bodyGenome.appearanceGenome.huePrimary * norm;
@@ -250,8 +249,8 @@ public class SpeciesGenomePool
         //Debug.Log("AddNewYearlyStats " + avgCandidateData.performanceData.totalTicksAlive);
     }
 
-    public CandidateAgentData GetNextAvailableCandidate() {
-
+    public CandidateAgentData GetNextAvailableCandidate() 
+    {
         CandidateAgentData candidateData = null; // candidateGenomesList[0].candidateGenome;
         if(candidateGenomesList.Count > 0) {
             for (int i = 0; i < candidateGenomesList.Count; i++) {
@@ -276,8 +275,8 @@ public class SpeciesGenomePool
         return candidateData;
     }
        
-    public void ProcessCompletedCandidate(CandidateAgentData candidateData, MasterGenomePool masterGenomePool) {
-
+    public void ProcessCompletedCandidate(CandidateAgentData candidateData, MasterGenomePool masterGenomePool) 
+    {
         numAgentsEvaluated++;
 
         leaderboardGenomesList.Insert(0, candidateData);  // place at front of leaderboard list (genomes eligible for being parents)
@@ -293,18 +292,18 @@ public class SpeciesGenomePool
             }
         }
         //Debug.Log("Removed! " + beforeCount.ToString() + " #: " + listIndex.ToString() + ", candID: " + candidateData.candidateID.ToString());
-        if(listIndex > -1) {
+        if (listIndex > -1) {
             //Debug.Log("RemoveAt(" + listIndex.ToString() + "),[" + candidateGenomesList[listIndex].candidateID.ToString() + "], candID: " + candidateData.candidateID.ToString() + ", SpeciesPool: " + this.speciesID.ToString() + ", CDSID: " + candidateData.speciesID.ToString());
             candidateGenomesList.RemoveAt(listIndex);  // Will this work? never used this before
 
             masterGenomePool.debugRecentlyDeletedCandidateIDsList.Insert(0, candidateData.candidateID);
-            if(masterGenomePool.debugRecentlyDeletedCandidateIDsList.Count > 512) {
+            if (masterGenomePool.debugRecentlyDeletedCandidateIDsList.Count > 512) {
                 masterGenomePool.debugRecentlyDeletedCandidateIDsList.RemoveAt(masterGenomePool.debugRecentlyDeletedCandidateIDsList.Count - 1);
             }
         }
         else {
             if (candidateGenomesList.Count > 0) {
-                Debug.LogError("ERROR NO INDEX FOUND! " + candidateData.candidateID.ToString() + ", species: " + this.speciesID.ToString() + ", CDSID: " + candidateData.speciesID.ToString() + ", [0]: " + candidateGenomesList[0].candidateID.ToString());
+                Debug.LogError("ERROR NO INDEX FOUND! " + candidateData.candidateID + ", species: " + speciesID+ ", CDSID: " + candidateData.speciesID + ", [0]: " + candidateGenomesList[0].candidateID);
             }
             else {
                 Debug.LogError("META-ERROR NO INDEX FOUND! ");
@@ -356,7 +355,8 @@ public class SpeciesGenomePool
                 int swapIdA = rankedIndicesList[j];
                 int swapIdB = rankedIndicesList[j + 1];
 
-                if (swapFitA < swapFitB) {  // bigger is better now after inversion
+                // bigger is better now after inversion
+                if (swapFitA < swapFitB) { 
                     rankedFitnessScoresArray[j] = swapFitB;
                     rankedFitnessScoresArray[j + 1] = swapFitA;
                     rankedIndicesList[j] = swapIdB;
@@ -471,7 +471,9 @@ public class SpeciesGenomePool
             default: Debug.LogError("Invalid selection group: " + group); return null;
         }
     }
+}
 
+#region Dead code (please remove)
     /*
     public AgentGenome GetNewMutatedGenome() {
 
@@ -554,4 +556,4 @@ public class SpeciesGenomePool
         return childGenome;
     }
     */
-}
+#endregion

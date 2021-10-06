@@ -6,6 +6,9 @@ using Playcraft;
 [Serializable]
 public class CritterModuleEnvironmentSensorsGenome 
 {
+    Lookup lookup => Lookup.instance;
+    NeuralMap map => lookup.neuralMap;
+
     public int parentID;
     public readonly BrainModuleID moduleID = BrainModuleID.EnvironmentSensors;
 
@@ -25,17 +28,26 @@ public class CritterModuleEnvironmentSensorsGenome
         useWaterStats = RandomStatics.CoinToss();
         maxRange = 20f;
     }
+    
+    List<NeuronGenome> neuronList;
 
-    public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
+    public void AppendModuleNeuronsToMasterList(List<NeuronGenome> neuronList) {
+        this.neuronList = neuronList;
+    
         if (useWaterStats) {
-            neuronList.Add(new NeuronGenome("depth", NeuronType.In, moduleID, 1)); 
-            neuronList.Add(new NeuronGenome("velX", NeuronType.In, moduleID, 2)); 
-            neuronList.Add(new NeuronGenome("velY", NeuronType.In, moduleID, 3));
-            neuronList.Add(new NeuronGenome("depthGradX", NeuronType.In, moduleID, 4)); 
-            neuronList.Add(new NeuronGenome("depthGradY", NeuronType.In, moduleID, 5)); 
+            AddNeuron("depth");
+            AddNeuron("velX");
+            AddNeuron("velY");
+            AddNeuron("depthGradX");
+            AddNeuron("depthGradY");
+            //neuronList.Add(new NeuronGenome("depth", NeuronType.In, moduleID, 1)); 
+            //neuronList.Add(new NeuronGenome("velX", NeuronType.In, moduleID, 2)); 
+            //neuronList.Add(new NeuronGenome("velY", NeuronType.In, moduleID, 3));
+            //neuronList.Add(new NeuronGenome("depthGradX", NeuronType.In, moduleID, 4)); 
+            //neuronList.Add(new NeuronGenome("depthGradY", NeuronType.In, moduleID, 5)); 
+            
 
-            /*
-            NeuronGenome depthSouth = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 6);  // 36        
+            /*NeuronGenome depthSouth = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 6);  // 36        
             NeuronGenome depthWest = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 7);  // 38       
         
             neuronList.Add(depthNorth);   
@@ -66,7 +78,9 @@ public class CritterModuleEnvironmentSensorsGenome
             neuronList.Add(distTopLeft);
         } */       
     }
-	
+    
+    void AddNeuron(string name) { neuronList.Add(map.GetGenome(name)); }
+
     public void SetToMutatedCopyOfParentGenome(CritterModuleEnvironmentSensorsGenome parentGenome, MutationSettingsInstance settings) {
         useWaterStats = RequestMutation(settings, parentGenome.useWaterStats);
         useCardinals = RequestMutation(settings, parentGenome.useCardinals);

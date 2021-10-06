@@ -203,7 +203,12 @@ public class BrainGenome
 
         // Keep a table of linearIndex positions for all neuron 2-dimensional ID's
         Dictionary<NID, int> IDs = new Dictionary<NID, int>();
-        for (int j = 0; j < allNeuronsList.Count; j++) {
+        for (int j = 0; j < allNeuronsList.Count; j++) 
+        {
+            // WPP: temp error suppression
+            if (IDs.TryGetValue(allNeuronsList[j].nid, out int id))
+                continue;
+                
             IDs.Add(allNeuronsList[j].nid, j);
         }
         

@@ -20,7 +20,7 @@ public class CritterModuleDevelopmentalGenome {
         quantityQualityRatio = 1f;
     }
 
-    public void AppendModuleNeuronsToMasterList(ref List<NeuronGenome> neuronList) {
+    public void AppendModuleNeuronsToMasterList(List<NeuronGenome> neuronList) {
 
     }
 	

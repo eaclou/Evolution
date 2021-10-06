@@ -9,6 +9,13 @@ public class NeuronGenome
     public NID nid; // Neuron ID
 
     public NeuronGenome() { }
+    
+    public NeuronGenome(MetaNeuron data)
+    {
+        neuronType = data.io;
+        name = data.name;
+        nid = new NID(data.moduleID, data.id);
+    }
 
     public NeuronGenome(string name, NeuronType type, BrainModuleID moduleID, int neuronID) {
         neuronType = type;
@@ -27,10 +34,4 @@ public class NeuronGenome
         name = template.name;
         nid = template.nid;
     }
-}
-
-public enum NeuronType {
-    In,
-    Hid,
-    Out
 }

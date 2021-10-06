@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
 
-public class CritterModuleTargetGenome : MonoBehaviour {
-
-}
+// Future use
+public class CritterModuleTargetGenome : MonoBehaviour { }

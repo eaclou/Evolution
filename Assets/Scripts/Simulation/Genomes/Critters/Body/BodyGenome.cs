@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-[System.Serializable]
+[Serializable]
 public class BodyGenome 
 {
     // BRAIN:
@@ -58,17 +59,18 @@ public class BodyGenome
         threatGenome.GenerateRandomInitialGenome();
     }
     
+    // WPP: ref removed from arguments, Lists are pass-by-reference
     // Go through each of the Body's Modules and add In/Out neurons based on module upgrades and settings:
     public void InitializeBrainGenome(List<NeuronGenome> neuronList) {
-        appearanceGenome.AppendModuleNeuronsToMasterList(ref neuronList);
-        communicationGenome.AppendModuleNeuronsToMasterList(ref neuronList);
-        coreGenome.AppendModuleNeuronsToMasterList(ref neuronList);
-        developmentalGenome.AppendModuleNeuronsToMasterList(ref neuronList);
-        environmentalGenome.AppendModuleNeuronsToMasterList(ref neuronList);
-        foodGenome.AppendModuleNeuronsToMasterList(ref neuronList);
-        friendGenome.AppendModuleNeuronsToMasterList(ref neuronList);
-        movementGenome.AppendModuleNeuronsToMasterList(ref neuronList);
-        threatGenome.AppendModuleNeuronsToMasterList(ref neuronList);        
+        appearanceGenome.AppendModuleNeuronsToMasterList(neuronList);
+        communicationGenome.AppendModuleNeuronsToMasterList(neuronList);
+        coreGenome.AppendModuleNeuronsToMasterList(neuronList);
+        developmentalGenome.AppendModuleNeuronsToMasterList(neuronList);
+        environmentalGenome.AppendModuleNeuronsToMasterList(neuronList);
+        foodGenome.AppendModuleNeuronsToMasterList(neuronList);
+        friendGenome.AppendModuleNeuronsToMasterList(neuronList);
+        movementGenome.AppendModuleNeuronsToMasterList(neuronList);
+        threatGenome.AppendModuleNeuronsToMasterList(neuronList);        
     }
 
     // Mutable by Player
