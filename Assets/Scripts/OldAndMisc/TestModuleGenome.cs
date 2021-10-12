@@ -22,15 +22,16 @@ public class TestModuleGenome {
     }
 
     public TestModuleGenome(TestModuleGenome template) {
-        this.parentID = template.parentID;
-        this.inno = template.inno;
-        this.maxSpeed = template.maxSpeed;
-        this.accel = template.accel;
-        this.radius = template.radius;
+        parentID = template.parentID;
+        inno = template.inno;
+        maxSpeed = template.maxSpeed;
+        accel = template.accel;
+        radius = template.radius;
     }
 
-    public void InitializeBrainGenome(List<NeuronGenome> neuronList) {
-        /*
+    /*
+    public void InitializeBrainGenome(List<NeuronGenome> neuronList) 
+    {
         NeuronGenome bias = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 0);
         NeuronGenome foodPosX = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 1);
         NeuronGenome foodPosY = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 2);
@@ -150,6 +151,6 @@ public class TestModuleGenome {
         neuronList.Add(outComm2); // 105
         neuronList.Add(outComm3); // 106 
         // 7 Total Outputs
-        */
     }
+    */
 }

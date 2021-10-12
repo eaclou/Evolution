@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class CritterMovementTestScript : MonoBehaviour {
-
+public class CritterMovementTestScript : MonoBehaviour 
+{
     public bool reset = false;
 
     public float frequency = 4f;
@@ -28,45 +26,33 @@ public class CritterMovementTestScript : MonoBehaviour {
     private AgentGenome testAgentGenome;
     private Agent testAgent;
 
-	// Use this for initialization
 	void Start () {
         InitializeCritter();
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 
-    private void FixedUpdate() {
-        if(reset) {
-
-
-
+    private void FixedUpdate() 
+    {
+        if(reset) 
+        {
             InitializeCritter();
-
             reset = false;
         }
-
-
         //testAgent.Tick();
     }
 
-    private void InitializeCritter() {
-
+    private void InitializeCritter() 
+    {
         // Delete existing children GameObjects:
-        foreach (Transform child in this.transform) {
-             GameObject.Destroy(child.gameObject);
+        foreach (Transform child in transform) {
+             Destroy(child.gameObject);
          }
 
         // Create dummy genome
-        testAgentGenome = new AgentGenome();
-        testAgentGenome.GenerateInitialRandomBodyGenome();
-        testAgentGenome.InitializeRandomBrainFromCurrentBody(1f, 0f, 0);
-        
+        testAgentGenome = new AgentGenome(0f, 0);
+
         // Create container Agent:
-        GameObject agentGO = new GameObject("Agent" + 0.ToString());
-        agentGO.transform.parent = this.transform;
+        GameObject agentGO = new GameObject("Agent" + 0);
+        agentGO.transform.parent = transform;
         testAgent = agentGO.AddComponent<Agent>();
 
         //testAgent.humanControlLerp = 1f;

@@ -70,18 +70,21 @@ public class GenerateBrainVisualization : MonoBehaviour
         public Vector3 pos;
     }
     
+    // * WPP: why is this needed?
     // Set once at start
     public struct AxonInitData 
     {  
         public float weight;
-        public int fromID;
-        public int toID;
+        //public int fromID;
+        //public int toID;
+        public Neuron from;
+        public Neuron to;
         
         public AxonInitData(Axon axon)
         {
             weight = axon.weight;
-            fromID = axon.fromID;
-            toID = axon.toID;
+            from = axon.from;
+            to = axon.to;
         }
     }
     
@@ -261,6 +264,7 @@ public class GenerateBrainVisualization : MonoBehaviour
     {
         this.neurons = neurons;
         this.axons = axons;
+        Debug.Log($"Initializing brain visualization with {neurons.Count} neurons and {axons.Count} axons");
 
         InitializeComputeBuffers(ref sockets, inputCount, outputCount);
         initialized = true;
@@ -516,8 +520,9 @@ public class GenerateBrainVisualization : MonoBehaviour
     // For now only one seed data
     void InitializeAxons()
     {
+        Debug.Log($"Initializing {axons.Count} axons");
+
         axonInitDataCBuffer?.Release();
-        //Debug.Log($"Initializing {axons.Count} axons");
         axonInitDataCBuffer = new ComputeBuffer(axons.Count, sizeof(float) * 1 + sizeof(int) * 2);
         
         AxonInitData[] axonInitDataArray = new AxonInitData[axons.Count]; 

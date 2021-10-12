@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+// TEMP DISABLED
 // Assumes full connectivity
 public class TestBrainVisualization : MonoBehaviour
 {
@@ -43,8 +44,8 @@ public class TestBrainVisualization : MonoBehaviour
         
         for (int i = 0; i < neuronCount; i++) 
         {
-            Neuron neuron = new Neuron(i, inputCount);
-            neurons.Add(neuron);
+            //Neuron neuron = new Neuron(i, inputCount);
+            //neurons.Add(neuron);
         }
         
         return neurons;
@@ -59,8 +60,8 @@ public class TestBrainVisualization : MonoBehaviour
             {
                 if (j + i * inputCount < MAX_AXON_COUNT) 
                 {
-                    Axon axon = new Axon(i, inputCount + j, Random.Range(-1f, 1f));
-                    axons.Add(axon);
+                    //Axon axon = new Axon(i, inputCount + j, Random.Range(-1f, 1f));
+                    //axons.Add(axon);
                 }
             }
         }

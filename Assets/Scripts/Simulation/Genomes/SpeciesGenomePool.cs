@@ -148,7 +148,7 @@ public class SpeciesGenomePool
 
         //=========================================================================
 
-        string debugTxt = "";
+        //string debugTxt = "";
         for (int i = 0; i < 64; i++) {
             
             mutationSettings.bodyCoreSizeMutationChance = 0.5f;
@@ -163,7 +163,7 @@ public class SpeciesGenomePool
             candidateGenomesList.Add(candidate);
             leaderboardGenomesList.Add(candidate);
 
-            debugTxt += "" + candidate.candidateGenome.brainGenome.linkList[0].weight.ToString("F2") + "  ";
+            //debugTxt += "" + candidate.candidateGenome.brainGenome.linkList[0].weight.ToString("F2") + "  ";
         }
 
         //Debug.Log("SPECIES CREATED! " + debugTxt);
@@ -173,35 +173,33 @@ public class SpeciesGenomePool
 
     public void ProcessExtinction(int curTimeStep) {
         isExtinct = true;
-        
         timeStepExtinct = curTimeStep;
     }
 
     private void CreateNewAverageCandidate() {
-        AgentGenome blankGenome = new AgentGenome();
-        blankGenome.GenerateInitialRandomBodyGenome();
-        int tempNumHiddenNeurons = 0;
-        blankGenome.InitializeRandomBrainFromCurrentBody(1.0f, 0.1f, tempNumHiddenNeurons);   // unneeded?
+        AgentGenome blankGenome = new AgentGenome(.1f, 0);
         avgCandidateData = new CandidateAgentData(blankGenome, speciesID);
-
         RecalculateAverageCandidate();
     }
     
+    // * WPP: shorten reference chains with temp variables
     private void RecalculateAverageCandidate() 
     {
+        var avgCore = avgCandidateData.candidateGenome.bodyGenome.coreGenome;
+
         //calculate avg candidate:
         avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.huePrimary = Vector3.zero;
         avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.hueSecondary = Vector3.zero;
-        avgCandidateData.candidateGenome.bodyGenome.coreGenome.dietSpecializationDecay = 0f;
-        avgCandidateData.candidateGenome.bodyGenome.coreGenome.dietSpecializationPlant = 0f;
-        avgCandidateData.candidateGenome.bodyGenome.coreGenome.dietSpecializationMeat = 0f;
-        avgCandidateData.candidateGenome.bodyGenome.coreGenome.talentSpecializationAttack = 0f;
-        avgCandidateData.candidateGenome.bodyGenome.coreGenome.talentSpecializationDefense = 0f;
-        avgCandidateData.candidateGenome.bodyGenome.coreGenome.talentSpecializationSpeed = 0f;
-        avgCandidateData.candidateGenome.bodyGenome.coreGenome.talentSpecializationUtility = 0f;
+        avgCore.dietSpecializationDecay = 0f;
+        avgCore.dietSpecializationPlant = 0f;
+        avgCore.dietSpecializationMeat = 0f;
+        avgCore.talentSpecializationAttack = 0f;
+        avgCore.talentSpecializationDefense = 0f;
+        avgCore.talentSpecializationSpeed = 0f;
+        avgCore.talentSpecializationUtility = 0f;
 
-        avgCandidateData.candidateGenome.bodyGenome.coreGenome.bodyLength = 0f;
-        avgCandidateData.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio = 0f;
+        avgCore.bodyLength = 0f;
+        avgCore.creatureAspectRatio = 0f;
 
         avgCandidateData.performanceData = new PerformanceData();  // clear // ***EC better spot for this??
         //Debug.Log("avgPerformanceData " + avgPerformanceData.totalTicksAlive.ToString());
@@ -213,16 +211,16 @@ public class SpeciesGenomePool
             
             avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.huePrimary += leaderboardGenomesList[i].candidateGenome.bodyGenome.appearanceGenome.huePrimary * norm;
             avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.hueSecondary += leaderboardGenomesList[i].candidateGenome.bodyGenome.appearanceGenome.hueSecondary * norm;
-            avgCandidateData.candidateGenome.bodyGenome.coreGenome.dietSpecializationDecay += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.dietSpecializationDecay * norm;
-            avgCandidateData.candidateGenome.bodyGenome.coreGenome.dietSpecializationPlant += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.dietSpecializationPlant * norm;
-            avgCandidateData.candidateGenome.bodyGenome.coreGenome.dietSpecializationMeat += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.dietSpecializationMeat * norm;
-            avgCandidateData.candidateGenome.bodyGenome.coreGenome.talentSpecializationAttack += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.talentSpecializationAttack * norm;
-            avgCandidateData.candidateGenome.bodyGenome.coreGenome.talentSpecializationDefense += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.talentSpecializationDefense * norm;
-            avgCandidateData.candidateGenome.bodyGenome.coreGenome.talentSpecializationSpeed += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.talentSpecializationSpeed * norm;
-            avgCandidateData.candidateGenome.bodyGenome.coreGenome.talentSpecializationUtility += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.talentSpecializationUtility * norm;
+            avgCore.dietSpecializationDecay += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.dietSpecializationDecay * norm;
+            avgCore.dietSpecializationPlant += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.dietSpecializationPlant * norm;
+            avgCore.dietSpecializationMeat += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.dietSpecializationMeat * norm;
+            avgCore.talentSpecializationAttack += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.talentSpecializationAttack * norm;
+            avgCore.talentSpecializationDefense += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.talentSpecializationDefense * norm;
+            avgCore.talentSpecializationSpeed += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.talentSpecializationSpeed * norm;
+            avgCore.talentSpecializationUtility += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.talentSpecializationUtility * norm;
         
-            avgCandidateData.candidateGenome.bodyGenome.coreGenome.bodyLength += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.bodyLength * norm;
-            avgCandidateData.candidateGenome.bodyGenome.coreGenome.creatureAspectRatio += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.creatureAspectRatio * norm;
+            avgCore.bodyLength += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.bodyLength * norm;
+            avgCore.creatureAspectRatio += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.creatureAspectRatio * norm;
 
             //Performance Data:
             avgCandidateData.performanceData.totalDamageDealt += leaderboardGenomesList[i].performanceData.totalDamageDealt * norm;
@@ -241,37 +239,28 @@ public class SpeciesGenomePool
         }
     }
     
-    public void AddNewYearlyStats(int year) {
-        
+    public void AddNewYearlyStats(int year) 
+    {
         CreateNewAverageCandidate(); // ***EC figure this out???        
         avgCandidateDataYearList.Add(avgCandidateData); // = new List<CandidateAgentData>(); // INCLUDES PerformanceData on CandidateData
-
         //Debug.Log("AddNewYearlyStats " + avgCandidateData.performanceData.totalTicksAlive);
     }
 
-    public CandidateAgentData GetNextAvailableCandidate() 
-    {
-        CandidateAgentData candidateData = null; // candidateGenomesList[0].candidateGenome;
-        if(candidateGenomesList.Count > 0) {
-            for (int i = 0; i < candidateGenomesList.Count; i++) {
-                if(candidateGenomesList[i].isBeingEvaluated) {
-                    // already being tested
-                    //Debug.LogError("GetNextAvailableCandidate(): candidateGenomesList[i].isBeingEvaluated!");
-                }
-                else {
-                    candidateData = candidateGenomesList[i];
-                    break;
-                }
+    public CandidateAgentData GetNextAvailableCandidate() {
+        CandidateAgentData candidateData = null; 
+        
+        if (candidateGenomesList.Count > 0) {
+            foreach (var candidate in candidateGenomesList) {
+                if (candidate.isBeingEvaluated) continue;
+                candidateData = candidate;
+                break;
             }
         }
         else {
             candidateData = new CandidateAgentData(representativeCandidate.candidateGenome, speciesID);
-            Debug.LogError("GetNextAvailableCandidate(): candidateData representativeGenome!!!! " + candidateData.ToString());
+            Debug.LogError("GetNextAvailableCandidate(): candidateData representativeGenome!!!! " + candidateData);
         }
         
-        /*if(candidateData == null) {
-            Debug.LogError("GetNextAvailableCandidate(): candidateData NULL!!!!");
-        }*/
         return candidateData;
     }
        
@@ -309,7 +298,6 @@ public class SpeciesGenomePool
                 Debug.LogError("META-ERROR NO INDEX FOUND! ");
             }
             
-            // Find it:
             masterGenomePool.GlobalFindCandidateID(candidateData.candidateID); // temp debug
         }
         
@@ -336,9 +324,7 @@ public class SpeciesGenomePool
         // Rank current leaderBoard list based on score
         for (int i = 0; i < numCandidates; i++) {
             float fitnessScore = 0.00001f;
-            //for(int j = 0; j < leaderboardGenomesList[i].evaluationScoresList.Count; j++) {
-                fitnessScore += (float)leaderboardGenomesList[i].performanceData.totalTicksAlive;
-            //}
+            fitnessScore += leaderboardGenomesList[i].performanceData.totalTicksAlive;
             rankedFitnessScoresArray[i] = fitnessScore;
             rankedIndicesList[i] = i;
             totalFitness += fitnessScore;
@@ -390,26 +376,14 @@ public class SpeciesGenomePool
 
     public AgentGenome Mutate(AgentGenome parentGenome, bool bodySettings, bool brainSettings) {
         //AgentGenome parentGenome = leaderboardGenomesList[selectedIndex].candidateGenome;
-        AgentGenome childGenome = new AgentGenome();
         
-        BodyGenome newBodyGenome = new BodyGenome();
-        BrainGenome newBrainGenome = new BrainGenome();
-
-        BodyGenome parentBodyGenome = parentGenome.bodyGenome;
-        BrainGenome parentBrainGenome = parentGenome.brainGenome;
-
         tempMutationSettings = bodySettings ? mutationSettings : cachedNoneMutationSettings;
-        newBodyGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome, tempMutationSettings);
+        BodyGenome newBodyGenome = new BodyGenome(parentGenome.bodyGenome, tempMutationSettings);
 
         tempMutationSettings = brainSettings ? mutationSettings : cachedNoneMutationSettings;
-        newBrainGenome.SetToMutatedCopyOfParentGenome(parentBrainGenome, newBodyGenome, tempMutationSettings);
+        BrainGenome newBrainGenome = new BrainGenome(parentGenome.brainGenome, newBodyGenome, tempMutationSettings);
 
-        childGenome.bodyGenome = newBodyGenome; 
-        childGenome.brainGenome = newBrainGenome;
-
-        childGenome.generationCount = parentGenome.generationCount + 1;
-
-        return childGenome;
+        return new AgentGenome(newBodyGenome, newBrainGenome, parentGenome.generationCount + 1);
     }
     
     public void UpdateLongestLife(Agent agent)
@@ -445,10 +419,10 @@ public class SpeciesGenomePool
     {
         AgentGenome genome = GetLeaderboardGenome(index);
 
-        if (genome.brainGenome.linkList.Count > linkedListIndex)
+        if (genome.brainGenome.linkCount > linkedListIndex)
             return null;
             
-        return genome.brainGenome.linkList[linkedListIndex];
+        return genome.brainGenome.links[linkedListIndex];
     }
     
     public AgentGenome GetLeaderboardGenome(int index)

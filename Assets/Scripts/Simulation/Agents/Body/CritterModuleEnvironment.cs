@@ -1,11 +1,11 @@
 ﻿
-public class CritterModuleEnvironment 
+public class CritterModuleEnvironment : IBrainModule
 {
     Lookup lookup => Lookup.instance;
     NeuralMap neuralMap => lookup.neuralMap;
 
     public int parentID;
-    BrainModuleID moduleID => genome.moduleID;
+    public BrainModuleID moduleID => genome.moduleID;
 
     public CritterModuleEnvironmentSensorsGenome genome;
 
@@ -49,13 +49,20 @@ public class CritterModuleEnvironment
         
         parentID = genome.parentID;
     }
+    
+    public void MapNeuron(MetaNeuron data, Neuron neuron)
+    {
+        if (moduleID != data.moduleID) return;
+        neuron.currentValue = GetNeuralValue(data.id);
+        //neuron.neuronType = data.io;
+    }
 
-    public void MapNeuron(NID nid, Neuron neuron) 
+    /*public void MapNeuron(NID nid, Neuron neuron) 
     {
         if (moduleID != nid.moduleID) return;
         neuron.neuronType = neuralMap.GetIO(nid.neuronID);    
         neuron.currentValue = GetNeuralValue(nid.neuronID);
-    }
+    }*/
     
     float[] GetNeuralValue(int neuronID)
     {

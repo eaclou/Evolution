@@ -17,7 +17,8 @@ public class MasterGenomePool
     private int targetNumSpecies = 3;
     public float speciesSimilarityDistanceThreshold = 12f;
     private int minNumGuaranteedEvalsForNewSpecies = 128;
-    
+    int numInitSpecies = 4;
+
     [SerializeField] float oldestSpeciesRerollChance = 0.33f;
 
     public int curNumAliveAgents;
@@ -29,7 +30,7 @@ public class MasterGenomePool
 
     public bool speciesCreatedOrDestroyedThisFrame = false;
 
-    public MutationSettingsInstance mutationSettingsRef;
+    MutationSettingsInstance mutationSettings;
 
     public List<int> debugRecentlyDeletedCandidateIDsList;
 
@@ -39,11 +40,11 @@ public class MasterGenomePool
    
     public MasterGenomePool() { }
 
-    public void FirstTimeInitialize(MutationSettingsInstance mutationSettingsRef) {
+    public void FirstTimeInitialize(MutationSettingsInstance mutationSettings) {
         debugRecentlyDeletedCandidateIDsList = new List<int>();
 
         nextCandidateIndex = 0;
-        this.mutationSettingsRef = mutationSettingsRef;
+        this.mutationSettings = mutationSettings;
         currentlyActiveSpeciesIDList = new List<int>();
         completeSpeciesPoolsList = new List<SpeciesGenomePool>();
 
@@ -52,15 +53,13 @@ public class MasterGenomePool
         //currentlyActiveSpeciesIDList.Add(0);
         //completeSpeciesPoolsList.Add(rootSpecies);
 
-        int numInitSpecies = 4;
         for (int i = 0; i < numInitSpecies; i++) {
-            float lerpV = Mathf.Clamp01((i + 0.1f) / (numInitSpecies + 1) + 0.06f) * 0.8f + 0.1f;
-            lerpV = 0.5f;
-            SpeciesGenomePool newSpecies = new SpeciesGenomePool(i, -1, 0, 0, mutationSettingsRef);
-            AgentGenome seedGenome = new AgentGenome();
-            seedGenome.GenerateInitialRandomBodyGenome();
-            int tempNumHiddenNeurons = Mathf.RoundToInt(20f * lerpV);
-            seedGenome.InitializeRandomBrainFromCurrentBody(1.0f, mutationSettingsRef.brainInitialConnectionChance * lerpV, tempNumHiddenNeurons);            
+            //float lerpV = Mathf.Clamp01((i + 0.1f) / (numInitSpecies + 1) + 0.06f) * 0.8f + 0.1f;
+            float lerpV = 0.5f;
+            
+            SpeciesGenomePool newSpecies = new SpeciesGenomePool(i, -1, 0, 0, mutationSettings);
+            AgentGenome seedGenome = new AgentGenome(mutationSettings, lerpV);
+
             newSpecies.FirstTimeInitialize(new CandidateAgentData(seedGenome, i), 0);
             currentlyActiveSpeciesIDList.Add(i);
             completeSpeciesPoolsList.Add(newSpecies);
@@ -199,7 +198,6 @@ public class MasterGenomePool
 
             return completeSpeciesPoolsList[currentlyActiveSpeciesIDList[selectedIndex]];        
         }
-        
 
         // NAIVE RANDOM AT FIRST:
         // filter flagged extinct species:
@@ -435,8 +433,8 @@ public class MasterGenomePool
         float dSensory = dFoodSpecDecay + dFoodSpecPlant + dFoodSpecMeat + dUseComms + dUseWaterStats + dUseCardinals + dUseDiagonals +
                          dUseNutrients + dUseFoodPos + dUseFoodVel + dUseFoodDir + dUseFoodStats + dUseFoodEgg + dUseFoodCorpse + dUseFriendPos + dUseFriendVel + dUseFriendDir +
                          dUseThreatPos + dUseThreatVel + dUseThreatDir + dUseThreatStats;
-        float dNeurons = Mathf.Abs(newGenome.brainGenome.hiddenNeuronList.Count - repGenome.brainGenome.hiddenNeuronList.Count);
-        float dAxons = Mathf.Abs(newGenome.brainGenome.linkList.Count - repGenome.brainGenome.linkList.Count) / (float)repGenome.brainGenome.bodyNeuronList.Count;
+        float dNeurons = Mathf.Abs(newGenome.brainGenome.hiddenNeurons.Count - repGenome.brainGenome.hiddenNeurons.Count);
+        float dAxons = Mathf.Abs(newGenome.brainGenome.linkCount - repGenome.brainGenome.linkCount) / (float)repGenome.brainGenome.inOutNeurons.Count;
 
         float dSpecialization = (new Vector4(newCore.talentSpecializationAttack, newCore.talentSpecializationDefense, newCore.talentSpecializationSpeed, newCore.talentSpecializationUtility).normalized - 
                                  new Vector4(repCore.talentSpecializationAttack, repCore.talentSpecializationDefense, repCore.talentSpecializationSpeed, repCore.talentSpecializationUtility).normalized).magnitude;

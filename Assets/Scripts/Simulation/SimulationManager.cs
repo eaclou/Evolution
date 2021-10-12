@@ -806,7 +806,6 @@ public class SimulationManager : Singleton<SimulationManager>
     private void CheckForReadyToSpawnAgents() {      
         int respawnThreshold = 1;
         
-
         for (int a = 0; a < agents.Length; a++) {
             if(agentRespawnCounter <= respawnThreshold || !agents[a].isAwaitingRespawn)
                 continue; 
@@ -883,7 +882,7 @@ public class SimulationManager : Singleton<SimulationManager>
         return altitudeSample.x <= _GlobalWaterLevel && altitudeSample.w >= 0.1f;
     }
     
-    private void AttemptToSpawnAgent(int agentIndex, int speciesIndex, CandidateAgentData candidateData) { //, int speciesIndex) {
+    private void AttemptToSpawnAgent(int agentIndex, int speciesIndex, CandidateAgentData candidateData) { 
         //Debug.Log("AttemptToSpawnAgent(" + agentIndex.ToString());
         // Which Species will the new agent belong to?
         // Random selection? Lottery-Selection among Species? Use this Agent's previous-life's Species?  Global Ranked Selection (across all species w/ modifiers) ?
@@ -908,7 +907,7 @@ public class SimulationManager : Singleton<SimulationManager>
         List<int> validEggSackIndicesList = GetValidEggSackIndices(speciesIndex);
         
         // **** BROKEN BY SPECIATION UPDATE!!! *****
-        if(validEggSackIndicesList.Count > 0) {  
+        if (validEggSackIndicesList.Count > 0) {  
             int randIndex = Random.Range(0, validEggSackIndicesList.Count);
             //Debug.Log("listLength:" + validEggSackIndicesList.Count.ToString() + ", randIndex = " + randIndex.ToString() + ", p: " + validEggSackIndicesList[randIndex].ToString());
             parentEggSack = eggSacks[validEggSackIndicesList[randIndex]];
@@ -916,8 +915,8 @@ public class SimulationManager : Singleton<SimulationManager>
             SpawnAgentFromEggSack(candidateData, agentIndex, speciesIndex, parentEggSack);
             candidateData.isBeingEvaluated = true;
         }
-        else { // No eggSack found:
-            
+        // No eggSack found:
+        else { 
             Vector3 randWorldPos = new Vector3(Random.Range(_MapSize * 0.4f, _MapSize * 0.6f), Random.Range(_MapSize * 0.4f, _MapSize * 0.6f), 0f);// GetRandomFoodSpawnPosition().startPosition;
             
             Vector2 spawnWorldPos = new Vector2(randWorldPos.x, randWorldPos.y);

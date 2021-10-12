@@ -2,7 +2,8 @@
 using UnityEngine;
 
 [Serializable]
-public class TestModule {
+public class TestModule 
+{
     //public int parentID;
     //public int inno;
     public int parentID;
@@ -175,33 +176,6 @@ public class TestModule {
         outComm3 = new float[1]; // 6 
         // 7 Total Outputs
 
-        //destroyed = false;
-        /*bias = new float[1];
-        bias[0] = 1f;
-
-        //ownPosX = new float[1];
-        //ownPosX[0] = startPos.agentStartPosition.x;
-        //ownPosY = new float[1];
-        //ownPosY[0] = startPos.agentStartPosition.y;
-        ownVelX = new float[1];
-        ownVelY = new float[1];
-
-        enemyPosX = new float[1];
-        enemyPosY = new float[1];
-        enemyVelX = new float[1];
-        enemyVelY = new float[1];
-        enemyDirX = new float[1];
-        enemyDirY = new float[1];
-
-        distLeft = new float[1];
-        distRight = new float[1];
-        distUp = new float[1];
-        distDown = new float[1];
-
-        throttleX = new float[1];
-        throttleY = new float[1];
-        */
-
         //maxHealth = genome.maxHealth;
         //health = maxHealth;
         //prevHealth = health;
@@ -229,68 +203,9 @@ public class TestModule {
         //component.healthModule = this;
     }
 
+    // WPP: obsolete, rebuild using new system if needed
+    /*
     public void MapNeuron(NID nid, Neuron neuron) {
-        /*
-        bias = new float[1];   //0
-        foodPosX = new float[1];  //1
-        foodPosY = new float[1]; // 2
-        foodDirX = new float[1];  // 3
-        foodDirY = new float[1];  // 4
-        foodTypeR = new float[1]; // 5
-        foodTypeG = new float[1]; // 6
-        foodTypeB = new float[1]; // 7
-
-        friendPosX = new float[1]; // 8
-        friendPosY = new float[1]; // 9
-        friendVelX = new float[1]; // 10
-        friendVelY = new float[1]; // 11
-        friendDirX = new float[1]; // 12
-        friendDirY = new float[1]; // 13
-
-        enemyPosX = new float[1]; // 14
-        enemyPosY = new float[1]; // 15
-        enemyVelX = new float[1]; // 16
-        enemyVelY = new float[1]; // 17
-        enemyDirX = new float[1]; // 18
-        enemyDirY = new float[1]; // 19
-
-        ownVelX = new float[1]; // 20
-        ownVelY = new float[1]; // 21
-        temperature = new float[1]; // 22
-        pressure = new float[1]; // 23
-        isContact = new float[1]; // 24
-        contactForceX = new float[1]; // 25
-        contactForceY = new float[1]; // 26
-        hitPoints = new float[1]; // 27
-        stamina = new float[1]; // 28
-        foodAmountR = new float[1]; // 29
-        foodAmountG = new float[1]; // 30
-        foodAmountB = new float[1]; // 31
-
-        distUp = new float[1]; // 32 // start up and go clockwise!
-        distTopRight = new float[1]; // 33
-        distRight = new float[1]; // 34
-        distBottomRight = new float[1]; // 35
-        distDown = new float[1]; // 36
-        distBottomLeft = new float[1]; // 37
-        distLeft = new float[1]; // 38
-        distTopLeft = new float[1]; // 39
-
-        inComm0 = new float[1]; // 40
-        inComm1 = new float[1]; // 41
-        inComm2 = new float[1]; // 42
-        inComm3 = new float[1]; // 43 
-        // 44 Total Inputs
-
-        throttleX = new float[1]; // 0
-        throttleY = new float[1]; // 1
-        dash = new float[1]; // 2
-        outComm0 = new float[1]; // 3
-        outComm1 = new float[1]; // 4
-        outComm2 = new float[1]; // 5
-        outComm3 = new float[1]; // 6 
-        */
-        
         // * WPP: refactor -> use switch statement, consider exposing as lookup table
         if (inno != nid.moduleID) 
             return;
@@ -505,9 +420,10 @@ public class TestModule {
         }
         #endregion
     }
+    */
 
-    public void Tick(bool isPlayer) {        
-
+    public void Tick(bool isPlayer) 
+    {
         //float xPos = ownRigidBody2D.transform.localPosition.x;
         //float yPos = ownRigidBody2D.transform.localPosition.y;
         Vector2 ownPos = new Vector2(ownRigidBody2D.transform.localPosition.x, ownRigidBody2D.transform.localPosition.y);
@@ -586,8 +502,6 @@ public class TestModule {
         foodAmountR[0] = Mathf.Max(foodAmountR[0] - foodDrain, 0f);
         foodAmountG[0] = Mathf.Max(foodAmountG[0] - foodDrain, 0f);
         foodAmountB[0] = Mathf.Max(foodAmountB[0] - foodDrain, 0f);
-        
-        
         
         int rayLayer = LayerMask.GetMask("EnvironmentCollision");
         //Debug.Log(LayerMask.GetMask("EnvironmentCollision"));

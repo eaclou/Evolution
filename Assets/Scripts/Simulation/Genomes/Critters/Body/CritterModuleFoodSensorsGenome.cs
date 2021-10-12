@@ -42,8 +42,65 @@ public class CritterModuleFoodSensorsGenome
         sensorRangeMult = 1f;
     }
     
-    List<NeuronGenome> neuronList;
+    List<NeuronGenome> masterList;
+    public void AppendModuleNeuronsToMasterList(List<NeuronGenome> masterList)
+    {
+        this.masterList = masterList;
+        
+        // * WPP: rename nutrients -> Plants
+        if (useNutrients) 
+        {
+            AddNeuron("nutrientDensity");   
+            AddNeuron("nutrientGradX");
+            AddNeuron("nutrientGradY");
+        }
+        if (usePos) 
+        {
+            AddNeuron("foodPosX");  // * WPP: is "food" specifically "microbes"? (if so, rename)
+            AddNeuron("foodPosY");
+            AddNeuron("foodDistance");
+            AddNeuron("animalPosX");
+            AddNeuron("animalPosY");
+            AddNeuron("animalDistance");
+        }
+        if (useVel) 
+        {
+            AddNeuron("foodVelX");
+            AddNeuron("foodVelY");
+            AddNeuron("animalVelX");
+            AddNeuron("animalVelY");
+        }
+        if (useDir) 
+        {
+            AddNeuron("foodDirX");
+            AddNeuron("foodDirY");
+            AddNeuron("animalDirX");
+            AddNeuron("animalDirY");
+        }
+        if (useStats) 
+        {
+            AddNeuron("foodQuality");
+            AddNeuron("foodRelSize");
+            AddNeuron("animalQuality");
+            AddNeuron("animalRelSize");
+        }
+        if (useEggs) 
+        {
+            AddNeuron("distanceToEgg");
+            AddNeuron("eggDirX");
+            AddNeuron("eggDirY");
+        }
+        if (useCorpse) 
+        {
+            AddNeuron("distanceToCorpse");
+            AddNeuron("corpseDirX");
+            AddNeuron("corpseDirY");
+        }
+    }
+    
+    void AddNeuron(string name) { masterList.Add(map.GetData(name)); }
 
+    /*List<NeuronGenome> neuronList;
     public void AppendModuleNeuronsToMasterList(List<NeuronGenome> neuronList) {
         this.neuronList = neuronList;
 
@@ -117,7 +174,7 @@ public class CritterModuleFoodSensorsGenome
         }
     }
     
-    void AddNeuron(string name) { neuronList.Add(map.GetGenome(name)); }
+    void AddNeuron(string name) { neuronList.Add(map.GetGenome(name)); }*/
     
     public void SetToMutatedCopyOfParentGenome(CritterModuleFoodSensorsGenome parentGenome, MutationSettingsInstance settings) {
         useNutrients = RequestMutation(settings, parentGenome.useNutrients);

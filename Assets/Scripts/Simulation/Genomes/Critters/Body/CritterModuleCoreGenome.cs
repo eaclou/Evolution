@@ -428,8 +428,38 @@ public class CritterModuleCoreGenome
         mouthAttackAmplitude = 1f;
     }
 
-    List<NeuronGenome> neuronList;
+    List<NeuronGenome> masterList;
+    public void AppendModuleNeuronsToMasterList(List<NeuronGenome> masterList)
+    {
+        this.masterList = masterList;
+        AddNeuron("Bias");
+        AddNeuron("isMouthTrigger");
+        AddNeuron("isContact");
+        AddNeuron("contactForceX");
+        AddNeuron("contactForceY");
+        AddNeuron("hitPoints");
+        AddNeuron("stamina");
+        AddNeuron("energyStored");
+        AddNeuron("foodStored");
+        AddNeuron("mouthFeedEffector"); 
+        
+        if(talentSpecAttackNorm > 0.2f) {
+            AddNeuron("mouthAttackEffector");
+        }
+        if(talentSpecDefenseNorm > 0.2f) {
+            AddNeuron("defendEffector");
+        }
+        if(talentSpecSpeedNorm > 0.2f) {
+            AddNeuron("dashEffector");
+        }
+        if(talentSpecUtilityNorm > 0.2f) {
+            AddNeuron("healEffector");
+        }       
+    }
     
+    void AddNeuron(string name) { masterList.Add(map.GetData(name)); }
+
+    /*List<NeuronGenome> neuronList;
     public void AppendModuleNeuronsToMasterList(List<NeuronGenome> neuronList) {
         // WPP: Lists are ref parameters by default
         this.neuronList = neuronList;
@@ -476,8 +506,8 @@ public class CritterModuleCoreGenome
         }
     }
     
-    void AddNeuron(string name) { neuronList.Add(map.GetGenome(name)); }
-
+    void AddNeuron(string name) { neuronList.Add(map.GetGenome(name)); }*/
+    
     public void SetToMutatedCopyOfParentGenome(CritterModuleCoreGenome parentGenome, MutationSettingsInstance settings) {
         string parentName = parentGenome.name;
         //int parentNameLength = parentName;
@@ -487,12 +517,11 @@ public class CritterModuleCoreGenome
         string middleChar = parentName.Substring(randIndex, 1);
         string backHalf = parentName.Substring(randIndex + 1);
         name = parentName;
-
-        float randChance1 = Random.Range(0f, 1f);
-        if(randChance1 < 0.05) {
+        
+        if (RandomStatics.CoinToss(.05f)) {
             int randLetterIndex = Random.Range(0, 26);
             
-            // * WPP: store in ScriptableObject
+            // * WPP: delegate to static function or scriptable object
             string[] lettersArray = new string[26];
             lettersArray[0] = "A";
             lettersArray[1] = "B";

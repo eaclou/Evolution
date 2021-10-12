@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [Serializable]
-public class CritterModuleFood 
+public class CritterModuleFood : IBrainModule
 {
     Lookup lookup => Lookup.instance;
     NeuralMap neuralMap => lookup.neuralMap;
@@ -11,7 +11,7 @@ public class CritterModuleFood
     ZooplanktonManager microbes => simulation.zooplanktonManager;
 
 	public int parentID;
-    BrainModuleID moduleID => genome.moduleID;
+    public BrainModuleID moduleID => genome.moduleID;
 
     public int nearestFoodParticleIndex = -1;  // debugging ** TEMP
     public Vector2 nearestFoodParticlePos;
@@ -68,6 +68,8 @@ public class CritterModuleFood
     public void Initialize(CritterModuleFoodSensorsGenome genome) {
         this.genome = genome;
         
+        // * WPP: Vulnerable to index out of range errors (such as in UI)
+        // consider initializing in variable declarations and leaving values at zero
         if(genome.useNutrients) {
             nutrientDensity = new float[1];
             nutrientGradX = new float[1];
@@ -151,14 +153,21 @@ public class CritterModuleFood
 
         parentID = genome.parentID;
     }
+    
+    public void MapNeuron(MetaNeuron data, Neuron neuron)
+    {
+        if (moduleID != data.moduleID) return;
+        neuron.currentValue = GetNeuralValue(data.id);
+        //neuron.neuronType = data.io;
+    }
 
     // WPP: conditionals replaced with switch and lookup
-    public void MapNeuron(NID nid, Neuron neuron) 
+    /*public void MapNeuron(NID nid, Neuron neuron) 
     {
         if (moduleID != nid.moduleID) return;
         neuron.neuronType = neuralMap.GetIO(nid.neuronID);    
         neuron.currentValue = GetNeuralValue(nid.neuronID);
-        /*if (nid.neuronID == 1) {
+        if (nid.neuronID == 1) {
             neuron.currentValue = nutrientDensity;
             neuron.neuronType = NeuronType.In;
         }
@@ -265,8 +274,8 @@ public class CritterModuleFood
         if (nid.neuronID == 32) {
             neuron.currentValue = foodAnimalRelSize;
             neuron.neuronType = NeuronType.In;
-        }*/
-    }
+        }
+    }*/
     
     float[] GetNeuralValue(int neuronID)
     {
@@ -356,9 +365,7 @@ public class CritterModuleFood
             foodAnimalPosX[0] = Mathf.Clamp(critterToAnimalParticle.x / sensorRange, -1f, 1f);
             foodAnimalPosY[0] = Mathf.Clamp(critterToAnimalParticle.y / sensorRange, -1f, 1f);
         }
-        if(genome.useVel) {
-
-        }
+        if(genome.useVel) { }
         if(genome.useDir) {
             foodPlantDirX[0] = foodParticleDir.x;
             foodPlantDirY[0] = foodParticleDir.y;
@@ -369,7 +376,8 @@ public class CritterModuleFood
             foodAnimalDirY[0] = animalParticleDir.y;
         }
         
-        // EGGS:::::
+        // * WPP: move to functions
+        // EGGS
         if (agent.coreModule.nearestEggSackModule) {
             Vector2 eggSackPos = new Vector2(agent.coreModule.nearestEggSackModule.rigidbodyRef.position.x - agent.ownPos.x, agent.coreModule.nearestEggSackModule.rigidbodyRef.position.y - agent.ownPos.y);
             Vector2 eggSackDir = eggSackPos.normalized;
@@ -382,7 +390,7 @@ public class CritterModuleFood
             }
         }
 
-        // CORPSE FOOD:::::           
+        // CORPSE FOOD          
         if (agent.coreModule.nearestEnemyAgent && agent.isDead) {
             Vector3 preyPos3 = agent.coreModule.nearestEnemyAgent.bodyRigidbody.position;
             Vector2 preyPos = new Vector2(preyPos3.x - agent.ownPos.x, preyPos3.y - agent.ownPos.y);

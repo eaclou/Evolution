@@ -29,8 +29,24 @@ public class CritterModuleEnvironmentSensorsGenome
         maxRange = 20f;
     }
     
-    List<NeuronGenome> neuronList;
+    List<NeuronGenome> masterList;
+    public void AppendModuleNeuronsToMasterList(List<NeuronGenome> masterList)
+    {
+        this.masterList = masterList;
+    
+        if (useWaterStats) 
+        {
+            AddNeuron("depth");
+            AddNeuron("velX");
+            AddNeuron("velY");
+            AddNeuron("depthGradX");
+            AddNeuron("depthGradY");
+        }
+    }
+    
+    void AddNeuron(string name) { masterList.Add(map.GetData(name)); }
 
+    /*List<NeuronGenome> neuronList;
     public void AppendModuleNeuronsToMasterList(List<NeuronGenome> neuronList) {
         this.neuronList = neuronList;
     
@@ -47,39 +63,39 @@ public class CritterModuleEnvironmentSensorsGenome
             //neuronList.Add(new NeuronGenome("depthGradY", NeuronType.In, moduleID, 5)); 
             
 
-            /*NeuronGenome depthSouth = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 6);  // 36        
-            NeuronGenome depthWest = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 7);  // 38       
+            //NeuronGenome depthSouth = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 6);  // 36        
+            //NeuronGenome depthWest = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 7);  // 38       
         
-            neuronList.Add(depthNorth);   
-            neuronList.Add(depthEast);     
-            neuronList.Add(depthSouth);       
-            neuronList.Add(depthWest); */
+            //neuronList.Add(depthNorth);   
+            //neuronList.Add(depthEast);     
+            //neuronList.Add(depthSouth);       
+            //neuronList.Add(depthWest); 
         }
-        if (useCardinals) {
-            /*NeuronGenome distUp = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 4); // 32 // start up and go clockwise!        
-            NeuronGenome distRight = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 5);  // 34        
-            NeuronGenome distDown = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 6);  // 36        
-            NeuronGenome distLeft = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 7);  // 38       
+        //if (useCardinals) {
+        //    NeuronGenome distUp = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 4); // 32 // start up and go clockwise!        
+        //    NeuronGenome distRight = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 5);  // 34        
+        //    NeuronGenome distDown = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 6);  // 36        
+        //    NeuronGenome distLeft = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 7);  // 38       
         
-            neuronList.Add(distUp);   
-            neuronList.Add(distRight);     
-            neuronList.Add(distDown);       
-            neuronList.Add(distLeft); */
-        }   
-        /*if(useDiagonals) {
-            NeuronGenome distTopRight = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 8); // 33
-            NeuronGenome distBottomRight = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 9); // 35
-            NeuronGenome distBottomLeft = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 10);  // 37
-            NeuronGenome distTopLeft = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 11);  // 39        
+        //    neuronList.Add(distUp);   
+       //     neuronList.Add(distRight);     
+        //    neuronList.Add(distDown);       
+         //   neuronList.Add(distLeft); 
+        //}   
+        //if(useDiagonals) {
+        //    NeuronGenome distTopRight = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 8); // 33
+        //    NeuronGenome distBottomRight = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 9); // 35
+        //    NeuronGenome distBottomLeft = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 10);  // 37
+        //    NeuronGenome distTopLeft = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 11);  // 39        
         
-            neuronList.Add(distTopRight); 
-            neuronList.Add(distBottomRight); 
-            neuronList.Add(distBottomLeft);
-            neuronList.Add(distTopLeft);
-        } */       
+        //    neuronList.Add(distTopRight); 
+        //    neuronList.Add(distBottomRight); 
+        //    neuronList.Add(distBottomLeft);
+        //    neuronList.Add(distTopLeft);
+        //}       
     }
     
-    void AddNeuron(string name) { neuronList.Add(map.GetGenome(name)); }
+    void AddNeuron(string name) { neuronList.Add(map.GetGenome(name)); }*/
 
     public void SetToMutatedCopyOfParentGenome(CritterModuleEnvironmentSensorsGenome parentGenome, MutationSettingsInstance settings) {
         useWaterStats = RequestMutation(settings, parentGenome.useWaterStats);

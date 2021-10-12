@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
 
-public class CritterModuleMovement 
+public class CritterModuleMovement : IBrainModule
 {
     Lookup lookup => Lookup.instance;
     NeuralMap neuralMap => lookup.neuralMap;
 
     public int parentID;
-    BrainModuleID moduleID;
+    public BrainModuleID moduleID { get; private set; }
 
     public float horsepower;
     public float turnRate;
@@ -58,8 +58,15 @@ public class CritterModuleMovement
 
         speedBonus = Mathf.Lerp(0.7f, 1.4f, 1f - invAspectRatio);
     }
+    
+    public void MapNeuron(MetaNeuron data, Neuron neuron)
+    {
+        if (moduleID != data.moduleID) return;
+        neuron.currentValue = GetNeuralValue(data.id);
+        //neuron.neuronType = data.io;
+    }
 
-    public void MapNeuron(NID nid, Neuron neuron) 
+    /*public void MapNeuron(NID nid, Neuron neuron) 
     {
         if (moduleID != nid.moduleID) return;
         neuron.neuronType = GetIO(nid.neuronID);    
@@ -74,7 +81,7 @@ public class CritterModuleMovement
             case 208: return NeuronType.In;
             default: return neuralMap.GetIO(neuronID);
         }
-    }
+    }*/
     
     float[] GetNeuralValue(int neuronID)
     {

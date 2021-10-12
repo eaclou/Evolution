@@ -23,13 +23,13 @@ public class BrainGenomeImage : MonoBehaviour
     {
         texture.Resize(WIDTH, 1);
 
-        for(int x = 0; x < WIDTH; x++) 
+        for (int x = 0; x < WIDTH; x++) 
         {                              
             Color testColor;
 
-            if (brain.linkList.Count > x) 
+            if (brain.linkCount > x) 
             {
-                float weightVal = brain.linkList[x].weight;
+                float weightVal = brain.links[x].weight;
                 testColor = new Color(weightVal * 0.5f + 0.5f, weightVal * 0.5f + 0.5f, weightVal * 0.5f + 0.5f);
                 
                 if(weightVal < -0.25f) 
@@ -54,6 +54,5 @@ public class BrainGenomeImage : MonoBehaviour
         }
         
         texture.Apply();
-    } 
-
+    }
 }

@@ -1,54 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 /// Maps neuron IDs to IO types, extend to include other static & centralized mappings
 [CreateAssetMenu(menuName = "Pond Water/Brain/Neuron Map", fileName = "Neuron Map")]
 public class NeuralMap : ScriptableObject
 {
+    public MetaNeuron hiddenTemplate;
     [SerializeField] MetaNeuron[] catalog;
-    
-    public NeuronGenome GetGenome(string name) { return new NeuronGenome(GetData(name)); }
-    
-    public MetaNeuron GetData(string name)
+
+    public NeuronGenome GetData(string name)
     {
         foreach (var item in catalog)
             if (item.name == name)
-                return item;
+                return new NeuronGenome(item);
                 
         Debug.LogError($"Unable to find neuron data for {name}");
         return null;
     }
     
-    public List<MetaNeuron> GetAllByModule(BrainModuleID moduleID)
+    public List<NeuronGenome> GetAllByModule(BrainModuleID moduleID)
     {
-        var list = new List<MetaNeuron>();
+        var list = new List<NeuronGenome>();
         
         foreach (var item in catalog)
             if (item.moduleID == moduleID)
-                list.Add(item);
+                list.Add(new NeuronGenome(item));
                 
         return list;
-    }
-
-    [Header("Obsolete")]
-    [SerializeField] NeuronMap[] mappings;
-
-    public NeuronType GetIO(int id)
-    {
-        foreach (var mapping in mappings)
-            if (mapping.ids.Contains(id))
-                return mapping.io;
-                
-        Debug.LogError($"No mapping found for id {id}");
-        return id < 100 ? NeuronType.In : NeuronType.Out;
-    }
-
-    [Serializable]
-    public struct NeuronMap
-    {
-        public NeuronType io;
-        public int[] ids;
     }
 }

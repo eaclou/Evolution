@@ -1,7 +1,8 @@
 ﻿using System;
 
+// * WPP: DEPRECATE
 /// Template from which Neurons are created
-[Serializable]
+/*[Serializable]
 public class NeuronGenome 
 {
     public NeuronType neuronType;
@@ -34,4 +35,4 @@ public class NeuronGenome
         name = template.name;
         nid = template.nid;
     }
-}
+}*/

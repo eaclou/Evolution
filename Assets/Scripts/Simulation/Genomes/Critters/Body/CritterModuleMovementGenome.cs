@@ -17,8 +17,23 @@ public class CritterModuleMovementGenome
         this.parentID = parentID;
     }
     
-    List<NeuronGenome> neuronList;
-
+    List<NeuronGenome> masterList;
+    public void AppendModuleNeuronsToMasterList(List<NeuronGenome> masterList)
+    {
+        this.masterList = masterList;
+        
+        AddNeuron("ownVelX");
+        AddNeuron("ownVelY");
+        AddNeuron("facingDirX");
+        AddNeuron("facingDirY");
+        AddNeuron("throttleX");
+        AddNeuron("throttleY");
+        AddNeuron("dash");
+    }
+    
+    void AddNeuron(string name) { masterList.Add(map.GetData(name)); }
+    
+    /*List<NeuronGenome> neuronList;
     public void AppendModuleNeuronsToMasterList(List<NeuronGenome> neuronList) {
         this.neuronList = neuronList;
 
@@ -41,7 +56,7 @@ public class CritterModuleMovementGenome
         // currently, all within COREmoduleGenome
     }
     
-    void AddNeuron(string name) { neuronList.Add(map.GetGenome(name)); }
+    void AddNeuron(string name) { neuronList.Add(map.GetGenome(name)); }*/
 
     public void GenerateRandomInitialGenome() {
         horsepower = 140f;

@@ -89,7 +89,10 @@ public class CreaturePanelUI : MonoBehaviour
         critterPortraitStrokesCBuffer = new ComputeBuffer(1 * theRenderKing.GetNumStrokesPerCritter(), theRenderKing.GetMemorySizeCritterStrokeData());
     }
     
-    public void Tick() {
+    public void Tick() 
+    {
+        if (!curPanelMode) return;
+    
         textPanelStateDebug.text = "MODE: " + curPanelMode.value;
 
         var actionState = GetAgentActionStateData(agent.curActionState);

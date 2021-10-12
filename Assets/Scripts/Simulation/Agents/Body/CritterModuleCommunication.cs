@@ -1,13 +1,13 @@
 ﻿using UnityEngine;
 
-public class CritterModuleCommunication 
+public class CritterModuleCommunication : IBrainModule
 {
     Lookup lookup => Lookup.instance;
     NeuralMap neuralMap => lookup.neuralMap;
 
     public CritterModuleCommunicationGenome genome;
 	public int parentID;
-    BrainModuleID moduleID => genome.moduleID;
+    public BrainModuleID moduleID => genome.moduleID;
 
     public float[] inComm0;
     public float[] inComm1;
@@ -34,13 +34,20 @@ public class CritterModuleCommunication
 
         parentID = genome.parentID;
     }
+    
+    public void MapNeuron(MetaNeuron data, Neuron neuron)
+    {
+        if (moduleID != data.moduleID) return;
+        neuron.currentValue = GetNeuralValue(data.id);
+        //neuron.neuronType = data.io;
+    }
 
-    public void MapNeuron(NID nid, Neuron neuron) 
+    /*public void MapNeuron(NID nid, Neuron neuron) 
     {
         if (moduleID != nid.moduleID) return;
         neuron.currentValue = GetNeuralValue(nid.neuronID);
         neuron.neuronType = neuralMap.GetIO(nid.neuronID);
-    }
+    }*/
     
     // * Use name from MetaNeuron
     // + consider using Reflection (match SO name field to variable name) to eliminate switch statement

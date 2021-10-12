@@ -117,8 +117,8 @@ public class DebugPanelUI : MonoBehaviour
             //string mouthType = "Active";
             //if (agentRef.mouthRef.isPassive) { mouthType = "Passive"; }
             //debugTxtAgent += "Mouth: [" + mouthType + "]\n";
-            debugTxtAgent += "# Neurons: " + brain.neuronList.Count + ", # Axons: " + brain.axonList.Count + "\n";
-            debugTxtAgent += "# In/Out Nodes: " + brainGenome.bodyNeuronList.Count + ", # Hidden Nodes: " + brainGenome.hiddenNeuronList.Count + ", # Links: " + brainGenome.linkList.Count + "\n";
+            debugTxtAgent += "# Neurons: " + brain.neurons.Count + ", # Axons: " + brain.axons.Count + "\n";
+            debugTxtAgent += "# In/Out Nodes: " + brainGenome.inOutNeurons.Count + ", # Hidden Nodes: " + brainGenome.hiddenNeurons.Count + ", # Links: " + brainGenome.links.Count + "\n";
 
             debugTxtAgent += "\nSENSORS:\n";
             debugTxtAgent += "Comms= " + bodyGenome.communicationGenome.useComms + "\n";

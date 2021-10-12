@@ -289,13 +289,34 @@ public class Agent : MonoBehaviour {
 
         AudioManager.instance.PlayCritterBite(ownPos);
     }
-
-    public void MapNeuronToModule(NID nid, Neuron neuron) {
+    
+    public void MapNeuronToModule(MetaNeuron data, Neuron neuron)
+    {
+        if (data.moduleID == BrainModuleID.Undefined)
+            neuron.Zero();
+        else
+            GetModule(data.moduleID)?.MapNeuron(data, neuron);
+    }
+    
+    // WPP: use interface & switch instead of querying each module
+    IBrainModule GetModule(BrainModuleID id)
+    {
+        switch (id)
+        {
+            case BrainModuleID.Core: return coreModule;
+            case BrainModuleID.Communication: return communicationModule;
+            case BrainModuleID.EnvironmentSensors: return environmentModule;
+            case BrainModuleID.FoodSensors: return foodModule;
+            case BrainModuleID.FriendSensors: return friendModule;
+            case BrainModuleID.ThreatSensors: return threatsModule;
+            case BrainModuleID.Movement: return movementModule;
+            default: return null;
+        }
+    }
+    /*public void MapNeuronToModule(NID nid, Neuron neuron) {
         // Hidden nodes
         if (nid.moduleID == BrainModuleID.Undefined) {
-            neuron.currentValue = new float[1];
-            neuron.neuronType = NeuronType.Hid;
-            neuron.previousValue = 0f;
+            neuron.SetHidden();
         }
         // In/Out nodes
         else {  
@@ -307,7 +328,7 @@ public class Agent : MonoBehaviour {
             movementModule.MapNeuron(nid, neuron);
             threatsModule.MapNeuron(nid, neuron);
         }
-    }
+    }*/
         
     public void ResetBrainState() {
         brain.ResetBrainState();
@@ -1337,8 +1358,10 @@ public class Agent : MonoBehaviour {
         curLifeStage = AgentLifeStage.Egg;
         parentEggSackRef = parentEggSack;
                 
-        ResetStartingValues();       
-        InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
+        ResetStartingValues();    
+        
+        // Modules need to be created first so that Brain can map its neurons to existing modules    
+        InitializeModules(genome);       
 
         Vector3 spawnOffset = 0.167f * parentEggSack.curSize.magnitude * Random.insideUnitSphere;
         spawnOffset.z = 0f;

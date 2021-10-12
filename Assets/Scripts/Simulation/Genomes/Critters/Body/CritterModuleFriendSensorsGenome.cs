@@ -27,8 +27,31 @@ public class CritterModuleFriendSensorsGenome
         useDir = RandomStatics.CoinToss();
     }
     
-    List<NeuronGenome> neuronList;
+    List<NeuronGenome> masterList;
+    public void AppendModuleNeuronsToMasterList(List<NeuronGenome> masterList)
+    {
+        this.masterList = masterList;
+        
+        if (usePos) 
+        {
+            AddNeuron("friendPosX");
+            AddNeuron("friendPosY");
+        }
+        if (useVel) 
+        {
+            AddNeuron("friendVelX");
+            AddNeuron("friendVelY");
+        }
+        if (useDir) 
+        {
+            AddNeuron("friendDirX");
+            AddNeuron("friendDirY");
+        }
+    }
+    
+    void AddNeuron(string name) { masterList.Add(map.GetData(name)); }
 
+    /*List<NeuronGenome> neuronList;
     public void AppendModuleNeuronsToMasterList(List<NeuronGenome> neuronList) {
         this.neuronList = neuronList;
 
@@ -52,7 +75,7 @@ public class CritterModuleFriendSensorsGenome
         }
     }
     
-    void AddNeuron(string name) { neuronList.Add(map.GetGenome(name)); }
+    void AddNeuron(string name) { neuronList.Add(map.GetGenome(name)); }*/
 
     public void SetToMutatedCopyOfParentGenome(CritterModuleFriendSensorsGenome parentGenome, MutationSettingsInstance settings) {
         usePos = RequestMutation(settings, parentGenome.usePos);

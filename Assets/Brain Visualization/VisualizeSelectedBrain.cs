@@ -21,10 +21,10 @@ public class VisualizeSelectedBrain : MonoBehaviour
     
     void RefreshAgent(Agent agent)
     {
-        neurons = agent.brain.neuronList;
-        axons = agent.brain.axonList;
+        neurons = agent.brain.neurons;
+        axons = agent.brain.axons;
         
-        //Debug.Log($"Selected agent brain has {neurons.Count} neurons and {axons.Count} axons");
+        Debug.Log($"Selected agent brain has {neurons.Count} neurons and {axons.Count} axons");
         var sockets = CreateSockets();
         visualization.Initialize(neurons, axons, ref sockets, inputNeurons.Count, outputNeurons.Count);
     }

@@ -13,9 +13,10 @@ public class HistoryPanelUI : MonoBehaviour
     public Button buttonToggleGraphMode;
     public Button buttonSelCreatureEventsLink;
     public Button buttonBack;
-
-    private List<SpeciesIconUI> speciesIconsList;  // keeping track of spawned buttons
-    private List<CreatureEventIconUI> creatureEventIconsList;
+    
+    // keeps track of spawned buttons
+    private List<SpeciesIconUI> speciesIconsList = new List<SpeciesIconUI>();  
+    private List<CreatureEventIconUI> creatureEventIconsList = new List<CreatureEventIconUI>();
     //private List<CreatureIconUI> creatureIconsList;
 
     TheCursorCzar theCursorCzar => TheCursorCzar.instance;
@@ -65,11 +66,13 @@ public class HistoryPanelUI : MonoBehaviour
         CreatureTimeline
     }
 
+    // * WPP: just make the variable public
     private HistoryPanelMode curPanelMode;
 
     public HistoryPanelMode GetCurPanelMode() {
         return curPanelMode;
     }
+    
     public void SetCurPanelMode(HistoryPanelMode mode) {
         curPanelMode = mode;
     }
@@ -78,6 +81,7 @@ public class HistoryPanelUI : MonoBehaviour
         public Vector3 worldPos;
         public Vector4 color;
     }
+    
     public ComputeBuffer worldTreeLineDataCBuffer;
     private int worldTreeNumPointsPerLine = 128;    
     private int worldTreeNumSpeciesLines = 32;
@@ -95,12 +99,7 @@ public class HistoryPanelUI : MonoBehaviour
     public bool isGraphMode;
 
     // How to sync rendered geo with UI buttons???
-    
-    public void Awake() {
-        speciesIconsList = new List<SpeciesIconUI>();
-        creatureEventIconsList = new List<CreatureEventIconUI>();
-    }
-    
+
     void Start() {
         uiManagerRef.OnAgentSelected += RefreshFocusedAgent;
     }

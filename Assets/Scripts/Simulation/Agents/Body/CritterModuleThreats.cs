@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
 
-public class CritterModuleThreats 
+public class CritterModuleThreats : IBrainModule
 {
     Lookup lookup => Lookup.instance;
     NeuralMap neuralMap => lookup.neuralMap;
 
     public int parentID;
-    BrainModuleID moduleID;
+    public BrainModuleID moduleID { get; private set; }
 
     public float[] enemyPosX;
     public float[] enemyPosY;
@@ -40,13 +40,20 @@ public class CritterModuleThreats
         parentID = genome.parentID;
         moduleID = genome.moduleID; 
     }
+    
+    public void MapNeuron(MetaNeuron data, Neuron neuron)
+    {
+        if (moduleID != data.moduleID) return;
+        neuron.currentValue = GetNeuralValue(data.id);
+        //neuron.neuronType = data.io;
+    }
 
-    public void MapNeuron(NID nid, Neuron neuron) 
+    /*public void MapNeuron(NID nid, Neuron neuron) 
     {
         if (moduleID != nid.moduleID) return;
         neuron.currentValue = GetNeuralValue(nid.neuronID);
         neuron.neuronType = neuralMap.GetIO(nid.neuronID);
-    }
+    }*/
     
     float[] GetNeuralValue(int neuronID)
     {

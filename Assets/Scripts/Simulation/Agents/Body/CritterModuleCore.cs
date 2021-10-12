@@ -1,14 +1,14 @@
 ﻿using UnityEngine;
 
 [System.Serializable] // Temporary for debug purposes (view in inspector)
-public class CritterModuleCore 
+public class CritterModuleCore : IBrainModule
 {
     SettingsManager settings => SettingsManager.instance;
     Lookup lookup => Lookup.instance;
     NeuralMap neuralMap => lookup.neuralMap;
 
     public int parentID;
-    BrainModuleID moduleID => genome.moduleID;
+    public BrainModuleID moduleID => genome.moduleID;
 
     // **** LOOK INTO::: close in its own class or store in bigger array rather than all individual length-one arrays? 
     public float[] bias;
@@ -190,12 +190,19 @@ public class CritterModuleCore
         energyBonus = Mathf.Lerp(0.75f, 1.5f, talentSpecUtilityNorm);
     }
     
-    public void MapNeuron(NID nid, Neuron neuron) 
+    public void MapNeuron(MetaNeuron data, Neuron neuron)
+    {
+        if (moduleID != data.moduleID) return;
+        neuron.currentValue = GetNeuralValue(data.id);
+        //neuron.neuronType = data.io;
+    }
+    
+    /*public void MapNeuron(NID nid, Neuron neuron) 
     {
         if (moduleID != nid.moduleID) return;
         neuron.neuronType = neuralMap.GetIO(nid.neuronID);    
         neuron.currentValue = GetNeuralValue(nid.neuronID);
-    }
+    }*/
     
     float[] GetNeuralValue(int neuronID)
     {

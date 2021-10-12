@@ -39,11 +39,8 @@ public class SpeciesGraphPanelUI : MonoBehaviour
         DigestSpec
     }
 
-    
-
-
-    void Start () {
-        
+    void Start () 
+    {
         if (statsSpeciesColorKey == null) {
             statsSpeciesColorKey = new Texture2D(maxDisplaySpecies, 1, TextureFormat.ARGB32, false);
             statsSpeciesColorKey.filterMode = FilterMode.Point;
