@@ -1,13 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class CreatureEventIconUI : MonoBehaviour
 {
-    UIManager uiManagerRef => UIManager.instance;
-
-    public int index = -1;
     public Image imageBG;
     public TooltipUI tooltip;
     public Vector2 targetCoords; // UI canvas
@@ -17,36 +12,36 @@ public class CreatureEventIconUI : MonoBehaviour
     //public bool isSelected = false;
     [SerializeField]
     public Color[] eventTypeColors;
+    
+    public void OnCreate(Transform anchor)
+    {
+        transform.SetParent(anchor, false);
+        transform.localPosition = Vector3.zero;
+        gameObject.SetActive(false);
+    }
 
-    public void UpdateIconPrefabData(CandidateAgentData.CandidateEventData data, int eventIndex) {
-        index = eventIndex;
+    public void UpdateIconPrefabData(CandidateAgentData.CandidateEventData data, int eventIndex) 
+    {
         eventData = data;
         tooltip.tooltipString = eventData.eventText;
-        
     }
-    public void SetTargetCoords(Vector2 newCoords) {
+    
+    public void SetTargetCoords(Vector2 newCoords) 
+    {
         //targetCoords = new Vector2((float)eventIndex / 32f + 0.1f, 0.5f);
         targetCoords = newCoords;
     }
 
-    public void Clicked() {
-        
-    }
+    public void Clicked() { }
 
+    /// Set position and color
     public void SetDisplay()
     {        
-        // POSITION
         currentCoords = Vector2.Lerp(currentCoords, targetCoords, 0.75f);
-
         gameObject.transform.localPosition = new Vector3(currentCoords.x * (float)HistoryPanelUI.GetPanelSizePixels(), currentCoords.y * (float)HistoryPanelUI.GetPanelSizePixels(), 0f);
-        
-        if(eventTypeColors != null) {
-            imageBG.color = eventTypeColors[this.eventData.type];
-        }
-        else {
-            imageBG.color = Color.Lerp(Color.red, Color.green, eventData.goodness);
-        }
-        
-        
+        imageBG.color = eventTypeColors == null ? Color.Lerp(Color.red, Color.green, eventData.goodness) : eventTypeColors[eventData.type];
     }
+    
+    public bool flaggedForDestruction;
+    void OnDestroy() { flaggedForDestruction = true; }
 }

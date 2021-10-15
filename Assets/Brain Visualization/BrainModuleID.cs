@@ -27,7 +27,15 @@ public enum BrainIconID
     Internal,
     Contact,
     InCommunication,
-    OutCommunication,
+    OutCommunication0,
+    OutCommunication1,
+    OutCommunication2,
+    OutCommunication3,
+    Attack,
+    Bite,
+    Dash,
+    Guard,
+    Rest,
 }
 
 public enum NeuronType {

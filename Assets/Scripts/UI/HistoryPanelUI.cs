@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class HistoryPanelUI : MonoBehaviour
 {
-    public GameObject anchorGO;
+    public Transform anchor;
     public GameObject prefabSpeciesIcon;
     public GameObject prefabCreatureIcon;
     public GameObject prefabCreatureEventIconUI;
@@ -15,8 +15,8 @@ public class HistoryPanelUI : MonoBehaviour
     public Button buttonBack;
     
     // keeps track of spawned buttons
-    private List<SpeciesIconUI> speciesIconsList = new List<SpeciesIconUI>();  
-    private List<CreatureEventIconUI> creatureEventIconsList = new List<CreatureEventIconUI>();
+    private List<SpeciesIconUI> speciesIcons = new List<SpeciesIconUI>();  
+    private List<CreatureEventIconUI> creatureEventIcons = new List<CreatureEventIconUI>();
     //private List<CreatureIconUI> creatureIconsList;
 
     TheCursorCzar theCursorCzar => TheCursorCzar.instance;
@@ -119,44 +119,41 @@ public class HistoryPanelUI : MonoBehaviour
         }
     }
     
-    private void CreateCreatureEventIcon() 
-    {
-        GameObject icon = Instantiate(prefabCreatureEventIconUI, Vector3.zero, Quaternion.identity);
-        icon.transform.SetParent(anchorGO.transform, false);
-        icon.transform.localPosition = Vector3.zero;
-        CreatureEventIconUI iconScript = icon.GetComponent<CreatureEventIconUI>();
-        
-        icon.gameObject.SetActive(false);
-        creatureEventIconsList.Add(iconScript);
+    private void CreateCreatureEventIcon() {
+        var icon = Instantiate(prefabCreatureEventIconUI).GetComponent<CreatureEventIconUI>();
+        icon.OnCreate(anchor);
+        creatureEventIcons.Add(icon);
     }
     
     private void UpdateCreatureEventIcons(CandidateAgentData candidate) {
-        if (creatureEventIconsList.Count == 0 || candidate.candidateEventDataList.Count == 0) return;
-
-        for (int i = 0; i < creatureEventIconsList.Count; i++) {
+        if (creatureEventIcons.Count == 0 || candidate.candidateEventDataList.Count == 0) return;
+        
+        ClearDeadCreatureEventIcons();
+        
+        for (int i = 0; i < creatureEventIcons.Count; i++) {
             if(curPanelMode == HistoryPanelMode.CreatureTimeline) {
                 var active = i < candidate.candidateEventDataList.Count;
             
-                creatureEventIconsList[i].gameObject.SetActive(active);
+                creatureEventIcons[i].gameObject.SetActive(active);
 
                 if (active) {
                     Vector2 eventCoords = Vector2.zero;
                     eventCoords.x = (float)(candidate.candidateEventDataList[i].eventFrame - candidate.performanceData.timeStepHatched) / (float)(simManager.simAgeTimeSteps - candidate.performanceData.timeStepHatched);
                     eventCoords.x = eventCoords.x * displayWidth + marginLeft;
                     eventCoords.y = (1f - ( (float)candidate.candidateEventDataList[i].type / 12f)) * displayHeight + marginBottom;
-                    creatureEventIconsList[i].UpdateIconPrefabData(candidate.candidateEventDataList[i], i);
-                    creatureEventIconsList[i].SetTargetCoords(eventCoords);
-                    creatureEventIconsList[i].SetDisplay();
+                    creatureEventIcons[i].UpdateIconPrefabData(candidate.candidateEventDataList[i], i);
+                    creatureEventIcons[i].SetTargetCoords(eventCoords);
+                    creatureEventIcons[i].SetDisplay();
                 }
             }
             else {
-                creatureEventIconsList[i].gameObject.SetActive(false); // hide icons when not on that screen
+                // Hide icons when not on that screen
+                creatureEventIcons[i].gameObject.SetActive(false); 
             }
         } 
     }
     
-    public void RefreshFocusedAgent(Agent agent)
-    {
+    public void RefreshFocusedAgent(Agent agent) {
         RefreshFocusedAgent(selectionManager.IsFocus(agent.candidateRef));
     }
     
@@ -264,7 +261,6 @@ public class HistoryPanelUI : MonoBehaviour
 
                         data.worldPos = new Vector3(xCoord, yCoord, zCoord);
                         data.color = new Color(hue.x, hue.y, hue.z, alpha);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
-
                     }
                     else {
                         // LINEAGE:
@@ -299,7 +295,6 @@ public class HistoryPanelUI : MonoBehaviour
                         }
                         data.worldPos = new Vector3(xCoord, yCoord, zCoord);
                     }
-                    
                 }
                 
                 if (curPanelMode == HistoryPanelMode.SpeciesPopulation || curPanelMode == HistoryPanelMode.CreatureTimeline) {
@@ -392,11 +387,12 @@ public class HistoryPanelUI : MonoBehaviour
 
     private void CreateSpeciesIcon(SpeciesGenomePool pool) 
     {
-        AgentGenome templateGenome = masterGenomePool.completeSpeciesPoolsList[pool.speciesID].leaderboardGenomesList[0].candidateGenome; //.bodyGenome.coreGenome.name;
+        AgentGenome templateGenome = masterGenomePool.completeSpeciesPoolsList[pool.speciesID].leaderboardGenomesList[0].candidateGenome; 
         Color color = new Color(templateGenome.bodyGenome.appearanceGenome.huePrimary.x, templateGenome.bodyGenome.appearanceGenome.huePrimary.y, templateGenome.bodyGenome.appearanceGenome.huePrimary.z);
 
-        GameObject obj = Instantiate(prefabSpeciesIcon, new Vector3(0f, 0f, 0f), Quaternion.identity);
-        obj.transform.SetParent(anchorGO.transform, false);
+        // WPP: moved to SpeciesIconUI.Initialize
+        /*GameObject obj = Instantiate(prefabSpeciesIcon, new Vector3(0f, 0f, 0f), Quaternion.identity);
+        obj.transform.SetParent(anchor.transform, false);
         obj.transform.localPosition = Vector3.zero;
         obj.transform.localScale = new Vector3(1f, 1f, 1f);
         obj.GetComponent<Image>().color = color;
@@ -405,27 +401,24 @@ public class HistoryPanelUI : MonoBehaviour
         labelText += "[" + pool.speciesID + "]";// " + masterGenomePool.completeSpeciesPoolsList[pool.speciesID].foundingCandidate.candidateGenome.bodyGenome.coreGenome.name;
 
         obj.GetComponentInChildren<Text>().text = labelText;
-        SpeciesIconUI iconScript = obj.GetComponent<SpeciesIconUI>();
-        speciesIconsList.Add(iconScript);
-
-        iconScript.Initialize(speciesIconsList.Count - 1, masterGenomePool.completeSpeciesPoolsList[pool.speciesID]);
- 
+        SpeciesIconUI iconScript = obj.GetComponent<SpeciesIconUI>();*/
+        var icon = Instantiate(prefabSpeciesIcon).GetComponent<SpeciesIconUI>();
+        icon.Initialize(speciesIcons.Count - 1, masterGenomePool.completeSpeciesPoolsList[pool.speciesID], anchor, color);
+        speciesIcons.Add(icon);
     }
     
     public void InitializeSpeciesIcons() {
-        //Debug.Log("InitializeSpeciesListBars");
+        Debug.Log("InitializeSpeciesListBars");
         int numSpecies = masterGenomePool.completeSpeciesPoolsList.Count;
-
-        foreach (Transform child in anchorGO.transform) { // clear all GO's
-            if(child.GetComponent<SpeciesIconUI>()) {
-                Destroy(child.gameObject);
-            }
-        }
+        
+        foreach (var icon in speciesIcons)
+            Destroy(icon.gameObject);
+            
+        speciesIcons.Clear();
 
         for (int s = 0; s < numSpecies; s++) {
             int speciesID = s;
             int parentSpeciesID = masterGenomePool.completeSpeciesPoolsList[speciesID].parentSpeciesID;
-
             CreateSpeciesIcon(masterGenomePool.completeSpeciesPoolsList[speciesID]);
         }
     }
@@ -448,7 +441,6 @@ public class HistoryPanelUI : MonoBehaviour
             }
         }
         else {
-            
             selectionManager.SetSelectedSpeciesUI(iconUI.speciesID);
             uiManagerRef.speciesOverviewUI.RebuildGenomeButtons();
         }
@@ -458,9 +450,7 @@ public class HistoryPanelUI : MonoBehaviour
         isGraphMode = !isGraphMode;
     }
     
-    public void ClickButtonToggleExtinct() {
-        
-    }
+    public void ClickButtonToggleExtinct() { }
     
     public void ClickButtonBack() {
         if(curPanelMode == HistoryPanelMode.CreatureTimeline) {
@@ -479,7 +469,8 @@ public class HistoryPanelUI : MonoBehaviour
         curPanelMode = HistoryPanelMode.CreatureTimeline;
     }
     
-    public void Tick() {
+    public void Tick() 
+    {
         textPanelStateDebug.text = "MODE: " + selectionManager.selectedSpeciesID + selectionManager.focusedCandidate.speciesID;
         buttonToggleExtinct.gameObject.SetActive(false);
         float targetStartTimeStep = 0f;
@@ -488,20 +479,18 @@ public class HistoryPanelUI : MonoBehaviour
         buttonBack.gameObject.SetActive(false);
         buttonSelCreatureEventsLink.gameObject.SetActive(false);
         tempPanelLifeEvents.gameObject.SetActive(false);
-        if(curPanelMode == HistoryPanelMode.AllSpecies) {
+        
+        if (curPanelMode == HistoryPanelMode.AllSpecies) 
+        {
             buttonToggleGraphMode.gameObject.SetActive(true);
             //buttonToggleExtinct.gameObject.SetActive(true);
             if (isGraphMode) {
                 UpdateSpeciesIconsGraphMode();
                 targetStartTimeStep = simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[0]].timeStepCreated;
-                
-                
                 tempPanelGraph.SetActive(true);
             }
             else {
                 UpdateSpeciesIconsLineageMode();
-                
-                
             }
         }
         else if(curPanelMode == HistoryPanelMode.SpeciesPopulation) {
@@ -511,7 +500,6 @@ public class HistoryPanelUI : MonoBehaviour
             //buttonToggleExtinct.gameObject.SetActive(false);
             buttonToggleGraphMode.gameObject.SetActive(false);
             buttonSelCreatureEventsLink.gameObject.SetActive(true);
-
         }
         else if(curPanelMode == HistoryPanelMode.CreatureTimeline) {
             tempPanelSpeciesPop.SetActive(false);
@@ -523,12 +511,14 @@ public class HistoryPanelUI : MonoBehaviour
             tempPanelLifeEvents.gameObject.SetActive(true);
             buttonSelCreatureEventsLink.gameObject.SetActive(false);
         }
+        
+        ClearDeadSpeciesIcons();
 
-        foreach (var icon in speciesIconsList) {
+        foreach (var icon in speciesIcons) {
             bool isSelected = false;
             if (icon.speciesID == selectionManager.selectedSpeciesID) {
                 isSelected = true;
-                icon.gameObject.transform.SetAsLastSibling();
+                icon.transform.SetAsLastSibling();
             }
             icon.UpdateSpeciesIconDisplay(panelSizePixels, isSelected);
         }
@@ -544,29 +534,29 @@ public class HistoryPanelUI : MonoBehaviour
     }
     
     private void UpdateSpeciesIconsLineageMode() {        
-        for (int s = 0; s < speciesIconsList.Count; s++) {            
-            float yCoord = 1f - (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);  
+        for (int s = 0; s < speciesIcons.Count; s++) {            
+            float yCoord = 1f - (float)s / Mathf.Max(speciesIcons.Count - 1, 1f);  
             float xCoord = 1f;
-            if (speciesIconsList[s].linkedPool.isExtinct) {
-                xCoord = (float)speciesIconsList[s].linkedPool.timeStepExtinct / Mathf.Max(1f, (float)simManager.simAgeTimeSteps);
+            if (speciesIcons[s].linkedPool.isExtinct) {
+                xCoord = (float)speciesIcons[s].linkedPool.timeStepExtinct / Mathf.Max(1f, (float)simManager.simAgeTimeSteps);
             }
 
             //float indent = 0.05f;           
-
             xCoord = xCoord * displayWidth + marginLeft;
             yCoord = yCoord * displayHeight + marginBottom;
-            speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
+            speciesIcons[s].SetTargetCoords(new Vector2(xCoord, yCoord));
         }
     }
     
     private void UpdateSpeciesIconsGraphMode() {
-        if (speciesIconsList[0].linkedPool.avgCandidateDataYearList.Count < 1) {
+        if (speciesIcons[0].linkedPool.avgCandidateDataYearList.Count < 1) {
             UpdateSpeciesIconsDefault();
             return;
         }
+        
         float bestScore = 0f;
-        for (int s = 0; s < speciesIconsList.Count; s++) {
-            SpeciesGenomePool pool = speciesIconsList[s].linkedPool;
+        foreach (var icon in speciesIcons) {
+            SpeciesGenomePool pool = icon.linkedPool;
             float valStat = (float)pool.avgCandidateDataYearList[pool.avgCandidateDataYearList.Count - 1].performanceData.totalTicksAlive;
 
             if(valStat > bestScore) {
@@ -575,9 +565,9 @@ public class HistoryPanelUI : MonoBehaviour
         }
 
         // SORT
-        for (int s = 0; s < speciesIconsList.Count; s++) {
-            SpeciesGenomePool pool = speciesIconsList[s].linkedPool;
-            float valStat = (float)pool.avgCandidateDataYearList[pool.avgCandidateDataYearList.Count - 1].performanceData.totalTicksAlive;
+        foreach (var icon in speciesIcons) {
+            SpeciesGenomePool pool = icon.linkedPool;
+            float valStat = pool.avgCandidateDataYearList[pool.avgCandidateDataYearList.Count - 1].performanceData.totalTicksAlive;
 
             float xCoord = 1f;
             if (pool.isExtinct) {
@@ -587,46 +577,48 @@ public class HistoryPanelUI : MonoBehaviour
             if(bestScore == 0f) {
                 bestScore = 1f;
             }
+            
             float yCoord = Mathf.Clamp01(valStat / bestScore);
-            
             xCoord = xCoord * displayWidth + marginLeft;
             yCoord = yCoord * displayHeight + marginBottom;
-            speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
-            
+            icon.SetTargetCoords(new Vector2(xCoord, yCoord));
         }
     }
     
+    /// Simple list, evenly spaced 
     private void UpdateSpeciesIconsDefault() {
-        for (int s = 0; s < speciesIconsList.Count; s++) {        // simple list, evenly spaced    
-            float xCoord = 1f;
-            
-            float yCoord = (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);      
-            
-            xCoord = xCoord * displayWidth + marginLeft;
+        for (int s = 0; s < speciesIcons.Count; s++) {           
+            float yCoord = (float)s / Mathf.Max(speciesIcons.Count - 1, 1f);
+            float xCoord = displayWidth + marginLeft;
             yCoord = yCoord * displayHeight + marginBottom;
-            speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
+            speciesIcons[s].SetTargetCoords(new Vector2(xCoord, yCoord));
         }
     }
     
+    /// Simple list, evenly spaced 
     private void UpdateSpeciesIconsSinglePop() {
-        for (int s = 0; s < speciesIconsList.Count; s++) {        // simple list, evenly spaced    
+        foreach (var icon in speciesIcons) {         
+            // DEFAULTS
             float xCoord = -0.2f;
-            float yCoord = 0.2f;// (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);   // DEFAULTS
+            float yCoord = 0.2f;// (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);   
 
             int prevSpeciesIndex = selectionManager.selectedSpeciesID - 1;
             if (prevSpeciesIndex < 0) prevSpeciesIndex = masterGenomePool.completeSpeciesPoolsList.Count - 1;
             int nextSpeciesIndex = selectionManager.selectedSpeciesID + 1;
             if (nextSpeciesIndex >= masterGenomePool.completeSpeciesPoolsList.Count) nextSpeciesIndex = 0;
 
-            if (speciesIconsList[s].linkedPool.speciesID == prevSpeciesIndex) {  // CYCLE PREV SPECIES
+            // CYCLE PREV SPECIES
+            if (icon.linkedPool.speciesID == prevSpeciesIndex) {  
                 xCoord = 0f;
                 yCoord = 1f;
             }
-            if (speciesIconsList[s].linkedPool.speciesID == selectionManager.selectedSpeciesID) {   // SELECTED
+            // SELECTED
+            if (icon.linkedPool.speciesID == selectionManager.selectedSpeciesID) {   
                 xCoord = 0f;
                 yCoord = 0.5f;
             }
-            if (speciesIconsList[s].linkedPool.speciesID == nextSpeciesIndex) {   // CYCLE NEXT SPECIES
+            // CYCLE NEXT SPECIES
+            if (icon.linkedPool.speciesID == nextSpeciesIndex) {   
                 xCoord = 0f;
                 yCoord = 0f;
             }
@@ -634,22 +626,21 @@ public class HistoryPanelUI : MonoBehaviour
             xCoord = xCoord * displayWidth + marginLeft;
             yCoord = yCoord * displayHeight + marginBottom;
 
-            speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
+            icon.SetTargetCoords(new Vector2(xCoord, yCoord));
         }
-        //*** UPDATE CREATURE ICONS!!!!!! v v v
         
+        //*** UPDATE CREATURE ICONS!!!!!! v v v
         SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[selectionManager.selectedSpeciesID];
         int numAgentsDisplayed = 0;
-        for(int a = 0; a < pool.candidateGenomesList.Count; a++) {
-            if(pool.candidateGenomesList[a].isBeingEvaluated) {
+        foreach (var candidate in pool.candidateGenomesList) {
+            if(candidate.isBeingEvaluated) {
                 numAgentsDisplayed++;
             }
         }
         numAgentsDisplayed = Mathf.Max(numAgentsDisplayed, 1); // avoid divide by 0
         
-        for(int line = 0; line < worldTreeNumCreatureLines; line++) 
-        {            
-            
+        for (int line = 0; line < worldTreeNumCreatureLines; line++) 
+        {
             if (line >= pool.candidateGenomesList.Count) 
                 continue;
                             
@@ -661,11 +652,8 @@ public class HistoryPanelUI : MonoBehaviour
             Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary * 2f;
 
             int timeStepStart = Mathf.RoundToInt(timelineStartTimeStep);            
-            float xEnd = 1f;
             if(pool.isExtinct || cand.performanceData.timeStepDied > 1) {
-                xEnd = (float)(cand.performanceData.timeStepDied - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
-
-                xCoord = xEnd;
+                xCoord = (float)(cand.performanceData.timeStepDied - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
             }
             
             xCoord = xCoord * displayWidth + marginLeft;
@@ -676,12 +664,29 @@ public class HistoryPanelUI : MonoBehaviour
         }
     }
     
+    /// Simple list, evenly spaced
+    /// DEFAULTS
     private void UpdateSpeciesIconsCreatureEvents() {
-        for (int s = 0; s < speciesIconsList.Count; s++) {        // simple list, evenly spaced    
+        foreach (var icon in speciesIcons) {           
             float xCoord = 0f;            
-            float yCoord = 0f;   // DEFAULTS
-            speciesIconsList[s].SetTargetCoords(new Vector2(xCoord, yCoord));
+            float yCoord = 0f;   
+            icon.SetTargetCoords(new Vector2(xCoord, yCoord));
         }        
+    }
+    
+    // WPP: prevent attempts to access destroyed objects
+    void ClearDeadSpeciesIcons()
+    {
+        for (int i = speciesIcons.Count - 1; i >= 0; i--)
+            if (speciesIcons[i].flaggedForDestruction)
+                speciesIcons.Remove(speciesIcons[i]);
+    }
+    
+    void ClearDeadCreatureEventIcons()
+    {
+        for (int i = creatureEventIcons.Count - 1; i >= 0; i--)
+            if (creatureEventIcons[i].flaggedForDestruction)
+                creatureEventIcons.Remove(creatureEventIcons[i]);
     }
 
     private void OnDisable() {

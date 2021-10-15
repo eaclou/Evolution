@@ -24,7 +24,7 @@ public class VisualizeSelectedBrain : MonoBehaviour
         neurons = agent.brain.neurons;
         axons = agent.brain.axons;
         
-        Debug.Log($"Selected agent brain has {neurons.Count} neurons and {axons.Count} axons");
+        //Debug.Log($"Selected agent brain has {neurons.Count} neurons and {axons.Count} axons");
         var sockets = CreateSockets();
         visualization.Initialize(neurons, axons, ref sockets, inputNeurons.Count, outputNeurons.Count);
     }
@@ -39,17 +39,11 @@ public class VisualizeSelectedBrain : MonoBehaviour
         SortNeuronsByIO(neurons);
         
         SocketInitData[] sockets = new SocketInitData[neurons.Count];
-
-        //Debug.Log($"Of {neurons.Count} neurons, {inputNeurons.Count} are input and {outputNeurons.Count} are output");
-        AssignNeuralPositions(ref sockets, inputNeurons.Count, 0, 0f);
-        AssignNeuralPositions(ref sockets, outputNeurons.Count, inputNeurons.Count, 0f);
         
-        // *** Success!!! Now use this to assign position (instead of above method based on IO type)
-        //foreach (var neuron in neurons)
-        //    Debug.Log(neuron.moduleID);
-
+        for (int i = 0; i < neurons.Count; i++)
+            sockets[i].pos = placement.GetNeuronPosition(neurons[i]);
+        
         return sockets;
-        //return placement.AssignNeuralPositions(neurons);
     }
     
     void SortNeuronsByIO(List<Neuron> neurons)
@@ -61,16 +55,6 @@ public class VisualizeSelectedBrain : MonoBehaviour
         {
             var list = neuron.neuronType == NeuronType.In ? inputNeurons : outputNeurons;
             list.Add(neuron);
-        }
-    }
-    
-    // * Modify so arranged in concentric circles
-    void AssignNeuralPositions(ref SocketInitData[] data, int count, int offsetIndex, float zPosition)
-    {
-        for(int i = 0; i < count; i++) {
-            float x = 0.6f * i / count - 0.3f;
-            int tier = Random.Range(0, 5);
-            data[i + offsetIndex].pos = new Vector3(x, (tier - 2) * 0.12f, zPosition);
         }
     }
 }
