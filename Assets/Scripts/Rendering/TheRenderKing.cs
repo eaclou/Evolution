@@ -3093,7 +3093,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
     }
 }
 
-public struct TreeOfLifeSpeciesKeyData {
+public struct TreeOfLifeSpeciesKeyData 
+{
     public int timeCreated;
     public int timeExtinct;
     public Vector3 huePrimary;
@@ -3102,4 +3103,19 @@ public struct TreeOfLifeSpeciesKeyData {
     public float isOn;
     public float isExtinct;
     public float isSelected;
+    
+    public TreeOfLifeSpeciesKeyData(SpeciesGenomePool pool, float isSelected, Vector3 parentHue)
+    {
+        timeCreated = pool.timeStepCreated;  // Use TimeSteps instead of Years???
+        timeExtinct = pool.timeStepExtinct;
+        
+        var appearance = pool.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome;
+        huePrimary = appearance.huePrimary;
+        hueSecondary = appearance.hueSecondary;
+        this.parentHue = parentHue;
+        
+        isExtinct = pool.isExtinct ? 1f : 0f;
+        isOn = 1f;
+        this.isSelected = isSelected;
+    }
 }

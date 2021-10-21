@@ -662,7 +662,7 @@ public class BaronVonTerrain : RenderBaron
     }
 
     public void IncrementWorldRadius(float radius) {
-        Debug.Log("WorldRadius = " + _WorldRadius);
+        //Debug.Log("WorldRadius = " + _WorldRadius);
         _WorldRadius += radius;
     }
 

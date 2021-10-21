@@ -408,7 +408,7 @@ public class HistoryPanelUI : MonoBehaviour
     }
     
     public void InitializeSpeciesIcons() {
-        Debug.Log("InitializeSpeciesListBars");
+        //Debug.Log("InitializeSpeciesListBars");
         int numSpecies = masterGenomePool.completeSpeciesPoolsList.Count;
         
         foreach (var icon in speciesIcons)

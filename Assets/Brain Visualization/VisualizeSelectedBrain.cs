@@ -32,6 +32,7 @@ public class VisualizeSelectedBrain : MonoBehaviour
     List<Neuron> neurons = new List<Neuron>();
     List<Neuron> inputNeurons = new List<Neuron>();
     List<Neuron> outputNeurons = new List<Neuron>();
+    List<Neuron> hiddenNeurons = new List<Neuron>();
     List<Axon> axons = new List<Axon>();
     
     SocketInitData[] CreateSockets()
@@ -39,10 +40,21 @@ public class VisualizeSelectedBrain : MonoBehaviour
         SortNeuronsByIO(neurons);
         
         SocketInitData[] sockets = new SocketInitData[neurons.Count];
+
+        // Place input and output neurons before hidden neurons
+        // because hidden neurons are between connected input and output neurons.
+        int offset = 0;
+        for (int i = 0; i < inputNeurons.Count; i++)
+            sockets[i + offset].pos = placement.GetNeuronPosition(inputNeurons[i]);
+            
+        offset = inputNeurons.Count;
+        for (int i = 0; i < outputNeurons.Count; i++)
+            sockets[i + offset].pos = placement.GetNeuronPosition(outputNeurons[i]);
         
-        for (int i = 0; i < neurons.Count; i++)
-            sockets[i].pos = placement.GetNeuronPosition(neurons[i]);
-        
+        offset = inputNeurons.Count + outputNeurons.Count;
+        for (int i = 0; i < hiddenNeurons.Count; i++)
+            sockets[i + offset].pos = placement.GetHiddenNeuronPosition(hiddenNeurons[i]);
+
         return sockets;
     }
     
@@ -50,11 +62,16 @@ public class VisualizeSelectedBrain : MonoBehaviour
     {
         inputNeurons.Clear();
         outputNeurons.Clear();
+        hiddenNeurons.Clear();
     
         foreach (var neuron in neurons) 
         {
-            var list = neuron.neuronType == NeuronType.In ? inputNeurons : outputNeurons;
-            list.Add(neuron);
+            switch (neuron.neuronType)
+            {
+                case NeuronType.In: inputNeurons.Add(neuron); break;
+                case NeuronType.Out: outputNeurons.Add(neuron); break;
+                case NeuronType.Hidden: hiddenNeurons.Add(neuron); break;
+            }
         }
     }
 }

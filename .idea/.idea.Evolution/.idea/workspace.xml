@@ -2,13 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="64a03a69-0c33-4641-98d6-062c7a4ddd72" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/encodings.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.vs/Evolution/DesignTimeBuild/.dtbcache" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.vs/Evolution/v15/Server/sqlite3/db.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.vs/Evolution/v15/Server/sqlite3/storage.ide" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.vs/Evolution/v15/Server/sqlite3/storage.ide-shm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.vs/Evolution/v15/Server/sqlite3/storage.ide-wal" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/Music/Pond Water_Birth_D3_9.13.21.mp3.meta" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/Music/Pond-Water_AmbientTheme_A1_9.16.21.ogg.meta" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/Music/Pond-Water_Birth_D3_9.13.21.ogg.meta" beforeDir="false" />
@@ -36,34 +30,9 @@
       <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_11.ogg.meta" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/AudioAssets/SFX/Splashes/Splash_12.ogg.meta" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/BrainModuleID.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/BrainModuleID.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/PlaceNeuronsAtUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/PlaceNeuronsAtUI.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/VisualizeSelectedBrain.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/VisualizeSelectedBrain.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Attack.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Attack.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Contact Force X.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Contact Force X.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Contact Force Y.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Contact Force Y.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Contact.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Contact.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Dash.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Dash.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Defend.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Defend.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Feed.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Feed.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Heal.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Heal.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Hit Points.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Hit Points.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Mouth Trigger.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Mouth Trigger.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Stamina.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Stamina.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Stored Energy.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Stored Energy.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Stored Food.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Stored Food.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Environment/Depth.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Environment/Depth.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Environment/X Depth Gradient.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Environment/X Depth Gradient.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Environment/X Velocity.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Environment/X Velocity.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Environment/Y Depth Gradient.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Environment/Y Depth Gradient.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Environment/Y Velocity.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Environment/Y Velocity.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Movement/Dash.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Movement/Dash.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Movement/Facing X Direction.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Movement/Facing X Direction.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Movement/Facing Y Direction.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Movement/Facing Y Direction.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Movement/Own X Velocity.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Movement/Own X Velocity.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Movement/Own Y Velocity.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Movement/Own Y Velocity.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Movement/Throttle X.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Movement/Throttle X.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Movement/Throttle Y.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Movement/Throttle Y.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Bias.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Bias.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Materials/Critter/CritterDebugGenericStrokeMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Critter/CritterDebugGenericStrokeMat.mat" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Materials/Critter/EggCoverDisplayMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Critter/EggCoverDisplayMat.mat" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Materials/Critter/EggSackStrokeDisplayMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Critter/EggSackStrokeDisplayMat.mat" afterDir="false" />
@@ -91,17 +60,16 @@
       <change beforePath="$PROJECT_DIR$/Assets/Materials/UI/Timeline/SpeciesPoolGenomeMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/UI/Timeline/SpeciesPoolGenomeMat.mat" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Materials/Water/WaterNutrientsBitsDisplayMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Water/WaterNutrientsBitsDisplayMat.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/HistoryPanelUI.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/HistoryPanelUI.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/SpeciesIconUI.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/SpeciesIconUI.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Audio/AudioManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Audio/AudioManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Rendering/BaronVonTerrain.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Rendering/BaronVonTerrain.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/HistoryPanelUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/HistoryPanelUI.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/CreatureEventIconUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/CreatureEventIconUI.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/SpeciesIconUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/SpeciesIconUI.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Logs/Packages-Update.log" beforeDir="false" afterPath="$PROJECT_DIR$/Logs/Packages-Update.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/manifest.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/packages-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/packages-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/ProjectVersion.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ProjectVersion.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/TimeManager.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/TimeManager.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesGraphPanelUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesGraphPanelUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Textures/initial_fluid_color_mixed.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Textures/initial_fluid_color_mixed.png.meta" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -111,16 +79,35 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/Assets/Playcraft/_NEW/PurgeList.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/A5949084-5872-4118-9A97-4C7DF1839E1C/d8/f5549872/ComputeBuffer.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesOverviewUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/SpeciesIconUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/CreatureEventIconUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/HistoryPanelUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/PurgeList.cs" />
+      <option value="$PROJECT_DIR$/Assets/Brain Visualization/BrainModuleID.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/BaronVonTerrain.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/HistoryPanelUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Audio/AudioManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesGraphPanelUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" />
+      <option value="$PROJECT_DIR$/Assets/Brain Visualization/VisualizeSelectedBrain.cs" />
+      <option value="$PROJECT_DIR$/Assets/Brain Visualization/PlaceNeuronsAtUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1zTNdNxmhXfKtPgFd5OBwb2kNlz" />
@@ -171,7 +158,8 @@
       <option name="presentableId" value="Default" />
       <updated>1634168206191</updated>
       <workItem from="1634168210705" duration="1401000" />
-      <workItem from="1634276144678" duration="3709000" />
+      <workItem from="1634276144678" duration="4027000" />
+      <workItem from="1634847458945" duration="4443000" />
     </task>
     <servers />
   </component>

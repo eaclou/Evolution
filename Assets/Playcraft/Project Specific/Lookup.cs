@@ -22,6 +22,7 @@ public class Lookup : ScriptableObject
     [Header("Scriptable Objects")]
     public SimEventLookup simEvents;
     public NeuralMap neuralMap;
+    public MetaNeuron hiddenTemplate => neuralMap.hiddenTemplate;
 
     [Header("Colors")]
     public Color buttonActiveColor = new Color(1f, 1f, 1f, 1f);

@@ -1,11 +1,11 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using Playcraft;
 using UnityEngine;
 using UnityEngine.Audio;
 
-public class AudioManager : Singleton<AudioManager> {
-
+// * WPP: refactor to eliminate repetition
+public class AudioManager : Singleton<AudioManager> 
+{
     public AudioMixer masterAudioMixer;
 
     public GameObject menuMusicGroupGO;
@@ -36,6 +36,7 @@ public class AudioManager : Singleton<AudioManager> {
 
         return amplitude01;
     }
+    
     public void PlayCritterDeath(Vector2 pos) {
         float volume = GetSFXVolumeFromPos(pos);
         if(volume > 0.01f) {
@@ -43,6 +44,7 @@ public class AudioManager : Singleton<AudioManager> {
             audioSourceCritterDeath01.Play();
         }
     }
+    
     public void PlayCritterDamage(Vector2 pos) {
         float volume = GetSFXVolumeFromPos(pos);
         if (volume > 0.01f) {
@@ -50,6 +52,7 @@ public class AudioManager : Singleton<AudioManager> {
             audioSourceCritterDamage01.Play();
         }
     }
+    
     public void PlayCritterDash(Vector2 pos) {
         float volume = GetSFXVolumeFromPos(pos);
         if (volume > 0.01f) {
@@ -57,6 +60,7 @@ public class AudioManager : Singleton<AudioManager> {
             audioSourceCritterDash01.Play();
         }
     }
+    
     public void PlayCritterSpawn(Vector2 pos) {
         float volume = GetSFXVolumeFromPos(pos);
         if (volume > 0.01f) {
@@ -64,6 +68,7 @@ public class AudioManager : Singleton<AudioManager> {
             audioSourceCritterSpawn01.Play();
         }
     }
+    
     public void PlayCritterBite(Vector2 pos) {
         float volume = GetSFXVolumeFromPos(pos);
         if (volume > 0.01f) {
@@ -71,6 +76,7 @@ public class AudioManager : Singleton<AudioManager> {
             audioSourceCritterBite01.Play();
         }
     }
+    
     public void PlayCritterAttack(Vector2 pos) {
         float volume = GetSFXVolumeFromPos(pos);
         if (volume > 0.01f) {
@@ -78,6 +84,7 @@ public class AudioManager : Singleton<AudioManager> {
             audioSourceCritterAttack01.Play();
         }
     }
+    
     public void PlayCritterDefend(Vector2 pos) {
         float volume = GetSFXVolumeFromPos(pos);
         if (volume > 0.01f) {
@@ -87,7 +94,6 @@ public class AudioManager : Singleton<AudioManager> {
     }
 
     public void Tick() {
-
         //Check prograss of play:
         if(frameCounter > framesPerTrack) {
             PlayNextSong();
@@ -96,17 +102,19 @@ public class AudioManager : Singleton<AudioManager> {
 
         frameCounter++;
     }
+    
     private void PlayNextSong() {
         GetRandomSong().Play();
-        Debug.Log("PLAY SONG)");
+        //Debug.Log("PLAY SONG)");
     }
+    
     private AudioSource GetRandomSong() {
         if(soundtrackSources.Length == 0) {
             return null;
         }
 
         int numTracks = soundtrackSources.Length;
-        int randTrackIndex = UnityEngine.Random.Range(0, numTracks - 1);
+        int randTrackIndex = Random.Range(0, numTracks - 1);
 
         return soundtrackSources[randTrackIndex];
     }
@@ -118,6 +126,7 @@ public class AudioManager : Singleton<AudioManager> {
     public void SetPlayerSwimLoopVolume(float volume) {
         audioSourcePlayerSwimLoop.volume = volume;
     }
+    
     public void PlaySwimStart() {
         audioSourcePlayerSwimStart.Play();
     }
@@ -125,34 +134,40 @@ public class AudioManager : Singleton<AudioManager> {
     public void AdjustMasterVolume(float value) {
         masterAudioMixer.SetFloat("masterVol", Range01toDecibels(value));
     }
+    
     public void AdjustGameplayVolume(float value) {
         masterAudioMixer.SetFloat("gameplayVol", Range01toDecibels(value));
     }
+    
     public void AdjustMusicVolume(float value) {
         masterAudioMixer.SetFloat("musicVol", Range01toDecibels(value));
     }
+    
     public void AdjustEffectsVolume(float value) {
         masterAudioMixer.SetFloat("effectsVol", Range01toDecibels(value));
     }
+    
     public void AdjustAmbientVolume(float value) {
         masterAudioMixer.SetFloat("ambientVol", Range01toDecibels(value));
     }
 
     public void AdjustMenuVolume(float value) {
         masterAudioMixer.SetFloat("menuVol", Range01toDecibels(value));
-
         //Debug.Log("menuAudioLevel DB: " + Range01toDecibels(value).ToString());
     }
 
     public void TurnOnMenuAudioGroup() {
         menuMusicGroupGO.SetActive(true);
     }
+    
     public void TurnOffMenuAudioGroup() {
         menuMusicGroupGO.SetActive(false);
     }
+    
     public void TurnOnGameplayAudioGroup() {
         gameplayAudioGroupGO.SetActive(true);
     }
+    
     public void TurnOffGameplayAudioGroup() {
         gameplayAudioGroupGO.SetActive(false);
     }

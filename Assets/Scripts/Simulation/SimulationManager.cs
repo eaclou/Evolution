@@ -1384,14 +1384,13 @@ public class SimulationManager : Singleton<SimulationManager>
     QualitySettingId simulationComplexity => gameOptions.simulationComplexity;
     QualitySettingId fluidPhysicsQuality => gameOptions.fluidPhysicsQuality;
     
-    public void ApplyQualitySettings() {
-        
+    public void ApplyQualitySettings() 
+    {
         numAgents = qualitySettings.GetAgentCount(simulationComplexity);
         numEggSacks = qualitySettings.GetEggSackCount(simulationComplexity);
         numInitialHiddenNeurons = qualitySettings.GetHiddenNeuronCont(simulationComplexity);
         fluidManager.SetResolution(fluidPhysicsQuality);
-
-        Debug.Log("ApplyQualitySettings() numAgents: " + numAgents);
+        //Debug.Log("ApplyQualitySettings() numAgents: " + numAgents);
     }
     
     private void OnDisable() {

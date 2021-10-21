@@ -40,6 +40,6 @@ public enum BrainIconID
 
 public enum NeuronType {
     In,
-    Hid,
+    Hidden,
     Out
 }

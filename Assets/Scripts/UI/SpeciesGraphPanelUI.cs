@@ -38,27 +38,35 @@ public class SpeciesGraphPanelUI : MonoBehaviour
         Eaten,
         DigestSpec
     }
+    
+    // WPP: applied initialization check to prevent execution order errors
+    void Start() { Initialize(); }
 
-    void Start () 
+    bool initialized;
+    void Initialize() 
     {
-        if (statsSpeciesColorKey == null) {
+        if (initialized) return;
+        initialized = true;
+    
+        if (!statsSpeciesColorKey) {
             statsSpeciesColorKey = new Texture2D(maxDisplaySpecies, 1, TextureFormat.ARGB32, false);
             statsSpeciesColorKey.filterMode = FilterMode.Point;
             statsSpeciesColorKey.wrapMode = TextureWrapMode.Clamp;
         }
         
-        statsTreeOfLifeSpeciesTexArray = new Texture2D[16]; // start with 16 choosable stats
+        // Start with 16 choosable stats
+        statsTreeOfLifeSpeciesTexArray = new Texture2D[16];
 
         for (int i = 0; i < statsTreeOfLifeSpeciesTexArray.Length; i++) {
             Texture2D statsTexture = new Texture2D(maxDisplaySpecies, 1, TextureFormat.RGBAFloat, false);
             statsTexture.filterMode = FilterMode.Bilinear;
             statsTexture.wrapMode = TextureWrapMode.Clamp;
-
             statsTreeOfLifeSpeciesTexArray[i] = statsTexture;
         }
                 
         maxValuesStatArray = new float[16];
         minValuesStatArray = new float[16];
+        
         for (int i = 0; i < maxValuesStatArray.Length; i++) {
             maxValuesStatArray[i] = 0.000001f;
             minValuesStatArray[i] = 1000000f;
@@ -69,8 +77,10 @@ public class SpeciesGraphPanelUI : MonoBehaviour
         selectedGraphCategory = (GraphCategory)buttonID;       
         UpdateSpeciesTreeDataTextures(simulationManager.curSimYear);        
     }
-    public void UpdateSpeciesTreeDataTextures(int year) {  // refactor using year?
-        //Debug.Log("WOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO " + year.ToString());
+    
+    public void UpdateSpeciesTreeDataTextures(int year) {
+        Initialize();
+      
         int numActiveSpecies = masterGenomePool.currentlyActiveSpeciesIDList.Count;
         int numTotalSpecies = masterGenomePool.completeSpeciesPoolsList.Count;
 
@@ -81,23 +91,29 @@ public class SpeciesGraphPanelUI : MonoBehaviour
         TreeOfLifeSpeciesKeyData[] speciesKeyDataArray = new TreeOfLifeSpeciesKeyData[32];
 
          // Get Active ones first:
-        for(int i = 0; i < masterGenomePool.currentlyActiveSpeciesIDList.Count; i++) {
+        for (int i = 0; i < masterGenomePool.currentlyActiveSpeciesIDList.Count; i++) 
+        {
             SpeciesGenomePool pool = masterGenomePool.completeSpeciesPoolsList[masterGenomePool.currentlyActiveSpeciesIDList[i]];
             SpeciesGenomePool parentPool;
             Vector3 parentHue = Vector3.one;
-            if(pool.parentSpeciesID != -1) {
+            if(pool.parentSpeciesID != -1) 
+            {
                 parentPool = masterGenomePool.completeSpeciesPoolsList[pool.parentSpeciesID];
                 parentHue = parentPool.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
             }
             Vector3 huePrimary = pool.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-            Vector3 hueSecondary = pool.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
             
-            statsSpeciesColorKey.SetPixel(i, 1, new Color(huePrimary.x, huePrimary.y, huePrimary.z));            
+            statsSpeciesColorKey?.SetPixel(i, 1, new Color(huePrimary.x, huePrimary.y, huePrimary.z)); 
+                       
             //Debug.Log("(" + i.ToString() + ", " + gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[i].ToString());
             displaySpeciesIndicesArray[i] = masterGenomePool.currentlyActiveSpeciesIDList[i];
 
-            TreeOfLifeSpeciesKeyData keyData = new TreeOfLifeSpeciesKeyData();
-            keyData.timeCreated = pool.timeStepCreated;  // Use TimeSteps instead of Years???
+            var isSelected = selectionManager.selectedSpeciesID == masterGenomePool.currentlyActiveSpeciesIDList[i] ? 1f : 0f;
+            TreeOfLifeSpeciesKeyData keyData = new TreeOfLifeSpeciesKeyData(pool, isSelected, parentHue);
+            
+            // WPP: use constructor
+            //Vector3 hueSecondary = pool.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
+            /*keyData.timeCreated = pool.timeStepCreated;  // Use TimeSteps instead of Years???
             keyData.timeExtinct = pool.timeStepExtinct;
             keyData.huePrimary = huePrimary;
             keyData.hueSecondary = hueSecondary;
@@ -105,27 +121,23 @@ public class SpeciesGraphPanelUI : MonoBehaviour
             keyData.isExtinct = pool.isExtinct ? 1f : 0f;
             keyData.isOn = 1f;
             //int selectedID = treeOfLifeManager.selectedID;
-            
-            keyData.isSelected = selectionManager.selectedSpeciesID == masterGenomePool.currentlyActiveSpeciesIDList[i] ? 1f : 0f;
+            keyData.isSelected = selectionManager.selectedSpeciesID == masterGenomePool.currentlyActiveSpeciesIDList[i] ? 1f : 0f;*/
 
             speciesKeyDataArray[i] = keyData;
         }
         
         // Then fill with most recently extinct:
-        for(int i = numTotalSpecies - 1; i > Mathf.Clamp((numTotalSpecies - maxDisplaySpecies), 0, numTotalSpecies); i--) {
+        for(int i = numTotalSpecies - 1; i > Mathf.Clamp(numTotalSpecies - maxDisplaySpecies, 0, numTotalSpecies); i--) 
+        {
             SpeciesGenomePool pool = masterGenomePool.completeSpeciesPoolsList[i];
 
-            SpeciesGenomePool parentPool;
-            if (pool.parentSpeciesID == -1) {
-                parentPool = pool; // whoa man...
-            }
-            else {
-                parentPool = masterGenomePool.completeSpeciesPoolsList[pool.parentSpeciesID];
-            }            
+            SpeciesGenomePool parentPool = pool.parentSpeciesID == -1 ? 
+                pool : masterGenomePool.completeSpeciesPoolsList[pool.parentSpeciesID];
 
             Vector3 huePrimary = pool.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
             Vector3 hueSecondary = pool.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
             Vector3 parentHue = parentPool.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+            
             if(masterGenomePool.completeSpeciesPoolsList[i].isExtinct) {
                 huePrimary = Vector3.zero;
             }
@@ -143,19 +155,7 @@ public class SpeciesGraphPanelUI : MonoBehaviour
             keyData.isOn = i >= masterGenomePool.completeSpeciesPoolsList.Count ||
                            pool.yearCreated == -1 || i == 0 ? 
                                 0f : 1f;
-            
-            // WPP: applied ternary
-            /*keyData.isOn = 1f;
-            if(i >= masterGenomePool.completeSpeciesPoolsList.Count) {
-                keyData.isOn = 0f;
-            }
-            if(pool.yearCreated == -1) {
-                keyData.isOn = 0f;
-            }
-            if(i == 0) {
-                keyData.isOn = 0f;
-            }*/
-            
+
             keyData.isSelected = selectionManager.selectedSpeciesID == i ? 1f : 0f;
 
             speciesKeyDataArray[i] = keyData;
@@ -167,61 +167,63 @@ public class SpeciesGraphPanelUI : MonoBehaviour
         // ========== data: =========== //
         int years = Mathf.Min(2048, year);  // cap textures at 2k for now?
         years = Mathf.Max(1, years);
+        
         // check for resize before doing it?
-        for(int i = 0; i < statsTreeOfLifeSpeciesTexArray.Length; i++) {
-            statsTreeOfLifeSpeciesTexArray[i].Resize(years, maxDisplaySpecies);
+        foreach (var texture in statsTreeOfLifeSpeciesTexArray) {
+            texture.Resize(years, maxDisplaySpecies);
         }
         
-        for(int i = 0; i < maxValuesStatArray.Length; i++) {
+        for (int i = 0; i < maxValuesStatArray.Length; i++) {
             maxValuesStatArray[i] = 0.0000001f;
             minValuesStatArray[i] = 1000000f;
         }
+        
         // for each year & each species, create 2D texture with fitness scores:
-        for(int s = 0; s < maxDisplaySpecies; s++) {            
-            
-            if(displaySpeciesIndicesArray[s] < masterGenomePool.completeSpeciesPoolsList.Count) {
-
+        for(int s = 0; s < maxDisplaySpecies; s++) 
+        {
+            if (displaySpeciesIndicesArray[s] < masterGenomePool.completeSpeciesPoolsList.Count) 
+            {
                 SpeciesGenomePool speciesPool = masterGenomePool.completeSpeciesPoolsList[displaySpeciesIndicesArray[s]];
-                if(speciesPool == null) {
-                    Debug.LogError("well, shit");
+                if (speciesPool == null) 
+                {
+                    Debug.LogError("speciesPool is null");
                 }
-                for(int t = 0; t < years; t++) {
-                
-                    //int index = t - speciesPool.yearCreated;
-                    
-                    for(int a = 0; a < statsTreeOfLifeSpeciesTexArray.Length; a++) {
+                for (int t = 0; t < years; t++) 
+                {
+                    for (int a = 0; a < statsTreeOfLifeSpeciesTexArray.Length; a++) 
+                    {
                         float valStat = 0f;
-                        if(speciesPool.avgCandidateDataYearList.Count > t) {
+                        if(speciesPool.avgCandidateDataYearList.Count > t) 
+                        {
                             valStat = (float)speciesPool.avgCandidateDataYearList[t].performanceData.totalTicksAlive; //0f;
                             //Debug.Log("valStat: " + valStat.ToString());
                         }
                         
-                        if(years > 15) {
+                        if(years > 15) 
+                        {
                             float time01 = (float)t / (float)years;
 
-                            if(time01 < 0.05f) {
-                                // **** Don't use first 5% of history towards stat range! ***
-                            }
-                            else {
+                            // Don't use first 5% of history towards stat range!
+                            if(time01 >= 0.05f) 
+                            {
                                 minValuesStatArray[a] = Mathf.Min(minValuesStatArray[a], valStat);                        
                                 maxValuesStatArray[a] = Mathf.Max(maxValuesStatArray[a], valStat);
                             }
                         }
-                        else {
+                        else 
+                        {
                             minValuesStatArray[a] = Mathf.Min(minValuesStatArray[a], valStat);                        
                             maxValuesStatArray[a] = Mathf.Max(maxValuesStatArray[a], valStat);
                         }
                         
-                        
-                                                
                         statsTreeOfLifeSpeciesTexArray[a].SetPixel(t, s, new Color(valStat, valStat, valStat, 1f));
                     }                    
                 }                
             }            
         }
         
-        for (int b = 0; b < statsTreeOfLifeSpeciesTexArray.Length; b++) {
-            statsTreeOfLifeSpeciesTexArray[b].Apply();
+        foreach (var texture in statsTreeOfLifeSpeciesTexArray) {
+            texture.Apply();
         }
         
         //RefreshGraphMaterial();        
