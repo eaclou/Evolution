@@ -8,8 +8,7 @@ using Playcraft;
 public class BrainGenome 
 {
     Lookup lookup => Lookup.instance;
-    NeuralMap neuralMap => lookup.neuralMap;
-    MetaNeuron hiddenTemplate => neuralMap.hiddenTemplate;
+    MetaNeuron hiddenTemplate => lookup.hiddenTemplate;
     
     public BrainGenome(BodyGenome bodyGenome, float initialConnectionDensity, int hiddenNeuronCount) 
     {

@@ -2,7 +2,8 @@
 using UnityEngine;
 using System.IO;
 
-[CreateAssetMenu(fileName = "GridSearchManager", menuName = "GridSearchManager", order = 1)]
+// * WPP: refactor if used -> break up functions, de-nest conditionals, etc.
+[CreateAssetMenu(fileName = "Grid Search Manager", menuName = "Pond Water/Grid Search Manager", order = 1)]
 public class GridSearchManager : ScriptableObject 
 {
     private MutationSettingsInstance settings;
@@ -37,9 +38,7 @@ public class GridSearchManager : ScriptableObject
 
     public bool isComplete = false;
 
-    public GridSearchManager() {
-        
-    }
+    public GridSearchManager() { }
 
     public int GetNumGens() {
         return numGens;
@@ -119,7 +118,7 @@ public class GridSearchManager : ScriptableObject
     }
 
     private void SaveResultsDataToFile() {
-        Debug.Log("storedResults.dataList.Count" + storedResults.dataList.Count.ToString());
+        Debug.Log("storedResults.dataList.Count" + storedResults.dataList.Count);
         // Choose Folder Name:
         string monthVar = System.DateTime.Now.Month.ToString();
         string dayVar = System.DateTime.Now.Day.ToString();
@@ -208,9 +207,7 @@ public class GridSearchManager : ScriptableObject
             File.Delete(pathResults);
         }
         System.IO.File.WriteAllText(pathResults, resultsString);
-
-
-
+        
         // Save Textures:
         // Texture Size:
         int pixels = 128;
@@ -248,14 +245,14 @@ public class GridSearchManager : ScriptableObject
                 }
             }
             tex.Apply();
-            string imageFilename = directory + "/" + "Graph" + i.ToString() + ".jpg";
+            string imageFilename = directory + "/" + "Graph" + i + ".jpg";
             System.IO.File.WriteAllBytes(imageFilename, tex.EncodeToJPG());            
         }
 
 
         // SAVE GENEPOOLS!!!
         for (int i = 0; i < storedResults.genePoolList.Count; i++) {
-            string saveNamePool = "GenePool_" + i.ToString();
+            string saveNamePool = "GenePool_" + i;
             string poolString = JsonUtility.ToJson(storedResults.genePoolList[i]);
             string pathPool = directory + "/" + saveNamePool + ".json";
             Debug.Log(pathPool);
@@ -288,11 +285,11 @@ public class GridSearchManager : ScriptableObject
             // trainingRunsScores:
             storedResults.trainingRunsScoreList.Add(avgRawScore);
             // Readout:
-            string txt = "Settings[" + (storedResults.trainingRunsScoreList.Count - 1).ToString() + "] Score: " + avgRawScore.ToString() +
-                         " A[" + coordA.ToString() + "]: " + storedResults.dataList[storedResults.dataList.Count - 1].dimensionA.ToString() +
-                         " B[" + coordB.ToString() + "]: " + storedResults.dataList[storedResults.dataList.Count - 1].dimensionB.ToString() +
-                         " C[" + coordC.ToString() + "]: " + storedResults.dataList[storedResults.dataList.Count - 1].dimensionC.ToString() +
-                         " D[" + coordD.ToString() + "]: " + storedResults.dataList[storedResults.dataList.Count - 1].dimensionD.ToString() + "";
+            string txt = "Settings[" + (storedResults.trainingRunsScoreList.Count - 1).ToString() + "] Score: " + avgRawScore +
+                         " A[" + coordA + "]: " + storedResults.dataList[storedResults.dataList.Count - 1].dimensionA +
+                         " B[" + coordB + "]: " + storedResults.dataList[storedResults.dataList.Count - 1].dimensionB +
+                         " C[" + coordC + "]: " + storedResults.dataList[storedResults.dataList.Count - 1].dimensionC +
+                         " D[" + coordD + "]: " + storedResults.dataList[storedResults.dataList.Count - 1].dimensionD + "";
             storedResults.readoutList.Add(txt);
             // Next Coordinates:
 
@@ -324,7 +321,7 @@ public class GridSearchManager : ScriptableObject
             }
         }
         
-        Debug.Log("GridSearch RUN |" + curIter.ToString() + "| A: " + coordA.ToString() + ", B: " + coordB.ToString() + ", C: " + coordC.ToString() + ", D: " + coordD.ToString());
+        Debug.Log("GridSearch RUN |" + curIter + "| A: " + coordA + ", B: " + coordB + ", C: " + coordC + ", D: " + coordD);
 
         CreateDataContainer();
 

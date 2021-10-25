@@ -1,10 +1,8 @@
-﻿using System.Collections;
-//using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "ZooplanktonSettings", menuName = "ScriptableObjects/ZooplanktonSettings", order = 1)]
-public class SettingsZooplankton : ScriptableObject {
-
+[CreateAssetMenu(fileName = "Zooplankton Settings", menuName = "Pond Water/Game Settings/Zooplankton", order = 1)]
+public class SettingsZooplankton : ScriptableObject 
+{
 	public float _MasterSwimSpeed = 0.35f;
     public float _AlignMaskRange = 0.025f;
     public float _AlignMaskOffset = 0.0833f;

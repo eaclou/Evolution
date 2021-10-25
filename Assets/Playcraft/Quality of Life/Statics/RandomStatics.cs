@@ -18,7 +18,12 @@ namespace Playcraft
         public static bool CoinToss(float chance = 0.5f) { return Random.Range(0, 1) < chance; }
         
         public static bool RandomFlip(float chance, bool defaultValue) { return CoinToss(chance) ? !defaultValue : defaultValue; }
-    
+        
+        static string[] alphabet = 
+        { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
+        
+        public static string GetRandomLetter() { return alphabet[Random.Range(0, alphabet.Length)]; }
+        
         #endregion
         
         public static int RandomNoRepeat(int min, int max, int prior)

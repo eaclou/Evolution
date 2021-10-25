@@ -9,6 +9,7 @@ public class CritterModuleCoreGenome
 {
     Lookup lookup => Lookup.instance;
     NeuralMap map => lookup.neuralMap;
+    NameList nameList => lookup.nameList;
 
     public int parentID;
     public readonly BrainModuleID moduleID = BrainModuleID.Core;
@@ -168,10 +169,12 @@ public class CritterModuleCoreGenome
 
     public enum TalentsDecay {
         None
-    } 
+    }
+     
     public enum TalentsPlant {
         None
-    } 
+    }
+     
     public enum TalentsMeat {
         None
     } 
@@ -236,15 +239,50 @@ public class CritterModuleCoreGenome
         public float phase;
         public int numPolyEdges;
         public Vector2 axisDir;
-        public bool repeat;       
+        public bool repeat;
+        
+        public MaskData(int maxPolyEdges)
+        {
+            coordinateTypeID = MaskCoordinateType.Polygonize;
+            functionTypeID = MaskFunctionType.Cos;
+            origin = Random.Range(0f, 1f); // normalized along length of creature
+            amplitude = Random.Range(0f, 1f); 
+            cycleDistance = Random.Range(0f, 1f); 
+            phase = Random.Range(0f, 1f); 
+            numPolyEdges = Random.Range(1, maxPolyEdges); 
+            axisDir = new Vector2(Random.Range(0f, 1f), Random.Range(0f, 1f));
+            repeat = true;
+        }
+        
+        public MaskData(float origin, float amplitude, float cycleDistance, float phase, int numPolyEdges, Vector2 axisDir)
+        {
+            coordinateTypeID = MaskCoordinateType.Polygonize;
+            functionTypeID = MaskFunctionType.Cos;
+            this.origin = origin; // normalized along length of creature
+            this.amplitude = amplitude;
+            this.cycleDistance = cycleDistance;
+            this.phase = phase;
+            this.numPolyEdges = numPolyEdges;
+            this.axisDir = axisDir;
+            repeat = true;
+        }
     }
     
+    // Each modifer gets interpreted by script, picks from correct maskData list
     [Serializable]
-    public struct ShapeModifierData {  // each modifer gets interpreted by script, picks from correct maskData list
+    public struct ShapeModifierData {  
         public ShapeModifierType modifierTypeID;  // extrude; axis-aligned scale; twist/pinch/etc?
         public List<int> maskIndicesList;  // method of falloff
         public float taperDistance; // keep/remove?
         public float amplitude;  // move to Range of mult like (0.8 to 1.25)?
+        
+        public ShapeModifierData(float amplitude, float taperDistance, ShapeModifierType modifierTypeID = ShapeModifierType.Extrude)
+        {
+            this.modifierTypeID = modifierTypeID;
+            maskIndicesList = new List<int>();
+            this.amplitude = amplitude;
+            this.taperDistance = taperDistance;
+        }
     }
     
     // or should I keep masks as separate list and refer to them through indices to allow for mask re-use?
@@ -268,9 +306,9 @@ public class CritterModuleCoreGenome
     
     public void GenerateRandomInitialGenome() {
         generation = 0;
-
-        // * WPP: store these in a ScriptableObject
-        string[] namesList = new string[29];
+        name = nameList.GetRandomName();
+        // WPP: stored these in a ScriptableObject
+        /*string[] namesList = new string[29];
         namesList[0] = "ALBERT";
         namesList[1] = "BORT";
         namesList[2] = "CANDICE";
@@ -302,23 +340,24 @@ public class CritterModuleCoreGenome
         namesList[28] = "HAM";
         
         int randomNameIndex = Random.Range(0, namesList.Length);
-        name = namesList[randomNameIndex];
+        name = namesList[randomNameIndex];*/
 
         isPassive = RandomStatics.CoinToss();
 
         shapeModifiersList = new List<ShapeModifierData>();  // empty
         masksList = new List<MaskData>();
         
-        // TEMP HARDCODED:
-        ShapeModifierData initModifier = new ShapeModifierData();
-        initModifier.modifierTypeID = ShapeModifierType.Extrude;
+        // WPP: using constructor
+        ShapeModifierData initModifier = new ShapeModifierData(Random.Range(0f, 1f), 1f);
+        /*initModifier.modifierTypeID = ShapeModifierType.Extrude;
         initModifier.maskIndicesList = new List<int>();
         initModifier.amplitude = Random.Range(0f, 1f);
-        initModifier.taperDistance = 1f;
+        initModifier.taperDistance = 1f;*/
 
+        // WPP: using constructor
         // Masks for this modifier:
-        MaskData maskData = new MaskData();
-        maskData.coordinateTypeID = MaskCoordinateType.Polygonize;
+        MaskData maskData = new MaskData(7);
+        /*maskData.coordinateTypeID = MaskCoordinateType.Polygonize;
         maskData.functionTypeID = MaskFunctionType.Cos;
         maskData.origin = Random.Range(0f, 1f); // normalized along length of creature
         maskData.amplitude = Random.Range(0f, 1f); 
@@ -326,12 +365,13 @@ public class CritterModuleCoreGenome
         maskData.phase = Random.Range(0f, 1f); 
         maskData.numPolyEdges = Random.Range(1, 7); 
         maskData.axisDir = new Vector2(Random.Range(0f, 1f), Random.Range(0f, 1f));
-        maskData.repeat = true;
+        maskData.repeat = true;*/
 
         masksList.Add(maskData);
         initModifier.maskIndicesList.Add(masksList.Count - 1); // reference mask by index to allow re-use by other shape modifiers    
         shapeModifiersList.Add(initModifier);
 
+        // WPP: expose hardcoded values (include ranges), consider ScriptableObject
         creatureBaseLength = Random.Range(0.4f, 0.4f);
         creatureAspectRatio = Random.Range(0.2f, 0.3f);
 
@@ -518,10 +558,11 @@ public class CritterModuleCoreGenome
         string backHalf = parentName.Substring(randIndex + 1);
         name = parentName;
         
+        // WPP: delegated random letter lookup to RandomStatics.GetRandomLetter()
         if (RandomStatics.CoinToss(.05f)) {
-            int randLetterIndex = Random.Range(0, 26);
+            middleChar = RandomStatics.GetRandomLetter();
+            /*int randLetterIndex = Random.Range(0, 26);
             
-            // * WPP: delegate to static function or scriptable object
             string[] lettersArray = new string[26];
             lettersArray[0] = "A";
             lettersArray[1] = "B";
@@ -550,31 +591,33 @@ public class CritterModuleCoreGenome
             lettersArray[24] = "Y";
             lettersArray[25] = "Z";
 
-            middleChar = lettersArray[randLetterIndex];
+            middleChar = lettersArray[randLetterIndex];*/
         }
 
-        frontHalf = frontHalf + middleChar;
+        frontHalf += middleChar;
 
         name = RandomStatics.CoinToss(.025f) ? backHalf + frontHalf : frontHalf + backHalf;
 
         // This is incremented elsewhere (simManager at time of reproduction)
         generation = parentGenome.generation; 
 
-        isPassive = UtilityMutationFunctions.GetMutatedBool(parentGenome.isPassive, 0.033f, settings.bodyCoreMutationStepSize);
+        isPassive = UtilityMutationFunctions.GetMutatedBool(parentGenome.isPassive, 0.033f);
 
         //float slotMult = settings.mutationStrengthSlot;
         
-        // Copy modifiers list? do I need to create copies of each entry? or staright copy should work since they are structs (value-typed)
+        // Copy modifiers list? do I need to create copies of each entry? or straight copy should work since they are structs (value-typed)
         shapeModifiersList = new List<ShapeModifierData>();  // empty
         for(int i = 0; i < parentGenome.shapeModifiersList.Count; i++) {
             ShapeModifierData newData = new ShapeModifierData();
+            
             newData.maskIndicesList = new List<int>();
-            for(int j = 0; j < parentGenome.shapeModifiersList[i].maskIndicesList.Count; j++) {
+            for (int j = 0; j < parentGenome.shapeModifiersList[i].maskIndicesList.Count; j++) {
                 int maskIndex = parentGenome.shapeModifiersList[i].maskIndicesList[j];
                 // MUTATE?
                 maskIndex = UtilityMutationFunctions.GetMutatedIntAdditive(maskIndex, settings.bodyProportionsMutationChance, 2, 0, parentGenome.shapeModifiersList[i].maskIndicesList.Count - 1);
                 newData.maskIndicesList.Add(maskIndex); // make sure this isn't passing as a reference? it's an 'int' (data-type) so should be ok... // newMaskData);
-            }            
+            }
+                    
             newData.modifierTypeID = parentGenome.shapeModifiersList[i].modifierTypeID;  // only works if this is NOT a reference type!!! ***
             newData.amplitude = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.shapeModifiersList[i].amplitude, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, -0.5f, 0.5f); //parentGenome.shapeModifiersList[i].amplitude;
             newData.taperDistance = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.shapeModifiersList[i].taperDistance, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0.2f, 2f); //;
@@ -582,14 +625,10 @@ public class CritterModuleCoreGenome
         }
         masksList = new List<MaskData>();
         for(int i = 0; i < parentGenome.masksList.Count; i++) {
-            MaskData newMask = new MaskData();
-            newMask = parentGenome.masksList[i];
-            //int maskCoordinateTypeID = (int)newMask.coordinateTypeID;
+            MaskData newMask = parentGenome.masksList[i];
             newMask.coordinateTypeID = MaskCoordinateType.Polygonize; // (MaskCoordinateType)UtilityMutationFunctions.GetMutatedIntAdditive(maskCoordinateTypeID, settings.defaultBodyMutationChance, 1, 0, 1);
-            //int maskFunctionTypeID = (int)newMask.functionTypeID;
             newMask.functionTypeID = MaskFunctionType.Cos; // (MaskFunctionType)UtilityMutationFunctions.GetMutatedIntAdditive(maskFunctionTypeID, settings.defaultBodyMutationChance, 2, 0, 2);
             newMask.numPolyEdges = UtilityMutationFunctions.GetMutatedIntAdditive(newMask.numPolyEdges, settings.bodyProportionsMutationChance, 4, 1, 6);
-
             newMask.origin = UtilityMutationFunctions.GetMutatedFloatAdditive(newMask.origin, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0f, 1f);
             newMask.phase = UtilityMutationFunctions.GetMutatedFloatAdditive(newMask.phase, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, -5f, 5f);
             newMask.cycleDistance = UtilityMutationFunctions.GetMutatedFloatAdditive(newMask.origin, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0.1f, 1f);
@@ -599,20 +638,21 @@ public class CritterModuleCoreGenome
         }
         // Mutate Add New Modifiers Here:?
         if(shapeModifiersList.Count < 6 && RandomStatics.CoinToss(.02f)) {
+            // WPP: initialized in constructor
             // Add new shapeModifier:
-            ShapeModifierData initModifier = new ShapeModifierData();
-            initModifier.modifierTypeID = ShapeModifierType.Extrude;
+            ShapeModifierData initModifier = new ShapeModifierData(.4f, .2f);
+            /*initModifier.modifierTypeID = ShapeModifierType.Extrude;
             initModifier.maskIndicesList = new List<int>();
             initModifier.amplitude = 0.4f;
-            initModifier.taperDistance = 0.2f;
+            initModifier.taperDistance = 0.2f;*/
 
             shapeModifiersList.Add(initModifier);
         }
         if(masksList.Count < 4 && RandomStatics.CoinToss(.04f)) {
-            // * WPP: use constructor
+            // WPP: use constructor
             // Add new mask:
-            MaskData maskData = new MaskData();
-            maskData.coordinateTypeID = MaskCoordinateType.Polygonize;
+            MaskData maskData = new MaskData(.5f, 1f, .5f, 0f, 1, new Vector2(0f, 1f));
+            /*maskData.coordinateTypeID = MaskCoordinateType.Polygonize;
             maskData.functionTypeID = MaskFunctionType.Cos;
             maskData.origin = 0.5f; // normalized along length of creature
             maskData.amplitude = 1f;
@@ -620,7 +660,7 @@ public class CritterModuleCoreGenome
             maskData.phase = 0f;
             maskData.numPolyEdges = 1;
             maskData.axisDir = new Vector2(0f, 1f);
-            maskData.repeat = true;
+            maskData.repeat = true;*/
 
             masksList.Add(maskData);
         }        

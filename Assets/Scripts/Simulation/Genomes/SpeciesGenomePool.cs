@@ -1,7 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using Playcraft;
 
-[System.Serializable]
+[Serializable]
 public class SpeciesGenomePool 
 {
     Lookup lookup => Lookup.instance;
@@ -11,7 +14,7 @@ public class SpeciesGenomePool
 
     public int depthLevel;
 
-    [System.NonSerialized]
+    [NonSerialized]
     public MutationSettingsInstance mutationSettings;  // Or remove this later to keep everything saveable?
 
     public string identifier;
@@ -92,9 +95,10 @@ public class SpeciesGenomePool
         InitShared();
         depthLevel = depth;
         Vector3 newHue = Random.insideUnitSphere;
-
+        
+        // WPP: replaced with RandomStatics.GetRandomLetter
         string newName = "";
-        string[] lettersArray = new string[26];
+        /*string[] lettersArray = new string[26];
                 lettersArray[0] = "A";
                 lettersArray[1] = "B";
                 lettersArray[2] = "C";
@@ -120,29 +124,27 @@ public class SpeciesGenomePool
                 lettersArray[22] = "W";
                 lettersArray[23] = "X";
                 lettersArray[24] = "Y";
-                lettersArray[25] = "Z";
+                lettersArray[25] = "Z";*/
 
-        for(int i = 0; i < foundingGenome.candidateGenome.bodyGenome.coreGenome.name.Length; i++) {
+        foreach (var letter in foundingGenome.candidateGenome.bodyGenome.coreGenome.name) {
             float randChance1 = Random.Range(0f, 1f);
-            if(randChance1 < 0.35) {
-                int randLetterIndex = Random.Range(0, 26);
-                newName += lettersArray[randLetterIndex];  
+            if (randChance1 < 0.35) {
+                //int randLetterIndex = Random.Range(0, 26);
+                //newName += lettersArray[randLetterIndex];
+                newName += RandomStatics.GetRandomLetter();  
                 
-                if(randChance1 < 0.05) {
-                    randLetterIndex = Random.Range(0, 26);
-                    newName += lettersArray[randLetterIndex];            
+                if (randChance1 < 0.05) {
+                    //randLetterIndex = Random.Range(0, 26);
+                    //newName += lettersArray[randLetterIndex];  
+                    newName += RandomStatics.GetRandomLetter();          
                 }
             }            
-            else if(randChance1 > 0.95f) {
-
-            }
-            else {
-                newName += foundingGenome.candidateGenome.bodyGenome.coreGenome.name[i];
+            else if (randChance1 <= 0.95f) {
+                newName += letter; 
             }
         }
 
         foundingGenome.candidateGenome.bodyGenome.coreGenome.name = newName;
-
         foundingGenome.candidateGenome.bodyGenome.appearanceGenome.huePrimary = Vector3.Lerp(foundingGenome.candidateGenome.bodyGenome.appearanceGenome.huePrimary, newHue, 0.75f);
         foundingGenome.candidateGenome.bodyGenome.appearanceGenome.hueSecondary = Vector3.Lerp(foundingGenome.candidateGenome.bodyGenome.appearanceGenome.hueSecondary, Vector3.one - newHue, 0.75f);
 
@@ -150,7 +152,6 @@ public class SpeciesGenomePool
 
         //string debugTxt = "";
         for (int i = 0; i < 64; i++) {
-            
             mutationSettings.bodyCoreSizeMutationChance = 0.5f;
             mutationSettings.bodyCoreMutationStepSize = 0.1f;
             //mutationSettingsRef.mutationStrengthSlot = 0.15f;
@@ -186,10 +187,11 @@ public class SpeciesGenomePool
     private void RecalculateAverageCandidate() 
     {
         var avgCore = avgCandidateData.candidateGenome.bodyGenome.coreGenome;
+        var avgAppearance = avgCandidateData.candidateGenome.bodyGenome.appearanceGenome;
 
         //calculate avg candidate:
-        avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.huePrimary = Vector3.zero;
-        avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.hueSecondary = Vector3.zero;
+        avgAppearance.huePrimary = Vector3.zero;
+        avgAppearance.hueSecondary = Vector3.zero;
         avgCore.dietSpecializationDecay = 0f;
         avgCore.dietSpecializationPlant = 0f;
         avgCore.dietSpecializationMeat = 0f;
@@ -205,12 +207,11 @@ public class SpeciesGenomePool
         //Debug.Log("avgPerformanceData " + avgPerformanceData.totalTicksAlive.ToString());
         //avgCandidateData.performanceData = avgPerformanceData;
         
-                
         for (int i = 0; i < leaderboardGenomesList.Count; i++) {
             float norm = 1f / (float)(leaderboardGenomesList.Count - 1);
             
-            avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.huePrimary += leaderboardGenomesList[i].candidateGenome.bodyGenome.appearanceGenome.huePrimary * norm;
-            avgCandidateData.candidateGenome.bodyGenome.appearanceGenome.hueSecondary += leaderboardGenomesList[i].candidateGenome.bodyGenome.appearanceGenome.hueSecondary * norm;
+            avgAppearance.huePrimary += leaderboardGenomesList[i].candidateGenome.bodyGenome.appearanceGenome.huePrimary * norm;
+            avgAppearance.hueSecondary += leaderboardGenomesList[i].candidateGenome.bodyGenome.appearanceGenome.hueSecondary * norm;
             avgCore.dietSpecializationDecay += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.dietSpecializationDecay * norm;
             avgCore.dietSpecializationPlant += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.dietSpecializationPlant * norm;
             avgCore.dietSpecializationMeat += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.dietSpecializationMeat * norm;

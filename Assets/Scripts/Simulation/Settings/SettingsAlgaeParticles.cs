@@ -1,11 +1,10 @@
-﻿using System.Collections;
-//using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "AlgaeParticleSettings", menuName = "ScriptableObjects/AlgaeParticleSettings", order = 1)]
-public class SettingsAlgaeParticles : ScriptableObject {
-
-	public float _AlgaeGrowthEfficiency = 0.1f;  // Energy --> biomass conversion
+[CreateAssetMenu(fileName = "Algae Particle Settings", menuName = "Pond Water/Game Settings/Algae Particles", order = 1)]
+public class SettingsAlgaeParticles : ScriptableObject 
+{
+	[Tooltip("Energy to biomass conversion")]
+	public float _AlgaeGrowthEfficiency = 0.1f;  
     public float _AlgaeGrowthNutrientsMask = 0.01f;
     //float nutrientsGrowthMask = saturate(_GlobalNutrients * 0.01);
     public float _AlgaeReservoirOxygenProductionEfficiency = 0.001f;

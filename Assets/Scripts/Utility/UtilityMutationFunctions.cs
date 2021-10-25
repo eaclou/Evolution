@@ -1,32 +1,35 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using Playcraft;
 
 public static class UtilityMutationFunctions {
 
-    public static bool GetMutatedBool(bool curValue, float mutationChance, float mutationStepSize) {
+    public static bool GetMutatedBool(bool curValue, float mutationChance) {
         bool mutatedValue = curValue;
+        
+        if (RandomStatics.CoinToss(mutationChance))
+            mutatedValue = RandomStatics.CoinToss();
 
-        float randomRoll = UnityEngine.Random.Range(0f, 1f);
+        // WPP: simplified with RandomStatics.CoinToss
+        //float randomRoll = Random.Range(0f, 1f);
 
-        if (randomRoll < mutationChance) {
-            float newVal = UnityEngine.Random.Range(0f, 1f);
-            if(newVal < 0.5f) {
-                mutatedValue = false;
-            }
-            else {
-                mutatedValue = true;
-            }
-        }
+        //if (randomRoll < mutationChance) {
+        //float newVal = Random.Range(0f, 1f);
+            
+            //if(newVal < 0.5f) {
+            //    mutatedValue = false;
+            //}
+            //else {
+            //    mutatedValue = true;
+            //}
+        //}
 
         return mutatedValue;
     }
 
 	public static float GetMutatedFloatAdditive(float curValue, float mutationChance, float mutationStepSize, float minValue, float maxValue) {
         float mutatedValue = curValue;
-
-        float randomRoll = UnityEngine.Random.Range(0f, 1f);
-        if (randomRoll < mutationChance) {
+        
+        if (RandomStatics.CoinToss(mutationChance)) {
             float randomPerturbation = Gaussian.GetRandomGaussian();
             mutatedValue += Mathf.Lerp(0f, randomPerturbation, mutationStepSize);
             
@@ -45,6 +48,7 @@ public static class UtilityMutationFunctions {
 
         return mutatedValue;
     }
+    
     public static Vector2 GetMutatedVector2Additive(Vector2 curValue, float mutationChance, float mutationStepSize, Vector2 minValue, Vector2 maxValue) {
         Vector2 mutatedValue = curValue;
 
@@ -66,10 +70,9 @@ public static class UtilityMutationFunctions {
 
     public static int GetMutatedIntAdditive(int curValue, float mutationChance, int maxMutationSize, int minValue, int maxValue) {
         int mutatedValue = curValue;
-
-        float randomRoll = UnityEngine.Random.Range(0f, 1f);
-        if (randomRoll < mutationChance) {
-            int randomPerturbation = UnityEngine.Random.Range(-maxMutationSize, maxMutationSize + 1);
+        
+        if (RandomStatics.CoinToss(mutationChance)) {
+            int randomPerturbation = Random.Range(-maxMutationSize, maxMutationSize + 1);
             mutatedValue += randomPerturbation;
 
             mutatedValue = Mathf.Max(mutatedValue, minValue);
