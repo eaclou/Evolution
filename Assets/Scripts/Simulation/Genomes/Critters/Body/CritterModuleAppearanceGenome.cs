@@ -71,4 +71,25 @@ public class CritterModuleAppearanceGenome
         eyeGenome.eyeBrushType = UtilityMutationFunctions.GetMutatedIntAdditive(parentGenome.eyeGenome.eyeBrushType, settings.bodyEyeProportionsMutationChance, 7, 0, 7);
         //eyeGenome.pupilRadius = UtilityMutationFunctions.GetMutatedFloatAdditive(parentBodyGenome.eyeGenome.pupilRadius, settings.bodyEyeProportionsMutationChance, settings.bodyEyeProportionsMutationStepSize, 0.25f, 0.95f);
     }
+    
+    public void SetToAverage(List<CandidateAgentData> leaderboard, float inverseCount)
+    {
+        // Clear out existing values
+        huePrimary = Vector3.zero;
+        hueSecondary = Vector3.zero;
+    
+        CritterModuleAppearanceGenome leader;
+    
+        // Sum the average leaderboard values
+        foreach (var agent in leaderboard)
+        {
+            leader = agent.candidateGenome.bodyGenome.appearanceGenome;
+            huePrimary += leader.huePrimary;
+            hueSecondary += leader.hueSecondary;
+        }
+        
+        // Multiply the result by the inverse of the leaderboard count for the average values
+        huePrimary *= inverseCount;
+        hueSecondary *= inverseCount;
+    }
 }

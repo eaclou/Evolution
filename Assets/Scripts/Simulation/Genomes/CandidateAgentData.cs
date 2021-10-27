@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 // WPP 5/9/21: De-nested because referenced outside CandidateAgentData
-// stats:
+/// Stats
 public struct PerformanceData {
     public float totalFoodEatenPlant;
     public float totalFoodEatenZoop;
@@ -32,7 +32,50 @@ public struct PerformanceData {
     public float attackActionPercent => totalTimesAttacked / (timesActed + .01f);
     public float defendActionPercent => totalTimesDefended / (timesActed + .01f);
     public float dashActionPercent => totalTimesDashed / (timesActed + .01f);
+    
+    /// Initialize as average
+    public PerformanceData(List<CandidateAgentData> leaderboard, float inverseCount)
+    {
+        PerformanceData self = new PerformanceData();
+        PerformanceData leader;
+    
+        // Sum the average leaderboard values
+        foreach (var agent in leaderboard)
+        {
+            leader = agent.performanceData;
+        
+            self.totalDamageDealt += leader.totalDamageDealt;
+            self.totalDamageTaken += leader.totalDamageTaken;
+            self.totalFoodEatenCorpse += leader.totalFoodEatenCorpse;
+            self.totalFoodEatenCreature += leader.totalFoodEatenCreature;
+            self.totalFoodEatenEgg += leader.totalFoodEatenEgg;
+            self.totalFoodEatenPlant += leader.totalFoodEatenPlant;
+            self.totalFoodEatenZoop += leader.totalFoodEatenZoop;
+            self.totalTicksAlive += leader.totalTicksAlive;
+            self.totalTicksRested += leader.totalTicksRested;
+            self.totalTimesAttacked += leader.totalTimesAttacked;
+            self.totalTimesDashed += leader.totalTimesDashed;
+            self.totalTimesDefended += leader.totalTimesDefended;
+            self.totalTimesPregnant += leader.totalTimesPregnant;  
+        }
 
+        // Multiply the result by the inverse of the leaderboard count for the average values
+        self.totalDamageDealt *= inverseCount;
+        self.totalDamageTaken *= inverseCount;
+        self.totalFoodEatenCorpse *= inverseCount;
+        self.totalFoodEatenCreature *= inverseCount;
+        self.totalFoodEatenEgg *= inverseCount;
+        self.totalFoodEatenPlant *= inverseCount;
+        self.totalFoodEatenZoop *= inverseCount;
+        self.totalTicksAlive *= inverseCount;
+        self.totalTicksRested *= inverseCount;
+        self.totalTimesAttacked *= inverseCount;
+        self.totalTimesDashed *= inverseCount;
+        self.totalTimesDefended *= inverseCount;
+        self.totalTimesPregnant *= inverseCount; 
+        
+        this = self;
+    }
 }
 
 [System.Serializable]
@@ -64,16 +107,14 @@ public class CandidateAgentData {
         }
     }
     
-    // WPP: renamed -> string = implementation detail
     public string causeOfDeath = "";
     public List<CandidateEventData> candidateEventDataList;
     
     public CandidateAgentData(AgentGenome genome, int speciesID) {
         //Debug.Log("NewCandidateData: " + MasterGenomePool.nextCandidateIndex.ToString());
-        int ID = MasterGenomePool.nextCandidateIndex;
         MasterGenomePool.nextCandidateIndex++;
         causeOfDeath = "Alive!";
-        this.candidateID = ID;
+        candidateID = MasterGenomePool.nextCandidateIndex;
         this.speciesID = speciesID;
         candidateGenome = genome;
         numCompletedEvaluations = 0;
@@ -81,13 +122,15 @@ public class CandidateAgentData {
         allEvaluationsComplete = false;  
         isBeingEvaluated = false;
 
-        this.name = GenerateTempCritterName();
+        name = GenerateTempCritterName();
 
         candidateEventDataList = new List<CandidateEventData>();
         performanceData = new PerformanceData();
     }
-    private string GenerateTempCritterName() {
-        
+    
+    private string GenerateTempCritterName() 
+    {
+        // * WPP: replace with static
         string[] letters = new string[26];
         letters[0] = "A";
         letters[1] = "B";
@@ -115,7 +158,6 @@ public class CandidateAgentData {
         letters[23] = "X";
         letters[24] = "Y";
         letters[25] = "Z";
-
         
         if (candidateID < 0)
             return "-1";
@@ -126,15 +168,15 @@ public class CandidateAgentData {
         name = letters[onesColumn];
         if(candidateID > 26) {
             int tensColummn = Mathf.FloorToInt((float)candidateID / 26f) % 26;
-            name = letters[tensColummn] + name;
+            name += letters[tensColummn];
 
             if(candidateID > 26 * 26) {
                 int hundredsColummn = Mathf.FloorToInt((float)candidateID / (26f * 26f)) % 26;
-                name = letters[hundredsColummn] + name;
+                name += letters[hundredsColummn];
 
                 if (candidateID > 26 * 26 * 26) {
                     int thousandsColummn = Mathf.FloorToInt((float)candidateID / (26f * 26f * 26f)) % 26;
-                    name = letters[thousandsColummn] + name;
+                    name += letters[thousandsColummn];
                 }
             }
         }
@@ -142,8 +184,7 @@ public class CandidateAgentData {
         return letters[speciesID % 26] + "'" + name;
     }
     
-
-    public void ProcessCompletedEvaluation(Agent agentRef) {
+    public void ProcessCompletedEvaluation(Agent agent) {
         //evaluationScoresList.Add(agentRef.masterFitnessScore);
         //this.performanceData = agentRef.perform  // 
 
@@ -152,10 +193,60 @@ public class CandidateAgentData {
     }
 
     public void RegisterCandidateEvent(int frame, string textString, float goodness, int type) {        
-        // WPP: use object initializer
         CandidateEventData newEvent = new CandidateEventData(frame, textString, goodness, type);
         candidateEventDataList.Add(newEvent);
     }
-
     
+    public void SetToAverage(List<CandidateAgentData> leaderboard)
+    {
+        var inverseCount = 1f / (leaderboard.Count - 1);
+        candidateGenome.bodyGenome.coreGenome.SetToAverage(leaderboard, inverseCount);
+        candidateGenome.bodyGenome.appearanceGenome.SetToAverage(leaderboard, inverseCount);
+        performanceData = new PerformanceData(leaderboard, inverseCount);
+        //SetPerformanceDataToAverage(leaderboard, inverseCount);
+    }
+
+    // PerformanceData is a struct, so needs to be performed here
+    /*void SetPerformanceDataToAverage(List<CandidateAgentData> leaderboard, float inverseCount)
+    {
+        // Clear out existing values
+        performanceData = new PerformanceData(); 
+        
+        PerformanceData leader;
+        
+        // Sum the average leaderboard values
+        foreach (var agent in leaderboard)
+        {
+            leader = agent.performanceData;
+        
+            performanceData.totalDamageDealt += leader.totalDamageDealt;
+            performanceData.totalDamageTaken += leader.totalDamageTaken;
+            performanceData.totalFoodEatenCorpse += leader.totalFoodEatenCorpse;
+            performanceData.totalFoodEatenCreature += leader.totalFoodEatenCreature;
+            performanceData.totalFoodEatenEgg += leader.totalFoodEatenEgg;
+            performanceData.totalFoodEatenPlant += leader.totalFoodEatenPlant;
+            performanceData.totalFoodEatenZoop += leader.totalFoodEatenZoop;
+            performanceData.totalTicksAlive += leader.totalTicksAlive;
+            performanceData.totalTicksRested += leader.totalTicksRested;
+            performanceData.totalTimesAttacked += leader.totalTimesAttacked;
+            performanceData.totalTimesDashed += leader.totalTimesDashed;
+            performanceData.totalTimesDefended += leader.totalTimesDefended;
+            performanceData.totalTimesPregnant += leader.totalTimesPregnant;  
+        }
+
+        // Multiply the result by the inverse of the leaderboard count for the average values
+        performanceData.totalDamageDealt *= inverseCount;
+        performanceData.totalDamageTaken *= inverseCount;
+        performanceData.totalFoodEatenCorpse *= inverseCount;
+        performanceData.totalFoodEatenCreature *= inverseCount;
+        performanceData.totalFoodEatenEgg *= inverseCount;
+        performanceData.totalFoodEatenPlant *= inverseCount;
+        performanceData.totalFoodEatenZoop *= inverseCount;
+        performanceData.totalTicksAlive *= inverseCount;
+        performanceData.totalTicksRested *= inverseCount;
+        performanceData.totalTimesAttacked *= inverseCount;
+        performanceData.totalTimesDashed *= inverseCount;
+        performanceData.totalTimesDefended *= inverseCount;
+        performanceData.totalTimesPregnant *= inverseCount; 
+    }*/
 }

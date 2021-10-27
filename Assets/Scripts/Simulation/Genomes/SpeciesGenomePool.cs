@@ -180,11 +180,13 @@ public class SpeciesGenomePool
     private void CreateNewAverageCandidate() {
         AgentGenome blankGenome = new AgentGenome(.1f, 0);
         avgCandidateData = new CandidateAgentData(blankGenome, speciesID);
-        RecalculateAverageCandidate();
+        avgCandidateData.SetToAverage(leaderboardGenomesList);
     }
     
-    // * WPP: shorten reference chains with temp variables
-    private void RecalculateAverageCandidate() 
+    // WPP: moved to CandidateAgentData, 
+    // process broken into parts for core, appearance, and performance data,
+    // optimized so normalization calculated and applied once
+    /*private void RecalculateAverageCandidate() 
     {
         var avgCore = avgCandidateData.candidateGenome.bodyGenome.coreGenome;
         var avgAppearance = avgCandidateData.candidateGenome.bodyGenome.appearanceGenome;
@@ -207,38 +209,46 @@ public class SpeciesGenomePool
         //Debug.Log("avgPerformanceData " + avgPerformanceData.totalTicksAlive.ToString());
         //avgCandidateData.performanceData = avgPerformanceData;
         
-        for (int i = 0; i < leaderboardGenomesList.Count; i++) {
-            float norm = 1f / (float)(leaderboardGenomesList.Count - 1);
-            
-            avgAppearance.huePrimary += leaderboardGenomesList[i].candidateGenome.bodyGenome.appearanceGenome.huePrimary * norm;
-            avgAppearance.hueSecondary += leaderboardGenomesList[i].candidateGenome.bodyGenome.appearanceGenome.hueSecondary * norm;
-            avgCore.dietSpecializationDecay += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.dietSpecializationDecay * norm;
-            avgCore.dietSpecializationPlant += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.dietSpecializationPlant * norm;
-            avgCore.dietSpecializationMeat += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.dietSpecializationMeat * norm;
-            avgCore.talentSpecializationAttack += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.talentSpecializationAttack * norm;
-            avgCore.talentSpecializationDefense += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.talentSpecializationDefense * norm;
-            avgCore.talentSpecializationSpeed += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.talentSpecializationSpeed * norm;
-            avgCore.talentSpecializationUtility += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.talentSpecializationUtility * norm;
+        CritterModuleCoreGenome leaderCore;
+        CritterModuleAppearanceGenome leaderAppearance;
+        PerformanceData leaderPerformance;
         
-            avgCore.bodyLength += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.bodyLength * norm;
-            avgCore.creatureAspectRatio += leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome.creatureAspectRatio * norm;
+        float norm = 1f / (leaderboardGenomesList.Count - 1);
+
+        for (int i = 0; i < leaderboardGenomesList.Count; i++) {
+            leaderAppearance = leaderboardGenomesList[i].candidateGenome.bodyGenome.appearanceGenome;
+            leaderCore = leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome;
+            leaderPerformance = leaderboardGenomesList[i].performanceData;
+            
+            avgAppearance.huePrimary += leaderAppearance.huePrimary * norm;
+            avgAppearance.hueSecondary += leaderAppearance.hueSecondary * norm;
+            
+            avgCore.dietSpecializationDecay += leaderCore.dietSpecializationDecay * norm;
+            avgCore.dietSpecializationPlant += leaderCore.dietSpecializationPlant * norm;
+            avgCore.dietSpecializationMeat += leaderCore.dietSpecializationMeat * norm;
+            avgCore.talentSpecializationAttack += leaderCore.talentSpecializationAttack * norm;
+            avgCore.talentSpecializationDefense += leaderCore.talentSpecializationDefense * norm;
+            avgCore.talentSpecializationSpeed += leaderCore.talentSpecializationSpeed * norm;
+            avgCore.talentSpecializationUtility += leaderCore.talentSpecializationUtility * norm;
+            avgCore.bodyLength += leaderCore.bodyLength * norm;
+            avgCore.creatureAspectRatio += leaderCore.creatureAspectRatio * norm;
 
             //Performance Data:
-            avgCandidateData.performanceData.totalDamageDealt += leaderboardGenomesList[i].performanceData.totalDamageDealt * norm;
-            avgCandidateData.performanceData.totalDamageTaken += leaderboardGenomesList[i].performanceData.totalDamageTaken * norm;
-            avgCandidateData.performanceData.totalFoodEatenCorpse += leaderboardGenomesList[i].performanceData.totalFoodEatenCorpse * norm;
-            avgCandidateData.performanceData.totalFoodEatenCreature += leaderboardGenomesList[i].performanceData.totalFoodEatenCreature * norm;
-            avgCandidateData.performanceData.totalFoodEatenEgg += leaderboardGenomesList[i].performanceData.totalFoodEatenEgg * norm;
-            avgCandidateData.performanceData.totalFoodEatenPlant += leaderboardGenomesList[i].performanceData.totalFoodEatenPlant * norm;
-            avgCandidateData.performanceData.totalFoodEatenZoop += leaderboardGenomesList[i].performanceData.totalFoodEatenZoop * norm;
-            avgCandidateData.performanceData.totalTicksAlive += leaderboardGenomesList[i].performanceData.totalTicksAlive * norm;
-            avgCandidateData.performanceData.totalTicksRested += leaderboardGenomesList[i].performanceData.totalTicksRested * norm;
-            avgCandidateData.performanceData.totalTimesAttacked += leaderboardGenomesList[i].performanceData.totalTimesAttacked * norm;
-            avgCandidateData.performanceData.totalTimesDashed += leaderboardGenomesList[i].performanceData.totalTimesDashed * norm;
-            avgCandidateData.performanceData.totalTimesDefended += leaderboardGenomesList[i].performanceData.totalTimesDefended * norm;
-            avgCandidateData.performanceData.totalTimesPregnant += leaderboardGenomesList[i].performanceData.totalTimesPregnant * norm;   
+            avgCandidateData.performanceData.totalDamageDealt += leaderPerformance.totalDamageDealt * norm;
+            avgCandidateData.performanceData.totalDamageTaken += leaderPerformance.totalDamageTaken * norm;
+            avgCandidateData.performanceData.totalFoodEatenCorpse += leaderPerformance.totalFoodEatenCorpse * norm;
+            avgCandidateData.performanceData.totalFoodEatenCreature += leaderPerformance.totalFoodEatenCreature * norm;
+            avgCandidateData.performanceData.totalFoodEatenEgg += leaderPerformance.totalFoodEatenEgg * norm;
+            avgCandidateData.performanceData.totalFoodEatenPlant += leaderPerformance.totalFoodEatenPlant * norm;
+            avgCandidateData.performanceData.totalFoodEatenZoop += leaderPerformance.totalFoodEatenZoop * norm;
+            avgCandidateData.performanceData.totalTicksAlive += leaderPerformance.totalTicksAlive * norm;
+            avgCandidateData.performanceData.totalTicksRested += leaderPerformance.totalTicksRested * norm;
+            avgCandidateData.performanceData.totalTimesAttacked += leaderPerformance.totalTimesAttacked * norm;
+            avgCandidateData.performanceData.totalTimesDashed += leaderPerformance.totalTimesDashed * norm;
+            avgCandidateData.performanceData.totalTimesDefended += leaderPerformance.totalTimesDefended * norm;
+            avgCandidateData.performanceData.totalTimesPregnant += leaderPerformance.totalTimesPregnant * norm;   
         }
-    }
+    }*/
     
     public void AddNewYearlyStats(int year) 
     {

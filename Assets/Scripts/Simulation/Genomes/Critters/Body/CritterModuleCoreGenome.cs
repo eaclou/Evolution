@@ -623,6 +623,7 @@ public class CritterModuleCoreGenome
             newData.taperDistance = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.shapeModifiersList[i].taperDistance, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0.2f, 2f); //;
             shapeModifiersList.Add(newData);
         }
+        
         masksList = new List<MaskData>();
         for(int i = 0; i < parentGenome.masksList.Count; i++) {
             MaskData newMask = parentGenome.masksList[i];
@@ -636,6 +637,7 @@ public class CritterModuleCoreGenome
             newMask.axisDir = UtilityMutationFunctions.GetMutatedVector2Additive(newMask.axisDir, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, -1f, 1f).normalized;
             masksList.Add(newMask);
         }
+        
         // Mutate Add New Modifiers Here:?
         if(shapeModifiersList.Count < 6 && RandomStatics.CoinToss(.02f)) {
             // WPP: initialized in constructor
@@ -648,6 +650,7 @@ public class CritterModuleCoreGenome
 
             shapeModifiersList.Add(initModifier);
         }
+        
         if(masksList.Count < 4 && RandomStatics.CoinToss(.04f)) {
             // WPP: use constructor
             // Add new mask:
@@ -755,5 +758,46 @@ public class CritterModuleCoreGenome
         
         mouthFeedFrequency = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthFeedFrequency, settings.bodyCoreSizeMutationChance, settings.bodyCoreMutationStepSize, 0.25f, 4f);
         mouthAttackAmplitude = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthAttackAmplitude, settings.bodyCoreSizeMutationChance, settings.bodyCoreMutationStepSize, 0.25f, 4f);
+    }
+    
+    public void SetToAverage(List<CandidateAgentData> leaderboard, float inverseCount)
+    {
+        // Clear out existing values
+        dietSpecializationDecay = 0f;
+        dietSpecializationPlant = 0f;
+        dietSpecializationMeat = 0f;
+        talentSpecializationAttack = 0f;
+        talentSpecializationDefense = 0f;
+        talentSpecializationSpeed = 0f;
+        talentSpecializationUtility = 0f;
+
+        CritterModuleCoreGenome leader;
+    
+        // Sum the average leaderboard values
+        foreach (var agent in leaderboard)
+        {
+            leader = agent.candidateGenome.bodyGenome.coreGenome;
+
+            dietSpecializationDecay += leader.dietSpecializationDecay;
+            dietSpecializationPlant += leader.dietSpecializationPlant;
+            dietSpecializationMeat += leader.dietSpecializationMeat;
+            talentSpecializationAttack += leader.talentSpecializationAttack;
+            talentSpecializationDefense += leader.talentSpecializationDefense;
+            talentSpecializationSpeed += leader.talentSpecializationSpeed;
+            talentSpecializationUtility += leader.talentSpecializationUtility;
+            bodyLength += leader.bodyLength;
+            creatureAspectRatio += leader.creatureAspectRatio;
+        }
+        
+        // Multiply the result by the inverse of the leaderboard count for the average values
+        dietSpecializationDecay *= inverseCount;
+        dietSpecializationPlant *= inverseCount;
+        dietSpecializationMeat *= inverseCount;
+        talentSpecializationAttack *= inverseCount;
+        talentSpecializationDefense *= inverseCount;
+        talentSpecializationSpeed *= inverseCount;
+        talentSpecializationUtility *= inverseCount;
+        bodyLength *= inverseCount;
+        creatureAspectRatio *= inverseCount;
     }
 }
