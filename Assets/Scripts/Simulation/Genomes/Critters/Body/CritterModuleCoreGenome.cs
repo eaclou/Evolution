@@ -371,7 +371,7 @@ public class CritterModuleCoreGenome
         initModifier.maskIndicesList.Add(masksList.Count - 1); // reference mask by index to allow re-use by other shape modifiers    
         shapeModifiersList.Add(initModifier);
 
-        // WPP: expose hardcoded values (include ranges), consider ScriptableObject
+        // * WPP: expose hardcoded values (include ranges), consider ScriptableObject
         creatureBaseLength = Random.Range(0.4f, 0.4f);
         creatureAspectRatio = Random.Range(0.2f, 0.3f);
 

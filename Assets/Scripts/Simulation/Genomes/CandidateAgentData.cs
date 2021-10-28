@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using Playcraft;
 
 // WPP 5/9/21: De-nested because referenced outside CandidateAgentData
 /// Stats
@@ -130,8 +131,8 @@ public class CandidateAgentData {
     
     private string GenerateTempCritterName() 
     {
-        // * WPP: replace with static
-        string[] letters = new string[26];
+        // WPP: moved to static alphabet
+        /*string[] letters = new string[26];
         letters[0] = "A";
         letters[1] = "B";
         letters[2] = "C";
@@ -157,14 +158,21 @@ public class CandidateAgentData {
         letters[22] = "W";
         letters[23] = "X";
         letters[24] = "Y";
-        letters[25] = "Z";
+        letters[25] = "Z";*/
         
         if (candidateID < 0)
             return "-1";
 
-        string name = "";// letters[cand.speciesID % 26];
+        string result = RandomStatics.alphabet[speciesID % 26] + "'";
+        
+        for (int i = 0; i < 4; i++)
+            if (!RequestAddLetterToName(ref result, i))
+                break;
+        
+        return result;
 
-        int onesColumn = candidateID % 26;
+        // WPP: moved to RequestAddLetterToName to eliminate repeition
+        /*int onesColumn = candidateID % 26;
         name = letters[onesColumn];
         if(candidateID > 26) {
             int tensColummn = Mathf.FloorToInt((float)candidateID / 26f) % 26;
@@ -179,14 +187,24 @@ public class CandidateAgentData {
                     name += letters[thousandsColummn];
                 }
             }
-        }
+        }*/
 
-        return letters[speciesID % 26] + "'" + name;
+        //return letters[speciesID % 26] + "'" + name;
+    }
+    
+    bool RequestAddLetterToName(ref string value, int column)
+    {
+        if (candidateID <= Mathf.Pow(26, column))
+            return false;
+        
+        int character = Mathf.FloorToInt(candidateID / Mathf.Pow(26f, column)) % 26;
+        value += RandomStatics.alphabet[character];
+        return true;
     }
     
     public void ProcessCompletedEvaluation(Agent agent) {
-        //evaluationScoresList.Add(agentRef.masterFitnessScore);
-        //this.performanceData = agentRef.perform  // 
+        //evaluationScoresList.Add(agent.masterFitnessScore);
+        //this.performanceData = agent.perform  // 
 
         numCompletedEvaluations++;
         isBeingEvaluated = false;

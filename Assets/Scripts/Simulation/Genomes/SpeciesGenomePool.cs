@@ -145,11 +145,8 @@ public class SpeciesGenomePool
         }
 
         foundingGenome.candidateGenome.bodyGenome.coreGenome.name = newName;
-        foundingGenome.candidateGenome.bodyGenome.appearanceGenome.huePrimary = Vector3.Lerp(foundingGenome.candidateGenome.bodyGenome.appearanceGenome.huePrimary, newHue, 0.75f);
-        foundingGenome.candidateGenome.bodyGenome.appearanceGenome.hueSecondary = Vector3.Lerp(foundingGenome.candidateGenome.bodyGenome.appearanceGenome.hueSecondary, Vector3.one - newHue, 0.75f);
-
-        //=========================================================================
-
+        foundingGenome.candidateGenome.bodyGenome.appearanceGenome.BlendHue(newHue, 0.75f);
+        
         //string debugTxt = "";
         for (int i = 0; i < 64; i++) {
             mutationSettings.bodyCoreSizeMutationChance = 0.5f;
@@ -168,7 +165,6 @@ public class SpeciesGenomePool
         }
 
         //Debug.Log("SPECIES CREATED! " + debugTxt);
-
         representativeCandidate = foundingGenome;
     }
 
@@ -286,7 +282,7 @@ public class SpeciesGenomePool
 
         int beforeCount = candidateGenomesList.Count;
         int listIndex = -1;
-        for(int i = 0; i < candidateGenomesList.Count; i++) {
+        for (int i = 0; i < candidateGenomesList.Count; i++) {
             if(candidateData.candidateID == candidateGenomesList[i].candidateID) {
                 listIndex = i;
             }
@@ -345,15 +341,18 @@ public class SpeciesGenomePool
         //Debug.Log(leaderboardGenomesListString);
         
         // Sort By Fitness
-        for (int i = 0; i < numCandidates - 1; i++) {
-            for (int j = 0; j < numCandidates - 1; j++) {
+        for (int i = 0; i < numCandidates - 1; i++) 
+        {
+            for (int j = 0; j < numCandidates - 1; j++) 
+            {
                 float swapFitA = rankedFitnessScoresArray[j];
                 float swapFitB = rankedFitnessScoresArray[j + 1];
                 int swapIdA = rankedIndicesList[j];
                 int swapIdB = rankedIndicesList[j + 1];
 
                 // bigger is better now after inversion
-                if (swapFitA < swapFitB) { 
+                if (swapFitA < swapFitB) 
+                { 
                     rankedFitnessScoresArray[j] = swapFitB;
                     rankedFitnessScoresArray[j + 1] = swapFitA;
                     rankedIndicesList[j] = swapIdB;

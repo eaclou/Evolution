@@ -72,6 +72,12 @@ public class CritterModuleAppearanceGenome
         //eyeGenome.pupilRadius = UtilityMutationFunctions.GetMutatedFloatAdditive(parentBodyGenome.eyeGenome.pupilRadius, settings.bodyEyeProportionsMutationChance, settings.bodyEyeProportionsMutationStepSize, 0.25f, 0.95f);
     }
     
+    public void BlendHue(Vector3 newHue, float blend)
+    {
+        huePrimary = Vector3.Lerp(huePrimary, newHue, blend);
+        hueSecondary = Vector3.Lerp(hueSecondary, Vector3.one - newHue, blend);
+    }
+    
     public void SetToAverage(List<CandidateAgentData> leaderboard, float inverseCount)
     {
         // Clear out existing values
