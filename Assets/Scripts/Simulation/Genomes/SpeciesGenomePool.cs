@@ -96,46 +96,14 @@ public class SpeciesGenomePool
         depthLevel = depth;
         Vector3 newHue = Random.insideUnitSphere;
         
-        // WPP: replaced with RandomStatics.GetRandomLetter
         string newName = "";
-        /*string[] lettersArray = new string[26];
-                lettersArray[0] = "A";
-                lettersArray[1] = "B";
-                lettersArray[2] = "C";
-                lettersArray[3] = "D";
-                lettersArray[4] = "E";
-                lettersArray[5] = "F";
-                lettersArray[6] = "G";
-                lettersArray[7] = "H";
-                lettersArray[8] = "I";
-                lettersArray[9] = "J";
-                lettersArray[10] = "K";
-                lettersArray[11] = "L";
-                lettersArray[12] = "M";
-                lettersArray[13] = "N";
-                lettersArray[14] = "O";
-                lettersArray[15] = "P";
-                lettersArray[16] = "Q";
-                lettersArray[17] = "R";
-                lettersArray[18] = "S";
-                lettersArray[19] = "T";
-                lettersArray[20] = "U";
-                lettersArray[21] = "V";
-                lettersArray[22] = "W";
-                lettersArray[23] = "X";
-                lettersArray[24] = "Y";
-                lettersArray[25] = "Z";*/
 
         foreach (var letter in foundingGenome.candidateGenome.bodyGenome.coreGenome.name) {
             float randChance1 = Random.Range(0f, 1f);
             if (randChance1 < 0.35) {
-                //int randLetterIndex = Random.Range(0, 26);
-                //newName += lettersArray[randLetterIndex];
                 newName += RandomStatics.GetRandomLetter();  
                 
                 if (randChance1 < 0.05) {
-                    //randLetterIndex = Random.Range(0, 26);
-                    //newName += lettersArray[randLetterIndex];  
                     newName += RandomStatics.GetRandomLetter();          
                 }
             }            
@@ -178,74 +146,7 @@ public class SpeciesGenomePool
         avgCandidateData = new CandidateAgentData(blankGenome, speciesID);
         avgCandidateData.SetToAverage(leaderboardGenomesList);
     }
-    
-    // WPP: moved to CandidateAgentData, 
-    // process broken into parts for core, appearance, and performance data,
-    // optimized so normalization calculated and applied once
-    /*private void RecalculateAverageCandidate() 
-    {
-        var avgCore = avgCandidateData.candidateGenome.bodyGenome.coreGenome;
-        var avgAppearance = avgCandidateData.candidateGenome.bodyGenome.appearanceGenome;
 
-        //calculate avg candidate:
-        avgAppearance.huePrimary = Vector3.zero;
-        avgAppearance.hueSecondary = Vector3.zero;
-        avgCore.dietSpecializationDecay = 0f;
-        avgCore.dietSpecializationPlant = 0f;
-        avgCore.dietSpecializationMeat = 0f;
-        avgCore.talentSpecializationAttack = 0f;
-        avgCore.talentSpecializationDefense = 0f;
-        avgCore.talentSpecializationSpeed = 0f;
-        avgCore.talentSpecializationUtility = 0f;
-
-        avgCore.bodyLength = 0f;
-        avgCore.creatureAspectRatio = 0f;
-
-        avgCandidateData.performanceData = new PerformanceData();  // clear // ***EC better spot for this??
-        //Debug.Log("avgPerformanceData " + avgPerformanceData.totalTicksAlive.ToString());
-        //avgCandidateData.performanceData = avgPerformanceData;
-        
-        CritterModuleCoreGenome leaderCore;
-        CritterModuleAppearanceGenome leaderAppearance;
-        PerformanceData leaderPerformance;
-        
-        float norm = 1f / (leaderboardGenomesList.Count - 1);
-
-        for (int i = 0; i < leaderboardGenomesList.Count; i++) {
-            leaderAppearance = leaderboardGenomesList[i].candidateGenome.bodyGenome.appearanceGenome;
-            leaderCore = leaderboardGenomesList[i].candidateGenome.bodyGenome.coreGenome;
-            leaderPerformance = leaderboardGenomesList[i].performanceData;
-            
-            avgAppearance.huePrimary += leaderAppearance.huePrimary * norm;
-            avgAppearance.hueSecondary += leaderAppearance.hueSecondary * norm;
-            
-            avgCore.dietSpecializationDecay += leaderCore.dietSpecializationDecay * norm;
-            avgCore.dietSpecializationPlant += leaderCore.dietSpecializationPlant * norm;
-            avgCore.dietSpecializationMeat += leaderCore.dietSpecializationMeat * norm;
-            avgCore.talentSpecializationAttack += leaderCore.talentSpecializationAttack * norm;
-            avgCore.talentSpecializationDefense += leaderCore.talentSpecializationDefense * norm;
-            avgCore.talentSpecializationSpeed += leaderCore.talentSpecializationSpeed * norm;
-            avgCore.talentSpecializationUtility += leaderCore.talentSpecializationUtility * norm;
-            avgCore.bodyLength += leaderCore.bodyLength * norm;
-            avgCore.creatureAspectRatio += leaderCore.creatureAspectRatio * norm;
-
-            //Performance Data:
-            avgCandidateData.performanceData.totalDamageDealt += leaderPerformance.totalDamageDealt * norm;
-            avgCandidateData.performanceData.totalDamageTaken += leaderPerformance.totalDamageTaken * norm;
-            avgCandidateData.performanceData.totalFoodEatenCorpse += leaderPerformance.totalFoodEatenCorpse * norm;
-            avgCandidateData.performanceData.totalFoodEatenCreature += leaderPerformance.totalFoodEatenCreature * norm;
-            avgCandidateData.performanceData.totalFoodEatenEgg += leaderPerformance.totalFoodEatenEgg * norm;
-            avgCandidateData.performanceData.totalFoodEatenPlant += leaderPerformance.totalFoodEatenPlant * norm;
-            avgCandidateData.performanceData.totalFoodEatenZoop += leaderPerformance.totalFoodEatenZoop * norm;
-            avgCandidateData.performanceData.totalTicksAlive += leaderPerformance.totalTicksAlive * norm;
-            avgCandidateData.performanceData.totalTicksRested += leaderPerformance.totalTicksRested * norm;
-            avgCandidateData.performanceData.totalTimesAttacked += leaderPerformance.totalTimesAttacked * norm;
-            avgCandidateData.performanceData.totalTimesDashed += leaderPerformance.totalTimesDashed * norm;
-            avgCandidateData.performanceData.totalTimesDefended += leaderPerformance.totalTimesDefended * norm;
-            avgCandidateData.performanceData.totalTimesPregnant += leaderPerformance.totalTimesPregnant * norm;   
-        }
-    }*/
-    
     public void AddNewYearlyStats(int year) 
     {
         CreateNewAverageCandidate(); // ***EC figure this out???        

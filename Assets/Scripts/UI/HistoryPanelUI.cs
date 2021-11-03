@@ -26,31 +26,28 @@ public class HistoryPanelUI : MonoBehaviour
     SelectionManager selectionManager => SelectionManager.instance;
 
     public float timelineStartTimeStep = 0f;
-
-    // * WPP: why are these constants instead of exposed?
-    // + if remaining as constants, remove [SerializeField]
-    [SerializeField]
+    
     private const int panelSizePixels = 360;
     [SerializeField]
-    private const float marginLeft = 0.1f;
+    float marginLeft = 0.1f;
     [SerializeField]
-    private const float marginRight = 0.1f;
+    float marginRight = 0.1f;
     [SerializeField]
-    private const float marginTop = 0.05f;
+    float marginTop = 0.05f;
     [SerializeField]
-    private const float marginMiddle = 0.025f;
+    float marginMiddle = 0.025f;
     [SerializeField]
-    private const float marginBottom = 0.1f;
-    [SerializeField]
-    private const float clockHeight = 0.2f;
+    float marginBottom = 0.1f;
+    [SerializeField] 
+    float clockHeight = 0.2f;
     [SerializeField]
     Text textPanelStateDebug;
     [SerializeField]
-    private GameObject tempPanelSpeciesPop;
+    GameObject tempPanelSpeciesPop;
     [SerializeField]
-    private GameObject tempPanelGraph;
+    GameObject tempPanelGraph;
     [SerializeField]
-    private GameObject tempPanelLifeEvents;
+    GameObject tempPanelLifeEvents;
     [SerializeField] int maxNumCreatureEventIcons;
 
     private float displayWidth => 1f - marginLeft - marginRight;
@@ -59,6 +56,7 @@ public class HistoryPanelUI : MonoBehaviour
     public static int GetPanelSizePixels() {
         return panelSizePixels;
     }
+    
     public enum HistoryPanelMode {
         AllSpecies,
         //ActiveSpecies,
@@ -66,13 +64,8 @@ public class HistoryPanelUI : MonoBehaviour
         CreatureTimeline
     }
 
-    // * WPP: just make the variable public
     private HistoryPanelMode curPanelMode;
 
-    public HistoryPanelMode GetCurPanelMode() {
-        return curPanelMode;
-    }
-    
     public void SetCurPanelMode(HistoryPanelMode mode) {
         curPanelMode = mode;
     }
@@ -159,7 +152,7 @@ public class HistoryPanelUI : MonoBehaviour
     
     public void RefreshFocusedAgent(bool focusHasChanged)
     {
-        HistoryPanelMode panelMode = GetCurPanelMode();
+        HistoryPanelMode panelMode = curPanelMode;
     
         // * WPP: comment suggests checking for matching species, but code is checking candidate ID, not species ID
         // + design goals of this if/else branch unclear

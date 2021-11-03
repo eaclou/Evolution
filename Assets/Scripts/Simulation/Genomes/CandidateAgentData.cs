@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Playcraft;
 
-// WPP 5/9/21: De-nested because referenced outside CandidateAgentData
 /// Stats
 public struct PerformanceData {
     public float totalFoodEatenPlant;
@@ -80,8 +79,8 @@ public struct PerformanceData {
 }
 
 [System.Serializable]
-public class CandidateAgentData {
-
+public class CandidateAgentData 
+{
     public int candidateID;
     public int speciesID;
     public AgentGenome candidateGenome;
@@ -131,35 +130,6 @@ public class CandidateAgentData {
     
     private string GenerateTempCritterName() 
     {
-        // WPP: moved to static alphabet
-        /*string[] letters = new string[26];
-        letters[0] = "A";
-        letters[1] = "B";
-        letters[2] = "C";
-        letters[3] = "D";
-        letters[4] = "E";
-        letters[5] = "F";
-        letters[6] = "G";
-        letters[7] = "H";
-        letters[8] = "I";
-        letters[9] = "J";
-        letters[10] = "K";
-        letters[11] = "L";
-        letters[12] = "M";
-        letters[13] = "N";
-        letters[14] = "O";
-        letters[15] = "P";
-        letters[16] = "Q";
-        letters[17] = "R";
-        letters[18] = "S";
-        letters[19] = "T";
-        letters[20] = "U";
-        letters[21] = "V";
-        letters[22] = "W";
-        letters[23] = "X";
-        letters[24] = "Y";
-        letters[25] = "Z";*/
-        
         if (candidateID < 0)
             return "-1";
 
@@ -170,26 +140,6 @@ public class CandidateAgentData {
                 break;
         
         return result;
-
-        // WPP: moved to RequestAddLetterToName to eliminate repeition
-        /*int onesColumn = candidateID % 26;
-        name = letters[onesColumn];
-        if(candidateID > 26) {
-            int tensColummn = Mathf.FloorToInt((float)candidateID / 26f) % 26;
-            name += letters[tensColummn];
-
-            if(candidateID > 26 * 26) {
-                int hundredsColummn = Mathf.FloorToInt((float)candidateID / (26f * 26f)) % 26;
-                name += letters[hundredsColummn];
-
-                if (candidateID > 26 * 26 * 26) {
-                    int thousandsColummn = Mathf.FloorToInt((float)candidateID / (26f * 26f * 26f)) % 26;
-                    name += letters[thousandsColummn];
-                }
-            }
-        }*/
-
-        //return letters[speciesID % 26] + "'" + name;
     }
     
     bool RequestAddLetterToName(ref string value, int column)

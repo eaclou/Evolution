@@ -114,7 +114,6 @@ public class CritterModuleCoreGenome
     public float talentSpecializationSpeed;
     public float talentSpecializationUtility;
     
-    // WPP: pulled from AppendModuleNeuronsToMasterList
     public float talentSpecTotal => talentSpecializationAttack + talentSpecializationDefense + talentSpecializationSpeed + talentSpecializationUtility;
     public float talentSpecAttackNorm => talentSpecializationAttack / talentSpecTotal;
     public float talentSpecDefenseNorm => talentSpecializationDefense / talentSpecTotal;
@@ -307,65 +306,16 @@ public class CritterModuleCoreGenome
     public void GenerateRandomInitialGenome() {
         generation = 0;
         name = nameList.GetRandomName();
-        // WPP: stored these in a ScriptableObject
-        /*string[] namesList = new string[29];
-        namesList[0] = "ALBERT";
-        namesList[1] = "BORT";
-        namesList[2] = "CANDICE";
-        namesList[3] = "DOMINIQUE";
-        namesList[4] = "ELIZABETH";
-        namesList[5] = "FRANKLIN";
-        namesList[6] = "GRUBBS";
-        namesList[7] = "HORNWORT";
-        namesList[8] = "ISABELLE";
-        namesList[9] = "JERRY";
-        namesList[10] = "KILLINGTON";
-        namesList[11] = "LOSER";
-        namesList[12] = "MARTHA";
-        namesList[13] = "NICHOLAS";
-        namesList[14] = "OPHELIA";
-        namesList[15] = "PATRICE";
-        namesList[16] = "QWERTY";
-        namesList[17] = "RANCHEROS";
-        namesList[18] = "STALLION";
-        namesList[19] = "THEODORE";
-        namesList[20] = "UMBERTO";
-        namesList[21] = "VILLAIN";
-        namesList[22] = "WINNER";
-        namesList[23] = "XAVIER";
-        namesList[24] = "YENNIFER";
-        namesList[25] = "ZELDO";
-        namesList[26] = "THE CHOSEN ONE";
-        namesList[27] = "EXCALIBUR";
-        namesList[28] = "HAM";
         
-        int randomNameIndex = Random.Range(0, namesList.Length);
-        name = namesList[randomNameIndex];*/
-
         isPassive = RandomStatics.CoinToss();
 
         shapeModifiersList = new List<ShapeModifierData>();  // empty
         masksList = new List<MaskData>();
         
-        // WPP: using constructor
         ShapeModifierData initModifier = new ShapeModifierData(Random.Range(0f, 1f), 1f);
-        /*initModifier.modifierTypeID = ShapeModifierType.Extrude;
-        initModifier.maskIndicesList = new List<int>();
-        initModifier.amplitude = Random.Range(0f, 1f);
-        initModifier.taperDistance = 1f;*/
 
-        // WPP: using constructor
         // Masks for this modifier:
         MaskData maskData = new MaskData(7);
-        /*maskData.coordinateTypeID = MaskCoordinateType.Polygonize;
-        maskData.functionTypeID = MaskFunctionType.Cos;
-        maskData.origin = Random.Range(0f, 1f); // normalized along length of creature
-        maskData.amplitude = Random.Range(0f, 1f); 
-        maskData.cycleDistance = Random.Range(0f, 1f); 
-        maskData.phase = Random.Range(0f, 1f); 
-        maskData.numPolyEdges = Random.Range(1, 7); 
-        maskData.axisDir = new Vector2(Random.Range(0f, 1f), Random.Range(0f, 1f));
-        maskData.repeat = true;*/
 
         masksList.Add(maskData);
         initModifier.maskIndicesList.Add(masksList.Count - 1); // reference mask by index to allow re-use by other shape modifiers    
@@ -494,60 +444,11 @@ public class CritterModuleCoreGenome
         }
         if(talentSpecUtilityNorm > 0.2f) {
             AddNeuron("healEffector");
-        }       
+        }
     }
     
     void AddNeuron(string name) { masterList.Add(map.GetData(name)); }
 
-    /*List<NeuronGenome> neuronList;
-    public void AppendModuleNeuronsToMasterList(List<NeuronGenome> neuronList) {
-        // WPP: Lists are ref parameters by default
-        this.neuronList = neuronList;
-        //NeuronGenome temperature = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 22);
-        //NeuronGenome pressure = new NeuronGenome(NeuronGenome.NeuronType.In, inno, 23);        
-        
-        // WPP: static data stored in NeuralMap
-        AddNeuron("Bias");
-        AddNeuron("isMouthTrigger");
-        AddNeuron("isContact");
-        AddNeuron("contactForceX");
-        AddNeuron("contactForceY");
-        AddNeuron("hitPoints");
-        AddNeuron("stamina");
-        AddNeuron("energyStored");
-        AddNeuron("foodStored");
-        AddNeuron("mouthFeedEffector");
-        //neuronList.Add(new NeuronGenome("Bias", NeuronType.In, moduleID, 0));
-        //neuronList.Add(new NeuronGenome("isMouthTrigger", NeuronType.In, moduleID, 21));
-        //neuronList.Add(new NeuronGenome("isContact", NeuronType.In, moduleID, 24));
-        //neuronList.Add(new NeuronGenome("contactForceX", NeuronType.In, moduleID, 25));
-        //neuronList.Add(new NeuronGenome("contactForceY", NeuronType.In, moduleID, 26));
-        //neuronList.Add(new NeuronGenome("hitPoints", NeuronType.In, moduleID, 27)); 
-        //neuronList.Add(new NeuronGenome("stamina", NeuronType.In, moduleID, 28));
-        //neuronList.Add(new NeuronGenome("energyStored", NeuronType.In, moduleID, 204));
-        //neuronList.Add(new NeuronGenome("foodStored", NeuronType.In, moduleID, 205));
-        //neuronList.Add(new NeuronGenome("mouthFeedEffector", NeuronType.Out, moduleID, 206));
-
-        if(talentSpecAttackNorm > 0.2f) {
-            AddNeuron("mouthAttackEffector");
-            //neuronList.Add(new NeuronGenome("mouthAttackEffector", NeuronType.Out, moduleID, 207));
-        }
-        if(talentSpecDefenseNorm > 0.2f) {
-            AddNeuron("defendEffector");
-            //neuronList.Add(new NeuronGenome("defendEffector", NeuronType.Out, moduleID, 208));
-        }
-        if(talentSpecSpeedNorm > 0.2f) {
-            AddNeuron("dashEffector");
-            //neuronList.Add(new NeuronGenome("dashEffector", NeuronType.Out, moduleID, 209));
-        }
-        if(talentSpecUtilityNorm > 0.2f) {
-            AddNeuron("healEffector");
-            //neuronList.Add(new NeuronGenome("healEffector", NeuronType.Out, moduleID, 210));
-        }
-    }
-    
-    void AddNeuron(string name) { neuronList.Add(map.GetGenome(name)); }*/
-    
     public void SetToMutatedCopyOfParentGenome(CritterModuleCoreGenome parentGenome, MutationSettingsInstance settings) {
         string parentName = parentGenome.name;
         //int parentNameLength = parentName;
@@ -558,40 +459,8 @@ public class CritterModuleCoreGenome
         string backHalf = parentName.Substring(randIndex + 1);
         name = parentName;
         
-        // WPP: delegated random letter lookup to RandomStatics.GetRandomLetter()
         if (RandomStatics.CoinToss(.05f)) {
             middleChar = RandomStatics.GetRandomLetter();
-            /*int randLetterIndex = Random.Range(0, 26);
-            
-            string[] lettersArray = new string[26];
-            lettersArray[0] = "A";
-            lettersArray[1] = "B";
-            lettersArray[2] = "C";
-            lettersArray[3] = "D";
-            lettersArray[4] = "E";
-            lettersArray[5] = "F";
-            lettersArray[6] = "G";
-            lettersArray[7] = "H";
-            lettersArray[8] = "I";
-            lettersArray[9] = "J";
-            lettersArray[10] = "K";
-            lettersArray[11] = "L";
-            lettersArray[12] = "M";
-            lettersArray[13] = "N";
-            lettersArray[14] = "O";
-            lettersArray[15] = "P";
-            lettersArray[16] = "Q";
-            lettersArray[17] = "R";
-            lettersArray[18] = "S";
-            lettersArray[19] = "T";
-            lettersArray[20] = "U";
-            lettersArray[21] = "V";
-            lettersArray[22] = "W";
-            lettersArray[23] = "X";
-            lettersArray[24] = "Y";
-            lettersArray[25] = "Z";
-
-            middleChar = lettersArray[randLetterIndex];*/
         }
 
         frontHalf += middleChar;
@@ -640,31 +509,12 @@ public class CritterModuleCoreGenome
         
         // Mutate Add New Modifiers Here:?
         if(shapeModifiersList.Count < 6 && RandomStatics.CoinToss(.02f)) {
-            // WPP: initialized in constructor
-            // Add new shapeModifier:
             ShapeModifierData initModifier = new ShapeModifierData(.4f, .2f);
-            /*initModifier.modifierTypeID = ShapeModifierType.Extrude;
-            initModifier.maskIndicesList = new List<int>();
-            initModifier.amplitude = 0.4f;
-            initModifier.taperDistance = 0.2f;*/
-
             shapeModifiersList.Add(initModifier);
         }
         
         if(masksList.Count < 4 && RandomStatics.CoinToss(.04f)) {
-            // WPP: use constructor
-            // Add new mask:
             MaskData maskData = new MaskData(.5f, 1f, .5f, 0f, 1, new Vector2(0f, 1f));
-            /*maskData.coordinateTypeID = MaskCoordinateType.Polygonize;
-            maskData.functionTypeID = MaskFunctionType.Cos;
-            maskData.origin = 0.5f; // normalized along length of creature
-            maskData.amplitude = 1f;
-            maskData.cycleDistance = 0.5f;
-            maskData.phase = 0f;
-            maskData.numPolyEdges = 1;
-            maskData.axisDir = new Vector2(0f, 1f);
-            maskData.repeat = true;*/
-
             masksList.Add(maskData);
         }        
         
