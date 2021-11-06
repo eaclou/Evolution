@@ -356,6 +356,17 @@ public class SpeciesGenomePool
             default: Debug.LogError("Invalid selection group: " + group); return null;
         }
     }
+    
+    public int GetNumberAgentsEvaluated()
+    {
+        int result = 0;
+        
+        foreach (var agent in candidateGenomesList) 
+            if(agent.isBeingEvaluated) 
+                result++;
+
+        return result;
+    }
 }
 
 #region Dead code (please remove)

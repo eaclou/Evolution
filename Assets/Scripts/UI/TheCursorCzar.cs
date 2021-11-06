@@ -60,6 +60,13 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
         return curMousePixelPos;
     }
     
+    public Vector2 GetScaledCursorCoords(float inverseScale, float yOffset)
+    {
+        float cursorCoordsX = Mathf.Clamp01(GetCursorPixelCoords().x / inverseScale);
+        float cursorCoordsY = Mathf.Clamp01((GetCursorPixelCoords().y + yOffset) / inverseScale);
+        return new Vector2(cursorCoordsX, cursorCoordsY);  
+    }
+    
     [SerializeField] RectTransform speciesHistoryRect;
 
     /// Get position of mouse on water plane:

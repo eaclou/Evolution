@@ -38,7 +38,7 @@ public class CreatureEventIconUI : MonoBehaviour
     public void SetDisplay()
     {        
         currentCoords = Vector2.Lerp(currentCoords, targetCoords, 0.75f);
-        gameObject.transform.localPosition = new Vector3(currentCoords.x * (float)HistoryPanelUI.GetPanelSizePixels(), currentCoords.y * (float)HistoryPanelUI.GetPanelSizePixels(), 0f);
+        gameObject.transform.localPosition = new Vector3(currentCoords.x * (float)HistoryPanelUI.panelSizePixels, currentCoords.y * (float)HistoryPanelUI.panelSizePixels, 0f);
         imageBG.color = eventTypeColors == null ? Color.Lerp(Color.red, Color.green, eventData.goodness) : eventTypeColors[eventData.type];
     }
     
