@@ -27,7 +27,8 @@ public class CreaturePortraitPanel : MonoBehaviour
         title += "</size>";
         candidateName.text = title;
         
-        SetColors(candidate.candidateGenome.bodyGenome.appearanceGenome);
+        if (candidate.candidateGenome?.bodyGenome?.appearanceGenome != null)
+            SetColors(candidate.candidateGenome.bodyGenome.appearanceGenome);
     }
 
     

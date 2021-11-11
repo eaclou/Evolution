@@ -35,7 +35,7 @@ public class SensorsPanel : MonoBehaviour
 
     public void Refresh() 
     {
-        if (genome.bodyGenome.foodGenome == null) return;
+        if (genome?.bodyGenome?.foodGenome == null) return;
         
         body = genome.bodyGenome;
         food = body.foodGenome;

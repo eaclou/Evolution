@@ -48,7 +48,7 @@ public class SimulationManager : Singleton<SimulationManager>
 
     public bool loadingComplete = false;
     
-    public bool _BigBangOn = false;
+    public bool _BigBangOn => uiManager.bigBangPanelUI.isRunning;
 
     private static float mapSize = 256f;  // This determines scale of environment, size of FluidSim plane!!! Important!
     public static float _MapSize => mapSize;
@@ -98,7 +98,6 @@ public class SimulationManager : Singleton<SimulationManager>
     MutationSettingsInstance GetSetVertebrateMutationSettings() { return _cachedVertebrateMutationSettings = lookup.GetMutationSettingsCopy(MutationSettingsId.Vertebrate); }
 
     
-    
     public int GetNumTimeStepsPerYear() {
         return numStepsInSimYear;
     }
@@ -126,6 +125,7 @@ public class SimulationManager : Singleton<SimulationManager>
         return null;
     }
 
+    public void AddHistoryEvent(SimEventData value) { simEventsManager.completeEventHistoryList.Add(value); }
 
     GlobalGraphData globalGraphData = new GlobalGraphData();
         
@@ -847,6 +847,13 @@ public class SimulationManager : Singleton<SimulationManager>
                 continue;
                           
             CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
+            
+            if (candidateData == null)
+            {
+                //Debug.LogError("Failed to find available candidate when attempting to brush spawn agent");
+                continue;
+            }
+            
             candidateData.candidateGenome = masterGenomePool.completeSpeciesPoolsList[speciesIndex].representativeCandidate.candidateGenome;
             
             //Debug.Log("AttemptToBrushSpawnAgent(" + a.ToString() + ") species: " + speciesIndex.ToString() + ", " + candidateData.ToString());
@@ -1351,35 +1358,6 @@ public class SimulationManager : Singleton<SimulationManager>
     }    
     #endregion
 
-    #region Utility Functions (not used) // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& UTILITY FUNCTIONS! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-    /*public int GetAgentIndexByLottery(float[] rankedFitnessList, int[] rankedIndicesList, int speciesIndex) {
-        int selectedIndex = 0;
-
-        int popSize = numAgents / numSpecies;
-        int startIndex = popSize * speciesIndex;
-        int endIndex = popSize * (speciesIndex + 1);
-        
-        // calculate total fitness of all EVEN and ODD agents separately!
-        float totalFitness = 0f;
-        for (int i = startIndex; i < endIndex; i++) {            
-            totalFitness += rankedFitnessList[i];
-        }
-        // generate random lottery value between 0f and totalFitness:
-        float lotteryValue = Random.Range(0f, totalFitness);
-        float currentValue = 0f;
-        for (int i = startIndex; i < endIndex; i++) {
-            if (lotteryValue >= currentValue && lotteryValue < (currentValue + rankedFitnessList[i])) {
-                // Jackpot!
-                selectedIndex = rankedIndicesList[i];
-                //Debug.Log("Selected: " + selectedIndex.ToString() + "! (" + i.ToString() + ") fit= " + currentValue.ToString() + "--" + (currentValue + (1f - rankedFitnessList[i])).ToString() + " / " + totalFitness.ToString() + ", lotto# " + lotteryValue.ToString() + ", fit= " + (1f - rankedFitnessList[i]).ToString());
-            }
-            currentValue += rankedFitnessList[i]; // add this agent's fitness to current value for next check
-        }
-        return selectedIndex;
-    }*/
-
-    #endregion
-    
     GameOptions gameOptions => uiManager.gameOptionsManager.gameOptions;
     QualitySettingId simulationComplexity => gameOptions.simulationComplexity;
     QualitySettingId fluidPhysicsQuality => gameOptions.fluidPhysicsQuality;
@@ -1398,8 +1376,13 @@ public class SimulationManager : Singleton<SimulationManager>
         vegetationManager?.ClearBuffers();
         zooplanktonManager?.ClearBuffers();
     }
+    
+    [Header("Debug")]
+    [SerializeField] bool debugLogStartup;
 
-    public void SaveTrainingData() {  // ********* BROKEN BY SPECIATION UPDATE!!!!!!!!!!!!! ****************
+    #region Broken by Speciation update
+    /// BROKEN BY SPECIATION UPDATE
+    public void SaveTrainingData() {  
         /*
         Debug.Log("SAVE Population!");
         GenePool pool = new GenePool(agentGenomePoolArray);
@@ -1414,7 +1397,9 @@ public class SimulationManager : Singleton<SimulationManager>
         System.IO.File.WriteAllText(filePath, json);
         */
     }
-    public void LoadTrainingData() {  // ********* BROKEN BY SPECIATION UPDATE!!!!!!!!!!!!! ****************
+    
+    /// BROKEN BY SPECIATION UPDATE
+    public void LoadTrainingData() {  
         /*
         //Debug.Log("LOAD Population!");
         //"E:\Unity Projects\GitHub\Evolution\Assets\GridSearchSaves\2018_2_13_12_35\GS_RawScores.json"
@@ -1438,405 +1423,432 @@ public class SimulationManager : Singleton<SimulationManager>
         //agentGenomePoolArray = loadedData.genomeArray;
         */
     }
+    #endregion
+}
+
+#region Utility Functions (not used) 
+/*public int GetAgentIndexByLottery(float[] rankedFitnessList, int[] rankedIndicesList, int speciesIndex) {
+    int selectedIndex = 0;
+
+    int popSize = numAgents / numSpecies;
+    int startIndex = popSize * speciesIndex;
+    int endIndex = popSize * (speciesIndex + 1);
     
-    #region OLD CODE: // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& OLD CODE! &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-    /*private void ResetTrainingForPersistent() {
-        rawFitnessScoresArray = new float[agentGenomePoolSize];
-
-        curGen = 0;
-        curApproxGen = 0;
-        avgFitnessLastGen = 0f;
-        bestFitnessScore = 0f;
-        numAgentsBorn = 0;
-        currentOldestAgent = 0;
-
-        recordPlayerAge = 0;
-        recordBotAge = 0;
-    
-        rollingAverageAgentScore = 0f;
-        if (fitnessScoresEachGenerationList == null) {
-            fitnessScoresEachGenerationList = new List<float>();
-        }
-        else {
-            fitnessScoresEachGenerationList.Clear();
-        }
-        agentAvgRecordScore = 1f;
-
-        // Respawn Agents:
-        RespawnAgents();
-        for (int i = 0; i < foodArray.Length; i++) {            
-            ReviveFood(i);
-        }
-        for(int i = 0; i < predatorArray.Length; i++) {
-            RevivePredator(i);
-        }
-    }*/
-
-    /*public void ToggleTrainingPersistent() {
-        if (firstTimeTraining) {
-            //ResetTrainingForNewGen();
-            rawFitnessScoresArray = new float[agentGenomePoolSize];
-            firstTimeTraining = false;
-        }
-        isTrainingPersistent = !isTrainingPersistent;
-    }*/
-    /*public void ResetGenomes() {
-        LoadingInitializePopulationGenomes();
-        curGen = 0;
-        ResetTrainingForNewGenSupervised();
-        ResetTrainingForPersistent();
-        //UpdateAgentBrains();
-    }*/
-
-    /*private void RespawnAgents() {  // doesn't create the Agent classes, just resets their data
-        for (int i = 0; i < agentGenomePoolSize; i++) {
-            Vector3 startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-30f, 30f), 0f);
-            StartPositionGenome agentStartPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
-            agentsArray[i].InitializeAgentFromGenome(agentGenomePoolArray[i], agentStartPosGenome);
-        }
-    } */ // *** confirm these are set up alright
-  
-    
-
-    /*private void UpdateAgentBrains() {
-        // UPDATE BRAINS TEST!!!!!
-        for (int a = 0; a < agentsArray.Length; a++) {
-            agentsArray[a].ReplaceBrain(supervisedGenomePoolArray[a % 32]);
-        }
-    }*/
-
-    /*public void Update() {
-        //cameraManager.targetTransform = playerAgent.transform;
-        
-        
-        
-        //Vector3 agentPos = Vector3.zero;
-        //if (playerAgent != null) {
-        //    agentPos = playerAgent.testModule.ownRigidBody2D.position;
-        //}
-        //Debug.Log("Update() AgentPos: (" + agentPos.x.ToString() + ", " + agentPos.y.ToString() + ") Time: " + Time.realtimeSinceStartup.ToString());
-    }*/
-
-    /*public IEnumerator TestYieldFixedUpdate() {
-        Vector3 agentPos = playerAgent.testModule.ownRigidBody2D.position;
-        Debug.Log("Coroutine BEFORE! (pre-physics) AgentPos: (" + agentPos.x.ToString() + ", " + agentPos.y.ToString() + ") Time: " + Time.realtimeSinceStartup.ToString());
-
-        yield return new WaitForFixedUpdate();
-
-        Debug.Log("Coroutine AFTER! (Yield WaitForFixedUpdate, supposedly after physics) AgentPos: (" + agentPos.x.ToString() + ", " + agentPos.y.ToString() + ") Time: " + Time.realtimeSinceStartup.ToString());
+    // calculate total fitness of all EVEN and ODD agents separately!
+    float totalFitness = 0f;
+    for (int i = startIndex; i < endIndex; i++) {            
+        totalFitness += rankedFitnessList[i];
     }
-    public IEnumerator TestYieldEndOfFrame() {
-        Vector3 agentPos = playerAgent.testModule.ownRigidBody2D.position;        
-        yield return new WaitForEndOfFrame();
-        Debug.Log("TestYieldEndOfFrame()) AgentPos: (" + agentPos.x.ToString() + ", " + agentPos.y.ToString() + ") Time: " + Time.realtimeSinceStartup.ToString());
+    // generate random lottery value between 0f and totalFitness:
+    float lotteryValue = Random.Range(0f, totalFitness);
+    float currentValue = 0f;
+    for (int i = startIndex; i < endIndex; i++) {
+        if (lotteryValue >= currentValue && lotteryValue < (currentValue + rankedFitnessList[i])) {
+            // Jackpot!
+            selectedIndex = rankedIndicesList[i];
+            //Debug.Log("Selected: " + selectedIndex.ToString() + "! (" + i.ToString() + ") fit= " + currentValue.ToString() + "--" + (currentValue + (1f - rankedFitnessList[i])).ToString() + " / " + totalFitness.ToString() + ", lotto# " + lotteryValue.ToString() + ", fit= " + (1f - rankedFitnessList[i]).ToString());
+        }
+        currentValue += rankedFitnessList[i]; // add this agent's fitness to current value for next check
     }
-    public void TestExecutionOrder() {
-        Vector3 agentPos = playerAgent.testModule.ownRigidBody2D.position;
-        Debug.Log("(During FixedUpdate - pre-physics) AgentPos: (" + agentPos.x.ToString() + ", " + agentPos.y.ToString() + ") Time: " + Time.realtimeSinceStartup.ToString());        
-    }*/
+    return selectedIndex;
+}*/
 
-    /*public void InitializeNewSimulation() {
-        //ToggleTrainingPersistent();        
-        // Create Environment (Or have it pre-built)
+#endregion
 
+#region OLD CODE: 
+/*private void ResetTrainingForPersistent() {
+    rawFitnessScoresArray = new float[agentGenomePoolSize];
 
-        settingsManager.Initialize();
+    curGen = 0;
+    curApproxGen = 0;
+    avgFitnessLastGen = 0f;
+    bestFitnessScore = 0f;
+    numAgentsBorn = 0;
+    currentOldestAgent = 0;
 
+    recordPlayerAge = 0;
+    recordBotAge = 0;
+
+    rollingAverageAgentScore = 0f;
+    if (fitnessScoresEachGenerationList == null) {
         fitnessScoresEachGenerationList = new List<float>();
-        supervisedScoresList = new List<float>();
+    }
+    else {
+        fitnessScoresEachGenerationList.Clear();
+    }
+    agentAvgRecordScore = 1f;
 
-        agentFluidColliderMaterialsArray = new Material[numAgents];
-        agentDebugTexturesArray = new Texture2D[numAgents];
-        foodMaterialsArray = new Material[numFood];
-        //foodDebugTexturesArray = new Texture2D[numFood];
-        // Create initial population of Genomes:
-        // Re-Factor:
-        bodyGenomeTemplate = new BodyGenome();
-        bodyGenomeTemplate.InitializeGenomeAsDefault();
+    // Respawn Agents:
+    RespawnAgents();
+    for (int i = 0; i < foodArray.Length; i++) {            
+        ReviveFood(i);
+    }
+    for(int i = 0; i < predatorArray.Length; i++) {
+        RevivePredator(i);
+    }
+}*/
 
-        InitializePopulationGenomes();
+/*public void ToggleTrainingPersistent() {
+    if (firstTimeTraining) {
+        //ResetTrainingForNewGen();
+        rawFitnessScoresArray = new float[agentGenomePoolSize];
+        firstTimeTraining = false;
+    }
+    isTrainingPersistent = !isTrainingPersistent;
+}*/
+/*public void ResetGenomes() {
+    LoadingInitializePopulationGenomes();
+    curGen = 0;
+    ResetTrainingForNewGenSupervised();
+    ResetTrainingForPersistent();
+    //UpdateAgentBrains();
+}*/
 
-        // Player's dummy Genome (required to initialize Agent Class):
-        AgentGenome playerGenome = new AgentGenome(-1);
-        playerGenome.InitializeBodyGenomeFromTemplate(bodyGenomeTemplate);
-        playerGenome.InitializeRandomBrainFromCurrentBody(0.25f);  // player's dummy genome zeroed
+/*private void RespawnAgents() {  // doesn't create the Agent classes, just resets their data
+    for (int i = 0; i < agentGenomePoolSize; i++) {
+        Vector3 startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-30f, 30f), 0f);
+        StartPositionGenome agentStartPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
+        agentsArray[i].InitializeAgentFromGenome(agentGenomePoolArray[i], agentStartPosGenome);
+    }
+} */ // *** confirm these are set up alright
 
-        // Instantiate Player Agent
-        string assetURL = "AgentPrefab";
-        GameObject playerAgentGO = Instantiate(Resources.Load(assetURL)) as GameObject;
-        playerAgentGO.name = "PlayerAgent";
-        //playerAgentGO.GetComponentInChildren<MeshRenderer>().material = playerMat;
-        playerAgentGO.GetComponent<Rigidbody2D>().mass = 1f;
-        //playerAgentGO.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-        playerAgent = playerAgentGO.GetComponent<Agent>();
-        //playerAgent.humanControlled = true;
-        //playerAgent.humanControlLerp = 1f;
-        playerAgent.speed *= 1f;
-        StartPositionGenome playerStartPosGenome = new StartPositionGenome(Vector3.zero, Quaternion.identity);
-        playerAgent.InitializeAgentFromGenome(playerGenome, playerStartPosGenome);
-        Material pMat = new Material(fluidColliderMatTemplate);
-        //playerAgentGO.GetComponentInChildren<MeshRenderer>().material = pMat;
-        playerAgent.meshRendererFluidCollider.material = pMat;
-        //playerAgent.material = pMat;
-        Texture2D playerTex = new Texture2D(4, 2);  // Health, foodAmountRGB, 4 outCommChannels
-        playerTex.filterMode = FilterMode.Point;
-        playerAgent.texture = playerTex;
-        playerAgent.meshRendererBeauty.material.SetTexture("_MainTex", playerTex);
-        //playerAgent.material.SetFloat("_IsPlayer", 1.0f);
+
+
+/*private void UpdateAgentBrains() {
+    // UPDATE BRAINS TEST!!!!!
+    for (int a = 0; a < agentsArray.Length; a++) {
+        agentsArray[a].ReplaceBrain(supervisedGenomePoolArray[a % 32]);
+    }
+}*/
+
+/*public void Update() {
+    //cameraManager.targetTransform = playerAgent.transform;
+    
+    
+    
+    //Vector3 agentPos = Vector3.zero;
+    //if (playerAgent != null) {
+    //    agentPos = playerAgent.testModule.ownRigidBody2D.position;
+    //}
+    //Debug.Log("Update() AgentPos: (" + agentPos.x.ToString() + ", " + agentPos.y.ToString() + ") Time: " + Time.realtimeSinceStartup.ToString());
+}*/
+
+/*public IEnumerator TestYieldFixedUpdate() {
+    Vector3 agentPos = playerAgent.testModule.ownRigidBody2D.position;
+    Debug.Log("Coroutine BEFORE! (pre-physics) AgentPos: (" + agentPos.x.ToString() + ", " + agentPos.y.ToString() + ") Time: " + Time.realtimeSinceStartup.ToString());
+
+    yield return new WaitForFixedUpdate();
+
+    Debug.Log("Coroutine AFTER! (Yield WaitForFixedUpdate, supposedly after physics) AgentPos: (" + agentPos.x.ToString() + ", " + agentPos.y.ToString() + ") Time: " + Time.realtimeSinceStartup.ToString());
+}
+public IEnumerator TestYieldEndOfFrame() {
+    Vector3 agentPos = playerAgent.testModule.ownRigidBody2D.position;        
+    yield return new WaitForEndOfFrame();
+    Debug.Log("TestYieldEndOfFrame()) AgentPos: (" + agentPos.x.ToString() + ", " + agentPos.y.ToString() + ") Time: " + Time.realtimeSinceStartup.ToString());
+}
+public void TestExecutionOrder() {
+    Vector3 agentPos = playerAgent.testModule.ownRigidBody2D.position;
+    Debug.Log("(During FixedUpdate - pre-physics) AgentPos: (" + agentPos.x.ToString() + ", " + agentPos.y.ToString() + ") Time: " + Time.realtimeSinceStartup.ToString());        
+}*/
+
+/*public void InitializeNewSimulation() {
+    //ToggleTrainingPersistent();        
+    // Create Environment (Or have it pre-built)
+
+
+    settingsManager.Initialize();
+
+    fitnessScoresEachGenerationList = new List<float>();
+    supervisedScoresList = new List<float>();
+
+    agentFluidColliderMaterialsArray = new Material[numAgents];
+    agentDebugTexturesArray = new Texture2D[numAgents];
+    foodMaterialsArray = new Material[numFood];
+    //foodDebugTexturesArray = new Texture2D[numFood];
+    // Create initial population of Genomes:
+    // Re-Factor:
+    bodyGenomeTemplate = new BodyGenome();
+    bodyGenomeTemplate.InitializeGenomeAsDefault();
+
+    InitializePopulationGenomes();
+
+    // Player's dummy Genome (required to initialize Agent Class):
+    AgentGenome playerGenome = new AgentGenome(-1);
+    playerGenome.InitializeBodyGenomeFromTemplate(bodyGenomeTemplate);
+    playerGenome.InitializeRandomBrainFromCurrentBody(0.25f);  // player's dummy genome zeroed
+
+    // Instantiate Player Agent
+    string assetURL = "AgentPrefab";
+    GameObject playerAgentGO = Instantiate(Resources.Load(assetURL)) as GameObject;
+    playerAgentGO.name = "PlayerAgent";
+    //playerAgentGO.GetComponentInChildren<MeshRenderer>().material = playerMat;
+    playerAgentGO.GetComponent<Rigidbody2D>().mass = 1f;
+    //playerAgentGO.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+    playerAgent = playerAgentGO.GetComponent<Agent>();
+    //playerAgent.humanControlled = true;
+    //playerAgent.humanControlLerp = 1f;
+    playerAgent.speed *= 1f;
+    StartPositionGenome playerStartPosGenome = new StartPositionGenome(Vector3.zero, Quaternion.identity);
+    playerAgent.InitializeAgentFromGenome(playerGenome, playerStartPosGenome);
+    Material pMat = new Material(fluidColliderMatTemplate);
+    //playerAgentGO.GetComponentInChildren<MeshRenderer>().material = pMat;
+    playerAgent.meshRendererFluidCollider.material = pMat;
+    //playerAgent.material = pMat;
+    Texture2D playerTex = new Texture2D(4, 2);  // Health, foodAmountRGB, 4 outCommChannels
+    playerTex.filterMode = FilterMode.Point;
+    playerAgent.texture = playerTex;
+    playerAgent.meshRendererBeauty.material.SetTexture("_MainTex", playerTex);
+    //playerAgent.material.SetFloat("_IsPlayer", 1.0f);
+
+    //  APPEARANCE:::::
+    playerAgent.huePrimary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);
+    playerAgent.hueSecondary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);
+    playerAgent.bodyPointStroke = theRenderKing.GeneratePointStrokeData(numAgents, Vector2.one, Vector2.zero, new Vector2(0f, 1f), playerAgent.huePrimary, 0f, 0);
+    playerAgent.decorationPointStrokesArray = new TheRenderKing.PointStrokeData[10];
+    // EYES:
+    playerAgent.decorationPointStrokesArray[0] = theRenderKing.GeneratePointStrokeData(numAgents,
+                                                                                        new Vector2(0.36f, 0.36f),
+                                                                                        new Vector2(-0.25f, 0.45f),
+                                                                                        new Vector2(0f, 1f),
+                                                                                        Vector3.one,
+                                                                                        1,
+                                                                                        4);
+    playerAgent.decorationPointStrokesArray[1] = theRenderKing.GeneratePointStrokeData(numAgents,
+                                                                                        new Vector2(0.36f, 0.36f),
+                                                                                        new Vector2(0.25f, 0.45f),
+                                                                                        new Vector2(0f, 1f),
+                                                                                        Vector3.one,
+                                                                                        1,
+                                                                                        4);
+    float minSize = 0.15f;
+    float maxSize = 0.45f;
+    for (int j = 0; j < playerAgent.decorationPointStrokesArray.Length - 2; j++) {
+        float lerpStrength = UnityEngine.Random.Range(0f, 1f);
+        int randBrush = UnityEngine.Random.Range(0, 4);
+        playerAgent.decorationPointStrokesArray[j + 2] = theRenderKing.GeneratePointStrokeData(numAgents,
+                                                                                        new Vector2(UnityEngine.Random.Range(minSize, maxSize), UnityEngine.Random.Range(minSize, maxSize)),
+                                                                                        UnityEngine.Random.insideUnitCircle * 0.35f,
+                                                                                        UnityEngine.Random.insideUnitCircle.normalized,
+                                                                                        Vector3.Lerp(playerAgent.huePrimary, playerAgent.hueSecondary, lerpStrength),
+                                                                                        lerpStrength,
+                                                                                        randBrush);
+    }
+
+    // $#!%@@@@@@@@@@@@ TEMP TEMP TEMP !%!#$%!#$%!@$%%!@$#%@$%@@@@@@@@@@@@@@@@@@@@@@@
+    //playerAgent.meshRendererFluidCollider.enabled = false;
+    //playerAgent.meshRendererBeauty.enabled = false;
+    playerAgent.humanControlLerp = 1f;
+    //playerAgent.meshRendererBeauty.material.SetFloat("_IsPlayer", 1.0f);
+    playerAgent.humanControlled = true;
+    playerAgent.testModule.foodAmountB[0] = 20f;
+    // $#!%@@@@@@@@@@@@ TEMP TEMP TEMP !%!#$%!#$%!@$%%!@$#%@$%@@@@@@@@@@@@@@@@@@@@@@@
+
+    cameraManager.targetTransform = playerAgent.transform;
+
+    uiManager.healthDisplayTex = playerTex;
+    uiManager.SetDisplayTextures();
+
+    // Instantiate AI Agents
+    agentsArray = new Agent[numAgents];
+    for (int i = 0; i < agentsArray.Length; i++) {
+        GameObject agentGO = Instantiate(Resources.Load(assetURL)) as GameObject;
+        agentGO.name = "Agent" + i.ToString();
+        float randScale = UnityEngine.Random.Range(1f, 1f);
+        agentGO.transform.localScale = new Vector3(randScale, randScale, randScale);
+        Agent newAgent = agentGO.GetComponent<Agent>();
+        //int numColumns = Mathf.RoundToInt(Mathf.Sqrt(numAgents));
+        //int row = Mathf.FloorToInt(i / numColumns);
+        //int col = i % numColumns;
+        //Vector3 startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-30f, 30f), 0f);
+        //StartPositionGenome agentStartPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
+        //StartPositionGenome agentStartPosGenome = new StartPositionGenome(new Vector3(1.25f * (col - numColumns / 2), -2.0f - (1.25f * row), 0f), Quaternion.identity);
+        agentsArray[i] = newAgent; // Add to stored list of current Agents
+        //newAgent.InitializeAgentFromGenome(supervisedGenomePoolArray[i], agentStartPosGenome);
+
+        Material fluidColliderMat = new Material(fluidColliderMatTemplate);
+        agentFluidColliderMaterialsArray[i] = fluidColliderMat;
+        //agentGO.GetComponentInChildren<MeshRenderer>().material = mat;
+        newAgent.meshRendererFluidCollider.material = fluidColliderMat;
+        //newAgent.material = fluidColliderMat;
+
+        Texture2D tex = new Texture2D(4, 2);  // Health, foodAmountRGB, 4 outCommChannels
+        tex.filterMode = FilterMode.Point;
+        agentDebugTexturesArray[i] = tex;
+        newAgent.texture = tex;
+        newAgent.meshRendererBeauty.material.SetTexture("_MainTex", tex);
 
         //  APPEARANCE:::::
-        playerAgent.huePrimary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);
-        playerAgent.hueSecondary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);
-        playerAgent.bodyPointStroke = theRenderKing.GeneratePointStrokeData(numAgents, Vector2.one, Vector2.zero, new Vector2(0f, 1f), playerAgent.huePrimary, 0f, 0);
-        playerAgent.decorationPointStrokesArray = new TheRenderKing.PointStrokeData[10];
+        newAgent.huePrimary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);
+        newAgent.hueSecondary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);            
+        newAgent.bodyPointStroke = theRenderKing.GeneratePointStrokeData(i, Vector2.one, Vector2.zero, new Vector2(0f, 1f), newAgent.huePrimary, 0f, 0);
+        newAgent.decorationPointStrokesArray = new TheRenderKing.PointStrokeData[10];
         // EYES:
-        playerAgent.decorationPointStrokesArray[0] = theRenderKing.GeneratePointStrokeData(numAgents,
-                                                                                            new Vector2(0.36f, 0.36f),
-                                                                                            new Vector2(-0.25f, 0.45f),
-                                                                                            new Vector2(0f, 1f),
-                                                                                            Vector3.one,
-                                                                                            1,
-                                                                                            4);
-        playerAgent.decorationPointStrokesArray[1] = theRenderKing.GeneratePointStrokeData(numAgents,
-                                                                                            new Vector2(0.36f, 0.36f),
-                                                                                            new Vector2(0.25f, 0.45f),
-                                                                                            new Vector2(0f, 1f),
-                                                                                            Vector3.one,
-                                                                                            1,
-                                                                                            4);
-        float minSize = 0.15f;
-        float maxSize = 0.45f;
-        for (int j = 0; j < playerAgent.decorationPointStrokesArray.Length - 2; j++) {
+        newAgent.decorationPointStrokesArray[0] = theRenderKing.GeneratePointStrokeData(i,
+                                                                                        new Vector2(0.36f, 0.36f),
+                                                                                        new Vector2(-0.25f, 0.45f),
+                                                                                        new Vector2(0f, 1f),
+                                                                                        Vector3.one,
+                                                                                        1,
+                                                                                        4);
+        newAgent.decorationPointStrokesArray[1] = theRenderKing.GeneratePointStrokeData(i,
+                                                                                        new Vector2(0.36f, 0.36f),
+                                                                                        new Vector2(0.25f, 0.45f),
+                                                                                        new Vector2(0f, 1f),
+                                                                                        Vector3.one,
+                                                                                        1,
+                                                                                        4);
+        for (int j = 0; j < newAgent.decorationPointStrokesArray.Length - 2; j++) {
             float lerpStrength = UnityEngine.Random.Range(0f, 1f);
             int randBrush = UnityEngine.Random.Range(0, 4);
-            playerAgent.decorationPointStrokesArray[j + 2] = theRenderKing.GeneratePointStrokeData(numAgents,
+            newAgent.decorationPointStrokesArray[j + 2] = theRenderKing.GeneratePointStrokeData(i, 
                                                                                             new Vector2(UnityEngine.Random.Range(minSize, maxSize), UnityEngine.Random.Range(minSize, maxSize)),
                                                                                             UnityEngine.Random.insideUnitCircle * 0.35f,
-                                                                                            UnityEngine.Random.insideUnitCircle.normalized,
-                                                                                            Vector3.Lerp(playerAgent.huePrimary, playerAgent.hueSecondary, lerpStrength),
+                                                                                            UnityEngine.Random.insideUnitCircle.normalized, 
+                                                                                            Vector3.Lerp(newAgent.huePrimary, newAgent.hueSecondary, lerpStrength),
                                                                                             lerpStrength,
                                                                                             randBrush);
         }
+    }
 
-        // $#!%@@@@@@@@@@@@ TEMP TEMP TEMP !%!#$%!#$%!@$%%!@$#%@$%@@@@@@@@@@@@@@@@@@@@@@@
-        //playerAgent.meshRendererFluidCollider.enabled = false;
-        //playerAgent.meshRendererBeauty.enabled = false;
-        playerAgent.humanControlLerp = 1f;
-        //playerAgent.meshRendererBeauty.material.SetFloat("_IsPlayer", 1.0f);
-        playerAgent.humanControlled = true;
-        playerAgent.testModule.foodAmountB[0] = 20f;
-        // $#!%@@@@@@@@@@@@ TEMP TEMP TEMP !%!#$%!#$%!@$%%!@$#%@$%@@@@@@@@@@@@@@@@@@@@@@@
+    // SPAWN AGENTS:
+    RespawnAgents();
 
-        cameraManager.targetTransform = playerAgent.transform;
+    // FOOODDDD!!!!
+    foodArray = new FoodModule[numFood];
+    SpawnFood();
+    predatorArray = new PredatorModule[numPredators];
+    SpawnPredators();
 
-        uiManager.healthDisplayTex = playerTex;
-        uiManager.SetDisplayTextures();
+    // Send agent info to FluidBG & RenderKing:
+    environmentFluidManager.agentsArray = agentsArray;
+    environmentFluidManager.playerAgent = playerAgent;
+    environmentFluidManager.foodArray = foodArray;
+    environmentFluidManager.predatorsArray = predatorArray;
 
-        // Instantiate AI Agents
-        agentsArray = new Agent[numAgents];
-        for (int i = 0; i < agentsArray.Length; i++) {
-            GameObject agentGO = Instantiate(Resources.Load(assetURL)) as GameObject;
-            agentGO.name = "Agent" + i.ToString();
-            float randScale = UnityEngine.Random.Range(1f, 1f);
-            agentGO.transform.localScale = new Vector3(randScale, randScale, randScale);
-            Agent newAgent = agentGO.GetComponent<Agent>();
-            //int numColumns = Mathf.RoundToInt(Mathf.Sqrt(numAgents));
-            //int row = Mathf.FloorToInt(i / numColumns);
-            //int col = i % numColumns;
-            //Vector3 startPos = new Vector3(UnityEngine.Random.Range(-30f, 30f), UnityEngine.Random.Range(-30f, 30f), 0f);
-            //StartPositionGenome agentStartPosGenome = new StartPositionGenome(startPos, Quaternion.identity);
-            //StartPositionGenome agentStartPosGenome = new StartPositionGenome(new Vector3(1.25f * (col - numColumns / 2), -2.0f - (1.25f * row), 0f), Quaternion.identity);
-            agentsArray[i] = newAgent; // Add to stored list of current Agents
-            //newAgent.InitializeAgentFromGenome(supervisedGenomePoolArray[i], agentStartPosGenome);
+    theRenderKing.agentsArray = agentsArray;
+    theRenderKing.playerAgent = playerAgent;
+    theRenderKing.SetPointStrokesBuffer();
+    theRenderKing.SetSimDataArrays();
+    theRenderKing.InitializeAllAgentCurveData();
 
-            Material fluidColliderMat = new Material(fluidColliderMatTemplate);
-            agentFluidColliderMaterialsArray[i] = fluidColliderMat;
-            //agentGO.GetComponentInChildren<MeshRenderer>().material = mat;
-            newAgent.meshRendererFluidCollider.material = fluidColliderMat;
-            //newAgent.material = fluidColliderMat;
+    LoadingInitializeGridCells();
+    HookUpModules();
+    InitializeTrainingApparatus();
 
-            Texture2D tex = new Texture2D(4, 2);  // Health, foodAmountRGB, 4 outCommChannels
-            tex.filterMode = FilterMode.Point;
-            agentDebugTexturesArray[i] = tex;
-            newAgent.texture = tex;
-            newAgent.meshRendererBeauty.material.SetTexture("_MainTex", tex);
 
-            //  APPEARANCE:::::
-            newAgent.huePrimary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);
-            newAgent.hueSecondary = UnityEngine.Random.insideUnitSphere * 0.5f + new Vector3(0.5f, 0.5f, 0.5f);            
-            newAgent.bodyPointStroke = theRenderKing.GeneratePointStrokeData(i, Vector2.one, Vector2.zero, new Vector2(0f, 1f), newAgent.huePrimary, 0f, 0);
-            newAgent.decorationPointStrokesArray = new TheRenderKing.PointStrokeData[10];
-            // EYES:
-            newAgent.decorationPointStrokesArray[0] = theRenderKing.GeneratePointStrokeData(i,
-                                                                                            new Vector2(0.36f, 0.36f),
-                                                                                            new Vector2(-0.25f, 0.45f),
-                                                                                            new Vector2(0f, 1f),
-                                                                                            Vector3.one,
-                                                                                            1,
-                                                                                            4);
-            newAgent.decorationPointStrokesArray[1] = theRenderKing.GeneratePointStrokeData(i,
-                                                                                            new Vector2(0.36f, 0.36f),
-                                                                                            new Vector2(0.25f, 0.45f),
-                                                                                            new Vector2(0f, 1f),
-                                                                                            Vector3.one,
-                                                                                            1,
-                                                                                            4);
-            for (int j = 0; j < newAgent.decorationPointStrokesArray.Length - 2; j++) {
-                float lerpStrength = UnityEngine.Random.Range(0f, 1f);
-                int randBrush = UnityEngine.Random.Range(0, 4);
-                newAgent.decorationPointStrokesArray[j + 2] = theRenderKing.GeneratePointStrokeData(i, 
-                                                                                                new Vector2(UnityEngine.Random.Range(minSize, maxSize), UnityEngine.Random.Range(minSize, maxSize)),
-                                                                                                UnityEngine.Random.insideUnitCircle * 0.35f,
-                                                                                                UnityEngine.Random.insideUnitCircle.normalized, 
-                                                                                                Vector3.Lerp(newAgent.huePrimary, newAgent.hueSecondary, lerpStrength),
-                                                                                                lerpStrength,
-                                                                                                randBrush);
-            }
+    // TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!!
+    // TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!!
+    ToggleTrainingPersistent();
+    // TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!!
+    // TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!!
+    // DON"T LEAVE THIS!!!
+    //RunAutomatedGridSearch();
+}*/
+
+/*private void CopyDataSampleToModule(DataSample sample, TestModule module) {
+
+    module.bias[0] = sample.inputDataArray[0];
+    module.foodPosX[0] = sample.inputDataArray[1];
+    module.foodPosY[0] = sample.inputDataArray[2];
+    module.foodDirX[0] = sample.inputDataArray[3];
+    module.foodDirY[0] = sample.inputDataArray[4];
+    module.foodTypeR[0] = sample.inputDataArray[5];
+    module.foodTypeG[0] = sample.inputDataArray[6];
+    module.foodTypeB[0] = sample.inputDataArray[7];
+    module.friendPosX[0] = sample.inputDataArray[8];
+    module.friendPosY[0] = sample.inputDataArray[9];
+    module.friendVelX[0] = sample.inputDataArray[10];
+    module.friendVelY[0] = sample.inputDataArray[11];
+    module.friendDirX[0] = sample.inputDataArray[12];
+    module.friendDirY[0] = sample.inputDataArray[13];
+    module.enemyPosX[0] = sample.inputDataArray[14];
+    module.enemyPosY[0] = sample.inputDataArray[15];
+    module.enemyVelX[0] = sample.inputDataArray[16];
+    module.enemyVelY[0] = sample.inputDataArray[17];
+    module.enemyDirX[0] = sample.inputDataArray[18];
+    module.enemyDirY[0] = sample.inputDataArray[19];
+    module.ownVelX[0] = sample.inputDataArray[20];
+    module.ownVelY[0] = sample.inputDataArray[21];
+
+    module.temperature[0] = sample.inputDataArray[22];
+    module.pressure[0] = sample.inputDataArray[23];
+    module.isContact[0] = sample.inputDataArray[24];
+    module.contactForceX[0] = sample.inputDataArray[25];
+    module.contactForceY[0] = sample.inputDataArray[26];
+    module.hitPoints[0] = sample.inputDataArray[27];
+    module.stamina[0] = sample.inputDataArray[28];
+    module.foodAmountR[0] = sample.inputDataArray[29];
+    module.foodAmountG[0] = sample.inputDataArray[30];
+    module.foodAmountB[0] = sample.inputDataArray[31];
+    module.distUp[0] = sample.inputDataArray[32];
+    module.distTopRight[0] = sample.inputDataArray[33];
+    module.distRight[0] = sample.inputDataArray[34];
+    module.distBottomRight[0] = sample.inputDataArray[35];
+    module.distDown[0] = sample.inputDataArray[36];
+    module.distBottomLeft[0] = sample.inputDataArray[37];
+    module.distLeft[0] = sample.inputDataArray[38];
+    module.distTopLeft[0] = sample.inputDataArray[39];
+    module.inComm0[0] = sample.inputDataArray[40];
+    module.inComm1[0] = sample.inputDataArray[41];
+    module.inComm2[0] = sample.inputDataArray[42];
+    module.inComm3[0] = sample.inputDataArray[43];
+}*/
+/*private float CompareDataSampleToBrainOutput(DataSample sample, TestModule module) {
+    float throttleX = Mathf.Round(module.throttleX[0] * 3f / 2f);// + module.throttleX[0];
+    float throttleY = Mathf.Round(module.throttleY[0] * 3f / 2f);// + module.throttleY[0];
+    float deltaX = sample.outputDataArray[0] - throttleX + (sample.outputDataArray[0] - module.throttleX[0]) * 0.25f;  // Change this later?
+    float deltaY = sample.outputDataArray[1] - throttleY + (sample.outputDataArray[1] - module.throttleY[0]) * 0.25f;
+    float distSquared = deltaX * deltaX + deltaY * deltaY;
+    return distSquared;
+}*/
+/*public void RunAutomatedGridSearch() {
+    // Runs a bunch of simulations with different settings and saves the results for later analysis
+    //gridSearchManager = new GridSearchManager();
+    bool newSearch = true;
+
+    if (newSearch) {
+        if (isTrainingPersistent) {
+            gridSearchManager.InitializeGridSearch(settingsManager.mutationSettingsPersistent, true);
         }
-
-        // SPAWN AGENTS:
-        RespawnAgents();
-
-        // FOOODDDD!!!!
-        foodArray = new FoodModule[numFood];
-        SpawnFood();
-        predatorArray = new PredatorModule[numPredators];
-        SpawnPredators();
-
-        // Send agent info to FluidBG & RenderKing:
-        environmentFluidManager.agentsArray = agentsArray;
-        environmentFluidManager.playerAgent = playerAgent;
-        environmentFluidManager.foodArray = foodArray;
-        environmentFluidManager.predatorsArray = predatorArray;
-
-        theRenderKing.agentsArray = agentsArray;
-        theRenderKing.playerAgent = playerAgent;
-        theRenderKing.SetPointStrokesBuffer();
-        theRenderKing.SetSimDataArrays();
-        theRenderKing.InitializeAllAgentCurveData();
-
-        LoadingInitializeGridCells();
-        HookUpModules();
-        InitializeTrainingApparatus();
-
-
-        // TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!!
-        // TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!!
-        ToggleTrainingPersistent();
-        // TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!!
-        // TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!! TEMPORARY!!!!
-        // DON"T LEAVE THIS!!!
-        //RunAutomatedGridSearch();
-    }*/
-
-    /*private void CopyDataSampleToModule(DataSample sample, TestModule module) {
-
-        module.bias[0] = sample.inputDataArray[0];
-        module.foodPosX[0] = sample.inputDataArray[1];
-        module.foodPosY[0] = sample.inputDataArray[2];
-        module.foodDirX[0] = sample.inputDataArray[3];
-        module.foodDirY[0] = sample.inputDataArray[4];
-        module.foodTypeR[0] = sample.inputDataArray[5];
-        module.foodTypeG[0] = sample.inputDataArray[6];
-        module.foodTypeB[0] = sample.inputDataArray[7];
-        module.friendPosX[0] = sample.inputDataArray[8];
-        module.friendPosY[0] = sample.inputDataArray[9];
-        module.friendVelX[0] = sample.inputDataArray[10];
-        module.friendVelY[0] = sample.inputDataArray[11];
-        module.friendDirX[0] = sample.inputDataArray[12];
-        module.friendDirY[0] = sample.inputDataArray[13];
-        module.enemyPosX[0] = sample.inputDataArray[14];
-        module.enemyPosY[0] = sample.inputDataArray[15];
-        module.enemyVelX[0] = sample.inputDataArray[16];
-        module.enemyVelY[0] = sample.inputDataArray[17];
-        module.enemyDirX[0] = sample.inputDataArray[18];
-        module.enemyDirY[0] = sample.inputDataArray[19];
-        module.ownVelX[0] = sample.inputDataArray[20];
-        module.ownVelY[0] = sample.inputDataArray[21];
-
-        module.temperature[0] = sample.inputDataArray[22];
-        module.pressure[0] = sample.inputDataArray[23];
-        module.isContact[0] = sample.inputDataArray[24];
-        module.contactForceX[0] = sample.inputDataArray[25];
-        module.contactForceY[0] = sample.inputDataArray[26];
-        module.hitPoints[0] = sample.inputDataArray[27];
-        module.stamina[0] = sample.inputDataArray[28];
-        module.foodAmountR[0] = sample.inputDataArray[29];
-        module.foodAmountG[0] = sample.inputDataArray[30];
-        module.foodAmountB[0] = sample.inputDataArray[31];
-        module.distUp[0] = sample.inputDataArray[32];
-        module.distTopRight[0] = sample.inputDataArray[33];
-        module.distRight[0] = sample.inputDataArray[34];
-        module.distBottomRight[0] = sample.inputDataArray[35];
-        module.distDown[0] = sample.inputDataArray[36];
-        module.distBottomLeft[0] = sample.inputDataArray[37];
-        module.distLeft[0] = sample.inputDataArray[38];
-        module.distTopLeft[0] = sample.inputDataArray[39];
-        module.inComm0[0] = sample.inputDataArray[40];
-        module.inComm1[0] = sample.inputDataArray[41];
-        module.inComm2[0] = sample.inputDataArray[42];
-        module.inComm3[0] = sample.inputDataArray[43];
-    }*/
-    /*private float CompareDataSampleToBrainOutput(DataSample sample, TestModule module) {
-        float throttleX = Mathf.Round(module.throttleX[0] * 3f / 2f);// + module.throttleX[0];
-        float throttleY = Mathf.Round(module.throttleY[0] * 3f / 2f);// + module.throttleY[0];
-        float deltaX = sample.outputDataArray[0] - throttleX + (sample.outputDataArray[0] - module.throttleX[0]) * 0.25f;  // Change this later?
-        float deltaY = sample.outputDataArray[1] - throttleY + (sample.outputDataArray[1] - module.throttleY[0]) * 0.25f;
-        float distSquared = deltaX * deltaX + deltaY * deltaY;
-        return distSquared;
-    }*/
-    /*public void RunAutomatedGridSearch() {
-        // Runs a bunch of simulations with different settings and saves the results for later analysis
-        //gridSearchManager = new GridSearchManager();
-        bool newSearch = true;
-
-        if (newSearch) {
-            if (isTrainingPersistent) {
-                gridSearchManager.InitializeGridSearch(settingsManager.mutationSettingsPersistent, true);
-            }
-            if (isTrainingSupervised) {
-                gridSearchManager.InitializeGridSearch(settingsManager.mutationSettingsSupervised, false);
-            }
+        if (isTrainingSupervised) {
+            gridSearchManager.InitializeGridSearch(settingsManager.mutationSettingsSupervised, false);
         }
-        else {
-            gridSearchManager.ResumeGridSearch();
-        }
-        isGridSearching = true;
-        //isTrainingPersistent = true;
+    }
+    else {
+        gridSearchManager.ResumeGridSearch();
+    }
+    isGridSearching = true;
+    //isTrainingPersistent = true;
 
+    ResetGenomes();
+}*/
+/*public void UpdateGridSearch(int curGen, float score) {
+    //Debug.Log("UpdateGridSearch(" + curGen.ToString() + ", float score)");
+    // run every "Generation"
+    //gridSearchManager.UpdateGridSearch();
+
+    // Save data regardless?:::
+    gridSearchManager.DataEntry(curGen, score);
+
+    if (curGen >= gridSearchManager.GetNumGens()) {
+        // Save this Gen?
+        GenePool pool = new GenePool(persistentGenomePoolArray);
+        gridSearchManager.storedResults.genePoolList.Add(pool);
+        // Next Run!
+        gridSearchManager.StartNewRun();
         ResetGenomes();
-    }*/
-    /*public void UpdateGridSearch(int curGen, float score) {
-        //Debug.Log("UpdateGridSearch(" + curGen.ToString() + ", float score)");
-        // run every "Generation"
-        //gridSearchManager.UpdateGridSearch();
-
-        // Save data regardless?:::
-        gridSearchManager.DataEntry(curGen, score);
-
-        if (curGen >= gridSearchManager.GetNumGens()) {
-            // Save this Gen?
-            GenePool pool = new GenePool(persistentGenomePoolArray);
-            gridSearchManager.storedResults.genePoolList.Add(pool);
-            // Next Run!
-            gridSearchManager.StartNewRun();
-            ResetGenomes();
-            if (isTrainingSupervised) {
-                ResetSupervisedTraining();
-            }
+        if (isTrainingSupervised) {
+            ResetSupervisedTraining();
         }
-        else {
-            // Save data
-            //gridSearchManager.DataEntry(curGen, score);
-        }
-        if (gridSearchManager.isComplete) {
-            //Debug.Log("UpdateGridSearch(gridSearchManager.isComplete)");
-            isGridSearching = false;
-        }
-    }*/
+    }
+    else {
+        // Save data
+        //gridSearchManager.DataEntry(curGen, score);
+    }
+    if (gridSearchManager.isComplete) {
+        //Debug.Log("UpdateGridSearch(gridSearchManager.isComplete)");
+        isGridSearching = false;
+    }
+}*/
 
-    #endregion
-
-    [Header("Debug")]
-    [SerializeField] bool debugLogStartup;
-}
+#endregion

@@ -519,7 +519,8 @@ public class HistoryPanelUI : MonoBehaviour
             icon.UpdateSpeciesIconDisplay(panelSizePixels, isSelected);
         }
 
-        if(selectionManager.focusedCandidate != null) UpdateCreatureEventIcons(selectionManager.focusedCandidate);
+        if(selectionManager.focusedCandidate != null) 
+            UpdateCreatureEventIcons(selectionManager.focusedCandidate);
         
         timelineStartTimeStep = Mathf.Lerp(timelineStartTimeStep, targetStartTimeStep, 0.15f);
     }

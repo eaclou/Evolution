@@ -35,7 +35,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
     private Texture2D speciesPoolGenomeTex; // speciesOverviewPanel
     public Material speciesPoolGenomeMat;
     
-    public List<GenomeButtonPrefabScript> buttons = new List<GenomeButtonPrefabScript>();
+    public List<GenomeButton> buttons = new List<GenomeButton>();
 
     public void ClickButtonToggleLineage() {
         isShowingLineage = !isShowingLineage;
@@ -104,7 +104,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
         for(int i = 0; i < maxButtons; i++) {
             GameObject buttonObj = Instantiate(genomeIcon, Vector3.zero, Quaternion.identity);
             buttonObj.transform.SetParent(genomeLeaderboard.transform, false);
-            buttons.Add(buttonObj.GetComponent<GenomeButtonPrefabScript>());
+            buttons.Add(buttonObj.GetComponent<GenomeButton>());
             buttonObj.gameObject.SetActive(false);
         }
     }

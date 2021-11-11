@@ -2,7 +2,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GenomeButtonPrefabScript : MonoBehaviour {
+public class GenomeButton : MonoBehaviour 
+{
     SimulationManager simulationManager => SimulationManager.instance;
     CameraManager cameraManager => CameraManager.instance;
     UIManager uiManager => UIManager.instance;

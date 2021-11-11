@@ -18,8 +18,7 @@ public class UIManager : Singleton<UIManager>
     TheRenderKing theRenderKing => TheRenderKing.instance;
     TheCursorCzar theCursorCzar => TheCursorCzar.instance;
     SelectionManager selectionManager => SelectionManager.instance;
-
-
+    
     public SpeciesOverviewUI speciesOverviewUI;  
     public SpeciesGraphPanelUI speciesGraphPanelUI; 
     public GenomeViewerUI genomeViewerUI;
@@ -85,34 +84,12 @@ public class UIManager : Singleton<UIManager>
     public Action<Agent> OnAgentSelected;
     
     #endregion
-    /*
-    public void CycleFocusedCandidateGenome()
-    {
-        int curSpeciesID = selectedSpeciesID + 1;
-
-        if(curSpeciesID >= simulationManager.masterGenomePool.speciesPoolCount) {
-            curSpeciesID = 0;
-        }
-    
-        var candidate = simulationManager.masterGenomePool.completeSpeciesPoolsList[curSpeciesID].representativeCandidate;
-        SetFocusedCandidateGenome(candidate);
-    }*/
 
     public void BeginAnnouncement()
     {
         isAnnouncementTextOn = true;
         timerAnnouncementTextCounter = 0;        
     }
-    
-    // WPP: replaced with C# event
-    /*
-    public void RefreshFocusedAgent(Agent agent) 
-    { 
-        historyPanelUI.RefreshFocusedAgent(AgentIsFocus(agent)); 
-    }
-    
-    public bool AgentIsFocus(Agent agent) { return selectionManager.IsFocus(agent.candidateRef); }
-    */
 
     #region Initialization Functions:::
 
@@ -128,7 +105,7 @@ public class UIManager : Singleton<UIManager>
 
         UnlockBrushes();   
         
-        // get slot from manager, set status directly
+        // Get slot from manager, set status directly
         var algae = trophicLayersManager.GetSlot(KnowledgeMapId.Algae);
         worldSpiritHubUI.selectedWorldSpiritSlot = algae;//trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
         brushesUI.selectedEssenceSlot = algae; //trophicLayersManager.kingdomPlants.trophicTiersList[0].trophicSlots[0];
@@ -166,6 +143,9 @@ public class UIManager : Singleton<UIManager>
         worldSpiritHubUI.ClickWorldCreateNewSpecies(trophicSlot);
     }
     
+    /// Reset to true to reset simulation, including Big Bang on start game
+    bool firstTimeStartup = true;
+    
     public void TransitionToNewGameState(GameState gameState) {
         mainMenu.gameObject.SetActive(gameState == GameState.MainMenu);
     
@@ -176,8 +156,8 @@ public class UIManager : Singleton<UIManager>
                 break;
             case GameState.Playing:
                 //canvasMain.renderMode = RenderMode.ScreenSpaceCamera;
-                //firstTimeStartup = false;
-                EnterPlayingUI();
+                EnterPlayingUI(firstTimeStartup);
+                firstTimeStartup = false;
                 break;
             default:
                 Debug.LogError("No Enum Type Found! (" + gameState + ")");
@@ -190,18 +170,17 @@ public class UIManager : Singleton<UIManager>
         panelPlaying.SetActive(false);
     }
     
-    //// ******* this happens everytime quit to menu and resume.... *** needs to change!!! ***
-    private void EnterPlayingUI() {   
+    private void EnterPlayingUI(bool newGame) {   
         panelLoading.SetActive(false);
         panelPlaying.SetActive(true);
 
-        simulationManager._BigBangOn = true;
-        
-        SimEventData newEventData = new SimEventData("New Simulation Start!", 0);
-
-        simulationManager.simEventsManager.completeEventHistoryList.Add(newEventData);
-
-        panelNotificationsUI.Narrate("... And Then There Was Not Nothing ...", new Color(0.75f, 0.75f, 0.75f));
+        if (newGame)
+        {
+            //simulationManager._BigBangOn = true;
+            bigBangPanelUI.Begin();
+            simulationManager.AddHistoryEvent(new SimEventData("New Simulation Start!", 0));
+            panelNotificationsUI.Narrate("... And Then There Was Not Nothing ...", new Color(0.75f, 0.75f, 0.75f));
+        }
     }
     #endregion
 
@@ -210,7 +189,8 @@ public class UIManager : Singleton<UIManager>
     void Update() 
     {                                        
         if (!simulationManager.loadingComplete) return;
-        if (bigBangPanelUI.Tick()) return;
+        //if (bigBangPanelUI.Tick()) return;
+        if (bigBangPanelUI.isRunning) return;
 
         observerModeUI.Tick();  // <== this is the big one *******  
         // ^^^  Need to Clean this up and replace with better approach ***********************        
@@ -295,7 +275,8 @@ public class UIManager : Singleton<UIManager>
 
     public void ClickLoadingGemStart() {
         //Debug.Log("Let there be not nothing!");
-        simulationManager._BigBangOn = true;
+        //simulationManager._BigBangOn = true;
+        TransitionToNewGameState(GameState.Playing);
     }
     
     public void UnlockBrushes() {
