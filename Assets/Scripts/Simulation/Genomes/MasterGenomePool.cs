@@ -72,6 +72,7 @@ public class MasterGenomePool
         }
     }        
 
+    /// Keep track of when species created so can't create multiple per frame?
     public void Tick() {
         speciesCreatedOrDestroyedThisFrame = false;
     }

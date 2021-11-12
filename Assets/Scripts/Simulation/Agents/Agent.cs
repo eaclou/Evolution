@@ -189,6 +189,7 @@ public class Agent : MonoBehaviour {
     Cooldown cooldown;
     
     public float totalEaten => candidateRef.performanceData.totalEaten;
+    public Vector3 position => bodyGO.transform.position;
     //public float overflowFoodAmount = 0f;
         
     private void Awake() {        
@@ -1385,5 +1386,48 @@ public class Agent : MonoBehaviour {
         if (isPregnantAndCarryingEggs) return 6;
 
         return 0;
+    }
+    
+    SimulationStateData simStateData => simManager.simStateData;
+    
+    // REVISIT CONVERSION btw fluid/scene coords and Force Amounts
+    // Expose magic numbers
+    public void ApplyFluidForces(int index)
+    {
+        Vector4 depthSample = simStateData.depthAtAgentPositionsArray[index];
+        waterDepth = SimulationManager._GlobalWaterLevel - depthSample.x;
+        
+        bool depthSampleInitialized = depthSample.y != 0f && depthSample.z != 0f;
+        depthGradient = depthSampleInitialized ? 
+            new Vector2(depthSample.y, depthSample.z).normalized :
+            Vector2.zero;
+                                //***** world boundary *****
+        if (depthSample.x > SimulationManager._GlobalWaterLevel || depthSample.w < 0.1f) //(floorDepth < agentSize)
+        {
+            float wallForce = 12.0f; // Mathf.Clamp01(agentSize - floorDepth) / agentSize;
+            Vector2 gradient = depthGradient; // new Vector2(depthSample.y, depthSample.z); //.normalized;
+            bodyRigidbody.AddForce(bodyRigidbody.mass * wallForce * -gradient, ForceMode2D.Impulse);
+
+            float damage = wallForce * 0.015f;  
+            
+            if (depthSample.w < 0.51f) {
+                damage *= 0.33f;
+            }
+            
+            if (coreModule != null && isMature) 
+            {
+                float defendBonus = isDefending ? 0f : 1.5f;
+                damage *= defendBonus;
+                
+                candidateRef.performanceData.totalDamageTaken += damage;
+                coreModule.isContact[0] = 1f;
+                coreModule.contactForceX[0] = gradient.x;
+                coreModule.contactForceY[0] = gradient.y;
+                TakeDamage(damage);
+            }
+        }
+        
+        bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[index] * 64f * bodyRigidbody.mass, ForceMode2D.Impulse);
+        avgFluidVel = Vector2.Lerp(avgFluidVel, simStateData.fluidVelocitiesAtAgentPositionsArray[index], 0.25f);
     }
 }

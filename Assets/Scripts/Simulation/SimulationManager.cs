@@ -461,18 +461,18 @@ public class SimulationManager : Singleton<SimulationManager>
     public void TickSimulation() {
         simAgeTimeSteps++;
         simAgeYearCounter++;
-        TickSparseEvents();  // Updates that don't happen every frame        
-        simEventsManager.Tick();  // Cooldown increment                
+        TickSparseEvents();       
+        simEventsManager.Tick();                
         eggSackRespawnCounter++;
         agentRespawnCounter++;
-        masterGenomePool.Tick(); // keep track of when species created so can't create multiple per frame?
+        masterGenomePool.Tick(); 
         audioManager.Tick();
 
         vegetationManager.MeasureTotalResourceGridAmount();
               
         vegetationManager.MeasureTotalPlantParticlesAmount();
 
-        if(trophicLayersManager.IsLayerOn(KnowledgeMapId.Microbes)) {
+        if (trophicLayersManager.IsLayerOn(KnowledgeMapId.Microbes)) {
             zooplanktonManager.MeasureTotalAnimalParticlesAmount();
         }
         
@@ -480,7 +480,7 @@ public class SimulationManager : Singleton<SimulationManager>
         float totalOxygenUsedByAgents = 0f;
         float totalWasteProducedByAgents = 0f;
         
-        if(trophicLayersManager.IsLayerOn(KnowledgeMapId.Animals)) {
+        if (trophicLayersManager.IsLayerOn(KnowledgeMapId.Animals)) {
             vegetationManager.FindClosestPlantParticleToCritters(simStateData);
             
             foreach (var agent in agents) {
@@ -502,7 +502,7 @@ public class SimulationManager : Singleton<SimulationManager>
         // Try to make sure AlgaeReservoir and AlgaeParticles share same mechanics!!! *********************************************
         simResourceManager.Tick(trophicLayersManager, vegetationManager);  // Resource Flows Here
         
-        if(targetAgent && selectionManager.focusedCandidate != null &&
+        if (targetAgent && selectionManager.focusedCandidate != null &&
            targetAgent.candidateRef != null &&
            targetAgent.isAwaitingRespawn && 
            targetAgent.candidateRef.candidateID == selectionManager.focusedCandidate.candidateID) 
@@ -512,10 +512,10 @@ public class SimulationManager : Singleton<SimulationManager>
                 
         // CHECK FOR NULL Objects:        
         // ******** REVISIT CODE ORDERING!!!!  -- Should check for death Before or After agent Tick/PhysX ???
-        if(trophicLayersManager.IsLayerOn(KnowledgeMapId.Animals)) {
+        if (trophicLayersManager.IsLayerOn(KnowledgeMapId.Animals)) {
             CheckForDevouredEggSacks();
             CheckForNullAgents();  // Result of this will affect: "simStateData.PopulateSimDataArrays(this)" !!!!!
-            if(simResourceManager.curGlobalOxygen > 10f) {
+            if (simResourceManager.curGlobalOxygen > 10f) {
                 CheckForReadyToSpawnAgents();
             }            
         }
@@ -540,20 +540,20 @@ public class SimulationManager : Singleton<SimulationManager>
         vegetationManager.SimResourceGrid(ref theRenderKing.baronVonTerrain);
         //}
         
-        if(trophicLayersManager.IsLayerOn(KnowledgeMapId.Plants)) {
+        if (trophicLayersManager.IsLayerOn(KnowledgeMapId.Plants)) {
             vegetationManager.EatSelectedFoodParticles(simStateData); // 
             // How much light/nutrients available?
             vegetationManager.SimulatePlantParticles(simStateData, simResourceManager);
         }
         
-        if(trophicLayersManager.IsLayerOn(KnowledgeMapId.Microbes)) {
+        if (trophicLayersManager.IsLayerOn(KnowledgeMapId.Microbes)) {
             zooplanktonManager.EatSelectedAnimalParticles(simStateData);        
             // Send back information about how much growth/photosynthesis there was?
             zooplanktonManager.SimulateAnimalParticles(simStateData, simResourceManager);
             // how much oxygen used? How much eaten? How much growth? How much waste/detritus?
         }
               
-        if(trophicLayersManager.IsLayerOn(KnowledgeMapId.Animals)) {
+        if (trophicLayersManager.IsLayerOn(KnowledgeMapId.Animals)) {
             // Load gameState into Agent Brain, process brain function, read out brainResults,
             // Execute Agent Actions -- apply propulsive force to each Agent:       
             foreach (var agent in agents) {
@@ -598,8 +598,9 @@ public class SimulationManager : Singleton<SimulationManager>
         */
     }
     
+    /// Updates that don't happen every frame 
     private void TickSparseEvents() {
-        if(simAgeYearCounter >= numStepsInSimYear) {
+        if (simAgeYearCounter >= numStepsInSimYear) {
             curSimYear++;
             simEventsManager.curEventBucks += 5; // temporarily high!
             simAgeYearCounter = 0;
@@ -609,12 +610,12 @@ public class SimulationManager : Singleton<SimulationManager>
             CheckForYearEvent();
         }
 
-        if(simAgeTimeSteps % 80 == 70) {
+        if (simAgeTimeSteps % 80 == 70) {
             uiManager.speciesGraphPanelUI.UpdateSpeciesTreeDataTextures(curSimYear);
             globalGraphData.AddNewEntry(simResourceManager, GetTotalAgentBiomass());
         }
 
-        if(simAgeTimeSteps % 79 == 3) {
+        if (simAgeTimeSteps % 79 == 3) {
             UpdateSimulationClimate();
             //RefreshLatestHistoricalDataEntry();
             RefreshLatestSpeciesDataEntry();
@@ -664,11 +665,11 @@ public class SimulationManager : Singleton<SimulationManager>
         public string message;
     }
     
-    // * WPP: delegate application of per-agent effects to Agent -> ApplyFluidForce(...)
+    // WPP: delegated to agents
     private void ApplyFluidForcesToDynamicObjects() {
-        // ********** REVISIT CONVERSION btw fluid/scene coords and Force Amounts !!!! *************
         for (int i = 0; i < agents.Length; i++) {
-            Vector4 depthSample = simStateData.depthAtAgentPositionsArray[i];
+            agents[i].ApplyFluidForces(i);
+            /*Vector4 depthSample = simStateData.depthAtAgentPositionsArray[i]; 
             agents[i].waterDepth = _GlobalWaterLevel - depthSample.x;
             
             bool depthSampleInitialized = depthSample.y != 0f && depthSample.z != 0f;
@@ -680,7 +681,7 @@ public class SimulationManager : Singleton<SimulationManager>
             {
                 float wallForce = 12.0f; // Mathf.Clamp01(agentSize - floorDepth) / agentSize;
                 Vector2 gradient = agents[i].depthGradient; // new Vector2(depthSample.y, depthSample.z); //.normalized;
-                agents[i].bodyRigidbody.AddForce(-gradient * agents[i].bodyRigidbody.mass * wallForce, ForceMode2D.Impulse);
+                agents[i].bodyRigidbody.AddForce(agents[i].bodyRigidbody.mass * wallForce * -gradient, ForceMode2D.Impulse);
 
                 float damage = wallForce * 0.015f;  
                 
@@ -704,13 +705,11 @@ public class SimulationManager : Singleton<SimulationManager>
             }
             
             agents[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 64f * agents[i].bodyRigidbody.mass, ForceMode2D.Impulse);
-            agents[i].avgFluidVel = Vector2.Lerp(agents[i].avgFluidVel, simStateData.fluidVelocitiesAtAgentPositionsArray[i], 0.25f);
+            agents[i].avgFluidVel = Vector2.Lerp(agents[i].avgFluidVel, simStateData.fluidVelocitiesAtAgentPositionsArray[i], 0.25f);*/
         }
-        /*for (int i = 0; i < eggSackArray.Length; i++) { // *** cache rigidBody reference
-            
-            eggSackArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtEggSackPositionsArray[i] * 16f * eggSackArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse); //
-            
-        }*/
+        //for (int i = 0; i < eggSackArray.Length; i++) { // *** cache rigidBody reference 
+        //    eggSackArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtEggSackPositionsArray[i] * 16f * eggSackArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse); //
+        //}
     }
     
     public void TickPlayerStirTool()
@@ -730,62 +729,74 @@ public class SimulationManager : Singleton<SimulationManager>
             Debug.Log("ERROR null vector!");
         }
         magnitude *= 0.05f;
-        float maxMag = 0.9f;
-        if(magnitude > maxMag) {
-            magnitude = maxMag;            
-        }
+        float maxMagnitude = 0.9f;
+        magnitude = Mathf.Min(magnitude, maxMagnitude);
         forceVector = forceVector.normalized * magnitude;
 
         //Debug.Log("PlayerToolStir pos: " + origin.ToString() + ", forceVec: [" + forceVector.x.ToString() + "," + forceVector.y.ToString() + "]  mag: " + magnitude.ToString());
-
         fluidManager.StirWaterOn(origin, forceVector, radiusMult);
     }
+    
     public void PlayerToolStirOff() {        
         fluidManager.StirWaterOff();
     }
-    
-    
-    private void PopulateGridCells() {
 
-        // Inefficient!!!
-        for (int x = 0; x < agentGridCellResolution; x++) {
-            for (int y = 0; y < agentGridCellResolution; y++) {
+    // WPP: delegated sections to functions
+    void PopulateGridCells() {
+        ClearAllMapGridCells();
+
+        // !! ******* MAP CHANGE!! ***** Now starts at 0,0 (bottomLeft) and goes up to mapSize,mapSize (topRight) just like UV coords *****
+        // This should make conversions between CPU and GPU coords a bit simpler in the long run
+        
+        PopulateFoodCells();
+        PopulateFriendCells();
+    }
+    
+    // Inefficient
+    void ClearAllMapGridCells()
+    {
+        for (int x = 0; x < agentGridCellResolution; x++) 
+        {
+            for (int y = 0; y < agentGridCellResolution; y++) 
+            {
                 mapGridCellArray[x][y].agentIndicesList.Clear();
                 mapGridCellArray[x][y].eggSackIndicesList.Clear();
                 //mapGridCellArray[x][y].predatorIndicesList.Clear();
             }
         }
-
-        // !! ******* MAP CHANGE!! ***** Now starts at 0,0 (bottomLeft) and goes up to mapSize,mapSize (topRight) just like UV coords *****
-        // This should make conversions between CPU and GPU coords a bit simpler in the long run
-        
-        // FOOD!!! :::::::
-        for (int f = 0; f < eggSacks.Length; f++) {
-            
-            float xPos = eggSacks[f].transform.position.x;
-            float yPos = eggSacks[f].transform.position.y;
-            int xCoord = Mathf.FloorToInt(xPos / mapSize * (float)agentGridCellResolution);
-            int yCoord = Mathf.FloorToInt(yPos / mapSize * (float)agentGridCellResolution);
-            xCoord = Mathf.Clamp(xCoord, 0, agentGridCellResolution - 1);
-            yCoord = Mathf.Clamp(yCoord, 0, agentGridCellResolution - 1);
-
+    }
+    
+    void PopulateFoodCells()
+    {
+        for (int f = 0; f < eggSacks.Length; f++) 
+        {
+            (int xCoord, int yCoord) = GetCellCoordinates(eggSacks[f].transform.position);
             mapGridCellArray[xCoord][yCoord].eggSackIndicesList.Add(f);
-        }
-        
-        // FRIENDS::::::
-        for (int a = 0; a < agents.Length; a++) {
-            float xPos = agents[a].bodyGO.transform.position.x;
-            float yPos = agents[a].bodyGO.transform.position.y;
-            int xCoord = Mathf.FloorToInt(xPos / mapSize * (float)agentGridCellResolution);
-            int yCoord = Mathf.FloorToInt(yPos / mapSize * (float)agentGridCellResolution);
-            xCoord = Mathf.Clamp(xCoord, 0, agentGridCellResolution - 1);
-            yCoord = Mathf.Clamp(yCoord, 0, agentGridCellResolution - 1);
-
+        }        
+    }
+    
+    void PopulateFriendCells()
+    {
+        for (int a = 0; a < agents.Length; a++) 
+        {
+            (int xCoord, int yCoord) = GetCellCoordinates(agents[a].position);
             mapGridCellArray[xCoord][yCoord].agentIndicesList.Add(a);
-        }
+        }        
+    }
+    
+    // WPP: common functionality from PopulateFood/FriendCells
+    (int, int) GetCellCoordinates(Vector3 position)
+    {
+        float xPos = position.x;
+        float yPos = position.y;
+        int xCoord = Mathf.FloorToInt(xPos / mapSize * (float)agentGridCellResolution);
+        int yCoord = Mathf.FloorToInt(yPos / mapSize * (float)agentGridCellResolution);
+        xCoord = Mathf.Clamp(xCoord, 0, agentGridCellResolution - 1);
+        yCoord = Mathf.Clamp(yCoord, 0, agentGridCellResolution - 1);
+        return (xCoord, yCoord);      
     }
 
-    // CHECK FOR DEAD FOOD!!! :::::::   *** revisit
+    // *** revisit
     private void CheckForDevouredEggSacks() {
         for (int f = 0; f < eggSacks.Length; f++) {
             if (eggSacks[f].isDepleted) {
@@ -841,48 +852,47 @@ public class SimulationManager : Singleton<SimulationManager>
     }
     
     public void AttemptToBrushSpawnAgent(int speciesIndex) {
-        for (int a = 0; a < agents.Length; a++) 
-        {
-            if (agents[a].isAwaitingRespawn)
-                continue;
-                          
-            CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
-            
-            if (candidateData == null)
-            {
-                //Debug.LogError("Failed to find available candidate when attempting to brush spawn agent");
-                continue;
-            }
-            
-            candidateData.candidateGenome = masterGenomePool.completeSpeciesPoolsList[speciesIndex].representativeCandidate.candidateGenome;
-            
-            //Debug.Log("AttemptToBrushSpawnAgent(" + a.ToString() + ") species: " + speciesIndex.ToString() + ", " + candidateData.ToString());
-            
-            // Spawn POS:
-            
-            //float isBrushingLerp = 0f;
-            //if(uiManager.isDraggingMouseLeft && trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
-            //    isBrushingLerp = 1f;
-            //}
+        if (!TryGetIndexOfAgentAwaitingRespawn(false, out int agentIndex))
+            return;
 
-            Vector3 cursorWorldPos = theCursorCzar.curMousePositionOnWaterPlane;
-            cursorWorldPos.x += Random.Range(-10f, 10f);
-            cursorWorldPos.y += Random.Range(-10f, 10f);
-            
-            Vector2 spawnWorldPos = new Vector2(cursorWorldPos.x, cursorWorldPos.y); 
-            
-            Vector4 altitudeSample = SampleTexture(theRenderKing.baronVonTerrain.terrainHeightDataRT, spawnWorldPos / _MapSize);
+        CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
+        candidateData.candidateGenome = masterGenomePool.completeSpeciesPoolsList[speciesIndex].representativeCandidate.candidateGenome;
+        
+        //Debug.Log("AttemptToBrushSpawnAgent(" + a.ToString() + ") species: " + speciesIndex.ToString() + ", " + candidateData.ToString());
+        //float isBrushingLerp = 0f;
+        //if(uiManager.isDraggingMouseLeft && trophicLayersManager.selectedTrophicSlotRef.kingdomID == 2) {
+        //    isBrushingLerp = 1f;
+        //}
 
-            if(IsValidSpawnLoc(altitudeSample)) {
-                SpawnAgentImmaculate(candidateData, a, speciesIndex, spawnWorldPos);
-                candidateData.isBeingEvaluated = true;
-            }
-            else {
-                Debug.Log("AttemptToBrushSpawnAgent(" + ") pos: " + spawnWorldPos + ", alt: " + altitudeSample);
-            }
-            
-            break;   
-        } 
+        Vector3 cursorWorldPos = theCursorCzar.curMousePositionOnWaterPlane;
+        cursorWorldPos.x += Random.Range(-10f, 10f);
+        cursorWorldPos.y += Random.Range(-10f, 10f);
+        
+        Vector2 spawnWorldPos = new Vector2(cursorWorldPos.x, cursorWorldPos.y); 
+        
+        Vector4 altitudeSample = SampleTexture(theRenderKing.baronVonTerrain.terrainHeightDataRT, spawnWorldPos / _MapSize);
+
+        if(IsValidSpawnLoc(altitudeSample)) {
+            SpawnAgentImmaculate(candidateData, agentIndex, speciesIndex, spawnWorldPos);
+            candidateData.isBeingEvaluated = true;
+        }
+        else {
+            Debug.Log("AttemptToBrushSpawnAgent(" + ") pos: " + spawnWorldPos + ", alt: " + altitudeSample);
+        }
+    }
+    
+    // WPP: search logic moved from AttemptToBrushSpawnAgent
+    /// Returns whether there is an agent that: 
+    /// is awaiting respawn if condition true, or is not awaiting respawn if condition false.
+    /// If successful, sets index to the first found agent.
+    bool TryGetIndexOfAgentAwaitingRespawn(bool condition, out int index)
+    {
+        for (index = 0; index < agents.Length; index++)
+            if (agents[index].isAwaitingRespawn == condition)
+                return true;
+                
+        index = -1;
+        return false;
     }
     
     private bool IsValidSpawnLoc(Vector4 altitudeSample) {
@@ -938,8 +948,7 @@ public class SimulationManager : Singleton<SimulationManager>
         }       
     }
     
-    // Conditions: EggSack belongs to the right species,
-    // is at proper stage of development, and matches the species index
+    /// Conditions: EggSack belongs to the right species, is at proper stage of development, and matches the species index
     List<int> GetValidEggSackIndices(int speciesIndex) {
         List<int> validEggSackIndicesList = new List<int>();
             
@@ -965,7 +974,6 @@ public class SimulationManager : Singleton<SimulationManager>
         computeShaderResourceGrid.SetBuffer(kernelCSSampleTexture, "outputValuesCBuffer", outputBuffer);
         computeShaderResourceGrid.SetFloat("_CoordX", uv.x);
         computeShaderResourceGrid.SetFloat("_CoordY", uv.y); 
-        // DISPATCH !!!
         computeShaderResourceGrid.Dispatch(kernelCSSampleTexture, 1, 1, 1);
         
         outputBuffer.GetData(sample);
@@ -1068,7 +1076,7 @@ public class SimulationManager : Singleton<SimulationManager>
         agentRef.SetToAwaitingRespawn();
         cameraManager.DidFollowedCreatureDie(agentRef);
 
-        ProcessAgentScores(agentRef);  // *** CLEAN THIS UP!!! ***
+        ProcessAgentScores(agentRef);
     }
     
     // ********** RE-IMPLEMENT THIS LATER!!!! ******************************************************************************
@@ -1193,7 +1201,7 @@ public class SimulationManager : Singleton<SimulationManager>
         }        
     }
         
-    private void ProcessAgentScores(Agent agentRef) {
+    private void ProcessAgentScores(Agent agent) {
         numAgentsProcessed++;      
         float weightedAvgLerpVal = 1f / 64f;
         weightedAvgLerpVal = Mathf.Max(weightedAvgLerpVal, 1f / (float)(numAgentsProcessed + 1));
@@ -1210,7 +1218,6 @@ public class SimulationManager : Singleton<SimulationManager>
         if (approxGen > curApproxGen) {
             curApproxGen++;            
         }
-        
     }
     
     float GetTotalEggSackVolume() {

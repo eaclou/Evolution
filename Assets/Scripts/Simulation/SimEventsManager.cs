@@ -34,6 +34,7 @@ public class SimEventsManager
         RegenerateAvailableExtremeEvents();
     }
 
+    /// Cooldown increment
     public void Tick() 
     {
         if (!isCooldown) return;

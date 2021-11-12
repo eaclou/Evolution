@@ -5,7 +5,7 @@ public class MainMenuUI : MonoBehaviour
 {
     [SerializeField] Button buttonQuickStartResume; // Future use
     [SerializeField] Button buttonNewSimulation;
-    [SerializeField] Text textMouseOverInfo;  // use!
+    [SerializeField] Text textMouseOverInfo;
     [SerializeField] Text quickStartText;
     [SerializeField] GameObject panelGameOptions;
     
@@ -32,14 +32,12 @@ public class MainMenuUI : MonoBehaviour
         Cursor.visible = true;
         //canvasMain.renderMode = RenderMode.ScreenSpaceOverlay;
         
-        if (firstTimeStartup) 
+        quickStartText.text = firstTimeStartup ? "QUICK START" : "RESUME";
+        
+        // *** For now, 1 sim at a time ***
+        if (!firstTimeStartup) 
         {
-            quickStartText.text = "QUICK START";
-        } 
-        else 
-        {
-            quickStartText.text = "RESUME";
-            buttonNewSimulation.gameObject.SetActive(false); // *** For now, 1 sim at a time ***
+            buttonNewSimulation.gameObject.SetActive(false); 
             textMouseOverInfo.gameObject.SetActive(false);
         }
         
@@ -73,31 +71,21 @@ public class MainMenuUI : MonoBehaviour
         Refresh();
     }
     
-    public void ClickQuickStart() 
+    public void ClickQuickStart() { StartGame(true); }
+    
+    public void ClickNewSimulation() { StartGame(false); }
+    
+    void StartGame(bool isQuickStart)
     {
-        if(firstTimeStartup) 
+        if (firstTimeStartup) 
         {
-            gameManager.StartNewGame(true);
+            gameManager.StartNewGame(isQuickStart);
         }
         else 
         {
             gameManager.ResumePlaying();
-        } 
+        }          
     }
-    
-    public void ClickNewSimulation() 
-    {
-        if(firstTimeStartup) 
-        {
-            gameManager.StartNewGame(false);
-        }
-        else 
-        {
-            gameManager.ResumePlaying();
-        }        
-    }
-    
-    #region REFACTOR: delegate to reusable system
     
     public void MouseEnterQuickStart() {
         //textMouseOverInfo.gameObject.SetActive(true);
@@ -127,17 +115,13 @@ public class MainMenuUI : MonoBehaviour
         textMouseOverInfo.gameObject.SetActive(false);
     }
     
-    #endregion
-
-    public void Refresh() {
+    public void Refresh() 
+    {
+        panelGameOptions.SetActive(optionsMenuOn);
+    
         if (optionsMenuOn) 
         {
-            panelGameOptions.SetActive(true);
             textMouseOverInfo.gameObject.SetActive(false);
-        }
-        else 
-        {
-            panelGameOptions.SetActive(false);
         }
     }
 }

@@ -83,41 +83,7 @@ public class EggSack : MonoBehaviour {
     
     
     public void FirstTimeInitialize() {
-        //settingsRef = settings; // WPP: moved to Singleton pattern
         fixedJoint.frequency = springJointMaxStrength;
-
-        // WPP: redundant, setup in prefab
-        /*
-        if(rigidbodyRef == null) {
-            rigidbodyRef = this.gameObject.AddComponent<Rigidbody2D>();
-            mainCollider = this.gameObject.AddComponent<CapsuleCollider2D>();
-            rigidbodyRef.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
-            mainCollider.enabled = false;
-
-            fixedJoint = this.gameObject.AddComponent<FixedJoint2D>();
-            fixedJoint.enabled = false;
-            fixedJoint.enableCollision = false;            
-            fixedJoint.dampingRatio = 0.25f;
-            fixedJoint.frequency = springJointMaxStrength;
-
-            springJoint = this.gameObject.AddComponent<SpringJoint2D>();
-            springJoint.enabled = false;
-            springJoint.autoConfigureDistance = false;
-            springJoint.autoConfigureConnectedAnchor = false;
-            springJoint.anchor = Vector2.zero;
-            springJoint.connectedAnchor = Vector2.zero;
-            springJoint.distance = 0.005f;
-            springJoint.dampingRatio = 0.1f;
-            springJoint.frequency = 5f;
-            
-            GameObject mouseClickColliderGO = new GameObject("MouseClickCollider");
-            mouseClickColliderGO.transform.parent = this.gameObject.transform;
-            mouseClickColliderGO.transform.localPosition = new Vector3(0f, 0f, 1f);
-            mouseClickCollider = mouseClickColliderGO.AddComponent<CapsuleCollider>();
-            mouseClickCollider.isTrigger = true;
-            mouseClickColliderGO.SetActive(false);
-        }
-        */
     }
 
     public void InitializeEggSackFromGenome(int index, AgentGenome agentGenome, Agent parentAgent, Vector3 startPos) {
@@ -132,39 +98,7 @@ public class EggSack : MonoBehaviour {
                
         BeginLifeStageGrowing(parentAgent, agentGenome, startPos);
     }
-    
-    /*public void InitializeEggSackFromGenomeImmaculate(int eggSackIndex, AgentGenome genome, StartPositionGenome startPos) {
-        curLifeStage = EggLifeStage.GrowingIndependent;
 
-        parentAgentIndex = 0;
-
-        index = eggSackIndex;
-        float parentScale = genome.bodyGenome.coreGenome.fullBodyWidth * 0.5f + genome.bodyGenome.coreGenome.fullBodyLength * 0.5f;
-        this.fullSize.x = parentScale * 0.9f;  // golden ratio? // easter egg for math nerds?
-        this.fullSize.y = this.fullSize.x * 1.16f;    
-        
-        //this.fullSize = new Vector2(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength) * 0.64f;
-
-        foodAmount = this.fullSize.x * this.fullSize.y;
-        this.fullSize *= 1.2f;
-        
-        lifeStageTransitionTimeStepCounter = 0;        
-        growthStatus = 0f;
-        decayStatus = 0f;
-
-        this.transform.localPosition = startPos.startPosition;        
-                        
-        rigidbodyRef.velocity = Vector2.zero;
-        rigidbodyRef.angularVelocity = 0f;
-        rigidbodyRef.drag = 7.5f;
-        rigidbodyRef.angularDrag = 5f;
-
-       
-        isDepleted = false;
-        healthStructural = 1f;
-        prevPos = transform.position;        
-    }*/
-    
     public void Nullify()
     {
         isDepleted = true;
@@ -203,7 +137,7 @@ public class EggSack : MonoBehaviour {
         rigidbodyRef.drag = 7.5f;
         rigidbodyRef.angularDrag = 1.5f;
 
-        if(parentAgentRef == null) {
+        if (!parentAgentRef) {
             isProtectedByParent = false;
             isAttachedBySpring = false;
             
@@ -242,6 +176,7 @@ public class EggSack : MonoBehaviour {
 
         UpdateEggSackSize(0.05f, true);
     }
+    
     private void CommenceBeingBorn() {
         //Debug.Log("Begin Birth!");
         birthTimeStepsCounter = 0;
@@ -319,8 +254,9 @@ public class EggSack : MonoBehaviour {
                 if(lifeStageTransitionTimeStepCounter >= Mathf.RoundToInt((float)growDurationTimeSteps * (float)pregnancyPercentageOfTotalGrowTime)) {                   
                     // transition from being attached to parent Agent rigidbody, to free-floating:
                     
-                    if(!isBeingBorn && parentAgentRef != null) {  // only happens if this eggSack belong to a pregnant parent Agent
-                        CommenceBeingBorn();  // only start it once
+                    // Only happens if this eggSack belongs to a pregnant parent Agent and only starts once
+                    if(!isBeingBorn && parentAgentRef) {  
+                        CommenceBeingBorn();
                     }                    
                 }
 
@@ -334,7 +270,7 @@ public class EggSack : MonoBehaviour {
                 }
 
                 if(!isProtectedByParent && isAttachedBySpring) {
-                    float distToParent = (parentAgentRef.bodyRigidbody.transform.position - rigidbodyRef.transform.position).magnitude;
+                    //float distToParent = (parentAgentRef.bodyRigidbody.transform.position - rigidbodyRef.transform.position).magnitude;
                     SeverJointAttachment();                    
                 }
                 break;
@@ -371,7 +307,7 @@ public class EggSack : MonoBehaviour {
                 healthStructural = 0f; // temp hack
                 break;
             default:
-                Debug.LogError("NO SUCH ENUM ENTRY IMPLEMENTED, YOU FOOL!!! (" + curLifeStage.ToString() + ")");
+                Debug.LogError($"NO SUCH ENUM ENTRY IMPLEMENTED, YOU FOOL!!! ({curLifeStage})");
                 break;
         }
     }
@@ -407,11 +343,8 @@ public class EggSack : MonoBehaviour {
         }
                 
         growthScaleNormalized = developmentProgress * (healthStructural * (1f - decayStatus) * 0.75f + 0.25f);
-
-        bool resizeCollider = false;
-        if(lifeStageTransitionTimeStepCounter % numSkipFramesResize == 2) {
-            resizeCollider = true;            
-        } 
+        
+        bool resizeCollider = lifeStageTransitionTimeStepCounter % numSkipFramesResize == 2;
         UpdateEggSackSize(growthScaleNormalized, resizeCollider);
         
         Vector3 curPos = transform.localPosition;        
@@ -425,11 +358,11 @@ public class EggSack : MonoBehaviour {
 
         developmentProgress = Mathf.Clamp01((float)lifeStageTransitionTimeStepCounter / (float)(growDurationTimeSteps));
                         
-        if(isBeingBorn) {
+        if (isBeingBorn) {
             birthTimeStepsCounter++;
         }
         
-        if(isAttachedBySpring) {
+        if (isAttachedBySpring) {
             float birthPercentage = Mathf.Clamp01((float)birthTimeStepsCounter / (float)birthDurationTimeSteps);
             //float lerpVal = birthPercentage;
 
@@ -469,3 +402,39 @@ public class EggSack : MonoBehaviour {
         return currentBiomass <= 0f;
     }
 }
+
+#region Dead Code (please delete)
+
+/*public void InitializeEggSackFromGenomeImmaculate(int eggSackIndex, AgentGenome genome, StartPositionGenome startPos) {
+    curLifeStage = EggLifeStage.GrowingIndependent;
+
+    parentAgentIndex = 0;
+
+    index = eggSackIndex;
+    float parentScale = genome.bodyGenome.coreGenome.fullBodyWidth * 0.5f + genome.bodyGenome.coreGenome.fullBodyLength * 0.5f;
+    this.fullSize.x = parentScale * 0.9f;  // golden ratio? // easter egg for math nerds?
+    this.fullSize.y = this.fullSize.x * 1.16f;    
+    
+    //this.fullSize = new Vector2(genome.bodyGenome.coreGenome.fullBodyWidth, genome.bodyGenome.coreGenome.fullBodyLength) * 0.64f;
+
+    foodAmount = this.fullSize.x * this.fullSize.y;
+    this.fullSize *= 1.2f;
+    
+    lifeStageTransitionTimeStepCounter = 0;        
+    growthStatus = 0f;
+    decayStatus = 0f;
+
+    this.transform.localPosition = startPos.startPosition;        
+                    
+    rigidbodyRef.velocity = Vector2.zero;
+    rigidbodyRef.angularVelocity = 0f;
+    rigidbodyRef.drag = 7.5f;
+    rigidbodyRef.angularDrag = 5f;
+
+   
+    isDepleted = false;
+    healthStructural = 1f;
+    prevPos = transform.position;        
+}*/
+
+#endregion
