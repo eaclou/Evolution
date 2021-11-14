@@ -28,6 +28,7 @@ public class SimulationManager : Singleton<SimulationManager>
     public ComputeShader computeShaderPlantParticles;  // algae particles
     public ComputeShader computeShaderAnimalParticles; // animal particles
     public MasterGenomePool masterGenomePool;           // agents
+    public FogSettings fogSettings;
 
     public TrophicLayersManager trophicLayersManager;
     public VegetationManager vegetationManager;
@@ -462,14 +463,13 @@ public class SimulationManager : Singleton<SimulationManager>
         simAgeTimeSteps++;
         simAgeYearCounter++;
         TickSparseEvents();       
-        simEventsManager.Tick();                
+        //simEventsManager.Tick();  // WPP: replaced with timer              
         eggSackRespawnCounter++;
         agentRespawnCounter++;
         masterGenomePool.Tick(); 
         audioManager.Tick();
 
         vegetationManager.MeasureTotalResourceGridAmount();
-              
         vegetationManager.MeasureTotalPlantParticlesAmount();
 
         if (trophicLayersManager.IsLayerOn(KnowledgeMapId.Microbes)) {
@@ -520,9 +520,11 @@ public class SimulationManager : Singleton<SimulationManager>
             }            
         }
 
-        // * WPP: expose and calculate in ScriptableObject
-        fogColor = Color.Lerp(new Color(0.15f, 0.25f, 0.52f), new Color(0.07f, 0.27f, 0.157f), Mathf.Clamp01(simResourceManager.curGlobalPlantParticles * 0.035f));
-        fogAmount = Mathf.Lerp(0.3f, 0.55f, Mathf.Clamp01(simResourceManager.curGlobalPlantParticles * 0.0036f));
+        // WPP: exposed and calculated in ScriptableObject
+        fogColor = fogSettings.fogColor; 
+        fogAmount = fogSettings.fogIntensity; 
+        //Color.Lerp(new Color(0.15f, 0.25f, 0.52f), new Color(0.07f, 0.27f, 0.157f), Mathf.Clamp01(simResourceManager.curGlobalPlantParticles * 0.035f));
+        //Mathf.Lerp(0.3f, 0.55f, Mathf.Clamp01(simResourceManager.curGlobalPlantParticles * 0.0036f));
 
         simStateData.PopulateSimDataArrays();  // reads from GameObject Transforms & RigidBodies!!! ++ from FluidSimulationData!!!
         theRenderKing.RenderSimulationCameras(); // will pass current info to FluidSim before it Ticks()
@@ -541,7 +543,7 @@ public class SimulationManager : Singleton<SimulationManager>
         //}
         
         if (trophicLayersManager.IsLayerOn(KnowledgeMapId.Plants)) {
-            vegetationManager.EatSelectedFoodParticles(simStateData); // 
+            vegetationManager.EatSelectedFoodParticles(simStateData); 
             // How much light/nutrients available?
             vegetationManager.SimulatePlantParticles(simStateData, simResourceManager);
         }
@@ -1055,7 +1057,6 @@ public class SimulationManager : Singleton<SimulationManager>
             speciesPool.ProcessCompletedCandidate(candidateData, masterGenomePool);
         }
 
-
         // &&&&& *****  HERE!!!! **** &&&&&&   --- Select a species first to serve as parentGenome !! ***** &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
         // Can be random selection (unbiased), or proportional to species avg Fitnesses?
         SpeciesGenomePool sourceSpeciesPool = masterGenomePool.GetSmallestSpecies(); // masterGenomePool.SelectNewGenomeSourceSpecies(false, 0.33f); // select at random
@@ -1119,7 +1120,7 @@ public class SimulationManager : Singleton<SimulationManager>
         
         for (int i = 0; i < numAgents; i++) 
         {
-            if(agents[i].speciesIndex == eggSacks[eggSackIndex].speciesIndex &&
+            if (agents[i].speciesIndex == eggSacks[eggSackIndex].speciesIndex &&
                agents[i].isMature &&
                !agents[i].isPregnantAndCarryingEggs &&
                agents[i].pregnancyRefactoryComplete &&
@@ -1140,7 +1141,7 @@ public class SimulationManager : Singleton<SimulationManager>
                 }
             }                
         
-            if(totalSuitableParentAgents > 0) 
+            if (totalSuitableParentAgents > 0) 
             {
                 // At Least ONE fertile Agent available:
                 int parentAgentIndex = suitableParentAgentsList[Random.Range(0, totalSuitableParentAgents)];

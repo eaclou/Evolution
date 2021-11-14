@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Playcraft;
 
 // * WPP: Refactor -> repetition, overly-nested conditionals, expose values, remove dead code, shorten reference chains
 public class SimEventsManager 
@@ -35,7 +36,9 @@ public class SimEventsManager
     }
 
     /// Cooldown increment
-    public void Tick() 
+    // WPP: converted to timer
+    // * nothing sets isCooldown to true, so this is not being used
+    /*public void Tick() 
     {
         if (!isCooldown) return;
 
@@ -46,7 +49,16 @@ public class SimEventsManager
             curCooldownCounter = 0;
             isCooldown = false;
         }
+    }*/
+    
+    public void BeginCooldown(float duration = 2f)
+    {
+        if (isCooldown) return;
+        isCooldown = true;
+        MonoSim.instance.Invoke(nameof(EndCooldown), duration);
     }
+    
+    void EndCooldown() { isCooldown = false; }
     
     /*
     public void ExecuteEvent(SimulationManager simManager, SimEventData data) {

@@ -1129,8 +1129,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
             obstacleStrokeDataArray[baseIndex + i].localDir = simManager.eggSacks[i].facingDirection;
             obstacleStrokeDataArray[baseIndex + i].scale = simManager.eggSacks[i].curSize * 0.95f;
 
-            float velX = (foodPos.x - simManager.eggSacks[i]._PrevPos.x) * velScale;
-            float velY = (foodPos.y - simManager.eggSacks[i]._PrevPos.y) * velScale;
+            float velX = (foodPos.x - simManager.eggSacks[i].prevPos.x) * velScale;
+            float velY = (foodPos.y - simManager.eggSacks[i].prevPos.y) * velScale;
 
             obstacleStrokeDataArray[baseIndex + i].color = new Vector4(velX, velY, 1f, 1f);
         }
