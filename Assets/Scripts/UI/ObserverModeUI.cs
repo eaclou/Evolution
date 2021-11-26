@@ -81,7 +81,7 @@ public class ObserverModeUI : MonoBehaviour
 
     public void Tick()
     {
-        if(vegetationManager == null) return;
+        if (vegetationManager == null) return;
 
         TickAnnouncement();
         TickTooltip();
@@ -200,7 +200,8 @@ public class ObserverModeUI : MonoBehaviour
     {
         switch (id)
         {
-            case TooltipId.CanvasElement: { //*** EAC Moving the logic to CreaturePanelUI to update Tooltip text for matching neurons
+            //*** EAC Moving the logic to CreaturePanelUI to update Tooltip text for matching neurons
+            case TooltipId.CanvasElement: { 
                 //if (cameraManager.targetAgent) {
                 //    return "OutComm[" + tooltip.elementID.ToString() + "] " + cameraManager.targetAgent.communicationModule.outComm0[0];
                 //}

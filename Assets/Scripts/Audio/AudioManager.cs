@@ -3,9 +3,12 @@ using Playcraft;
 using UnityEngine;
 using UnityEngine.Audio;
 
-// * WPP: refactor to eliminate repetition
 public class AudioManager : Singleton<AudioManager> 
 {
+    CameraManager cameraManager => CameraManager.instance;
+    Vector3 cameraFocus => cameraManager.curCameraFocusPivotPos;
+    Vector2 cameraFocus2D => new Vector2(cameraFocus.x, cameraFocus.y);
+
     public AudioMixer masterAudioMixer;
 
     public GameObject menuMusicGroupGO;
@@ -28,8 +31,8 @@ public class AudioManager : Singleton<AudioManager>
     private int framesPerTrack = 12500;
     private float distSqrFalloff = 110f;
 
-    private float GetSFXVolumeFromPos(Vector2 pos) {
-        float distSqr = (pos - new Vector2(CameraManager.instance.curCameraFocusPivotPos.x, CameraManager.instance.curCameraFocusPivotPos.y)).sqrMagnitude;
+    private float GetSFXVolumeFromPos(Vector2 position) {
+        float distSqr = (position - cameraFocus2D).sqrMagnitude;
         float dist = Mathf.Sqrt(distSqr);
         float falloffDist = Mathf.Sqrt(distSqrFalloff);
         float amplitude01 = 1f - Mathf.Clamp01(dist / falloffDist);
@@ -37,60 +40,29 @@ public class AudioManager : Singleton<AudioManager>
         return amplitude01;
     }
     
-    public void PlayCritterDeath(Vector2 pos) {
-        float volume = GetSFXVolumeFromPos(pos);
-        if(volume > 0.01f) {
-            audioSourceCritterDeath01.volume = volume;
-            audioSourceCritterDeath01.Play();
-        }
-    }
+    public void PlayCritterDeath(Vector2 position) { PlaySound(audioSourceCritterDeath01, position); }
+    public void PlayCritterDamage(Vector2 position) { PlaySound(audioSourceCritterDamage01, position); }
+    public void PlayCritterDash(Vector2 position) { PlaySound(audioSourceCritterDash01, position); }
+    public void PlayCritterSpawn(Vector2 position) { PlaySound(audioSourceCritterSpawn01, position); }
+    public void PlayCritterBite(Vector2 position) { PlaySound(audioSourceCritterBite01, position); }
+    public void PlayCritterAttack(Vector2 position) { PlaySound(audioSourceCritterAttack01, position); }
+    public void PlayCritterDefend(Vector2 position) { PlaySound(audioSourceCritterDefend01, position); }
     
-    public void PlayCritterDamage(Vector2 pos) {
-        float volume = GetSFXVolumeFromPos(pos);
+    // WPP 11/26/21 refactored from Play"" methods above into below generic function
+    /*
+    float volume = GetSFXVolumeFromPos(pos);
         if (volume > 0.01f) {
-            audioSourceCritterDamage01.volume = volume;
-            audioSourceCritterDamage01.Play();
-        }
+        audioSourceCritterAttack01.volume = volume;
+        audioSourceCritterAttack01.Play();
     }
+    */
     
-    public void PlayCritterDash(Vector2 pos) {
-        float volume = GetSFXVolumeFromPos(pos);
-        if (volume > 0.01f) {
-            audioSourceCritterDash01.volume = volume;
-            audioSourceCritterDash01.Play();
-        }
-    }
-    
-    public void PlayCritterSpawn(Vector2 pos) {
-        float volume = GetSFXVolumeFromPos(pos);
-        if (volume > 0.01f) {
-            audioSourceCritterSpawn01.volume = volume;
-            audioSourceCritterSpawn01.Play();
-        }
-    }
-    
-    public void PlayCritterBite(Vector2 pos) {
-        float volume = GetSFXVolumeFromPos(pos);
-        if (volume > 0.01f) {
-            audioSourceCritterBite01.volume = volume;
-            audioSourceCritterBite01.Play();
-        }
-    }
-    
-    public void PlayCritterAttack(Vector2 pos) {
-        float volume = GetSFXVolumeFromPos(pos);
-        if (volume > 0.01f) {
-            audioSourceCritterAttack01.volume = volume;
-            audioSourceCritterAttack01.Play();
-        }
-    }
-    
-    public void PlayCritterDefend(Vector2 pos) {
-        float volume = GetSFXVolumeFromPos(pos);
-        if (volume > 0.01f) {
-            audioSourceCritterDefend01.volume = volume;
-            audioSourceCritterDefend01.Play();
-        }
+    void PlaySound(AudioSource sound, Vector2 position)
+    {
+        float volume = GetSFXVolumeFromPos(position);
+        if (volume <= .01f) return;
+        sound.volume = volume;
+        sound.Play();
     }
 
     public void Tick() {
@@ -105,7 +77,6 @@ public class AudioManager : Singleton<AudioManager>
     
     private void PlayNextSong() {
         GetRandomSong().Play();
-        //Debug.Log("PLAY SONG)");
     }
     
     private AudioSource GetRandomSong() {

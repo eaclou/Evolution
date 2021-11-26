@@ -50,7 +50,6 @@ public class SimEventsManager
             isCooldown = false;
         }
     }*/
-    
     public void BeginCooldown(float duration = 2f)
     {
         if (isCooldown) return;

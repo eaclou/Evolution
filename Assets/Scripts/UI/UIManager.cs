@@ -96,7 +96,7 @@ public class UIManager : Singleton<UIManager>
     public void InitialUnlocks() {
         //Debug.Log("InitialUnlocks WATER UNLOCKED!!! " + unlockCooldownCounter); // + ", " + BigBangPanelUI.bigBangFramesCounter.ToString());
 
-        selectionManager.focusedCandidate = simulationManager.masterGenomePool.completeSpeciesPoolsList[0].candidateGenomesList[0];
+        selectionManager.focusedCandidate = speciesPools[0].candidateGenomesList[0];
         
         theRenderKing.baronVonTerrain.IncrementWorldRadius(5.7f);
 
@@ -119,7 +119,7 @@ public class UIManager : Singleton<UIManager>
         InitializeTrophicSlot(KnowledgeMapId.Microbes);
         InitializeTrophicSlot(KnowledgeMapId.Animals);
 
-        theRenderKing.InitializeCreaturePortrait(simulationManager.masterGenomePool.completeSpeciesPoolsList[0].foundingCandidate.candidateGenome); //, gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][mutationUI.selectedToolbarMutationID].representativeGenome);
+        theRenderKing.InitializeCreaturePortrait(speciesPools[0].foundingCandidate.candidateGenome); //, gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][mutationUI.selectedToolbarMutationID].representativeGenome);
         
         trophicLayersManager.SetSlotStatus(KnowledgeMapId.Nutrients, TrophicSlotStatus.On);
         trophicLayersManager.SetSlotStatus(KnowledgeMapId.Pebbles, TrophicSlotStatus.On);
@@ -189,7 +189,7 @@ public class UIManager : Singleton<UIManager>
     void Update() 
     {                                        
         if (!simulationManager.loadingComplete) return;
-        //if (bigBangPanelUI.Tick()) return;
+        //if (bigBangPanelUI.Tick()) return;  // WPP: moved to coroutine
         if (bigBangPanelUI.isRunning) return;
 
         observerModeUI.Tick();  // <== this is the big one *******  

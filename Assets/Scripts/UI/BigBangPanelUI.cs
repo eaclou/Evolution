@@ -23,6 +23,7 @@ public class BigBangPanelUI : MonoBehaviour
     {
         isRunning = true;
         int frameCounter = 0;
+        var tick = new WaitForFixedUpdate();
         
         manager.InitialUnlocks();
         curActiveTool = ToolType.Stir;
@@ -36,7 +37,7 @@ public class BigBangPanelUI : MonoBehaviour
                 if (stroke.disableOnFrame == frameCounter)
                     stroke.image.enabled = false;
 
-            yield return null;
+            yield return tick;
             frameCounter += 1;
         }
         

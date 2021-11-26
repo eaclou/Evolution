@@ -446,7 +446,6 @@ public class TheRenderKing : Singleton<TheRenderKing>
         public float age;
     }
 
-    
     public struct CritterUberStrokeData 
     {
         public int parentIndex;  // which Critter is this attached to?	
@@ -3013,7 +3012,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
             Render();
         }
     }
-    
+
     #endregion
 
     private void OnDisable() {
