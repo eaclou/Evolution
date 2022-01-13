@@ -5,11 +5,6 @@ using UnityEngine.Rendering;
 using Playcraft;
 using Random = UnityEngine.Random;
 
-// * WPP: 1024 is used a lot, what concept does it represent? (replace with constant, exposed value, or system setting)
-// repeat for other magic numbers
-    // Max number of threads that can be executed by a shader group
-    // MAX_SHADER_THREADS = 1024
-
 /// Initializes and updates all materials and compute buffers in game, including individual agents
 // * WPP: break into regions to focus optimization efforts
     // General initialization: low priority
@@ -34,6 +29,9 @@ public class TheRenderKing : Singleton<TheRenderKing>
     
     CreaturePanelUI creaturePanelUI => uiManager.creaturePanelUI;
     ClockPanelUI clockPanelUI => uiManager.clockPanelUI;
+    
+    /// Max number of threads that can be executed by a shader group
+    const int maxShaderThreads = 1024;
 
     // Set in inspector
     public BaronVonTerrain baronVonTerrain;
@@ -175,7 +173,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
     private int numStrokesPerCritterSkinDetail = 128;
     private ComputeBuffer mainCritterStrokesCBuffer;    
 
-    private int numFloatyBits = 1024 * 1;
+    private int numFloatyBits = maxShaderThreads;
     private ComputeBuffer floatyBitsCBuffer;
 
     private BasicStrokeData[] obstacleStrokeDataArray;
@@ -659,10 +657,10 @@ public class TheRenderKing : Singleton<TheRenderKing>
     }
     
     private void InitializeSpiritBrushQuadBuffer() {
-        cursorParticlesArray = new CursorParticleData[1024];
+        cursorParticlesArray = new CursorParticleData[maxShaderThreads];
         //spiritBrushQuadDataSpawnCBuffer = new ComputeBuffer(32, GetMemorySizeSpiritbrushQuadData());
-        cursorParticlesCBuffer0 = new ComputeBuffer(1024, GetMemorySizeCursorParticleData());
-        cursorParticlesCBuffer1 = new ComputeBuffer(1024, GetMemorySizeCursorParticleData());
+        cursorParticlesCBuffer0 = new ComputeBuffer(maxShaderThreads, GetMemorySizeCursorParticleData());
+        cursorParticlesCBuffer1 = new ComputeBuffer(maxShaderThreads, GetMemorySizeCursorParticleData());
 
         int numSpawnPoints = 3;
         Vector3[] spawnPointsArray = new Vector3[numSpawnPoints];
@@ -679,10 +677,10 @@ public class TheRenderKing : Singleton<TheRenderKing>
         cursorParticlesCBuffer0.SetData(cursorParticlesArray);
 
         //============================================================
-        SpiritBrushQuadData[] spiritBrushQuadDataArray = new SpiritBrushQuadData[1024];
+        SpiritBrushQuadData[] spiritBrushQuadDataArray = new SpiritBrushQuadData[maxShaderThreads];
         //spiritBrushQuadDataSpawnCBuffer = new ComputeBuffer(32, GetMemorySizeSpiritbrushQuadData());
-        spiritBrushQuadDataCBuffer0 = new ComputeBuffer(1024, GetMemorySizeSpiritbrushQuadData());
-        spiritBrushQuadDataCBuffer1 = new ComputeBuffer(1024, GetMemorySizeSpiritbrushQuadData());
+        spiritBrushQuadDataCBuffer0 = new ComputeBuffer(maxShaderThreads, GetMemorySizeSpiritbrushQuadData());
+        spiritBrushQuadDataCBuffer1 = new ComputeBuffer(maxShaderThreads, GetMemorySizeSpiritbrushQuadData());
         
         for (int i = 0; i < spiritBrushQuadDataArray.Length; i++) {
             SpiritBrushQuadData data = new SpiritBrushQuadData(0, 256f, 200f, 256f, 0.3f);
@@ -1792,11 +1790,11 @@ public class TheRenderKing : Singleton<TheRenderKing>
 
         for (int y = 0; y < numColumns; y++) 
         {
-            // radial fan lines:
+            // Radial fan lines:
             float angleRad = (-spreadAngle / 2f + angleInc * y) * Mathf.PI;
             Vector2 tangent = new Vector2(Mathf.Cos(angleRad), Mathf.Sin(angleRad));
             
-            //arcs:
+            // Arcs:
             for (int x = 0; x < numRows; x++) 
             {
                 // Find Tail Anchor Point:               
@@ -1810,11 +1808,12 @@ public class TheRenderKing : Singleton<TheRenderKing>
                 float functionMult = (Mathf.Sin(Mathf.PI * frac * frequencies.x + offsets.x) * amplitudes.x * 0.5f + 1.5f +
                                       Mathf.Cos(Mathf.PI * frac * frequencies.y + offsets.y) * amplitudes.y * 0.5f +
                                       Mathf.Sin(Mathf.PI * frac * frequencies.z + offsets.z) * amplitudes.z * 0.5f) / 3f;
-
-                strokesArray[brushIndexLeft].scale = new Vector2(0.05f * (float)x, lengthMult * functionMult);
-                strokesArray[brushIndexRight].scale = strokesArray[brushIndexLeft].scale;
-
-                // * WPP: merge similar code blocks
+                                      
+                SetStrokeData(ref strokesArray[brushIndexLeft], x, y, tangent, numRows, arrayIndexStart, lengthMult, functionMult, tMult);
+                SetStrokeData(ref strokesArray[brushIndexRight], x, y, tangent, numRows, arrayIndexStart, lengthMult, functionMult, tMult, strokesArray[brushIndexLeft].scale);
+                strokesArray[brushIndexRight].neighborIndex += numStrokesPerCritterTailFin / 2;
+                // WPP: merged similar code blocks
+                /*strokesArray[brushIndexLeft].scale = new Vector2(0.05f * (float)x, lengthMult * functionMult);
                 strokesArray[brushIndexLeft].bindNormal = (new Vector3(-1f, 0f, 0f) + Random.insideUnitSphere * 0.3f).normalized;
                 strokesArray[brushIndexLeft].bindTangent = new Vector3(0f, -tangent.x, tangent.y);
                 strokesArray[brushIndexLeft].bindPos += strokesArray[brushIndexLeft].bindTangent * strokesArray[brushIndexLeft].scale.y * (float)x;
@@ -1825,6 +1824,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
                 strokesArray[brushIndexLeft].neighborAlign = 1f;
                 strokesArray[brushIndexLeft].passiveFollow = Mathf.Lerp(0.3f, 0.7f, (float)x / (float)(numRows - 1));
 
+                strokesArray[brushIndexRight].scale = strokesArray[brushIndexLeft].scale;
                 strokesArray[brushIndexRight].bindNormal = (new Vector3(1f, 0f, 0f) + Random.insideUnitSphere * 0.3f).normalized;
                 strokesArray[brushIndexRight].bindTangent = new Vector3(0f, -tangent.x, tangent.y);
                 strokesArray[brushIndexRight].bindPos += strokesArray[brushIndexRight].bindTangent * strokesArray[brushIndexRight].scale.y * (float)x;
@@ -1833,9 +1833,24 @@ public class TheRenderKing : Singleton<TheRenderKing>
                 strokesArray[brushIndexRight].t = 0.05f - tangent.x * strokesArray[brushIndexLeft].scale.y * (float)x / tMult;
                 strokesArray[brushIndexRight].neighborIndex = arrayIndexStart + numRows * y + Mathf.Max(0, (x - 1)) + (numStrokesPerCritterTailFin / 2);
                 strokesArray[brushIndexRight].neighborAlign = 1f;
-                strokesArray[brushIndexRight].passiveFollow = Mathf.Lerp(0.3f, 0.7f, (float)x / (float)(numRows - 1));
+                strokesArray[brushIndexRight].passiveFollow = Mathf.Lerp(0.3f, 0.7f, (float)x / (float)(numRows - 1));*/
             }
         }
+    }
+
+    private void SetStrokeData(ref CritterUberStrokeData strokeData, int x, int y, Vector2 tangent, int rowCount, int startIndex,
+    float lengthMultiplier, float functionMultiplier, float tMultiplier, Vector2 overrideScale = default)
+    {
+        strokeData.scale = overrideScale == Vector2.zero ? new Vector2(0.05f * x, lengthMultiplier * functionMultiplier) : overrideScale;
+        strokeData.bindNormal = (new Vector3(-1f, 0f, 0f) + Random.insideUnitSphere * 0.3f).normalized;
+        strokeData.bindTangent = new Vector3(0f, -tangent.x, tangent.y);
+        strokeData.bindPos += strokeData.bindTangent * strokeData.scale.y * x;
+        strokeData.jawMask = 1f;
+        strokeData.scale.y *= 1.75f;
+        strokeData.t = 0.05f - tangent.x * strokeData.scale.y * x / tMultiplier;
+        strokeData.neighborIndex = startIndex + rowCount * y + Mathf.Max(0, x - 1);
+        strokeData.neighborAlign = 1f;
+        strokeData.passiveFollow = Mathf.Lerp(0.3f, 0.7f, x / (rowCount - 1));
     }
 
     private void GenerateCritterSkinDetailBrushstrokes(ref CritterUberStrokeData[] strokesArray, AgentGenome agentGenome, int agentIndex) {
@@ -2126,7 +2141,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         fluidManager.computeShaderFluidSim.SetTexture(kernelSimFloatyBits, "_SpiritBrushTex", spiritBrushRT);
         fluidManager.computeShaderFluidSim.SetBuffer(kernelSimFloatyBits, "FloatyBitsCBuffer", floatyBitsCBuffer);
         fluidManager.computeShaderFluidSim.SetTexture(kernelSimFloatyBits, "VelocityRead", fluidManager._VelocityPressureDivergenceMain);
-        fluidManager.computeShaderFluidSim.Dispatch(kernelSimFloatyBits, floatyBitsCBuffer.count / 1024, 1, 1);
+        fluidManager.computeShaderFluidSim.Dispatch(kernelSimFloatyBits, floatyBitsCBuffer.count / maxShaderThreads, 1, 1);
     }
     
     public void SimSpiritBrushQuads() {
@@ -2920,7 +2935,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         cmdBufferMain.DrawProcedural(Matrix4x4.identity, plantParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, vegetationManager.plantParticlesCBuffer.count * 32);
     }
     
-    // add shadow pass eventually
+    // Add shadow pass eventually
     void DisplayAnimalParticles(float isHighlight)
     {
         float isSelectedMicrobes = 0f; //***EC -- revisit

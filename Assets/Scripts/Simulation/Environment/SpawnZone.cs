@@ -1,20 +1,20 @@
 ﻿using UnityEngine;
+using Playcraft;
 
-public class SpawnZone : MonoBehaviour {
+public class SpawnZone : MonoBehaviour 
+{
     public float radius = 10f;
     public bool active = true;
     public int refactoryCounter = 0;
+    [Range(0, 1)] public float resetChance = .002f;
 
-    private void FixedUpdate() {
-        if(!active) {
+    void FixedUpdate() {
+        if (!active) {
             refactoryCounter++;
         }
-        else {
-            float randRoll = Random.Range(0f, 1f);
-            if (randRoll < 0.002f) {
-                active = false;
-                refactoryCounter = 0;
-            }
-        }        
+        else if (RandomStatics.CoinToss(resetChance)) {
+            active = false;
+            refactoryCounter = 0;
+        }
     }
 }
