@@ -15,6 +15,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
     // Singleton references
     TheCursorCzar theCursorCzar => TheCursorCzar.instance;
     SimulationManager simManager => SimulationManager.instance;
+    SimulationStateData simStateData => simManager.simStateData;
     CameraManager cameraManager => CameraManager.instance;
     UIManager uiManager => UIManager.instance;
     EnvironmentFluidManager fluidManager => EnvironmentFluidManager.instance;
@@ -1230,9 +1231,9 @@ public class TheRenderKing : Singleton<TheRenderKing>
         eggsUpdateCBuffer.SetData(eggDataArray);
         int kernelCSUpdateDynamicEggBuffers = computeShaderEggSacks.FindKernel("CSUpdateDynamicEggBuffers");
         //computeShaderBrushStrokes.SetInt("_CurveStrokesUpdateAgentIndex", agentIndex); // ** can I just use parentIndex instead?
-        computeShaderEggSacks.SetBuffer(kernelCSUpdateDynamicEggBuffers, "eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
+        computeShaderEggSacks.SetBuffer(kernelCSUpdateDynamicEggBuffers, "eggSackSimDataCBuffer", simStateData.eggSackSimDataCBuffer);
         computeShaderEggSacks.SetBuffer(kernelCSUpdateDynamicEggBuffers, "eggDataUpdateCBuffer", eggsUpdateCBuffer);
-        computeShaderEggSacks.SetBuffer(kernelCSUpdateDynamicEggBuffers, "eggDataWriteCBuffer", simManager.simStateData.eggDataCBuffer);
+        computeShaderEggSacks.SetBuffer(kernelCSUpdateDynamicEggBuffers, "eggDataWriteCBuffer", simStateData.eggDataCBuffer);
         computeShaderEggSacks.Dispatch(kernelCSUpdateDynamicEggBuffers, 1, 1, 1);
         eggsUpdateCBuffer.Release();
     }
@@ -1992,35 +1993,50 @@ public class TheRenderKing : Singleton<TheRenderKing>
         spiritBrushQuadDataSpawnCBuffer.Release();
     }
 
-    // * WPP: merge below 3 methods
     private void SimEggSacks() {
         int kernelCSSimulateEggs = computeShaderEggSacks.FindKernel("CSSimulateEggs");
         computeShaderEggSacks.SetTexture(kernelCSSimulateEggs, "velocityRead", fluidManager._VelocityPressureDivergenceMain);
-        computeShaderEggSacks.SetBuffer(kernelCSSimulateEggs, "eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
-        computeShaderEggSacks.SetBuffer(kernelCSSimulateEggs, "eggDataWriteCBuffer", simManager.simStateData.eggDataCBuffer);
+        computeShaderEggSacks.SetBuffer(kernelCSSimulateEggs, "eggSackSimDataCBuffer", simStateData.eggSackSimDataCBuffer);
+        computeShaderEggSacks.SetBuffer(kernelCSSimulateEggs, "eggDataWriteCBuffer", simStateData.eggDataCBuffer);
         computeShaderEggSacks.SetFloat("_MapSize", SimulationManager._MapSize);
         computeShaderEggSacks.SetFloat("_Time", Time.realtimeSinceStartup);
-        computeShaderEggSacks.Dispatch(kernelCSSimulateEggs, simManager.simStateData.eggDataCBuffer.count / 64, 1, 1);
+        computeShaderEggSacks.Dispatch(kernelCSSimulateEggs, simStateData.eggDataCBuffer.count / 64, 1, 1);
     }
-
+    
+    // WPP: merged below 2 methods
     private void SimCritterGenericStrokes() {
-        int kernelCSSimulateCritterGenericStrokes = computeShaderCritters.FindKernel("CSSimulateCritterGenericStrokes");
+        /*int kernelCSSimulateCritterGenericStrokes = computeShaderCritters.FindKernel("CSSimulateCritterGenericStrokes");
         computeShaderCritters.SetTexture(kernelCSSimulateCritterGenericStrokes, "velocityRead", fluidManager._VelocityPressureDivergenceMain);
-        computeShaderCritters.SetBuffer(kernelCSSimulateCritterGenericStrokes, "critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-        computeShaderCritters.SetBuffer(kernelCSSimulateCritterGenericStrokes, "critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        computeShaderCritters.SetBuffer(kernelCSSimulateCritterGenericStrokes, "critterInitDataCBuffer", simStateData.critterInitDataCBuffer);
+        computeShaderCritters.SetBuffer(kernelCSSimulateCritterGenericStrokes, "critterSimDataCBuffer", simStateData.critterSimDataCBuffer);
         computeShaderCritters.SetBuffer(kernelCSSimulateCritterGenericStrokes, "critterGenericStrokesWriteCBuffer", mainCritterStrokesCBuffer);
         computeShaderCritters.SetFloat("_MapSize", SimulationManager._MapSize);
-        computeShaderCritters.Dispatch(kernelCSSimulateCritterGenericStrokes, mainCritterStrokesCBuffer.count / 16, 1, 1);
+        computeShaderCritters.Dispatch(kernelCSSimulateCritterGenericStrokes, mainCritterStrokesCBuffer.count / 16, 1, 1);*/
+        SimCritterStrokes("CSSimulateCritterGenericStrokes", simStateData.critterInitDataCBuffer, 
+            simStateData.critterSimDataCBuffer, mainCritterStrokesCBuffer);
     }
     
     private void SimUIToolbarCritterPortraitStrokes() {
-        int kernelCSSimulateCritterPortraitStrokes = computeShaderCritters.FindKernel("CSSimulateCritterPortraitStrokes");
+        /*int kernelCSSimulateCritterPortraitStrokes = computeShaderCritters.FindKernel("CSSimulateCritterPortraitStrokes");
         computeShaderCritters.SetTexture(kernelCSSimulateCritterPortraitStrokes, "velocityRead", fluidManager._VelocityPressureDivergenceMain);
         computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterInitDataCBuffer", creaturePanelUI.portraitCritterInitDataCBuffer);
         computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterSimDataCBuffer", creaturePanelUI.portraitCritterSimDataCBuffer);
         computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterGenericStrokesWriteCBuffer", creaturePanelUI.critterPortraitStrokesCBuffer);
         computeShaderCritters.SetFloat("_MapSize", SimulationManager._MapSize);
-        computeShaderCritters.Dispatch(kernelCSSimulateCritterPortraitStrokes, creaturePanelUI.critterPortraitStrokesCBuffer.count / 16, 1, 1);
+        computeShaderCritters.Dispatch(kernelCSSimulateCritterPortraitStrokes, creaturePanelUI.critterPortraitStrokesCBuffer.count / 16, 1, 1);*/
+        SimCritterStrokes("CSSimulateCritterPortraitStrokes", creaturePanelUI.portraitCritterInitDataCBuffer, 
+            creaturePanelUI.portraitCritterSimDataCBuffer, creaturePanelUI.critterPortraitStrokesCBuffer);
+    }
+    
+    private void SimCritterStrokes(string kernelName, ComputeBuffer initBuffer, ComputeBuffer dataBuffer, ComputeBuffer writeBuffer)
+    {
+        int kernelIndex = computeShaderCritters.FindKernel(kernelName);
+        computeShaderCritters.SetTexture(kernelIndex, "velocityRead", fluidManager._VelocityPressureDivergenceMain);
+        computeShaderCritters.SetBuffer(kernelIndex, "critterInitDataCBuffer", initBuffer);
+        computeShaderCritters.SetBuffer(kernelIndex, "critterSimDataCBuffer", dataBuffer);
+        computeShaderCritters.SetBuffer(kernelIndex, "critterGenericStrokesWriteCBuffer", writeBuffer);
+        computeShaderCritters.SetFloat("_MapSize", SimulationManager._MapSize);
+        computeShaderCritters.Dispatch(kernelIndex, mainCritterStrokesCBuffer.count / 16, 1, 1);
     }
 
     //***EAC destined to be replaced by GPU ^ ^ ^
@@ -2419,7 +2435,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         
         RenderStructuredBuffer(resourceSimTransferMat, "animalParticleDataCBuffer", zooplanktonManager.animalParticlesCBuffer);
         RenderStructuredBuffer(plantParticleDataMat, "plantParticleDataCBuffer", vegetationManager.plantParticlesCBuffer);
-        RenderStructuredBuffer(resourceSimAgentDataMat, "critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        RenderStructuredBuffer(resourceSimAgentDataMat, "critterSimDataCBuffer", simStateData.critterSimDataCBuffer);
 
         Graphics.ExecuteCommandBuffer(cmdBufferResourceSim);
         resourceSimRenderCamera.Render();
@@ -2870,9 +2886,9 @@ public class TheRenderKing : Singleton<TheRenderKing>
 
         debugAgentResourcesMat.SetPass(0);
         debugAgentResourcesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        debugAgentResourcesMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-        debugAgentResourcesMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-        cmdBufferDebugVis.DrawProcedural(Matrix4x4.identity, debugAgentResourcesMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
+        debugAgentResourcesMat.SetBuffer("critterInitDataCBuffer", simStateData.critterInitDataCBuffer);
+        debugAgentResourcesMat.SetBuffer("critterSimDataCBuffer", simStateData.critterSimDataCBuffer);
+        cmdBufferDebugVis.DrawProcedural(Matrix4x4.identity, debugAgentResourcesMat, 0, MeshTopology.Triangles, 6, simStateData.critterInitDataCBuffer.count);
 
         debugVisAlgaeParticlesMat.SetPass(0);
         debugVisAlgaeParticlesMat.SetBuffer("foodParticleDataCBuffer", vegetationManager.plantParticlesCBuffer);
@@ -2961,10 +2977,10 @@ public class TheRenderKing : Singleton<TheRenderKing>
     void DisplayEggStrokes()
     {
         eggSackStrokeDisplayMat.SetPass(0);
-        eggSackStrokeDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-        eggSackStrokeDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-        eggSackStrokeDisplayMat.SetBuffer("eggDataCBuffer", simManager.simStateData.eggDataCBuffer);
-        eggSackStrokeDisplayMat.SetBuffer("eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
+        eggSackStrokeDisplayMat.SetBuffer("critterInitDataCBuffer", simStateData.critterInitDataCBuffer);
+        eggSackStrokeDisplayMat.SetBuffer("critterSimDataCBuffer", simStateData.critterSimDataCBuffer);
+        eggSackStrokeDisplayMat.SetBuffer("eggDataCBuffer", simStateData.eggDataCBuffer);
+        eggSackStrokeDisplayMat.SetBuffer("eggSackSimDataCBuffer", simStateData.eggSackSimDataCBuffer);
         eggSackStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         eggSackStrokeDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         eggSackStrokeDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
@@ -2972,7 +2988,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         eggSackStrokeDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
         eggSackStrokeDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         eggSackStrokeDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
-        cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggSackStrokeDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.eggDataCBuffer.count);
+        cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggSackStrokeDisplayMat, 0, MeshTopology.Triangles, 6, simStateData.eggDataCBuffer.count);
     }
     
     // What is this????
@@ -2980,8 +2996,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
     {
         critterDebugGenericStrokeMat.SetPass(0);
         critterDebugGenericStrokeMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        critterDebugGenericStrokeMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-        critterDebugGenericStrokeMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        critterDebugGenericStrokeMat.SetBuffer("critterInitDataCBuffer", simStateData.critterInitDataCBuffer);
+        critterDebugGenericStrokeMat.SetBuffer("critterSimDataCBuffer", simStateData.critterSimDataCBuffer);
         critterDebugGenericStrokeMat.SetBuffer("critterGenericStrokesCBuffer", mainCritterStrokesCBuffer);
         critterDebugGenericStrokeMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         critterDebugGenericStrokeMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
@@ -3007,9 +3023,9 @@ public class TheRenderKing : Singleton<TheRenderKing>
     void DisplayEggCover()
     {
         eggCoverDisplayMat.SetPass(0);
-        eggCoverDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-        eggCoverDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-        //eggCoverDisplayMat.SetBuffer("eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
+        eggCoverDisplayMat.SetBuffer("critterInitDataCBuffer", simStateData.critterInitDataCBuffer);
+        eggCoverDisplayMat.SetBuffer("critterSimDataCBuffer", simStateData.critterSimDataCBuffer);
+        //eggCoverDisplayMat.SetBuffer("eggSackSimDataCBuffer", simStateData.eggSackSimDataCBuffer);
         eggCoverDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         eggCoverDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         eggCoverDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
@@ -3017,7 +3033,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         eggCoverDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
         eggCoverDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         //eggCoverDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
-        cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggCoverDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
+        cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggCoverDisplayMat, 0, MeshTopology.Triangles, 6, simStateData.critterInitDataCBuffer.count);
     }
 
     // requires MeshRenderer Component to be called
