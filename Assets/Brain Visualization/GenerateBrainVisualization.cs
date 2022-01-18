@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public struct SocketInitData {
-    public Vector3 pos;
+public struct SocketInitData 
+{
+    public Vector3 position;
 }
 
 public class GenerateBrainVisualization : MonoBehaviour 
@@ -45,8 +46,7 @@ public class GenerateBrainVisualization : MonoBehaviour
     
     #endregion
     
-    // Data sent into compute buffers through arrays
-    #region Structs
+    #region Structs for compute buffers
     
     public struct NeuronInitData 
     {
@@ -66,9 +66,10 @@ public class GenerateBrainVisualization : MonoBehaviour
         public float curValue;  // [-1,1]  // set by CPU continually
     }
     
-    public struct NeuronSimData {
-        public Vector3 pos;
-    }
+    // WPP: duplicate of NeuronInitData
+    //public struct NeuronSimData {
+    //    public Vector3 pos;
+    //}
     
     // Set once at start
     public struct AxonInitData 
@@ -267,7 +268,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         initialized = true;
     }
 
-    void InitializeComputeBuffers(ref SocketInitData[] socketInitDataArray, int inputNeuronCount, int outputNeuronCount) 
+    void InitializeComputeBuffers(ref SocketInitData[] sockets, int inputNeuronCount, int outputNeuronCount) 
     {
         argsCoreCBuffer = new ComputeBuffer(1, argsCore.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
         argsCablesCBuffer = new ComputeBuffer(1, argsCables.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
@@ -278,14 +279,19 @@ public class GenerateBrainVisualization : MonoBehaviour
         neuronSimDataCBuffer?.Release();
         neuronSimDataCBuffer = new ComputeBuffer(numNeurons, sizeof(float) * 3);
         
-        InitializeNeuralPositions();
+        //for (int i = 0; i < sockets.Length; i++)
+        //    Debug.Log($"socket {i} placed at {sockets[i].position}");
+
+        neuronSimDataCBuffer.SetData(sockets);
+        //InitializeNeuralPositions();  // WPP: removed, was overriding placement        
+        
         InitializeAxons();
         
         socketInitDataCBuffer?.Release();
         socketInitDataCBuffer = new ComputeBuffer(numNeurons, sizeof(float) * 3);
         
-        socketInitDataCBuffer.SetData(socketInitDataArray);
-        socketInitDataCBuffer.GetData(socketInitDataArray);
+        socketInitDataCBuffer.SetData(sockets);
+        socketInitDataCBuffer.GetData(sockets);
 
         int maxTriangles = numNeurons * maxTrisPerNeuron + axons.Count * maxTrisPerAxon + maxTrisPerSubNeuron * axons.Count * 2;
         AppendTriangles(ref appendTrianglesCoreCBuffer, maxTriangles);
@@ -293,8 +299,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         maxTriangles = numNeurons * maxTrisPerCable;
         AppendTriangles(ref appendTrianglesCablesCBuffer, maxTriangles);
 
-        // FREE-FLOATING CAMERA-FACING QUADS:::::::::::
-        //Create quad buffer
+        // Create buffer of free-floating, camera-facing quads
         quadVerticesCBuffer?.Release();
         quadVerticesCBuffer = new ComputeBuffer(6, sizeof(float) * 3);
         quadVerticesCBuffer.SetData(new[] {
@@ -500,19 +505,20 @@ public class GenerateBrainVisualization : MonoBehaviour
         neuronFeedDataCBuffer.SetData(neuronValuesArray);
     }
     
-    void InitializeNeuralPositions()
+    // WPP: ERROR: overwrites neuron placement with random values
+    /*void InitializeNeuralPositions()
     {
         NeuronSimData[] neuronSimDataArray = new NeuronSimData[numNeurons];
         
         for (int i = 0; i < neuronSimDataArray.Length; i++) 
         {
-            neuronSimDataArray[i].pos = Random.insideUnitSphere * 1f;
+            neuronSimDataArray[i].pos = Random.insideUnitSphere * 1f;   // ERROR: overwrites placement
             var polarity = neurons[i].neuronType == NeuronType.In ? -1f : 1f;
             neuronSimDataArray[i].pos.z = polarity * Mathf.Abs(neuronSimDataArray[i].pos.z);
         }
         
         neuronSimDataCBuffer.SetData(neuronSimDataArray);
-    }
+    }*/
     
     // For now only one seed data
     void InitializeAxons()

@@ -90,7 +90,7 @@ public class TestBrainVisualization : MonoBehaviour
         for(int i = 0; i < count; i++) {
             float x = 0.6f * (float)i / (float)count - 0.3f;
             int tier = Random.Range(0, 5);
-            data[i + offsetIndex].pos = new Vector3(x, (float)(tier - 2) * 0.12f, zPosition);
+            data[i + offsetIndex].position = new Vector3(x, (float)(tier - 2) * 0.12f, zPosition);
         }
     }
 }

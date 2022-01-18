@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using Random = UnityEngine.Random;
+
 
 public class VisualizeSelectedBrain : MonoBehaviour
 {
@@ -40,20 +40,22 @@ public class VisualizeSelectedBrain : MonoBehaviour
         SortNeuronsByIO(neurons);
         
         SocketInitData[] sockets = new SocketInitData[neurons.Count];
+        //Debug.Log($"sockets: {sockets.Length}, input: {inputNeurons.Count}, output: {outputNeurons.Count}, " +
+        //          $"hidden: {hiddenNeurons.Count}, total: {inputNeurons.Count + outputNeurons.Count + hiddenNeurons.Count}");
 
         // Place input and output neurons before hidden neurons
         // because hidden neurons are between connected input and output neurons.
         int offset = 0;
         for (int i = 0; i < inputNeurons.Count; i++)
-            sockets[i + offset].pos = placement.GetNeuronPosition(inputNeurons[i]);
+            sockets[i + offset].position = placement.GetNeuronPosition(inputNeurons[i]);
             
         offset = inputNeurons.Count;
         for (int i = 0; i < outputNeurons.Count; i++)
-            sockets[i + offset].pos = placement.GetNeuronPosition(outputNeurons[i]);
+            sockets[i + offset].position = placement.GetNeuronPosition(outputNeurons[i]);
         
         offset = inputNeurons.Count + outputNeurons.Count;
         for (int i = 0; i < hiddenNeurons.Count; i++)
-            sockets[i + offset].pos = placement.GetHiddenNeuronPosition(hiddenNeurons[i]);
+            sockets[i + offset].position = placement.GetHiddenNeuronPosition(hiddenNeurons[i]);
 
         return sockets;
     }
