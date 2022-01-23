@@ -3,10 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="64a03a69-0c33-4641-98d6-062c7a4ddd72" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/PlaceNeuronsAtUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/PlaceNeuronsAtUI.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/TestBrainVisualization.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/TestBrainVisualization.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/VisualizeSelectedBrain.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/VisualizeSelectedBrain.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Materials/Critter/CritterDebugGenericStrokeMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Critter/CritterDebugGenericStrokeMat.mat" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Materials/Critter/EggCoverDisplayMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Critter/EggCoverDisplayMat.mat" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Materials/Critter/EggSackStrokeDisplayMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Critter/EggSackStrokeDisplayMat.mat" afterDir="false" />
@@ -34,6 +30,129 @@
       <change beforePath="$PROJECT_DIR$/Assets/Materials/UI/Timeline/SpeciesPoolGenomeMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/UI/Timeline/SpeciesPoolGenomeMat.mat" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Materials/Water/WaterNutrientsBitsDisplayMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Water/WaterNutrientsBitsDisplayMat.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Color Catcher.unity" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Color Catcher.unity.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Events.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Events/Score.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Events/Score.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Guards.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Guards/Blue Guard Variant.prefab" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Guards/Blue Guard Variant.prefab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Guards/Green Guard Variant.prefab" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Guards/Green Guard Variant.prefab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Guards/Guard Base.prefab" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Guards/Guard Base.prefab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Guards/Red Guard Variant.prefab" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Guards/Red Guard Variant.prefab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Guards/Yellow Guard Variant.prefab" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Guards/Yellow Guard Variant.prefab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Materials.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Materials/Black.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Materials/Black.mat.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Materials/Blue.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Materials/Blue.mat.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Materials/Green.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Materials/Green.mat.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Materials/Red.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Materials/Red.mat.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Materials/White.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Materials/White.mat.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Materials/Yellow.mat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Materials/Yellow.mat.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Path.prefab" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Path.prefab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Position Swap.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Position Swap/0 1.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Position Swap/0 1.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Position Swap/0 2.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Position Swap/0 2.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Position Swap/0 3.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Position Swap/0 3.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Position Swap/1 2.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Position Swap/1 2.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Position Swap/1 3.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Position Swap/1 3.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Position Swap/2 3.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Position Swap/2 3.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Scripts.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Scripts/GetBlockerData.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Scripts/GetBlockerData.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Scripts/MatchAllColors.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Scripts/MatchAllColors.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Scripts/MoveBlocker.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Scripts/MoveBlocker.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Scripts/SetLevelData.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Scripts/SetLevelData.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Scripts/SwapWispBlockerData.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Scripts/SwapWispBlockerData.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Scripts/WispBlockerOverride.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Scripts/WispBlockerOverride.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Scripts/WispDetect.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Scripts/WispDetect.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Scripts/WispTag.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Scripts/WispTag.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Spheres.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Spheres/Base Sphere.prefab" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Spheres/Base Sphere.prefab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Spheres/Blue Variant.prefab" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Spheres/Blue Variant.prefab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Spheres/Green Variant.prefab" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Spheres/Green Variant.prefab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Spheres/Red Variant.prefab" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Spheres/Red Variant.prefab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Spheres/Yellow Variant.prefab" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Color Catcher/Spheres/Yellow Variant.prefab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Counting Cubes.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Counting Cubes/Binary Raycast Camera.prefab" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Counting Cubes/Binary Raycast Camera.prefab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Counting Cubes/Counting Cube.prefab" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Counting Cubes/Counting Cube.prefab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Counting Cubes/Counting Cubes.unity" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Counting Cubes/Counting Cubes.unity.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Moving Platforms.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Moving Platforms/Moving Platform.prefab" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Moving Platforms/Moving Platform.prefab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Moving Platforms/Moving Platforms.unity" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Examples/Moving Platforms/Moving Platforms.unity.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/AccessSerialization.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/AccessSerialization.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Inventory.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Inventory/Cube.prefab" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Inventory/Cube.prefab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Inventory/Inventory.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Inventory/Inventory.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Inventory/InventoryUI.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Inventory/InventoryUI.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Inventory/Sphere.prefab" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Inventory/Sphere.prefab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/PlayerProfile.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/PlayerProfile.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Save Load Example.unity" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Save Load Example.unity.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Save Objects [Incomplete].meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Save Objects [Incomplete]/GameEvents.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Save Objects [Incomplete]/GameEvents.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Save Objects [Incomplete]/SaveShape.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Save Objects [Incomplete]/SaveShape.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Save Objects [Incomplete]/ShapeData.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Save Objects [Incomplete]/ShapeData.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Save Objects [Incomplete]/SpawnShape.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Save Objects [Incomplete]/SpawnShape.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/SaveData.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/SaveData.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/SerializationManager.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/SerializationManager.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Surrogates.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Surrogates/QuaternionSerializationSurrogate.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Surrogates/QuaternionSerializationSurrogate.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Surrogates/Vector3SerializationSurrogate.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Playcraft/Serialization/Surrogates/Vector3SerializationSurrogate.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/AgentPrefab.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/AgentPrefab.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,19 +172,17 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/NameList.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/AgentInfo.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/Widgets/GenomeButton.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/A5949084-5872-4118-9A97-4C7DF1839E1C/d8/f5549872/ComputeBuffer.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/FD824CFB-5500-4855-B9E6-D51B008C90E4/3f/bdb00cc8/List`1.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../Character-Template/Assets/Playcraft/Experimental/Serialization/SerializationManager.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/FogSettings.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Saving/SaveData.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Saving/BinaryFormatter.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/SpeciesIconUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Playcraft/_NEW/PurgeList.cs" />
-      <option value="$PROJECT_DIR$/Assets/Brain Visualization/BrainModuleID.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/BaronVonTerrain.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesGraphPanelUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/NameListSO.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/BrainGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/Project Specific/Lookup.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/NameList.cs" />
@@ -90,7 +207,6 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePortraitPanel.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/MainMenuUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/MasterGenomePool.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/BodyGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/EggSack.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/FogSO.cs" />
@@ -110,6 +226,14 @@
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/PlaceNeuronsAtUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" />
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/VisualizeSelectedBrain.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/Serialization/SaveData.cs" />
+      <option value="$PROJECT_DIR$/Assets/Playcraft/Serialization/SerializationManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/AgentInfo.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Saving/SaveData.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Saving/SaveDataAccessMono.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Saving/SaveDataAccess.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Saving/BinaryFormatter.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1zTNdNxmhXfKtPgFd5OBwb2kNlz" />
@@ -174,6 +298,7 @@
       <workItem from="1642057878029" duration="303000" />
       <workItem from="1642058279740" duration="4891000" />
       <workItem from="1642542724794" duration="4702000" />
+      <workItem from="1642919682383" duration="5792000" />
     </task>
     <servers />
   </component>

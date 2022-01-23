@@ -28,16 +28,22 @@ public class Agent : MonoBehaviour {
     
     //private bool isFeedingPlant = false;
     //private bool isFeedingZooplankton = false;
-
-    public float speed = 500f;
-    public float smoothedThrottleLerp = 0.1f;
-    public float animationCycle = 0f;
-    public float turningAmount = 0f;
-    public float swimAnimationCycleSpeed = 0.06f;
+    
+    public AgentInfo info;
+    [HideInInspector] public AgentData data;
+    
+    // WPP: separates data from process for saving purposes
+    // get/set avoids having to use data. everywhere else in the script
+    public float speed { get => data.speed; set => data.speed = value; } // 500f;
+    public float smoothedThrottleLerp { get => data.smoothedThrottleLerp; set => data.smoothedThrottleLerp = value; } // 0.1f;
+    public float animationCycle { get => data.animationCycle; set => data.animationCycle = value; } // 0f;
+    public float turningAmount { get => data.turningAmount; set => data.turningAmount = value; } // 0f;
+    public float swimAnimationCycleSpeed { get => data.swimAnimationCycleSpeed; set => data.swimAnimationCycleSpeed = value; } // 0.06f;
 
     //public float globalWaterLevel;
-
-    public float spawnStartingScale = 0.1f; // *** REFACTOR!!! SYNC WITH EGGS!!!
+    
+    // *** REFACTOR!!! SYNC WITH EGGS!!!
+    public float spawnStartingScale = 0.1f; 
 
     public bool isInert = true;  // when inert, colliders disabled // is this still used??
     // Refactor??
@@ -189,7 +195,7 @@ public class Agent : MonoBehaviour {
     Cooldown cooldown;
     
     public float totalEaten => candidateRef.performanceData.totalEaten;
-    public Vector3 position => bodyGO.transform.position;
+    public Vector3 position { get => bodyGO.transform.position; set => bodyGO.transform.position = value; }
     //public float overflowFoodAmount = 0f;
         
     private void Awake() {        
@@ -1086,20 +1092,19 @@ public class Agent : MonoBehaviour {
             return;
         }  
 
-        if(coreModule.mouthAttackEffector[0] >= mostActiveEffectorValue) {
+        if (coreModule.mouthAttackEffector[0] >= mostActiveEffectorValue) {
             curActionState = AgentActionState.Attacking;
             UseAbility(attack);
             RegisterAgentEvent(simManager.simAgeTimeSteps, "Attacked!", 1f, 6);
             AudioManager.instance.PlayCritterAttack(ownPos);
-            
         }
-        if(coreModule.dashEffector[0] >= mostActiveEffectorValue) {
+        if (coreModule.dashEffector[0] >= mostActiveEffectorValue) {
             curActionState = AgentActionState.Dashing;
             UseAbility(dash);
             RegisterAgentEvent(simManager.simAgeTimeSteps, "Dashed!", 1f, 8);
             AudioManager.instance.PlayCritterDash(ownPos);
         }
-        if(coreModule.defendEffector[0] >= mostActiveEffectorValue) {
+        if (coreModule.defendEffector[0] >= mostActiveEffectorValue) {
             curActionState = AgentActionState.Defending;
             UseAbility(defend);
             RegisterAgentEvent(simManager.simAgeTimeSteps, "Defended!", 1f, 7);
@@ -1305,6 +1310,8 @@ public class Agent : MonoBehaviour {
 
     private void ResetStartingValues() 
     {
+        data = info.data;
+    
         animationCycle = 0f;
         lifeStageTransitionTimeStepCounter = 0;
         pregnancyRefactoryTimeStepCounter = 0;
