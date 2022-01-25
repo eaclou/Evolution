@@ -4,14 +4,15 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Pond Water/Game Data/Agent")]
 public class AgentInfo : ScriptableObject
 {
-    public AgentData data;
+    [SerializeField] AgentData data;
+    public AgentData GetData() { return new AgentData(data); }
 }
 
+// * WPP: move immutable values (if any) to AgentInfo
 [Serializable]
-public struct AgentData
+public class AgentData
 {
     public Vector3 position;
-
     public float speed;
     public float smoothedThrottleLerp;
     public float animationCycle;
@@ -32,7 +33,37 @@ public struct AgentData
     public bool isResting;
     public int cooldownDuration; 
     public bool isMarkedForDeathByUser;
-    public int index;    
+    public AgentActionState curActionState;
+    public int index;
     public int speciesIndex;  
     public AgentLifeStage curLifeStage;
+    
+    public AgentData(AgentData original)
+    {
+        position = original.position;
+        speed = original.speed;
+        smoothedThrottleLerp = original.smoothedThrottleLerp;
+        animationCycle = original.animationCycle;
+        turningAmount = original.turningAmount;
+        swimAnimationCycleSpeed = original.swimAnimationCycleSpeed;
+        spawnStartingScale = original.spawnStartingScale;
+        isInert = original.isInert;
+        isActing = original.isActing;
+        isDecaying = original.isDecaying;
+        feedAnimDuration = original.feedAnimDuration;
+        feedAnimCooldown = original.feedAnimCooldown;
+        attackAnimDuration = original.attackAnimDuration;
+        attackAnimCooldown = original.attackAnimCooldown;
+        dashDuration = original.dashDuration;
+        dashCooldown = original.dashCooldown;
+        defendDuration = original.defendDuration;
+        defendCooldown = original.defendCooldown;
+        isResting = original.isResting;
+        cooldownDuration = original.cooldownDuration;
+        isMarkedForDeathByUser = original.isMarkedForDeathByUser;
+        curActionState = original.curActionState;
+        index = original.index;
+        speciesIndex = original.speciesIndex;
+        curLifeStage = original.curLifeStage;
+    }
 }

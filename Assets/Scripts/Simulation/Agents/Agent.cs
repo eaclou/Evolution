@@ -30,15 +30,16 @@ public class Agent : MonoBehaviour {
     //private bool isFeedingZooplankton = false;
     
     public AgentInfo info;
-    [HideInInspector] public AgentData data;
+    //[HideInInspector] 
+    public AgentData data;
     
     // WPP: separates data from process for saving purposes
     // get/set avoids having to use data. everywhere else in the script
-    public float speed { get => data.speed; set => data.speed = value; } // 500f;
-    public float smoothedThrottleLerp { get => data.smoothedThrottleLerp; set => data.smoothedThrottleLerp = value; } // 0.1f;
-    public float animationCycle { get => data.animationCycle; set => data.animationCycle = value; } // 0f;
-    public float turningAmount { get => data.turningAmount; set => data.turningAmount = value; } // 0f;
-    public float swimAnimationCycleSpeed { get => data.swimAnimationCycleSpeed; set => data.swimAnimationCycleSpeed = value; } // 0.06f;
+    public float speed { get => data.speed; set => data.speed = value; }
+    public float smoothedThrottleLerp { get => data.smoothedThrottleLerp; set => data.smoothedThrottleLerp = value; } 
+    public float animationCycle { get => data.animationCycle; set => data.animationCycle = value; } 
+    public float turningAmount { get => data.turningAmount; set => data.turningAmount = value; } 
+    public float swimAnimationCycleSpeed { get => data.swimAnimationCycleSpeed; set => data.swimAnimationCycleSpeed = value; } 
     
     // *** REFACTOR!!! SYNC WITH EGGS!!!
     public float spawnStartingScale { get => data.spawnStartingScale; set => data.spawnStartingScale = value; }
@@ -48,13 +49,12 @@ public class Agent : MonoBehaviour {
     /// biting, defending, dashing, etc -- exclusive actions  
     public bool isActing { get => data.isActing; set => data.isActing = value; }  
     public bool isDecaying { get => data.isDecaying; set => data.isDecaying = value; }
-
     public bool isFeeding => feed.inProcess;
     public bool isAttacking => attack.inProcess;
-
+    
     // Flag for intention to eat gpu food particle (plant-type) 
     public bool isFreeToEat => isFeeding && !isCooldown; // && feedingFrameCounter <= 4;
-
+    
     //***EC eventually move these into creature genome, make variable
     public int feedAnimDuration { get => data.feedAnimDuration; set => data.feedAnimDuration = value; }
     public int feedAnimCooldown { get => data.feedAnimCooldown; set => data.feedAnimCooldown = value; }
@@ -62,38 +62,29 @@ public class Agent : MonoBehaviour {
     public int attackAnimCooldown { get => data.attackAnimCooldown; set => data.attackAnimCooldown = value; }
     public int feedingFrameCounter => feed.frameCount;
     public int attackingFrameCounter => attack.frameCount;
-    
     public bool isDashing => dash.inProcess;
     public int dashFrameCounter => dash.frameCount;
     public int dashDuration { get => data.dashDuration; set => data.dashDuration = value; }
     public int dashCooldown { get => data.dashCooldown; set => data.dashCooldown = value; }
-
     public bool isDefending => defend.inProcess;
     public int defendFrameCounter => defend.frameCount;
     public int defendDuration { get => data.defendDuration; set => data.defendDuration = value; }
     public int defendCooldown { get => data.defendCooldown; set => data.defendCooldown = value; }
-
     // * WPP: same functionality as isFreeToAct -> pick one to use and delete other
     public bool isResting { get => data.isResting; set => data.isResting = value; } 
     public bool isCooldown => cooldown.inProcess;
-
     public int cooldownFrameCounter => cooldown.frameCount;
     public int cooldownDuration { get => data.cooldownDuration; set => data.cooldownDuration = value; }
-
     public bool isMarkedForDeathByUser { get => data.isMarkedForDeathByUser; set => data.isMarkedForDeathByUser = value; }
-
-    // ERROR: get/set causes agents to only appear as dots, bodies not visible
-    public int index;// { get => data.index; set => data.index = value; }  
-    // ERROR (maybe): get/set seems to alter behavior?  Solve related errors first
-    public int speciesIndex;// { get => data.speciesIndex; set => data.speciesIndex = value; }
-    // ERROR: get/set prevents agents from appearing
-    public AgentLifeStage curLifeStage;// { get => data.curLifeStage; set => data.curLifeStage = value; }
+    public int index { get => data.index; set => data.index = value;  }  
+    public int speciesIndex { get => data.speciesIndex; set => data.speciesIndex = value; }
+    public AgentLifeStage curLifeStage { get => data.curLifeStage; set => data.curLifeStage = value; }
     
     public CandidateAgentData candidateRef;
     
     public bool isYoung => curLifeStage == AgentLifeStage.Mature && !isSexuallyMature;
 
-    public AgentActionState curActionState;
+    public AgentActionState curActionState; // { get => data.curActionState; set => data.curActionState = value; }
 
     public int gestationDurationTimeSteps = 120;
     //public int _GestationDurationTimeSteps => gestationDurationTimeSteps;
@@ -105,7 +96,8 @@ public class Agent : MonoBehaviour {
     public float sizePercentage = 0f;
     
     public Brain brain;
-    public GameObject bodyGO;   // * WPP: Remove, just move the agent
+    /// Primary root segment child object
+    public GameObject bodyGO;
     public Rigidbody2D bodyRigidbody;
 
     // MODULES:::
@@ -200,23 +192,17 @@ public class Agent : MonoBehaviour {
     
     public float totalEaten => candidateRef.performanceData.totalEaten;
     public Vector3 position { get => bodyGO.transform.position; set => bodyGO.transform.position = value; }
-    //public float overflowFoodAmount = 0f;
         
-    private void Awake() {        
-        // temp fix for delayed spawning of Agents (leading to nullReferenceExceptions)
-        //agentWidthsArray = new float[widthsTexResolution];
-        isInert = true;
-    }
-    
-    void Start()
-    {
+    private void Awake() {  
+        data = info.GetData();
+        
         attack = new AttackOverTime(this, attackAnimDuration, attackAnimCooldown, EnterCooldown); 
         dash = new Dash(this, dashDuration, dashCooldown, EnterCooldown);
         defend = new Defend(this, defendDuration, defendCooldown, EnterCooldown);
         feed = new Feed(this, feedAnimDuration, feedAnimCooldown, EnterCooldown);
         cooldown = new Cooldown();
     }
-    
+
     void EnterCooldown(int duration) 
     {
         cooldown.duration = duration; 
@@ -235,12 +221,11 @@ public class Agent : MonoBehaviour {
             return 0f;
         }
         if (!isDead) {
-            Debug.LogError("I'm not dead yet! " + index + " " + curLifeStage);
+            Debug.LogError($"I'm not dead yet! {index} {curLifeStage}");
             return 0f;
         }
     
         float percentage = 1f - currentBiomass / biomassAtDeath;
-        
         return Mathf.Clamp01(percentage);
     }
     
@@ -438,7 +423,6 @@ public class Agent : MonoBehaviour {
         candidateRef.performanceData.timeStepDied = SimulationManager.instance.simAgeTimeSteps;
         biomassAtDeath = currentBiomass;
         mouthRef.Disable();
-
         
         AudioManager.instance.PlayCritterDeath(ownPos);
     }
@@ -878,6 +862,7 @@ public class Agent : MonoBehaviour {
         isPregnantAndCarryingEggs = false;
         pregnancyRefactoryTimeStepCounter = 0;
     }
+    
     private void CheckForMaturity() {
         float starterMass = settingsRef.agentSettings._BaseInitMass * settingsRef.agentSettings._MinPregnancyFactor;
         float curProportion = currentBiomass * settingsRef.agentSettings._MaxPregnancyProportion;
@@ -886,6 +871,7 @@ public class Agent : MonoBehaviour {
             isSexuallyMature = true;
         }
     }
+    
     public void CompletedPregnancy() {
         childEggSackRef = null;
         candidateRef.performanceData.totalTimesPregnant++;
@@ -1314,8 +1300,6 @@ public class Agent : MonoBehaviour {
 
     private void ResetStartingValues() 
     {
-        data = info.data;
-    
         animationCycle = 0f;
         lifeStageTransitionTimeStepCounter = 0;
         pregnancyRefactoryTimeStepCounter = 0;

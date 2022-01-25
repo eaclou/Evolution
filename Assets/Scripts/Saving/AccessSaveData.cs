@@ -1,8 +1,7 @@
-﻿using System;
+﻿using Playcraft;
 
 /// Get and set data for the currently loaded save
-[Serializable]
-public class SaveDataAccess
+public class AccessSaveData : Singleton<AccessSaveData>
 {
     SimulationManager simulation => SimulationManager.instance;
 
