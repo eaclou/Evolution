@@ -257,7 +257,7 @@ public class SimulationStateData {
             critterSimDataArray[i].heading = simManager.agents[i].facingDirection;            
             float embryo = 1f;
             if(simManager.agents[i].isEgg) {
-                embryo = (float)simManager.agents[i].lifeStageTransitionTimeStepCounter / (float)simManager.agents[i]._GestationDurationTimeSteps;
+                embryo = (float)simManager.agents[i].lifeStageTransitionTimeStepCounter / (float)simManager.agents[i].gestationDurationTimeSteps;
                 embryo = Mathf.Clamp01(embryo);
             }
             critterSimDataArray[i].currentBiomass = simManager.agents[i].currentBiomass;

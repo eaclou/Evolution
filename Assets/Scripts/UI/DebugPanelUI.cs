@@ -92,7 +92,7 @@ public class DebugPanelUI : MonoBehaviour
             int maxCount = 1;
             if (agent.isEgg) {
                 curCount = agent.lifeStageTransitionTimeStepCounter;
-                maxCount = agent._GestationDurationTimeSteps;
+                maxCount = agent.gestationDurationTimeSteps;
             }
             if (agent.isMature) {
                 curCount = agent.ageCounter;

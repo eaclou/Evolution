@@ -93,17 +93,18 @@ public class WatcherUI : MonoBehaviour {
     private void UpdateUI() {
         panelWatcherExpand.SetActive(false);
 
-        if(cameraManager.isFollowingPlantParticle) {
+        if (cameraManager.isFollowingPlantParticle) {
             cameraManager.targetPlantWorldPos = simulationManager.vegetationManager.selectedPlantParticleData.worldPos;
         }
-        if(cameraManager.isFollowingAnimalParticle) {
+        if (cameraManager.isFollowingAnimalParticle) {
             cameraManager.targetZooplanktonWorldPos = simulationManager.zooplanktonManager.selectedAnimalParticleData.worldPos;
         }
 
         //panelWatcherSpiritVertebratesText.SetActive(false);
       
         TextCommonStatsA.gameObject.SetActive(false);
-        if(watcherSelectedTrophicSlotRef != null) {
+        if (watcherSelectedTrophicSlotRef != null) 
+        {
             TextCommonStatsA.gameObject.SetActive(true);
 
             int critterIndex = cameraManager.targetAgentIndex;
@@ -118,95 +119,88 @@ public class WatcherUI : MonoBehaviour {
             Color textColorSecondary = new Color(textHueSecondary.x, textHueSecondary.y, textHueSecondary.z);
             textTargetLayer.color = textColorPrimary;
             
-            string str = "";
-            
             textTargetLayer.text = "Species " + agent.speciesIndex + ":  " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name;
 
             //textNewInspectAgentName.text = "Critter #" + agent.candidateRef.candidateID.ToString(); //.candidateGenome.bodyGenome.coreGenome.name;
             //textNewInspectAgentName.color = textColorSecondary; // uiManagerRef.colorVertebratesLayer;
 
-            if(agent.coreModule != null) {
-                
-                followCreaturePanel.SetActive(true);
-
-                panelFollowStatus.SetActive(isFollowStatusPanelOn);
-                panelFollowBehavior.SetActive(isFollowBehaviorPanelOn);
-                //panelFollowGenome.SetActive(isFollowGenomePanelOn);
-                panelFollowHistory.SetActive(isFollowHistoryPanelOn);
-                
-                TextCommonStatsA.gameObject.SetActive(false);  // non-vertebrates just share one textbox for now
-
-                //textWatcherVertebratePageNum.text = "PAGE " + (curWatcherPanelVertebratePageNum + 1).ToString() + " of 4";
-                textWatcherTargetIndex.text = "#" + agent.index;
-                                
-                //textNewInspectLog.text = "";
-                textWatcherVertebrateHUD.text = "";
-                                   
-                int maxEventsToDisplay = 8;
-                //int numEvents = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplay);
-                int startIndex = Mathf.Max(0, agent.candidateRef.candidateEventDataList.Count - maxEventsToDisplay);                   
-                string eventString = "";
-                for(int q = agent.candidateRef.candidateEventDataList.Count - 1; q >= startIndex; q--) {
-                    eventString += "\n[" + agent.candidateRef.candidateEventDataList[q].eventFrame + "] " + agent.candidateRef.candidateEventDataList[q].eventText;
-                }                
-
-                string textStringLog = "Event Log! Agent[" + agent.index + "]";                    
-                // Agent Event Log:
-                int maxEventsToDisplayLog = 12;
-                //int numEventsLog = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplayLog);
-                int startIndexLog = Mathf.Max(0, agent.candidateRef.candidateEventDataList.Count - maxEventsToDisplayLog);                   
-                string eventLogString = "";
-                for(int q = agent.candidateRef.candidateEventDataList.Count - 1; q >= startIndexLog; q--) {
-                    float dimAmount = Mathf.Clamp01((float)(agent.candidateRef.candidateEventDataList.Count - q - 1) * 0.55f);
-                    //Color displayColor = Color.Lerp(Color.red, Color.green, agent.agentEventDataList[q].goodness);
-                    string goodColorStr = "#00FF00FF";
-                    if(dimAmount > 0.5f) {
-                        goodColorStr = "#007700FF";
-                    }
-                    string badColorStr = "#FF0000FF";
-                    if(dimAmount > 0.5f) {
-                        badColorStr = "#770000FF";
-                    }
-                    if(agent.candidateRef.candidateEventDataList[q].goodness > 0.5f) {
-                        eventLogString += "<color=" + goodColorStr + ">";
-                    }
-                    else {
-                        eventLogString += "<color=" + badColorStr + ">";
-                    }
-                            
-                    eventLogString += "\n[" + agent.candidateRef.candidateEventDataList[q].eventFrame.ToString() + "] " + agent.candidateRef.candidateEventDataList[q].eventText;
-                    eventLogString += "</color>";
-                }
-                textStringLog += eventLogString;
-                textWatcherVertebrateText.text = textStringLog;
-                    
-                    
-                int curCount = 0;
-                int maxCount = 1;
-                if (agent.isEgg) {
-                    curCount = agent.lifeStageTransitionTimeStepCounter;
-                    maxCount = agent._GestationDurationTimeSteps;
-                }            
-                if (agent.isMature) {
-                    curCount = agent.ageCounter;
-                    maxCount = agent.maxAgeTimeSteps;
-                }
-                if (agent.isDead) {
-                    curCount = agent.lifeStageTransitionTimeStepCounter;
-                    maxCount = curCount; // agentRef._DecayDurationTimeSteps;
-                }
-                //int progressPercent = Mathf.RoundToInt((float)curCount / (float)maxCount * 100f);
-                //string lifeStageProgressTxt = " " + agent.curLifeStage.ToString() + " " + curCount.ToString() + "/" + maxCount.ToString() + "  " + progressPercent.ToString() + "% ";
-                
-                
-            }
-            else {
+            if (agent.coreModule == null) 
+            {
                 followCreaturePanel.SetActive(false);
+                return;
             }
-            TextCommonStatsA.text = str;
+                
+            followCreaturePanel.SetActive(true);
+            panelFollowStatus.SetActive(isFollowStatusPanelOn);
+            panelFollowBehavior.SetActive(isFollowBehaviorPanelOn);
+            //panelFollowGenome.SetActive(isFollowGenomePanelOn);
+            panelFollowHistory.SetActive(isFollowHistoryPanelOn);
+            
+            TextCommonStatsA.gameObject.SetActive(false);  // non-vertebrates just share one textbox for now
+
+            //textWatcherVertebratePageNum.text = "PAGE " + (curWatcherPanelVertebratePageNum + 1).ToString() + " of 4";
+            textWatcherTargetIndex.text = "#" + agent.index;
+                            
+            //textNewInspectLog.text = "";
+            textWatcherVertebrateHUD.text = "";
+                               
+            int maxEventsToDisplay = 8;
+            //int numEvents = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplay);
+            int startIndex = Mathf.Max(0, agent.candidateRef.candidateEventDataList.Count - maxEventsToDisplay);                   
+            string eventString = "";
+            for(int q = agent.candidateRef.candidateEventDataList.Count - 1; q >= startIndex; q--) {
+                eventString += "\n[" + agent.candidateRef.candidateEventDataList[q].eventFrame + "] " + agent.candidateRef.candidateEventDataList[q].eventText;
+            }                
+
+            string textStringLog = "Event Log! Agent[" + agent.index + "]";                    
+            // Agent Event Log:
+            int maxEventsToDisplayLog = 12;
+            //int numEventsLog = Mathf.Min(agent.agentEventDataList.Count, maxEventsToDisplayLog);
+            int startIndexLog = Mathf.Max(0, agent.candidateRef.candidateEventDataList.Count - maxEventsToDisplayLog);                   
+            string eventLogString = "";
+            
+            for (int q = agent.candidateRef.candidateEventDataList.Count - 1; q >= startIndexLog; q--) 
+            {
+                float dimAmount = Mathf.Clamp01((float)(agent.candidateRef.candidateEventDataList.Count - q - 1) * 0.55f);
+                //Color displayColor = Color.Lerp(Color.red, Color.green, agent.agentEventDataList[q].goodness);
+                string goodColorStr = dimAmount > 0.5f ? "#007700FF" : "#00FF00FF";
+                string badColorStr = dimAmount > 0.5f ? "#770000FF" : "#FF0000FF";
+                string colorStr = agent.candidateRef.candidateEventDataList[q].goodness > 0.5f ? goodColorStr : badColorStr;
+                eventLogString += "<color=" + colorStr + ">";
+                eventLogString += "\n[" + agent.candidateRef.candidateEventDataList[q].eventFrame + "] " + agent.candidateRef.candidateEventDataList[q].eventText;
+                eventLogString += "</color>";
+            }
+            textStringLog += eventLogString;
+            textWatcherVertebrateText.text = textStringLog;
+                
+            // WPP: delegated to function (commented out because results not used for anything)
+            //GetLifeStageProgressText(agent);
+            
+            TextCommonStatsA.text = "";
         }
     }
+    
+    string GetLifeStageProgressText(Agent agent)
+    {
+        int curCount = 0;
+        int maxCount = 1;
+        if (agent.isEgg) {
+            curCount = agent.lifeStageTransitionTimeStepCounter;
+            maxCount = agent.gestationDurationTimeSteps;
+        }            
+        if (agent.isMature) {
+            curCount = agent.ageCounter;
+            maxCount = agent.maxAgeTimeSteps;
+        }
+        if (agent.isDead) {
+            curCount = agent.lifeStageTransitionTimeStepCounter;
+            maxCount = curCount; // agentRef._DecayDurationTimeSteps;
+        }
+        int progressPercent = Mathf.RoundToInt((float)curCount / (float)maxCount * 100f);
+        return " " + agent.curLifeStage + " " + curCount + "/" + maxCount + "  " + progressPercent + "% ";
+    }
 
+	// * WPP: clean out dead code.  If it is needed again, write it again, it is not a big loss.
 	public void UpdateWatcherPanelUI() {
         //animatorWatcherUI.SetBool("_IsOpen", isOpen);
         UpdateUI();
@@ -393,21 +387,6 @@ public class WatcherUI : MonoBehaviour {
         cameraManager.SetTargetAgent(simulationManager.agents[newIndex], newIndex);                
     }
 
-    // WPP: removed, access cameraManager directly when needed
-    /*
-    public void StopFollowingAgent() {
-        cameraManager.isFollowingAgent = false;
-    }
-    
-    public void StopFollowingPlantParticle() {
-        cameraManager.isFollowingPlantParticle = false;
-    }
-    
-    public void StopFollowingAnimalParticle() {
-        cameraManager.isFollowingAnimalParticle = false;        
-    }
-    */    
-        
     public void StartFollowingAgent() {
         cameraManager.isFollowingAgent = true;
         //uiManagerRef.globalResourcesUI.CreateBrainGenomeTexture(uiManagerRef.cameraManager.targetAgent.candidateRef.candidateGenome);

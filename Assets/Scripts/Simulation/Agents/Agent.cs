@@ -39,16 +39,15 @@ public class Agent : MonoBehaviour {
     public float animationCycle { get => data.animationCycle; set => data.animationCycle = value; } // 0f;
     public float turningAmount { get => data.turningAmount; set => data.turningAmount = value; } // 0f;
     public float swimAnimationCycleSpeed { get => data.swimAnimationCycleSpeed; set => data.swimAnimationCycleSpeed = value; } // 0.06f;
-
-    //public float globalWaterLevel;
     
     // *** REFACTOR!!! SYNC WITH EGGS!!!
-    public float spawnStartingScale = 0.1f; 
+    public float spawnStartingScale { get => data.spawnStartingScale; set => data.spawnStartingScale = value; }
 
-    public bool isInert = true;  // when inert, colliders disabled // is this still used??
-    // Refactor??
-    public bool isActing = false;  // biting, defending, dashing, etc -- exclusive actions    
-    public bool isDecaying = false;
+    /// Disables colliders when true;
+    public bool isInert { get => data.isInert; set => data.isInert = value; }
+    /// biting, defending, dashing, etc -- exclusive actions  
+    public bool isActing { get => data.isActing; set => data.isActing = value; }  
+    public bool isDecaying { get => data.isDecaying; set => data.isDecaying = value; }
 
     public bool isFeeding => feed.inProcess;
     public bool isAttacking => attack.inProcess;
@@ -57,42 +56,47 @@ public class Agent : MonoBehaviour {
     public bool isFreeToEat => isFeeding && !isCooldown; // && feedingFrameCounter <= 4;
 
     //***EC eventually move these into creature genome, make variable
-    public int feedAnimDuration = 30;  
-    public int feedAnimCooldown = 30;
-    public int attackAnimDuration = 40;
-    public int attackAnimCooldown = 75;
+    public int feedAnimDuration { get => data.feedAnimDuration; set => data.feedAnimDuration = value; }
+    public int feedAnimCooldown { get => data.feedAnimCooldown; set => data.feedAnimCooldown = value; }
+    public int attackAnimDuration { get => data.attackAnimDuration; set => data.attackAnimDuration = value; }
+    public int attackAnimCooldown { get => data.attackAnimCooldown; set => data.attackAnimCooldown = value; }
     public int feedingFrameCounter => feed.frameCount;
     public int attackingFrameCounter => attack.frameCount;
     
     public bool isDashing => dash.inProcess;
     public int dashFrameCounter => dash.frameCount;
-    public int dashDuration = 40;
-    public int dashCooldown = 120;
+    public int dashDuration { get => data.dashDuration; set => data.dashDuration = value; }
+    public int dashCooldown { get => data.dashCooldown; set => data.dashCooldown = value; }
 
     public bool isDefending => defend.inProcess;
     public int defendFrameCounter => defend.frameCount;
-    public int defendDuration = 60;
-    public int defendCooldown = 60;
+    public int defendDuration { get => data.defendDuration; set => data.defendDuration = value; }
+    public int defendCooldown { get => data.defendCooldown; set => data.defendCooldown = value; }
 
-    public bool isResting = false;  // * WPP: same functionality as isFreeToAct -> pick one to use and delete other
+    // * WPP: same functionality as isFreeToAct -> pick one to use and delete other
+    public bool isResting { get => data.isResting; set => data.isResting = value; } 
     public bool isCooldown => cooldown.inProcess;
 
     public int cooldownFrameCounter => cooldown.frameCount;
-    public int cooldownDuration = 60;  // arbitrary default
+    public int cooldownDuration { get => data.cooldownDuration; set => data.cooldownDuration = value; }
 
-    public bool isMarkedForDeathByUser = false;
+    public bool isMarkedForDeathByUser { get => data.isMarkedForDeathByUser; set => data.isMarkedForDeathByUser = value; }
 
-    public int index;    
-    public int speciesIndex = -1;  // Set these at birth!
+    // ERROR: get/set causes agents to only appear as dots, bodies not visible
+    public int index;// { get => data.index; set => data.index = value; }  
+    // ERROR (maybe): get/set seems to alter behavior?  Solve related errors first
+    public int speciesIndex;// { get => data.speciesIndex; set => data.speciesIndex = value; }
+    // ERROR: get/set prevents agents from appearing
+    public AgentLifeStage curLifeStage;// { get => data.curLifeStage; set => data.curLifeStage = value; }
+    
     public CandidateAgentData candidateRef;
-
-    public AgentLifeStage curLifeStage;
+    
     public bool isYoung => curLifeStage == AgentLifeStage.Mature && !isSexuallyMature;
 
     public AgentActionState curActionState;
 
-    private int gestationDurationTimeSteps = 120;
-    public int _GestationDurationTimeSteps => gestationDurationTimeSteps;
+    public int gestationDurationTimeSteps = 120;
+    //public int _GestationDurationTimeSteps => gestationDurationTimeSteps;
     
     public int maxAgeTimeSteps = 100000;
     
@@ -761,7 +765,7 @@ public class Agent : MonoBehaviour {
         if (!isAttachedToParentEggSack || !parentEggSackRef) 
             return;
             
-        float embryoPercentage = (float)lifeStageTransitionTimeStepCounter / (float)_GestationDurationTimeSteps;
+        float embryoPercentage = (float)lifeStageTransitionTimeStepCounter / (float)gestationDurationTimeSteps;
         float targetDist = Mathf.Lerp(0.01f, parentEggSackRef.fullSize.magnitude * 0.15f, embryoPercentage);
         springJoint.distance = targetDist;
 
