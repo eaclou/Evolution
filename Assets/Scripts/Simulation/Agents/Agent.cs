@@ -30,7 +30,7 @@ public class Agent : MonoBehaviour {
     //private bool isFeedingZooplankton = false;
     
     public AgentInfo info;
-    //[HideInInspector] 
+    [HideInInspector] 
     public AgentData data;
     
     // WPP: separates data from process for saving purposes
