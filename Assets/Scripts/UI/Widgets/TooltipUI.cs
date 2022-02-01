@@ -8,10 +8,10 @@ public class TooltipUI : MonoBehaviour
     public int elementID;
     
     public void OnHoverStart() {
-        ui.observerModeUI.EnterTooltipObject(this);
+        ui.EnterTooltipObject(this);
     }
     
     public void OnHoverExit() {
-        ui.observerModeUI.ExitTooltipObject();
+        ui.ExitTooltipObject();
     }
 }

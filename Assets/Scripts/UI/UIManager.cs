@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Playcraft;
 using UnityEngine;
+using UnityEngine.UI;
 
 public enum ToolType {
     None,
@@ -17,6 +18,7 @@ public class UIManager : Singleton<UIManager>
     TrophicLayersManager trophicLayersManager => simulationManager.trophicLayersManager;
     TheRenderKing theRenderKing => TheRenderKing.instance;
     TheCursorCzar theCursorCzar => TheCursorCzar.instance;
+    CameraManager cameraManager => CameraManager.instance;
     SelectionManager selectionManager => SelectionManager.instance;
     
     public SpeciesOverviewUI speciesOverviewUI;  
@@ -41,13 +43,9 @@ public class UIManager : Singleton<UIManager>
     
     Lookup lookup => Lookup.instance;
 
-    public bool isPlantHighlight;
-    public bool isZooplanktonHighlight;
-    public bool isVertebrateHighlight;
-    
-    public float plantHighlight => observerModeUI.isPlantHighlight ? 1f : 0f;
-    public float zooplanktonHighlight => observerModeUI.isMicrobeHighlight ? 1f : 0f;
-    public float vertebrateHighlight => observerModeUI.isVertebrateHighlight ? 1f : 0f;
+    //public bool isPlantHighlight;
+    //public bool isZooplanktonHighlight;
+    //public bool isVertebrateHighlight;
        
     public bool updateTerrainAltitude;  // WPP: assigned but not used
     public float terrainUpdateMagnitude;// WPP: assigned but not used
@@ -82,9 +80,144 @@ public class UIManager : Singleton<UIManager>
     public bool isRebuildTimeStep => simulationManager.simAgeTimeSteps % timeStepsToRebuildGenomeButtons == 1;
 
     public Action<Agent> OnAgentSelected;
+
+    Text textTooltip => theCursorCzar.textTooltip;
+    GameObject panelTooltip => theCursorCzar.panelTooltip;
+    bool tooltipActive;
+
+    public bool isTooltipHover = false;
+    public TooltipUI curTooltip;
+    //public string tooltipString;
+    float cursorX => theCursorCzar.GetCursorPixelCoords().x;
+    Vector2 mousePositionOnWater => theCursorCzar.curMousePositionOnWaterPlane2D;
+    TooltipId tooltipId;
+    float plantDistance;
+    float microbeDistance;
+    
+    public bool isVertebrateHighlight => tooltipId == TooltipId.Agent;
+    public bool isPlantHighlight => tooltipId == TooltipId.Algae;
+    public bool isMicrobeHighlight => tooltipId == TooltipId.Microbe;
+    public float plantHighlight => isPlantHighlight ? 1f : 0f;
+    public float zooplanktonHighlight => isMicrobeHighlight ? 1f : 0f;
+    public float vertebrateHighlight => isVertebrateHighlight ? 1f : 0f;
+    
+    public bool cursorInSpeciesHistoryPanel;
+    public void SetCursorInSpeciesHistoryPanel(bool value) { cursorInSpeciesHistoryPanel = value; }
+
+    [SerializeField] float hitboxRadius = 1f;
+
+    [SerializeField] TooltipData[] tooltips;
+    // WPP: colors exposed in editor, opens door to further variation as needed
+    [Serializable]
+    public struct TooltipData
+    {
+        public TooltipId id;
+        public Color color;
+    }
+    
+    public enum TooltipId
+    {
+        CanvasElement,
+        Time,
+        Agent,
+        Algae,
+        Microbe,
+        Sensor,
+        Specialization,
+        Status
+    }
     
     #endregion
 
+    // TOOLTIPS TEMP:
+    void TickTooltip()
+    {
+        plantDistance = 1f;
+        if(simulationManager.vegetationManager != null) {
+            plantDistance = (simulationManager.vegetationManager.closestPlantParticleData.worldPos - mousePositionOnWater).magnitude;
+        }
+        microbeDistance = 1f;
+        if (simulationManager.zooplanktonManager != null) {
+            microbeDistance = (simulationManager.zooplanktonManager.closestAnimalParticlePosition2D - mousePositionOnWater).magnitude;
+        }                    
+        tooltipActive = false;
+        foreach (var tip in tooltips)
+        {
+            
+            if (!GetTooltipCondition(tip.id))
+                
+                continue;
+            
+
+            ActivateTooltip(tip);
+            tooltipActive = true;
+            break;
+        }
+        panelTooltip.SetActive(tooltipActive);
+    }
+    void ActivateTooltip(TooltipData data)
+    {
+        tooltipId = data.id;
+        ActivateTooltip(GetTooltipString(data.id), data.color);
+    }
+
+    void ActivateTooltip(string text, Color color)
+    {
+        textTooltip.text = text;
+        textTooltip.color = color;
+        panelTooltip.SetActive(true);   
+        
+    }
+    public void EnterTooltipObject(TooltipUI tip) {
+        isTooltipHover = true;
+        curTooltip = tip;        
+    }
+    
+    public void ExitTooltipObject() {
+        isTooltipHover = false;
+    }
+    
+    string GetTooltipString(TooltipId id)
+    {
+        
+        switch (id)
+        {
+            //*** EAC Moving the logic to CreaturePanelUI to update Tooltip text for matching neurons
+            case TooltipId.CanvasElement: { 
+                //if (cameraManager.targetAgent) {
+                //    return "OutComm[" + tooltip.elementID.ToString() + "] " + cameraManager.targetAgent.communicationModule.outComm0[0];
+                //}
+                //else {
+                    return curTooltip.tooltipString;
+                //}
+            }
+            case TooltipId.Time: return "TIME: " + ((float)simulationManager.simAgeTimeSteps * cursorX / 360f).ToString("F0");
+            case TooltipId.Agent: return "Critter " + cameraManager.mouseHoverAgentRef.candidateRef.name + "\nBiomass: " + cameraManager.mouseHoverAgentRef.currentBiomass.ToString("F2");
+            case TooltipId.Algae: return "Algae #" + simulationManager.vegetationManager.closestPlantParticleData.index;
+            case TooltipId.Microbe: return "Microbe #" + simulationManager.zooplanktonManager.closestAnimalParticleData.index;
+            case TooltipId.Sensor: return "Sensor #" + (simulationManager.simAgeTimeSteps * cursorX / 360f).ToString("F0");
+            case TooltipId.Specialization: return "Specializations"; //***EAC EGGSACK???
+            case TooltipId.Status: return "STATUS";
+            default: return "";
+        }
+    }
+    
+    bool GetTooltipCondition(TooltipId id)
+    {
+        switch (id)
+        {
+            case TooltipId.CanvasElement: return isTooltipHover;
+            case TooltipId.Time: return cursorInSpeciesHistoryPanel;
+            case TooltipId.Agent: return cameraManager.isMouseHoverAgent;
+            case TooltipId.Algae: return plantDistance < hitboxRadius && plantDistance < microbeDistance;
+            case TooltipId.Microbe: return microbeDistance < hitboxRadius && microbeDistance < plantDistance;
+            case TooltipId.Sensor: return cursorInSpeciesHistoryPanel;    // ERROR: same as Year
+            case TooltipId.Specialization: return isTooltipHover;
+            case TooltipId.Status: return isTooltipHover;
+            default: return false;
+        }
+    }
+    
     public void BeginAnnouncement()
     {
         isAnnouncementTextOn = true;
@@ -187,14 +320,18 @@ public class UIManager : Singleton<UIManager>
     #region UPDATE UI PANELS FUNCTIONS!!! :::
     // ***EC CLEAN THIS CRAP UP
     void Update() 
-    {                                        
+    { 
+        observerModeUI.Tick();  // <== this is the big one *******          
+        // ^^^  Need to Clean this up and replace with better approach ***********************        
+        
+        TickTooltip();
+        theCursorCzar.Tick();  // this will assume a larger role
+
         if (!simulationManager.loadingComplete) return;
         //if (bigBangPanelUI.Tick()) return;  // WPP: moved to coroutine
         if (bigBangPanelUI.isRunning) return;
 
-        observerModeUI.Tick();  // <== this is the big one *******  
-        // ^^^  Need to Clean this up and replace with better approach ***********************        
-        theCursorCzar.Tick();  // this will assume a larger role
+        
         brushesUI.UpdateBrushesUI(); 
         
         if (selectionManager.focusedCandidate?.candidateGenome != null) 

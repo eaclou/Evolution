@@ -136,7 +136,10 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
         Vector4[] dataArray = new Vector4[1];
         Vector4 gizmoPos = new Vector4(curMousePositionOnWaterPlane.x, curMousePositionOnWaterPlane.y, 0f, 0f);
         dataArray[0] = gizmoPos;
-        theRenderKing.gizmoCursorPosCBuffer.SetData(dataArray);
+        if(theRenderKing.gizmoCursorPosCBuffer != null) {
+            theRenderKing.gizmoCursorPosCBuffer.SetData(dataArray);
+        }
+        
 
         stirGizmoVisible = false;
 

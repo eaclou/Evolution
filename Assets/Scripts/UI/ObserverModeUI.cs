@@ -11,22 +11,15 @@ public class ObserverModeUI : MonoBehaviour
     CameraManager cameraManager => CameraManager.instance;
     TheCursorCzar theCursorCzar => TheCursorCzar.instance;
     TheRenderKing theRenderKing => TheRenderKing.instance;
-    
-    Text textTooltip => theCursorCzar.textTooltip;
-    GameObject panelTooltip => theCursorCzar.panelTooltip;
+        
     ZooplanktonManager zooplanktonManager => simulationManager.zooplanktonManager;
     VegetationManager vegetationManager => simulationManager.vegetationManager;
     ToolType curActiveTool => manager.curActiveTool;
-
-    public bool isTooltipHover = false;
-    public TooltipUI tooltip;
-    //public string tooltipString;
-    
+        
     float cursorX => theCursorCzar.GetCursorPixelCoords().x;
     Vector2 mousePositionOnWater => theCursorCzar.curMousePositionOnWaterPlane2D;
     
-    [SerializeField] int announcementDuration = 640;
-    [SerializeField] float hitboxRadius = 1f;
+    [SerializeField] int announcementDuration = 640;    
 
     public new bool enabled;
     public GameObject panelObserverMode;
@@ -44,12 +37,7 @@ public class ObserverModeUI : MonoBehaviour
     public bool isBrushAddingAgents = false;
     public bool updateTerrainAltitude;
     public float terrainUpdateMagnitude;
-    
-    TooltipId tooltipId;
-    public bool isVertebrateHighlight => tooltipId == TooltipId.Agent;
-    public bool isPlantHighlight => tooltipId == TooltipId.Algae;
-    public bool isMicrobeHighlight => tooltipId == TooltipId.Microbe;
-        
+            
     public PanelFocus panelFocus = PanelFocus.WorldHub;
     public enum PanelFocus 
     {
@@ -60,10 +48,7 @@ public class ObserverModeUI : MonoBehaviour
     }
     
     bool isKeyboardInput;
-    
-    public bool cursorInSpeciesHistoryPanel;
-    public void SetCursorInSpeciesHistoryPanel(bool value) { cursorInSpeciesHistoryPanel = value; }
-
+        
     public void StepCamera(Vector2 input)
     {    
         panelObserverMode.SetActive(enabled);
@@ -77,14 +62,14 @@ public class ObserverModeUI : MonoBehaviour
         cameraManager.MoveCamera(input.normalized);
     }
     
-    bool tooltipActive;
+    
 
     public void Tick()
     {
         if (vegetationManager == null) return;
 
         TickAnnouncement();
-        TickTooltip();
+        
         TickBrushes();
         
         theRenderKing.baronVonTerrain.ClickTestTerrainUpdateMaps(updateTerrainAltitude, terrainUpdateMagnitude);
@@ -106,41 +91,7 @@ public class ObserverModeUI : MonoBehaviour
             //inspectToolUnlockedAnnounce = false;
         }
     }
-
-    float plantDistance;
-    float microbeDistance;
-    
-    void TickTooltip()
-    {
-        plantDistance = (vegetationManager.closestPlantParticleData.worldPos - mousePositionOnWater).magnitude;
-        microbeDistance = (zooplanktonManager.closestAnimalParticlePosition2D - mousePositionOnWater).magnitude;
-                                
-        tooltipActive = false;
-        foreach (var tooltip in tooltips)
-        {
-            if (!GetTooltipCondition(tooltip.id))
-                continue;
             
-            ActivateTooltip(tooltip);
-            tooltipActive = true;
-            break;
-        }
-        panelTooltip.SetActive(tooltipActive);
-    }
-    
-    void ActivateTooltip(TooltipData data)
-    {
-        tooltipId = data.id;
-        ActivateTooltip(GetTooltipString(data.id), data.color);
-    }
-
-    void ActivateTooltip(string text, Color color)
-    {
-        textTooltip.text = text;
-        textTooltip.color = color;
-        panelTooltip.SetActive(true);        
-    }
-    
     void TickBrushes()
     {
         if (EventSystem.current.IsPointerOverGameObject())
@@ -183,79 +134,7 @@ public class ObserverModeUI : MonoBehaviour
         theRenderKing.gizmoStirStickAMat.SetFloat(VISIBLE, visibility);
     }
     
-    #region Tooltip Data
     
-    [SerializeField] TooltipData[] tooltips;
     
-    public void EnterTooltipObject(TooltipUI tip) {
-        isTooltipHover = true;
-        tooltip = tip;
-    }
-    
-    public void ExitTooltipObject() {
-        isTooltipHover = false;
-    }
-    
-    string GetTooltipString(TooltipId id)
-    {
-        switch (id)
-        {
-            //*** EAC Moving the logic to CreaturePanelUI to update Tooltip text for matching neurons
-            case TooltipId.CanvasElement: { 
-                //if (cameraManager.targetAgent) {
-                //    return "OutComm[" + tooltip.elementID.ToString() + "] " + cameraManager.targetAgent.communicationModule.outComm0[0];
-                //}
-                //else {
-                    return tooltip.tooltipString;
-                //}
-            }
-            case TooltipId.Time: return "TIME: " + ((float)simulationManager.simAgeTimeSteps * cursorX / 360f).ToString("F0");
-            case TooltipId.Agent: return "Critter " + cameraManager.mouseHoverAgentRef.candidateRef.name + "\nBiomass: " + cameraManager.mouseHoverAgentRef.currentBiomass.ToString("F2");
-            case TooltipId.Algae: return "Algae #" + vegetationManager.closestPlantParticleData.index;
-            case TooltipId.Microbe: return "Microbe #" + zooplanktonManager.closestAnimalParticleData.index;
-            case TooltipId.Sensor: return "Sensor #" + (simulationManager.simAgeTimeSteps * cursorX / 360f).ToString("F0");
-            case TooltipId.Specialization: return "Specializations"; //***EAC EGGSACK???
-            case TooltipId.Status: return "STATUS";
-            default: return "";
-        }
-    }
-    
-    bool GetTooltipCondition(TooltipId id)
-    {
-        switch (id)
-        {
-            case TooltipId.CanvasElement: return isTooltipHover;
-            case TooltipId.Time: return cursorInSpeciesHistoryPanel;
-            case TooltipId.Agent: return cameraManager.isMouseHoverAgent;
-            case TooltipId.Algae: return plantDistance < hitboxRadius && plantDistance < microbeDistance;
-            case TooltipId.Microbe: return microbeDistance < hitboxRadius && microbeDistance < plantDistance;
-            case TooltipId.Sensor: return cursorInSpeciesHistoryPanel;    // ERROR: same as Year
-            case TooltipId.Specialization: return isTooltipHover;
-            case TooltipId.Status: return isTooltipHover;
-            default: return false;
-        }
-    }
-
-    // WPP: colors exposed in editor, opens door to further variation as needed
-    [Serializable]
-    public struct TooltipData
-    {
-        public TooltipId id;
-        public Color color;
-    }
-    
-    public enum TooltipId
-    {
-        CanvasElement,
-        Time,
-        Agent,
-        Algae,
-        Microbe,
-        Sensor,
-        Specialization,
-        Status
-    }
-    
-    #endregion
 }
 

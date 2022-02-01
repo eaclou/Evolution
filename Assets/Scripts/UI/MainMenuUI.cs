@@ -5,8 +5,8 @@ public class MainMenuUI : MonoBehaviour
 {
     [SerializeField] Button buttonQuickStartResume; // Future use
     [SerializeField] Button buttonNewSimulation;
-    [SerializeField] Text textMouseOverInfo;
-    [SerializeField] Text quickStartText;
+    //[SerializeField] Text textMouseOverInfo;
+    //[SerializeField] Text quickStartText;
     [SerializeField] GameObject panelGameOptions;
     
     GameManager gameManager => GameManager.instance;
@@ -32,13 +32,13 @@ public class MainMenuUI : MonoBehaviour
         Cursor.visible = true;
         //canvasMain.renderMode = RenderMode.ScreenSpaceOverlay;
         
-        quickStartText.text = firstTimeStartup ? "QUICK START" : "RESUME";
+        //quickStartText.text = firstTimeStartup ? "QUICK START" : "RESUME";
         
         // *** For now, 1 sim at a time ***
         if (!firstTimeStartup) 
         {
             buttonNewSimulation.gameObject.SetActive(false); 
-            textMouseOverInfo.gameObject.SetActive(false);
+            //textMouseOverInfo.gameObject.SetActive(false);
         }
         
         firstTimeStartup = false; 
@@ -86,7 +86,7 @@ public class MainMenuUI : MonoBehaviour
             gameManager.ResumePlaying();
         }          
     }
-    
+    /*
     public void MouseEnterQuickStart() {
         //textMouseOverInfo.gameObject.SetActive(true);
         //textMouseOverInfo.text = "Start with an existing ecosystem full of various living organisms.";
@@ -114,14 +114,14 @@ public class MainMenuUI : MonoBehaviour
     public void MouseExitControlsButton() {
         textMouseOverInfo.gameObject.SetActive(false);
     }
-    
+    */
     public void Refresh() 
     {
         panelGameOptions.SetActive(optionsMenuOn);
     
         if (optionsMenuOn) 
         {
-            textMouseOverInfo.gameObject.SetActive(false);
+            //textMouseOverInfo.gameObject.SetActive(false);
         }
     }
 }
