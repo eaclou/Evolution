@@ -30,6 +30,10 @@ public class TheRenderKing : Singleton<TheRenderKing>
     
     CreaturePanelUI creaturePanelUI => uiManager.creaturePanelUI;
     ClockPanelUI clockPanelUI => uiManager.clockPanelUI;
+
+    
+    public GenerateBrainVisualization brainVisualization;
+
     
     /// Max number of threads that can be executed by a shader group
     const int maxShaderThreads = 1024;
@@ -50,6 +54,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
     public Camera slotPortraitRenderCamera;
     public Camera resourceSimRenderCamera;
     public Camera worldTreeRenderCamera;
+    public Camera creatureBrainVisCamera;
 
     public bool isDebugRender = false;
 
@@ -61,6 +66,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
     private CommandBuffer cmdBufferSpiritBrush;
     private CommandBuffer cmdBufferSlotPortraitDisplay;
     private CommandBuffer cmdBufferResourceSim;
+    private CommandBuffer cmdBufferBrainVis;
     [NonSerialized]
     public CommandBuffer cmdBufferWorldTree;
 
@@ -580,6 +586,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         slotPortraitRenderCamera.enabled = false;
         resourceSimRenderCamera.enabled = false;
         worldTreeRenderCamera.enabled = false;
+        creatureBrainVisCamera.enabled = false;
     }
     
     // Use this for initialization:
@@ -1060,6 +1067,10 @@ public class TheRenderKing : Singleton<TheRenderKing>
         cmdBufferWorldTree = new CommandBuffer();
         cmdBufferWorldTree.name = "cmdBufferWorldTree";
         worldTreeRenderCamera.AddCommandBuffer(CameraEvent.BeforeDepthNormalsTexture, cmdBufferWorldTree);
+
+        cmdBufferBrainVis = new CommandBuffer();
+        cmdBufferBrainVis.name = "cmdBufferBrainVis";
+        creatureBrainVisCamera.AddCommandBuffer(CameraEvent.BeforeDepthNormalsTexture, cmdBufferBrainVis);
     }
     
     #endregion
@@ -2467,6 +2478,37 @@ public class TheRenderKing : Singleton<TheRenderKing>
         */
         Graphics.ExecuteCommandBuffer(cmdBufferWorldTree);
         worldTreeRenderCamera.Render();
+
+        //======================================================================================================
+
+        // CREATURE BRAIN VIS:
+        cmdBufferBrainVis.Clear(); // needed since camera clear flag is set to none
+        cmdBufferBrainVis.SetRenderTarget(creatureBrainVisCamera.targetTexture);
+        cmdBufferBrainVis.ClearRenderTarget(true, true, new Color(0.33f, 0f, 0f, 1f), 1.0f);  // clear -- needed???
+        cmdBufferBrainVis.SetViewProjectionMatrices(creatureBrainVisCamera.worldToCameraMatrix, creatureBrainVisCamera.projectionMatrix);
+      
+        //worldTreeLineDataMat.SetPass(0);
+        //worldTreeLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        //worldTreeLineDataMat.SetBuffer("worldTreeLineDataCBuffer", uiManager.historyPanelUI.worldTreeLineDataCBuffer);
+        //cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, worldTreeLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.historyPanelUI.worldTreeLineDataCBuffer.count);
+        
+        if (!brainVisualization.initialized) return;
+    
+        brainVisualization.displayMaterialCables.SetPass(0);
+        // not sure why at this used to work with Triangles but now requires Points....
+        cmdBufferBrainVis.DrawProceduralIndirect(Matrix4x4.identity, brainVisualization.displayMaterialCables, 0, MeshTopology.Points, brainVisualization.argsCablesCBuffer);  
+        
+        brainVisualization.displayMaterialCore.SetPass(0);
+        cmdBufferBrainVis.DrawProceduralIndirect(Matrix4x4.identity, brainVisualization.displayMaterialCore, 0, MeshTopology.Points, brainVisualization.argsCoreCBuffer);  
+        
+        brainVisualization.floatingGlowyBitsMaterial.SetPass(0);
+        cmdBufferBrainVis.DrawProcedural(Matrix4x4.identity, brainVisualization.floatingGlowyBitsMaterial, 0, MeshTopology.Triangles, 6, brainVisualization.floatingGlowyBitsCBuffer.count);
+
+        brainVisualization.extraBallsMaterial.SetPass(0);
+        cmdBufferBrainVis.DrawProcedural(Matrix4x4.identity, brainVisualization.extraBallsMaterial, 0, MeshTopology.Triangles, 6, brainVisualization.extraBallsCBuffer.count);
+
+        Graphics.ExecuteCommandBuffer(cmdBufferBrainVis);
+        creatureBrainVisCamera.Render();
     }
 
     void RenderStructuredBuffer(Material material, string bufferId, ComputeBuffer buffer)

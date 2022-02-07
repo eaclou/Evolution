@@ -71,8 +71,10 @@ public class ObserverModeUI : MonoBehaviour
         TickAnnouncement();
         
         TickBrushes();
+        if(simulationManager.loadingComplete) {
+            theRenderKing.baronVonTerrain.ClickTestTerrainUpdateMaps(updateTerrainAltitude, terrainUpdateMagnitude);
+        }
         
-        theRenderKing.baronVonTerrain.ClickTestTerrainUpdateMaps(updateTerrainAltitude, terrainUpdateMagnitude);
 
         SetStirVisible();
     }

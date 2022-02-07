@@ -16,8 +16,8 @@ public class GenerateBrainVisualization : MonoBehaviour
     #region Internal data
 
     private ComputeBuffer quadVerticesCBuffer;  // holds information for a 2-triangle Quad mesh (6 vertices)
-    private ComputeBuffer floatingGlowyBitsCBuffer;  // holds information for placement and attributes of each instance of quadVertices to draw
-    private ComputeBuffer extraBallsCBuffer;
+    public ComputeBuffer floatingGlowyBitsCBuffer;  // holds information for placement and attributes of each instance of quadVertices to draw
+    public ComputeBuffer extraBallsCBuffer;
     private ComputeBuffer axonBallCBuffer;
     private ComputeBuffer neuronBallCBuffer;
 
@@ -31,18 +31,18 @@ public class GenerateBrainVisualization : MonoBehaviour
     private ComputeBuffer cableInitDataCBuffer;   // initial data required to calculate positions of cables
     private ComputeBuffer cableSimDataCBuffer;    // holds the positions of the control points of the cable's underlying bezier curve
     private ComputeBuffer socketInitDataCBuffer;  // holds the positions of the sockets on wall that cables plug into
-    private ComputeBuffer argsCoreCBuffer;        // Some other secondary buffers for decorations later
+    public ComputeBuffer argsCoreCBuffer;        // Some other secondary buffers for decorations later
     private uint[] argsCore = new uint[5] { 0, 0, 0, 0, 0 };
     
     // will likely split these out into seperate ones later to support multiple materials/layers, but all-in-one for now...
     private ComputeBuffer appendTrianglesCablesCBuffer; 
     private ComputeBuffer appendTrianglesCoreCBuffer;
-    private ComputeBuffer argsCablesCBuffer;
+    public ComputeBuffer argsCablesCBuffer;
     
     private uint[] argsCables = new uint[5] { 0, 0, 0, 0, 0 };
     
     int numAxons = 270;
-    bool initialized;
+    public bool initialized;
     
     #endregion
     
@@ -162,10 +162,10 @@ public class GenerateBrainVisualization : MonoBehaviour
     ComputeShader shaderComputeFloatingGlowyBits => settings.shaderComputeFloatingGlowyBits;
     ComputeShader shaderComputeExtraBalls => settings.shaderComputeExtraBalls;  // quads w/ nml maps to like like extra blobs attached to neurons & axons
     //public Shader shaderDisplayBrain;
-    Material displayMaterialCore => settings.displayMaterialCore;
-    Material displayMaterialCables => settings.displayMaterialCables;
-    Material floatingGlowyBitsMaterial => settings.floatingGlowyBitsMaterial;
-    Material extraBallsMaterial => settings.extraBallsMaterial;
+    public Material displayMaterialCore => settings.displayMaterialCore;
+    public Material displayMaterialCables => settings.displayMaterialCables;
+    public Material floatingGlowyBitsMaterial => settings.floatingGlowyBitsMaterial;
+    public Material extraBallsMaterial => settings.extraBallsMaterial;
     
     int maxTrisPerNeuron => settings.maxTrisPerNeuron;
     int maxTrisPerSubNeuron => settings.maxTrisPerSubNeuron;
@@ -664,7 +664,7 @@ public class GenerateBrainVisualization : MonoBehaviour
 
     void OnRenderObject() 
     {
-        if (!initialized) return;
+        /*if (!initialized) return;
     
         displayMaterialCables.SetPass(0);
         // not sure why at this used to work with Triangles but now requires Points....
@@ -679,7 +679,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         Graphics.DrawProceduralNow(MeshTopology.Triangles, 6, floatingGlowyBitsCBuffer.count);
 
         extraBallsMaterial.SetPass(0);
-        Graphics.DrawProceduralNow(MeshTopology.Triangles, 6, extraBallsCBuffer.count);
+        Graphics.DrawProceduralNow(MeshTopology.Triangles, 6, extraBallsCBuffer.count);*/
     }
 
     void Update () 
