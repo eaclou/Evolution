@@ -41,8 +41,8 @@ public class CreaturePanelUI : MonoBehaviour
     public TooltipUI tooltipAppearance;
     public TooltipUI tooltipSpeciesIcon;
     
-    [SerializeField]
-    Text textPanelStateDebug;
+    //[SerializeField]
+    //Text textPanelStateDebug;
 
     // * WPP: move to Lookup
     /*public Sprite spriteIconCreatureStateEgg;
@@ -93,7 +93,7 @@ public class CreaturePanelUI : MonoBehaviour
     {
         if (!curPanelMode) return;
     
-        textPanelStateDebug.text = "MODE: " + curPanelMode.value;
+        //textPanelStateDebug.text = "MODE: " + curPanelMode.value;
 
         var actionState = GetAgentActionStateData(agent.curActionState);
         imageCurAction.sprite = actionState.sprite;

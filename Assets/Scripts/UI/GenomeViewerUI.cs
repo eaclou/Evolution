@@ -16,7 +16,6 @@ public class GenomeViewerUI : MonoBehaviour {
         panelGenomeSensors.SetActive(true);
         panelPerformanceBehavior.SetActive(true);
         panelEaten.SetActive(true);
-
     }    
     
     [Serializable]

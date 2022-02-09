@@ -33,7 +33,7 @@ public class SelectionManager : Singleton<SelectionManager>
         if (focusedCandidate?.candidateGenome == null) 
             return;
         
-        uiManager.genomeViewerUI.UpdateUI();
+        //uiManager.genomeViewerUI.UpdateUI();
 
         if(uiManager.isRebuildTimeStep) {
             uiManager.speciesOverviewUI.RebuildGenomeButtons();  

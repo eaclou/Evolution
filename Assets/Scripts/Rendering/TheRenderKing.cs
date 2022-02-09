@@ -2484,7 +2484,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         // CREATURE BRAIN VIS:
         cmdBufferBrainVis.Clear(); // needed since camera clear flag is set to none
         cmdBufferBrainVis.SetRenderTarget(creatureBrainVisCamera.targetTexture);
-        cmdBufferBrainVis.ClearRenderTarget(true, true, new Color(0.33f, 0f, 0f, 1f), 1.0f);  // clear -- needed???
+        cmdBufferBrainVis.ClearRenderTarget(true, true, new Color(0f, 0f, 0f, 0f), 1.0f);  // clear -- needed???
         cmdBufferBrainVis.SetViewProjectionMatrices(creatureBrainVisCamera.worldToCameraMatrix, creatureBrainVisCamera.projectionMatrix);
       
         //worldTreeLineDataMat.SetPass(0);

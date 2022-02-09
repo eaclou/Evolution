@@ -338,7 +338,7 @@ public class UIManager : Singleton<UIManager>
         {
             creaturePanelUI.Tick();
             // --- Move these into CreaturePanel?
-            genomeViewerUI.UpdateUI(); 
+            //genomeViewerUI.UpdateUI(); 
             creatureBrainActivityUI.Tick();
             creaturePaperDollUI.Tick();            
             // ---
