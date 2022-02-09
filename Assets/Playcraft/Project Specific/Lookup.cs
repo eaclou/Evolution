@@ -24,6 +24,7 @@ public class Lookup : ScriptableObject
     public NeuralMap neuralMap;
     public MetaNeuron hiddenTemplate => neuralMap.hiddenTemplate;
     public NameList nameList;
+    public TechTree techTree;
 
     [Header("Colors")]
     public Color buttonActiveColor = new Color(1f, 1f, 1f, 1f);
