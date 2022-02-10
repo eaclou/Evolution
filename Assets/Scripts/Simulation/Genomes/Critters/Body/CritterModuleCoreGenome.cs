@@ -10,6 +10,7 @@ public class CritterModuleCoreGenome
     Lookup lookup => Lookup.instance;
     NeuralMap map => lookup.neuralMap;
     NameList nameList => lookup.nameList;
+    InitialGenomeInfo genomeInitialization => lookup.genomeInitialization;
 
     public int parentID;
     public readonly BrainModuleID moduleID = BrainModuleID.Core;
@@ -22,7 +23,9 @@ public class CritterModuleCoreGenome
     //    Head
     //    Body/Torso
     //    Tail
-
+    
+    public InitialGenomeData initialData;
+    
     public float creatureBaseLength;
     public float creatureAspectRatio;
     
@@ -321,8 +324,89 @@ public class CritterModuleCoreGenome
         initModifier.maskIndicesList.Add(masksList.Count - 1); // reference mask by index to allow re-use by other shape modifiers    
         shapeModifiersList.Add(initModifier);
 
-        // * WPP: expose hardcoded values (include ranges), consider ScriptableObject
-        creatureBaseLength = Random.Range(0.4f, 0.4f);
+        initialData = genomeInitialization.GetInitialGenomeData();
+        creatureBaseLength = initialData.creatureBaseLength;
+        creatureAspectRatio = initialData.creatureAspectRatio;
+        creatureFrontTaperSize = initialData.creatureFrontTaperSize;
+        creatureBackTaperSize = initialData.creatureBackTaperSize;
+
+        //mouthComplexShapeLerp = 0f;
+        mouthLength = initialData.mouth.length;
+        mouthFrontWidth = initialData.mouth.frontWidth;
+        mouthFrontHeight = initialData.mouth.frontHeight;
+        mouthFrontVerticalOffset = initialData.mouth.frontVerticalOffset;
+        mouthBackWidth = initialData.mouth.backWidth;  
+        mouthBackHeight = initialData.mouth.backHeight;
+        mouthBackVerticalOffset = initialData.mouth.backVerticalOffset;
+        mouthToHeadTransitionSize = initialData.mouth.transitionSize;
+
+        headLength = initialData.head.length; 
+        headFrontWidth = initialData.head.frontWidth; 
+        headFrontHeight = initialData.head.frontHeight; 
+        headFrontVerticalOffset = initialData.head.frontVerticalOffset;
+        headBackWidth = initialData.head.backWidth; 
+        headBackHeight = initialData.head.backHeight; 
+        headBackVerticalOffset = initialData.head.backVerticalOffset;
+        headToBodyTransitionSize = initialData.head.transitionSize;
+
+        bodyLength = initialData.body.length;
+        bodyFrontWidth = initialData.body.frontWidth;
+        bodyFrontHeight = initialData.body.frontHeight;
+        bodyFrontVerticalOffset = initialData.body.frontVerticalOffset;
+        bodyBackWidth = initialData.body.backWidth;
+        bodyBackHeight = initialData.body.backHeight;
+        bodyBackVerticalOffset = initialData.body.backVerticalOffset;
+        bodyToTailTransitionSize = initialData.body.transitionSize;
+
+        tailLength = initialData.tail.length;
+        tailFrontWidth = initialData.tail.frontWidth;
+        tailFrontHeight = initialData.tail.frontHeight;
+        tailFrontVerticalOffset = initialData.tail.frontVerticalOffset;
+        tailBackWidth = initialData.tail.backWidth;
+        tailBackHeight = initialData.tail.backHeight;
+        tailBackVerticalOffset = initialData.tail.backVerticalOffset;
+
+        numEyes = initialData.eyeCount;
+        eyePosSpread = initialData.eyeSpread; 
+        eyeLocAmplitude = initialData.eyeLocationAmplitude;
+        eyeLocFrequency = initialData.eyeLocationFrequency;
+        eyeLocOffset = initialData.eyeLocationOffset;       
+        socketRadius = initialData.socketRadius;
+        socketHeight = initialData.socketHeight;
+        socketBulge = initialData.socketBulge;
+        eyeballRadius = initialData.eyeballRadius;
+        eyeBulge = initialData.eyeBulge;
+        irisWidthFraction = initialData.irisWidthPercent;      
+        pupilWidthFraction = initialData.pupilWidthPercent;
+        pupilHeightFraction = initialData.pupilHeightPercent;
+        eyeballHue = initialData.eyeballHue;
+        irisHue = initialData.irisHue;
+
+        dorsalFinStartCoordY = initialData.dorsalFinStartY;
+        dorsalFinEndCoordY = initialData.dorsalFinEndY;
+        dorsalFinSlantAmount = initialData.dorsalFinSlant;
+        dorsalFinBaseHeight = initialData.dorsalFinBaseHeight;
+
+        tailFinSpreadAngle = initialData.tailFinSpreadAngle;
+        tailFinBaseLength = initialData.tailFinBaseLength;
+        tailFinFrequencies = initialData.tailFinFrequencies;
+        tailFinAmplitudes = initialData.tailFinAmplitudes;
+        tailFinOffsets = initialData.tailFinOffsets;
+
+        talentSpecializationAttack = initialData.attackSpecialization;
+        talentSpecializationDefense = initialData.defenseSpecialization;
+        talentSpecializationSpeed = initialData.speedSpecialization;
+        talentSpecializationUtility = initialData.utilitySpecialization;
+
+        dietSpecializationPlant = initialData.plantDietSpecialization;
+        dietSpecializationDecay = initialData.decayDietSpecialization;
+        dietSpecializationMeat = initialData.meatDietSpecialization;
+
+        mouthFeedFrequency = initialData.mouthFeedFrequency;
+        mouthAttackAmplitude = initialData.mouthAttackAmplitude;
+        
+        // WPP: exposed hardcoded values (include ranges), see InitialGenomeInfo
+        /*creatureBaseLength = Random.Range(0.4f, 0.4f);
         creatureAspectRatio = Random.Range(0.2f, 0.3f);
 
         //creatureComplexShapeLerp = 0f;
@@ -390,7 +474,6 @@ public class CritterModuleCoreGenome
         pupilHeightFraction = Random.Range(0.75f, 1f);
         eyeballHue = Vector3.one;
         irisHue = new Vector3(Random.Range(0.25f, 0.75f), Random.Range(0.25f, 0.75f), Random.Range(0.25f, 0.75f));
-        
 
         // Dorsal Fin:
         dorsalFinStartCoordY = Random.Range(0f, 0.4f);
@@ -415,7 +498,7 @@ public class CritterModuleCoreGenome
         dietSpecializationMeat = Random.Range(0.4f, 0.6f);
 
         mouthFeedFrequency = 1f;
-        mouthAttackAmplitude = 1f;
+        mouthAttackAmplitude = 1f;*/
     }
 
     List<NeuronGenome> masterList;

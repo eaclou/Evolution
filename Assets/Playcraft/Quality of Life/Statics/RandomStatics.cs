@@ -19,6 +19,8 @@ namespace Playcraft
         
         public static bool RandomFlip(float chance, bool defaultValue) { return CoinToss(chance) ? !defaultValue : defaultValue; }
         
+        public static float RandomRange(Vector2 range) { return Random.Range(range.x, range.y); }
+        
         public static string[] alphabet = 
         { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
         
