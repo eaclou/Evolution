@@ -72,11 +72,13 @@ public class BrainGenome
             hiddenNeurons.Add(neuron);
         }
         
+        //Debug.Log($"Linking layers with connection density of {initialConnectionDensity}");
+        //Debug.Log($"{inputNeuronList.Count} input neurons to {outputNeuronList.Count} output neurons");
         LinkLayers(inputNeuronList, outputNeuronList, initialConnectionDensity, initialWeightMultiplier);
+        //Debug.Log($"{inputNeuronList.Count} input neurons to {hiddenNeurons.Count} hidden neurons");
         LinkLayers(inputNeuronList, hiddenNeurons, initialConnectionDensity, initialWeightMultiplier);
+        //Debug.Log($"{hiddenNeurons.Count} hidden neurons to {outputNeuronList.Count} output neurons");
         LinkLayers(hiddenNeurons, outputNeuronList, initialConnectionDensity, initialWeightMultiplier);
-
-        //PrintBrainGenome();
     }
     
     // WPP: build once on full initialization and cache result
@@ -97,16 +99,24 @@ public class BrainGenome
     
     void LinkLayers(List<NeuronGenome> fromList, List<NeuronGenome> toList, float initialConnectionDensity, float initialWeightMultiplier) 
     {
+        //int debugConnectionCount = 0;
+        
         foreach (var toElement in toList) 
         {
             foreach (var fromElement in fromList) 
             {
-                if (!RandomStatics.CoinToss(initialConnectionDensity)) continue;
+                var connectNeurons = RandomStatics.CoinToss(initialConnectionDensity);
+                //Debug.Log($"{initialConnectionDensity} {connectNeurons}");
+                if (!connectNeurons) continue;
                 var randomWeight = Gaussian.GetRandomGaussian() * initialWeightMultiplier;
                 var linkGenome = new LinkGenome(fromElement, toElement, randomWeight, true);
                 links.Add(linkGenome);
+                
+                //debugConnectionCount++;
             }
-        }          
+        }
+        
+        //Debug.Log($"{debugConnectionCount} links found out of possible {fromList.Count * toList.Count}");
     }
 
     public void SetToMutatedCopyOfParentGenome(BrainGenome parentGenome, BodyGenome bodyGenome, MutationSettingsInstance settings) 
@@ -123,7 +133,6 @@ public class BrainGenome
         InitializeBodyNeuronList();
         bodyGenome.InitializeBrainGenome(inOutNeurons);  
 
-        // WPP: delegated to functions
         hiddenNeurons = MutateHiddenNeurons(parentGenome.hiddenNeurons);
         links = MutateLinks(parentGenome.links, settings);
 
@@ -203,11 +212,9 @@ public class BrainGenome
         for (int k = 0; k < maxChecks; k++) 
         {
             int randInputID = Random.Range(0, inputNeuronList.Count);
-            // NID fromNID = inputNeuronList[randInputID].nid;
             var from = inputNeuronList[randInputID];
 
             int randOutputID = Random.Range(0, outputNeuronList.Count);
-            //NID toNID = outputNeuronList[randOutputID].nid;
             var to = outputNeuronList[randOutputID];
 
             // * WPP: delegate to function
@@ -298,7 +305,7 @@ public class BrainGenome
 
         //Debug.Log($"Removing {axonsToRemoveIndicesList.Count} vestigial links");
         if (axonsToRemoveIndicesList.Count > 0)
-            for(int k = axonsToRemoveIndicesList.Count - 1; k >= 0; k--)
+            for (int k = axonsToRemoveIndicesList.Count - 1; k >= 0; k--)
                 links.RemoveAt(axonsToRemoveIndicesList[k]);
     }
 
