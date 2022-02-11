@@ -24,56 +24,75 @@ public class CritterModuleCoreGenome
     //    Body/Torso
     //    Tail
     
-    public InitialGenomeData initialData;
+    #region Data Access
     
-    public float creatureBaseLength;
-    public float creatureAspectRatio;
+    private InitialGenomeData _data;
+    public InitialGenomeData data 
+    { 
+        get
+        {
+             if (_data == null) 
+                _data = new InitialGenomeData(genomeInitialization); 
+             
+             return _data;   
+        }
+        set => _data = value; 
+    }
+    
+    public float creatureBaseLength { get => data.creatureBaseLength; set => data.creatureBaseLength = value; }
+    public float creatureAspectRatio { get => data.creatureAspectRatio; set => data.creatureAspectRatio = value; }
     
     // Mouth/Snout:
-    public float creatureFrontTaperSize;
-    public float creatureBackTaperSize;
+    public float creatureFrontTaperSize { get => data.creatureFrontTaperSize; set => data.creatureFrontTaperSize = value; }
+    public float creatureBackTaperSize { get => data.creatureBackTaperSize; set => data.creatureBackTaperSize = value; }
 
     //public float mouthComplexShapeLerp;  // 0 = spherical simple creature, 1 = use section proportions
-    public float mouthLength;
-    public float mouthFrontWidth;  // width of snout at front of critter
-    public float mouthFrontHeight; // height of snout at front of critter
-    public float mouthFrontVerticalOffset; // shift up/down pivot/cylinder center
-    public float mouthBackWidth; 
-    public float mouthBackHeight;
-    public float mouthBackVerticalOffset;
-
-    public float mouthToHeadTransitionSize;  // 0-1 normalized
+    public float mouthLength { get => data.mouth.length; set => data.mouth.length = value; }
+    /// Width of snout at front of critter
+    public float mouthFrontWidth { get => data.mouth.frontWidth; set => data.mouth.frontWidth = value; }
+    /// Height of snout at front of critter 
+    public float mouthFrontHeight { get => data.mouth.frontHeight; set => data.mouth.frontHeight = value; }
+    /// Shift up/down pivot/cylinder center
+    public float mouthFrontVerticalOffset { get => data.mouth.frontVerticalOffset; set => data.mouth.frontVerticalOffset = value; }
+    public float mouthBackWidth { get => data.mouth.backWidth; set => data.mouth.backWidth = value; }
+    public float mouthBackHeight { get => data.mouth.backHeight; set => data.mouth.backHeight = value; }
+    public float mouthBackVerticalOffset { get => data.mouth.backVerticalOffset; set => data.mouth.backVerticalOffset = value; }
+    public float mouthToHeadTransitionSize { get => data.mouth.transitionSize; set => data.mouth.transitionSize = value; }  
     // Head
     //public float headComplexShapeLerp;
-    public float headLength;
-    public float headFrontWidth;
-    public float headFrontHeight;
-    public float headFrontVerticalOffset;
-    public float headBackWidth; 
-    public float headBackHeight;
-    public float headBackVerticalOffset;
-
-    public float headToBodyTransitionSize;  // 0-1 normalized
+    public float headLength { get => data.head.length; set => data.head.length = value; }
+    public float headFrontWidth { get => data.head.frontWidth; set => data.head.frontWidth = value; }
+    public float headFrontHeight { get => data.head.frontHeight; set => data.head.frontHeight = value; }
+    public float headFrontVerticalOffset { get => data.head.frontVerticalOffset; set => data.head.frontVerticalOffset = value; }
+    public float headBackWidth { get => data.head.backWidth; set => data.head.backWidth = value; }
+    public float headBackHeight { get => data.head.backHeight; set => data.head.backHeight = value; }
+    public float headBackVerticalOffset { get => data.head.backVerticalOffset; set => data.head.backVerticalOffset = value; }
+    public float headToBodyTransitionSize { get => data.head.transitionSize; set => data.head.transitionSize = value; } 
     // Body:
     //public float bodyComplexShapeLerp;
-    public float bodyLength;
-    public float bodyFrontWidth;  // width of snout at front of critter
-    public float bodyFrontHeight; // height of snout at front of critter
-    public float bodyFrontVerticalOffset; // shift up/down pivot/cylinder center
-    public float bodyBackWidth; 
-    public float bodyBackHeight;
-    public float bodyBackVerticalOffset;
-
-    public float bodyToTailTransitionSize;  // 0-1 normalized
+    public float bodyLength { get => data.body.length; set => data.body.length = value; } 
+    /// Width of snout at front of critter
+    public float bodyFrontWidth { get => data.body.frontWidth; set => data.body.frontWidth = value; } 
+    /// Height of snout at front of critter  
+    public float bodyFrontHeight { get => data.body.frontHeight; set => data.body.frontHeight = value; } 
+    /// Shift up/down pivot/cylinder center 
+    public float bodyFrontVerticalOffset { get => data.body.frontVerticalOffset; set => data.body.frontVerticalOffset = value; } 
+    public float bodyBackWidth { get => data.body.backWidth; set => data.body.backWidth = value; } 
+    public float bodyBackHeight { get => data.body.backHeight; set => data.body.backHeight = value; } 
+    public float bodyBackVerticalOffset { get => data.body.backVerticalOffset; set => data.body.backVerticalOffset = value; }
+    public float bodyToTailTransitionSize { get => data.body.transitionSize; set => data.body.transitionSize = value; } 
     //Tail:
     //public float tailComplexShapeLerp;
-    public float tailLength;
-    public float tailFrontWidth;  // width of snout at front of critter
-    public float tailFrontHeight; // height of snout at front of critter
-    public float tailFrontVerticalOffset; // shift up/down pivot/cylinder center
-    public float tailBackWidth; 
-    public float tailBackHeight;
-    public float tailBackVerticalOffset;
+    public float tailLength { get => data.tail.length; set => data.tail.length = value; } 
+    /// width of snout at front of critter
+    public float tailFrontWidth { get => data.tail.frontWidth; set => data.tail.frontWidth = value; }  
+    /// height of snout at front of critter
+    public float tailFrontHeight { get => data.tail.frontHeight; set => data.tail.frontHeight = value; } 
+    /// shift up/down pivot/cylinder center
+    public float tailFrontVerticalOffset { get => data.tail.frontVerticalOffset; set => data.tail.frontVerticalOffset = value; } 
+    public float tailBackWidth { get => data.tail.backWidth; set => data.tail.backWidth = value; }  
+    public float tailBackHeight { get => data.tail.backHeight; set => data.tail.backHeight = value; } 
+    public float tailBackVerticalOffset { get => data.tail.backVerticalOffset; set => data.tail.backVerticalOffset = value; } 
     
     public float fullLength => tailLength + bodyLength + headLength + mouthLength;
     public float bodyCoord => tailLength / fullLength;
@@ -81,41 +100,43 @@ public class CritterModuleCoreGenome
     public float mouthCoord => (tailLength + bodyLength + headLength) / fullLength;
 
     // EYES:::  (Eventually separate these out better into different subclasses/structs)
-    public int numEyes = 2;
-    public float eyePosSpread = 1f;  // 1f == full hemisphere coverage, 0 == top
-    public float eyeLocAmplitude = 0.5f;
-    public float eyeLocFrequency = 1f;
-    public float eyeLocOffset = 0f;
-        
-    public float socketRadius = 1f;  // relative to body size?
-    public float socketHeight = 0.25f; 
-    public float socketBulge = 0f;
-    public float eyeballRadius = 1f;
-    public float eyeBulge = 0.33f;
-    public float irisWidthFraction = 0.9f;        
-    public float pupilWidthFraction = 0.5f;  // percentage of iris size
-    public float pupilHeightFraction = 1f;
-    public Vector3 eyeballHue;
-    public Vector3 irisHue;
+    public int numEyes { get => data.eyeCount; set => data.eyeCount = value; }
+    /// 1f == full hemisphere coverage, 0 == top
+    public float eyePosSpread { get => data.eyeSpread; set => data.eyeSpread = value; } 
+    public float eyeLocAmplitude { get => data.eyeLocationAmplitude; set => data.eyeLocationAmplitude = value; } 
+    public float eyeLocFrequency { get => data.eyeLocationFrequency; set => data.eyeLocationFrequency = value; } 
+    public float eyeLocOffset { get => data.eyeLocationOffset; set => data.eyeLocationOffset = value; } 
+    /// Relative to body size?    
+    public float socketRadius { get => data.socketRadius; set => data.socketRadius = value; }   
+    public float socketHeight { get => data.socketHeight; set => data.socketHeight = value; }  
+    public float socketBulge { get => data.socketBulge; set => data.socketBulge = value; } 
+    public float eyeballRadius { get => data.eyeballRadius; set => data.eyeballRadius = value; } 
+    public float eyeBulge { get => data.eyeBulge; set => data.eyeBulge = value; } 
+    public float irisWidthFraction { get => data.irisWidthPercent; set => data.irisWidthPercent = value; }    
+    /// Percentage of iris size    
+    public float pupilWidthFraction { get => data.pupilWidthPercent; set => data.pupilWidthPercent = value; }   
+    public float pupilHeightFraction { get => data.pupilHeightPercent; set => data.pupilHeightPercent = value; } 
+    public Vector3 eyeballHue { get => data.eyeballHue; set => data.eyeballHue = value; } 
+    public Vector3 irisHue { get => data.irisHue; set => data.irisHue = value; } 
     
     // Dorsal Fin:
-    public float dorsalFinStartCoordY = 0.2f;
-    public float dorsalFinEndCoordY = 0.7f;
-    public float dorsalFinSlantAmount = 0.35f;
-    public float dorsalFinBaseHeight = 1f;
+    public float dorsalFinStartCoordY { get => data.dorsalFinStartY; set => data.dorsalFinStartY = value; } 
+    public float dorsalFinEndCoordY { get => data.dorsalFinEndY; set => data.dorsalFinEndY = value; } 
+    public float dorsalFinSlantAmount { get => data.dorsalFinSlant; set => data.dorsalFinSlant = value; } 
+    public float dorsalFinBaseHeight { get => data.dorsalFinBaseHeight; set => data.dorsalFinBaseHeight = value; } 
 
     // TAIL FIN:
-    public float tailFinSpreadAngle = 0.35f;
-    public float tailFinBaseLength = 1f;
-    public Vector3 tailFinFrequencies = Vector3.one;
-    public Vector3 tailFinAmplitudes = Vector3.one;
-    public Vector3 tailFinOffsets = Vector3.zero;
+    public float tailFinSpreadAngle { get => data.tailFinSpreadAngle; set => data.tailFinSpreadAngle = value; } 
+    public float tailFinBaseLength { get => data.tailFinBaseLength; set => data.tailFinBaseLength = value; } 
+    public Vector3 tailFinFrequencies { get => data.tailFinFrequencies; set => data.tailFinFrequencies = value; } 
+    public Vector3 tailFinAmplitudes { get => data.tailFinAmplitudes; set => data.tailFinAmplitudes = value; } 
+    public Vector3 tailFinOffsets { get => data.tailFinOffsets; set => data.tailFinOffsets = value; } 
 
     // Specialization Paths first try:
-    public float talentSpecializationAttack;
-    public float talentSpecializationDefense;
-    public float talentSpecializationSpeed;
-    public float talentSpecializationUtility;
+    public float talentSpecializationAttack { get => data.attackSpecialization; set => data.attackSpecialization = value; } 
+    public float talentSpecializationDefense { get => data.defenseSpecialization; set => data.defenseSpecialization = value; } 
+    public float talentSpecializationSpeed { get => data.speedSpecialization; set => data.speedSpecialization = value; } 
+    public float talentSpecializationUtility { get => data.utilitySpecialization; set => data.utilitySpecialization = value; } 
     
     public float talentSpecTotal => talentSpecializationAttack + talentSpecializationDefense + talentSpecializationSpeed + talentSpecializationUtility;
     public float talentSpecAttackNorm => talentSpecializationAttack / talentSpecTotal;
@@ -124,12 +145,14 @@ public class CritterModuleCoreGenome
     public float talentSpecUtilityNorm => talentSpecializationUtility / talentSpecTotal;
 
     // Diet specialization:
-    public float dietSpecializationDecay;
-    public float dietSpecializationPlant;    
-    public float dietSpecializationMeat;
+    public float dietSpecializationDecay { get => data.decayDietSpecialization; set => data.decayDietSpecialization = value; }
+    public float dietSpecializationPlant { get => data.plantDietSpecialization; set => data.plantDietSpecialization = value; }   
+    public float dietSpecializationMeat { get => data.meatDietSpecialization; set => data.meatDietSpecialization = value; }
 
-    public float mouthFeedFrequency;
-    public float mouthAttackAmplitude;
+    public float mouthFeedFrequency { get => data.mouthFeedFrequency; set => data.mouthFeedFrequency = value; }
+    public float mouthAttackAmplitude { get => data.mouthAttackAmplitude; set => data.mouthAttackAmplitude = value; }
+    
+    #endregion
 
     public TalentsAttack[] talentSpecAttack; // 5 tiers?    // tiers at specialization levels:  55%, 65%, 75%, 85%, 95%    
     public TalentsDefend[] talentSpecDefend; // 5 tiers?
@@ -324,87 +347,7 @@ public class CritterModuleCoreGenome
         initModifier.maskIndicesList.Add(masksList.Count - 1); // reference mask by index to allow re-use by other shape modifiers    
         shapeModifiersList.Add(initModifier);
 
-        initialData = genomeInitialization.GetInitialGenomeData();
-        creatureBaseLength = initialData.creatureBaseLength;
-        creatureAspectRatio = initialData.creatureAspectRatio;
-        creatureFrontTaperSize = initialData.creatureFrontTaperSize;
-        creatureBackTaperSize = initialData.creatureBackTaperSize;
-
-        //mouthComplexShapeLerp = 0f;
-        mouthLength = initialData.mouth.length;
-        mouthFrontWidth = initialData.mouth.frontWidth;
-        mouthFrontHeight = initialData.mouth.frontHeight;
-        mouthFrontVerticalOffset = initialData.mouth.frontVerticalOffset;
-        mouthBackWidth = initialData.mouth.backWidth;  
-        mouthBackHeight = initialData.mouth.backHeight;
-        mouthBackVerticalOffset = initialData.mouth.backVerticalOffset;
-        mouthToHeadTransitionSize = initialData.mouth.transitionSize;
-
-        headLength = initialData.head.length; 
-        headFrontWidth = initialData.head.frontWidth; 
-        headFrontHeight = initialData.head.frontHeight; 
-        headFrontVerticalOffset = initialData.head.frontVerticalOffset;
-        headBackWidth = initialData.head.backWidth; 
-        headBackHeight = initialData.head.backHeight; 
-        headBackVerticalOffset = initialData.head.backVerticalOffset;
-        headToBodyTransitionSize = initialData.head.transitionSize;
-
-        bodyLength = initialData.body.length;
-        bodyFrontWidth = initialData.body.frontWidth;
-        bodyFrontHeight = initialData.body.frontHeight;
-        bodyFrontVerticalOffset = initialData.body.frontVerticalOffset;
-        bodyBackWidth = initialData.body.backWidth;
-        bodyBackHeight = initialData.body.backHeight;
-        bodyBackVerticalOffset = initialData.body.backVerticalOffset;
-        bodyToTailTransitionSize = initialData.body.transitionSize;
-
-        tailLength = initialData.tail.length;
-        tailFrontWidth = initialData.tail.frontWidth;
-        tailFrontHeight = initialData.tail.frontHeight;
-        tailFrontVerticalOffset = initialData.tail.frontVerticalOffset;
-        tailBackWidth = initialData.tail.backWidth;
-        tailBackHeight = initialData.tail.backHeight;
-        tailBackVerticalOffset = initialData.tail.backVerticalOffset;
-
-        numEyes = initialData.eyeCount;
-        eyePosSpread = initialData.eyeSpread; 
-        eyeLocAmplitude = initialData.eyeLocationAmplitude;
-        eyeLocFrequency = initialData.eyeLocationFrequency;
-        eyeLocOffset = initialData.eyeLocationOffset;       
-        socketRadius = initialData.socketRadius;
-        socketHeight = initialData.socketHeight;
-        socketBulge = initialData.socketBulge;
-        eyeballRadius = initialData.eyeballRadius;
-        eyeBulge = initialData.eyeBulge;
-        irisWidthFraction = initialData.irisWidthPercent;      
-        pupilWidthFraction = initialData.pupilWidthPercent;
-        pupilHeightFraction = initialData.pupilHeightPercent;
-        eyeballHue = initialData.eyeballHue;
-        irisHue = initialData.irisHue;
-
-        dorsalFinStartCoordY = initialData.dorsalFinStartY;
-        dorsalFinEndCoordY = initialData.dorsalFinEndY;
-        dorsalFinSlantAmount = initialData.dorsalFinSlant;
-        dorsalFinBaseHeight = initialData.dorsalFinBaseHeight;
-
-        tailFinSpreadAngle = initialData.tailFinSpreadAngle;
-        tailFinBaseLength = initialData.tailFinBaseLength;
-        tailFinFrequencies = initialData.tailFinFrequencies;
-        tailFinAmplitudes = initialData.tailFinAmplitudes;
-        tailFinOffsets = initialData.tailFinOffsets;
-
-        talentSpecializationAttack = initialData.attackSpecialization;
-        talentSpecializationDefense = initialData.defenseSpecialization;
-        talentSpecializationSpeed = initialData.speedSpecialization;
-        talentSpecializationUtility = initialData.utilitySpecialization;
-
-        dietSpecializationPlant = initialData.plantDietSpecialization;
-        dietSpecializationDecay = initialData.decayDietSpecialization;
-        dietSpecializationMeat = initialData.meatDietSpecialization;
-
-        mouthFeedFrequency = initialData.mouthFeedFrequency;
-        mouthAttackAmplitude = initialData.mouthAttackAmplitude;
-        
+        data = genomeInitialization.GetInitialGenomeData();
         // WPP: exposed hardcoded values (include ranges), see InitialGenomeInfo
         /*creatureBaseLength = Random.Range(0.4f, 0.4f);
         creatureAspectRatio = Random.Range(0.2f, 0.3f);
@@ -601,6 +544,7 @@ public class CritterModuleCoreGenome
             masksList.Add(maskData);
         }        
         
+        // * WPP: expose hardcoded values, move logic to InitialGenomeData
         // Or start with deformed sphere???? *****
         creatureBaseLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureBaseLength, settings.bodyCoreSizeMutationChance, settings.bodyCoreMutationStepSize, 0.4f, 0.4f);
         creatureAspectRatio = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureAspectRatio, settings.bodyCoreSizeMutationChance, settings.bodyCoreMutationStepSize, 0.2f, 0.3f);

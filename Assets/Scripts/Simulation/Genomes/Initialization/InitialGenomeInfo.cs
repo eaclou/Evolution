@@ -66,7 +66,7 @@ public class InitialGenomeInfo : ScriptableObject
     public InitialGenomeData GetInitialGenomeData() { return new InitialGenomeData(this); }
 }
 
-public struct InitialGenomeData
+public class InitialGenomeData
 {
     public float creatureBaseLength;
     public float creatureAspectRatio;
@@ -117,6 +117,7 @@ public struct InitialGenomeData
     public float decayDietSpecialization;
     public float meatDietSpecialization;
 
+    /// Initialize from ranges stored in editor-defined template
     public InitialGenomeData(InitialGenomeInfo template)
     {
         creatureBaseLength = RandomStatics.RandomRange(template.creatureBaseLength);

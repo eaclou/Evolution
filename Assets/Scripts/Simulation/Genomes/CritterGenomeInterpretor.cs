@@ -90,8 +90,8 @@ public class CritterGenomeInterpretor {
                     //heightMultiplier = Mathf.Lerp(heightMultiplier, 0f, Mathf.Pow(mouthTipBlendLerpAmount, 1f));
                     //heightMultiplier = heightMultiplier * gene.mouthLength;
 
-                    if (bindPoseY > segmentsSummedCritterLength) { // ERROR                        
-                        Debug.LogError("bindPoseY is longer than the creature is! ");
+                    if (bindPoseY > segmentsSummedCritterLength) {                       
+                        Debug.LogError($"bindPoseY is {bindPoseY}, which is longer than the creature {segmentsSummedCritterLength}!");
                     }
                 }
                 else {
@@ -176,7 +176,6 @@ public class CritterGenomeInterpretor {
                     float taperMask = 1f - Mathf.Clamp01(Mathf.Abs(point.initCoordsNormalized.y - maskData.origin) / modifierData.taperDistance);
 
                     maskValue *= rawMaskValue * taperMask;
-                    
                 }
                 radiusMult += maskValue * modifierData.amplitude;
                 // OLD:
@@ -189,7 +188,6 @@ public class CritterGenomeInterpretor {
         widthMultiplier *= radiusMult;
         heightMultiplier *= radiusMult;
         
-
 
         widthMultiplier *= circleWidthMultiplier;  // this includes * 0.5f from earlier to account for radius vs diameter
         heightMultiplier *= circleHeightMultiplier;

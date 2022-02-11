@@ -18,7 +18,7 @@ public class InitialGenomeBodyPartInfo : ScriptableObject
     public InitialGenomeBodyPartData GetRandomizedData() { return new InitialGenomeBodyPartData(this); }
 }
 
-public struct InitialGenomeBodyPartData
+public class InitialGenomeBodyPartData
 {
     public float length;
     public float frontWidth;

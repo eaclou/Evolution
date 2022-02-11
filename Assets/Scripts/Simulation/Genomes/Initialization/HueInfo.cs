@@ -11,7 +11,7 @@ public class HueInfo : ScriptableObject
     public HueData GetHue() { return new HueData(this); }
 }
 
-public struct HueData
+public class HueData
 {
     public float red;
     public float green;
