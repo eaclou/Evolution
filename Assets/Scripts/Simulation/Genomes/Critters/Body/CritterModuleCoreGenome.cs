@@ -27,7 +27,17 @@ public class CritterModuleCoreGenome
     #region Data Access
     
     private InitialGenomeData _data;
-    public InitialGenomeData data { get => _data ?? new InitialGenomeData(genomeInitialization); set => _data = value; }
+    public InitialGenomeData data 
+    { 
+        get
+        {
+             if (_data == null) 
+                _data = new InitialGenomeData(genomeInitialization); 
+             
+             return _data;   
+        }
+        set => _data = value; 
+    }
     
     public float creatureBaseLength { get => data.creatureBaseLength; set => data.creatureBaseLength = value; }
     public float creatureAspectRatio { get => data.creatureAspectRatio; set => data.creatureAspectRatio = value; }
@@ -534,6 +544,7 @@ public class CritterModuleCoreGenome
             masksList.Add(maskData);
         }        
         
+        // * WPP: expose hardcoded values, move logic to InitialGenomeData
         // Or start with deformed sphere???? *****
         creatureBaseLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureBaseLength, settings.bodyCoreSizeMutationChance, settings.bodyCoreMutationStepSize, 0.4f, 0.4f);
         creatureAspectRatio = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureAspectRatio, settings.bodyCoreSizeMutationChance, settings.bodyCoreMutationStepSize, 0.2f, 0.3f);
