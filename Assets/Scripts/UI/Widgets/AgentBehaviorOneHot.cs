@@ -169,7 +169,7 @@ public class AgentBehaviorOneHot : MonoBehaviour {
         UpdateBarColor(behaviorBarAttack.GetComponent<Image>(), 0f, false);
         behaviorBarAttack.GetComponent<TooltipUI>().tooltipString = "Attack";
 
-        UpdateBarColor(behaviorBarOther.GetComponent<Image>(), 0f, false);
+        //UpdateBarColor(behaviorBarOther.GetComponent<Image>(), 0f, false);
 
         textOther.gameObject.SetActive(false);
         throttleGO.gameObject.SetActive(false);
@@ -258,7 +258,7 @@ public class AgentBehaviorOneHot : MonoBehaviour {
             throttleGO.gameObject.SetActive(true);
         }
         //behaviorBarOther.transform.localScale = Vector3.one * (other * 0.5f + 0.5f);
-        UpdateBarColor(behaviorBarOther.GetComponent<Image>(), agent.coreModule.healEffector[0], isActive);
+        //UpdateBarColor(behaviorBarOther.GetComponent<Image>(), agent.coreModule.healEffector[0], isActive);
 
     }
 
@@ -279,6 +279,8 @@ public class AgentBehaviorOneHot : MonoBehaviour {
         if(!active) {
             col *= 0.5f;
         }
+        col.a = 1f;
         image.color = col;
+        
     }
 }
