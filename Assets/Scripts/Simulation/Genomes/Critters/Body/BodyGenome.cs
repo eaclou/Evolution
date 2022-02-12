@@ -59,33 +59,33 @@ public class BodyGenome
         return size;        
     }
 
+    /// Sets "use" variables based on coin tosses
     public void GenerateInitialRandomBodyGenome() 
     {
         appearanceGenome.GenerateRandomInitialGenome();
-        communicationGenome.GenerateRandomInitialGenome();
+        communicationGenome.GenerateRandomInitialGenome(); // useComms
         coreGenome.GenerateRandomInitialGenome();
         developmentalGenome.GenerateRandomInitialGenome();
-        environmentalGenome.GenerateRandomInitialGenome();
-        foodGenome.GenerateRandomInitialGenome();
-        friendGenome.GenerateRandomInitialGenome();
+        environmentalGenome.GenerateRandomInitialGenome(); // useCardinals, useDiagonals, useWaterStats
+        foodGenome.GenerateRandomInitialGenome();          // usePos, useVel, useDir, useStats, useNutrients, useEggs, useCorpse
+        friendGenome.GenerateRandomInitialGenome();        // usePos, useVel, useDir
         movementGenome.GenerateRandomInitialGenome();
-        threatGenome.GenerateRandomInitialGenome();
+        threatGenome.GenerateRandomInitialGenome();        // usePos, useVel, useDir, useStats
     }
     
+    /// Creates neurons based on state of "use" variables
     public void InitializeBrainGenome(List<NeuronGenome> masterList)
     {
         appearanceGenome.AppendModuleNeuronsToMasterList(masterList);
-        communicationGenome.AppendModuleNeuronsToMasterList(masterList);
-        coreGenome.AppendModuleNeuronsToMasterList(masterList);
+        communicationGenome.AppendModuleNeuronsToMasterList(masterList);  // useComms
+        coreGenome.AppendModuleNeuronsToMasterList(masterList);           // talentSpec[s] > 0.2f
         developmentalGenome.AppendModuleNeuronsToMasterList(masterList);
-        environmentalGenome.AppendModuleNeuronsToMasterList(masterList);
-        foodGenome.AppendModuleNeuronsToMasterList(masterList);
-        friendGenome.AppendModuleNeuronsToMasterList(masterList);
+        environmentalGenome.AppendModuleNeuronsToMasterList(masterList);  // useWaterStats
+        foodGenome.AppendModuleNeuronsToMasterList(masterList);           // usePos, useVel, useDir, useStats, useNutrients, useEggs, useCorpse
+        friendGenome.AppendModuleNeuronsToMasterList(masterList);         // usePos, useVel, useDir
         movementGenome.AppendModuleNeuronsToMasterList(masterList);
-        threatGenome.AppendModuleNeuronsToMasterList(masterList);  
+        threatGenome.AppendModuleNeuronsToMasterList(masterList);         // usePos, useVel, useDir, useStats
     }
-    
-    //IBrainModule GetModule(
     
     // WPP: ref removed from arguments, Lists are pass-by-reference
     // Go through each of the Body's Modules and add In/Out neurons based on module upgrades and settings:

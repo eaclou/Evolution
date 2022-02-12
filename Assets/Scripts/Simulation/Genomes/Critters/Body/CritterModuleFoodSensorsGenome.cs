@@ -100,6 +100,7 @@ public class CritterModuleFoodSensorsGenome
     
     void AddNeuron(string name) { masterList.Add(map.GetData(name)); }
 
+    // WPP: removed, delegated to NeuralMap.GetData(name)
     /*List<NeuronGenome> neuronList;
     public void AppendModuleNeuronsToMasterList(List<NeuronGenome> neuronList) {
         this.neuronList = neuronList;

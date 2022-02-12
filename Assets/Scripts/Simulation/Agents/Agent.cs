@@ -23,6 +23,7 @@ public class Agent : MonoBehaviour {
     Lookup lookup => Lookup.instance;
     SettingsManager settingsRef => SettingsManager.instance;
     SimulationManager simManager => SimulationManager.instance;
+    AudioManager audioManager => AudioManager.instance;
     //private PerformanceData performanceData;
     //public float totalFoodEatenDecay = 0f;
     
@@ -276,14 +277,14 @@ public class Agent : MonoBehaviour {
         candidateRef.performanceData.totalFoodEatenCreature += foodAmount;
 
         EatFoodMeat(foodAmount);
-        RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Ate Vertebrate! (" + (foodAmount * 100f).ToString("F0") + ") candID: " + preyAgent.candidateRef.candidateID, 1f, 2);
+        RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Vertebrate! (" + (foodAmount * 100f).ToString("F0") + ") candID: " + preyAgent.candidateRef.candidateID, 1f, 2);
         preyAgent.ProcessBeingEaten(preyAgent.currentBiomass);
         
         colliderBody.enabled = false;
         springJoint.enabled = false;
         springJoint.connectedBody = null;
 
-        AudioManager.instance.PlayCritterBite(ownPos);
+        audioManager.PlayCritterBite(ownPos);
     }
     
     public void MapNeuronToModule(MetaNeuron data, Neuron neuron)
@@ -294,7 +295,6 @@ public class Agent : MonoBehaviour {
             GetModule(data.moduleID)?.MapNeuron(data, neuron);
     }
     
-    // WPP: use interface & switch instead of querying each module
     IBrainModule GetModule(BrainModuleID id)
     {
         switch (id)
@@ -309,23 +309,7 @@ public class Agent : MonoBehaviour {
             default: return null;
         }
     }
-    /*public void MapNeuronToModule(NID nid, Neuron neuron) {
-        // Hidden nodes
-        if (nid.moduleID == BrainModuleID.Undefined) {
-            neuron.SetHidden();
-        }
-        // In/Out nodes
-        else {  
-            communicationModule.MapNeuron(nid, neuron);
-            coreModule.MapNeuron(nid, neuron);
-            environmentModule.MapNeuron(nid, neuron);
-            foodModule.MapNeuron(nid, neuron);
-            friendModule.MapNeuron(nid, neuron);
-            movementModule.MapNeuron(nid, neuron);
-            threatsModule.MapNeuron(nid, neuron);
-        }
-    }*/
-        
+
     public void ResetBrainState() {
         brain.ResetBrainState();
     }
@@ -342,7 +326,7 @@ public class Agent : MonoBehaviour {
     // These values are sometimes raw attributes & sometimes processed data
     // Should I break them up into individual sensor types -- like Ears, Collider Rangefind, etc.?
     // Separate sensors for each target type or add multiple data types to rangefinder raycasts?
-    public void TickModules(SimulationManager simManager) 
+    public void TickModules() 
     {
         //UpdateInternalResources();  // update energy, stamina, food -- or do this during TickActions?
                
@@ -404,7 +388,7 @@ public class Agent : MonoBehaviour {
         
         // * Swallowed Whole did not call RegisterAgentEvent -> mistake?
         if (deathEvent != "")
-            RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, deathEvent, 0f, 10);
+            RegisterAgentEvent(simManager.simAgeTimeSteps, deathEvent, 0f, 10);
 
         if(isPregnantAndCarryingEggs) {
             AbortPregnancy();
@@ -420,11 +404,11 @@ public class Agent : MonoBehaviour {
 
         masterFitnessScore = totalExperience; // update this???
         candidateRef.performanceData.totalTicksAlive = ageCounter;
-        candidateRef.performanceData.timeStepDied = SimulationManager.instance.simAgeTimeSteps;
+        candidateRef.performanceData.timeStepDied = simManager.simAgeTimeSteps;
         biomassAtDeath = currentBiomass;
         mouthRef.Disable();
         
-        AudioManager.instance.PlayCritterDeath(ownPos);
+        audioManager.PlayCritterDeath(ownPos);
     }
     
     // *** WPP: trigger state changes & processes when conditions met
@@ -511,9 +495,9 @@ public class Agent : MonoBehaviour {
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.digestEfficiencyPlant * 1f);     
 
         //Debug.Log("EatFoodPlant " + amount.ToString());
-        RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Ate Plant! (+" + (amount * 1000f).ToString("F0") + " food)", 1f, 0);
+        RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Plant! (+" + (amount * 1000f).ToString("F0") + " food)", 1f, 0);
 
-        AudioManager.instance.PlayCritterBite(ownPos);
+        audioManager.PlayCritterBite(ownPos);
     }
     
     // * WPP: combine below two methods (were extracted from CritterMouthComponent)
@@ -521,29 +505,29 @@ public class Agent : MonoBehaviour {
     {
         candidateRef.performanceData.totalFoodEatenEgg += amount;
         EatFoodMeat(amount); // assumes all foodAmounts are equal
-        RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Ate Egg Bit! (" + (amount * 1000f).ToString("F0") + ")", 1f, 3);
+        RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Egg Bit! (" + (amount * 1000f).ToString("F0") + ")", 1f, 3);
 
-        AudioManager.instance.PlayCritterBite(ownPos);
+        audioManager.PlayCritterBite(ownPos);
     }
     
     public void EatEggsWhole(float amount)
     {
         candidateRef.performanceData.totalFoodEatenEgg += amount;
         EatFoodDecay(amount);
-        RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Ate Egg! (" + (amount * 1000f).ToString("F0") + ")", 1f, 3);
+        RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Egg! (" + (amount * 1000f).ToString("F0") + ")", 1f, 3);
 
-        AudioManager.instance.PlayCritterBite(ownPos);
+        audioManager.PlayCritterBite(ownPos);
     }
     
     public void EatCorpse(float amount, float biteSize)
     {
         candidateRef.performanceData.totalFoodEatenCorpse += biteSize;
         EatFoodDecay(amount); // assumes all foodAmounts are equal !! *****
-        RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Ate Carrion! (" + (amount * 100f).ToString("F0") + ")", 1f, 4);
+        RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Carrion! (" + (amount * 100f).ToString("F0") + ")", 1f, 4);
         //if(coreModule.foodEfficiencyMeat > 0.5f) { // ** // damage bonus -- provided has the required specialization level:::::
         //    GainExperience((flowR / coreModule.stomachCapacity) * 0.5f);  
         //}  
-        AudioManager.instance.PlayCritterBite(ownPos);
+        audioManager.PlayCritterBite(ownPos);
     }
     
     public void EatFoodMeat(float amount) {
@@ -565,9 +549,9 @@ public class Agent : MonoBehaviour {
         
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.digestEfficiencyMeat * 1f); // Exp for appropriate food
         
-        RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Ate Microbe! (" + (amount * 1000f).ToString("F0") + ")", 1f, 1);
+        RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Microbe! (" + (amount * 1000f).ToString("F0") + ")", 1f, 1);
 
-        AudioManager.instance.PlayCritterBite(ownPos);
+        audioManager.PlayCritterBite(ownPos);
     }
     
     public void EatFoodDecay(float amount) {
@@ -586,16 +570,16 @@ public class Agent : MonoBehaviour {
 
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.digestEfficiencyDecay * 1f); // Exp for appropriate food
 
-        RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Ate Corpse! (" + (amount * 100f).ToString("F0") + ")", 1f, 4);
+        RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Corpse! (" + (amount * 100f).ToString("F0") + ")", 1f, 4);
 
-        AudioManager.instance.PlayCritterBite(ownPos);
+        audioManager.PlayCritterBite(ownPos);
     }
     
     public void TakeDamage(float damage) {
         coreModule.DirectDamage(damage);        
         candidateRef.performanceData.totalDamageTaken += damage;
-        RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Took Damage! (" + (damage * 100f).ToString("F0") + ")", 0f, 10);
-        AudioManager.instance.PlayCritterDamage(ownPos);
+        RegisterAgentEvent(simManager.simAgeTimeSteps, "Took Damage! (" + (damage * 100f).ToString("F0") + ")", 0f, 10);
+        audioManager.PlayCritterDamage(ownPos);
         CheckForDeathHealth();
     }
     
@@ -604,13 +588,13 @@ public class Agent : MonoBehaviour {
 
         float defendBonus = 1f;
         if(isDefending && defendFrameCounter < defendDuration) {
-            RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Blocked Bite! from #" + predatorAgentRef.index, 0.75f, 11);
+            RegisterAgentEvent(simManager.simAgeTimeSteps, "Blocked Bite! from #" + predatorAgentRef.index, 0.75f, 11);
         }
         else {
             damage *= defendBonus;
             predatorAgentRef.candidateRef.performanceData.totalDamageDealt += damage;
             TakeDamage(damage);
-            RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Bitten! (" + (damage * 100f).ToString("F0") + ") by #" + predatorAgentRef.index.ToString(), 0f, 10);
+            RegisterAgentEvent(simManager.simAgeTimeSteps, "Bitten! (" + (damage * 100f).ToString("F0") + ") by #" + predatorAgentRef.index, 0f, 10);
         }
         
         //coreModule.energy *= 0.5f; 
@@ -644,7 +628,7 @@ public class Agent : MonoBehaviour {
             ScaleBody(sizePercentage, false);
         }
         
-        RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Devoured!", 0f, 10);  
+        RegisterAgentEvent(simManager.simAgeTimeSteps, "Devoured!", 0f, 10);  
     }
 
     public void Tick() {
@@ -784,11 +768,11 @@ public class Agent : MonoBehaviour {
         
         mouthRef.Enable();
         //isCooldown = false;
-        RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Was Born!", 1f, 11);
+        RegisterAgentEvent(simManager.simAgeTimeSteps, "Was Born!", 1f, 11);
 
         candidateRef.performanceData.timeStepHatched = simManager.simAgeTimeSteps;
 
-        AudioManager.instance.PlayCritterSpawn(ownPos);
+        audioManager.PlayCritterSpawn(ownPos);
     }
     
     private void TickMature() {
@@ -817,9 +801,9 @@ public class Agent : MonoBehaviour {
         
         ScaleBody(sizePercentage, resizeFrame);  // change how growth works?
 
-        TickModules(simManager); // update inputs for Brain        
-        TickBrain(); // Tick Brain
-        TickActions(simManager); // Execute Actions  -- Also Updates Resources!!! ***
+        TickModules(); // Update inputs for Brain        
+        TickBrain();  
+        TickActions(); // Execute Actions  -- Also Updates Resources!!! ***
         TickMetabolism();
 
         lifeStageTransitionTimeStepCounter++;
@@ -845,7 +829,7 @@ public class Agent : MonoBehaviour {
             currentBiomass -= settingsRef.agentSettings._BaseInitMass;
             childEggSackRef.currentBiomass = starterMass;     // * TROUBLE!!!
 
-            RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Pregnant! " + starterMass, 0.5f, 10);
+            RegisterAgentEvent(simManager.simAgeTimeSteps, "Pregnant! " + starterMass, 0.5f, 10);
         }
         else {
             Debug.LogError("Something went wrong!! " + " curMass: " + currentBiomass + ", reqMass: " + starterMass.ToString() + ", curProp: " + curProportion.ToString() );
@@ -878,7 +862,7 @@ public class Agent : MonoBehaviour {
         isPregnantAndCarryingEggs = false;
         pregnancyRefactoryTimeStepCounter = 0;
 
-        RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "Pregnancy Complete!", 0.95f, 10);
+        RegisterAgentEvent(simManager.simAgeTimeSteps, "Pregnancy Complete!", 0.95f, 10);
     }
     
     private void TickDead() {
@@ -938,7 +922,7 @@ public class Agent : MonoBehaviour {
     [SerializeField] [Range(0,1)] float restingBonusWhenResting = 0.65f;
     float restingBonus => isResting ? restingBonusWhenResting : 1f;
 
-    public void TickActions(SimulationManager simManager) {
+    public void TickActions() {
         //AgentActionState currentState = AgentActionState.Default;
         
         float horizontalMovementInput = movementModule.throttleX[0]; // Mathf.Lerp(horAI, horHuman, humanControlLerp);
@@ -1063,7 +1047,7 @@ public class Agent : MonoBehaviour {
             
         float mostActiveEffectorValue = FloatMath.GetHighest(effectorValues);
         
-        if(coreModule.healEffector[0] >= mostActiveEffectorValue) {
+        if (coreModule.healEffector[0] >= mostActiveEffectorValue) {
             isResting = isFreeToAct;
                 
             if(isFreeToAct) {
@@ -1086,19 +1070,19 @@ public class Agent : MonoBehaviour {
             curActionState = AgentActionState.Attacking;
             UseAbility(attack);
             RegisterAgentEvent(simManager.simAgeTimeSteps, "Attacked!", 1f, 6);
-            AudioManager.instance.PlayCritterAttack(ownPos);
+            audioManager.PlayCritterAttack(ownPos);
         }
         if (coreModule.dashEffector[0] >= mostActiveEffectorValue) {
             curActionState = AgentActionState.Dashing;
             UseAbility(dash);
             RegisterAgentEvent(simManager.simAgeTimeSteps, "Dashed!", 1f, 8);
-            AudioManager.instance.PlayCritterDash(ownPos);
+            audioManager.PlayCritterDash(ownPos);
         }
         if (coreModule.defendEffector[0] >= mostActiveEffectorValue) {
             curActionState = AgentActionState.Defending;
             UseAbility(defend);
             RegisterAgentEvent(simManager.simAgeTimeSteps, "Defended!", 1f, 7);
-            AudioManager.instance.PlayCritterDefend(ownPos);
+            audioManager.PlayCritterDefend(ownPos);
         }    
     }
     
