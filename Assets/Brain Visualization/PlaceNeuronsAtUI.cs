@@ -8,7 +8,7 @@ public class PlaceNeuronsAtUI : MonoBehaviour
 
     /// INCOMPLETE: visualization is finicky about placement
     /// ui placement may need to be mapped to a valid area
-    public Vector3 GetNeuronPosition(Neuron neuron)
+    public Vector3 GetInputNeuronPosition(Neuron neuron)
     {
         //return Random.insideUnitSphere;
         //***EAC IF TWO OR MORE NEURONS SHARE SAME EXACT POSITION IT CREATES A DIVIDE BY ZERO ERROR!!!!!!!!!***
@@ -17,7 +17,21 @@ public class PlaceNeuronsAtUI : MonoBehaviour
 
         foreach (var placement in uiPlacements)
             if (placement.id == data.iconID)
-                return (placement.location.position - new Vector3(960f, 920f, 0f)).normalized * 0.85f + Random.insideUnitSphere * 0.01f;
+                return (placement.location.position - new Vector3(960f, 600f, 0f)).normalized * 0.85f + Random.insideUnitSphere * 0.01f;
+
+                
+        Debug.LogError($"Unable to find placement for {neuron.moduleID} {data}");
+        return Vector3.zero;
+    }
+
+    public Vector3 GetOutputNeuronPosition(Neuron neuron)
+    {
+        
+        var data = neuron.genome.data;
+
+        foreach (var placement in uiPlacements)
+            if (placement.id == data.iconID)
+                return (placement.location.position - new Vector3(760f, 1060f, 0f)).normalized * 0.75f + Random.insideUnitSphere * 0.01f;
 
                 
         Debug.LogError($"Unable to find placement for {neuron.moduleID} {data}");
@@ -32,7 +46,7 @@ public class PlaceNeuronsAtUI : MonoBehaviour
         // Calculate & return intermediate location
         // return Vector3.zero;
         
-        return Random.insideUnitSphere * 0.25f;
+        return new Vector3(-0.9f, 0f, 0f) + Random.insideUnitSphere * 0.01f;
     }
 
     [Serializable]

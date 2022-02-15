@@ -15,7 +15,7 @@ public class AgentGenome
     
     public AgentGenome(MutationSettingsInstance mutationSettings, float lerpV) 
     {
-        int numberOfHiddenNeurons = Mathf.RoundToInt(20f * lerpV);
+        int numberOfHiddenNeurons = Mathf.RoundToInt(4f * lerpV);  //***EAC CHANGE!
         float brainInitialConnectionDensity = mutationSettings.brainInitialConnectionChance * lerpV;
         ConstructRandom(brainInitialConnectionDensity, numberOfHiddenNeurons);
     }

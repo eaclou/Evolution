@@ -2487,15 +2487,10 @@ public class TheRenderKing : Singleton<TheRenderKing>
         cmdBufferBrainVis.ClearRenderTarget(true, true, new Color(0f, 0f, 0f, 0f), 1.0f);  // clear -- needed???
         cmdBufferBrainVis.SetViewProjectionMatrices(creatureBrainVisCamera.worldToCameraMatrix, creatureBrainVisCamera.projectionMatrix);
       
-        //worldTreeLineDataMat.SetPass(0);
-        //worldTreeLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        //worldTreeLineDataMat.SetBuffer("worldTreeLineDataCBuffer", uiManager.historyPanelUI.worldTreeLineDataCBuffer);
-        //cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, worldTreeLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.historyPanelUI.worldTreeLineDataCBuffer.count);
-        
         if (!brainVisualization.initialized) return;
     
-        brainVisualization.displayMaterialCables.SetPass(0);
-        // not sure why at this used to work with Triangles but now requires Points....
+        // not sure why this used to work with Triangles but now requires Points....
+        brainVisualization.displayMaterialCables.SetPass(0);        
         cmdBufferBrainVis.DrawProceduralIndirect(Matrix4x4.identity, brainVisualization.displayMaterialCables, 0, MeshTopology.Points, brainVisualization.argsCablesCBuffer);  
         
         brainVisualization.displayMaterialCore.SetPass(0);

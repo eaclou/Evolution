@@ -45,7 +45,6 @@ float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
 void CSInitializeAxonSimData (uint3 id : SV_DispatchThreadID)
 {
 	// Set up initial positions / settings for Axons, based on neuron and other data
-
 	//id.x == axonID
 
 	AxonSimData axonData;
@@ -98,12 +97,6 @@ void CSInitializeCableSimData (uint3 id : SV_DispatchThreadID)
 
 	cableSimDataCBuffer[id.x] = cableData;	
 }
-
-
-
-
-
-
 
 #pragma kernel CSSimNeuronAttract
 
