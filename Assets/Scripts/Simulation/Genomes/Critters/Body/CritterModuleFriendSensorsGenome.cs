@@ -8,7 +8,6 @@ public class CritterModuleFriendSensorsGenome
     Lookup lookup => Lookup.instance;
     NeuralMap map => lookup.neuralMap;
 
-    public int parentID;
     public readonly BrainModuleID moduleID = BrainModuleID.FriendSensors;
 
     public bool usePos;
@@ -53,32 +52,6 @@ public class CritterModuleFriendSensorsGenome
     }
     
     void AddNeuron(string name) { masterList.Add(map.GetData(name)); }
-
-    /*List<NeuronGenome> neuronList;
-    public void AppendModuleNeuronsToMasterList(List<NeuronGenome> neuronList) {
-        this.neuronList = neuronList;
-
-        if (usePos) {
-            AddNeuron("friendPosX");
-            AddNeuron("friendPosY");
-            //neuronList.Add(new NeuronGenome("friendPosX", NeuronType.In, moduleID, 8));
-            //neuronList.Add(new NeuronGenome("friendPosY", NeuronType.In, moduleID, 9));
-        }
-        if (useVel) {
-            AddNeuron("friendVelX");
-            AddNeuron("friendVelY");
-            //neuronList.Add(new NeuronGenome("friendVelX", NeuronType.In, moduleID, 10));
-            //neuronList.Add(new NeuronGenome("friendVelY", NeuronType.In, moduleID, 11));
-        }
-        if (useDir) {
-            AddNeuron("friendDirX");
-            AddNeuron("friendDirY");
-            //neuronList.Add(new NeuronGenome("friendDirX", NeuronType.In, moduleID, 12));
-            //neuronList.Add(new NeuronGenome("friendDirY", NeuronType.In, moduleID, 13));
-        }
-    }
-    
-    void AddNeuron(string name) { neuronList.Add(map.GetGenome(name)); }*/
 
     public void SetToMutatedCopyOfParentGenome(CritterModuleFriendSensorsGenome parentGenome, MutationSettingsInstance settings) {
         usePos = RequestMutation(settings, parentGenome.usePos);

@@ -11,18 +11,19 @@ public class CritterModuleCommunicationGenome
 
     public bool useComms;
 
-    // Deprecate
+    // Deprecate: use InitialUnlockedTechInfo.GetInitialUnlocks instead (contains probability)
     public void InitializeRandom() {
         useComms = RandomStatics.CoinToss();
     }
     
-    public void Initialize(UnlockedTech unlockedTech) {
+    /*public void Initialize(UnlockedTech unlockedTech) {
         useComms = unlockedTech.Contains(TechElementId.VocalCords);
-    }
+    }*/
     
+    // Deprecate: handled in BodyGenome.InitializeBrainGenome foreach loop
     public void AppendModuleNeuronsToMasterList(List<NeuronGenome> masterList)
     {
-        if(!useComms) 
+        if (!useComms) 
             return;
             
         var toAdd = map.GetAllByModule(moduleID);

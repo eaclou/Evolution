@@ -12,7 +12,7 @@ public class NeuralMap : ScriptableObject
     {
         foreach (var item in catalog)
             if (item.name == name)
-                return new NeuronGenome(item);
+                return item.GetNeuronGenome();
                 
         Debug.LogError($"Unable to find neuron data for {name}");
         return null;
@@ -24,7 +24,7 @@ public class NeuralMap : ScriptableObject
         
         foreach (var item in catalog)
             if (item.moduleID == moduleID)
-                list.Add(new NeuronGenome(item));
+                list.Add(item.GetNeuronGenome());
                 
         return list;
     }

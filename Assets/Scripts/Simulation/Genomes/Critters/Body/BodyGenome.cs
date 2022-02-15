@@ -17,7 +17,7 @@ public class BodyGenome
     public BodyGenome(BodyGenome parentGenome, MutationSettingsInstance mutationSettings)
     {
         unlockedTech = new UnlockedTech(parentGenome.unlockedTech);
-        FirstTimeInitializeCritterModuleGenomes();  // * Is this necessary?
+        FirstTimeInitializeCritterModuleGenomes();
         SetToMutatedCopyOfParentGenome(parentGenome, mutationSettings);
     }
     
@@ -61,16 +61,17 @@ public class BodyGenome
         return size;        
     }
 
+    // * WPP: Deprecate: handled in constructor -> construction of new UnlockedTech
     /// Sets "use" variables based on coin tosses
     public void GenerateInitialRandomBodyGenome() 
     {
         appearanceGenome.InitializeRandom();
-        communicationGenome.Initialize(unlockedTech); 
+        //communicationGenome.Initialize(unlockedTech); 
         coreGenome.InitializeRandom();          // WPP: Unclear mapping to abilities.  What (if any) traits are activated isPassive?
         developmentalGenome.Initialize();
         environmentalGenome.InitializeRandom(); // Unclear mapping to abilities
         foodGenome.InitializeRandom();          // Unclear mapping to abilities
-        friendGenome.InitializeRandom();        // Unclear mapping to abilities
+        //friendGenome.InitializeRandom();        // Unclear mapping to abilities
         movementGenome.InitializeRandom();
         threatGenome.InitializeRandom();        // Unclear mapping to abilities
     }
@@ -78,13 +79,18 @@ public class BodyGenome
     /// Creates neurons based on state of "use" variables
     public void InitializeBrainGenome(List<NeuronGenome> masterList)
     {
+        foreach (var tech in unlockedTech.values)
+            foreach (var template in tech.unlocks)
+                masterList.Add(template.GetNeuronGenome());
+    
+        // Deprecate: use above foreach loop
         appearanceGenome.AppendModuleNeuronsToMasterList(masterList);
-        communicationGenome.AppendModuleNeuronsToMasterList(masterList);
+        //communicationGenome.AppendModuleNeuronsToMasterList(masterList);  // Testing removal...
         coreGenome.AppendModuleNeuronsToMasterList(masterList);
         developmentalGenome.AppendModuleNeuronsToMasterList(masterList);
         environmentalGenome.AppendModuleNeuronsToMasterList(masterList);
         foodGenome.AppendModuleNeuronsToMasterList(masterList); 
-        friendGenome.AppendModuleNeuronsToMasterList(masterList);
+        //friendGenome.AppendModuleNeuronsToMasterList(masterList);
         movementGenome.AppendModuleNeuronsToMasterList(masterList);
         threatGenome.AppendModuleNeuronsToMasterList(masterList);
     }

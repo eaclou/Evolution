@@ -360,7 +360,6 @@ public class Agent : MonoBehaviour {
             return;
         
         coreModule.SetAllHealth(0f);
-
         //Debug.LogError("CheckForDeathHealth" + currentBiomass.ToString());
 
         InitializeDeath(lookup.GetCauseOfDeath(CauseOfDeathId.Injuries));    

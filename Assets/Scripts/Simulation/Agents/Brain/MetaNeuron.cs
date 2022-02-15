@@ -10,6 +10,8 @@ public class MetaNeuron : ScriptableObject
     public BrainIconID iconID;
     [Tooltip("Auto-generates index, probably obsolete")]
     public int id;
+    
+    public NeuronGenome GetNeuronGenome(int index = -1) { return new NeuronGenome(this, index); }
 }
 
 /// Differentiates neuron templates with the same static data (needed for hidden neurons).

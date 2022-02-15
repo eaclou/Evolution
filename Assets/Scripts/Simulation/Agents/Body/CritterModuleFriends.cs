@@ -33,16 +33,8 @@ public class CritterModuleFriends : IBrainModule
     {
         if (moduleID != data.moduleID) return;
         neuron.currentValue = GetNeuralValue(data.id);
-        //neuron.neuronType = data.io;
     }
 
-    /*public void MapNeuron(NID nid, Neuron neuron) 
-    {
-        if (moduleID != nid.moduleID) return;
-        neuron.neuronType = neuralMap.GetIO(nid.neuronID);    
-        neuron.currentValue = GetNeuralValue(nid.neuronID);
-    }*/
-    
     float[] GetNeuralValue(int neuronID)
     {
         switch(neuronID)
@@ -61,10 +53,12 @@ public class CritterModuleFriends : IBrainModule
         Vector2 friendPos = Vector2.zero;
         Vector2 friendDir = Vector2.zero;
         Vector2 friendVel = Vector2.zero;
-        if(agent.coreModule.nearestFriendAgent) {
-            friendPos = new Vector2(agent.coreModule.nearestFriendAgent.bodyRigidbody.transform.localPosition.x - agent.ownPos.x, agent.coreModule.nearestFriendAgent.bodyRigidbody.transform.localPosition.y - agent.ownPos.y);
+        
+        if (agent.coreModule.nearestFriendAgent) {
+            var nearestFriend = agent.coreModule.nearestFriendAgent.bodyRigidbody;
+            friendPos = new Vector2(nearestFriend.transform.localPosition.x - agent.ownPos.x, nearestFriend.transform.localPosition.y - agent.ownPos.y);
             friendDir = friendPos.normalized;
-            friendVel = new Vector2(agent.coreModule.nearestFriendAgent.bodyRigidbody.velocity.x, agent.coreModule.nearestFriendAgent.bodyRigidbody.velocity.y);
+            friendVel = new Vector2(nearestFriend.velocity.x, nearestFriend.velocity.y);
         }
 
         friendPosX[0] = friendPos.x / 20f;
