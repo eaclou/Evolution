@@ -26,7 +26,16 @@ public class VisualizeSelectedBrain : MonoBehaviour
         
         //Debug.Log($"Selected agent brain has {neurons.Count} neurons and {axons.Count} axons");
         var sockets = CreateSockets();
+        /*
+        string neuronString = "RefreshAgentneuronData: [" + neurons.Count + "] ";
+        foreach(var socket in sockets) {
+            neuronString += socket.position + ", ";
+        }
+        Debug.Log(neuronString);
+        */
         visualization.Initialize(neurons, axons, ref sockets, inputNeurons.Count, outputNeurons.Count);
+
+        
     }
     
     List<Neuron> neurons = new List<Neuron>();
@@ -46,8 +55,8 @@ public class VisualizeSelectedBrain : MonoBehaviour
         // Place input and output neurons before hidden neurons
         // because hidden neurons are between connected input and output neurons.
         int offset = 0;
-        for (int i = 0; i < inputNeurons.Count; i++)
-            sockets[i + offset].position = placement.GetNeuronPosition(inputNeurons[i]);
+        for (int i = 0; i < inputNeurons.Count; i++) 
+            sockets[i + offset].position = placement.GetNeuronPosition(inputNeurons[i]);            
             
         offset = inputNeurons.Count;
         for (int i = 0; i < outputNeurons.Count; i++)
@@ -56,6 +65,8 @@ public class VisualizeSelectedBrain : MonoBehaviour
         offset = inputNeurons.Count + outputNeurons.Count;
         for (int i = 0; i < hiddenNeurons.Count; i++)
             sockets[i + offset].position = placement.GetHiddenNeuronPosition(hiddenNeurons[i]);
+
+        
 
         return sockets;
     }

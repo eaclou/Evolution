@@ -2501,11 +2501,11 @@ public class TheRenderKing : Singleton<TheRenderKing>
         brainVisualization.displayMaterialCore.SetPass(0);
         cmdBufferBrainVis.DrawProceduralIndirect(Matrix4x4.identity, brainVisualization.displayMaterialCore, 0, MeshTopology.Points, brainVisualization.argsCoreCBuffer);  
         
-        brainVisualization.floatingGlowyBitsMaterial.SetPass(0);
-        cmdBufferBrainVis.DrawProcedural(Matrix4x4.identity, brainVisualization.floatingGlowyBitsMaterial, 0, MeshTopology.Triangles, 6, brainVisualization.floatingGlowyBitsCBuffer.count);
+        //brainVisualization.floatingGlowyBitsMaterial.SetPass(0);
+        //cmdBufferBrainVis.DrawProcedural(Matrix4x4.identity, brainVisualization.floatingGlowyBitsMaterial, 0, MeshTopology.Triangles, 6, brainVisualization.floatingGlowyBitsCBuffer.count);
 
-        brainVisualization.extraBallsMaterial.SetPass(0);
-        cmdBufferBrainVis.DrawProcedural(Matrix4x4.identity, brainVisualization.extraBallsMaterial, 0, MeshTopology.Triangles, 6, brainVisualization.extraBallsCBuffer.count);
+        //brainVisualization.extraBallsMaterial.SetPass(0);
+        //cmdBufferBrainVis.DrawProcedural(Matrix4x4.identity, brainVisualization.extraBallsMaterial, 0, MeshTopology.Triangles, 6, brainVisualization.extraBallsCBuffer.count);
 
         Graphics.ExecuteCommandBuffer(cmdBufferBrainVis);
         creatureBrainVisCamera.Render();

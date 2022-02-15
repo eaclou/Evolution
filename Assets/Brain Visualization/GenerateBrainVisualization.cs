@@ -277,7 +277,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         InitializeNeuronFeedDataCBuffer();
 
         neuronSimDataCBuffer?.Release();
-        neuronSimDataCBuffer = new ComputeBuffer(numNeurons, sizeof(float) * 3);
+        neuronSimDataCBuffer = new ComputeBuffer(numNeurons, sizeof(float) * 3); //***EAC only vec3 position so far
         
         //for (int i = 0; i < sockets.Length; i++)
         //    Debug.Log($"socket {i} placed at {sockets[i].position}");
@@ -554,7 +554,7 @@ public class GenerateBrainVisualization : MonoBehaviour
 
         NeuronFeedData[] neuronValuesArray = new NeuronFeedData[neurons.Count];
         for (int i = 0; i < neuronValuesArray.Length; i++) {
-            neuronValuesArray[i].curValue = Mathf.Sin(Time.fixedTime * 1.25f + neurons[i].currentValue[0]);
+            neuronValuesArray[i].curValue = neurons[i].currentValue[0]; // Mathf.Sin(Time.fixedTime * 1.25f + neurons[i].currentValue[0]);
         }
         neuronFeedDataCBuffer.SetData(neuronValuesArray);
 
