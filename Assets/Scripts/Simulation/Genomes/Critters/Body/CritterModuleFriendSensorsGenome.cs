@@ -16,15 +16,18 @@ public class CritterModuleFriendSensorsGenome
     public bool useDir;
 
     public float sensorRange;
+    
 
-    public CritterModuleFriendSensorsGenome(int parentID) {
-        this.parentID = parentID;
-    }
-
-    public void GenerateRandomInitialGenome() {
+    public void InitializeRandom() {
         usePos = RandomStatics.CoinToss();
         useVel = RandomStatics.CoinToss();
         useDir = RandomStatics.CoinToss();
+    }
+    
+    public void Initialize(UnlockedTech unlockedTech) {
+        // usePos = unlockedTech.Contains(TechElementId.???);
+        // useVel = unlockedTech.Contains(TechElementId.???);
+        // useDir = unlockedTech.Contains(TechElementId.???);
     }
     
     List<NeuronGenome> masterList;

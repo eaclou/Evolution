@@ -9,7 +9,6 @@ public class CritterModuleEnvironmentSensorsGenome
     Lookup lookup => Lookup.instance;
     NeuralMap map => lookup.neuralMap;
 
-    public int parentID;
     public readonly BrainModuleID moduleID = BrainModuleID.EnvironmentSensors;
 
     public bool useWaterStats;
@@ -17,16 +16,19 @@ public class CritterModuleEnvironmentSensorsGenome
     public bool useDiagonals;    
 
     public float maxRange;
-
-    public CritterModuleEnvironmentSensorsGenome(int parentID) {
-        this.parentID = parentID;
-    }
-
-    public void GenerateRandomInitialGenome() {
+    
+    public void InitializeRandom() {
         useCardinals = RandomStatics.CoinToss();
         useDiagonals = RandomStatics.CoinToss();
         useWaterStats = RandomStatics.CoinToss();
         maxRange = 20f;
+    }
+    
+    public void Initialize(UnlockedTech unlockedTech) {
+       // useCardinals = unlockedTech.Contains(TechElementId.???);
+       // useDiagonals = unlockedTech.Contains(TechElementId.???);
+       // useWaterStats = unlockedTech.Contains(TechElementId.???);
+       maxRange = 20f; // * Expose magic number
     }
     
     List<NeuronGenome> masterList;

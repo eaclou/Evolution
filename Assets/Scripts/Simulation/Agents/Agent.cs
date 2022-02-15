@@ -1041,6 +1041,7 @@ public class Agent : MonoBehaviour {
     private void SelectAction() {
         curActionState = AgentActionState.Default;
 
+        // * Some of these should not be checked if tech is not available
         float[] effectorValues = { 0f, coreModule.mouthFeedEffector[0], 
             coreModule.mouthAttackEffector[0], coreModule.defendEffector[0],
             coreModule.dashEffector[0], coreModule.healEffector[0] };
@@ -1056,7 +1057,7 @@ public class Agent : MonoBehaviour {
             curActionState = AgentActionState.Resting;
         }
 
-        if(coreModule.mouthFeedEffector[0] >= mostActiveEffectorValue) {
+        if (coreModule.mouthFeedEffector[0] >= mostActiveEffectorValue) {
             curActionState = AgentActionState.Feeding;
             UseAbility(feed);
         }

@@ -7,17 +7,17 @@ public class CritterModuleCommunicationGenome
 {
     NeuralMap map => Lookup.instance.neuralMap;
 
-    public int parentID;
     public readonly BrainModuleID moduleID = BrainModuleID.Communication;
 
     public bool useComms;
 
-	public CritterModuleCommunicationGenome(int parentID) {
-        this.parentID = parentID;
-    }
-
-    public void GenerateRandomInitialGenome() {
+    // Deprecate
+    public void InitializeRandom() {
         useComms = RandomStatics.CoinToss();
+    }
+    
+    public void Initialize(UnlockedTech unlockedTech) {
+        useComms = unlockedTech.Contains(TechElementId.VocalCords);
     }
     
     public void AppendModuleNeuronsToMasterList(List<NeuronGenome> masterList)
@@ -30,7 +30,8 @@ public class CritterModuleCommunicationGenome
             masterList.Add(item);    
     }
 
-    public void SetToMutatedCopyOfParentGenome(CritterModuleCommunicationGenome parentGenome, MutationSettingsInstance settings) {
+    public void SetToMutatedCopyOfParentGenome(CritterModuleCommunicationGenome parentGenome, MutationSettingsInstance settings) 
+    {
         var mutate = RandomStatics.CoinToss(settings.bodyModuleInternalMutationChance);
         useComms = mutate ? !parentGenome.useComms : parentGenome.useComms;
     }

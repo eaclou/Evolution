@@ -45,9 +45,7 @@ public class CritterModuleEnvironment : IBrainModule
         velTopRightX = new float[1]; 
         velTopLeftY = new float[1]; 
         velBottomLeftX = new float[1];
-        velBottomRightY = new float[1]; 
-        
-        parentID = genome.parentID;
+        velBottomRightY = new float[1];
     }
     
     public void MapNeuron(MetaNeuron data, Neuron neuron)

@@ -150,8 +150,6 @@ public class CritterModuleFood : IBrainModule
                 foodPreferenceOrder[2] = 0;  
             }
         }*/
-
-        parentID = genome.parentID;
     }
     
     public void MapNeuron(MetaNeuron data, Neuron neuron)

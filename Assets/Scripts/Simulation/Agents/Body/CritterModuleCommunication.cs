@@ -6,7 +6,6 @@ public class CritterModuleCommunication : IBrainModule
     NeuralMap neuralMap => lookup.neuralMap;
 
     public CritterModuleCommunicationGenome genome;
-	public int parentID;
     public BrainModuleID moduleID => genome.moduleID;
 
     public float[] inComm0;
@@ -31,8 +30,6 @@ public class CritterModuleCommunication : IBrainModule
         outComm1 = new float[1]; // 4
         outComm2 = new float[1]; // 5
         outComm3 = new float[1]; // 6 
-
-        parentID = genome.parentID;
     }
     
     public void MapNeuron(MetaNeuron data, Neuron neuron)

@@ -181,8 +181,6 @@ public class CritterModuleCore : IBrainModule
         energyStored[0] = 1f;
         foodStored[0] = 0f;
         
-        parentID = genome.parentID;
-
         // * WPP: expose magic numbers
         damageBonus = Mathf.Lerp(0.33f, 2f, talentSpecAttackNorm);
         healthBonus = Mathf.Lerp(0.33f, 2f, talentSpecDefenseNorm);
@@ -194,16 +192,8 @@ public class CritterModuleCore : IBrainModule
     {
         if (moduleID != data.moduleID) return;
         neuron.currentValue = GetNeuralValue(data.id);
-        //neuron.neuronType = data.io;
     }
-    
-    /*public void MapNeuron(NID nid, Neuron neuron) 
-    {
-        if (moduleID != nid.moduleID) return;
-        neuron.neuronType = neuralMap.GetIO(nid.neuronID);    
-        neuron.currentValue = GetNeuralValue(nid.neuronID);
-    }*/
-    
+
     float[] GetNeuralValue(int neuronID)
     {
         switch(neuronID)

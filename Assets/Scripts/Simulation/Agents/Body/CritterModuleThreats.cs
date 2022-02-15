@@ -37,7 +37,6 @@ public class CritterModuleThreats : IBrainModule
         enemyGrowthStage = new float[1]; // 202
         enemyThreatRating = new float[1]; // 203
 
-        parentID = genome.parentID;
         moduleID = genome.moduleID; 
     }
     

@@ -12,7 +12,6 @@ public class CritterModuleCoreGenome
     NameList nameList => lookup.nameList;
     InitialGenomeInfo genomeInitialization => lookup.genomeInitialization;
 
-    public int parentID;
     public readonly BrainModuleID moduleID = BrainModuleID.Core;
 
     public int generation;
@@ -325,17 +324,13 @@ public class CritterModuleCoreGenome
     public float biteSharpness;
     
 
-	public CritterModuleCoreGenome(int parentID) {
-        this.parentID = parentID;
-    }
-    
-    public void GenerateRandomInitialGenome() {
+    public void InitializeRandom() {
         generation = 0;
         name = nameList.GetRandomName();
         
         isPassive = RandomStatics.CoinToss();
 
-        shapeModifiersList = new List<ShapeModifierData>();  // empty
+        shapeModifiersList = new List<ShapeModifierData>();
         masksList = new List<MaskData>();
         
         ShapeModifierData initModifier = new ShapeModifierData(Random.Range(0f, 1f), 1f);
@@ -344,104 +339,10 @@ public class CritterModuleCoreGenome
         MaskData maskData = new MaskData(7);
 
         masksList.Add(maskData);
-        initModifier.maskIndicesList.Add(masksList.Count - 1); // reference mask by index to allow re-use by other shape modifiers    
+        initModifier.maskIndicesList.Add(masksList.Count - 1); // reference mask by index to allow reuse by other shape modifiers    
         shapeModifiersList.Add(initModifier);
 
         data = genomeInitialization.GetInitialGenomeData();
-        // WPP: exposed hardcoded values (include ranges), see InitialGenomeInfo
-        /*creatureBaseLength = Random.Range(0.4f, 0.4f);
-        creatureAspectRatio = Random.Range(0.2f, 0.3f);
-
-        //creatureComplexShapeLerp = 0f;
-        // Or start with deformed sphere???? *****
-        // Mouth/Snout:
-        creatureFrontTaperSize = 0.3f;
-        creatureBackTaperSize = 0.4f;
-
-        //mouthComplexShapeLerp = 0f;
-        mouthLength = Random.Range(0.75f, 1.25f); 
-        mouthFrontWidth = Random.Range(0.75f, 1.25f);  // width of snout at front of critter
-        mouthFrontHeight = Random.Range(0.75f, 1.25f); // height of snout at front of critter
-        mouthFrontVerticalOffset = Random.Range(-0.25f, 0.25f); // shift up/down pivot/cylinder center
-        mouthBackWidth = Random.Range(0.75f, 1.25f);  
-        mouthBackHeight = Random.Range(0.75f, 1.25f); 
-        mouthBackVerticalOffset = Random.Range(-0.25f, 0.25f);         
-
-        mouthToHeadTransitionSize = Random.Range(0.35f, 0.65f);  // 0-1 normalized
-        // Head
-        //headComplexShapeLerp = 0f;
-        headLength = Random.Range(0.75f, 1.25f);  
-        headFrontWidth = Random.Range(0.75f, 1.25f);  
-        headFrontHeight = Random.Range(0.75f, 1.25f); 
-        headFrontVerticalOffset = Random.Range(-0.25f, 0.25f);
-        headBackWidth = Random.Range(0.75f, 1.25f);   
-        headBackHeight = Random.Range(0.75f, 1.25f); 
-        headBackVerticalOffset = Random.Range(-0.25f, 0.25f);
-
-        headToBodyTransitionSize = Random.Range(0.35f, 0.65f);  // 0-1 normalized
-        // Body:
-        //bodyComplexShapeLerp = 0f;
-        bodyLength = Random.Range(0.75f, 1.25f);  //1f;
-        bodyFrontWidth = Random.Range(0.75f, 1.25f);  //1f;  // width of snout at front of critter
-        bodyFrontHeight = Random.Range(0.75f, 1.25f);  //1f; // height of snout at front of critter
-        bodyFrontVerticalOffset = Random.Range(-0.25f, 0.25f); //0f; // shift up/down pivot/cylinder center
-        bodyBackWidth = Random.Range(0.75f, 1.25f);  //1f; 
-        bodyBackHeight = Random.Range(0.75f, 1.25f);  //1f;
-        bodyBackVerticalOffset = Random.Range(-0.25f, 0.25f); //0f;
-
-        bodyToTailTransitionSize = Random.Range(0.35f, 0.65f); //0.5f;  // 0-1 normalized
-        //Tail:
-        //tailComplexShapeLerp = 0f;
-        tailLength = Random.Range(0.75f, 1.25f);  //1f;
-        tailFrontWidth = Random.Range(0.75f, 1.25f);  //1f;  // width of snout at front of critter
-        tailFrontHeight = Random.Range(0.75f, 1.25f);  //1f; // height of snout at front of critter
-        tailFrontVerticalOffset = Random.Range(-0.25f, 0.25f); //0f; // shift up/down pivot/cylinder center
-        tailBackWidth = Random.Range(0.75f, 1.25f);  //1f; 
-        tailBackHeight = Random.Range(0.75f, 1.25f);  //1f;
-        tailBackVerticalOffset = Random.Range(-0.25f, 0.25f); //0f;
-
-        //tailEndCapTaperSize = 0.5f;
-
-        numEyes = 2; // UnityEngine.Random.Range(2,4);
-        eyePosSpread = Random.Range(0.3f, 0.7f);  // 1f == full hemisphere coverage, 0 == top
-        eyeLocAmplitude = Random.Range(0.4f, 0.6f);
-        eyeLocFrequency = Random.Range(0.75f, 1.25f);
-        eyeLocOffset = Random.Range(0f, 0.1f);       
-        socketRadius = Random.Range(0.65f, 1f);  // relative to body size?
-        socketHeight = Random.Range(0.15f, 1f);
-        socketBulge = Random.Range(0f, 1f);
-        eyeballRadius = Random.Range(0.8f, 1.2f);
-        eyeBulge = Random.Range(0.25f, 0.5f);
-        irisWidthFraction = Random.Range(0.7f, 0.95f);       
-        pupilWidthFraction = Random.Range(0.2f, 0.5f);  // percentage of iris size
-        pupilHeightFraction = Random.Range(0.75f, 1f);
-        eyeballHue = Vector3.one;
-        irisHue = new Vector3(Random.Range(0.25f, 0.75f), Random.Range(0.25f, 0.75f), Random.Range(0.25f, 0.75f));
-
-        // Dorsal Fin:
-        dorsalFinStartCoordY = Random.Range(0f, 0.4f);
-        dorsalFinEndCoordY = Random.Range(0.6f, 0.8f);
-        dorsalFinSlantAmount = Random.Range(0.25f, 0.4f);
-        dorsalFinBaseHeight = Random.Range(0f, 2.5f);
-
-        // Tail Fin:
-        tailFinSpreadAngle = Random.Range(0.1f, 0.5f);
-        tailFinBaseLength = Random.Range(0f, 1f);
-        tailFinFrequencies = Vector3.one;
-        tailFinAmplitudes = Vector3.one;
-        tailFinOffsets = Vector3.zero;
-
-        talentSpecializationAttack = Random.Range(0.4f, 0.6f);
-        talentSpecializationDefense = Random.Range(0.4f, 0.6f);
-        talentSpecializationSpeed = Random.Range(0.4f, 0.6f);
-        talentSpecializationUtility = Random.Range(0.4f, 0.6f);
-
-        dietSpecializationPlant = Random.Range(0.4f, 0.6f);
-        dietSpecializationDecay = Random.Range(0.4f, 0.6f);
-        dietSpecializationMeat = Random.Range(0.4f, 0.6f);
-
-        mouthFeedFrequency = 1f;
-        mouthAttackAmplitude = 1f;*/
     }
 
     List<NeuronGenome> masterList;
@@ -459,16 +360,16 @@ public class CritterModuleCoreGenome
         AddNeuron("foodStored");
         AddNeuron("mouthFeedEffector"); 
         
-        if(talentSpecAttackNorm > 0.2f) {
+        if (talentSpecAttackNorm > 0.2f) {
             AddNeuron("mouthAttackEffector");
         }
-        if(talentSpecDefenseNorm > 0.2f) {
+        if (talentSpecDefenseNorm > 0.2f) {
             AddNeuron("defendEffector");
         }
-        if(talentSpecSpeedNorm > 0.2f) {
+        if (talentSpecSpeedNorm > 0.2f) {
             AddNeuron("dashEffector");
         }
-        if(talentSpecUtilityNorm > 0.2f) {
+        if (talentSpecUtilityNorm > 0.2f) {
             AddNeuron("healEffector");
         }
     }

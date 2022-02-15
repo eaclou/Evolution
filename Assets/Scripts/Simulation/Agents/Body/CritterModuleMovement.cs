@@ -51,7 +51,6 @@ public class CritterModuleMovement : IBrainModule
 
         dash = new float[1]; // 2
         
-        parentID = genome.parentID;
         moduleID = genome.moduleID;
 
         float invAspectRatio = agentGenome.bodyGenome.coreGenome.creatureAspectRatio;

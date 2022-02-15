@@ -25,6 +25,7 @@ public class Lookup : ScriptableObject
     public MetaNeuron hiddenTemplate => neuralMap.hiddenTemplate;
     public NameList nameList;
     public TechTree techTree;
+    public InitialUnlockedTechInfo baseInitialAbilities;
     public InitialGenomeInfo genomeInitialization;
 
     [Header("Colors")]

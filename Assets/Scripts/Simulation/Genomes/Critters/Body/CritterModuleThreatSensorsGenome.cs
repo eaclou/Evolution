@@ -8,23 +8,26 @@ public class CritterModuleThreatSensorsGenome
     Lookup lookup => Lookup.instance;
     NeuralMap map => lookup.neuralMap;
 
-    public int parentID;
     public readonly BrainModuleID moduleID = BrainModuleID.ThreatSensors;
 
     public bool usePos;
     public bool useVel;
     public bool useDir;
     public bool useStats;
+    
 
-    public CritterModuleThreatSensorsGenome(int parentID) {
-        this.parentID = parentID;
-    }
-
-    public void GenerateRandomInitialGenome() {
+    public void InitializeRandom() {
         usePos = RandomStatics.CoinToss();
         useVel = RandomStatics.CoinToss();
         useDir = RandomStatics.CoinToss();
         useStats = RandomStatics.CoinToss();
+    }
+    
+    public void Initialize(UnlockedTech unlockedTech) {
+        // usePos = unlockedTech.Contains(TechElementId.???);
+        // useVel = unlockedTech.Contains(TechElementId.???);
+        // useDir = unlockedTech.Contains(TechElementId.???);
+        // useStats = unlockedTech.Contains(TechElementId.???);
     }
     
     List<NeuronGenome> masterList;

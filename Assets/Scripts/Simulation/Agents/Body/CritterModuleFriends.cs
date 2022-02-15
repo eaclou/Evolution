@@ -5,7 +5,6 @@ public class CritterModuleFriends : IBrainModule
     Lookup lookup => Lookup.instance;
     NeuralMap neuralMap => lookup.neuralMap;
 
-    public int parentID;
     public BrainModuleID moduleID { get; private set; }
 
     public float[] friendPosX;
@@ -27,7 +26,6 @@ public class CritterModuleFriends : IBrainModule
         friendDirX = new float[1]; // 12
         friendDirY = new float[1]; // 13
 
-        parentID = genome.parentID;
         moduleID = genome.moduleID; 
     }
     

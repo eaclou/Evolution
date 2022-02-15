@@ -4,17 +4,12 @@ using System.Collections.Generic;
 [Serializable]
 public class CritterModuleDevelopmentalGenome 
 {
-    public int parentID;
     public BrainModuleID moduleID => BrainModuleID.Developmental;
 
     public float gestationTimeMult;
     public float quantityQualityRatio;
 
-    public CritterModuleDevelopmentalGenome(int parentID) {
-        this.parentID = parentID;
-    }
-
-    public void GenerateRandomInitialGenome() {
+    public void Initialize() {
         gestationTimeMult = 1f;
         quantityQualityRatio = 1f;
     }

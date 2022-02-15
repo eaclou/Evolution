@@ -1,10 +1,10 @@
 ﻿using System;
 using UnityEngine;
 
+// * Not clear if this is needed, consider removal
 [CreateAssetMenu(menuName = "Pond Water/Tech Tree/Tree")]
 public class TechTree : ScriptableObject
 {
-    // * Not sure if these are needed
     public TechElement[] elements;
     public TechCategoryData[] categories;
     

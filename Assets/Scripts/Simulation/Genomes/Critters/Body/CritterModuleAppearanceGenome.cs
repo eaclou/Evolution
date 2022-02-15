@@ -5,7 +5,6 @@ using UnityEngine;
 [System.Serializable]
 public class CritterModuleAppearanceGenome 
 {
-    public int parentID;
     public BrainModuleID moduleID => BrainModuleID.Appearance;
 	
     // BODY:
@@ -29,14 +28,10 @@ public class CritterModuleAppearanceGenome
         public int eyeBrushType;
     }
 
-    public CritterModuleAppearanceGenome(int parentID) {
-        this.parentID = parentID;
-    }
-
     // Future use
     public void AppendModuleNeuronsToMasterList(List<NeuronGenome> masterList) { }
 
-    public void GenerateRandomInitialGenome() 
+    public void InitializeRandom() 
     {
         //sizeAndAspectRatio = new Vector2(1f, 1f);
         huePrimary = new Vector3(Random.Range(0.1f, 1f), Random.Range(0.1f, 1f), Random.Range(0.1f, 1f));

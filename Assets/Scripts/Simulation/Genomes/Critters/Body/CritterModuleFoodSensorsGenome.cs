@@ -25,11 +25,7 @@ public class CritterModuleFoodSensorsGenome
 
     public float sensorRangeMult;
 
-    public CritterModuleFoodSensorsGenome(int parentID) {
-        this.parentID = parentID;
-    }
-
-    public void GenerateRandomInitialGenome() {
+    public void InitializeRandom() {
         usePos = RandomStatics.CoinToss();
         useVel = RandomStatics.CoinToss();
         useDir = RandomStatics.CoinToss();
@@ -38,6 +34,17 @@ public class CritterModuleFoodSensorsGenome
         useEggs = RandomStatics.CoinToss();
         useCorpse = RandomStatics.CoinToss();
 
+        preferredSize = 0.5f;
+        sensorRangeMult = 1f;
+    }
+    
+    public void Initialize(UnlockedTech unlockedTech) {
+        // usePos = unlockedTech.Contains(TechElementId.???);
+        // useVel = unlockedTech.Contains(TechElementId.???);
+        // useDir = unlockedTech.Contains(TechElementId.???);
+        //...
+
+        // * Expose magic numbers
         preferredSize = 0.5f;
         sensorRangeMult = 1f;
     }
