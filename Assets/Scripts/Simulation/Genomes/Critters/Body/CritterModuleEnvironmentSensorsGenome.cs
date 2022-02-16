@@ -3,18 +3,32 @@ using System.Collections.Generic;
 using Random = UnityEngine.Random;
 using Playcraft;
 
+/// DEPRECATE
 [Serializable]
 public class CritterModuleEnvironmentSensorsGenome 
 {
-    Lookup lookup => Lookup.instance;
-    NeuralMap map => lookup.neuralMap;
-
     public readonly BrainModuleID moduleID = BrainModuleID.EnvironmentSensors;
 
     public bool useWaterStats;
     public bool useCardinals;
-    public bool useDiagonals;    
+    public bool useDiagonals;
 
+    public void SetToMutatedCopyOfParentGenome(CritterModuleEnvironmentSensorsGenome parentGenome, MutationSettingsInstance settings) {
+        useWaterStats = RequestMutation(settings, parentGenome.useWaterStats);
+        useCardinals = RequestMutation(settings, parentGenome.useCardinals);
+        useDiagonals = RequestMutation(settings, parentGenome.useDiagonals);
+    }
+    
+    bool RequestMutation(MutationSettingsInstance settings, bool defaultValue) {
+        return RandomStatics.RandomFlip(settings.bodyModuleInternalMutationChance, defaultValue);
+    }
+}
+
+
+    #region Obsolete: delete on verify
+    /*
+    Lookup lookup => Lookup.instance;
+    
     public float maxRange;
     
     public void InitializeRandom() {
@@ -23,14 +37,7 @@ public class CritterModuleEnvironmentSensorsGenome
         useWaterStats = RandomStatics.CoinToss();
         maxRange = 20f;
     }
-    
-    public void Initialize(UnlockedTech unlockedTech) {
-       // useCardinals = unlockedTech.Contains(TechElementId.???);
-       // useDiagonals = unlockedTech.Contains(TechElementId.???);
-       // useWaterStats = unlockedTech.Contains(TechElementId.???);
-       maxRange = 20f; // * Expose magic number
-    }
-    
+
     List<NeuronGenome> masterList;
     public void AppendModuleNeuronsToMasterList(List<NeuronGenome> masterList)
     {
@@ -98,14 +105,4 @@ public class CritterModuleEnvironmentSensorsGenome
     }
     
     void AddNeuron(string name) { neuronList.Add(map.GetGenome(name)); }*/
-
-    public void SetToMutatedCopyOfParentGenome(CritterModuleEnvironmentSensorsGenome parentGenome, MutationSettingsInstance settings) {
-        useWaterStats = RequestMutation(settings, parentGenome.useWaterStats);
-        useCardinals = RequestMutation(settings, parentGenome.useCardinals);
-        useDiagonals = RequestMutation(settings, parentGenome.useDiagonals);
-    }
-    
-    bool RequestMutation(MutationSettingsInstance settings, bool defaultValue) {
-        return RandomStatics.RandomFlip(settings.bodyModuleInternalMutationChance, defaultValue);
-    }
-}
+    #endregion

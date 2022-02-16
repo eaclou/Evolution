@@ -6,7 +6,7 @@ public class CritterModuleThreats : IBrainModule
     NeuralMap neuralMap => lookup.neuralMap;
 
     public int parentID;
-    public BrainModuleID moduleID { get; private set; }
+    public BrainModuleID moduleID => BrainModuleID.ThreatSensors;
 
     public float[] enemyPosX;
     public float[] enemyPosY;
@@ -20,11 +20,7 @@ public class CritterModuleThreats : IBrainModule
     public float[] enemyGrowthStage;
     public float[] enemyThreatRating;
 
-    public CritterModuleThreats(CritterModuleThreatSensorsGenome genome) {
-        Initialize(genome);
-    }
-
-    public void Initialize(CritterModuleThreatSensorsGenome genome) {
+    public CritterModuleThreats() {
         enemyPosX = new float[1]; // 14
         enemyPosY = new float[1]; // 15
         enemyVelX = new float[1]; // 16
@@ -36,24 +32,14 @@ public class CritterModuleThreats : IBrainModule
         enemyHealth = new float[1];   // 201
         enemyGrowthStage = new float[1]; // 202
         enemyThreatRating = new float[1]; // 203
-
-        moduleID = genome.moduleID; 
     }
-    
+
     public void MapNeuron(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
         neuron.currentValue = GetNeuralValue(data.id);
-        //neuron.neuronType = data.io;
     }
 
-    /*public void MapNeuron(NID nid, Neuron neuron) 
-    {
-        if (moduleID != nid.moduleID) return;
-        neuron.currentValue = GetNeuralValue(nid.neuronID);
-        neuron.neuronType = neuralMap.GetIO(nid.neuronID);
-    }*/
-    
     float[] GetNeuralValue(int neuronID)
     {
         switch (neuronID)

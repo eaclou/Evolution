@@ -37,7 +37,6 @@ public class TechElement : ScriptableObject
     }
 }
 
-// * Used by UnlockedTech to search by ID (consider refactor)
 public enum TechElementId
 {
     Heterotrophic,
@@ -93,4 +92,5 @@ public enum TechElementId
     Scales,
     SpinalCord,
     VenomGland,
+    NerveCells,
 }

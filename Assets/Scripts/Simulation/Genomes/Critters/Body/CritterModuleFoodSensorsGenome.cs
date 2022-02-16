@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
-using Playcraft;
+﻿using Playcraft;
 
+/// DEPRECATE
 public class CritterModuleFoodSensorsGenome 
 {
-    Lookup lookup => Lookup.instance;
-    NeuralMap map => lookup.neuralMap;
-
     public int parentID;
     public readonly BrainModuleID moduleID = BrainModuleID.FoodSensors;
 
@@ -21,169 +18,26 @@ public class CritterModuleFoodSensorsGenome
     //public float preferenceParticles;
     //public float preferenceEggs;
     //public float preferenceCreatures;
+    
+    /// Not used
     public float preferredSize;
 
+    /// Not used
     public float sensorRangeMult;
 
     public void InitializeRandom() {
-        usePos = RandomStatics.CoinToss();
-        useVel = RandomStatics.CoinToss();
-        useDir = RandomStatics.CoinToss();
-        useStats = RandomStatics.CoinToss();
-        useNutrients = RandomStatics.CoinToss();
-        useEggs = RandomStatics.CoinToss();
-        useCorpse = RandomStatics.CoinToss();
+        //usePos = RandomStatics.CoinToss();
+        //useVel = RandomStatics.CoinToss();
+        //useDir = RandomStatics.CoinToss();
+        //useStats = RandomStatics.CoinToss();
+        //useNutrients = RandomStatics.CoinToss();
+        //useEggs = RandomStatics.CoinToss();
+        //useCorpse = RandomStatics.CoinToss();
 
         preferredSize = 0.5f;
         sensorRangeMult = 1f;
     }
-    
-    public void Initialize(UnlockedTech unlockedTech) {
-        // usePos = unlockedTech.Contains(TechElementId.???);
-        // useVel = unlockedTech.Contains(TechElementId.???);
-        // useDir = unlockedTech.Contains(TechElementId.???);
-        //...
 
-        // * Expose magic numbers
-        preferredSize = 0.5f;
-        sensorRangeMult = 1f;
-    }
-    
-    List<NeuronGenome> masterList;
-    public void AppendModuleNeuronsToMasterList(List<NeuronGenome> masterList)
-    {
-        this.masterList = masterList;
-        
-        // * WPP: rename nutrients -> Plants
-        if (useNutrients) 
-        {
-            AddNeuron("nutrientDensity");   
-            AddNeuron("nutrientGradX");
-            AddNeuron("nutrientGradY");
-        }
-        if (usePos) 
-        {
-            AddNeuron("foodPosX");  // * WPP: is "food" specifically "microbes"? (if so, rename)
-            AddNeuron("foodPosY");
-            AddNeuron("foodDistance");
-            AddNeuron("animalPosX");
-            AddNeuron("animalPosY");
-            AddNeuron("animalDistance");
-        }
-        if (useVel) 
-        {
-            AddNeuron("foodVelX");
-            AddNeuron("foodVelY");
-            AddNeuron("animalVelX");
-            AddNeuron("animalVelY");
-        }
-        if (useDir) 
-        {
-            AddNeuron("foodDirX");
-            AddNeuron("foodDirY");
-            AddNeuron("animalDirX");
-            AddNeuron("animalDirY");
-        }
-        if (useStats) 
-        {
-            AddNeuron("foodQuality");
-            AddNeuron("foodRelSize");
-            AddNeuron("animalQuality");
-            AddNeuron("animalRelSize");
-        }
-        if (useEggs) 
-        {
-            AddNeuron("distanceToEgg");
-            AddNeuron("eggDirX");
-            AddNeuron("eggDirY");
-        }
-        if (useCorpse) 
-        {
-            AddNeuron("distanceToCorpse");
-            AddNeuron("corpseDirX");
-            AddNeuron("corpseDirY");
-        }
-    }
-    
-    void AddNeuron(string name) { masterList.Add(map.GetData(name)); }
-
-    // WPP: removed, delegated to NeuralMap.GetData(name)
-    /*List<NeuronGenome> neuronList;
-    public void AppendModuleNeuronsToMasterList(List<NeuronGenome> neuronList) {
-        this.neuronList = neuronList;
-
-        if (useNutrients) {
-            AddNeuron("nutrientDensity");   // * WPP: rename nutrients -> Plants
-            AddNeuron("nutrientGradX");
-            AddNeuron("nutrientGradY");
-            //neuronList.Add(new NeuronGenome("nutrientDensity", NeuronType.In, moduleID, 1));
-            //neuronList.Add(new NeuronGenome("nutrientGradX", NeuronType.In, moduleID, 2));
-            //neuronList.Add(new NeuronGenome("nutrientGradY", NeuronType.In, moduleID, 3));
-        }
-        if (usePos) {
-            AddNeuron("foodPosX");  // * WPP: is "food" specifically "microbes"? (if so, rename)
-            AddNeuron("foodPosY");
-            AddNeuron("foodDistance");
-            AddNeuron("animalPosX");
-            AddNeuron("animalPosY");
-            AddNeuron("animalDistance");
-            //neuronList.Add(new NeuronGenome("foodPosX", NeuronType.In, moduleID, 4));
-            //neuronList.Add(new NeuronGenome("foodPosY", NeuronType.In, moduleID, 5));
-            //neuronList.Add(new NeuronGenome("distance", NeuronType.In, moduleID, 6));
-            //neuronList.Add(new NeuronGenome("animalPosX", NeuronType.In, moduleID, 24));
-            //neuronList.Add(new NeuronGenome("animalPosY", NeuronType.In, moduleID, 25));
-            //neuronList.Add(new NeuronGenome("animalDistance",NeuronType.In, moduleID, 26));
-        }
-        if (useVel) {
-            AddNeuron("foodVelX");
-            AddNeuron("foodVelY");
-            AddNeuron("animalVelX");
-            AddNeuron("animalVelY");
-            //neuronList.Add(new NeuronGenome("foodVelX", NeuronType.In, moduleID, 7));
-            //neuronList.Add(new NeuronGenome("foodVelY", NeuronType.In, moduleID, 8));
-            //neuronList.Add(new NeuronGenome("animalVelX", NeuronType.In, moduleID, 27));
-            //neuronList.Add(new NeuronGenome("animalVelY", NeuronType.In, moduleID, 28));
-        }
-        if (useDir) {
-            AddNeuron("foodDirX");
-            AddNeuron("foodDirY");
-            AddNeuron("animalDirX");
-            AddNeuron("animalDirY");
-            //neuronList.Add(new NeuronGenome("foodDirX", NeuronType.In, moduleID, 9));
-            //neuronList.Add(new NeuronGenome("foodDirY", NeuronType.In, moduleID, 10));
-            //neuronList.Add(new NeuronGenome("animalDirX", NeuronType.In, moduleID, 29));
-            //neuronList.Add(new NeuronGenome("animalDirY", NeuronType.In, moduleID, 30));
-        }
-        if (useStats) {
-            AddNeuron("foodQuality");
-            AddNeuron("foodRelSize");
-            AddNeuron("animalQuality");
-            AddNeuron("animalRelSize");
-            //neuronList.Add(new NeuronGenome("foodQuality", NeuronType.In, moduleID, 11));
-            //neuronList.Add(new NeuronGenome("foodRelSize", NeuronType.In, moduleID, 12));
-            //neuronList.Add(new NeuronGenome("animalQuality", NeuronType.In, moduleID, 31));
-            //neuronList.Add(new NeuronGenome("animalRelSize", NeuronType.In, moduleID, 32));
-        }
-        if (useEggs) {
-            AddNeuron("distanceToEgg");
-            AddNeuron("eggDirX");
-            AddNeuron("eggDirY");
-            //neuronList.Add(new NeuronGenome("distance", NeuronType.In, moduleID, 13));
-            //neuronList.Add(new NeuronGenome("eggDirX", NeuronType.In, moduleID, 14));
-            //neuronList.Add(new NeuronGenome("eggDirY", NeuronType.In, moduleID, 15));
-        }
-        if (useCorpse) {
-            AddNeuron("distanceToCorpse");
-            AddNeuron("corpseDirX");
-            AddNeuron("corpseDirY");
-            //neuronList.Add(new NeuronGenome("distance", NeuronType.In, moduleID, 16));
-            //neuronList.Add(new NeuronGenome("corpseDirX", NeuronType.In, moduleID, 17));
-            //neuronList.Add(new NeuronGenome("corpseDirY", NeuronType.In, moduleID, 18));
-        }
-    }
-    
-    void AddNeuron(string name) { neuronList.Add(map.GetGenome(name)); }*/
-    
     public void SetToMutatedCopyOfParentGenome(CritterModuleFoodSensorsGenome parentGenome, MutationSettingsInstance settings) {
         useNutrients = RequestMutation(settings, parentGenome.useNutrients);
         usePos = RequestMutation(settings, parentGenome.usePos);
@@ -204,3 +58,67 @@ public class CritterModuleFoodSensorsGenome
         return RandomStatics.RandomFlip(settings.bodyModuleInternalMutationChance, defaultValue);
     }
 }
+
+#region OBSOLETE: use TechElement -> unlocks (delete on verify)
+/*
+    Lookup lookup => Lookup.instance;
+    NeuralMap map => lookup.neuralMap;
+
+List<NeuronGenome> masterList;
+public void AppendModuleNeuronsToMasterList(List<NeuronGenome> masterList)
+{
+    this.masterList = masterList;
+    
+    if (useNutrients) 
+    {
+        AddNeuron("nutrientDensity");   
+        AddNeuron("nutrientGradX");
+        AddNeuron("nutrientGradY");
+    }
+    if (usePos) 
+    {
+        AddNeuron("foodPosX");
+        AddNeuron("foodPosY");
+        AddNeuron("foodDistance");
+        AddNeuron("animalPosX");
+        AddNeuron("animalPosY");
+        AddNeuron("animalDistance");
+    }
+    if (useVel) 
+    {
+        AddNeuron("foodVelX");
+        AddNeuron("foodVelY");
+        AddNeuron("animalVelX");
+        AddNeuron("animalVelY");
+    }
+    if (useDir) 
+    {
+        AddNeuron("foodDirX");
+        AddNeuron("foodDirY");
+        AddNeuron("animalDirX");
+        AddNeuron("animalDirY");
+    }
+    if (useStats) 
+    {
+        AddNeuron("foodQuality");
+        AddNeuron("foodRelSize");
+        AddNeuron("animalQuality");
+        AddNeuron("animalRelSize");
+    }
+    if (useEggs) 
+    {
+        AddNeuron("distanceToEgg");
+        AddNeuron("eggDirX");
+        AddNeuron("eggDirY");
+    }
+    if (useCorpse) 
+    {
+        AddNeuron("distanceToCorpse");
+        AddNeuron("corpseDirX");
+        AddNeuron("corpseDirY");
+    }
+}
+
+void AddNeuron(string name) { masterList.Add(map.GetData(name)); }
+*/
+#endregion

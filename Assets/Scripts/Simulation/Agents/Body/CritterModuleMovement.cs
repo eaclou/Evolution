@@ -6,11 +6,8 @@ public class CritterModuleMovement : IBrainModule
     NeuralMap neuralMap => lookup.neuralMap;
 
     public int parentID;
-    public BrainModuleID moduleID { get; private set; }
+    public BrainModuleID moduleID => BrainModuleID.Movement;
 
-    public float horsepower;
-    public float turnRate;
-    
     public float[] ownVelX;
     public float[] ownVelY;
 
@@ -31,15 +28,7 @@ public class CritterModuleMovement : IBrainModule
     public float speedBonus = 1f;
     public float turnBonus = 1f;
 	
-    public CritterModuleMovement(AgentGenome agentGenome, CritterModuleMovementGenome genome) {
-        Initialize(agentGenome, genome);
-    }
-
-    public void Initialize(AgentGenome agentGenome, CritterModuleMovementGenome genome) {
-
-        horsepower = genome.horsepower;               
-        turnRate = genome.turnRate;
-        
+    public CritterModuleMovement(AgentGenome agentGenome) { //, CritterModuleMovementGenome genome) {
         ownVelX = new float[1]; // 20
         ownVelY = new float[1]; // 21
 
@@ -51,13 +40,11 @@ public class CritterModuleMovement : IBrainModule
 
         dash = new float[1]; // 2
         
-        moduleID = genome.moduleID;
-
         float invAspectRatio = agentGenome.bodyGenome.coreGenome.creatureAspectRatio;
 
         speedBonus = Mathf.Lerp(0.7f, 1.4f, 1f - invAspectRatio);
     }
-    
+
     public void MapNeuron(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 using System.Collections.Generic;
 using Playcraft;
 
@@ -22,13 +23,7 @@ public class CritterModuleFriendSensorsGenome
         useVel = RandomStatics.CoinToss();
         useDir = RandomStatics.CoinToss();
     }
-    
-    public void Initialize(UnlockedTech unlockedTech) {
-        // usePos = unlockedTech.Contains(TechElementId.???);
-        // useVel = unlockedTech.Contains(TechElementId.???);
-        // useDir = unlockedTech.Contains(TechElementId.???);
-    }
-    
+
     List<NeuronGenome> masterList;
     public void AppendModuleNeuronsToMasterList(List<NeuronGenome> masterList)
     {
@@ -63,3 +58,4 @@ public class CritterModuleFriendSensorsGenome
         return RandomStatics.RandomFlip(settings.bodyModuleInternalMutationChance, defaultValue);
     }
 }
+*/

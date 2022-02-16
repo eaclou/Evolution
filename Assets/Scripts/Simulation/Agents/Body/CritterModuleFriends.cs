@@ -2,10 +2,7 @@
 
 public class CritterModuleFriends : IBrainModule
 {
-    Lookup lookup => Lookup.instance;
-    NeuralMap neuralMap => lookup.neuralMap;
-
-    public BrainModuleID moduleID { get; private set; }
+    public BrainModuleID moduleID => BrainModuleID.FriendSensors;
 
     public float[] friendPosX;
     public float[] friendPosY;
@@ -14,21 +11,15 @@ public class CritterModuleFriends : IBrainModule
     public float[] friendDirX;
     public float[] friendDirY;
 
-    public CritterModuleFriends(CritterModuleFriendSensorsGenome genome) {
-        Initialize(genome);
-    }
-
-    public void Initialize(CritterModuleFriendSensorsGenome genome) {
+    public CritterModuleFriends() {
         friendPosX = new float[1]; // 8
         friendPosY = new float[1]; // 9
         friendVelX = new float[1]; // 10
         friendVelY = new float[1]; // 11
         friendDirX = new float[1]; // 12
         friendDirY = new float[1]; // 13
-
-        moduleID = genome.moduleID; 
     }
-    
+
     public void MapNeuron(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;

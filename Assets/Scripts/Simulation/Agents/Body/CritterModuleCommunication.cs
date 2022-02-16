@@ -2,11 +2,7 @@
 
 public class CritterModuleCommunication : IBrainModule
 {
-    Lookup lookup => Lookup.instance;
-    NeuralMap neuralMap => lookup.neuralMap;
-
-    public CritterModuleCommunicationGenome genome;
-    public BrainModuleID moduleID => genome.moduleID;
+    public BrainModuleID moduleID => BrainModuleID.Communication;
 
     public float[] inComm0;
     public float[] inComm1;
@@ -18,9 +14,11 @@ public class CritterModuleCommunication : IBrainModule
     public float[] outComm2;
     public float[] outComm3;  // 7 Out?
     
-    public void Initialize(CritterModuleCommunicationGenome genome) {
-        this.genome = genome;
-
+    bool canCommunicate;
+    
+    public void Initialize(bool canCommunicate) {
+        this.canCommunicate = canCommunicate;
+    
         inComm0 = new float[1]; // 40
         inComm1 = new float[1]; // 41
         inComm2 = new float[1]; // 42
@@ -66,7 +64,7 @@ public class CritterModuleCommunication : IBrainModule
 
     public void Tick(Agent agent) 
     {
-        if (!genome.useComms) 
+        if (!canCommunicate) 
             return;
 
         if (agent.coreModule.nearestFriendAgent) // && agent.coreModule.nearestFriendAgent.isDefending) {

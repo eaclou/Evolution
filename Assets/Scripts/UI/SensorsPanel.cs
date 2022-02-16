@@ -28,10 +28,10 @@ public class SensorsPanel : MonoBehaviour
 
     BodyGenome body;
     CritterModuleFoodSensorsGenome food;
-    CritterModuleFriendSensorsGenome friend;
-    CritterModuleThreatSensorsGenome threat;
+    //CritterModuleFriendSensorsGenome friend;
+    //CritterModuleThreatSensorsGenome threat;
     CritterModuleEnvironmentSensorsGenome environment;
-    CritterModuleCommunicationGenome communication;
+    //CritterModuleCommunicationGenome communication;
 
     public void Refresh() 
     {
@@ -39,10 +39,10 @@ public class SensorsPanel : MonoBehaviour
         
         body = genome.bodyGenome;
         food = body.foodGenome;
-        friend = body.friendGenome;
-        threat = body.threatGenome;
+        //friend = body.friendGenome;
+        //threat = body.threatGenome;
         environment = body.environmentalGenome;
-        communication = body.communicationGenome;
+        //communication = body.communicationGenome;
         
         foreach (var sensor in sensors)
             sensor.SetSensorEnabled(IsSensorEnabled(sensor.id));
@@ -62,12 +62,12 @@ public class SensorsPanel : MonoBehaviour
             case SensorID.Eggs: return food.useEggs;
             case SensorID.Meat: return food.useVel;
             case SensorID.Corpse: return food.useCorpse;
-            case SensorID.Friend: return friend.usePos || friend.useVel || friend.useDir;
-            case SensorID.Foe: return threat.usePos || threat.useVel || threat.useDir;
+            case SensorID.Friend: return body.hasAnimalSensor; //friend.usePos || friend.useVel || friend.useDir;
+            case SensorID.Foe: return body.hasAnimalSensor;    //threat.usePos || threat.useVel || threat.useDir;
             case SensorID.Water: return environment.useWaterStats;
             case SensorID.Wall: return false;
             case SensorID.Internals: return true;
-            case SensorID.Communication: return communication.useComms;
+            case SensorID.Communication: return body.hasComms;
             case SensorID.Contact: return true;
             default: return false;
         }        
@@ -91,7 +91,7 @@ public class SensorsPanel : MonoBehaviour
             case SensorID.Foe: return agent.threatsModule.enemyDirX != null;
             case SensorID.Water: return agent.environmentModule.waterDepth != null;
             case SensorID.Internals: return true;
-            case SensorID.Communication: return communication.useComms;
+            case SensorID.Communication: return body.hasComms;
             case SensorID.Contact: return true;
             default: return false;
         }        

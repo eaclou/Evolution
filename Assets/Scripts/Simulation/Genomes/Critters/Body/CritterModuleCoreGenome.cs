@@ -349,16 +349,17 @@ public class CritterModuleCoreGenome
     public void AppendModuleNeuronsToMasterList(List<NeuronGenome> masterList)
     {
         this.masterList = masterList;
-        AddNeuron("Bias");
-        AddNeuron("isMouthTrigger");
-        AddNeuron("isContact");
-        AddNeuron("contactForceX");
-        AddNeuron("contactForceY");
-        AddNeuron("hitPoints");
-        AddNeuron("stamina");
-        AddNeuron("energyStored");
-        AddNeuron("foodStored");
-        AddNeuron("mouthFeedEffector"); 
+        
+        //AddNeuron("Bias");
+        //AddNeuron("isMouthTrigger");
+        //AddNeuron("isContact");
+        //AddNeuron("contactForceX");
+        //AddNeuron("contactForceY");
+        //AddNeuron("hitPoints");
+        //AddNeuron("stamina");
+        //AddNeuron("energyStored");
+        //AddNeuron("foodStored");
+        //AddNeuron("mouthFeedEffector"); 
         
         if (talentSpecAttackNorm > 0.2f) {
             AddNeuron("mouthAttackEffector");

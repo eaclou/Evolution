@@ -28,9 +28,6 @@ public class CritterModuleAppearanceGenome
         public int eyeBrushType;
     }
 
-    // Future use
-    public void AppendModuleNeuronsToMasterList(List<NeuronGenome> masterList) { }
-
     public void InitializeRandom() 
     {
         //sizeAndAspectRatio = new Vector2(1f, 1f);

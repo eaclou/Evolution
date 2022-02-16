@@ -1,35 +1,16 @@
-﻿using System;
+﻿/*
+using System;
 using System.Collections.Generic;
 using Playcraft;
 
+/// DEPRECATE
 [Serializable]
 public class CritterModuleCommunicationGenome 
 {
-    NeuralMap map => Lookup.instance.neuralMap;
-
     public readonly BrainModuleID moduleID = BrainModuleID.Communication;
 
+    /// Deprecate
     public bool useComms;
-
-    // Deprecate: use InitialUnlockedTechInfo.GetInitialUnlocks instead (contains probability)
-    public void InitializeRandom() {
-        useComms = RandomStatics.CoinToss();
-    }
-    
-    /*public void Initialize(UnlockedTech unlockedTech) {
-        useComms = unlockedTech.Contains(TechElementId.VocalCords);
-    }*/
-    
-    // Deprecate: handled in BodyGenome.InitializeBrainGenome foreach loop
-    public void AppendModuleNeuronsToMasterList(List<NeuronGenome> masterList)
-    {
-        if (!useComms) 
-            return;
-            
-        var toAdd = map.GetAllByModule(moduleID);
-        foreach (var item in toAdd)
-            masterList.Add(item);    
-    }
 
     public void SetToMutatedCopyOfParentGenome(CritterModuleCommunicationGenome parentGenome, MutationSettingsInstance settings) 
     {
@@ -37,3 +18,4 @@ public class CritterModuleCommunicationGenome
         useComms = mutate ? !parentGenome.useComms : parentGenome.useComms;
     }
 }
+*/

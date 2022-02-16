@@ -1188,7 +1188,7 @@ public class Agent : MonoBehaviour {
 
     public void InitializeModules(AgentGenome genome) {
         communicationModule = new CritterModuleCommunication();
-        communicationModule.Initialize(genome.bodyGenome.communicationGenome);
+        communicationModule.Initialize(genome.bodyGenome.hasComms);
 
         coreModule = new CritterModuleCore(genome.bodyGenome.coreGenome);
 
@@ -1196,9 +1196,9 @@ public class Agent : MonoBehaviour {
 
         environmentModule = new CritterModuleEnvironment(genome.bodyGenome.environmentalGenome);
         foodModule = new CritterModuleFood(genome.bodyGenome.foodGenome);
-        friendModule = new CritterModuleFriends(genome.bodyGenome.friendGenome);
-        movementModule = new CritterModuleMovement(genome, genome.bodyGenome.movementGenome);
-        threatsModule = new CritterModuleThreats(genome.bodyGenome.threatGenome);
+        friendModule = new CritterModuleFriends();
+        movementModule = new CritterModuleMovement(genome);
+        threatsModule = new CritterModuleThreats();
     }
     
     public void FirstTimeInitialize() { 

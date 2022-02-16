@@ -68,7 +68,7 @@ public class DebugPanelUI : MonoBehaviour
     CritterModuleCoreGenome coreGenome;
     CritterModuleFood foodModule;
     CritterModuleMovement movementModule;
-    CritterModuleFoodSensorsGenome foodGenome;
+    //CritterModuleFoodSensorsGenome foodGenome;
 
     // * WPP: break code sections into methods, call from here
     private void UpdateUI() {
@@ -84,7 +84,7 @@ public class DebugPanelUI : MonoBehaviour
         coreGenome = bodyGenome.coreGenome;
         foodModule = agent.foodModule;
         movementModule = agent.movementModule;
-        foodGenome = bodyGenome.foodGenome;
+        //foodGenome = bodyGenome.foodGenome;
         
         if (!agent.isInert) {
             // DebugTxt1 : use this for selected creature stats:
@@ -121,11 +121,11 @@ public class DebugPanelUI : MonoBehaviour
             debugTxtAgent += "# In/Out Nodes: " + brainGenome.inOutNeurons.Count + ", # Hidden Nodes: " + brainGenome.hiddenNeurons.Count + ", # Links: " + brainGenome.links.Count + "\n";
 
             debugTxtAgent += "\nSENSORS:\n";
-            debugTxtAgent += "Comms= " + bodyGenome.communicationGenome.useComms + "\n";
+            debugTxtAgent += "Comms= " + bodyGenome.hasComms + "\n";
             debugTxtAgent += "Enviro: WaterStats: " + bodyGenome.environmentalGenome.useWaterStats + ", Cardinals= " + agent.candidateRef.candidateGenome.bodyGenome.environmentalGenome.useCardinals + ", Diagonals= " + bodyGenome.environmentalGenome.useDiagonals + "\n";
-            debugTxtAgent += "Food: Nutrients= " + foodGenome.useNutrients + ", Pos= " + foodGenome.usePos + ",  Dir= " + foodGenome.useDir + ",  Stats= " + foodGenome.useStats + ", useEggs: " + foodGenome.useEggs + ", useCorpse: " + foodGenome.useCorpse + "\n";
-            debugTxtAgent += "Friend: Pos= " + bodyGenome.friendGenome.usePos + ",  Dir= " + bodyGenome.friendGenome.useDir + ",  Vel= " + bodyGenome.friendGenome.useVel + "\n";
-            debugTxtAgent += "Threat: Pos= " + bodyGenome.threatGenome.usePos + ",  Dir= " + bodyGenome.threatGenome.useDir + ",  Vel= " + bodyGenome.threatGenome.useVel + ",  Stats= " + bodyGenome.threatGenome.useStats + "\n";
+            //debugTxtAgent += "Food: Nutrients= " + foodGenome.useNutrients + ", Pos= " + foodGenome.usePos + ",  Dir= " + foodGenome.useDir + ",  Stats= " + foodGenome.useStats + ", useEggs: " + foodGenome.useEggs + ", useCorpse: " + foodGenome.useCorpse + "\n";
+            //debugTxtAgent += "Friend: Pos= " + bodyGenome.friendGenome.usePos + ",  Dir= " + bodyGenome.friendGenome.useDir + ",  Vel= " + bodyGenome.friendGenome.useVel + "\n";
+            //debugTxtAgent += "Threat: Pos= " + bodyGenome.threatGenome.usePos + ",  Dir= " + bodyGenome.threatGenome.useDir + ",  Vel= " + bodyGenome.threatGenome.useVel + ",  Stats= " + bodyGenome.threatGenome.useStats + "\n";
             // Realtime Values:
             debugTxtAgent += "\nREALTIME DATA:";
             //debugTxtAgent += "\nExp: " + agentRef.totalExperience.ToString("F2") + ",  fitnessScore: " + agentRef.masterFitnessScore.ToString("F2") + ", LVL: " + agentRef.curLevel.ToString();

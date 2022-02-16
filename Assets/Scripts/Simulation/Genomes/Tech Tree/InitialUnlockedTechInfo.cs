@@ -27,6 +27,7 @@ public class InitialTechElement
     [Range(0, 1)] public float probability;
 }
 
+/// Per agent list management of TechElements
 public class UnlockedTech
 {
     public List<TechElement> values;

@@ -1,10 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class AgentBehaviorOneHot : MonoBehaviour {
-
+// REFACTOR: multiple GetComponents in Update loop, excessive conditional nesting, expose hardcoded values, 
+// inconsistent formatting, shorten reference chains, remove commented-out code
+public class AgentBehaviorOneHot : MonoBehaviour 
+{
     public GameObject behaviorBarRest;
     public GameObject behaviorBarDash;
     public GameObject behaviorBarGuard;
@@ -36,15 +36,8 @@ public class AgentBehaviorOneHot : MonoBehaviour {
     public Text textAttack;
     public Text textOther;
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    // * WPP: extremely inefficient!  
+    // Remove GetComponent calls, use nested struct pattern to store references
     public void UpdateExtras(CandidateAgentData candidate) {
         textRest.gameObject.SetActive(false);
         textDash.gameObject.SetActive(false);
@@ -79,19 +72,17 @@ public class AgentBehaviorOneHot : MonoBehaviour {
 
         float sigmaFood2 = 0f;
         food2.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood2);
-        
-        
     }
-    public void UpdateExtras(Agent agentRef) {
+    
+    public void UpdateExtras(Agent agentRef) 
+    {
         /*
         waterDepthGO.GetComponent<Text>().text = "Water Depth: " + agentRef.waterDepth.ToString() + 
                                                  "\ncontact:(" + agentRef.coreModule.contactForceX[0].ToString() + ", " + agentRef.coreModule.contactForceY[0].ToString() + ")" +
                                                  "\nmeat eaten: " + (agentRef.candidateRef.performanceData.totalFoodEatenZoop * 1000f).ToString("F0") + 
                                                  "\nplants eaten: " + (agentRef.candidateRef.performanceData.totalFoodEatenPlant * 1000f).ToString("F0");
-*/
-
-
-
+       */
+        
         outComm0.GetComponent<Image>().color = Color.Lerp(Color.black, Color.white, agentRef.communicationModule.outComm0[0]);
         outComm0.GetComponent<TooltipUI>().tooltipString = "OutComm0: " + agentRef.communicationModule.outComm0[0].ToString("F2");
         outComm1.GetComponent<Image>().color = Color.Lerp(Color.black, Color.white, agentRef.communicationModule.outComm1[0]);
@@ -101,7 +92,7 @@ public class AgentBehaviorOneHot : MonoBehaviour {
         outComm3.GetComponent<Image>().color = Color.Lerp(Color.black, Color.white, agentRef.communicationModule.outComm3[0]);
         outComm3.GetComponent<TooltipUI>().tooltipString = "OutComm3: " + agentRef.communicationModule.outComm3[0].ToString("F2");
 
-        if(!agentRef.candidateRef.candidateGenome.bodyGenome.communicationGenome.useComms) {
+        if (!agentRef.candidateRef.candidateGenome.bodyGenome.hasComms) {
             outComm0.GetComponent<TooltipUI>().tooltipString = "OutComms (disabled)";
             outComm1.GetComponent<TooltipUI>().tooltipString = "OutComms (disabled)";
             outComm2.GetComponent<TooltipUI>().tooltipString = "OutComms (disabled)";
@@ -128,7 +119,6 @@ public class AgentBehaviorOneHot : MonoBehaviour {
         else {
             contactForceGO.SetActive(false);
         }
-
         
         float sigmaFood0 = Mathf.Atan2(agentRef.foodModule.foodPlantDirY[0], agentRef.foodModule.foodPlantDirX[0]) * Mathf.Rad2Deg; // agentRef.movementModule.throttleX[0];
         sigmaFood0 -= 90f;
@@ -141,9 +131,8 @@ public class AgentBehaviorOneHot : MonoBehaviour {
         float sigmaFood2 = Mathf.Atan2(agentRef.foodModule.foodEggDirY[0], agentRef.foodModule.foodEggDirX[0]) * Mathf.Rad2Deg; // agentRef.movementModule.throttleX[0];
         sigmaFood2 -= 90f;
         food2.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood2);
-        
-        
     }
+    
     public void UpdateBars(CandidateAgentData candidate) {
         
         Color activeColor = Color.white;
@@ -173,7 +162,7 @@ public class AgentBehaviorOneHot : MonoBehaviour {
 
         textOther.gameObject.SetActive(false);
         throttleGO.gameObject.SetActive(false);
-                
+        
     }
     public void UpdateBars(Agent agent) { //float rest, float dash, float guard, float bite, float attack, float other, bool isCooldown) {
 
@@ -259,11 +248,10 @@ public class AgentBehaviorOneHot : MonoBehaviour {
         }
         //behaviorBarOther.transform.localScale = Vector3.one * (other * 0.5f + 0.5f);
         //UpdateBarColor(behaviorBarOther.GetComponent<Image>(), agent.coreModule.healEffector[0], isActive);
-
     }
 
-    private void UpdateBarColor(Image image, float val, bool active) {
-
+    private void UpdateBarColor(Image image, float val, bool active) 
+    {
         Color col = Color.red;
 
         if (val < -0.25f) {
@@ -281,6 +269,5 @@ public class AgentBehaviorOneHot : MonoBehaviour {
         }
         col.a = 1f;
         image.color = col;
-        
     }
 }
