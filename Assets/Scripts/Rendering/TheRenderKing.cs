@@ -2490,8 +2490,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
         if (!brainVisualization.initialized) return;
     
         // not sure why this used to work with Triangles but now requires Points....
-        brainVisualization.displayMaterialCables.SetPass(0);        
-        cmdBufferBrainVis.DrawProceduralIndirect(Matrix4x4.identity, brainVisualization.displayMaterialCables, 0, MeshTopology.Points, brainVisualization.argsCablesCBuffer);  
+        //brainVisualization.displayMaterialCables.SetPass(0);        
+        //cmdBufferBrainVis.DrawProceduralIndirect(Matrix4x4.identity, brainVisualization.displayMaterialCables, 0, MeshTopology.Points, brainVisualization.argsCablesCBuffer);  
         
         brainVisualization.displayMaterialCore.SetPass(0);
         cmdBufferBrainVis.DrawProceduralIndirect(Matrix4x4.identity, brainVisualization.displayMaterialCore, 0, MeshTopology.Points, brainVisualization.argsCoreCBuffer);  

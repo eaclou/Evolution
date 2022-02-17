@@ -129,6 +129,7 @@ public class Brain
         }
     }
 
+
     public void PrintBrain() {
         Debug.Log("neuronCount: " + neurons.Count);
         string neuronText = "";

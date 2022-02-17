@@ -235,6 +235,7 @@
 				col = lerp(col + 0.65, float4(0.1, 0.1, 0.1, 1) + 0.65, fakeFog);
 				// apply fog
 				//UNITY_APPLY_FOG(i.fogCoord, col);
+				//return float4(1,1,1,1);
 				return col;
 			}
 			ENDCG

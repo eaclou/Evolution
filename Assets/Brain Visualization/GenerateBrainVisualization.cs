@@ -266,6 +266,27 @@ public class GenerateBrainVisualization : MonoBehaviour
 
         InitializeComputeBuffers(ref sockets, inputCount, outputCount);
         initialized = true;
+
+        //PrintNeuronPositions(neurons, ref sockets);
+        //PrintAxonPositions(axons);
+    }
+
+    public void PrintNeuronPositions(List<Neuron> neurons, ref SocketInitData[] sockets) {
+        Vector3[] nPos = new Vector3[sockets.Length];
+        neuronSimDataCBuffer.GetData(nPos);
+        string neuronText = neurons.Count + " Neurons\n";
+        for (int i = 0; i < sockets.Length; i++) {
+            neuronText += i + "[" + neurons[i].neuronType + "] " + sockets[i].position + ", " + nPos[i] + ", " + neurons[i].name + "\n";
+        }        
+        Debug.Log(neuronText);
+    }
+
+    public void PrintAxonPositions(List<Axon> axons) {
+        string axonText = axons.Count + " Axons\n";
+        for (int i = 0; i < axons.Count; i++) {
+            axonText += i + "[" + axons[i].from.name + axons[i].from.index + "->" + axons[i].to.name + axons[i].to.index + "\n";
+        }        
+        Debug.Log(axonText);
     }
 
     void InitializeComputeBuffers(ref SocketInitData[] sockets, int inputNeuronCount, int outputNeuronCount) 
@@ -279,23 +300,16 @@ public class GenerateBrainVisualization : MonoBehaviour
         InitializeNeuronFeedDataCBuffer();
 
         neuronSimDataCBuffer?.Release();
-        neuronSimDataCBuffer = new ComputeBuffer(numNeurons, sizeof(float) * 3); //***EAC only vec3 position so far
-        
-        neuronSimDataCBuffer.SetData(sockets);      
+        neuronSimDataCBuffer = new ComputeBuffer(numNeurons, sizeof(float) * 3); //***EAC only vec3 position so far        
+        neuronSimDataCBuffer.SetData(sockets);
         
         InitializeAxons();
         
-        //socketInitDataCBuffer?.Release();
-        //socketInitDataCBuffer = new ComputeBuffer(numNeurons, sizeof(float) * 3);
-        
-        //socketInitDataCBuffer.SetData(sockets);
-        //socketInitDataCBuffer.GetData(sockets);
-
         int maxTriangles = numNeurons * maxTrisPerNeuron + axons.Count * maxTrisPerAxon; // + maxTrisPerSubNeuron * axons.Count * 2;
         AppendTriangles(ref appendTrianglesCoreCBuffer, maxTriangles);
         
-        maxTriangles = axons.Count * maxTrisPerAxon;
-        AppendTriangles(ref appendTrianglesCablesCBuffer, maxTriangles);
+        //maxTriangles = axons.Count * maxTrisPerAxon;
+        //AppendTriangles(ref appendTrianglesCablesCBuffer, maxTriangles);
 
         // Create buffer of free-floating, camera-facing quads
         quadVerticesCBuffer?.Release();
@@ -422,7 +436,7 @@ public class GenerateBrainVisualization : MonoBehaviour
     void AppendTriangles(ref ComputeBuffer computeBuffer, int maxTriangles)
     {
         computeBuffer?.Release();
-        computeBuffer = new ComputeBuffer(maxTriangles, sizeof(float) * 45, ComputeBufferType.Append); // vector3 position * 3 verts
+        computeBuffer = new ComputeBuffer(maxTriangles, sizeof(float) * 45, ComputeBufferType.Append);
         computeBuffer.SetCounterValue(0);
     }
     
@@ -469,6 +483,7 @@ public class GenerateBrainVisualization : MonoBehaviour
     void SetCablesTrianglesBuffer(string kernelName, int x, int y = 1, int z = 1) {
         int kernelID = SetShaderBuffer(shaderComputeBrain, kernelName);        
         shaderComputeBrain.SetBuffer(kernelID, "axonInitDataCBuffer", axonInitDataCBuffer);
+        shaderComputeBrain.SetBuffer(kernelID, "neuronSimDataCBuffer", neuronSimDataCBuffer);
         shaderComputeBrain.SetBuffer(kernelID, "axonSimDataCBuffer", axonSimDataCBuffer);
         shaderComputeBrain.SetBuffer(kernelID, "appendTrianglesCoreCBuffer", appendTrianglesCoreCBuffer);
         shaderComputeBrain.Dispatch(kernelID, x, y, z); // Create all triangles for SubNeurons
@@ -527,8 +542,27 @@ public class GenerateBrainVisualization : MonoBehaviour
         AxonInitData[] axonInitDataArray = new AxonInitData[axons.Count]; 
         
         for (int x = 0; x < axonInitDataArray.Length; x++) {
-            AxonInitData axonData = new AxonInitData(axons[x]);
+            AxonInitData axonData = new AxonInitData(axons[x]); //*** EAC
+            int fromOld = axonData.fromID;
+            int fromNew = 0;
+            for(int f = 0; f < neurons.Count; f++) {
+                if(fromOld == neurons[f].index) {
+                    fromNew = f;
+                    continue;
+                }
+            }
+            int toOld = axonData.toID;
+            int toNew = 0;
+            for(int t = 0; t < neurons.Count; t++) {
+                if(toOld == neurons[t].index) {
+                    toNew = t;
+                    continue;
+                }
+            }
+            axonData.fromID = fromNew;
+            axonData.toID = toNew;
             axonInitDataArray[x] = axonData;
+            //Debug.Log(axonData.fromID + " -> " + axonData.toID);
         }
         
         axonInitDataCBuffer.SetData(axonInitDataArray);
