@@ -63,8 +63,10 @@ public class VisualizeSelectedBrain : MonoBehaviour
             sockets[i + offset].position = placement.GetOutputNeuronPosition(outputNeurons[i]);     // OUT
         
         offset = inputNeurons.Count + outputNeurons.Count;
-        for (int i = 0; i < hiddenNeurons.Count; i++)
+        for (int i = 0; i < hiddenNeurons.Count; i++) {
             sockets[i + offset].position = placement.GetHiddenNeuronPosition(hiddenNeurons[i]);  // HID
+            //Debug.Log("HID " + sockets[i + offset].position);
+        }
         
         return sockets;
     }

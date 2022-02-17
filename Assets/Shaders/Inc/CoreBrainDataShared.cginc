@@ -23,19 +23,6 @@ struct AxonSimData {
     float3 p3;
     float pulsePos;
 };
-struct CableInitData {
-    int socketID;
-    int neuronID;
-};
-struct CableSimData {
-    float3 p0;
-    float3 p1;
-    float3 p2;
-    float3 p3;
-};
-struct SocketInitData {
-    float3 pos;
-};
 
 struct CurveSample {
 	float3 origin;
@@ -50,17 +37,15 @@ StructuredBuffer<NeuronFeedData> neuronFeedDataCBuffer;
 RWStructuredBuffer<NeuronSimData> neuronSimDataCBuffer;
 StructuredBuffer<AxonInitData> axonInitDataCBuffer;
 RWStructuredBuffer<AxonSimData> axonSimDataCBuffer;
-StructuredBuffer<SocketInitData> socketInitDataCBuffer;
-StructuredBuffer<CableInitData> cableInitDataCBuffer;
-RWStructuredBuffer<CableSimData> cableSimDataCBuffer;
+
 
 // Core Sizes:
 float minNeuronRadius = 0.05;
 float maxNeuronRadius = 0.5;
 float minAxonRadius = 0.05;
 float maxAxonRadius = 0.5;
-float minSubNeuronScale = 0.25;
-float maxSubNeuronScale = 0.75;  // max size relative to parent Neuron
+float minSubNeuronScale = 0.6;
+float maxSubNeuronScale = 0.8;
 float minAxonFlareScale = 0.2;
 float maxAxonFlareScale = 0.9;  // max axon flare size relative to SubNeuron
 float axonFlarePos = 0.92;
@@ -88,7 +73,6 @@ float axonPerpendicularityForce = 0.01;
 float axonAttachStraightenForce = 0.01;
 float axonAttachSpreadForce = 0.025;
 float axonRepelForce = 0.2;
-float cableAttractForce = 0.01;
 
 float time = 0.0;
 
@@ -172,55 +156,6 @@ CurveSample GetAxonSample(int axonID, float t, float angle) {
 	float spiralUp = sin(t * axonPosSpiralFreq) * axonPosSpiralAmp;
 	ringOrigin += (right * spiralRight + up * spiralUp) * (1.0 - distToSideScreenEdge); // noise masked at ends;
 
-	float x = cos((angle) * 2.0 * 3.14159);
-	float y = sin((angle) * 2.0 * 3.14159);
-		
-	curveSample.normal = right * x + up * y;
-	curveSample.origin = ringOrigin;
-	curveSample.right = right;
-	curveSample.up = up;
-	curveSample.forward = forward;
-	
-	return curveSample;
-}
-
-float GetCableRadius(int ID, float t, float angle) {
-	float radius = cableRadius;
-	float edgeRadius = cableRadius * 4;
-
-	float flarePos = 0.9;
-	float flareWidth = 0.03;
-	float distToSideScreenEdge = (0.5 - min((1.0 - t), t)) * 2.0;           // 1 at edge, 0.0 at middle of spline	
-	float distToInflectionPoint = abs(distToSideScreenEdge - flarePos);
-	float flareMask = smoothstep((flarePos - flareWidth), (flarePos + flareWidth), distToSideScreenEdge);
-	
-	//float pulseDistance = abs(t - axonSimDataCBuffer[axonID].pulsePos);
-	//float pulseMultiplier = 1.0 - smoothstep(0, 0.2, pulseDistance);  // 0->1
-	//pulseMultiplier = pulseMultiplier * axonMaxPulseMultiplier + 1.0;  // [1,1+axonMaxPulseMultiplier]
-	//baseRadius *= pulseMultiplier;
-
-	//float edgeRadius = lerp(max(minAxonRadius, closestNeuronRadius * (maxSubNeuronScale * minAxonFlareScale)), closestNeuronRadius * (maxSubNeuronScale * maxAxonFlareScale), abs(axonInitDataCBuffer[axonID].weight));
-	//edgeRadius += clamp(noiseExtrude * axonExtrudeNoiseAmp, 0, 10);
-	
-	radius = lerp(radius, edgeRadius, flareMask);
-
-
-
-	//float radius = cableRadius;
-	return radius;
-	
-}
-
-CurveSample GetCableCurveSample(int ID, float t, float angle) {
-
-	CurveSample curveSample;
-
-	float3 ringOrigin = GetPoint(cableSimDataCBuffer[ID].p0, cableSimDataCBuffer[ID].p1, cableSimDataCBuffer[ID].p2, cableSimDataCBuffer[ID].p3, t);	
-
-	float3 forward = normalize(GetFirstDerivative(cableSimDataCBuffer[ID].p0, cableSimDataCBuffer[ID].p1, cableSimDataCBuffer[ID].p2, cableSimDataCBuffer[ID].p3, t));
-	float3 right = normalize(cross(forward, float3(0.0, 1.0, 0.0)));
-	float3 up = normalize(cross(right, forward));
-	
 	float x = cos((angle) * 2.0 * 3.14159);
 	float y = sin((angle) * 2.0 * 3.14159);
 		

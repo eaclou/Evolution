@@ -69,35 +69,6 @@ void CSInitializeAxonSimData (uint3 id : SV_DispatchThreadID)
 }
 
 
-
-#pragma kernel CSInitializeCableSimData
-
-[numthreads(1,1,1)]
-void CSInitializeCableSimData (uint3 id : SV_DispatchThreadID)
-{
-	// Set up initial positions / settings for Axons, based on neuron and other data
-
-	//id.x == cableID; // ( == neuronID == SocketID)
-
-	CableSimData cableData;
-	
-	float rand1 = rand(float2(id.x, id.x)) * 2.0 - 1.0;
-	float rand2 = rand(float2(id.x, rand1)) * 2.0 - 1.0;
-	float rand3 = rand(float2(rand1, rand2)) * 2.0 - 1.0;
-	float3 startDir = float3(rand1, rand2, rand3);
-	float3 endDir = float3(rand3, rand1, rand2);
-
-	float3 startPos = socketInitDataCBuffer[id.x].pos; //+ startDir;  // grab positions from corresponding NeuronID positions
-	float3 endPos = neuronSimDataCBuffer[id.x].pos; // + endDir;
-
-	cableData.p0 = startPos;
-	cableData.p1 = lerp(startPos, endPos, 1.0/3.0);
-	cableData.p2 = lerp(startPos, endPos, 2.0/3.0);
-	cableData.p3 = endPos;
-
-	cableSimDataCBuffer[id.x] = cableData;	
-}
-
 #pragma kernel CSSimNeuronAttract
 
 [numthreads(1,1,1)]
@@ -140,7 +111,6 @@ void CSSimNeuronAttract (uint3 id : SV_DispatchThreadID)
 	float3 resolveP2 = lerp(axonSimDataCBuffer[axonID].p0, axonSimDataCBuffer[axonID].p3, 2.0/3.0) - axonSimDataCBuffer[axonID].p2;
 	//axonSimDataCBuffer[axonID].p2 += resolveP2 * axonStraightenForce * abs(axonInitDataCBuffer[axonID].weight);
 	
-
 
 	float3 startAttachDir = axonSimDataCBuffer[axonID].p0 - neuronSimDataCBuffer[axonInitDataCBuffer[axonID].fromID].pos;
 	float3 endAttachDir = axonSimDataCBuffer[axonID].p3 - neuronSimDataCBuffer[axonInitDataCBuffer[axonID].toID].pos;
@@ -188,9 +158,6 @@ void CSSimNeuronAttract (uint3 id : SV_DispatchThreadID)
 
 
 
-
-
-
 #pragma kernel CSSimNeuronRepel
 
 [numthreads(1,1,1)]
@@ -222,8 +189,6 @@ void CSSimNeuronRepel (uint3 id : SV_DispatchThreadID)
 		neuronSimDataCBuffer[id.y].pos += forceVector * neuronRepelForce / neuronCount;
 	}
 }
-
-
 
 
 
@@ -314,141 +279,6 @@ void CSSimAxonRepel (uint3 id : SV_DispatchThreadID)
 
 
 
-
-#pragma kernel CSUpdateCablePositions
-
-[numthreads(1,1,1)]
-void CSUpdateCablePositions (uint3 id : SV_DispatchThreadID)
-{
-	//CableSimData cableData;
-	
-	float rand1 = rand(float2(id.x, id.x)) * 2.0 - 1.0;
-	float rand2 = rand(float2(id.x, rand1)) * 2.0 - 1.0;
-	float rand3 = rand(float2(rand1, rand2)) * 2.0 - 1.0;
-	//float3 startDir = float3(rand1, rand2, rand3);
-	//float3 endDir = float3(rand3, rand1, rand2);
-
-	//float3 startPos = socketInitDataCBuffer[id.x].pos; //+ startDir;  // grab positions from corresponding NeuronID positions
-	float3 endPos = neuronSimDataCBuffer[id.x].pos; // + endDir;
-
-	//cableData.p0 = startPos;
-	//cableData.p1 = lerp(startPos, endPos, 1.0/3.0);
-	//cableData.p2 = lerp(startPos, endPos, 2.0/3.0);
-	cableSimDataCBuffer[id.x].p3 = endPos;
-
-	// MOVE NEURON!!
-	float minPullDist = 0.1;
-	
-	
-	
-	float type = neuronInitDataCBuffer[id.x].type;
-
-	float3 startToEndVec = neuronSimDataCBuffer[id.x].pos - socketInitDataCBuffer[id.x].pos;
-	float linearAxonDistance = length(startToEndVec);
-
-	float attractForce = smoothstep(minPullDist, minPullDist * 2, linearAxonDistance) * cableAttractForce;
-	neuronSimDataCBuffer[id.x].pos -= startToEndVec * attractForce;
-	
-	float3 startAttachDirIn = float3(0,0,1);
-	float3 endAttachDirIn = float3(0,0,-1);
-	float3 startAttachDirOut = float3(0,0,-1);
-	float3 endAttachDirOut = float3(0,0,1);
-	float3 startAttachDir = lerp(startAttachDirIn, startAttachDirOut, type);
-	float3 endAttachDir = lerp(endAttachDirIn, endAttachDirOut, type);
-
-	float3 targetPosP1 = normalize(startAttachDir) * linearAxonDistance * 0.33 + cableSimDataCBuffer[id.x].p0;
-	float3 targetPosP2 = normalize(endAttachDir) * linearAxonDistance * 0.33 + cableSimDataCBuffer[id.x].p3;
-
-	float3 resolveVectorP1 = targetPosP1 - cableSimDataCBuffer[id.x].p1;
-	float3 resolveVectorP2 = targetPosP2 - cableSimDataCBuffer[id.x].p2;
-
-	float resolveForce = 0.01;
-	cableSimDataCBuffer[id.x].p1 += resolveVectorP1 * resolveForce;
-	cableSimDataCBuffer[id.x].p2 += resolveVectorP2 * resolveForce;
-
-	float lengthNeuron = length(neuronSimDataCBuffer[id.x].pos);  // keep inside bowl!
-	if(lengthNeuron > bowlConstrainRadius) {
-		neuronSimDataCBuffer[id.x].pos = neuronSimDataCBuffer[id.x].pos * (bowlConstrainRadius / lengthNeuron);
-	}
-
-	//cableSimDataCBuffer[id.x] = cableData;	
-
-	/*uint elements;
-	uint stride;
-	axonSimDataCBuffer.GetDimensions(elements, stride);
-	float axonCount = (float)elements;
-
-	// Go through Axons and move neurons
-	// then update axon positions
-
-	int axonID = id.x;
-
-	// move pulsePosition based on axon weight
-	axonSimDataCBuffer[axonID].pulsePos = frac(axonSimDataCBuffer[axonID].pulsePos + 0.08 * abs(axonInitDataCBuffer[axonID].weight) * abs(neuronFeedDataCBuffer[axonInitDataCBuffer[axonID].fromID].curValue) * abs(neuronFeedDataCBuffer[axonInitDataCBuffer[axonID].fromID].curValue));
-
-	float3 neuronPos0 = neuronSimDataCBuffer[axonInitDataCBuffer[id.x].fromID].pos;
-	float3 neuronPos1 = neuronSimDataCBuffer[axonInitDataCBuffer[id.x].toID].pos;
-
-	float3 vectorN2N = neuronPos1 - neuronPos0;
-	float distSqr = vectorN2N.x * vectorN2N.x + vectorN2N.y * vectorN2N.y + vectorN2N.z * vectorN2N.z + 0.0001;
-	float dist = length(vectorN2N) + 0.00001;  // avoid divide by 0
-	
-	// if neurons are already close to each other (2 x combined radii) then can't attract any more
-	float minDistMask = dist - 5.0 * (neuronInitDataCBuffer[axonInitDataCBuffer[axonID].fromID].radius * abs(neuronFeedDataCBuffer[axonInitDataCBuffer[axonID].fromID].curValue) + neuronInitDataCBuffer[axonInitDataCBuffer[axonID].toID].radius * abs(neuronFeedDataCBuffer[axonInitDataCBuffer[axonID].toID].curValue));
-
-	// Move Neurons & axons:
-	//start Neuron:
-	neuronSimDataCBuffer[axonInitDataCBuffer[axonID].fromID].pos += vectorN2N * neuronAttractForce * abs(axonInitDataCBuffer[axonID].weight) * minDistMask / axonCount;	
-	//end Neuron:	
-	neuronSimDataCBuffer[axonInitDataCBuffer[axonID].toID].pos -= vectorN2N * neuronAttractForce * abs(axonInitDataCBuffer[axonID].weight) * minDistMask / axonCount;
-	
-	//Axon Control Points:  // Straightening Axons:
-	float3 resolveP1 = lerp(axonSimDataCBuffer[axonID].p0, axonSimDataCBuffer[axonID].p3, 1.0/3.0) - axonSimDataCBuffer[axonID].p1;
-	//axonSimDataCBuffer[axonID].p1 += resolveP1 * axonStraightenForce * abs(axonInitDataCBuffer[axonID].weight);   // try to make a straight line
-	float3 resolveP2 = lerp(axonSimDataCBuffer[axonID].p0, axonSimDataCBuffer[axonID].p3, 2.0/3.0) - axonSimDataCBuffer[axonID].p2;
-	//axonSimDataCBuffer[axonID].p2 += resolveP2 * axonStraightenForce * abs(axonInitDataCBuffer[axonID].weight);
-	
-
-
-	float3 startAttachDir = axonSimDataCBuffer[axonID].p0 - neuronSimDataCBuffer[axonInitDataCBuffer[axonID].fromID].pos;
-	float3 endAttachDir = axonSimDataCBuffer[axonID].p3 - neuronSimDataCBuffer[axonInitDataCBuffer[axonID].toID].pos;
-
-	float3 startToEndVec = neuronSimDataCBuffer[axonInitDataCBuffer[axonID].toID].pos - neuronSimDataCBuffer[axonInitDataCBuffer[axonID].fromID].pos;
-	float linearAxonDistance = length(startToEndVec);
-
-	float3 targetPosP1 = normalize(startAttachDir) * linearAxonDistance * 0.33 + axonSimDataCBuffer[axonID].p0;
-	float3 targetPosP2 = normalize(endAttachDir) * linearAxonDistance * 0.33 + axonSimDataCBuffer[axonID].p3;
-
-	float3 resolveVectorP1 = targetPosP1 - axonSimDataCBuffer[axonID].p1;
-	float3 resolveVectorP2 = targetPosP2 - axonSimDataCBuffer[axonID].p2;
-
-	axonSimDataCBuffer[axonID].p1 += resolveVectorP1 * axonPerpendicularityForce;
-	axonSimDataCBuffer[axonID].p2 += resolveVectorP2 * axonPerpendicularityForce;
-
-
-	// Axon Attach Point Direction!!!
-	float3 startToEndDirection = normalize(startToEndVec);
-
-	float3 resolveVectorP0 = startToEndDirection - normalize(startAttachDir) + float3(0.000001, 0.000001, 0.000001);  // offset to prevent zero vector?
-	float3 resolveVectorP3 = -startToEndDirection - normalize(endAttachDir) + float3(0.000001, 0.000001, 0.000001);  // offset to prevent zero vector?
-
-	axonSimDataCBuffer[axonID].p0 += resolveVectorP0 * axonAttachStraightenForce;
-	axonSimDataCBuffer[axonID].p3 += resolveVectorP3 * axonAttachStraightenForce;
-
-	// Axon Anchor points:
-	float3 dir0 = normalize(axonSimDataCBuffer[axonID].p0 - neuronSimDataCBuffer[axonInitDataCBuffer[axonID].fromID].pos);
-	float3 dir1 = normalize(axonSimDataCBuffer[axonID].p3 - neuronSimDataCBuffer[axonInitDataCBuffer[axonID].toID].pos);
-
-	// Set actual position of endPoints to edge of neuron:
-	axonSimDataCBuffer[axonID].p0 = neuronSimDataCBuffer[axonInitDataCBuffer[axonID].fromID].pos + dir0 * GetNeuronRadius(axonInitDataCBuffer[axonID].fromID, dir0) * 1;	
-	axonSimDataCBuffer[axonID].p3 = neuronSimDataCBuffer[axonInitDataCBuffer[axonID].toID].pos + dir1 * GetNeuronRadius(axonInitDataCBuffer[axonID].toID, dir1) * 1;
-	*/
-}
-
-
-
-
-
 #pragma kernel CSGenerateNeuronTriangles
 
 #define neuron_resolution_height 16
@@ -533,105 +363,6 @@ void CSGenerateNeuronTriangles (uint3 id : SV_DispatchThreadID)
 	triBottom.colorC = faceColor;
 	appendTrianglesCoreCBuffer.Append(triBottom);
 }
-
-
-
-#pragma kernel CSGenerateSubNeuronTriangles
-
-#define subneuron_resolution_height 8
-#define subneuron_resolution_ring 8
-
-[numthreads(1,subneuron_resolution_height,subneuron_resolution_ring)]
-void CSGenerateSubNeuronTriangles (uint3 id : SV_DispatchThreadID)
-{
-	int axonID = floor(id.x / 2);
-	float startOrEndPoint = frac((float)id.x / 2) * 2.0;  // 0 or 1, hopefully
-	int subNeuronID = id.x;
-	int neuronID = round(lerp((float)axonInitDataCBuffer[axonID].fromID, (float)axonInitDataCBuffer[axonID].toID , startOrEndPoint));
-	float idx = (float)id.x;
-	float idy = (float)id.y;  // along curve
-	float idz = (float)id.z;  // around curve (rings)	
-	float tInc = 1.0 / (float)subneuron_resolution_height;
-	
-	float3 origin = lerp(axonSimDataCBuffer[axonID].p0, axonSimDataCBuffer[axonID].p3, startOrEndPoint);
-
-	//float3 parentNeuronPos = neuronSimDataCBuffer[neuronID].pos;
-	// NEED TO DETERMINE WHICH AXON ID this instance is referring to --- fromID or toID ???
-	float parentNeuronRadius0 = GetNeuronRadius(axonInitDataCBuffer[axonID].fromID, normalize(axonSimDataCBuffer[axonID].p0 - neuronSimDataCBuffer[axonInitDataCBuffer[axonID].fromID].pos));
-	float parentNeuronRadius1 = GetNeuronRadius(axonInitDataCBuffer[axonID].toID, normalize(axonSimDataCBuffer[axonID].p3 - neuronSimDataCBuffer[axonInitDataCBuffer[axonID].toID].pos));
-	float parentNeuronRadius = lerp(parentNeuronRadius0, parentNeuronRadius1, startOrEndPoint);
-
-	const float PI = 3.141592;
-	// Longitude:
-	float xStart = cos((idz / (float)subneuron_resolution_ring) * 2.0 * 3.14159);
-	float xNext = cos(((idz + 1.0) / (float)subneuron_resolution_ring) * 2.0 * 3.14159);
-	float zStart = sin((idz / (float)subneuron_resolution_ring) * 2.0 * 3.14159);
-	float zNext = sin(((idz + 1.0) / (float)subneuron_resolution_ring) * 2.0 * 3.14159);
-	// vertical pos:
-	// REFACTOR::::	  // idy/height should be remapped from [0,1] to: [-pi/2, pi/2] in order to start at south pole and go to north pole
-	float yStart = sin((idy / (float)subneuron_resolution_height) * PI - (PI / 2.0));
-	float yNext = sin(((idy + 1.0) / (float)subneuron_resolution_height) * PI - (PI / 2.0));
-	// radius modifier due to nearness to poles:
-	float axisDistStart = cos((idy / (float)subneuron_resolution_height) * PI - (PI / 2.0));
-	float axisDistNext = cos(((idy + 1.0) / (float)subneuron_resolution_height) * PI - (PI / 2.0));
-
-	float3 normalBottomLeft = float3(xStart * axisDistStart, yStart, zStart * axisDistStart);
-	float3 normalBottomRight = float3(xNext * axisDistStart, yStart, zNext * axisDistStart);
-	float3 normalTopLeft = float3(xStart * axisDistNext, yNext, zStart * axisDistNext);
-	float3 normalTopRight = float3(xNext * axisDistNext, yNext, zNext * axisDistNext);
-
-	// use fromID or toID? which attachpoint is this instance?
-	float scale = lerp(minSubNeuronScale, maxSubNeuronScale, abs(axonInitDataCBuffer[axonID].weight));
-	
-	
-	float3 bottomLeft = origin + normalBottomLeft * GetNeuronRadius(neuronID, normalize(normalBottomLeft)) * scale; 
-	float3 bottomRight = origin + normalBottomRight * GetNeuronRadius(neuronID, normalize(normalBottomRight)) * scale; 
-	float3 topLeft = origin + normalTopLeft * GetNeuronRadius(neuronID, normalize(normalTopLeft)) * scale; 
-	float3 topRight = origin + normalTopRight * GetNeuronRadius(neuronID, normalize(normalTopRight)) * scale; 
-
-	float3 colorIn = inNeuronsBaseColor * 1;
-	float3 colorOut = outNeuronsBaseColor * 1;
-	float inOut = neuronInitDataCBuffer[neuronID].type;
-	float3 faceColor = lerp(colorIn, colorOut, inOut) * abs(neuronFeedDataCBuffer[neuronID].curValue) * 3.0;
-		
-	Triangle triTop;
-	triTop.vertA = bottomLeft;
-	triTop.normA = normalBottomLeft;
-	triTop.tanA = cross(float3(0,1,0), triTop.normA);
-	triTop.uvwA = float3(idz / (float)subneuron_resolution_ring, idy / (float)subneuron_resolution_height, yStart);
-	triTop.colorA = faceColor;
-	triTop.vertB = topLeft;
-	triTop.normB = normalTopLeft;
-	triTop.tanB = cross(float3(0,1,0), triTop.normB);
-	triTop.uvwB = float3(idz / (float)subneuron_resolution_ring, (idy + 1.0) / (float)subneuron_resolution_height, yStart);
-	triTop.colorB = faceColor;
-	triTop.vertC = topRight;
-	triTop.normC = normalTopRight;
-	triTop.tanC = cross(float3(0,1,0), triTop.normC);
-	triTop.uvwC = float3((idz + 1.0) / (float)subneuron_resolution_ring, (idy + 1.0) / (float)subneuron_resolution_height, yStart);
-	triTop.colorC = faceColor;
-	appendTrianglesCoreCBuffer.Append(triTop);
-
-
-	Triangle triBottom;
-	triBottom.vertA = bottomRight;
-	triBottom.normA = normalBottomRight;
-	triBottom.tanA = cross(float3(0,1,0), triBottom.normA);
-	triBottom.uvwA = float3((idz + 1.0) / (float)subneuron_resolution_ring, idy / (float)subneuron_resolution_height, yStart);
-	triBottom.colorA = faceColor;
-	triBottom.vertB = bottomLeft;
-	triBottom.normB = normalBottomLeft;
-	triBottom.tanB = cross(float3(0,1,0), triBottom.normB);
-	triBottom.uvwB = float3(idz / (float)subneuron_resolution_ring, idy / (float)subneuron_resolution_height, yStart);
-	triBottom.colorB = faceColor;
-	triBottom.vertC = topRight;
-	triBottom.normC = normalTopRight;
-	triBottom.tanC = cross(float3(0,1,0), triBottom.normC);
-	triBottom.uvwC = float3((idz + 1.0) / (float)subneuron_resolution_ring, (idy + 1.0) / (float)subneuron_resolution_height, yStart);
-	triBottom.colorC = faceColor;
-	appendTrianglesCoreCBuffer.Append(triBottom);
-}
-
 
 
 
@@ -747,96 +478,6 @@ void CSGenerateAxonTriangles (uint3 id : SV_DispatchThreadID)
 	triBottom.uvwC = float3((idz + 1.0) / (float)resolution_ring, (idy + 1.0) / (float)resolution_height, 0.0) * uvScale;
 	triBottom.colorC = colTop;
 	appendTrianglesCoreCBuffer.Append(triBottom);
-
-}
-
-
-
-
-
-
-#pragma kernel CSGenerateCablesTriangles
-
-#define cable_resolution_height 48
-#define cable_resolution_ring 12
-
-
-
-[numthreads(1,cable_resolution_height,cable_resolution_ring)]
-void CSGenerateCablesTriangles (uint3 id : SV_DispatchThreadID)
-{
-	float idx = (float)id.x;
-	float idy = (float)id.y;  // along curve
-	float idz = (float)id.z;  // around curve (rings)	
-	float tInc = 1.0 / (float)cable_resolution_height;
-
-	float t0 = idy * tInc;
-	float t1 = (idy + 1.0) * tInc;
-	float angle0 = idz / (float)cable_resolution_ring;
-	float angle1 = (idz + 1.0) / (float)cable_resolution_ring;
-
-	CurveSample sample0; 
-	sample0 = GetCableCurveSample(id.x, t0, angle0);
-	CurveSample sample1; 
-	sample1 = GetCableCurveSample(id.x, t1, angle1);
-			
-	float xStart = cos((angle0) * 2.0 * 3.14159);
-	float xNext = cos((angle1) * 2.0 * 3.14159);
-	float yStart = sin((angle0) * 2.0 * 3.14159);
-	float yNext = sin((angle1) * 2.0 * 3.14159);
-
-	float3 normalBottomLeft = sample0.right * xStart + sample0.up * yStart;
-	float3 normalBottomRight = sample0.right * xNext + sample0.up * yNext;
-	float3 normalTopLeft = sample1.right * xStart + sample1.up * yStart;
-	float3 normalTopRight = sample1.right * xNext + sample1.up * yNext;
-	
-	float3 bottomLeft = normalBottomLeft * GetCableRadius(id.x, t0, frac(angle0)) + sample0.origin;
-	float3 bottomRight = normalBottomRight * GetCableRadius(id.x, t0, frac(angle1)) + sample0.origin;
-	float3 topLeft = normalTopLeft * GetCableRadius(id.x, t1, frac(angle0)) + sample1.origin;
-	float3 topRight = normalTopRight * GetCableRadius(id.x, t1, frac(angle1)) + sample1.origin;
-
-	float rand1 = rand(float2(id.x, id.x));
-	float rand2 = rand(float2(id.x, rand1));
-	float rand3 = rand(float2(rand1, rand2));
-	float3 randColor = float3(rand1, rand2, rand3);
-	float3 color = lerp(inNeuronsBaseColor, outNeuronsBaseColor, neuronInitDataCBuffer[id.x].type); //randColor; //cableBaseColor; //lerp(inNeuronsBaseColor, outNeuronsBaseColor, neuronInitDataCBuffer[id.x].type);
-	color += randColor * 0.25;	
-	
-	Triangle triTop;
-	triTop.vertA = bottomLeft;
-	triTop.normA = normalBottomLeft;
-	triTop.tanA = cross(sample0.forward, triTop.normA);
-	triTop.uvwA = float3((idz / (float)cable_resolution_ring) * uvScale.x, (idy / (float)cable_resolution_height) * uvScale.y, 0.0);
-	triTop.colorA = color;
-	triTop.vertB = topLeft;
-	triTop.normB = normalTopLeft;
-	triTop.tanB = cross(sample1.forward, triTop.normB);
-	triTop.uvwB = float3(idz / (float)cable_resolution_ring, (idy + 1.0) / (float)cable_resolution_height, 0.0) * uvScale;
-	triTop.colorB = color;
-	triTop.vertC = topRight;
-	triTop.normC = normalTopRight;
-	triTop.tanC = cross(sample1.forward, triTop.normC);
-	triTop.uvwC = float3((idz + 1.0) / (float)cable_resolution_ring, (idy + 1.0) / (float)cable_resolution_height, 0.0) * uvScale;
-	triTop.colorC = color;
-	appendTrianglesCablesCBuffer.Append(triTop);
-
-	Triangle triBottom;
-	triBottom.vertA = bottomRight;
-	triBottom.normA = normalBottomRight;
-	triBottom.tanA = cross(sample0.forward, triBottom.normA);
-	triBottom.uvwA = float3((idz + 1.0) / (float)cable_resolution_ring, idy / (float)cable_resolution_height, 0.0) * uvScale;
-	triBottom.colorA = color;
-	triBottom.vertB = bottomLeft;
-	triBottom.normB = normalBottomLeft;
-	triBottom.tanB = cross(sample0.forward, triBottom.normB);
-	triBottom.uvwB = float3(idz / (float)cable_resolution_ring, idy / (float)cable_resolution_height, 0.0) * uvScale;
-	triBottom.colorB = color;
-	triBottom.vertC = topRight;
-	triBottom.normC = normalTopRight;
-	triBottom.tanC = cross(sample0.forward, triBottom.normC);
-	triBottom.uvwC = float3((idz + 1.0) / (float)cable_resolution_ring, (idy + 1.0) / (float)cable_resolution_height, 0.0) * uvScale;
-	triBottom.colorC = color;
-	appendTrianglesCablesCBuffer.Append(triBottom);
 
 }
 

@@ -96,13 +96,13 @@ public class BodyGenome
         //AddNeuron("contactForceY");
         //AddNeuron("hitPoints");
         //AddNeuron("stamina");
-        //AddNeuron("energyStored");
-        //AddNeuron("foodStored");
+        AddNeuron("energyStored");
+        AddNeuron("foodStored");
         AddNeuron("mouthFeedEffector");
         
         // Movement
-        //AddNeuron("ownVelX");
-        //AddNeuron("ownVelY");
+        AddNeuron("ownVelX");
+        AddNeuron("ownVelY");
         //AddNeuron("facingDirX");
         //AddNeuron("facingDirY");
         AddNeuron("throttleX");

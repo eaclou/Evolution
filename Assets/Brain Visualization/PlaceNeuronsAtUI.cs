@@ -15,9 +15,19 @@ public class PlaceNeuronsAtUI : MonoBehaviour
 
         var data = neuron.genome.data;
 
-        foreach (var placement in uiPlacements)
-            if (placement.id == data.iconID)
-                return (placement.location.position - new Vector3(960f, 600f, 0f)).normalized * 0.85f + Random.insideUnitSphere * 0.01f;
+        foreach (var placement in uiPlacements) {
+            if (placement.id == data.iconID) {
+                Vector3 localPos = Vector3.zero; // Random.insideUnitSphere * 0.001f;
+                float frac = Mathf.Clamp01((float)placement.id / (float)uiPlacements.Length);
+                float radius = 0.9f;
+                float angleRadians = Mathf.PI * frac;
+                float x = Mathf.Cos(angleRadians) * radius;
+                float y = Mathf.Sin(angleRadians) * radius;
+                localPos.x = x;
+                localPos.y = y;
+                return localPos + Random.insideUnitSphere * 0.001f;
+            }
+        }        //return (placement.location.position - new Vector3(960f, 600f, 0f)).normalized * 0.85f + Random.insideUnitSphere * 0.01f;
 
                 
         Debug.LogError($"Unable to find placement for {neuron.moduleID} {data}");
@@ -25,14 +35,22 @@ public class PlaceNeuronsAtUI : MonoBehaviour
     }
 
     public Vector3 GetOutputNeuronPosition(Neuron neuron)
-    {
-        
+    {        
         var data = neuron.genome.data;
 
-        foreach (var placement in uiPlacements)
-            if (placement.id == data.iconID)
-                return (placement.location.position - new Vector3(760f, 1060f, 0f)).normalized * 0.75f + Random.insideUnitSphere * 0.01f;
-
+        foreach (var placement in uiPlacements) {
+            if (placement.id == data.iconID) {
+                Vector3 localPos = Vector3.zero; // Random.insideUnitSphere * 0.001f;
+                float frac = Mathf.Clamp01((float)placement.id / (float)uiPlacements.Length);
+                float radius = 0.35f;
+                float angleRadians = Mathf.PI * frac;
+                float x = Mathf.Cos(angleRadians) * radius;
+                float y = Mathf.Sin(angleRadians) * radius;
+                localPos.x = x;
+                localPos.y = y - 0.8f;
+                return localPos + Random.insideUnitSphere * 0.001f;
+            }
+        }
                 
         Debug.LogError($"Unable to find placement for {neuron.moduleID} {data}");
         return Vector3.zero;
@@ -40,13 +58,28 @@ public class PlaceNeuronsAtUI : MonoBehaviour
     
     /// NOT IMPLEMENTED
     public Vector3 GetHiddenNeuronPosition(Neuron neuron)
-    {
+    {   
+        var data = neuron.genome.data;
         // Get input location
         // Get output location
         // Calculate & return intermediate location
         // return Vector3.zero;
+        //foreach (var placement in uiPlacements) {
+        //    if (placement.id == data.iconID) {
+        Vector3 localPos = Vector3.zero; // Random.insideUnitSphere * 0.001f;
+        float frac = Mathf.Clamp01((float)neuron.index / 2f);
+        float radius = 0.25f;
+        float angleRadians = Mathf.PI * frac;
+        float x = Mathf.Cos(angleRadians) * radius;
+        float y = Mathf.Sin(angleRadians) * radius;
+        localPos.x = x;
+        localPos.y = y + 0.1f;
+        //Debug.Log($"Unable to find placement for {neuron.index} {data.iconID}");
+        return localPos + Random.insideUnitSphere * 0.001f;
+            //}
+        //}
         
-        return new Vector3(-0.9f, 0f, 0f) + Random.insideUnitSphere * 0.01f;
+        //return Vector3.zero;
     }
 
     [Serializable]
