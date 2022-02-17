@@ -91,23 +91,23 @@ public class BodyGenome
         // Core
         AddNeuron("Bias");
         AddNeuron("isMouthTrigger");
-        AddNeuron("isContact");
-        AddNeuron("contactForceX");
-        AddNeuron("contactForceY");
-        AddNeuron("hitPoints");
-        AddNeuron("stamina");
-        AddNeuron("energyStored");
-        AddNeuron("foodStored");
+        //AddNeuron("isContact");
+        //AddNeuron("contactForceX");
+        //AddNeuron("contactForceY");
+        //AddNeuron("hitPoints");
+        //AddNeuron("stamina");
+        //AddNeuron("energyStored");
+        //AddNeuron("foodStored");
         AddNeuron("mouthFeedEffector");
         
         // Movement
-        AddNeuron("ownVelX");
-        AddNeuron("ownVelY");
-        AddNeuron("facingDirX");
-        AddNeuron("facingDirY");
+        //AddNeuron("ownVelX");
+        //AddNeuron("ownVelY");
+        //AddNeuron("facingDirX");
+        //AddNeuron("facingDirY");
         AddNeuron("throttleX");
         AddNeuron("throttleY");
-        AddNeuron("dash");
+       // AddNeuron("dash");
 
         // * Unable to remove (yet) as this depends on talent specializations
         coreGenome.AppendModuleNeuronsToMasterList(masterList);

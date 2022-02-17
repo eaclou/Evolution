@@ -291,7 +291,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         //socketInitDataCBuffer.SetData(sockets);
         //socketInitDataCBuffer.GetData(sockets);
 
-        int maxTriangles = numNeurons * maxTrisPerNeuron; // + maxTrisPerSubNeuron * axons.Count * 2;
+        int maxTriangles = numNeurons * maxTrisPerNeuron + axons.Count * maxTrisPerAxon; // + maxTrisPerSubNeuron * axons.Count * 2;
         AppendTriangles(ref appendTrianglesCoreCBuffer, maxTriangles);
         
         maxTriangles = axons.Count * maxTrisPerAxon;
@@ -470,7 +470,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         int kernelID = SetShaderBuffer(shaderComputeBrain, kernelName);        
         shaderComputeBrain.SetBuffer(kernelID, "axonInitDataCBuffer", axonInitDataCBuffer);
         shaderComputeBrain.SetBuffer(kernelID, "axonSimDataCBuffer", axonSimDataCBuffer);
-        shaderComputeBrain.SetBuffer(kernelID, "appendTrianglesCablesCBuffer", appendTrianglesCablesCBuffer);
+        shaderComputeBrain.SetBuffer(kernelID, "appendTrianglesCoreCBuffer", appendTrianglesCoreCBuffer);
         shaderComputeBrain.Dispatch(kernelID, x, y, z); // Create all triangles for SubNeurons
     }
     /*void SetTrianglesBuffer(string kernelName, int x, int y = 1, int z = 1, bool refreshAxonBuffer = true)
