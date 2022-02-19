@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 [CreateAssetMenu(menuName = "Pond Water/Tech Tree/Element")]
 public class TechElement : ScriptableObject
@@ -20,6 +21,10 @@ public class TechElement : ScriptableObject
     [Tooltip("Other tech that must be unlocked before this tech can be unlocked")]
     public TechElement[] prerequisites;
     
+    // * ERROR PRONE! Consider centralizing in Lookup with tree structure (or setting via OnValidate)
+    [Tooltip("Other tech that becomes available when this tech is unlocked")]
+    public TechElement[] nextTech;
+    
     [Tooltip("Neurons activated by this tech")]
     public MetaNeuron[] unlocks;
     
@@ -39,6 +44,16 @@ public class TechElement : ScriptableObject
                 return true;
                 
         return false;
+    }
+    
+    public bool IsPrerequisite(List<TechElement> abilities)
+    {
+        foreach (var ability in abilities)
+            foreach (var prerequisite in ability.prerequisites)
+                if (prerequisite == this)
+                    return true;
+        
+        return false;        
     }
 }
 

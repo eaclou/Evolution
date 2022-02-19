@@ -52,10 +52,27 @@ public class UnlockedTech
         return false;
     }
     
-    public void GetMutatedCopy()
+    public UnlockedTech GetMutatedCopy()
     {
         var copy = new UnlockedTech(this);
+        var removed = new List<TechElement>();
+        var added = new List<TechElement>();
         
+        foreach (var value in values)
+            if (value.IsPrerequisite(values) && RandomStatics.CoinToss(value.mutationLockChance))
+                removed.Add(value);
+                
+        foreach (var remove in removed)
+            values.Remove(remove);
+
+        foreach (var value in values)
+            foreach (var tech in value.nextTech)
+                if (RandomStatics.CoinToss(tech.mutationUnlockChance))
+                    added.Add(tech);
         
+        foreach (var add in added)
+            copy.values.Add(add);
+            
+        return copy;
     }
 }

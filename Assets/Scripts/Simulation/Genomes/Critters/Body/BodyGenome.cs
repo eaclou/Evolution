@@ -104,7 +104,7 @@ public class BodyGenome
         appearanceGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.appearanceGenome, settings);
         coreGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.coreGenome, settings);
         
-        
+        unlockedTech = unlockedTech.GetMutatedCopy();
     }
 }
 
