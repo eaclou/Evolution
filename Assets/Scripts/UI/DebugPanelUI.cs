@@ -121,8 +121,8 @@ public class DebugPanelUI : MonoBehaviour
             debugTxtAgent += "# In/Out Nodes: " + brainGenome.inOutNeurons.Count + ", # Hidden Nodes: " + brainGenome.hiddenNeurons.Count + ", # Links: " + brainGenome.links.Count + "\n";
 
             debugTxtAgent += "\nSENSORS:\n";
-            debugTxtAgent += "Comms= " + bodyGenome.hasComms + "\n";
-            debugTxtAgent += "Enviro: WaterStats: " + bodyGenome.environmentalGenome.useWaterStats + ", Cardinals= " + agent.candidateRef.candidateGenome.bodyGenome.environmentalGenome.useCardinals + ", Diagonals= " + bodyGenome.environmentalGenome.useDiagonals + "\n";
+            debugTxtAgent += "Comms= " + bodyGenome.data.hasComms + "\n";
+            debugTxtAgent += "Enviro: WaterStats: " + bodyGenome.data.useWaterStats + ", Cardinals= " + bodyGenome.data.useCardinals + ", Diagonals= " + bodyGenome.data.useDiagonals + "\n";
             //debugTxtAgent += "Food: Nutrients= " + foodGenome.useNutrients + ", Pos= " + foodGenome.usePos + ",  Dir= " + foodGenome.useDir + ",  Stats= " + foodGenome.useStats + ", useEggs: " + foodGenome.useEggs + ", useCorpse: " + foodGenome.useCorpse + "\n";
             //debugTxtAgent += "Friend: Pos= " + bodyGenome.friendGenome.usePos + ",  Dir= " + bodyGenome.friendGenome.useDir + ",  Vel= " + bodyGenome.friendGenome.useVel + "\n";
             //debugTxtAgent += "Threat: Pos= " + bodyGenome.threatGenome.usePos + ",  Dir= " + bodyGenome.threatGenome.useDir + ",  Vel= " + bodyGenome.threatGenome.useVel + ",  Stats= " + bodyGenome.threatGenome.useStats + "\n";
@@ -248,7 +248,7 @@ public class DebugPanelUI : MonoBehaviour
         debugTextureViewerMat.SetFloat("_Amplitude", _Amplitude);
         debugTextureViewerMat.SetVector("_ChannelMask", _ChannelMask);
         debugTextureViewerMat.SetInt("_ChannelSoloIndex", _ChannelSoloIndex);
-        debugTextureViewerMat.SetFloat("_IsChannelSolo", (float)_IsChannelSolo);
+        debugTextureViewerMat.SetFloat("_IsChannelSolo", _IsChannelSolo);
         debugTextureViewerMat.SetFloat("_Gamma", _Gamma);        
         //debugTextureViewerMat.
         if(debugTextureViewerArray[_DebugTextureIndex]) {

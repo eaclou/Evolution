@@ -367,20 +367,24 @@ public class MasterGenomePool
         var newBody = newGenome.bodyGenome;
         var newCore = newBody.coreGenome;
         var newAppearance = newBody.appearanceGenome;
+        
+        // WPP: removed
         //var newCommunication = newBody.communicationGenome;
         //var newThreat = newBody.threatGenome;
         //var newFriend = newBody.friendGenome;
-        var newFood = newBody.foodGenome;
-        var newEnvironment = newBody.environmentalGenome;
+        //var newFood = newBody.foodGenome;
+        //var newEnvironment = newBody.environmentalGenome;
         
         var repBody = repGenome.bodyGenome;
         var repCore = repBody.coreGenome;
         var repAppearance = repBody.appearanceGenome;
+        
+        // WPP: removed
         //var repCommunication = repBody.communicationGenome;
         //var repThreat = repBody.threatGenome;
         //var repFriend = repBody.friendGenome;
-        var repFood = repBody.foodGenome;
-        var repEnvironment = repBody.environmentalGenome;
+        //var repFood = repBody.foodGenome;
+        //var repEnvironment = repBody.environmentalGenome;
     
         float dBaseSize = Mathf.Abs(newCore.creatureBaseLength - repCore.creatureBaseLength);
         float dBaseAspectRatio = Mathf.Abs(newCore.creatureAspectRatio - repCore.creatureAspectRatio);
@@ -412,20 +416,19 @@ public class MasterGenomePool
         float dFoodSpecPlant = Mathf.Abs(newCore.dietSpecializationPlant - repCore.dietSpecializationPlant);
         float dFoodSpecMeat = Mathf.Abs(newCore.dietSpecializationMeat - repCore.dietSpecializationMeat);
                 
-        float dUseComms = newBody.hasComms == repBody.hasComms ? 0f : 1f;
-        float dUseWaterStats = newEnvironment.useWaterStats == repEnvironment.useWaterStats ? 0f : 1f;
-        float dUseCardinals = newEnvironment.useCardinals == repEnvironment.useCardinals ? 0f : 1f;
-        float dUseDiagonals = newEnvironment.useDiagonals == repEnvironment.useDiagonals ? 0f : 1f;
-        float dUseNutrients = newFood.useNutrients == repFood.useNutrients ? 0f : 1f;
-        float dUseFoodPos = newFood.usePos == repFood.usePos ? 0f : 1f;
-        float dUseFoodVel = newFood.useVel == repFood.useVel ? 0f : 1f;
-        float dUseFoodDir = newFood.useDir == repFood.useDir ? 0f : 1f;
-        float dUseFoodStats = newFood.useStats == repFood.useStats ? 0f : 1f;
-        float dUseFoodEgg = newFood.useEggs == repFood.useEggs ? 0f : 1f;
-        float dUseFoodCorpse = newFood.useCorpse == repFood.useCorpse ? 0f : 1f;
+        float dUseComms = newBody.data.hasComms == repBody.data.hasComms ? 0f : 1f;
+        float dUseWaterStats = newBody.data.useWaterStats == repBody.data.useWaterStats ? 0f : 1f;
+        float dUseCardinals = newBody.data.useCardinals == repBody.data.useCardinals ? 0f : 1f;
+        float dUseDiagonals = newBody.data.useDiagonals == repBody.data.useDiagonals ? 0f : 1f;
+        float dUseNutrients = newBody.data.useNutrients == repBody.data.useNutrients ? 0f : 1f;
+        float dUseFoodPos = newBody.data.useFoodPosition == repBody.data.useFoodPosition ? 0f : 1f;
+        float dUseFoodVel = newBody.data.useFoodVelocity == repBody.data.useFoodVelocity ? 0f : 1f;
+        float dUseFoodDir = newBody.data.useFoodDirection == repBody.data.useFoodDirection ? 0f : 1f;
+        float dUseFoodStats = newBody.data.useFoodStats == repBody.data.useFoodStats ? 0f : 1f;
+        float dUseFoodEgg = newBody.data.useEggs == repBody.data.useEggs ? 0f : 1f;
+        float dUseFoodCorpse = newBody.data.useCorpse == repBody.data.useCorpse ? 0f : 1f;
         
-        // WPP: deprecated "use" variables, checking for tech directly instead
-        var dHasAnimalSensor = newBody.hasAnimalSensor == repBody.hasAnimalSensor;
+        var dHasAnimalSensor = newBody.data.hasAnimalSensor == repBody.data.hasAnimalSensor;
         float dUseFriendPos = dHasAnimalSensor ? 0f : 1f; // newFriend.usePos == repFriend.usePos
         float dUseFriendVel = dHasAnimalSensor ? 0f : 1f; // newFriend.useVel == repFriend.useVel
         float dUseFriendDir = dHasAnimalSensor ? 0f : 1f; // newFriend.useDir == repFriend.useDir

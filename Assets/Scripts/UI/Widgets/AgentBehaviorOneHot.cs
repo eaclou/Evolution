@@ -92,7 +92,7 @@ public class AgentBehaviorOneHot : MonoBehaviour
         outComm3.GetComponent<Image>().color = Color.Lerp(Color.black, Color.white, agentRef.communicationModule.outComm3[0]);
         outComm3.GetComponent<TooltipUI>().tooltipString = "OutComm3: " + agentRef.communicationModule.outComm3[0].ToString("F2");
 
-        if (!agentRef.candidateRef.candidateGenome.bodyGenome.hasComms) {
+        if (!agentRef.candidateRef.candidateGenome.bodyGenome.data.hasComms) {
             outComm0.GetComponent<TooltipUI>().tooltipString = "OutComms (disabled)";
             outComm1.GetComponent<TooltipUI>().tooltipString = "OutComms (disabled)";
             outComm2.GetComponent<TooltipUI>().tooltipString = "OutComms (disabled)";
@@ -250,6 +250,7 @@ public class AgentBehaviorOneHot : MonoBehaviour
         //UpdateBarColor(behaviorBarOther.GetComponent<Image>(), agent.coreModule.healEffector[0], isActive);
     }
 
+    // * WPP: iterate through a lookup data class with exposed threshold values bound to colors
     private void UpdateBarColor(Image image, float val, bool active) 
     {
         Color col = Color.red;

@@ -43,7 +43,6 @@ public class UnlockedTech
             values.Add(original.values[i]);
     }
     
-    // * Try to come up with another way to search that doesn't involve a massive enum
     public bool Contains(TechElementId id) 
     { 
         foreach (var value in values)
@@ -51,5 +50,12 @@ public class UnlockedTech
                 return true;
                 
         return false;
+    }
+    
+    public void GetMutatedCopy()
+    {
+        var copy = new UnlockedTech(this);
+        
+        
     }
 }

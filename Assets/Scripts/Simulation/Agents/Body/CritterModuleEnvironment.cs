@@ -1,14 +1,10 @@
 ﻿
 public class CritterModuleEnvironment : IBrainModule
 {
-    Lookup lookup => Lookup.instance;
-    NeuralMap neuralMap => lookup.neuralMap;
-
-    public int parentID;
-    public BrainModuleID moduleID => genome.moduleID;
-
-    public CritterModuleEnvironmentSensorsGenome genome;
-
+    public BrainModuleID moduleID => BrainModuleID.EnvironmentSensors;
+    
+    BodyGenomeData genomeData;
+    
     public float[] waterDepth;
     public float[] waterVelX;
     public float[] waterVelY;
@@ -26,13 +22,9 @@ public class CritterModuleEnvironment : IBrainModule
     public float[] velBottomLeftX;
     public float[] velBottomRightY;
     
-    public CritterModuleEnvironment(CritterModuleEnvironmentSensorsGenome genome) {
-        Initialize(genome);
-    }
-
-    public void Initialize(CritterModuleEnvironmentSensorsGenome genome) {
-        this.genome = genome;
-
+    public CritterModuleEnvironment(BodyGenomeData genomeData) {
+        this.genomeData = genomeData;
+    
         waterDepth = new float[1];
         waterVelX = new float[1];
         waterVelY = new float[1];
@@ -47,7 +39,7 @@ public class CritterModuleEnvironment : IBrainModule
         velBottomLeftX = new float[1];
         velBottomRightY = new float[1];
     }
-    
+
     public void MapNeuron(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
@@ -82,7 +74,7 @@ public class CritterModuleEnvironment : IBrainModule
     }
 
     public void Tick(Agent agent) {
-        if(genome.useWaterStats) {
+        if (genomeData.useWaterStats) {
             waterDepth[0] = agent.waterDepth;
             waterVelX[0] = agent.avgFluidVel.x * 10f;
             waterVelY[0] = agent.avgFluidVel.y * 10f; // *** *10f to get closer to 0-1 range since values are very low

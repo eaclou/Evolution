@@ -2,10 +2,6 @@
 
 public class CritterModuleMovement : IBrainModule
 {
-    Lookup lookup => Lookup.instance;
-    NeuralMap neuralMap => lookup.neuralMap;
-
-    public int parentID;
     public BrainModuleID moduleID => BrainModuleID.Movement;
 
     public float[] ownVelX;
@@ -28,7 +24,7 @@ public class CritterModuleMovement : IBrainModule
     public float speedBonus = 1f;
     public float turnBonus = 1f;
 	
-    public CritterModuleMovement(AgentGenome agentGenome) { //, CritterModuleMovementGenome genome) {
+    public CritterModuleMovement(AgentGenome agentGenome) {
         ownVelX = new float[1]; // 20
         ownVelY = new float[1]; // 21
 

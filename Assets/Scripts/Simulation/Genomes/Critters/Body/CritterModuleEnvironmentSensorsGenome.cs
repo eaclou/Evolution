@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 using System.Collections.Generic;
 using Random = UnityEngine.Random;
 using Playcraft;
@@ -23,6 +24,7 @@ public class CritterModuleEnvironmentSensorsGenome
         return RandomStatics.RandomFlip(settings.bodyModuleInternalMutationChance, defaultValue);
     }
 }
+*/
 
 
     #region Obsolete: delete on verify

@@ -4,14 +4,11 @@ using UnityEngine;
 [Serializable]
 public class CritterModuleFood : IBrainModule
 {
-    Lookup lookup => Lookup.instance;
-    NeuralMap neuralMap => lookup.neuralMap;
     SimulationManager simulation => SimulationManager.instance;
     VegetationManager vegetation => simulation.vegetationManager;
     ZooplanktonManager microbes => simulation.zooplanktonManager;
 
-	public int parentID;
-    public BrainModuleID moduleID => genome.moduleID;
+    public BrainModuleID moduleID => BrainModuleID.FoodSensors;
 
     public int nearestFoodParticleIndex = -1;  // debugging ** TEMP
     public Vector2 nearestFoodParticlePos;
@@ -58,14 +55,13 @@ public class CritterModuleFood : IBrainModule
     public float preferredSize;
     //public int[] foodPreferenceOrder;
     
+    public BodyGenomeData genome;
 
-    public CritterModuleFoodSensorsGenome genome;
-
-    public CritterModuleFood(CritterModuleFoodSensorsGenome genome) {
+    public CritterModuleFood(BodyGenomeData genome) {
         Initialize(genome);
     }
 
-    public void Initialize(CritterModuleFoodSensorsGenome genome) {
+    public void Initialize(BodyGenomeData genome) {
         this.genome = genome;
         
         // * WPP: Vulnerable to index out of range errors (such as in UI)
@@ -75,14 +71,14 @@ public class CritterModuleFood : IBrainModule
             nutrientGradX = new float[1];
             nutrientGradY = new float[1];
         }
-        if(genome.usePos) {
+        if(genome.useFoodPosition) {
             foodPlantPosX = new float[1];
             foodPlantPosY = new float[1];
             
             foodAnimalPosX = new float[1];
             foodAnimalPosY = new float[1];
         }
-        if(genome.useVel) {
+        if(genome.useFoodVelocity) {
             foodPlantVelX = new float[1];
             foodPlantVelY = new float[1];
             foodAnimalVelX = new float[1];
@@ -103,7 +99,8 @@ public class CritterModuleFood : IBrainModule
         foodCorpseDistance = new float[1];
         foodCorpseDirX = new float[1];
         foodCorpseDirY = new float[1];
-        if(genome.useStats) {
+        
+        if(genome.useFoodStats) {
             foodPlantQuality = new float[1];
             foodPlantRelSize = new float[1];
             foodAnimalQuality = new float[1];
@@ -111,8 +108,6 @@ public class CritterModuleFood : IBrainModule
         }
         
         sensorRange = 16f; // TEMP HARDCODED *****
-        preferredSize = genome.preferredSize;
-
         /*foodPreferenceOrder = new int[3];  // 0 == particle, 1=egg, 2==creature
         if(genome.preferenceParticles >= genome.preferenceEggs) {
             if(genome.preferenceParticles >= genome.preferenceCreatures) { // particles first place
@@ -232,22 +227,22 @@ public class CritterModuleFood : IBrainModule
         Vector2 animalParticleDir = critterToAnimalParticle.normalized;
         float nearestAnimalParticleDistance = Mathf.Clamp01((sensorRange - critterToAnimalParticle.magnitude) / sensorRange); // inverted dist(proximity) 0-1
         
-        if(genome.useStats) {
+        if(genome.useFoodStats) {
             foodPlantQuality[0] = 1f; // *** temp until particles can decay naturally
             foodPlantRelSize[0] = nearestFoodParticleAmount;
 
             foodAnimalQuality[0] = 1f; // *** temp until particles can decay naturally
             foodAnimalRelSize[0] = nearestAnimalParticleAmount;
         }
-        if(genome.usePos) {
+        if(genome.useFoodPosition) {
             foodPlantPosX[0] = Mathf.Clamp(critterToFoodParticle.x / sensorRange, -1f, 1f);
             foodPlantPosY[0] = Mathf.Clamp(critterToFoodParticle.y / sensorRange, -1f, 1f);
 
             foodAnimalPosX[0] = Mathf.Clamp(critterToAnimalParticle.x / sensorRange, -1f, 1f);
             foodAnimalPosY[0] = Mathf.Clamp(critterToAnimalParticle.y / sensorRange, -1f, 1f);
         }
-        if(genome.useVel) { }
-        if(genome.useDir) {
+        if(genome.useFoodVelocity) { }
+        if(genome.useFoodDirection) {
             foodPlantDirX[0] = foodParticleDir.x;
             foodPlantDirY[0] = foodParticleDir.y;
             foodPlantDistance[0] = nearestFoodParticleDistance;
@@ -264,7 +259,7 @@ public class CritterModuleFood : IBrainModule
             Vector2 eggSackDir = eggSackPos.normalized;
             float nearestEggSackDistance = Mathf.Clamp01((sensorRange - eggSackPos.magnitude) / sensorRange);
 
-            if(genome.useDir) {
+            if(genome.useFoodDirection) {
                 foodEggDistance[0] = nearestEggSackDistance;
                 foodEggDirX[0] = eggSackDir.x;
                 foodEggDirY[0] = eggSackDir.y;
@@ -278,7 +273,7 @@ public class CritterModuleFood : IBrainModule
             Vector2 preyDir = preyPos.normalized;
             float nearestPreyDistance = Mathf.Clamp01((sensorRange - preyPos.magnitude) / sensorRange);
 
-            if (genome.useDir) {
+            if (genome.useFoodDirection) {
                 foodCorpseDistance[0] = nearestPreyDistance;
                 foodCorpseDirX[0] = preyDir.x;
                 foodCorpseDirY[0] = preyDir.y;

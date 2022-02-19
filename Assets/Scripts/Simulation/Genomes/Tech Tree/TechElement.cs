@@ -3,8 +3,10 @@
 [CreateAssetMenu(menuName = "Pond Water/Tech Tree/Element")]
 public class TechElement : ScriptableObject
 {
-    // * Not sure if this is needed
+    [Tooltip("Potential future use")]
     public TechCategory category;
+    
+    [Tooltip("Used internally for code-based lookups")]
     public TechElementId id;
     
     // Not yet implemented
@@ -15,8 +17,11 @@ public class TechElement : ScriptableObject
     [Tooltip("Probability a mutation will lock this ability if it is not the prerequisite for another active ability.")]
     [Range(0, 1)] public float mutationLockChance;
 
+    [Tooltip("Other tech that must be unlocked before this tech can be unlocked")]
     public TechElement[] prerequisites;
-    public MetaNeuron[] unlocks;    
+    
+    [Tooltip("Neurons activated by this tech")]
+    public MetaNeuron[] unlocks;
     
     public bool HasPrerequisites(TechElement[] abilities)
     {
@@ -93,4 +98,5 @@ public enum TechElementId
     SpinalCord,
     VenomGland,
     NerveCells,
+    Unknown,
 }

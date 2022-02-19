@@ -27,21 +27,21 @@ public class SensorsPanel : MonoBehaviour
     [SerializeField] Sensor[] sensors;
 
     BodyGenome body;
-    CritterModuleFoodSensorsGenome food;
+    //CritterModuleFoodSensorsGenome food;
     //CritterModuleFriendSensorsGenome friend;
     //CritterModuleThreatSensorsGenome threat;
-    CritterModuleEnvironmentSensorsGenome environment;
+    //CritterModuleEnvironmentSensorsGenome environment;
     //CritterModuleCommunicationGenome communication;
 
     public void Refresh() 
     {
-        if (genome?.bodyGenome?.foodGenome == null) return;
+        if (genome?.bodyGenome == null) return;
         
         body = genome.bodyGenome;
-        food = body.foodGenome;
+        //food = body.foodGenome;
         //friend = body.friendGenome;
         //threat = body.threatGenome;
-        environment = body.environmentalGenome;
+        //environment = body.environmentalGenome;
         //communication = body.communicationGenome;
         
         foreach (var sensor in sensors)
@@ -57,17 +57,17 @@ public class SensorsPanel : MonoBehaviour
     {
         switch (id)
         {
-            case SensorID.Plants: return food.useNutrients || food.useStats;
-            case SensorID.Microbes: return food.usePos;
-            case SensorID.Eggs: return food.useEggs;
-            case SensorID.Meat: return food.useVel;
-            case SensorID.Corpse: return food.useCorpse;
-            case SensorID.Friend: return body.hasAnimalSensor; //friend.usePos || friend.useVel || friend.useDir;
-            case SensorID.Foe: return body.hasAnimalSensor;    //threat.usePos || threat.useVel || threat.useDir;
-            case SensorID.Water: return environment.useWaterStats;
+            case SensorID.Plants: return body.data.useNutrients || body.data.useFoodStats;
+            case SensorID.Microbes: return body.data.useFoodPosition;
+            case SensorID.Eggs: return body.data.useEggs;
+            case SensorID.Meat: return body.data.useFoodVelocity;
+            case SensorID.Corpse: return body.data.useCorpse;
+            case SensorID.Friend: return body.data.hasAnimalSensor; //friend.usePos || friend.useVel || friend.useDir;
+            case SensorID.Foe: return body.data.hasAnimalSensor;    //threat.usePos || threat.useVel || threat.useDir;
+            case SensorID.Water: return body.data.useWaterStats;
             case SensorID.Wall: return false;
             case SensorID.Internals: return true;
-            case SensorID.Communication: return body.hasComms;
+            case SensorID.Communication: return body.data.hasComms;
             case SensorID.Contact: return true;
             default: return false;
         }        
@@ -84,14 +84,14 @@ public class SensorsPanel : MonoBehaviour
         {
             case SensorID.Plants: return agent.foodModule.nutrientGradX != null;
             case SensorID.Microbes: return true;
-            case SensorID.Eggs: return food.useEggs;
+            case SensorID.Eggs: return body.data.useEggs;
             case SensorID.Meat: return agent.foodModule.foodAnimalVelX != null;
-            case SensorID.Corpse: return food.useCorpse;
+            case SensorID.Corpse: return body.data.useCorpse;
             case SensorID.Friend: return agent.friendModule.friendDirX != null;
             case SensorID.Foe: return agent.threatsModule.enemyDirX != null;
             case SensorID.Water: return agent.environmentModule.waterDepth != null;
             case SensorID.Internals: return true;
-            case SensorID.Communication: return body.hasComms;
+            case SensorID.Communication: return body.data.hasComms;
             case SensorID.Contact: return true;
             default: return false;
         }        

@@ -6,16 +6,13 @@ public class BodyGenome
     Lookup lookup => Lookup.instance;
     NeuralMap map => lookup.neuralMap;
     
-    // Cached for quick access
-    public bool hasComms;
-    public bool hasAnimalSensor;
-    
+    public BodyGenomeData data;
+
     public BodyGenome() 
     {
         unlockedTech = lookup.baseInitialAbilities.GetInitialUnlocks();
-        hasComms = HasTech(TechElementId.VocalCords);
-        hasAnimalSensor = HasTech(TechElementId.AnimalSensor);
-        
+        data = new BodyGenomeData(unlockedTech);
+
         FirstTimeInitializeCritterModuleGenomes();
         GenerateInitialRandomBodyGenome();
     }
@@ -23,23 +20,16 @@ public class BodyGenome
     public BodyGenome(BodyGenome parentGenome, MutationSettingsInstance mutationSettings)
     {
         unlockedTech = new UnlockedTech(parentGenome.unlockedTech);
+        data = new BodyGenomeData(unlockedTech);
+
         FirstTimeInitializeCritterModuleGenomes();
         SetToMutatedCopyOfParentGenome(parentGenome, mutationSettings);
     }
     
-    public UnlockedTech unlockedTech;
-    public bool HasTech(TechElementId id) { return unlockedTech.Contains(id); }
+    UnlockedTech unlockedTech;
     
-    //public TestModuleGenome testModuleGenome;
     public CritterModuleAppearanceGenome appearanceGenome;
-    //public CritterModuleCommunicationGenome communicationGenome;
     public CritterModuleCoreGenome coreGenome;
-    public CritterModuleEnvironmentSensorsGenome environmentalGenome;
-    public CritterModuleFoodSensorsGenome foodGenome;
-    //public CritterModuleFriendSensorsGenome friendGenome;
-    //public CritterModuleMovementGenome movementGenome;
-    //public CritterModuleThreatSensorsGenome threatGenome;
-    
     
     public static float GetBodySizeScore01(BodyGenome genome) {
         // Refactor: 25f is hardcoded approximate! // * WPP: approximate of what? (use a constant or exposed value)
@@ -51,13 +41,7 @@ public class BodyGenome
     public void FirstTimeInitializeCritterModuleGenomes() 
     {
         appearanceGenome = new CritterModuleAppearanceGenome();  
-        //communicationGenome = new CritterModuleCommunicationGenome();
         coreGenome = new CritterModuleCoreGenome();
-        environmentalGenome = new CritterModuleEnvironmentSensorsGenome(); 
-        foodGenome = new CritterModuleFoodSensorsGenome();
-        //friendGenome = new CritterModuleFriendSensorsGenome(); 
-        //movementGenome = new CritterModuleMovementGenome();
-        //threatGenome = new CritterModuleThreatSensorsGenome(); 
     }
         
     public Vector3 GetFullsizeBoundingBox() {
@@ -72,8 +56,6 @@ public class BodyGenome
     {
         appearanceGenome.InitializeRandom();
         coreGenome.InitializeRandom();
-        //foodGenome.InitializeRandom();     // Sets unused variables, safe to remove
-        //movementGenome.InitializeRandom(); // Sets unused variables, safe to remove
     }
     
     List<NeuronGenome> masterList = new List<NeuronGenome>();
@@ -87,8 +69,14 @@ public class BodyGenome
             foreach (var template in tech.unlocks)
                 masterList.Add(template.GetNeuronGenome());
                 
-        // WPP: moved non-conditional neurons from modules
-        // Core
+        AddNonConditionalNeurons();
+
+        // * Unable to remove (yet) as this depends on talent specializations
+        coreGenome.AppendModuleNeuronsToMasterList(masterList);
+    }
+    
+    void AddNonConditionalNeurons()
+    {
         AddNeuron("Bias");
         AddNeuron("isMouthTrigger");
         //AddNeuron("isContact");
@@ -99,35 +87,64 @@ public class BodyGenome
         AddNeuron("energyStored");
         AddNeuron("foodStored");
         AddNeuron("mouthFeedEffector");
-        
-        // Movement
         AddNeuron("ownVelX");
         AddNeuron("ownVelY");
         //AddNeuron("facingDirX");
         //AddNeuron("facingDirY");
         AddNeuron("throttleX");
         AddNeuron("throttleY");
-       // AddNeuron("dash");
-
-        // * Unable to remove (yet) as this depends on talent specializations
-        coreGenome.AppendModuleNeuronsToMasterList(masterList);
+        // AddNeuron("dash");
     }
     
     void AddNeuron(string name) { masterList.Add(map.GetData(name)); }
 
     // Mutable by Player
-    public void SetToMutatedCopyOfParentGenome(BodyGenome parentBodyGenome, MutationSettingsInstance settings) {   
-        // *** Result needs to be fully independent copy and share no references!!!
-        // *** OPTIMIZATION:  convert this to use pooling rather than using new memory alloc every mutation
-
-        // Add body-sensor/effector mutations here and Cleanup Brain Genome:
+    void SetToMutatedCopyOfParentGenome(BodyGenome parentBodyGenome, MutationSettingsInstance settings) {
+        // Add body-sensor/effector mutations here and cleanup Brain Genome:
         appearanceGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.appearanceGenome, settings);
-        //communicationGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.communicationGenome, settings);
         coreGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.coreGenome, settings);
-        environmentalGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.environmentalGenome, settings);
-        foodGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.foodGenome, settings);
-        //friendGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.friendGenome, settings);        
-        //movementGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.movementGenome, settings);
-        //threatGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.threatGenome, settings);
+        
+        
     }
+}
+
+/// Quick-access properties, calculated by unlocked tech
+public class BodyGenomeData
+{
+    UnlockedTech unlockedTech;
+
+    public bool hasComms;
+    public bool hasAnimalSensor;
+    public bool useWaterStats;
+    public bool useCardinals;
+    public bool useDiagonals;
+    
+    public bool useNutrients;
+    public bool useFoodPosition;
+    public bool useFoodVelocity;
+    public bool useFoodDirection;
+    public bool useFoodStats;
+    public bool useEggs;
+    public bool useCorpse;
+    
+    public BodyGenomeData(UnlockedTech unlockedTech)
+    {
+        this.unlockedTech = unlockedTech;
+        hasComms = HasTech(TechElementId.VocalCords);
+        hasAnimalSensor = HasTech(TechElementId.AnimalSensor);
+        
+        // * Fill in enum values
+        useWaterStats = HasTech(TechElementId.Unknown);
+        useCardinals = HasTech(TechElementId.Unknown);
+        useDiagonals = HasTech(TechElementId.Unknown); 
+        useNutrients = HasTech(TechElementId.Unknown);
+        useFoodPosition = HasTech(TechElementId.Unknown);
+        useFoodVelocity = HasTech(TechElementId.Unknown);
+        useFoodDirection = HasTech(TechElementId.Unknown);
+        useFoodStats = HasTech(TechElementId.Unknown);
+        useEggs = HasTech(TechElementId.Unknown);
+        useCorpse = HasTech(TechElementId.Unknown);
+    }
+    
+    public bool HasTech(TechElementId id) { return unlockedTech.Contains(id); }
 }
