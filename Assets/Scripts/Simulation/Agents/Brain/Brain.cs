@@ -113,13 +113,18 @@ public class Brain
         // NAIVE APPROACH:
         // run through all links and save sum values in target neurons
         foreach (var axon in axons) {
+            float curVal = 0f;
+            if (axon.from.currentValue != null) {
+                curVal = axon.from.currentValue[0];
+            }
             // Find input neuron, multiply its value by the axon weight, and add that to output neuron total:
             //neurons[axon.to].inputTotal += axon.weight * neurons[axon.from].currentValue[0];
-            axon.to.inputTotal += axon.weight * axon.from.currentValue[0];
+            axon.to.inputTotal += axon.weight * curVal;
         }
         
         // Once all axons are calculated, process the neurons:
         foreach (var neuron in neurons) {
+            if (neuron.currentValue == null) neuron.currentValue = new float[1]; // null reference error fix
             neuron.previousValue = neuron.currentValue[0]; // Save previous state
             if (neuron.neuronType != NeuronType.In) {
                 neuron.currentValue[0] = TransferFunctions.Evaluate(TransferFunctions.TransferFunction.RationalSigmoid, neuron.inputTotal);

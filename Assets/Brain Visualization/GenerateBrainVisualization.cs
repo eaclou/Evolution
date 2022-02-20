@@ -502,7 +502,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         
         UpdateNeuronBuffer("CSSimNeuronAttract", axons.Count, 1);
         UpdateNeuronBuffer("CSSimNeuronRepel", numNeurons, numNeurons);
-        UpdateNeuronBuffer("CSSimAxonRepel", axons.Count, axons.Count);
+        //UpdateNeuronBuffer("CSSimAxonRepel", axons.Count, axons.Count);
 
         // Regenerate triangles
         appendTrianglesCoreCBuffer?.Release();

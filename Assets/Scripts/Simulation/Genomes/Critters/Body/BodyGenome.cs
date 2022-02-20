@@ -134,16 +134,16 @@ public class BodyGenomeData
         hasAnimalSensor = HasTech(TechElementId.AnimalSensor);
         
         // * Fill in enum values
-        useWaterStats = HasTech(TechElementId.Unknown);
-        useCardinals = HasTech(TechElementId.Unknown);
-        useDiagonals = HasTech(TechElementId.Unknown); 
-        useNutrients = HasTech(TechElementId.Unknown);
-        useFoodPosition = HasTech(TechElementId.Unknown);
-        useFoodVelocity = HasTech(TechElementId.Unknown);
-        useFoodDirection = HasTech(TechElementId.Unknown);
-        useFoodStats = HasTech(TechElementId.Unknown);
-        useEggs = HasTech(TechElementId.Unknown);
-        useCorpse = HasTech(TechElementId.Unknown);
+        useWaterStats = HasTech(TechElementId.WaterSensor);
+        useCardinals = HasTech(TechElementId.SensoryGanglia);
+        useDiagonals = HasTech(TechElementId.SensoryGanglia); 
+        useNutrients = HasTech(TechElementId.SensoryGanglia);
+        useFoodPosition = HasTech(TechElementId.FoodSensor);
+        useFoodVelocity = HasTech(TechElementId.FoodSensor);
+        useFoodDirection = HasTech(TechElementId.FoodSensor);
+        useFoodStats = HasTech(TechElementId.Eyes);
+        useEggs = HasTech(TechElementId.EggSensor);
+        useCorpse = HasTech(TechElementId.CorpseSensor);
     }
     
     public bool HasTech(TechElementId id) { return unlockedTech.Contains(id); }
