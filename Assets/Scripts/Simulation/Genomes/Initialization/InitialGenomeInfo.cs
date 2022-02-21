@@ -5,9 +5,10 @@ using Playcraft;
 public class InitialGenomeInfo : ScriptableObject
 {
     [Header("Creature")]
-    public Vector2 creatureBaseLength = new Vector2(0.4f, 0.4f);
-    public Vector2 creatureAspectRatio = new Vector2(0.2f, 0.3f);
+    public GenomeField creatureBaseLength = new GenomeField(); 
+    public GenomeField creatureAspectRatio = new GenomeField();
     
+    // * WPP: convert to GenomeFields, see above for example
     [Tooltip("Mouth/Snout")]
     public float creatureFrontTaperSize = 0.3f;
     public float creatureBackTaperSize = 0.4f;
@@ -22,6 +23,8 @@ public class InitialGenomeInfo : ScriptableObject
     
     [Header("Eyes")]
     public int eyeCount = 2;
+    
+    // * WPP: Convert to GenomeFields, see above for example
     [Tooltip("1f = full hemisphere coverage, 0 = top")]
     public Vector2 eyeSpread = new Vector2(0.3f, 0.7f);
     public Vector2 eyeLocationAmplitude = new Vector2(0.4f, 0.6f);
@@ -120,8 +123,8 @@ public class InitialGenomeData
     /// Initialize from ranges stored in editor-defined template
     public InitialGenomeData(InitialGenomeInfo template)
     {
-        creatureBaseLength = RandomStatics.RandomRange(template.creatureBaseLength);
-        creatureAspectRatio = RandomStatics.RandomRange(template.creatureAspectRatio);
+        creatureBaseLength = RandomStatics.RandomRange(template.creatureBaseLength.initialRange);
+        creatureAspectRatio = RandomStatics.RandomRange(template.creatureAspectRatio.initialRange);
         
         creatureFrontTaperSize = template.creatureFrontTaperSize;
         creatureBackTaperSize = template.creatureBackTaperSize;

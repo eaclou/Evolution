@@ -5,7 +5,9 @@ using Playcraft;
 public class InitialGenomeBodyPartInfo : ScriptableObject
 {
     [Header("Randomized Ranges")]
-    public Vector2 length = new Vector2(0.75f, 1.25f);
+    public GenomeField length = new GenomeField();
+    
+    // * WPP: convert to GenomeFields, see above for example
     public Vector2 frontWidth = new Vector2(0.75f, 1.25f);
     public Vector2 frontHeight = new Vector2(0.75f, 1.25f);
     public Vector2 frontVerticalOffset = new Vector2(-.25f, .25f);
@@ -31,7 +33,8 @@ public class InitialGenomeBodyPartData
     
     public InitialGenomeBodyPartData(InitialGenomeBodyPartInfo template)
     {
-        length = RandomStatics.RandomRange(template.length);
+        length = RandomStatics.RandomRange(template.length.initialRange);
+        
         frontWidth = RandomStatics.RandomRange(template.frontWidth);
         frontHeight = RandomStatics.RandomRange(template.frontHeight);
         frontVerticalOffset = RandomStatics.RandomRange(template.frontVerticalOffset);

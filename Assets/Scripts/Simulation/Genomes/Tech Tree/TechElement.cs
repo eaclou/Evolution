@@ -10,11 +10,9 @@ public class TechElement : ScriptableObject
     [Tooltip("Used internally for code-based lookups")]
     public TechElementId id;
     
-    // Not yet implemented
     [Tooltip("Probability a mutation will unlock this ability if all prerequisites are met.")]
     [Range(0, 1)] public float mutationUnlockChance;
     
-    // Not yet implemented
     [Tooltip("Probability a mutation will lock this ability if it is not the prerequisite for another active ability.")]
     [Range(0, 1)] public float mutationLockChance;
 
@@ -97,7 +95,7 @@ public enum TechElementId
     Clock,
     Dream,
     Hormones,
-    Priopriception,
+    Proprioception,
     SensoryGanglia,
     Sleep,
     BiteResistant,

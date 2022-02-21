@@ -8,22 +8,12 @@ public static class UtilityMutationFunctions {
         
         if (RandomStatics.CoinToss(mutationChance))
             mutatedValue = RandomStatics.CoinToss();
-
-        // WPP: simplified with RandomStatics.CoinToss
-        //float randomRoll = Random.Range(0f, 1f);
-
-        //if (randomRoll < mutationChance) {
-        //float newVal = Random.Range(0f, 1f);
-            
-            //if(newVal < 0.5f) {
-            //    mutatedValue = false;
-            //}
-            //else {
-            //    mutatedValue = true;
-            //}
-        //}
-
+        
         return mutatedValue;
+    }
+    
+    public static float GetMutatedFloatAdditive(float current, float chance, float stepSize, Vector2 range) {
+        return GetMutatedFloatAdditive(current, chance, stepSize, range.x, range.y);
     }
 
 	public static float GetMutatedFloatAdditive(float curValue, float mutationChance, float mutationStepSize, float minValue, float maxValue) {

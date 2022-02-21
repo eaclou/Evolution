@@ -10,7 +10,7 @@ public class CritterModuleCoreGenome
     Lookup lookup => Lookup.instance;
     NeuralMap map => lookup.neuralMap;
     NameList nameList => lookup.nameList;
-    InitialGenomeInfo genomeInitialization => lookup.genomeInitialization;
+    InitialGenomeInfo genomeInfo => lookup.genomeInitialization;
 
     public readonly BrainModuleID moduleID = BrainModuleID.Core;
 
@@ -31,7 +31,7 @@ public class CritterModuleCoreGenome
         get
         {
              if (_data == null) 
-                _data = new InitialGenomeData(genomeInitialization); 
+                _data = new InitialGenomeData(genomeInfo); 
              
              return _data;   
         }
@@ -342,7 +342,7 @@ public class CritterModuleCoreGenome
         initModifier.maskIndicesList.Add(masksList.Count - 1); // reference mask by index to allow reuse by other shape modifiers    
         shapeModifiersList.Add(initModifier);
 
-        data = genomeInitialization.GetInitialGenomeData();
+        data = genomeInfo.GetInitialGenomeData();
     }
 
     List<NeuronGenome> masterList;
@@ -446,16 +446,16 @@ public class CritterModuleCoreGenome
             masksList.Add(maskData);
         }        
         
-        // * WPP: expose hardcoded values, move logic to InitialGenomeData
-        // Or start with deformed sphere???? *****
-        creatureBaseLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureBaseLength, settings.bodyCoreSizeMutationChance, settings.bodyCoreMutationStepSize, 0.4f, 0.4f);
-        creatureAspectRatio = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureAspectRatio, settings.bodyCoreSizeMutationChance, settings.bodyCoreMutationStepSize, 0.2f, 0.3f);
+
+        // WPP: exposed mutation fields, use as examples for others
+        creatureBaseLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureBaseLength, settings.bodyCoreSizeMutationChance, settings.bodyCoreMutationStepSize, genomeInfo.creatureBaseLength.mutationRange);
+        creatureAspectRatio = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureAspectRatio, settings.bodyCoreSizeMutationChance, settings.bodyCoreMutationStepSize, genomeInfo.creatureAspectRatio.mutationRange);
         
         // Mouth/Snout:
         creatureFrontTaperSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureFrontTaperSize, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0.05f, 0.33f);
         creatureBackTaperSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.creatureBackTaperSize, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0.05f, 0.33f);
-                
-        mouthLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthLength, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0.2f, 2f);
+        
+        mouthLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthLength, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, genomeInfo.mouth.length.mutationRange);//0.2f, 2f);
         mouthFrontWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthFrontWidth, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0.05f, 1.5f);  // width of snout at front of critter (RELATIVE TO LENGTH OF SEGMENT!)
         mouthFrontHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthFrontHeight, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0.05f, 1.5f);
         mouthFrontVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthFrontVerticalOffset, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, -1f, 1f);
@@ -465,7 +465,7 @@ public class CritterModuleCoreGenome
         
         mouthToHeadTransitionSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.mouthToHeadTransitionSize, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0.25f, 1f);
         // Head        
-        headLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headLength, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0.2f, 2f);
+        headLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headLength, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, genomeInfo.head.length.mutationRange); //0.2f, 2f);
         headFrontWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headFrontWidth, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0.05f, 1.5f);
         headFrontHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headFrontHeight, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0.05f, 1.5f);
         headFrontVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headFrontVerticalOffset, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, -1f, 1f);
@@ -475,7 +475,7 @@ public class CritterModuleCoreGenome
 
         headToBodyTransitionSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.headToBodyTransitionSize, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0.25f, 1f);
         // Body:
-        bodyLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyLength, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0.5f, 5f);
+        bodyLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyLength, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, genomeInfo.body.length.mutationRange); //0.5f, 5f);
         bodyFrontWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyFrontWidth, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0.05f, 1.5f);
         bodyFrontHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyFrontHeight, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0.05f, 1.5f);
         bodyFrontVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyFrontVerticalOffset, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, -1f, 1f);
@@ -485,7 +485,7 @@ public class CritterModuleCoreGenome
 
         bodyToTailTransitionSize = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.bodyToTailTransitionSize, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0.25f, 1f);
         //Tail:
-        tailLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailLength, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0.5f, 5f);
+        tailLength = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailLength, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, genomeInfo.tail.length.mutationRange); //0.5f, 5f);
         tailFrontWidth = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailFrontWidth, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0.05f, 1.5f);
         tailFrontHeight = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailFrontHeight, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, 0.05f, 1.5f);
         tailFrontVerticalOffset = UtilityMutationFunctions.GetMutatedFloatAdditive(parentGenome.tailFrontVerticalOffset, settings.bodyProportionsMutationChance, settings.bodyProportionsMutationStepSize, -1f, 1f);
