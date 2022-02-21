@@ -58,16 +58,18 @@ public class UnlockedTech
         var removed = new List<TechElement>();
         var added = new List<TechElement>();
         
+        // Random chance of removing a tech if it is not the prerequisite of some other tech the agent has.
         foreach (var value in values)
-            if (value.IsPrerequisite(values) && RandomStatics.CoinToss(value.mutationLockChance))
+            if (!value.IsPrerequisite(values) && RandomStatics.CoinToss(value.mutationLockChance))
                 removed.Add(value);
                 
         foreach (var remove in removed)
             values.Remove(remove);
 
+        // Random chance of adding a tech if its prerequisite is met and the agent doesn't already have it.
         foreach (var value in values)
             foreach (var tech in value.nextTech)
-                if (RandomStatics.CoinToss(tech.mutationUnlockChance))
+                if (RandomStatics.CoinToss(tech.mutationUnlockChance) && !values.Contains(tech))
                     added.Add(tech);
         
         foreach (var add in added)

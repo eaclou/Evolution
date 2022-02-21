@@ -99,11 +99,10 @@ public class BodyGenome
     void AddNeuron(string name) { masterList.Add(map.GetData(name)); }
 
     // Mutable by Player
+    // Add body-sensor/effector mutations here and cleanup Brain Genome:
     void SetToMutatedCopyOfParentGenome(BodyGenome parentBodyGenome, MutationSettingsInstance settings) {
-        // Add body-sensor/effector mutations here and cleanup Brain Genome:
         appearanceGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.appearanceGenome, settings);
         coreGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.coreGenome, settings);
-        
         unlockedTech = unlockedTech.GetMutatedCopy();
     }
 }
@@ -130,10 +129,9 @@ public class BodyGenomeData
     public BodyGenomeData(UnlockedTech unlockedTech)
     {
         this.unlockedTech = unlockedTech;
+        
         hasComms = HasTech(TechElementId.VocalCords);
         hasAnimalSensor = HasTech(TechElementId.AnimalSensor);
-        
-        // * Fill in enum values
         useWaterStats = HasTech(TechElementId.WaterSensor);
         useCardinals = HasTech(TechElementId.SensoryGanglia);
         useDiagonals = HasTech(TechElementId.SensoryGanglia); 
