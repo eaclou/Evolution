@@ -5,17 +5,17 @@ using Playcraft;
 public class InitialGenomeBodyPartInfo : ScriptableObject
 {
     [Header("Randomized Ranges")]
-    public GenomeField length = new GenomeField();
+    public GenomeField length = new GenomeField();//
     
     // * WPP: convert to GenomeFields, see above for example
-    public Vector2 frontWidth = new Vector2(0.75f, 1.25f);
-    public Vector2 frontHeight = new Vector2(0.75f, 1.25f);
-    public Vector2 frontVerticalOffset = new Vector2(-.25f, .25f);
-    public Vector2 backWidth = new Vector2(0.75f, 1.25f);
-    public Vector2 backHeight = new Vector2(0.75f, 1.25f);
-    public Vector2 backVerticalOffset = new Vector2(-0.25f, 0.25f);
+    public GenomeField frontWidth = new GenomeField();//new Vector2(0.75f, 1.25f);
+    public GenomeField frontHeight = new GenomeField();//new Vector2(0.75f, 1.25f);
+    public GenomeField frontVerticalOffset = new GenomeField();//new Vector2(-.25f, .25f);
+    public GenomeField backWidth = new GenomeField();//new Vector2(0.75f, 1.25f);
+    public GenomeField backHeight = new GenomeField();//new Vector2(0.75f, 1.25f);
+    public GenomeField backVerticalOffset = new GenomeField();//new Vector2(-0.25f, 0.25f);
     [Tooltip("0-1 normalized")]
-    public Vector2 transitionSize = new Vector2(0.35f, 0.65f);
+    public GenomeField transitionSize = new GenomeField();//new Vector2(0.35f, 0.65f);
     
     public InitialGenomeBodyPartData GetRandomizedData() { return new InitialGenomeBodyPartData(this); }
 }
@@ -35,12 +35,12 @@ public class InitialGenomeBodyPartData
     {
         length = RandomStatics.RandomRange(template.length.initialRange);
         
-        frontWidth = RandomStatics.RandomRange(template.frontWidth);
-        frontHeight = RandomStatics.RandomRange(template.frontHeight);
-        frontVerticalOffset = RandomStatics.RandomRange(template.frontVerticalOffset);
-        backWidth = RandomStatics.RandomRange(template.backWidth);
-        backHeight = RandomStatics.RandomRange(template.backHeight);
-        backVerticalOffset = RandomStatics.RandomRange(template.backVerticalOffset);
-        transitionSize = RandomStatics.RandomRange(template.transitionSize);
+        frontWidth = RandomStatics.RandomRange(template.frontWidth.initialRange);
+        frontHeight = RandomStatics.RandomRange(template.frontHeight.initialRange);
+        frontVerticalOffset = RandomStatics.RandomRange(template.frontVerticalOffset.initialRange);
+        backWidth = RandomStatics.RandomRange(template.backWidth.initialRange);
+        backHeight = RandomStatics.RandomRange(template.backHeight.initialRange);
+        backVerticalOffset = RandomStatics.RandomRange(template.backVerticalOffset.initialRange);
+        transitionSize = RandomStatics.RandomRange(template.transitionSize.initialRange);
     }
 }

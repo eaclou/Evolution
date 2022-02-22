@@ -13,12 +13,12 @@ public class AgentGenome
         ConstructRandom(initialConnectionDensity, hiddenNeurons);
     }
     
-    public AgentGenome(MutationSettingsInstance mutationSettings, float lerpV) 
+    /*public AgentGenome(MutationSettingsInstance mutationSettings, float lerpV) 
     {
         int numberOfHiddenNeurons = Mathf.RoundToInt(4f * lerpV);  //***EAC CHANGE!
         float brainInitialConnectionDensity = mutationSettings.brainInitialConnectionChance * lerpV;
         ConstructRandom(brainInitialConnectionDensity, numberOfHiddenNeurons);
-    }
+    }*/
     
     void ConstructRandom(float initialConnectionDensity, int hiddenNeuronCount)
     {
