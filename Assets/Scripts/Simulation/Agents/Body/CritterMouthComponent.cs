@@ -67,10 +67,11 @@ public class CritterMouthComponent : MonoBehaviour
 
     void ActiveFeedBiteCheck() 
     {
-        for (int i = edibleObjectsInRange.Count - 1; i >= 0; i--)
-        {
-            RequestFeedBiteAgent(edibleObjectsInRange[i]);
-            RequestBiteEggSack(edibleObjectsInRange[i]);
+        for (int i = edibleObjectsInRange.Count - 1; i >= 0; i--) {            
+            if (edibleObjectsInRange.Count != 0) {
+                RequestFeedBiteAgent(edibleObjectsInRange[i]);
+                RequestBiteEggSack(edibleObjectsInRange[i]);
+            }
         }
     }
     

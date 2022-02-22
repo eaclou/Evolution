@@ -112,4 +112,5 @@ public enum TechElementId
     VenomGland,
     NerveCells,
     Unknown,
+    Root
 }

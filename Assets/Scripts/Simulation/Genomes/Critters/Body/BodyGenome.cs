@@ -72,7 +72,7 @@ public class BodyGenome
         AddNonConditionalNeurons();
 
         // * Unable to remove (yet) as this depends on talent specializations
-        coreGenome.AppendModuleNeuronsToMasterList(masterList);
+        //coreGenome.AppendModuleNeuronsToMasterList(masterList);
     }
     
     void AddNonConditionalNeurons()
@@ -84,11 +84,11 @@ public class BodyGenome
         //AddNeuron("contactForceY");
         //AddNeuron("hitPoints");
         //AddNeuron("stamina");
-        AddNeuron("energyStored");
+        //AddNeuron("energyStored");
         AddNeuron("foodStored");
-        AddNeuron("mouthFeedEffector");
-        AddNeuron("ownVelX");
-        AddNeuron("ownVelY");
+        //AddNeuron("ownVelX");
+        //AddNeuron("ownVelY");
+        AddNeuron("mouthFeedEffector");        
         //AddNeuron("facingDirX");
         //AddNeuron("facingDirY");
         AddNeuron("throttleX");

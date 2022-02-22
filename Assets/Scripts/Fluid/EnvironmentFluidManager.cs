@@ -98,11 +98,11 @@ public class EnvironmentFluidManager : Singleton<EnvironmentFluidManager>
         RerollForcePoints();
         //debugMat.SetTexture("_MainTex", sourceColorRT);
 
-        computeShaderFluidSim.SetFloat("_ForceOn", 1f);
+        computeShaderFluidSim.SetFloat("_ForceOn", 0f);
     }
     
     public void RerollForcePoints() {
-        CreateForcePoints(44f, 64f, 128f);
+        CreateForcePoints(1f, 64f, 128f);
     }
     
     public void Tick(VegetationManager vegetationManagerRef) {

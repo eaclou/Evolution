@@ -80,7 +80,7 @@ public class SimulationManager : Singleton<SimulationManager>
 
     public int curApproxGen = 1;
 
-    public int numInitialHiddenNeurons = 16;
+    public int numInitialHiddenNeurons = 2;
             
     private int numAgentsProcessed = 0;
 

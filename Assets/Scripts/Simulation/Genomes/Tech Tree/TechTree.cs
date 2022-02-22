@@ -21,7 +21,8 @@ public enum TechCategory
     SensoryGanglia, 
     LimbDifferentiation, 
     NerveCells, 
-    Lysosomes 
+    Lysosomes,
+    Root
 }
 
 [Serializable]

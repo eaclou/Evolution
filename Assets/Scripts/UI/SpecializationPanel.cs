@@ -4,7 +4,9 @@ public class SpecializationPanel : MonoBehaviour
 {
     SelectionManager selectionManager => SelectionManager.instance;
     CritterModuleCoreGenome coreGenome => selectionManager.focusedCandidate.candidateGenome.bodyGenome.coreGenome;
-    
+    [SerializeField]
+    TechElementIconUI[] techElementIcons;
+
     [SerializeField] StatUI attack;
     [SerializeField] StatUI defense;
     [SerializeField] StatUI speed;
@@ -15,5 +17,16 @@ public class SpecializationPanel : MonoBehaviour
         defense.RefreshDisplay(coreGenome.talentSpecializationDefense * 100f, coreGenome.talentSpecializationDefense, false);
         speed.RefreshDisplay(coreGenome.talentSpecializationSpeed * 100f, coreGenome.talentSpecializationSpeed, false);
         energy.RefreshDisplay(coreGenome.talentSpecializationUtility * 100f, coreGenome.talentSpecializationUtility, false);
+
+        if(techElementIcons.Length >= 0) {
+            foreach(var tech in techElementIcons) {
+                if(selectionManager.focusedCandidate.candidateGenome.bodyGenome.data.HasTech(tech.techElement.id)) {
+                    tech.gameObject.transform.localScale = Vector3.one;
+                }
+                else {
+                    tech.gameObject.transform.localScale = Vector3.one * 0.12f;
+                }
+            }
+        }
     }
 }

@@ -78,7 +78,6 @@ public class CritterModuleEnvironment : IBrainModule
             waterDepth[0] = agent.waterDepth;
             waterVelX[0] = agent.avgFluidVel.x * 10f;
             waterVelY[0] = agent.avgFluidVel.y * 10f; // *** *10f to get closer to 0-1 range since values are very low
-
             depthGradX[0] = agent.depthGradient.x;
             depthGradY[0] = agent.depthGradient.y;
             //depthEast[0] = agent.depthEast;
