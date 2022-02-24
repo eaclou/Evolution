@@ -79,21 +79,10 @@ public class BodyGenome
     {
         AddNeuron("Bias");
         AddNeuron("isMouthTrigger");
-        //AddNeuron("isContact");
-        //AddNeuron("contactForceX");
-        //AddNeuron("contactForceY");
-        //AddNeuron("hitPoints");
-        //AddNeuron("stamina");
-        //AddNeuron("energyStored");
-        AddNeuron("foodStored");
-        //AddNeuron("ownVelX");
-        //AddNeuron("ownVelY");
-        AddNeuron("mouthFeedEffector");        
-        //AddNeuron("facingDirX");
-        //AddNeuron("facingDirY");
+        AddNeuron("foodStored"); // Or hungerAlarm???
+        AddNeuron("mouthFeedEffector");  // This only works with Collider2Ds, won't detect Plants or Microbes
         AddNeuron("throttleX");
         AddNeuron("throttleY");
-        // AddNeuron("dash");
     }
     
     void AddNeuron(string name) { masterList.Add(map.GetData(name)); }
