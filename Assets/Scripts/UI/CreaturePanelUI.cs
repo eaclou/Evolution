@@ -12,23 +12,8 @@ public class CreaturePanelUI : MonoBehaviour
     Agent agent => simulationManager.agents[cameraManager.targetAgentIndex];
     float totalTicksAlive => simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].avgCandidateData.performanceData.totalTicksAlive;
 
-    // WPP: moved to PanelModeData
-    /*[SerializeField]
-    GameObject panelPortrait;
     [SerializeField]
-    GameObject panelGenome;
-    [SerializeField]
-    GameObject panelBrain;
-    [SerializeField]
-    GameObject panelPaperDoll;
-
-    [SerializeField]
-    Image imageAppearanceIcon;
-    [SerializeField]
-    Image imageGenomeIcon;
-    [SerializeField]
-    Image imageBrainIcon;*/
-    
+    Animator CreaturePanelAnimator;
     [SerializeField] Color onColor = Color.white;
     [SerializeField] Color offColor = Color.gray;
 
@@ -40,29 +25,12 @@ public class CreaturePanelUI : MonoBehaviour
     public TooltipUI tooltipGenome;
     public TooltipUI tooltipAppearance;
     public TooltipUI tooltipSpeciesIcon;
-    
-    //[SerializeField]
-    //Text textPanelStateDebug;
-
-    // * WPP: move to Lookup
-    /*public Sprite spriteIconCreatureStateEgg;
-    public Sprite spriteIconCreatureStateYoung;
-    public Sprite spriteIconCreatureStateMature;
-    public Sprite spriteIconCreatureStateDecaying;
-    public Sprite spriteIconCreatureStateFossil;*/
-    
+        
     [SerializeField] AgentActionStateData[] actionStates;
     [SerializeField] AgentActionStateData defaultActionState;
     
     [SerializeField] PanelModeData[] panelModes;
     [SerializeField] StringSO startingPanelMode;
-
-    // WPP: moved to AgentActionStateData
-    /*public Sprite spriteIconCreatureActionAttack;
-    public Sprite spriteIconCreatureActionDefend;
-    public Sprite spriteIconCreatureActionDash;
-    public Sprite spriteIconCreatureActionRest;
-    public Sprite spriteIconCreatureActionFeed;*/
 
     public Sprite spriteBrainButton;
 
@@ -87,6 +55,15 @@ public class CreaturePanelUI : MonoBehaviour
         portraitCritterInitDataCBuffer?.Release();
         portraitCritterInitDataCBuffer = new ComputeBuffer(6, SimulationStateData.GetCritterInitDataSize());
         critterPortraitStrokesCBuffer = new ComputeBuffer(1 * theRenderKing.GetNumStrokesPerCritter(), theRenderKing.GetMemorySizeCritterStrokeData());
+    }
+
+    public void ClickGenome() {
+        CreaturePanelAnimator.SetBool("GenomeON", true);
+        CreaturePanelAnimator.SetBool("BrainWiringON", false);
+    }
+    public void ClickBrain() {
+        CreaturePanelAnimator.SetBool("GenomeON", false);
+        CreaturePanelAnimator.SetBool("BrainWiringON", true);
     }
     
     public void Tick() 

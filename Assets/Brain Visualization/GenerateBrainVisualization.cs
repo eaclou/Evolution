@@ -246,7 +246,7 @@ public class GenerateBrainVisualization : MonoBehaviour
     public void PrintAxonPositions(List<Axon> axons) {
         string axonText = axons.Count + " Axons\n";
         for (int i = 0; i < axons.Count; i++) {
-            axonText += i + "[" + axons[i].from.name + axons[i].from.index + "->" + axons[i].to.name + axons[i].to.index + "\n";
+            axonText += i + "[" + axons[i].from.name + axons[i].from.index + "->" + axons[i].to.name + axons[i].to.index + ", " + axons[i].weight + "\n";
         }        
         Debug.Log(axonText);
     }

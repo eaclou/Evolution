@@ -19,7 +19,7 @@ public enum TechCategory
     Social, 
     FoodSensors, 
     SelfStatus, 
-    Clock, 
+    Swim, 
     Environment, 
     Predation,
     Root

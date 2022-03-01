@@ -17,7 +17,8 @@ public class PlaceNeuronsAtUI : MonoBehaviour
 
         foreach (var placement in uiPlacements) {
             if (placement.id == data.iconID) {
-                Vector3 localPos = Vector3.zero; // Random.insideUnitSphere * 0.001f;
+                return (placement.location.localPosition / 140f) + Random.insideUnitSphere * 0.01f;
+                /*Vector3 localPos = Vector3.zero; // Random.insideUnitSphere * 0.001f;
                 float frac = Mathf.Clamp01((float)placement.id / (float)uiPlacements.Length);
                 float radius = 0.9f;
                 float angleRadians = Mathf.PI * frac;
@@ -25,13 +26,13 @@ public class PlaceNeuronsAtUI : MonoBehaviour
                 float y = Mathf.Sin(angleRadians) * radius;
                 localPos.x = x;
                 localPos.y = y;
-                return localPos + Random.insideUnitSphere * 0.001f;
+                return localPos + Random.insideUnitSphere * 0.001f;*/
             }
-        }        //return (placement.location.position - new Vector3(960f, 600f, 0f)).normalized * 0.85f + Random.insideUnitSphere * 0.01f;
+        }        
 
                 
         Debug.LogError($"Unable to find placement for {neuron.moduleID} {data}");
-        return Vector3.zero;
+        return Vector3.zero + Random.insideUnitSphere * 0.01f;
     }
 
     public Vector3 GetOutputNeuronPosition(Neuron neuron)
@@ -40,7 +41,8 @@ public class PlaceNeuronsAtUI : MonoBehaviour
 
         foreach (var placement in uiPlacements) {
             if (placement.id == data.iconID) {
-                Vector3 localPos = Vector3.zero; // Random.insideUnitSphere * 0.001f;
+                return (placement.location.localPosition / 140f) + Random.insideUnitSphere * 0.01f;
+                /*Vector3 localPos = Vector3.zero; // Random.insideUnitSphere * 0.001f;
                 float frac = Mathf.Clamp01((float)placement.id / (float)uiPlacements.Length);
                 float radius = 0.35f;
                 float angleRadians = Mathf.PI * frac;
@@ -48,12 +50,12 @@ public class PlaceNeuronsAtUI : MonoBehaviour
                 float y = Mathf.Sin(angleRadians) * radius;
                 localPos.x = x;
                 localPos.y = y - 0.8f;
-                return localPos + Random.insideUnitSphere * 0.001f;
+                return localPos + Random.insideUnitSphere * 0.001f;*/
             }
         }
                 
         Debug.LogError($"Unable to find placement for {neuron.moduleID} {data}");
-        return Vector3.zero;
+        return Vector3.zero + Random.insideUnitSphere * 0.01f;
     }
     
     /// NOT IMPLEMENTED
@@ -75,7 +77,7 @@ public class PlaceNeuronsAtUI : MonoBehaviour
         localPos.x = x;
         localPos.y = y + 0.1f;
         //Debug.Log($"Unable to find placement for {neuron.index} {data.iconID}");
-        return localPos + Random.insideUnitSphere * 0.001f;
+        return localPos + Random.insideUnitSphere * 0.01f;
             //}
         //}
         

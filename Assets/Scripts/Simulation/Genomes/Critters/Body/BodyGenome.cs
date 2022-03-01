@@ -79,9 +79,9 @@ public class BodyGenome
     {
         AddNeuron("Bias");
         AddNeuron("isMouthTrigger");        
-        AddNeuron("mouthFeedEffector");  // This only works with Collider2Ds, won't detect Plants or Microbes
-        AddNeuron("throttleX");
-        AddNeuron("throttleY");
+        //AddNeuron("mouthFeedEffector");  // This only works with Collider2Ds, won't detect Plants or Microbes
+        //AddNeuron("throttleX");
+        //AddNeuron("throttleY");
     }
     
     void AddNeuron(string name) { masterList.Add(map.GetData(name)); }
@@ -104,8 +104,7 @@ public class BodyGenomeData
     public bool hasAnimalSensor;
     public bool useWaterStats;
     public bool useCardinals;
-    public bool useDiagonals;
-    
+    public bool useDiagonals;    
     public bool useNutrients;
     public bool useFoodPosition;
     public bool useFoodVelocity;
@@ -124,11 +123,11 @@ public class BodyGenomeData
         useCardinals = HasTech(TechElementId.CorpseDist);
         useDiagonals = HasTech(TechElementId.CorpseVel); 
         useNutrients = HasTech(TechElementId.Nutrients);
-        useFoodPosition = HasTech(TechElementId.FoodSensors);
-        useFoodVelocity = HasTech(TechElementId.FoodSensors);
-        useFoodDirection = HasTech(TechElementId.FoodSensors); //***EAC CHANGE THIS!!
+        useFoodPosition = HasTech(TechElementId.MicrobesDir);
+        useFoodVelocity = HasTech(TechElementId.PlantsVel);
+        useFoodDirection = HasTech(TechElementId.PlantsDir); //***EAC CHANGE THIS!!
         useFoodStats = HasTech(TechElementId.FoodSensors);
-        useEggs = HasTech(TechElementId.Predation);
+        useEggs = HasTech(TechElementId.EggDir);
         useCorpse = HasTech(TechElementId.CorpseDir);
     }
     

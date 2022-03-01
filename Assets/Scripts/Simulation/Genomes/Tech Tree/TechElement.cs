@@ -80,18 +80,19 @@ public enum TechElementId
     Energy,
     OwnVel,
     OwnDir,
-    Clock,
+    Swim, //throttle
     Dash,
     Sleep,
     IsContact,
     ContactXY,
     Water,
-    Predation,
+    Predation, //bite
     Attack,
     PreyDir,
     PreyDist,
     PreyVel,
     CorpseDir,
     CorpseDist,
-    CorpseVel
+    CorpseVel,
+    EggDir
 }
