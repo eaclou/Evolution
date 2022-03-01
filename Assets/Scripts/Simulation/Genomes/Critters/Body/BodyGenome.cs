@@ -78,8 +78,7 @@ public class BodyGenome
     void AddNonConditionalNeurons()
     {
         AddNeuron("Bias");
-        AddNeuron("isMouthTrigger");
-        AddNeuron("foodStored"); // Or hungerAlarm???
+        AddNeuron("isMouthTrigger");        
         AddNeuron("mouthFeedEffector");  // This only works with Collider2Ds, won't detect Plants or Microbes
         AddNeuron("throttleX");
         AddNeuron("throttleY");
@@ -119,18 +118,18 @@ public class BodyGenomeData
     {
         this.unlockedTech = unlockedTech;
         
-        hasComms = HasTech(TechElementId.VocalCords);
-        hasAnimalSensor = HasTech(TechElementId.AnimalSensor);
-        useWaterStats = HasTech(TechElementId.WaterSensor);
-        useCardinals = HasTech(TechElementId.SensoryGanglia);
-        useDiagonals = HasTech(TechElementId.SensoryGanglia); 
-        useNutrients = HasTech(TechElementId.SensoryGanglia);
-        useFoodPosition = HasTech(TechElementId.FoodSensor);
-        useFoodVelocity = HasTech(TechElementId.FoodSensor);
-        useFoodDirection = HasTech(TechElementId.FoodSensor);
-        useFoodStats = HasTech(TechElementId.Eyes);
-        useEggs = HasTech(TechElementId.EggSensor);
-        useCorpse = HasTech(TechElementId.CorpseSensor);
+        hasComms = HasTech(TechElementId.OutComms01);
+        hasAnimalSensor = HasTech(TechElementId.Social);
+        useWaterStats = HasTech(TechElementId.Water);
+        useCardinals = HasTech(TechElementId.CorpseDist);
+        useDiagonals = HasTech(TechElementId.CorpseVel); 
+        useNutrients = HasTech(TechElementId.Nutrients);
+        useFoodPosition = HasTech(TechElementId.FoodSensors);
+        useFoodVelocity = HasTech(TechElementId.FoodSensors);
+        useFoodDirection = HasTech(TechElementId.FoodSensors); //***EAC CHANGE THIS!!
+        useFoodStats = HasTech(TechElementId.FoodSensors);
+        useEggs = HasTech(TechElementId.Predation);
+        useCorpse = HasTech(TechElementId.CorpseDir);
     }
     
     public bool HasTech(TechElementId id) { return unlockedTech.Contains(id); }

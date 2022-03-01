@@ -16,12 +16,12 @@ public class TechTree : ScriptableObject
 
 public enum TechCategory 
 { 
-    SpinalCord, 
-    Heterotrophic, 
-    SensoryGanglia, 
-    LimbDifferentiation, 
-    NerveCells, 
-    Lysosomes,
+    Social, 
+    FoodSensors, 
+    SelfStatus, 
+    Clock, 
+    Environment, 
+    Predation,
     Root
 }
 
