@@ -17,7 +17,7 @@ public class PlaceNeuronsAtUI : MonoBehaviour
 
         foreach (var placement in uiPlacements) {
             if (placement.id == data.iconID) {
-                return (placement.location.localPosition / 140f) + Random.insideUnitSphere * 0.01f;
+                return (placement.location.localPosition / 140f) + Random.insideUnitSphere * 0.01f + (float)(neuron.index % 2) * new Vector3(0.06f, -0.07f, 0f);
                 /*Vector3 localPos = Vector3.zero; // Random.insideUnitSphere * 0.001f;
                 float frac = Mathf.Clamp01((float)placement.id / (float)uiPlacements.Length);
                 float radius = 0.9f;
@@ -41,7 +41,7 @@ public class PlaceNeuronsAtUI : MonoBehaviour
 
         foreach (var placement in uiPlacements) {
             if (placement.id == data.iconID) {
-                return (placement.location.localPosition / 140f) + Random.insideUnitSphere * 0.01f;
+                return (placement.location.localPosition / 140f) + Random.insideUnitSphere * 0.01f + (float)(neuron.index % 2) * new Vector3(-0.08f, 0.14f, 0f);
                 /*Vector3 localPos = Vector3.zero; // Random.insideUnitSphere * 0.001f;
                 float frac = Mathf.Clamp01((float)placement.id / (float)uiPlacements.Length);
                 float radius = 0.35f;
@@ -69,7 +69,7 @@ public class PlaceNeuronsAtUI : MonoBehaviour
         //foreach (var placement in uiPlacements) {
         //    if (placement.id == data.iconID) {
         Vector3 localPos = Vector3.zero; // Random.insideUnitSphere * 0.001f;
-        float frac = Mathf.Clamp01((float)neuron.index / 2f);
+        float frac = (float)neuron.index / 5f;
         float radius = 0.25f;
         float angleRadians = Mathf.PI * frac;
         float x = Mathf.Cos(angleRadians) * radius;

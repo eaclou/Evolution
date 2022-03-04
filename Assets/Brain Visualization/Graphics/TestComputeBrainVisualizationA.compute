@@ -328,7 +328,7 @@ void CSGenerateNeuronTriangles (uint3 id : SV_DispatchThreadID)
 	float3 colorIn = inNeuronsBaseColor * 1;
 	float3 colorOut = outNeuronsBaseColor * 1;
 	float inOut = neuronInitDataCBuffer[neuronID].type;
-	float3 faceColor = lerp(colorIn, colorOut, inOut) * abs(neuronFeedDataCBuffer[neuronID].curValue) * 5.0;
+	float3 faceColor = lerp(colorIn, colorOut, neuronFeedDataCBuffer[neuronID].curValue * 0.5f + 0.5f);      //inOut) * abs(neuronFeedDataCBuffer[neuronID].curValue) * 1.0;
 		
 	Triangle triTop;
 	triTop.vertA = bottomLeft;
