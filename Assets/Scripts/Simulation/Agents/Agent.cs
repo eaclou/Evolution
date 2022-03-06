@@ -96,7 +96,7 @@ public class Agent : MonoBehaviour {
 
     public float sizePercentage = 0f;
     
-    public Brain brain;
+    [ReadOnly] public Brain brain;
     /// Primary root segment child object
     public GameObject bodyGO;
     public Rigidbody2D bodyRigidbody;
@@ -113,10 +113,12 @@ public class Agent : MonoBehaviour {
     public CritterMouthComponent mouthRef;
 
     public CapsuleCollider2D colliderBody;
-    public SpringJoint2D springJoint;   // Used to attach to EggSack Object while still in Egg stage
+    /// Used to attach to EggSack Object while still in Egg stage
+    public SpringJoint2D springJoint;   
     public CapsuleCollider mouseClickCollider;
     
-    public Vector3 fullSizeBoundingBox;  // ASSUMES Z=LENGTH, Y=HEIGHT, X=WIDTH
+    /// z = length, y = height, x = width
+    public Vector3 fullSizeBoundingBox;  
     public Vector3 currentBoundingBoxSize;
     public float fullSizeBodyVolume = 1f;
     //public float centerOfMass = 0f;
@@ -149,8 +151,7 @@ public class Agent : MonoBehaviour {
     private float fullsizeBiomass = 1f;
     public float biomassAtDeath = 1f;
     
-    private Vector3 prevPos;  // use these instead of sampling rigidbody?
-    public Vector3 _PrevPos => prevPos;
+    private Vector3 prevPos;  // use this instead of sampling rigidbody
 
     public float prevVel;
     public float curVel;
@@ -161,7 +162,8 @@ public class Agent : MonoBehaviour {
 
     public Vector2 throttle;
     public Vector2 smoothedThrottle;
-    public Vector2 facingDirection;  // based on throttle history
+    /// based on throttle history
+    public Vector2 facingDirection;  
 
     public float avgVel;
     public Vector2 avgFluidVel;
@@ -174,8 +176,8 @@ public class Agent : MonoBehaviour {
     public int beingSwallowedFrameCounter = 0;
     public int swallowingPreyFrameCounter = 0;
     public int swallowDuration = 60; // * how does this mix with mouseComponent???? 
-    public Agent predatorAgentRef;
-    public Agent preyAgentRef;
+    public Agent predatorAgentRef;  // * Not used
+    public Agent preyAgentRef;      // * Not used
 
     public EggSack parentEggSackRef;  // instead of using own fixed embry development duration - look up parentEggSack and use its counter?
     public bool isAttachedToParentEggSack = false;
@@ -1185,7 +1187,7 @@ public class Agent : MonoBehaviour {
         curLevel++;
         experienceForNextLevel *= 2f;
     }
-
+    
     public void InitializeModules(AgentGenome genome) {
         communicationModule = new CritterModuleCommunication();
         communicationModule.Initialize(genome.bodyGenome.data.hasComms);
@@ -1199,8 +1201,12 @@ public class Agent : MonoBehaviour {
         friendModule = new CritterModuleFriends();
         movementModule = new CritterModuleMovement(genome);
         threatsModule = new CritterModuleThreats();
+        
+        unlockedTech = genome.bodyGenome.unlockedTech;
     }
     
+    [ReadOnly] public UnlockedTech unlockedTech;
+
     public void FirstTimeInitialize() { 
         curLifeStage = AgentLifeStage.AwaitingRespawn;
         //InitializeAgentWidths(genome);
@@ -1208,7 +1214,7 @@ public class Agent : MonoBehaviour {
         //InitializeModules(genome);  //  This breaks MapGridCell update, because coreModule doesn't exist?
     }
 
-    // Colliders Footprint???  *************************************************************************************************************
+    // Colliders Footprint???  *****************************************************************************************
 
     // * WPP: expose magic numbers
     public void ReconstructAgentGameObjects(AgentGenome genome, EggSack parentEggSack, Vector3 startPos, bool isImmaculate, float waterLevel) {

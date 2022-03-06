@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BodyGenome 
@@ -26,8 +27,7 @@ public class BodyGenome
         SetToMutatedCopyOfParentGenome(parentGenome, mutationSettings);
     }
     
-    UnlockedTech unlockedTech;
-    
+    public UnlockedTech unlockedTech { get; private set; }
     public CritterModuleAppearanceGenome appearanceGenome;
     public CritterModuleCoreGenome coreGenome;
     

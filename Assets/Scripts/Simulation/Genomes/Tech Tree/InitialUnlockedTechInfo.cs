@@ -28,6 +28,7 @@ public class InitialTechElement
 }
 
 /// Per agent list management of TechElements
+[Serializable]
 public class UnlockedTech
 {
     public List<TechElement> values;

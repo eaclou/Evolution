@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
+[Serializable]
 public class Brain 
 {
     public List<Neuron> neurons;
-    //public Dictionary<NID, int> IDs;
     public List<Axon> axons;
 
     public Brain(BrainGenome genome, Agent agent) {
@@ -12,14 +13,13 @@ public class Brain
         RebuildBrain(genome, agent);
     }
 
+    /// Create Neurons and Axons
     public void RebuildBrain(BrainGenome genome, Agent agent) 
     {
         //Debug.Log($"Rebuilding brain with {genome.inOutNeurons.Count} neurons in genome, " +
         //          $"and {genome.linkCount} links in genome");
-    
-        // Create Neurons:
+        
         neurons = new List<Neuron>();
-        //IDs = new Dictionary<NID, int>();
         
         RebuildNeurons(genome.inOutNeurons, agent);
         RebuildNeurons(genome.hiddenNeurons, agent);
@@ -40,21 +40,12 @@ public class Brain
         
         foreach (var link in genome.links) 
         {
-            // find out neuronIDs:
-            //if (!IDs.TryGetValue(new NID(link.fromModuleID, link.fromNeuronID), out int fromID)) {
-            //    Debug.LogError("fromNID NOT FOUND " + link.fromModuleID + ", " + link.fromNeuronID);
-            //}
-            //if (!IDs.TryGetValue(new NID(link.toModuleID, link.toNeuronID), out int toID)) {
-            //    Debug.LogError("toNID NOT FOUND " + link.fromModuleID + ", " + link.fromNeuronID);
-            //}
             var from = GetMatchingNeuron(neurons, link.from);
             var to = GetMatchingNeuron(neurons, link.to);
             
             if (from == null || to == null)
                 continue;
-
-            //Debug.Log(fromID.ToString() + " --> " + toID.ToString() + ", " + genome.linkList[i].weight.ToString());
-            //int fromID = IDs < new NID(genome.linkList[i].fromModuleID, genome.linkList[i].fromNeuronID) >;
+            
             Axon axon = new Axon(from, to, link.weight);
             axons.Add(axon);
         }        
@@ -79,27 +70,6 @@ public class Brain
         }
     }
     
-    // *** WPP: reconsider approach
-    /*void RebuildNeurons(List<Neuron> neurons, Agent agent)
-    {
-        foreach (var neuron in neurons)
-        {
-            agent.MapNeuronToModule(neuron.data, neuron);
-            neurons.Add(neuron);
-        }
-    }*/
-
-    // * WPP: deprecate
-    /*void RebuildNeurons(List<NeuronGenome> neurons, Agent agent)
-    {
-        for (int i = 0; i < neurons.Count; i++) {
-            Neuron neuron = new Neuron(neurons[i].name, neurons[i].nid.moduleID);
-            agent.MapNeuronToModule(neurons[i].nid, neuron);
-            IDs.Add(neurons[i].nid, i);
-            neuronList.Add(neuron);
-        }
-    }*/
-
     public void ResetBrainState() {
         foreach (var neuron in neurons) {
             neuron.currentValue[0] = 0f;
@@ -107,7 +77,7 @@ public class Brain
         }
     }
 
-    /// Ticks state of brain forward 1 timestep
+    /// Ticks state of brain forward 1 time-step
     public void BrainMasterFunction() 
     {
         // NAIVE APPROACH:
@@ -133,8 +103,7 @@ public class Brain
             neuron.inputTotal = 0f;
         }
     }
-
-
+    
     public void PrintBrain() {
         Debug.Log("neuronCount: " + neurons.Count);
         string neuronText = "";

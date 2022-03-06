@@ -4,9 +4,9 @@ using UnityEngine;
 [Serializable]
 public class AgentGenome 
 {
-    public int generationCount = 0;
-    public BodyGenome bodyGenome;
-    public BrainGenome brainGenome;
+    [ReadOnly] public int generationCount = 0;
+    [ReadOnly] public BodyGenome bodyGenome;
+    [ReadOnly] public BrainGenome brainGenome;
     
     public AgentGenome(float initialConnectionDensity, int hiddenNeurons)
     {

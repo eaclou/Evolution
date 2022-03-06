@@ -113,7 +113,7 @@ public class GameManager : Singleton<GameManager> {
                 uiManager.TransitionToNewGameState(nextState);
                 break;
             default:
-                Debug.LogError("No Enum Type Found! (" + nextState.ToString() + ")");
+                Debug.LogError("No Enum Type Found! (" + nextState + ")");
                 break;
         }
     }

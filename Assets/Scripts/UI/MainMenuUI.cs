@@ -70,39 +70,33 @@ public class MainMenuUI : MonoBehaviour
     public void ClickCreditsButton()
     {
         ClearAnimatorParameters();
-
         mainMenuAnimator.SetBool("CreditsON", true);
-
-        
     }
+    
     public void ClickFeedbackButton()
     {
         ClearAnimatorParameters();
-
         mainMenuAnimator.SetBool("FeedbackON", true);
-
-        
     }
+    
     public void ClickNewButton()
     {
         ClearAnimatorParameters();
         mainMenuAnimator.SetBool("NewON", true);        
     }
+    
     public void ClickSaveButton()
     {
         ClearAnimatorParameters();
         mainMenuAnimator.SetBool("SaveON", true);        
     }
+    
     public void ClickLoadButton()
     {
         ClearAnimatorParameters();
         mainMenuAnimator.SetBool("LoadON", true);        
     }
 
-
-
-
-    
     public void ClickOptionsMenu() 
     {
         //optionsMenuOn = !optionsMenuOn;
@@ -111,7 +105,6 @@ public class MainMenuUI : MonoBehaviour
         ClearAnimatorParameters();
         mainMenuAnimator.SetBool("SettingsON", true);
         //Refresh();
-
     }
     
     public void ClickQuickStart() { StartGame(true); }

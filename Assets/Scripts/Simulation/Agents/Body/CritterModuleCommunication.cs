@@ -34,16 +34,8 @@ public class CritterModuleCommunication : IBrainModule
     {
         if (moduleID != data.moduleID) return;
         neuron.currentValue = GetNeuralValue(data.id);
-        //neuron.neuronType = data.io;
     }
 
-    /*public void MapNeuron(NID nid, Neuron neuron) 
-    {
-        if (moduleID != nid.moduleID) return;
-        neuron.currentValue = GetNeuralValue(nid.neuronID);
-        neuron.neuronType = neuralMap.GetIO(nid.neuronID);
-    }*/
-    
     // * Use name from MetaNeuron
     // + consider using Reflection (match SO name field to variable name) to eliminate switch statement
     float[] GetNeuralValue(int neuronID)
