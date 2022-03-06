@@ -18,15 +18,17 @@ public class SpecializationPanel : MonoBehaviour
         speed.RefreshDisplay(coreGenome.talentSpecializationSpeed * 100f, coreGenome.talentSpecializationSpeed, false);
         energy.RefreshDisplay(coreGenome.talentSpecializationUtility * 100f, coreGenome.talentSpecializationUtility, false);
 
-        if(techElementIcons.Length >= 0) {
-            foreach(var tech in techElementIcons) {
-                if(selectionManager.focusedCandidate.candidateGenome.bodyGenome.data.HasTech(tech.techElement.id)) {
-                    tech.gameObject.transform.localScale = Vector3.one;
-                }
-                else {
-                    tech.gameObject.transform.localScale = Vector3.one * 0.12f;
-                }
+        // WPP: expression is always true, foreach handles 0-length condition, invert conditional (if needed) to reduce nesting
+        //if (techElementIcons.Length >= 0) {
+            foreach (var tech in techElementIcons) {
+                tech.gameObject.transform.localScale = selectionManager.FocusedAgentHasTech(tech.techElement.id) ? Vector3.one : Vector3.one * 0.12f;
+                //if (selectionManager.focusedCandidate.candidateGenome.bodyGenome.data.HasTech(tech.techElement.id)) {
+                //    tech.gameObject.transform.localScale = Vector3.one;
+                //}
+                //else {
+                //    tech.gameObject.transform.localScale = Vector3.one * 0.12f;
+                //}
             }
-        }
+        //}
     }
 }

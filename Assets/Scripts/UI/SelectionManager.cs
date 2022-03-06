@@ -13,6 +13,7 @@ public class SelectionManager : Singleton<SelectionManager>
     public void SetFocusedCandidateGenome(SpeciesGenomePool selectedPool, SelectionGroup group, int index) {
         var candidate = selectedPool.GetFocusedCandidate(group, index);
         SetFocusedCandidateGenome(candidate);
+        UnityEngine.Debug.Log($"Selecting agent index {index}");
     }
 
     public void SetFocusedCandidateGenome(CandidateAgentData candidate) {
@@ -46,4 +47,6 @@ public class SelectionManager : Singleton<SelectionManager>
         selectedSpeciesID = id;
         uiManager.speciesOverviewUI.RebuildGenomeButtons();
     }
+    
+    public bool FocusedAgentHasTech(TechElementId techId) { return focusedCandidate.candidateGenome.bodyGenome.data.HasTech(techId); }
 }
