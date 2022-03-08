@@ -28,23 +28,17 @@ public class AgentBehaviorOneHot : MonoBehaviour
     public GameObject food0;
     public GameObject food1;
     public GameObject food2;
-
-    public Text textRest;
-    public Text textDash;
-    public Text textGuard;
-    public Text textBite;
-    public Text textAttack;
-    public Text textOther;
+    
 
     // * WPP: extremely inefficient!  
     // Remove GetComponent calls, use nested struct pattern to store references
     public void UpdateExtras(CandidateAgentData candidate) {
-        textRest.gameObject.SetActive(false);
-        textDash.gameObject.SetActive(false);
-        textGuard.gameObject.SetActive(false);
-        textBite.gameObject.SetActive(false);
-        textAttack.gameObject.SetActive(false);
-        textOther.gameObject.SetActive(false);
+        //textRest.gameObject.SetActive(false);
+        //textDash.gameObject.SetActive(false);
+        //textGuard.gameObject.SetActive(false);
+        //textBite.gameObject.SetActive(false);
+        //textAttack.gameObject.SetActive(false);
+        //textOther.gameObject.SetActive(false);
         outComm0.GetComponent<Image>().color = Color.Lerp(Color.black, Color.white, 0f);
         outComm0.GetComponent<TooltipUI>().tooltipString = "OutComm0";
         outComm1.GetComponent<Image>().color = Color.Lerp(Color.black, Color.white, 0f);
@@ -160,7 +154,7 @@ public class AgentBehaviorOneHot : MonoBehaviour
 
         //UpdateBarColor(behaviorBarOther.GetComponent<Image>(), 0f, false);
 
-        textOther.gameObject.SetActive(false);
+        //textOther.gameObject.SetActive(false);
         throttleGO.gameObject.SetActive(false);
         
     }
@@ -178,11 +172,11 @@ public class AgentBehaviorOneHot : MonoBehaviour
 
         bool isActive = false;
         if(rest >= highestPriority && !agent.isCooldown) {
-            textRest.color = activeColor;
+            //textRest.color = activeColor;
             isActive = true;
         }
         else {
-            textRest.color = inactiveColor;
+            //textRest.color = inactiveColor;
         }
         behaviorBarRest.transform.localScale = new Vector3(rest * 0.1f + 0.9f, rest * 0.1f + 0.9f,  1f);
         UpdateBarColor(behaviorBarRest.GetComponent<Image>(), rest, isActive);
@@ -190,11 +184,11 @@ public class AgentBehaviorOneHot : MonoBehaviour
         
         isActive = false;
         if(dash >= highestPriority && !agent.isCooldown) {
-            textDash.color = activeColor;
+            //textDash.color = activeColor;
             isActive = true;
         }
         else {
-            textDash.color = inactiveColor;
+            //textDash.color = inactiveColor;
         }
         behaviorBarDash.transform.localScale = Vector3.one * (dash * 0.1f + 0.9f); // new Vector3(dash * 0.5f + 0.5f, dash * 0.5f + 0.5f, 1f);
         UpdateBarColor(behaviorBarDash.GetComponent<Image>(), dash, isActive);
@@ -202,11 +196,11 @@ public class AgentBehaviorOneHot : MonoBehaviour
 
         isActive = false;
         if(guard >= highestPriority && !agent.isCooldown) {
-            textGuard.color = activeColor;
+            //textGuard.color = activeColor;
             isActive = true;
         }
         else {
-            textGuard.color = inactiveColor;
+            //textGuard.color = inactiveColor;
         }
         behaviorBarGuard.transform.localScale = Vector3.one * (guard * 0.1f + 0.9f); // new Vector3(guard * 0.5f + 0.5f, guard * 0.5f + 0.5f,  1f);
         UpdateBarColor(behaviorBarGuard.GetComponent<Image>(), guard, isActive);
@@ -214,11 +208,11 @@ public class AgentBehaviorOneHot : MonoBehaviour
 
         isActive = false;
         if(bite >= highestPriority && !agent.isCooldown) {
-            textBite.color = activeColor;
+            //textBite.color = activeColor;
             isActive = true;
         }
         else {
-            textBite.color = inactiveColor;
+            //textBite.color = inactiveColor;
         }
         behaviorBarBite.transform.localScale = Vector3.one * (bite * 0.1f + 0.9f); // new Vector3(bite * 0.5f + 0.5f, bite * 0.5f + 0.5f, 1f);
         UpdateBarColor(behaviorBarBite.GetComponent<Image>(), bite, isActive);
@@ -226,11 +220,11 @@ public class AgentBehaviorOneHot : MonoBehaviour
 
         isActive = false;
         if(attack >= highestPriority && !agent.isCooldown) {
-            textAttack.color = activeColor;
+            //textAttack.color = activeColor;
             isActive = true;
         }
         else {
-            textAttack.color = inactiveColor;
+            //textAttack.color = inactiveColor;
         }
         behaviorBarAttack.transform.localScale = Vector3.one * (attack * 0.1f + 0.9f); // new Vector3(attack * 0.5f + 0.5f, attack * 0.5f + 0.5f, 1f);
         UpdateBarColor(behaviorBarAttack.GetComponent<Image>(), attack, isActive);
@@ -238,12 +232,12 @@ public class AgentBehaviorOneHot : MonoBehaviour
 
         //isActive = false;
         if(agent.isCooldown) {
-            textOther.color = Color.yellow;
-            textOther.gameObject.SetActive(true);
+            //textOther.color = Color.yellow;
+            //textOther.gameObject.SetActive(true);
             //throttleGO.gameObject.SetActive(false);
         }
         else {
-            textOther.gameObject.SetActive(false);
+            //textOther.gameObject.SetActive(false);
             throttleGO.gameObject.SetActive(true);
         }
         //behaviorBarOther.transform.localScale = Vector3.one * (other * 0.5f + 0.5f);

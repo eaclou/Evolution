@@ -33,6 +33,8 @@ public class CreaturePanelUI : MonoBehaviour
     [SerializeField] PanelModeData[] panelModes;
     [SerializeField] StringSO startingPanelMode;
 
+    private bool isBrainWiringOpen = false;
+
     public Sprite spriteBrainButton;
 
     private StringSO curPanelMode;
@@ -69,13 +71,14 @@ public class CreaturePanelUI : MonoBehaviour
         critterPortraitStrokesCBuffer = new ComputeBuffer(1 * theRenderKing.GetNumStrokesPerCritter(), theRenderKing.GetMemorySizeCritterStrokeData());
     }
 
-    public void ClickGenome() {
-        CreaturePanelAnimator.SetBool("GenomeON", true);
-        CreaturePanelAnimator.SetBool("BrainWiringON", false);
-    }
+    //public void ClickGenome() {
+    //    CreaturePanelAnimator.SetBool("GenomeON", true);
+    //    CreaturePanelAnimator.SetBool("BrainWiringON", false);
+    //}
     public void ClickBrain() {
-        CreaturePanelAnimator.SetBool("GenomeON", false);
-        CreaturePanelAnimator.SetBool("BrainWiringON", true);
+        isBrainWiringOpen = !isBrainWiringOpen;
+        CreaturePanelAnimator.SetBool("GenomeON", !isBrainWiringOpen);
+        CreaturePanelAnimator.SetBool("BrainWiringON", isBrainWiringOpen);
     }
     
     public void Tick() 

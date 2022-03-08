@@ -396,6 +396,8 @@ public class Agent : MonoBehaviour {
             AbortPregnancy();
         }
 
+        brain.ResetBrainState();
+
         //colliderBody.enabled = false;
         //bodyRigidbody.simulated = false;
         //bodyRigidbody.isKinematic = true;
@@ -637,35 +639,6 @@ public class Agent : MonoBehaviour {
         // Resources:
         wasteProducedLastFrame = 0f;
         oxygenUsedLastFrame = 0f;
-
-        //globalWaterLevel = simManager.theRenderKing.baronVonWater._GlobalWaterLevel;
-
-        /*if(isBeingSwallowed)
-        {
-            beingSwallowedFrameCounter++;
-
-            if(beingSwallowedFrameCounter >= 10)
-            {
-                //Debug.Log("isBeingSwallowed + swallow Complete!");
-                //curLifeStage = AgentLifeStage.Null;
-                //lifeStageTransitionTimeStepCounter = 0;
-                
-                beingSwallowedFrameCounter = 0;
-                isBeingSwallowed = false;
-
-                colliderBody.enabled = false;
-                springJoint.enabled = false;
-                springJoint.connectedBody = null;
-            }
-            else
-            {
-                float scale = (float)beingSwallowedFrameCounter / (float)swallowDuration;
-
-                ScaleBody((1.0f - scale) * 1f * sizePercentage, true);
-            }
-        }  */      
-
-        // Any external inputs updated by simManager just before this
 
         // Check for StateChange:
         CheckForLifeStageTransition();

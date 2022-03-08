@@ -21,9 +21,10 @@ public class BrainGenomeImage : MonoBehaviour
     // * WPP: expose values in editor
     public void SetTexture(BrainGenome brain) 
     {
-        texture.Resize(WIDTH, 1);
+        int width = Mathf.Min(WIDTH, brain.linkCount);
+        texture.Resize(width, 1);
 
-        for (int x = 0; x < WIDTH; x++) 
+        for (int x = 0; x < width; x++) 
         {                              
             Color testColor;
 

@@ -12,7 +12,9 @@ public class CreaturePaperDollUI : MonoBehaviour
     Agent agent => simulationManager.agents[cameraManager.targetAgentIndex];
     CritterModuleCore coreModule => agent.coreModule;
 
-    public WidgetAgentStatus widgetAgentStatus;
+    //public WidgetAgentStatus widgetAgentStatus;
+    [SerializeField]
+    GameObject panelStatusBars;
 
     [SerializeField]
     TooltipUI tooltipState;
@@ -39,9 +41,15 @@ public class CreaturePaperDollUI : MonoBehaviour
     public void Tick() {
         if (coreModule == null) return;
         CandidateAgentData candidate = selectionManager.focusedCandidate;
+        if(agent.curLifeStage != AgentLifeStage.Mature) {
+            panelStatusBars.SetActive(false);
+        }
+        else {
+            panelStatusBars.SetActive(true);
+        }
+
         if(agent.candidateRef.candidateID == candidate.candidateID) {
-            widgetAgentStatus.UpdateBars(agent); 
-        
+            
             var lifeStageData = lookup.GetAgentLifeStageData(agent.curLifeStage, agent.isYoung);
 
             tooltipState.tooltipString = lifeStageData.stateName + ", Lifespan: " + agent.ageCounter + ", Size: " + agent.currentBiomass.ToString("F3");
@@ -60,10 +68,9 @@ public class CreaturePaperDollUI : MonoBehaviour
             imageMeterBarWaste.transform.localScale = new Vector3(1f, 0f, 1f);
         }
         else {
-            //widgetAgentStatus.UpdateBars(agent); 
             
             var lifeStageData = lookup.GetAgentLifeStageData(AgentLifeStage.Dead);
-            tooltipState.tooltipString = lifeStageData.stateName + ", Age: " + candidate.performanceData.totalTicksAlive + ", Size: "; // + candidate.performanceData.si.ToString("F3");
+            tooltipState.tooltipString = lifeStageData.stateName + ", Age: " + candidate.performanceData.totalTicksAlive; // + ", Size: " + candidate.performanceData.grow.ToString("F3");
             tooltipImage.sprite = lifeStageData.icon;
 
             tooltipHealth.tooltipString = "Health:";
