@@ -210,6 +210,7 @@ public class Agent : MonoBehaviour {
     {
         cooldown.duration = duration; 
         UseAbility(cooldown);
+        
     }
     
     public bool isDead => curLifeStage == AgentLifeStage.Dead;
@@ -1056,11 +1057,13 @@ public class Agent : MonoBehaviour {
                 candidateRef.performanceData.totalTicksRested++;
             }
             curActionState = AgentActionState.Resting;
+            UIManager.instance.creaturePanelUI.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
         }
 
         if (coreModule.mouthFeedEffector[0] >= mostActiveEffectorValue) {
             curActionState = AgentActionState.Feeding;
             UseAbility(feed);
+            UIManager.instance.creaturePanelUI.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
         }
         
         if (!isFreeToAct) {
@@ -1073,18 +1076,23 @@ public class Agent : MonoBehaviour {
             UseAbility(attack);
             RegisterAgentEvent(simManager.simAgeTimeSteps, "Attacked!", 1f, 6);
             audioManager.PlayCritterAttack(ownPos);
+            UIManager.instance.creaturePanelUI.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
+            
         }
         if (coreModule.dashEffector[0] >= mostActiveEffectorValue) {
             curActionState = AgentActionState.Dashing;
             UseAbility(dash);
             RegisterAgentEvent(simManager.simAgeTimeSteps, "Dashed!", 1f, 8);
             audioManager.PlayCritterDash(ownPos);
+            UIManager.instance.creaturePanelUI.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
         }
         if (coreModule.defendEffector[0] >= mostActiveEffectorValue) {
             curActionState = AgentActionState.Defending;
             UseAbility(defend);
             RegisterAgentEvent(simManager.simAgeTimeSteps, "Defended!", 1f, 7);
             audioManager.PlayCritterDefend(ownPos);
+            
+            UIManager.instance.creaturePanelUI.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
         }    
     }
     

@@ -28,6 +28,7 @@ public class CreaturePanelUI : MonoBehaviour
         
     [SerializeField] AgentActionStateData[] actionStates;
     [SerializeField] AgentActionStateData defaultActionState;
+    public AgentActionStateData mostRecentActionState;
     
     [SerializeField] PanelModeData[] panelModes;
     [SerializeField] StringSO startingPanelMode;
@@ -47,6 +48,17 @@ public class CreaturePanelUI : MonoBehaviour
     
         foreach (var panelMode in panelModes)
             panelMode.Initialize(onColor, offColor);
+    }
+
+    public void UpdateAgentActionStateData(int candID, AgentActionState actionState) {
+        if(SelectionManager.instance.focusedCandidate.candidateID != candID) return;
+        
+        for(int i = 0; i < actionStates.Length; i++) {
+            if (actionStates[i].id == actionState) {
+                
+                mostRecentActionState = actionStates[i];
+            }
+        }
     }
 
     public void InitializeRenderBuffers() 
@@ -72,9 +84,9 @@ public class CreaturePanelUI : MonoBehaviour
     
         //textPanelStateDebug.text = "MODE: " + curPanelMode.value;
 
-        var actionState = GetAgentActionStateData(agent.curActionState);
-        imageCurAction.sprite = actionState.sprite;
-        tooltipCurrentAction.tooltipString = actionState.text;
+        //AgentActionStateData actionState = GetAgentActionStateData(agent.curActionState);
+        imageCurAction.sprite = mostRecentActionState.sprite;
+        tooltipCurrentAction.tooltipString = mostRecentActionState.text;
 
         tooltipSpeciesIcon.tooltipString = "Species #" + agent.speciesIndex + "\nAvg Life: " + totalTicksAlive.ToString("F0");
 
@@ -82,10 +94,10 @@ public class CreaturePanelUI : MonoBehaviour
             panelMode.SetActive(curPanelMode);
 
         if (agent.coreModule == null) return;
-
+                
         tooltipBrain.tooltipString = "BRAIN";//\nAction: " + agent.curActionState;
-        tooltipGenome.tooltipString = "GENOME";//\nGen#" + agent.candidateRef.candidateGenome.generationCount + ", DNA length: " + (agent.candidateRef.candidateGenome.brainGenome.linkList.Count + agent.candidateRef.candidateGenome.brainGenome.bodyNeuronList.Count);
-        tooltipAppearance.tooltipString = "APPEARANCE";
+        tooltipGenome.tooltipString = "Genome???";
+        tooltipAppearance.tooltipString = "GEN " + agent.candidateRef.candidateGenome.generationCount + ", Axons: " + (agent.candidateRef.candidateGenome.brainGenome.links.Count + ", IO: " + agent.candidateRef.candidateGenome.brainGenome.inOutNeurons.Count + ", H: " + agent.candidateRef.candidateGenome.brainGenome.hiddenNeurons.Count);//"APPEARANCE";
     }
     
     public void SetPanelMode(StringSO mode) {
