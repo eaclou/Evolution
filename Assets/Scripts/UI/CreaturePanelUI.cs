@@ -80,6 +80,9 @@ public class CreaturePanelUI : MonoBehaviour
         CreaturePanelAnimator.SetBool("GenomeON", !isBrainWiringOpen);
         CreaturePanelAnimator.SetBool("BrainWiringON", isBrainWiringOpen);
     }
+    public void OpenClose() {
+        CreaturePanelAnimator.SetBool("PanelOFF", !CreaturePanelAnimator.GetBool("PanelOFF"));
+    }
     
     public void Tick() 
     {

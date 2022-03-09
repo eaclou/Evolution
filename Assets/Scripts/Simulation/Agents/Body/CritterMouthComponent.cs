@@ -118,7 +118,7 @@ public class CritterMouthComponent : MonoBehaviour
         for (int i = edibleObjectsInRange.Count - 1; i >= 0; i--)
         {
             RequestAttackBiteAgent(edibleObjectsInRange[i]);
-            RequestBiteEggSack(edibleObjectsInRange[i]);
+            RequestBiteEggSack(edibleObjectsInRange[i]); //***EAC out of index Error occasionally
         }
     }
     

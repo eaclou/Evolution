@@ -17,14 +17,14 @@ public class CreaturePortraitPanel : MonoBehaviour
 
     public void SetTitleText()
     {
-        title = "<size=18>Critter</size> " + candidate.name + "<size=18>";
+        title = candidate.name; /* + "<size=18>";
         
         if(candidate.isBeingEvaluated) 
             title += "\n(following)";
         else 
             title += candidate.numCompletedEvaluations > 0 ? "\nFossil" : "\nUnborn";
         
-        title += "</size>";
+        title += "</size>";*/
         candidateName.text = title;
         
         SetColors(candidate.candidateGenome.bodyGenome.appearanceGenome);
