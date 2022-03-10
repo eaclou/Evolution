@@ -9,8 +9,8 @@ public class CreaturePaperDollUI : MonoBehaviour
     SelectionManager selectionManager => SelectionManager.instance;
 
     
-    Agent agent => simulationManager.agents[cameraManager.targetAgentIndex];
-    CritterModuleCore coreModule => agent.coreModule;
+    Agent agent => SelectionManager.instance.currentSelection.agent;
+    //CritterModuleCore coreModule => agent.coreModule;
 
     //public WidgetAgentStatus widgetAgentStatus;
     [SerializeField]
@@ -39,8 +39,8 @@ public class CreaturePaperDollUI : MonoBehaviour
     Image imageMeterBarWaste;
     
     public void Tick() {
-        if (coreModule == null) return;
-        CandidateAgentData candidate = selectionManager.focusedCandidate;
+        if (agent == null || agent.coreModule == null) return;
+        CandidateAgentData candidate = selectionManager.currentSelection.candidate;
         if(agent.curLifeStage != AgentLifeStage.Mature) {
             panelStatusBars.SetActive(false);
         }
@@ -55,14 +55,14 @@ public class CreaturePaperDollUI : MonoBehaviour
             tooltipState.tooltipString = lifeStageData.stateName + ", Lifespan: " + agent.ageCounter + ", Size: " + agent.currentBiomass.ToString("F3");
             tooltipImage.sprite = lifeStageData.icon;
 
-            tooltipHealth.tooltipString = "Health: " + (coreModule.health * 100f).ToString("F0") + "%";          
-            imageMeterBarHealth.transform.localScale = new Vector3(1f, coreModule.health, 1f);
+            tooltipHealth.tooltipString = "Health: " + (agent.coreModule.health * 100f).ToString("F0") + "%";          
+            imageMeterBarHealth.transform.localScale = new Vector3(1f, agent.coreModule.health, 1f);
         
-            tooltipEnergy.tooltipString = "Energy: " + coreModule.energy.ToString("F0");
-            imageMeterBarEnergy.transform.localScale = new Vector3(1f, Mathf.Clamp01(coreModule.energy * 0.0025f), 1f);
+            tooltipEnergy.tooltipString = "Energy: " + agent.coreModule.energy.ToString("F0");
+            imageMeterBarEnergy.transform.localScale = new Vector3(1f, Mathf.Clamp01(agent.coreModule.energy * 0.0025f), 1f);
         
-            tooltipStomachFood.tooltipString = "Stomach: " + (coreModule.stomachContentsPercent * 100f).ToString("F0");
-            imageMeterBarStomach.transform.localScale = new Vector3(1f, coreModule.stomachContentsPercent, 1f);
+            tooltipStomachFood.tooltipString = "Stomach: " + (agent.coreModule.stomachContentsPercent * 100f).ToString("F0");
+            imageMeterBarStomach.transform.localScale = new Vector3(1f, agent.coreModule.stomachContentsPercent, 1f);
         
             tooltipWaste.tooltipString = "Waste: (tbd)"; // + agent.coreModule.was.ToString("F0");
             imageMeterBarWaste.transform.localScale = new Vector3(1f, 0f, 1f);

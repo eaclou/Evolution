@@ -4,7 +4,7 @@ using UnityEngine.UI;
 public class GenomeOverviewPanel : MonoBehaviour
 {
     SelectionManager selectionManager => SelectionManager.instance;
-    CandidateAgentData agent => selectionManager.focusedCandidate;
+    CandidateAgentData cand => selectionManager.currentSelection.candidate;
  
     public Text textGeneration;
     public Text textBodySize;
@@ -16,11 +16,11 @@ public class GenomeOverviewPanel : MonoBehaviour
 
     public void Refresh()
     {
-        genome = agent.candidateGenome;
+        genome = cand.candidateGenome;
         brain = genome.brainGenome;
         core = genome.bodyGenome.coreGenome;
     
-        float lifespan = agent.performanceData.totalTicksAlive;
+        float lifespan = cand.performanceData.totalTicksAlive;
         
         textGeneration.text = "Gen: " + genome.generationCount;
         textBodySize.text = "Size: " + (100f * core.creatureBaseLength).ToString("F0") + ", Aspect 1:" + (1f / core.creatureAspectRatio).ToString("F0");

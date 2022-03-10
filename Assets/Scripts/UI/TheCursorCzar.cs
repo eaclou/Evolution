@@ -113,7 +113,8 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
                 return; 
             
             uiManagerRef.OnAgentSelected?.Invoke(agent);
-            selectionManager.SetFocusedCandidateGenome(agent.candidateRef);
+            selectionManager.SetSelected(agent.candidateRef);
+            cameraManager.SetFollowing(KnowledgeMapId.Animals);
         }
         else if (!clicked) 
         {

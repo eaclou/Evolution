@@ -107,8 +107,8 @@ public class WatcherUI : MonoBehaviour {
         {
             TextCommonStatsA.gameObject.SetActive(true);
 
-            int critterIndex = cameraManager.targetAgentIndex;
-            Agent agent = simulationManager.agents[critterIndex];
+            //int critterIndex = cameraManager.targetAgentIndex;
+            Agent agent = SelectionManager.instance.currentSelection.agent;
 
             imageDimmingSheet.gameObject.SetActive(agent.isDecaying);  // ** dimming sheet! to show not following???? just an experiment
             //button
@@ -346,7 +346,7 @@ public class WatcherUI : MonoBehaviour {
             }
         }
         else if (slotRef.id == KnowledgeMapId.Animals) {
-            ClickPrevAgent();
+            //ClickPrevAgent();
         }
     }
     
@@ -371,10 +371,10 @@ public class WatcherUI : MonoBehaviour {
             }
         }
         else if (slotRef.id == KnowledgeMapId.Animals) {
-            ClickNextAgent();
+            //ClickNextAgent();
         }
     }
-    
+    /*
     public void ClickPrevAgent() {
         //Debug.Log("ClickPrevAgent");
         int newIndex = (simulationManager.numAgents + cameraManager.targetAgentIndex - 1) % simulationManager.numAgents;
@@ -386,7 +386,7 @@ public class WatcherUI : MonoBehaviour {
         int newIndex = (cameraManager.targetAgentIndex + 1) % simulationManager.numAgents;
         cameraManager.SetTargetAgent(simulationManager.agents[newIndex], newIndex);                
     }
-
+    */
     public void StartFollowingAgent() {
         cameraManager.isFollowingAgent = true;
         //uiManagerRef.globalResourcesUI.CreateBrainGenomeTexture(uiManagerRef.cameraManager.targetAgent.candidateRef.candidateGenome);

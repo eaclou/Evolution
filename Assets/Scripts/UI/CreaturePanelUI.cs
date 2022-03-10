@@ -9,7 +9,7 @@ public class CreaturePanelUI : MonoBehaviour
     CameraManager cameraManager => CameraManager.instance;
     TheRenderKing theRenderKing => TheRenderKing.instance;
     
-    Agent agent => simulationManager.agents[cameraManager.targetAgentIndex];
+    Agent agent => SelectionManager.instance.currentSelection.agent;
     float totalTicksAlive => simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].avgCandidateData.performanceData.totalTicksAlive;
 
     [SerializeField]
@@ -56,7 +56,7 @@ public class CreaturePanelUI : MonoBehaviour
     }
 
     public void UpdateAgentActionStateData(int candID, AgentActionState actionState) {
-        if(SelectionManager.instance.focusedCandidate.candidateID != candID) return;
+        if(SelectionManager.instance.currentSelection.candidate.candidateID != candID) return;
         
         for(int i = 0; i < actionStates.Length; i++) {
             if (actionStates[i].id == actionState) {
@@ -113,7 +113,7 @@ public class CreaturePanelUI : MonoBehaviour
         foreach (var panelMode in panelModes)
             panelMode.SetActive(curPanelMode);
 
-        if (agent.coreModule == null) return;
+        if (agent == null) return;
 
 
         //speciesCoatOfArmsImage.sprite = Sprite.Create(SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].GetCoatOfArms(), speciesCoatOfArmsImage.rectTransform.rect, Vector2.zero);;

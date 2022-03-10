@@ -38,22 +38,23 @@ public class GenomeButton : MonoBehaviour
         // updates focusedCandidate in uiManager
         uiManager.speciesOverviewUI.ChangeSelectedGenome(group, index);  
         
-        if(!selectionManager.focusedCandidate.isBeingEvaluated) 
+        if(!selectionManager.currentSelection.candidate.isBeingEvaluated) 
             return;
 
-        FindCorrespondingAgent();
+        selectionManager.SetSelected(SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[selectionManager.currentSelection.historySelectedSpeciesID].candidateGenomesList[index]); // FindCorrespondingAgent();
     }
-
+    /*
     void FindCorrespondingAgent()
     {
         var agentIndex = simulationManager.GetIndexOfFocusedAgent();
         if (agentIndex == -1) return;
         
-        cameraManager.SetTargetAgent(simulationManager.agents[agentIndex], agentIndex);
-        selectionManager.ResetCurrentFocusedCandidateGenome();
+        //cameraManager.SetTargetAgent(simulationManager.agents[agentIndex], agentIndex);
+        //selectionManager.ResetCurrentFocusedCandidateGenome();
+        selectionManager.SetSelected()
         cameraManager.isFollowingAgent = true; 
     }
-
+    */
     public void SetTargetCoords(Vector2 newCoords) {
         targetCoords = newCoords;
     }
@@ -73,7 +74,7 @@ public class GenomeButton : MonoBehaviour
         if (candidate.isBeingEvaluated) 
         {
             Agent matchingAgent = simulationManager.GetAgent(candidate);
-            bool isFocus = selectionManager.IsFocus(candidate);
+            bool isFocus = selectionManager.IsSelected(candidate);
             
             ColorBlock block = button.colors;
             block.colorMultiplier = isFocus ? 2f : 1f;

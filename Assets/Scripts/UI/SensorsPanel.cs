@@ -21,8 +21,8 @@ public enum SensorID
 public class SensorsPanel : MonoBehaviour
 {
     SelectionManager selectionManager => SelectionManager.instance;
-    AgentGenome genome => selectionManager.focusedCandidate.candidateGenome;
-    Agent agent => CameraManager.instance.targetAgent;
+    AgentGenome genome => selectionManager.currentSelection.candidate.candidateGenome;
+    Agent agent => selectionManager.currentSelection.agent;
 
     [SerializeField] Sensor[] sensors;
 

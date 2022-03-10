@@ -19,17 +19,17 @@ public class CreatureBrainActivityUI : MonoBehaviour
     private Agent agent;
 
     public void Tick() {
-        critterIndex = cameraManager.targetAgentIndex;
-        agent = simulationManager.agents[critterIndex];
+        //critterIndex = cameraManager.targetAgentIndex;
+        agent = SelectionManager.instance.currentSelection.agent;// simulationManager.agents[critterIndex];
         
-        if (agent.coreModule == null || agent.communicationModule == null)
+        if (agent == null || agent.coreModule == null || agent.communicationModule == null)
             return;
 
-        if(agent.candidateRef.candidateID == selectionManager.focusedCandidate.candidateID) {
+        if(agent.candidateRef.candidateID == selectionManager.currentSelection.candidate.candidateID) {
             UpdateBrainLive(agent);
         }
         else {
-            UpdateBrainFossil(selectionManager.focusedCandidate);
+            UpdateBrainFossil(selectionManager.currentSelection.candidate);
         }
     }
     

@@ -4,7 +4,7 @@ using UnityEngine.UI;
 public class SpecializationPanel : MonoBehaviour
 {
     SelectionManager selectionManager => SelectionManager.instance;
-    CritterModuleCoreGenome coreGenome => selectionManager.focusedCandidate.candidateGenome.bodyGenome.coreGenome;
+    CritterModuleCoreGenome coreGenome => selectionManager.currentSelection.candidate.candidateGenome.bodyGenome.coreGenome;
     [SerializeField]
     TechElementIconUI[] techElementIcons;
     [SerializeField]
@@ -23,7 +23,7 @@ public class SpecializationPanel : MonoBehaviour
         // WPP: expression is always true, foreach handles 0-length condition, invert conditional (if needed) to reduce nesting
         //if (techElementIcons.Length >= 0) {
         foreach (var tech in techElementIcons) {
-            bool hasTech = selectionManager.FocusedAgentHasTech(tech.techElement.id);
+            bool hasTech = selectionManager.SelectedAgentHasTech(tech.techElement.id);
             if(hasTech) {
                 foreach (var category in techTree.categories) {
                     if(tech.techElement.category == category.category) {

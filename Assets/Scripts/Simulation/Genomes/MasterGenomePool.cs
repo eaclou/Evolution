@@ -35,7 +35,7 @@ public class MasterGenomePool
     public List<int> debugRecentlyDeletedCandidateIDsList;
 
     PanelNotificationsUI panelPendingClickPrompt => uiManager.panelNotificationsUI;
-    public SpeciesGenomePool selectedPool => completeSpeciesPoolsList[selectionManager.selectedSpeciesID];
+    public SpeciesGenomePool selectedPool => completeSpeciesPoolsList[selectionManager.currentSelection.historySelectedSpeciesID];
     public int speciesPoolCount => completeSpeciesPoolsList.Count;   
    
     public MasterGenomePool() { }
@@ -63,7 +63,9 @@ public class MasterGenomePool
             newSpecies.FirstTimeInitialize(new CandidateAgentData(seedGenome, i), 0);
             currentlyActiveSpeciesIDList.Add(i);
             completeSpeciesPoolsList.Add(newSpecies);
-        }        
+        }
+
+        SelectionManager.instance.SetSelected(completeSpeciesPoolsList[0].candidateGenomesList[0]);
     }
 
     public void AddNewYearlySpeciesStats(int year) {

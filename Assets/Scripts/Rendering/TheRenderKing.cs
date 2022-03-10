@@ -22,7 +22,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
     ZooplanktonManager zooplanktonManager => simManager.zooplanktonManager;
     VegetationManager vegetationManager => simManager.vegetationManager;
     SelectionManager selectionManager => SelectionManager.instance;
-    CandidateAgentData focusedCandidate => selectionManager.focusedCandidate;
+    CandidateAgentData focusedCandidate => selectionManager.currentSelection.candidate;
     
     WorldSpiritHubUI worldSpiritHubUI => uiManager.worldSpiritHubUI;
     TrophicSlot selectedWorldSpiritSlot => worldSpiritHubUI.selectedWorldSpiritSlot;
@@ -3059,7 +3059,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         critterDebugGenericStrokeMat.SetTexture("_VelocityTex", fluidManager._VelocityPressureDivergenceMain);
         critterDebugGenericStrokeMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);              
         critterDebugGenericStrokeMat.SetInt("_HoverID", cameraManager.mouseHoverAgentIndex);
-        critterDebugGenericStrokeMat.SetInt("_SelectedID", cameraManager.targetAgentIndex); 
+        critterDebugGenericStrokeMat.SetInt("_SelectedID", 0); 
                                        
         float isHoverCritter = cameraManager.isMouseHoverAgent ? 1f : 0f;
         float isHighlightCritter = isHoverCritter;

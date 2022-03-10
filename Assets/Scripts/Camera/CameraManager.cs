@@ -177,7 +177,7 @@ public class CameraManager : Singleton<CameraManager>
 
         masterTargetDistance += zoomSpeed;
     }
-    
+    /*
     public void SetTargetAgent() {
         SetTargetAgent(simulation.agents[targetAgentIndex], targetAgentIndex);
     }
@@ -188,13 +188,18 @@ public class CameraManager : Singleton<CameraManager>
         targetAgent = agent;
         targetAgentTransform = agent.bodyGO.transform;
         targetAgentIndex = index;
-    }
+
+    }*/
 
     public void MouseOverAgent(Agent agent, bool clicked)
     {
         if (clicked) 
         {
-            SetTargetAgent(agent, agent.index);
+            SelectionManager.instance.SetSelected(agent.candidateRef);
+            //SetTargetAgent(agent, agent.index);
+            targetAgent = agent;
+            targetAgentTransform = agent.bodyGO.transform;
+            targetAgentIndex = agent.index;
             SetFollowing(KnowledgeMapId.Animals);
         }
             
@@ -224,7 +229,7 @@ public class CameraManager : Singleton<CameraManager>
     } 
     public void DidFollowedCreatureDie(Agent agentRef) {
 
-        if(agentRef == targetAgent) {
+        if(agentRef == SelectionManager.instance.currentSelection.agent) {
             isFollowingAgent = false;
             Logger.Log("followed creature died!", true);
         }

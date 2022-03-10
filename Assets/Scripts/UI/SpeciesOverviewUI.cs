@@ -50,7 +50,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
         
     public void RebuildGenomeButtons() 
     {
-        SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[selectionManager.focusedCandidate.speciesID]; 
+        SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[selectionManager.currentSelection.candidate.speciesID]; 
         
         //SetSpeciesIconColors(pool.appearanceGenome);
 
@@ -135,13 +135,13 @@ public class SpeciesOverviewUI : MonoBehaviour {
 
     public void ChangeSelectedGenome(SelectionGroup group, int index) {
         SpeciesGenomePool pool = simulationManager.GetSelectedGenomePool();
-        selectionManager.SetFocusedCandidateGenome(pool, group, index);
+        //selectionManager.SetFocusedCandidateGenome(pool, group, index);
         selectedButtonData = GetSelectionGroupData(group);
 
         uiManager.historyPanelUI.buttonSelCreatureEventsLink.gameObject.transform.localPosition = new Vector3(360f, 180f, 0f);
 
         if (group == SelectionGroup.Candidates)
-            cameraManager.SetTargetAgent();
+            selectionManager.SetSelected(pool.candidateGenomesList[index]);
 
         if(selectedButtonData != null && selectedButtonData.image != null) {
             selectedButtonData.image.color = Color.white;

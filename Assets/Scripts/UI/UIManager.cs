@@ -229,7 +229,7 @@ public class UIManager : Singleton<UIManager>
     public void InitialUnlocks() {
         //Debug.Log("InitialUnlocks WATER UNLOCKED!!! " + unlockCooldownCounter); // + ", " + BigBangPanelUI.bigBangFramesCounter.ToString());
 
-        selectionManager.focusedCandidate = speciesPools[0].candidateGenomesList[0];
+        //selectionManager.focusedCandidate = speciesPools[0].candidateGenomesList[0];
         
         theRenderKing.baronVonTerrain.IncrementWorldRadius(5.7f);
 
@@ -334,7 +334,7 @@ public class UIManager : Singleton<UIManager>
         
         brushesUI.UpdateBrushesUI(); 
         
-        if (selectionManager.focusedCandidate?.candidateGenome != null) 
+        if (selectionManager.currentSelection.candidate.candidateGenome != null) 
         {
             creaturePanelUI.Tick();
             // --- Move these into CreaturePanel?
@@ -343,7 +343,7 @@ public class UIManager : Singleton<UIManager>
             creaturePaperDollUI.Tick();            
             // ---
 
-            creatureLifeEventsLogUI.Tick(selectionManager.focusedCandidate);
+            creatureLifeEventsLogUI.Tick(selectionManager.currentSelection.candidate);
 
             //***EAC still needed? answer: yes :(
             // * WPP: expose magic numbers, create variable names describing purpose

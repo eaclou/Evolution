@@ -108,7 +108,7 @@ public class SpeciesGraphPanelUI : MonoBehaviour
             //Debug.Log("(" + i.ToString() + ", " + gameManager.simulationManager.masterGenomePool.currentlyActiveSpeciesIDList[i].ToString());
             displaySpeciesIndicesArray[i] = masterGenomePool.currentlyActiveSpeciesIDList[i];
 
-            var isSelected = selectionManager.selectedSpeciesID == masterGenomePool.currentlyActiveSpeciesIDList[i] ? 1f : 0f;
+            var isSelected = selectionManager.currentSelection.historySelectedSpeciesID == masterGenomePool.currentlyActiveSpeciesIDList[i] ? 1f : 0f;
             TreeOfLifeSpeciesKeyData keyData = new TreeOfLifeSpeciesKeyData(pool, isSelected, parentHue);
             
             // WPP: use constructor
@@ -156,7 +156,7 @@ public class SpeciesGraphPanelUI : MonoBehaviour
                            pool.yearCreated == -1 || i == 0 ? 
                                 0f : 1f;
 
-            keyData.isSelected = selectionManager.selectedSpeciesID == i ? 1f : 0f;
+            keyData.isSelected = selectionManager.currentSelection.historySelectedSpeciesID == i ? 1f : 0f;
 
             speciesKeyDataArray[i] = keyData;
         }
@@ -231,28 +231,28 @@ public class SpeciesGraphPanelUI : MonoBehaviour
 
     private void RefreshGraphMaterial() {
         //Debug.Log("RefreshGraphMaterial " + statsTreeOfLifeSpeciesTexArray[0].width.ToString() + ", " + maxValuesStatArray[0].ToString());
-        SpeciesGenomePool pool = masterGenomePool.completeSpeciesPoolsList[selectionManager.selectedSpeciesID];
+        SpeciesGenomePool pool = masterGenomePool.completeSpeciesPoolsList[selectionManager.currentSelection.historySelectedSpeciesID];
 
         switch(selectedGraphCategory) {
             case GraphCategory.Life:
                 speciesGraphMatLeft.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[0]);
                 speciesGraphMatLeft.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatLeft.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[0].width);
-                speciesGraphMatLeft.SetInt("_SelectedSpeciesID", selectionManager.selectedSpeciesID);
+                speciesGraphMatLeft.SetInt("_SelectedSpeciesID", selectionManager.currentSelection.historySelectedSpeciesID);
                 speciesGraphMatLeft.SetFloat("_MaximumValue", maxValuesStatArray[0]);
                 speciesGraphMatLeft.SetFloat("_MinimumValue", minValuesStatArray[0]);
 
                 speciesGraphMatCenter.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[14]);
                 speciesGraphMatCenter.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatCenter.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[14].width);
-                speciesGraphMatCenter.SetInt("_SelectedSpeciesID", selectionManager.selectedSpeciesID);
+                speciesGraphMatCenter.SetInt("_SelectedSpeciesID", selectionManager.currentSelection.historySelectedSpeciesID);
                 speciesGraphMatCenter.SetFloat("_MaximumValue", maxValuesStatArray[14]);
                 speciesGraphMatCenter.SetFloat("_MinimumValue", minValuesStatArray[14]);
 
                 speciesGraphMatRight.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[15]);
                 speciesGraphMatRight.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatRight.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[15].width);
-                speciesGraphMatRight.SetInt("_SelectedSpeciesID", selectionManager.selectedSpeciesID);
+                speciesGraphMatRight.SetInt("_SelectedSpeciesID", selectionManager.currentSelection.historySelectedSpeciesID);
                 speciesGraphMatRight.SetFloat("_MaximumValue", maxValuesStatArray[15]);
                 speciesGraphMatRight.SetFloat("_MinimumValue", minValuesStatArray[15]);
 
@@ -268,21 +268,21 @@ public class SpeciesGraphPanelUI : MonoBehaviour
                 speciesGraphMatLeft.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[4]);
                 speciesGraphMatLeft.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatLeft.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[4].width);
-                speciesGraphMatLeft.SetInt("_SelectedSpeciesID", selectionManager.selectedSpeciesID);
+                speciesGraphMatLeft.SetInt("_SelectedSpeciesID", selectionManager.currentSelection.historySelectedSpeciesID);
                 speciesGraphMatLeft.SetFloat("_MaximumValue", maxValuesStatArray[4]);
                 speciesGraphMatLeft.SetFloat("_MinimumValue", minValuesStatArray[4]);
                 
                 speciesGraphMatCenter.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[12]);
                 speciesGraphMatCenter.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatCenter.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[12].width);
-                speciesGraphMatCenter.SetInt("_SelectedSpeciesID", selectionManager.selectedSpeciesID);
+                speciesGraphMatCenter.SetInt("_SelectedSpeciesID", selectionManager.currentSelection.historySelectedSpeciesID);
                 speciesGraphMatCenter.SetFloat("_MaximumValue", maxValuesStatArray[12]);
                 speciesGraphMatCenter.SetFloat("_MinimumValue", minValuesStatArray[12]);
 
                 speciesGraphMatRight.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[13]);
                 speciesGraphMatRight.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatRight.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[13].width);
-                speciesGraphMatRight.SetInt("_SelectedSpeciesID", selectionManager.selectedSpeciesID);
+                speciesGraphMatRight.SetInt("_SelectedSpeciesID", selectionManager.currentSelection.historySelectedSpeciesID);
                 speciesGraphMatRight.SetFloat("_MaximumValue", maxValuesStatArray[13]);
                 speciesGraphMatRight.SetFloat("_MinimumValue", minValuesStatArray[13]);
 
@@ -296,21 +296,21 @@ public class SpeciesGraphPanelUI : MonoBehaviour
                 speciesGraphMatLeft.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[5]);
                 speciesGraphMatLeft.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatLeft.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[5].width);
-                speciesGraphMatLeft.SetInt("_SelectedSpeciesID", selectionManager.selectedSpeciesID);
+                speciesGraphMatLeft.SetInt("_SelectedSpeciesID", selectionManager.currentSelection.historySelectedSpeciesID);
                 speciesGraphMatLeft.SetFloat("_MaximumValue", maxValuesStatArray[5]);
                 speciesGraphMatLeft.SetFloat("_MinimumValue", minValuesStatArray[5]);
                 
                 speciesGraphMatCenter.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[6]);
                 speciesGraphMatCenter.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatCenter.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[6].width);
-                speciesGraphMatCenter.SetInt("_SelectedSpeciesID", selectionManager.selectedSpeciesID);
+                speciesGraphMatCenter.SetInt("_SelectedSpeciesID", selectionManager.currentSelection.historySelectedSpeciesID);
                 speciesGraphMatCenter.SetFloat("_MaximumValue", maxValuesStatArray[6]);
                 speciesGraphMatCenter.SetFloat("_MinimumValue", minValuesStatArray[6]);
 
                 speciesGraphMatRight.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[7]);
                 speciesGraphMatRight.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatRight.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[7].width);
-                speciesGraphMatRight.SetInt("_SelectedSpeciesID", selectionManager.selectedSpeciesID);
+                speciesGraphMatRight.SetInt("_SelectedSpeciesID", selectionManager.currentSelection.historySelectedSpeciesID);
                 speciesGraphMatRight.SetFloat("_MaximumValue", maxValuesStatArray[7]);
                 speciesGraphMatRight.SetFloat("_MinimumValue", minValuesStatArray[7]);
 
@@ -320,21 +320,21 @@ public class SpeciesGraphPanelUI : MonoBehaviour
                 speciesGraphMatLeft.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[1]);
                 speciesGraphMatLeft.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatLeft.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[1].width);
-                speciesGraphMatLeft.SetInt("_SelectedSpeciesID", selectionManager.selectedSpeciesID);
+                speciesGraphMatLeft.SetInt("_SelectedSpeciesID", selectionManager.currentSelection.historySelectedSpeciesID);
                 speciesGraphMatLeft.SetFloat("_MaximumValue", maxValuesStatArray[1]);
                 speciesGraphMatLeft.SetFloat("_MinimumValue", minValuesStatArray[1]);
 
                 speciesGraphMatCenter.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[2]);
                 speciesGraphMatCenter.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatCenter.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[2].width);
-                speciesGraphMatCenter.SetInt("_SelectedSpeciesID", selectionManager.selectedSpeciesID);
+                speciesGraphMatCenter.SetInt("_SelectedSpeciesID", selectionManager.currentSelection.historySelectedSpeciesID);
                 speciesGraphMatCenter.SetFloat("_MaximumValue", maxValuesStatArray[2]);
                 speciesGraphMatCenter.SetFloat("_MinimumValue", minValuesStatArray[2]);
 
                 speciesGraphMatRight.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[3]);
                 speciesGraphMatRight.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatRight.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[3].width);
-                speciesGraphMatRight.SetInt("_SelectedSpeciesID", selectionManager.selectedSpeciesID);
+                speciesGraphMatRight.SetInt("_SelectedSpeciesID", selectionManager.currentSelection.historySelectedSpeciesID);
                 speciesGraphMatRight.SetFloat("_MaximumValue", maxValuesStatArray[3]);
                 speciesGraphMatRight.SetFloat("_MinimumValue", minValuesStatArray[3]);
 
@@ -344,21 +344,21 @@ public class SpeciesGraphPanelUI : MonoBehaviour
                 speciesGraphMatLeft.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[10]);
                 speciesGraphMatLeft.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatLeft.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[10].width);
-                speciesGraphMatLeft.SetInt("_SelectedSpeciesID", selectionManager.selectedSpeciesID);
+                speciesGraphMatLeft.SetInt("_SelectedSpeciesID", selectionManager.currentSelection.historySelectedSpeciesID);
                 speciesGraphMatLeft.SetFloat("_MaximumValue", maxValuesStatArray[10]);
                 speciesGraphMatLeft.SetFloat("_MinimumValue", minValuesStatArray[10]);
                 
                 speciesGraphMatCenter.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[11]);
                 speciesGraphMatCenter.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatCenter.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[11].width);
-                speciesGraphMatCenter.SetInt("_SelectedSpeciesID", selectionManager.selectedSpeciesID);
+                speciesGraphMatCenter.SetInt("_SelectedSpeciesID", selectionManager.currentSelection.historySelectedSpeciesID);
                 speciesGraphMatCenter.SetFloat("_MaximumValue", maxValuesStatArray[11]);
                 speciesGraphMatCenter.SetFloat("_MinimumValue", minValuesStatArray[11]);
 
                 speciesGraphMatRight.SetTexture("_MainTex", statsTreeOfLifeSpeciesTexArray[9]);
                 speciesGraphMatRight.SetTexture("_ColorKeyTex", statsSpeciesColorKey);
                 speciesGraphMatRight.SetFloat("_NumEntries", statsTreeOfLifeSpeciesTexArray[9].width);
-                speciesGraphMatRight.SetInt("_SelectedSpeciesID", selectionManager.selectedSpeciesID);
+                speciesGraphMatRight.SetInt("_SelectedSpeciesID", selectionManager.currentSelection.historySelectedSpeciesID);
                 speciesGraphMatRight.SetFloat("_MaximumValue", maxValuesStatArray[9]);
                 speciesGraphMatRight.SetFloat("_MinimumValue", minValuesStatArray[9]);
 

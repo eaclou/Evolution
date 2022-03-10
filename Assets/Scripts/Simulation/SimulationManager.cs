@@ -103,7 +103,7 @@ public class SimulationManager : Singleton<SimulationManager>
         return numStepsInSimYear;
     }
     public SpeciesGenomePool GetSelectedGenomePool() {
-        return GetGenomePoolBySpeciesID(selectionManager.selectedSpeciesID);
+        return GetGenomePoolBySpeciesID(selectionManager.currentSelection.historySelectedSpeciesID);
     }
     
     public SpeciesGenomePool GetGenomePoolBySpeciesID(int id) {
@@ -138,7 +138,8 @@ public class SimulationManager : Singleton<SimulationManager>
         // Turn off menu music:
         audioManager.TurnOffMenuAudioGroup();
         // otherwise it's null and a giant mess
-        cameraManager.SetTargetAgent(agents[0], 0);  
+        SelectionManager.instance.SetSelected(agents[0].candidateRef);
+        //cameraManager.SetTargetAgent(agents[0], 0);  
     }
     
     public void BeginLoadingNewSimulation() { StartCoroutine(LoadingNewSimulation()); }
@@ -439,12 +440,10 @@ public class SimulationManager : Singleton<SimulationManager>
 
     #region Every Frame  //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& EVERY FRAME &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-    // * WPP: different methods of calculating same concept -> pick one and stick with it
-    public Agent targetAgent => cameraManager.targetAgent;
-    public Agent targetAgentFromArray => agents[cameraManager.targetAgentIndex];
+    public Agent targetAgent => SelectionManager.instance.currentSelection.agent;
     
-    public bool targetAgentIsDead => targetAgentFromArray.isDead;
-    public int targetAgentAge => targetAgentFromArray.ageCounter;
+    public bool targetAgentIsDead => targetAgent.isDead;
+    public int targetAgentAge => targetAgent.ageCounter;
     
     public int GetIndexOfFocusedAgent()
     {
@@ -455,7 +454,7 @@ public class SimulationManager : Singleton<SimulationManager>
         return -1;
     }
     
-    public bool IsAgentUIFocus(int index) { return GetAgentID(index) == selectionManager.focusedCandidate.candidateID; }
+    public bool IsAgentUIFocus(int index) { return GetAgentID(index) == selectionManager.currentSelection.candidate.candidateID; }
     public int GetAgentID(int agentIndex) { return agents[agentIndex].candidateRef.candidateID; }
 
     // * WPP: break into sections -> comments (minimum) or functions (better)
@@ -502,10 +501,10 @@ public class SimulationManager : Singleton<SimulationManager>
         // Try to make sure AlgaeReservoir and AlgaeParticles share same mechanics!!! *********************************************
         simResourceManager.Tick(trophicLayersManager, vegetationManager);  // Resource Flows Here
         
-        if (targetAgent && selectionManager.focusedCandidate != null &&
+        if (targetAgent && selectionManager.currentSelection.candidate != null &&
            targetAgent.candidateRef != null &&
            targetAgent.isAwaitingRespawn && 
-           targetAgent.candidateRef.candidateID == selectionManager.focusedCandidate.candidateID) 
+           targetAgent.candidateRef.candidateID == selectionManager.currentSelection.candidate.candidateID) 
         {
            cameraManager.isFollowingAgent = false;        
         }

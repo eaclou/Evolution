@@ -14,7 +14,7 @@ public class DebugPanelUI : MonoBehaviour
     TheRenderKing theRenderKing => TheRenderKing.instance;
     TheCursorCzar theCursorCzar => TheCursorCzar.instance;
     CameraManager cameraManager => CameraManager.instance;
-    Agent agent => cameraManager.targetAgent;
+    Agent agent => SelectionManager.instance.currentSelection.agent;
     UIManager uiManager => UIManager.instance;
     EnvironmentFluidManager fluidManager => EnvironmentFluidManager.instance;
     
