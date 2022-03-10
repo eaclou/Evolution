@@ -11,5 +11,8 @@ public class Cooldown : IAgentAbility
     public int frameCount => process.frameCount;
         
     public void Begin() { process.Begin(); }
-    public void End() { process.End(); }
+    public void End() {
+
+        process.End();
+    }
 }

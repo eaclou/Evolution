@@ -55,6 +55,8 @@ public class SpeciesGenomePool
     public List<CandidateAgentData> avgCandidateDataYearList;
     public CandidateAgentData avgCandidateData;
 
+    private Texture2D coatOfArmsTex;
+
     //public float avgLifespan = 0f;
     public bool isFlaggedForExtinction = false;
     public bool isExtinct = false;
@@ -117,8 +119,8 @@ public class SpeciesGenomePool
         
         //string debugTxt = "";
         for (int i = 0; i < 64; i++) {
-            mutationSettings.bodyCoreSizeMutationChance = 0.5f;
-            mutationSettings.bodyCoreMutationStepSize = 0.1f;
+            //mutationSettings.bodyCoreSizeMutationChance = 0.5f;
+            //mutationSettings.bodyCoreMutationStepSize = 0.1f;
             //mutationSettingsRef.mutationStrengthSlot = 0.15f;
 
             AgentGenome agentGenome = Mutate(foundingGenome.candidateGenome, true, true);            
@@ -134,6 +136,13 @@ public class SpeciesGenomePool
 
         //Debug.Log("SPECIES CREATED! " + debugTxt);
         representativeCandidate = foundingGenome;
+
+        
+        coatOfArmsTex = TheRenderKing.instance.GenerateSpeciesCoatOfArms(foundingGenome.candidateGenome);
+    }
+
+    public Texture2D GetCoatOfArms() {
+        return coatOfArmsTex;
     }
 
     public void ProcessExtinction(int curTimeStep) {

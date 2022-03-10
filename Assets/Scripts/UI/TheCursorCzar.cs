@@ -52,7 +52,7 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
     public Vector3 cursorParticlesWorldPos;
     public Ray cursorRay;   // WPP: not used
     
-    public Vector2 screenResolution = new Vector2(1780, 1000);
+    public Vector2 screenResolution = new Vector2(1920, 1080);
     float mouseXScreenNormal => Mathf.Clamp(curMousePixelPos.x, 0f, screenResolution.x);
     float mouseYScreenNormal => Mathf.Clamp(curMousePixelPos.y, 0f, screenResolution.y);
     

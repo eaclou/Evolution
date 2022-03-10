@@ -18,8 +18,8 @@ public class SpeciesOverviewUI : MonoBehaviour {
     
     public GameObject panelGenomeViewer;
     public Image genomeLeaderboard;
-    public Image imageLineageA;
-    public Image imageLineageB;
+    //public Image imageLineageA;
+    //public Image imageLineageB;
     
     [SerializeField] int maxButtons = 24;
     [SerializeField] SelectionGroup defaultSelectionGroup = SelectionGroup.Founder;
@@ -52,7 +52,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
     {
         SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[selectionManager.focusedCandidate.speciesID]; 
         
-        SetSpeciesIconColors(pool.appearanceGenome);
+        //SetSpeciesIconColors(pool.appearanceGenome);
 
         textSpeciesLineage.gameObject.SetActive(true);
         textSpeciesLineage.text = GetLineageText(pool);
@@ -62,10 +62,10 @@ public class SpeciesOverviewUI : MonoBehaviour {
         RebuildGenomeButtonsCurrent(pool);        
     }
     
-    private void SetSpeciesIconColors(CritterModuleAppearanceGenome appearance) {
-        imageLineageA.color = ColorFloor(appearance.huePrimary, hueMin);
-        imageLineageB.color = ColorFloor(appearance.hueSecondary, hueMin);
-    }
+    //private void SetSpeciesIconColors(CritterModuleAppearanceGenome appearance) {
+    //    imageLineageA.color = ColorFloor(appearance.huePrimary, hueMin);
+    //    imageLineageB.color = ColorFloor(appearance.hueSecondary, hueMin);
+    //}
     
     // * Consider moving to static class if generally useful
     private Color ColorFloor(Vector3 hue, float min) {

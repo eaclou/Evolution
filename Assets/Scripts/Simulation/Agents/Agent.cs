@@ -943,9 +943,9 @@ public class Agent : MonoBehaviour {
 
             mouthRef.lastBiteFoodAmount += foodParticleEatAmount + animalParticleEatAmount;
 
-            if(isEatingPlant || isEatingAnimal) {
-                UseAbility(feed);
-            }
+            //if(isEatingPlant || isEatingAnimal) {
+            //    UseAbility(feed);
+            //}
            
             SelectAction();                  
         }
@@ -1017,7 +1017,7 @@ public class Agent : MonoBehaviour {
         curActionState = AgentActionState.Default;
 
         // * Some of these should not be checked if tech is not available
-        float[] effectorValues = { 0f, coreModule.mouthFeedEffector[0], 
+        float[] effectorValues = { 0.001f, coreModule.mouthFeedEffector[0], 
             coreModule.mouthAttackEffector[0], coreModule.defendEffector[0],
             coreModule.dashEffector[0], coreModule.healEffector[0] };
             
@@ -1040,9 +1040,13 @@ public class Agent : MonoBehaviour {
         }
         
         if (!isFreeToAct) {
-            curActionState = AgentActionState.Cooldown;
+            UIManager.instance.creaturePanelUI.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
             return;
-        }  
+        }
+        else {
+            curActionState = AgentActionState.Default;
+            UIManager.instance.creaturePanelUI.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
+        }
 
         if (coreModule.mouthAttackEffector[0] >= mostActiveEffectorValue) {
             curActionState = AgentActionState.Attacking;

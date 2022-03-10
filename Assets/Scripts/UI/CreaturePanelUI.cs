@@ -24,7 +24,10 @@ public class CreaturePanelUI : MonoBehaviour
     public TooltipUI tooltipBrain;
     public TooltipUI tooltipGenome;
     public TooltipUI tooltipAppearance;
-    public TooltipUI tooltipSpeciesIcon;
+   //public TooltipUI tooltipSpeciesIcon;
+
+    [SerializeField]
+    Button buttonOpenClose;
         
     [SerializeField] AgentActionStateData[] actionStates;
     [SerializeField] AgentActionStateData defaultActionState;
@@ -33,7 +36,7 @@ public class CreaturePanelUI : MonoBehaviour
     [SerializeField] PanelModeData[] panelModes;
     [SerializeField] StringSO startingPanelMode;
 
-    private bool isBrainWiringOpen = false;
+    private bool isPanelOpen = true;
 
     public Sprite spriteBrainButton;
 
@@ -71,43 +74,63 @@ public class CreaturePanelUI : MonoBehaviour
         critterPortraitStrokesCBuffer = new ComputeBuffer(1 * theRenderKing.GetNumStrokesPerCritter(), theRenderKing.GetMemorySizeCritterStrokeData());
     }
 
-    //public void ClickGenome() {
-    //    CreaturePanelAnimator.SetBool("GenomeON", true);
-    //    CreaturePanelAnimator.SetBool("BrainWiringON", false);
-    //}
-    public void ClickBrain() {
-        isBrainWiringOpen = !isBrainWiringOpen;
-        CreaturePanelAnimator.SetBool("GenomeON", !isBrainWiringOpen);
-        CreaturePanelAnimator.SetBool("BrainWiringON", isBrainWiringOpen);
-    }
     public void OpenClose() {
-        CreaturePanelAnimator.SetBool("PanelOFF", !CreaturePanelAnimator.GetBool("PanelOFF"));
+        isPanelOpen = !isPanelOpen;
+        if(isPanelOpen) {
+            buttonOpenClose.GetComponentInChildren<Text>().text = "<";
+        }
+        else {
+            buttonOpenClose.GetComponentInChildren<Text>().text = ">";
+        }
+        CreaturePanelAnimator.SetBool("PanelOFF", !isPanelOpen);
     }
+    public void MouseEnterOpenCloseButtonArea() {
+        
+        Animator OpenCloseButtonAnimator = buttonOpenClose.GetComponent<Animator>();
+        OpenCloseButtonAnimator.SetBool("ON", true);
+    }
+    public void MouseExitOpenCloseButtonArea() {
+        Animator OpenCloseButtonAnimator = buttonOpenClose.GetComponent<Animator>();
+        OpenCloseButtonAnimator.SetBool("ON", false);
+    }    
     
     public void Tick() 
     {
         if (!curPanelMode) return;
     
-        //textPanelStateDebug.text = "MODE: " + curPanelMode.value;
-
-        //AgentActionStateData actionState = GetAgentActionStateData(agent.curActionState);
+        if(Screen.height - Input.mousePosition.y < 64 && Math.Abs((Screen.width / 2) - Input.mousePosition.x) < 128) {            
+            MouseEnterOpenCloseButtonArea();            
+        }
+        else {
+            MouseExitOpenCloseButtonArea();
+        }
+        
         imageCurAction.sprite = mostRecentActionState.sprite;
         tooltipCurrentAction.tooltipString = mostRecentActionState.text;
 
-        tooltipSpeciesIcon.tooltipString = "Species #" + agent.speciesIndex + "\nAvg Life: " + totalTicksAlive.ToString("F0");
+        //tooltipSpeciesIcon.tooltipString = "Species #" + agent.speciesIndex + "\nAvg Life: " + totalTicksAlive.ToString("F0");
 
         foreach (var panelMode in panelModes)
             panelMode.SetActive(curPanelMode);
 
         if (agent.coreModule == null) return;
-                
-        tooltipBrain.tooltipString = "BRAIN";//\nAction: " + agent.curActionState;
+
+
+        //speciesCoatOfArmsImage.sprite = Sprite.Create(SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].GetCoatOfArms(), speciesCoatOfArmsImage.rectTransform.rect, Vector2.zero);;
+        
+        //SpriteRenderer renderer = speciesCoatOfArmsImage.gameObject.GetComponent<SpriteRenderer>();
+        //if (renderer == null) {
+        //    renderer = speciesCoatOfArmsImage.gameObject.AddComponent<SpriteRenderer>();            
+        //}
+        //renderer.sprite = speciesCoatOfArmsImage.sprite;  
+        
+
+        tooltipBrain.tooltipString = "BRAIN" + agent.curActionState + " (" + mostRecentActionState.id + ")";
         tooltipGenome.tooltipString = "Genome???";
         tooltipAppearance.tooltipString = "GEN " + agent.candidateRef.candidateGenome.generationCount + ", Axons: " + (agent.candidateRef.candidateGenome.brainGenome.links.Count + ", IO: " + agent.candidateRef.candidateGenome.brainGenome.inOutNeurons.Count + ", H: " + agent.candidateRef.candidateGenome.brainGenome.hiddenNeurons.Count);//"APPEARANCE";
     }
     
     public void SetPanelMode(StringSO mode) {
-        //Debug.Log($"CreaturePanelUI.SetPanelMode({mode})");
         curPanelMode = mode;
     }
 
@@ -147,7 +170,7 @@ public class CreaturePanelUI : MonoBehaviour
         public void Initialize(Color onColor, Color offColor)
         {
             this.onColor = onColor;
-            this.offColor=  offColor;
+            this.offColor = offColor;
         }
         
         public void SetActive(ScriptableObject id) { SetActive(this.id == id); }

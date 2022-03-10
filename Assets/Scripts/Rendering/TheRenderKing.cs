@@ -30,11 +30,9 @@ public class TheRenderKing : Singleton<TheRenderKing>
     
     CreaturePanelUI creaturePanelUI => uiManager.creaturePanelUI;
     ClockPanelUI clockPanelUI => uiManager.clockPanelUI;
-
-    
+        
     public GenerateBrainVisualization brainVisualization;
-
-    
+        
     /// Max number of threads that can be executed by a shader group
     const int maxShaderThreads = 1024;
 
@@ -1075,6 +1073,26 @@ public class TheRenderKing : Singleton<TheRenderKing>
     
     #endregion
 
+    public Texture2D GenerateSpeciesCoatOfArms(AgentGenome genome) {
+        int res = 64;
+        Texture2D newTex = new Texture2D(res, res);
+        // create Tex Here:
+        for(int x = 0; x < res; x++) {
+            for(int y = 0; y < res; y++) {
+                Color pixColor;
+                if(x < res / 2) {
+                    pixColor = new Color(genome.bodyGenome.appearanceGenome.huePrimary.x, genome.bodyGenome.appearanceGenome.huePrimary.y, genome.bodyGenome.appearanceGenome.huePrimary.z);
+                }
+                else {
+                    pixColor = new Color(genome.bodyGenome.appearanceGenome.hueSecondary.x, genome.bodyGenome.appearanceGenome.hueSecondary.y, genome.bodyGenome.appearanceGenome.hueSecondary.z);
+                }
+                
+                newTex.SetPixel(x, y, pixColor);
+            }
+        }
+        newTex.Apply();
+        return newTex;
+    }
     public Vector4[] GetDepthAtObjectPositions(Vector4[] positionsArray) 
     {
         ComputeBuffer objectDataInFluidCoordsCBuffer = new ComputeBuffer(positionsArray.Length, sizeof(float) * 4);

@@ -6,7 +6,7 @@ public class HistoryPanelUI : MonoBehaviour
 {
     public Transform anchor;
     public GameObject prefabSpeciesIcon;
-    public GameObject prefabCreatureIcon;
+    //public GameObject prefabCreatureIcon;
     public GameObject prefabCreatureEventIconUI;
 
     public Button buttonToggleExtinct;

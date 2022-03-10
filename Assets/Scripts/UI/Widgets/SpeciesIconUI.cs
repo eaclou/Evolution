@@ -17,7 +17,8 @@ public class SpeciesIconUI : MonoBehaviour
     private Vector2 currentCoords;
 
     public TooltipUI tooltip;
-    
+
+    public Sprite sprite;
     public Image imageColor1;
     public Image imageColor2;
     public Image imageColor3;
@@ -32,8 +33,13 @@ public class SpeciesIconUI : MonoBehaviour
         transform.SetParent(anchor, false);
         transform.localPosition = Vector3.zero;
         transform.localScale = new Vector3(1f, 1f, 1f);
-        image.color = color;
-          
+        image.color = Color.white;
+                
+        sprite = Sprite.Create(pool.GetCoatOfArms(), image.rectTransform.rect, Vector2.one * 0.5f);
+        sprite.name = "whoaSprite!";
+        image.sprite = sprite;
+        //image.GetComponent<CanvasRenderer>().SetTexture(pool.GetCoatOfArms());
+
         text.text = "[" + pool.speciesID + "]";// " + masterGenomePool.completeSpeciesPoolsList[pool.speciesID].foundingCandidate.candidateGenome.bodyGenome.coreGenome.name;
     }
 

@@ -229,8 +229,8 @@ public class GenerateBrainVisualization : MonoBehaviour
         InitializeComputeBuffers(ref sockets, inputCount, outputCount);
         initialized = true;
 
-        PrintNeuronPositions(neurons, ref sockets);
-        PrintAxonPositions(axons);
+        //PrintNeuronPositions(neurons, ref sockets);
+        //PrintAxonPositions(axons);
     }
 
     public void PrintNeuronPositions(List<Neuron> neurons, ref SocketInitData[] sockets) {
