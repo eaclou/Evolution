@@ -4,7 +4,7 @@ using UnityEngine.UI;
 public class SpecializationPanel : MonoBehaviour
 {
     SelectionManager selectionManager => SelectionManager.instance;
-    CritterModuleCoreGenome coreGenome => selectionManager.currentSelection.candidate.candidateGenome.bodyGenome.coreGenome;
+    //CritterModuleCoreGenome coreGenome => selectionManager.currentSelection.candidate.candidateGenome.bodyGenome.coreGenome;
     [SerializeField]
     TechElementIconUI[] techElementIcons;
     [SerializeField]
@@ -24,16 +24,15 @@ public class SpecializationPanel : MonoBehaviour
         //if (techElementIcons.Length >= 0) {
         foreach (var tech in techElementIcons) {
             bool hasTech = selectionManager.SelectedAgentHasTech(tech.techElement.id);
-            if(hasTech) {
+            if (hasTech) {
                 foreach (var category in techTree.categories) {
-                    if(tech.techElement.category == category.category) {
-                        tech.gameObject.GetComponent<Image>().color = category.color;
-                        continue;
+                    if (tech.techElement.category == category.category) {
+                        tech.image.color = category.color;
                     }
                 }
             }
             else {
-                tech.gameObject.GetComponent<Image>().color = new Color(0.1f, 0.1f, 0.1f);
+                tech.image.color = new Color(0.1f, 0.1f, 0.1f);
             }
             
             tech.gameObject.transform.localScale = hasTech ? Vector3.one : Vector3.one * 0.5f;

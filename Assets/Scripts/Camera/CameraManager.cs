@@ -47,8 +47,6 @@ public class CameraManager : Singleton<CameraManager>
     public Vector4 worldSpaceCameraRightDir;
     public Vector4 worldSpaceCameraUpDir;
 
-    
-    // Use this for initialization
     void Start () {
         InitializeCamera();
         //targetCamPos = new Vector3(128f, 128f, -64f);
@@ -153,9 +151,7 @@ public class CameraManager : Singleton<CameraManager>
         float tiltSpeedMult = Mathf.Lerp(minSizeTiltSpeedMult, maxSizeTiltSpeedMult, relSize);
 
         masterTargetTiltAngle += tiltAngle * masterTiltSpeed * tiltSpeedMult * Time.deltaTime;
-
         masterTargetTiltAngle = Mathf.Clamp(masterTargetTiltAngle, 0f, 60f);
-
     }
 
     public void ZoomCameraFixed(float zoomValue) 
@@ -177,25 +173,13 @@ public class CameraManager : Singleton<CameraManager>
 
         masterTargetDistance += zoomSpeed;
     }
-    /*
-    public void SetTargetAgent() {
-        SetTargetAgent(simulation.agents[targetAgentIndex], targetAgentIndex);
-    }
-
-    public void SetTargetAgent(Agent agent, int index) 
-    {
-        //Debug.Log("SetTarget! " + index.ToString());
-        targetAgent = agent;
-        targetAgentTransform = agent.bodyGO.transform;
-        targetAgentIndex = index;
-
-    }*/
 
     public void MouseOverAgent(Agent agent, bool clicked)
     {
         if (clicked) 
         {
-            SelectionManager.instance.SetSelected(agent.candidateRef);
+            // WPP: removed: function already called by TheCursorCzar
+            //SelectionManager.instance.SetSelected(agent.candidateRef);
             //SetTargetAgent(agent, agent.index);
             targetAgent = agent;
             targetAgentTransform = agent.bodyGO.transform;
@@ -226,18 +210,18 @@ public class CameraManager : Singleton<CameraManager>
         Vector2 v = (targetPosition - pastTargetPosition) / t;
         Vector2 f = pastPosition - pastTargetPosition + v;
         return targetPosition - v + f * Mathf.Exp(-t);
-    } 
-    public void DidFollowedCreatureDie(Agent agentRef) {
-
-        if(agentRef == SelectionManager.instance.currentSelection.agent) {
-            isFollowingAgent = false;
-            Logger.Log("followed creature died!", true);
-            SelectionManager.instance.FollowedCreatureDied();
-        }
-        else {
-
-        }
     }
+
+    public void DidFollowedCreatureDie(Agent agentRef) 
+    {
+        if (agentRef != SelectionManager.instance.currentSelection.agent) 
+            return;
+        
+        isFollowingAgent = false;
+        Logger.Log("followed creature died!", true);
+        SelectionManager.instance.FollowedCreatureDied();
+    }
+    
     public Vector4 Get4DFocusBox(Vector2 boxSizeHalf)
     {
         return new Vector4(curCameraFocusPivotPos.x - boxSizeHalf.x,
@@ -246,3 +230,16 @@ public class CameraManager : Singleton<CameraManager>
             curCameraFocusPivotPos.y + boxSizeHalf.y);
     }    
 }
+
+/*
+public void SetTargetAgent() {
+    SetTargetAgent(simulation.agents[targetAgentIndex], targetAgentIndex);
+}
+
+public void SetTargetAgent(Agent agent, int index) 
+{
+    //Debug.Log("SetTarget! " + index.ToString());
+    targetAgent = agent;
+    targetAgentTransform = agent.bodyGO.transform;
+    targetAgentIndex = index;
+}*/

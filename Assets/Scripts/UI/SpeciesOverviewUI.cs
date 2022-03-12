@@ -143,10 +143,9 @@ public class SpeciesOverviewUI : MonoBehaviour {
         if (group == SelectionGroup.Candidates)
             selectionManager.SetSelected(pool.candidateGenomesList[index]);
 
-        if(selectedButtonData != null && selectedButtonData.image != null) {
+        if (selectedButtonData != null && selectedButtonData.image != null) {
             selectedButtonData.image.color = Color.white;
-            
-             // new Vector3(selectedButtonData.image.rectTransform.localPosition.x + 24f, selectedButtonData.image.rectTransform.localPosition.y, 0f);
+            // new Vector3(selectedButtonData.image.rectTransform.localPosition.x + 24f, selectedButtonData.image.rectTransform.localPosition.y, 0f);
         }
         panelGenomeViewer.SetActive(true);
 

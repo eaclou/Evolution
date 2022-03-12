@@ -25,36 +25,21 @@ public class GenomeButton : MonoBehaviour
     [SerializeField] BackgroundState fossilState;
     [SerializeField] BackgroundState unbornState;
     
-    //public Color testColor; void OnValidate() { testColor = Color.gray; }
-
     public void UpdateButtonPrefab(SelectionGroup grp, int slotIndex) {
         index = slotIndex;
         group = grp;
     }
 
-    public void ClickedThisButton() {
-        
-
-        // updates focusedCandidate in uiManager
+    /// Updates focusedCandidate in uiManager
+    public void ClickedThisButton() 
+    {
         uiManager.speciesOverviewUI.ChangeSelectedGenome(group, index);  
         
-        if(!selectionManager.currentSelection.candidate.isBeingEvaluated) 
-            return;
+        // WPP: removed, function already called by above line
+        //if (!selectionManager.currentSelection.candidate.isBeingEvaluated) return;
+        //selectionManager.SetSelected(simulationManager.masterGenomePool.completeSpeciesPoolsList[selectionManager.currentSelection.historySelectedSpeciesID].candidateGenomesList[index]); // FindCorrespondingAgent();
+    }
 
-        selectionManager.SetSelected(SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[selectionManager.currentSelection.historySelectedSpeciesID].candidateGenomesList[index]); // FindCorrespondingAgent();
-    }
-    /*
-    void FindCorrespondingAgent()
-    {
-        var agentIndex = simulationManager.GetIndexOfFocusedAgent();
-        if (agentIndex == -1) return;
-        
-        //cameraManager.SetTargetAgent(simulationManager.agents[agentIndex], agentIndex);
-        //selectionManager.ResetCurrentFocusedCandidateGenome();
-        selectionManager.SetSelected()
-        cameraManager.isFollowingAgent = true; 
-    }
-    */
     public void SetTargetCoords(Vector2 newCoords) {
         targetCoords = newCoords;
     }
@@ -126,3 +111,17 @@ public class GenomeButton : MonoBehaviour
         //public Sprite icon;
     }
 }
+
+    
+/*
+void FindCorrespondingAgent()
+{
+    var agentIndex = simulationManager.GetIndexOfFocusedAgent();
+    if (agentIndex == -1) return;
+    
+    //cameraManager.SetTargetAgent(simulationManager.agents[agentIndex], agentIndex);
+    //selectionManager.ResetCurrentFocusedCandidateGenome();
+    selectionManager.SetSelected()
+    cameraManager.isFollowingAgent = true; 
+}
+*/
