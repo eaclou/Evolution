@@ -134,12 +134,10 @@ public class SimulationManager : Singleton<SimulationManager>
     
     public void LoadingWarmupComplete()
     {
-        //simulationWarmUpComplete = true;
-        // Turn off menu music:
+        // Turn off menu music
         audioManager.TurnOffMenuAudioGroup();
         // otherwise it's null and a giant mess
-        SelectionManager.instance.SetSelected(agents[0].candidateRef);
-        //cameraManager.SetTargetAgent(agents[0], 0);  
+        selectionManager.SetSelected(agents[0].candidateRef);
     }
     
     public void BeginLoadingNewSimulation() { StartCoroutine(LoadingNewSimulation()); }

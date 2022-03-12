@@ -1074,27 +1074,23 @@ public class TheRenderKing : Singleton<TheRenderKing>
     }
     
     #endregion
+    
+    const int textureResolution = 64;
 
-    public Texture2D GenerateSpeciesCoatOfArms(AgentGenome genome) {
-        int res = 64;
-        Texture2D newTex = new Texture2D(res, res);
-        // create Tex Here:
-        for(int x = 0; x < res; x++) {
-            for(int y = 0; y < res; y++) {
-                Color pixColor;
-                if(x < res / 2) {
-                    pixColor = new Color(genome.bodyGenome.appearanceGenome.huePrimary.x, genome.bodyGenome.appearanceGenome.huePrimary.y, genome.bodyGenome.appearanceGenome.huePrimary.z);
-                }
-                else {
-                    pixColor = new Color(genome.bodyGenome.appearanceGenome.hueSecondary.x, genome.bodyGenome.appearanceGenome.hueSecondary.y, genome.bodyGenome.appearanceGenome.hueSecondary.z);
-                }
-                
+    public Texture2D GenerateSpeciesCoatOfArms(CritterModuleAppearanceGenome appearance) {
+        Texture2D newTex = new Texture2D(textureResolution, textureResolution);
+        
+        for (int x = 0; x < textureResolution; x++) {
+            for (int y = 0; y < textureResolution; y++) {
+                var hue = x < textureResolution / 2 ? appearance.huePrimary : appearance.hueSecondary;
+                var pixColor = new Color(hue.x, hue.y, hue.z);
                 newTex.SetPixel(x, y, pixColor);
             }
         }
         newTex.Apply();
         return newTex;
     }
+    
     public Vector4[] GetDepthAtObjectPositions(Vector4[] positionsArray) 
     {
         ComputeBuffer objectDataInFluidCoordsCBuffer = new ComputeBuffer(positionsArray.Length, sizeof(float) * 4);
@@ -2036,25 +2032,11 @@ public class TheRenderKing : Singleton<TheRenderKing>
     
     // WPP: merged below 2 methods
     private void SimCritterGenericStrokes() {
-        /*int kernelCSSimulateCritterGenericStrokes = computeShaderCritters.FindKernel("CSSimulateCritterGenericStrokes");
-        computeShaderCritters.SetTexture(kernelCSSimulateCritterGenericStrokes, "velocityRead", fluidManager._VelocityPressureDivergenceMain);
-        computeShaderCritters.SetBuffer(kernelCSSimulateCritterGenericStrokes, "critterInitDataCBuffer", simStateData.critterInitDataCBuffer);
-        computeShaderCritters.SetBuffer(kernelCSSimulateCritterGenericStrokes, "critterSimDataCBuffer", simStateData.critterSimDataCBuffer);
-        computeShaderCritters.SetBuffer(kernelCSSimulateCritterGenericStrokes, "critterGenericStrokesWriteCBuffer", mainCritterStrokesCBuffer);
-        computeShaderCritters.SetFloat("_MapSize", SimulationManager._MapSize);
-        computeShaderCritters.Dispatch(kernelCSSimulateCritterGenericStrokes, mainCritterStrokesCBuffer.count / 16, 1, 1);*/
         SimCritterStrokes("CSSimulateCritterGenericStrokes", simStateData.critterInitDataCBuffer, 
             simStateData.critterSimDataCBuffer, mainCritterStrokesCBuffer);
     }
     
     private void SimUIToolbarCritterPortraitStrokes() {
-        /*int kernelCSSimulateCritterPortraitStrokes = computeShaderCritters.FindKernel("CSSimulateCritterPortraitStrokes");
-        computeShaderCritters.SetTexture(kernelCSSimulateCritterPortraitStrokes, "velocityRead", fluidManager._VelocityPressureDivergenceMain);
-        computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterInitDataCBuffer", creaturePanelUI.portraitCritterInitDataCBuffer);
-        computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterSimDataCBuffer", creaturePanelUI.portraitCritterSimDataCBuffer);
-        computeShaderCritters.SetBuffer(kernelCSSimulateCritterPortraitStrokes, "critterGenericStrokesWriteCBuffer", creaturePanelUI.critterPortraitStrokesCBuffer);
-        computeShaderCritters.SetFloat("_MapSize", SimulationManager._MapSize);
-        computeShaderCritters.Dispatch(kernelCSSimulateCritterPortraitStrokes, creaturePanelUI.critterPortraitStrokesCBuffer.count / 16, 1, 1);*/
         SimCritterStrokes("CSSimulateCritterPortraitStrokes", creaturePanelUI.portraitCritterInitDataCBuffer, 
             creaturePanelUI.portraitCritterSimDataCBuffer, creaturePanelUI.critterPortraitStrokesCBuffer);
     }
@@ -2091,7 +2073,10 @@ public class TheRenderKing : Singleton<TheRenderKing>
     
     private void SetToolbarPortraitCritterInitData(AgentGenome genome) 
     {
-        AgentGenome genome0 = genome; 
+        var body = genome.bodyGenome;
+        // ERROR: body is null on simulation startup on Low simulation complexity
+        var appearance = body.appearanceGenome; 
+        
         // simManager.masterGenomePool.completeSpeciesPoolsList[simManager.uiManager.globalResourcesUI.selectedSpeciesIndex].representativeGenome;
         //AgentGenome genome1 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][simManager.uiManager.mutationUI.selectedToolbarMutationID].representativeGenome;
         //AgentGenome genome2 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][0].representativeGenome;
@@ -2100,11 +2085,11 @@ public class TheRenderKing : Singleton<TheRenderKing>
         //AgentGenome genome5 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][3].representativeGenome;
 
         // NOT the best place for this:::: ***        
-        treeOfLifeBackdropPortraitBorderMat.SetColor("_TintPri", new Color(genome0.bodyGenome.appearanceGenome.huePrimary.x, genome0.bodyGenome.appearanceGenome.huePrimary.y, genome0.bodyGenome.appearanceGenome.huePrimary.z));
-        treeOfLifeBackdropPortraitBorderMat.SetColor("_TintSec", new Color(genome0.bodyGenome.appearanceGenome.hueSecondary.x, genome0.bodyGenome.appearanceGenome.hueSecondary.y, genome0.bodyGenome.appearanceGenome.hueSecondary.z));
+        treeOfLifeBackdropPortraitBorderMat.SetColor("_TintPri", new Color(body.appearanceGenome.huePrimary.x, appearance.huePrimary.y, appearance.huePrimary.z));
+        treeOfLifeBackdropPortraitBorderMat.SetColor("_TintSec", new Color(appearance.hueSecondary.x, appearance.hueSecondary.y, appearance.hueSecondary.z));
         
         CritterInitData[] toolbarPortraitCritterInitDataArray = new CritterInitData[6];
-        CritterInitData initData = new CritterInitData(genome0.bodyGenome);
+        CritterInitData initData = new CritterInitData(body);
 
         toolbarPortraitCritterInitDataArray[0] = initData;
         

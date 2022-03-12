@@ -38,7 +38,8 @@ public class MasterGenomePool
     public SpeciesGenomePool selectedPool => completeSpeciesPoolsList[selectionManager.currentSelection.historySelectedSpeciesID];
     public int speciesPoolCount => completeSpeciesPoolsList.Count;   
    
-    public MasterGenomePool() { }
+    // WPP: empty constructor is redundant, compiler creates this by default
+    //public MasterGenomePool() { }
 
     public void FirstTimeInitialize(MutationSettingsInstance mutationSettings) {
         debugRecentlyDeletedCandidateIDsList = new List<int>();
@@ -58,14 +59,14 @@ public class MasterGenomePool
             //float lerpV = 0.5f;
             
             SpeciesGenomePool newSpecies = new SpeciesGenomePool(i, -1, 0, 0, mutationSettings);
-            AgentGenome seedGenome = new AgentGenome(mutationSettings.brainInitialConnectionChance, SimulationManager.instance.numInitialHiddenNeurons);
+            AgentGenome seedGenome = new AgentGenome(mutationSettings.brainInitialConnectionChance,simulation.numInitialHiddenNeurons);
 
             newSpecies.FirstTimeInitialize(new CandidateAgentData(seedGenome, i), 0);
             currentlyActiveSpeciesIDList.Add(i);
             completeSpeciesPoolsList.Add(newSpecies);
         }
 
-        SelectionManager.instance.SetSelected(completeSpeciesPoolsList[0].candidateGenomesList[0]);
+        selectionManager.SetSelected(completeSpeciesPoolsList[0].candidateGenomesList[0]);
     }
 
     public void AddNewYearlySpeciesStats(int year) {
@@ -103,7 +104,7 @@ public class MasterGenomePool
         }
 
         if (noCurrentlyExtinctFlaggedSpecies) {
-            if(completeSpeciesPoolsList[leastFitSpeciesID].numAgentsEvaluated > minNumGuaranteedEvalsForNewSpecies) {
+            if (completeSpeciesPoolsList[leastFitSpeciesID].numAgentsEvaluated > minNumGuaranteedEvalsForNewSpecies) {
                 // OK to KILL!!!
                 FlagSpeciesExtinct(leastFitSpeciesID);
                 //completeSpeciesPoolsList[leastFitSpeciesID].isFlaggedForExtinction = true;
@@ -369,25 +370,11 @@ public class MasterGenomePool
         var newBody = newGenome.bodyGenome;
         var newCore = newBody.coreGenome;
         var newAppearance = newBody.appearanceGenome;
-        
-        // WPP: removed
-        //var newCommunication = newBody.communicationGenome;
-        //var newThreat = newBody.threatGenome;
-        //var newFriend = newBody.friendGenome;
-        //var newFood = newBody.foodGenome;
-        //var newEnvironment = newBody.environmentalGenome;
-        
+
         var repBody = repGenome.bodyGenome;
         var repCore = repBody.coreGenome;
         var repAppearance = repBody.appearanceGenome;
-        
-        // WPP: removed
-        //var repCommunication = repBody.communicationGenome;
-        //var repThreat = repBody.threatGenome;
-        //var repFriend = repBody.friendGenome;
-        //var repFood = repBody.foodGenome;
-        //var repEnvironment = repBody.environmentalGenome;
-    
+
         float dBaseSize = Mathf.Abs(newCore.creatureBaseLength - repCore.creatureBaseLength);
         float dBaseAspectRatio = Mathf.Abs(newCore.creatureAspectRatio - repCore.creatureAspectRatio);
 

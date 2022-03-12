@@ -15,7 +15,7 @@ public class CritterModuleCoreGenome
     public readonly BrainModuleID moduleID = BrainModuleID.Core;
 
     public int generation;
-    public string name;
+    public string name; // * WPP: duplicate field, also present in CandidateAgentData
 
     // 4 main sections: 
     //    Mouth/Snout

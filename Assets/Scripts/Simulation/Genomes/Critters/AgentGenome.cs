@@ -8,9 +8,12 @@ public class AgentGenome
     [ReadOnly] public BodyGenome bodyGenome;
     [ReadOnly] public BrainGenome brainGenome;
     
+    //public AgentGenome() { Debug.LogError("Default AgentGenomeConstructor"); ConstructRandom(0.1f, 0); }
+
     public AgentGenome(float initialConnectionDensity, int hiddenNeurons)
     {
         ConstructRandom(initialConnectionDensity, hiddenNeurons);
+        Debug.Log("Constructing random AgentGenome...");
     }
     
     /*public AgentGenome(MutationSettingsInstance mutationSettings, float lerpV) 
@@ -31,6 +34,7 @@ public class AgentGenome
         this.bodyGenome = bodyGenome; 
         this.brainGenome = brainGenome;
         this.generationCount = generationCount;
+        Debug.Log("Constructing AgentGenome via mutation");
     }
     
     public void GenerateInitialRandomBodyGenome() {

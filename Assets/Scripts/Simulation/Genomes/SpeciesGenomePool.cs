@@ -99,23 +99,7 @@ public class SpeciesGenomePool
         depthLevel = depth;
         Vector3 newHue = Random.insideUnitSphere;
         
-        string newName = "";
-
-        foreach (var letter in foundingGenome.candidateGenome.bodyGenome.coreGenome.name) {
-            float randChance1 = Random.Range(0f, 1f);
-            if (randChance1 < 0.35) {
-                newName += RandomStatics.GetRandomLetter();  
-                
-                if (randChance1 < 0.05) {
-                    newName += RandomStatics.GetRandomLetter();          
-                }
-            }            
-            else if (randChance1 <= 0.95f) {
-                newName += letter; 
-            }
-        }
-
-        foundingGenome.candidateGenome.bodyGenome.coreGenome.name = newName;
+        foundingGenome.candidateGenome.bodyGenome.coreGenome.name = MutateName(foundingGenome.candidateGenome.bodyGenome.coreGenome.name);
         foundingGenome.candidateGenome.bodyGenome.appearanceGenome.BlendHue(newHue, 0.75f);
         
         //string debugTxt = "";
@@ -139,15 +123,36 @@ public class SpeciesGenomePool
         representativeCandidate = foundingGenome;
 
         coatOfArmsMat = new Material(TheRenderKing.instance.coatOfArmsShader);
-        coatOfArmsTex = TheRenderKing.instance.GenerateSpeciesCoatOfArms(foundingGenome.candidateGenome);
+        coatOfArmsTex = TheRenderKing.instance.GenerateSpeciesCoatOfArms(foundingGenome.candidateGenome.bodyGenome.appearanceGenome);
         coatOfArmsMat.SetPass(0);
         coatOfArmsMat.SetTexture("_MainTex", coatOfArmsTex);
+    }
+    
+    string MutateName(string original)
+    {
+        var newName = "";
+
+        foreach (var letter in original) {
+            float randChance1 = Random.Range(0f, 1f);
+            if (randChance1 < 0.35) {
+                newName += RandomStatics.GetRandomLetter();  
+                
+                if (randChance1 < 0.05) {
+                    newName += RandomStatics.GetRandomLetter();          
+                }
+            }            
+            else if (randChance1 <= 0.95f) {
+                newName += letter; 
+            }
+        }
+        
+        return newName;
     }
 
     public Texture2D GetCoatOfArms() {
         return coatOfArmsTex;
     }
-
+    
     public void ProcessExtinction(int curTimeStep) {
         isExtinct = true;
         timeStepExtinct = curTimeStep;
@@ -211,21 +216,13 @@ public class SpeciesGenomePool
             }
         }
         else {
-            if (candidateGenomesList.Count > 0) {
-                Debug.LogError("ERROR NO INDEX FOUND! " + candidateData.candidateID + ", species: " + speciesID+ ", CDSID: " + candidateData.speciesID + ", [0]: " + candidateGenomesList[0].candidateID);
-            }
-            else {
-                Debug.LogError("META-ERROR NO INDEX FOUND! ");
-            }
-            
+            Debug.LogError(candidateGenomesList.Count <= 0 ? "META-ERROR NO INDEX FOUND! " : 
+                $"ERROR NO INDEX FOUND! {candidateData.candidateID}, species: {speciesID}, CDSID: {candidateData.speciesID}, [0]: {candidateGenomesList[0].candidateID}");
+
             masterGenomePool.GlobalFindCandidateID(candidateData.candidateID); // temp debug
         }
         
         // *** NOTE! *** List.Remove() was unreliable - worked sometimes but not others? still unsure about it
-        //int afterCount = candidateGenomesList.Count;
-        //if(beforeCount - afterCount > 0) {
-        //    
-        //}
     }
 
     public void AddNewCandidateGenome(AgentGenome newGenome) {
@@ -333,7 +330,7 @@ public class SpeciesGenomePool
         recordMostEaten = totalEaten;
         recordHolderMostEaten = agent.candidateRef;
 
-        if(numAgentsEvaluated > maxLeaderboardGenomePoolSize) {
+        if (numAgentsEvaluated > maxLeaderboardGenomePoolSize) {
             hallOfFameGenomesList.Add(agent.candidateRef);
         }
     }

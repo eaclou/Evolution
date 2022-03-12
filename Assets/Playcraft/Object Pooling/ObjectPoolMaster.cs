@@ -8,7 +8,7 @@ namespace Playcraft.Pooling
         [SerializeField] ObjectPoolData[] pools = default;
         private Dictionary<GameObject, ObjectSpawner> objectPoolDict = new Dictionary<GameObject, ObjectSpawner>();
 
-        private void Start()
+        void Start()
         {
             foreach (var pool in pools)
             {
@@ -16,8 +16,8 @@ namespace Playcraft.Pooling
                 GeneratePool(pool);
             }
         }
-
-        private void GeneratePool(ObjectPoolData data)
+        
+        void GeneratePool(ObjectPoolData data)
         {    
             GameObject pool = new GameObject();
             pool.name = data.prefab.name;

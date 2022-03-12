@@ -78,7 +78,7 @@ public class HistoryPanelUI : MonoBehaviour
     private int worldTreeNumCreatureLines = 32;
     private int worldTreeBufferCount => worldTreeNumPointsPerLine * (worldTreeNumSpeciesLines * worldTreeNumCreatureLines);
     
-    //***EAC deprecate!
+    //***EAC deprecate! -> not used, safe to delete
     public struct TreeOfLifeEventLineData { 
         public int timeStepActivated;
         /// minor = 0, major = 0.5, extreme = 1.0
@@ -95,13 +95,13 @@ public class HistoryPanelUI : MonoBehaviour
 
     // How to sync rendered geo with UI buttons???
 
-    void Start() {
-        //uiManagerRef.OnAgentSelected += RefreshFocusedAgent;
+    /*void Start() {
+        uiManagerRef.OnAgentSelected += RefreshFocusedAgent;
     }
     
     void OnDestroy() {
-        //if (UIManager.exists) uiManagerRef.OnAgentSelected -= RefreshFocusedAgent;
-    }
+        if (UIManager.exists) uiManagerRef.OnAgentSelected -= RefreshFocusedAgent;
+    }*/
     
     public void InitializePanel() {
         InitializeSpeciesIcons();
@@ -121,7 +121,9 @@ public class HistoryPanelUI : MonoBehaviour
     }
     
     private void UpdateCreatureEventIcons(CandidateAgentData candidate) {
-        if (creatureEventIcons.Count == 0 || candidate.candidateEventDataList.Count == 0) return;
+        if (candidate?.candidateEventDataList == null ||
+            creatureEventIcons.Count == 0 || candidate.candidateEventDataList.Count == 0) 
+            return;
         
         ClearDeadCreatureEventIcons();
         
@@ -523,8 +525,7 @@ public class HistoryPanelUI : MonoBehaviour
             icon.UpdateSpeciesIconDisplay(panelSizePixels, isSelected);
         }
 
-        if(selectionManager.currentSelection.candidate != null) 
-            UpdateCreatureEventIcons(selectionManager.currentSelection.candidate);
+        UpdateCreatureEventIcons(selectionManager.currentSelection.candidate);
         
         timelineStartTimeStep = Mathf.Lerp(timelineStartTimeStep, targetStartTimeStep, 0.15f);
     }

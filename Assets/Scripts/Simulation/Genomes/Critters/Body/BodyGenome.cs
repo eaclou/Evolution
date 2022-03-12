@@ -28,6 +28,7 @@ public class BodyGenome
     }
     
     public UnlockedTech unlockedTech { get; private set; }
+    
     public CritterModuleAppearanceGenome appearanceGenome;
     public CritterModuleCoreGenome coreGenome;
     

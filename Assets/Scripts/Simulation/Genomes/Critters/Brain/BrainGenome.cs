@@ -35,15 +35,10 @@ public class BrainGenome
         links = new List<LinkGenome>();
     }
 
-    // WPP: Never used
-    //public void SetBodyNeuronsFromTemplate(BodyGenome templateBody) {
-    //    InitializeBodyNeuronList();
-    //    InitializeBodyNeurons(templateBody);
-    //}
-
     public void InitializeRandomBrainGenome(BodyGenome bodyGenome, float initialWeightMultiplier, float initialConnectionDensity, int numInitHiddenNeurons) {
         InitializeNewBrainGenomeLists();
         InitializeIONeurons(bodyGenome);
+        PrintNeuronCounts(initialConnectionDensity);
         InitializeAxons(initialWeightMultiplier, initialConnectionDensity, numInitHiddenNeurons);
     }
     
@@ -67,36 +62,24 @@ public class BrainGenome
     public void InitializeAxons(float initialWeightMultiplier, float initialConnectionDensity, int numInitHiddenNeurons) 
     {
         for (int i = 0; i < numInitHiddenNeurons; i++) {
-            //NeuronGenome neuron = new NeuronGenome("Hid" + i, NeuronType.Hid, BrainModuleID.Undefined, i);
+            //NeuronGenome neuron = new NeuronGenome("Hidden" + i, NeuronType.Hid, BrainModuleID.Undefined, i);
             var neuron = new NeuronGenome(hiddenTemplate, i);
             hiddenNeurons.Add(neuron);
         }
         
-        //Debug.Log($"Linking layers with connection density of {initialConnectionDensity}");
-        //Debug.Log($"{inputNeuronList.Count} input neurons to {outputNeuronList.Count} output neurons");
         LinkLayers(inputNeuronList, outputNeuronList, initialConnectionDensity, initialWeightMultiplier);
-        //Debug.Log($"{inputNeuronList.Count} input neurons to {hiddenNeurons.Count} hidden neurons");
         LinkLayers(inputNeuronList, hiddenNeurons, initialConnectionDensity, initialWeightMultiplier);
-        //Debug.Log($"{hiddenNeurons.Count} hidden neurons to {outputNeuronList.Count} output neurons");
         LinkLayers(hiddenNeurons, outputNeuronList, initialConnectionDensity, initialWeightMultiplier);
     }
     
-    // WPP: build once on full initialization and cache result
-    // * Consider moving to global static
-    /*(List<MetaNeuron>, List<MetaNeuron>) GetIOLists() {
-        List<MetaNeuron> inputNeuronList = new List<MetaNeuron>();
-        List<MetaNeuron> outputNeuronList = new List<MetaNeuron>();
-        
-        foreach (var neuron in inOutNeurons) {
-            switch (neuron.io) {
-                case NeuronType.In: inputNeuronList.Add(neuron); break;
-                case NeuronType.Out: outputNeuronList.Add(neuron); break;
-            }
-        }
-        
-        return (inputNeuronList, outputNeuronList);        
-    }*/
-    
+    void PrintNeuronCounts(float initialConnectionDensity)
+    {
+        Debug.Log($"Linking layers with connection density of {initialConnectionDensity}\n" +
+                  $"{inputNeuronList.Count} input neurons to {outputNeuronList.Count} output neurons\n" +
+                  $"{inputNeuronList.Count} input neurons to {hiddenNeurons.Count} hidden neurons)" +
+                  $"{hiddenNeurons.Count} hidden neurons to {outputNeuronList.Count} output neurons");
+    }
+
     void LinkLayers(List<NeuronGenome> fromList, List<NeuronGenome> toList, float initialConnectionDensity, float initialWeightMultiplier) 
     {
         //int debugConnectionCount = 0;
@@ -121,15 +104,18 @@ public class BrainGenome
 
     public void SetToMutatedCopyOfParentGenome(BrainGenome parentGenome, BodyGenome bodyGenome, MutationSettingsInstance settings) 
     {
+        /*
         //this.bodyNeuronList = parentGenome.bodyNeuronList; // UNSUSTAINABLE!!! might work now since all neuronLists are identical ******
 
         // Copy from parent brain or rebuild neurons from scratch based on the new mutated bodyGenome???? --- ******
-        /*for(int i = 0; i < parentGenome.bodyNeuronList.Count; i++) {
+        for(int i = 0; i < parentGenome.bodyNeuronList.Count; i++) {
             NeuronGenome newBodyNeuronGenome = new NeuronGenome(parentGenome.bodyNeuronList[i]);
             this.bodyNeuronList.Add(newBodyNeuronGenome);
-        }*/
+        }
         // Alternate: SetBodyNeuronsFromTemplate(BodyGenome templateBody);
-        // Rebuild BodyNeuronGenomeList from scratch based on bodyGenome!!!!
+        */
+        
+        // Rebuild BodyNeuronGenomeList from scratch based on bodyGenome
         InitializeBodyNeuronList();
         bodyGenome.InitializeBrainGenome(inOutNeurons);  
 
