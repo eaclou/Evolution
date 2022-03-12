@@ -78,4 +78,6 @@ public class UnlockedTech
             
         return copy;
     }
+    
+    public bool Contains(TechElement value) { return values.Contains(value); }
 }

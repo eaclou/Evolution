@@ -23,7 +23,7 @@ public class SpecializationPanel : MonoBehaviour
         // WPP: expression is always true, foreach handles 0-length condition, invert conditional (if needed) to reduce nesting
         //if (techElementIcons.Length >= 0) {
         foreach (var tech in techElementIcons) {
-            bool hasTech = selectionManager.SelectedAgentHasTech(tech.techElement.id);
+            bool hasTech = selectionManager.SelectedAgentHasTech(tech.techElement);
             if (hasTech) {
                 foreach (var category in techTree.categories) {
                     if (tech.techElement.category == category.category) {

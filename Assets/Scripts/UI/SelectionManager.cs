@@ -38,14 +38,18 @@ public class SelectionManager : Singleton<SelectionManager>
         //uiManager.historyPanelUI.RefreshFocusedAgent(currentSelection.agent);
         uiManager.speciesOverviewUI.RebuildGenomeButtons();
         
-        if (hasAgent) PrintTech();
+        if (hasAgent) 
+        {
+            unlockedTech = currentSelection.candidate.candidateGenome.bodyGenome.unlockedTech;
+            PrintTech();
+        }
     }
+    
+    [ReadOnly] public UnlockedTech unlockedTech;
     
     /// For debugging unlocked tech on selected agent
     void PrintTech()
     {
-        var unlockedTech = currentSelection.candidate.candidateGenome.bodyGenome.unlockedTech;
-        
         Debug.Log($"Selected agent {currentSelection.agent.transform.GetSiblingIndex()}, " +
                   $"has {unlockedTech.values.Count} tech:");
                   
@@ -63,7 +67,9 @@ public class SelectionManager : Singleton<SelectionManager>
         currentSelection.historySelectedSpeciesID = id;        
     }
     
-    public bool SelectedAgentHasTech(TechElementId techId) { return currentSelection.candidate.candidateGenome.bodyGenome.data.HasTech(techId); }
+    // WPP: simplified search by using cached values
+    //public bool SelectedAgentHasTech(TechElementId techId) { return currentSelection.candidate.candidateGenome.bodyGenome.data.HasTech(techId); }
+    public bool SelectedAgentHasTech(TechElement value) { return unlockedTech.Contains(value); }
 
     public class SelectionData {
         public int historySelectedSpeciesID;
