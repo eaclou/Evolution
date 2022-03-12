@@ -5,9 +5,10 @@ public class Neuron
 {
     public NeuronGenome genome;
 
-    public NeuronType neuronType => genome.data.io;
-    public BrainModuleID moduleID => genome.data.moduleID;
-    public string name => genome.data.name;
+    public MetaNeuron data => genome.data;
+    public NeuronType neuronType => data.io;
+    public BrainModuleID moduleID => data.moduleID;
+    public string name => data.name;
     public int index => genome.index;
     
     public float inputTotal;
@@ -23,7 +24,7 @@ public class Neuron
         previousValue = 0f;
     }
     
-    public bool IsMe(NeuronGenome other) { return genome.data == other.data && genome.index == other.index; }
+    public bool IsMe(NeuronGenome other) { return data == other.data && genome.index == other.index; }
 }
 
 // * WPP: need to modify TestBrainVisualization to condense into above constructor

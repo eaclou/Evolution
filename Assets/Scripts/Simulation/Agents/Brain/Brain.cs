@@ -116,4 +116,15 @@ public class Brain
         }
         Debug.Log(neuronText + "\n" + axonText);
     }
+    
+    public List<Neuron> GetNeuronsByTechElement(TechElement tech)
+    {
+        var result = new List<Neuron>();
+
+        foreach (var neuron in neurons)
+            if (tech.Contains(neuron.data))
+                result.Add(neuron);
+                
+        return result;
+    }
 }

@@ -13,7 +13,7 @@ public class SelectionManager : Singleton<SelectionManager>
     public void ResetCurrentFocusedCandidateGenome() { SetSelected(currentSelection.candidate); }
 
     public void SetSelected(CandidateAgentData candidate) {
-        if(currentSelection == null) {
+        if (currentSelection == null) {
             currentSelection = new SelectionData();
         }
         currentSelection.candidate = candidate;
@@ -70,6 +70,20 @@ public class SelectionManager : Singleton<SelectionManager>
     // WPP: simplified search by using cached values
     //public bool SelectedAgentHasTech(TechElementId techId) { return currentSelection.candidate.candidateGenome.bodyGenome.data.HasTech(techId); }
     public bool SelectedAgentHasTech(TechElement value) { return unlockedTech.Contains(value); }
+    
+    public string SelectedTechValue(TechElement tech)
+    {
+        if (currentSelection == null || currentSelection.agent == null) return "";
+        var neurons = currentSelection.agent.brain.GetNeuronsByTechElement(tech);
+        
+        var values = "";
+        for (int i = 0; i < neurons.Count; i++)
+        {
+            values += neurons[i].currentValue[0].ToString("F2");
+            if (i < neurons.Count - 1) values += ", ";
+        }
+        return values;
+    }
 
     public class SelectionData {
         public int historySelectedSpeciesID;

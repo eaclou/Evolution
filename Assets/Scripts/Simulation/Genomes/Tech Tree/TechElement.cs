@@ -56,6 +56,15 @@ public class TechElement : ScriptableObject
         
         return false;        
     }
+    
+    public bool Contains(MetaNeuron value)
+    {
+        foreach (var unlock in unlocks)
+            if (unlock == value)
+                return true;
+        
+        return false;
+    }
 }
 
 public enum TechElementId
