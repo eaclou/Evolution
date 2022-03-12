@@ -56,6 +56,7 @@ public class SpeciesGenomePool
     public CandidateAgentData avgCandidateData;
 
     private Texture2D coatOfArmsTex;
+    public Material coatOfArmsMat;
 
     //public float avgLifespan = 0f;
     public bool isFlaggedForExtinction = false;
@@ -137,8 +138,10 @@ public class SpeciesGenomePool
         //Debug.Log("SPECIES CREATED! " + debugTxt);
         representativeCandidate = foundingGenome;
 
-        
+        coatOfArmsMat = new Material(TheRenderKing.instance.coatOfArmsShader);
         coatOfArmsTex = TheRenderKing.instance.GenerateSpeciesCoatOfArms(foundingGenome.candidateGenome);
+        coatOfArmsMat.SetPass(0);
+        coatOfArmsMat.SetTexture("_MainTex", coatOfArmsTex);
     }
 
     public Texture2D GetCoatOfArms() {

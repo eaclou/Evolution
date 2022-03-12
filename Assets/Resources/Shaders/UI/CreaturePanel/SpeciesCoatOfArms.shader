@@ -2,7 +2,10 @@
 {
     Properties
     {
-        _MainTex ("Texture", 2D) = "white" {}
+        _MainTex ("_MainTex", 2D) = "white" {}
+		_PatternTex ("_PatternTex", 2D) = "white" {}
+		_TintPri ("_TintPri", Color) = (1,1,1,1)
+		_TintSec ("_TintSec", Color) = (0,0,0,1)
     }
     SubShader
     {
@@ -34,6 +37,14 @@
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
+			sampler2D _PatternTex;
+
+			uniform float _CurFrame;
+			uniform float _NumRows;
+			uniform float _NumColumns;
+
+			uniform float4 _TintPri;
+			uniform float4 _TintSec;
 
             v2f vert (appdata v)
             {

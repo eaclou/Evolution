@@ -40,6 +40,9 @@ public class CreaturePanelUI : MonoBehaviour
 
     public Sprite spriteBrainButton;
 
+    [SerializeField]
+    public SpeciesIconUI speciesIconUI;
+
     private StringSO curPanelMode;
 
     // PORTRAIT!!!!
@@ -115,7 +118,9 @@ public class CreaturePanelUI : MonoBehaviour
 
         if (agent == null) return;
 
-
+        speciesIconUI.GetComponent<Image>().material = simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].coatOfArmsMat;
+        speciesIconUI.tooltip.tooltipString = "Species " + simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].identifier;
+        //speciesIconUI.GetComponent<Image>().material.SetTexture("_MainTex", speciesIconUI.linkedPool.GetCoatOfArms());
         //speciesCoatOfArmsImage.sprite = Sprite.Create(SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].GetCoatOfArms(), speciesCoatOfArmsImage.rectTransform.rect, Vector2.zero);;
         
         //SpriteRenderer renderer = speciesCoatOfArmsImage.gameObject.GetComponent<SpriteRenderer>();

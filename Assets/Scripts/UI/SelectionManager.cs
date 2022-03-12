@@ -38,13 +38,17 @@ public class SelectionManager : Singleton<SelectionManager>
         }
         
         currentSelection.isGenomeOnly = !hasAgent;
-        SetHistorySelectedSpeciesUI(candidate.speciesID);        
-                
+        SetHistorySelectedSpeciesUI(candidate.speciesID);
+        uiManager.historyPanelUI.InitializePanel();
+        //uiManager.historyPanelUI.RefreshFocusedAgent(currentSelection.agent);
         uiManager.speciesOverviewUI.RebuildGenomeButtons();
         
                 
     }
 
+    public void FollowedCreatureDied() {
+        currentSelection.isGenomeOnly = true;
+    }
     
     public bool IsSelected(CandidateAgentData candidate) { return candidate.candidateID == currentSelection.candidate.candidateID; }
     

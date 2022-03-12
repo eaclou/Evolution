@@ -96,11 +96,11 @@ public class HistoryPanelUI : MonoBehaviour
     // How to sync rendered geo with UI buttons???
 
     void Start() {
-        uiManagerRef.OnAgentSelected += RefreshFocusedAgent;
+        //uiManagerRef.OnAgentSelected += RefreshFocusedAgent;
     }
     
     void OnDestroy() {
-        if (UIManager.exists) uiManagerRef.OnAgentSelected -= RefreshFocusedAgent;
+        //if (UIManager.exists) uiManagerRef.OnAgentSelected -= RefreshFocusedAgent;
     }
     
     public void InitializePanel() {
@@ -147,6 +147,7 @@ public class HistoryPanelUI : MonoBehaviour
     }
     
     public void RefreshFocusedAgent(Agent agent) {
+        if (agent == null) return;
         RefreshFocusedAgent(selectionManager.IsSelected(agent.candidateRef));
     }
     
@@ -452,7 +453,10 @@ public class HistoryPanelUI : MonoBehaviour
     public void ClickButtonBack() {
         if(curPanelMode == HistoryPanelMode.CreatureTimeline) {
             curPanelMode = HistoryPanelMode.SpeciesPopulation;
-        }        
+        } 
+        if(curPanelMode == HistoryPanelMode.SpeciesPopulation) {
+            curPanelMode = HistoryPanelMode.AllSpecies;
+        } 
     }
     
     public void ClickButtonModeCycle() {

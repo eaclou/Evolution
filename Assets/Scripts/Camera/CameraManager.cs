@@ -232,6 +232,7 @@ public class CameraManager : Singleton<CameraManager>
         if(agentRef == SelectionManager.instance.currentSelection.agent) {
             isFollowingAgent = false;
             Logger.Log("followed creature died!", true);
+            SelectionManager.instance.FollowedCreatureDied();
         }
         else {
 

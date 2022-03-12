@@ -32,7 +32,9 @@ public class TheRenderKing : Singleton<TheRenderKing>
     ClockPanelUI clockPanelUI => uiManager.clockPanelUI;
         
     public GenerateBrainVisualization brainVisualization;
-        
+
+    [SerializeField]
+    public Shader coatOfArmsShader;
     /// Max number of threads that can be executed by a shader group
     const int maxShaderThreads = 1024;
 
