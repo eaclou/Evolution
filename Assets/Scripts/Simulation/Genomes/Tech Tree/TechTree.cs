@@ -12,6 +12,15 @@ public class TechTree : ScriptableObject
     {
         return requestedAbility.HasPrerequisites(abilities);
     }
+    
+    public Color CategoryColor(TechElement element)
+    {
+        foreach (var category in categories)
+            if (category.category == element.category)
+                return category.color;
+                
+        return Color.gray;
+    }
 }
 
 public enum TechCategory 

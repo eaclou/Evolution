@@ -6,10 +6,61 @@
   <component name="ChangeListManager">
     <list default="true" id="64a03a69-0c33-4641-98d6-062c7a4ddd72" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/FoodSensors.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/FoodSensors/FoodSensors.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/FoodSensors/FoodSensors.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/FoodSensors/MicrobesDir.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/FoodSensors/MicrobesDir.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/FoodSensors/MicrobesDist.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/FoodSensors/MicrobesDist.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/FoodSensors/MicrobesVel.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/FoodSensors/MicrobesVel.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/FoodSensors/Nutrients.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/FoodSensors/Nutrients.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/FoodSensors/PlantsDir.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/FoodSensors/PlantsDir.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/FoodSensors/PlantsDist.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/FoodSensors/PlantsDist.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/FoodSensors/PlantsVel.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/FoodSensors/PlantsVel.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/Predation/CorpseDir.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/Predation/CorpseDir.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/Predation/CorpseDist.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/Predation/CorpseDist.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/Predation/CorpseVel.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/Predation/CorpseVel.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/Predation/EggDir.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/Predation/EggDir.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/Predation/PreyDir.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/Predation/PreyDir.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/Predation/PreyDist.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/Predation/PreyDist.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/Predation/PreyVel.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/Predation/PreyVel.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/SelfStatus.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/SelfStatus/Energy.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/SelfStatus/Energy.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/SelfStatus/Health.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/SelfStatus/Health.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/SelfStatus/Lifestage.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/SelfStatus/Lifestage.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/SelfStatus/OwnDir.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/SelfStatus/OwnDir.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/SelfStatus/OwnVel.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/SelfStatus/OwnVel.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/SelfStatus/SelfStatus.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/SelfStatus/SelfStatus.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/Social/FriendDist.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/Social/FriendDist.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/Social/FriendVel.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/Social/FriendVel.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/CreaturePanel/TechElementIcon.prefab" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/CreaturePanel/TechElementIcon.prefab.meta" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/CreaturePanelUI.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/CreaturePanelUI.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Tech Tree/InitialUnlockedTechInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Tech Tree/InitialUnlockedTechInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/SelectionManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/SelectionManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Tech Tree/TechElement.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Tech Tree/TechElement.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Tech Tree/TechTree.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Tech Tree/TechTree.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/SpecializationPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/SpecializationPanel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/TechElementIconUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/TechElementIconUI.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -174,7 +225,7 @@
       <workItem from="1645237140386" duration="5397000" />
       <workItem from="1645425796257" duration="5768000" />
       <workItem from="1646552507872" duration="4344000" />
-      <workItem from="1647046701935" duration="5076000" />
+      <workItem from="1647046701935" duration="7403000" />
     </task>
     <servers />
   </component>

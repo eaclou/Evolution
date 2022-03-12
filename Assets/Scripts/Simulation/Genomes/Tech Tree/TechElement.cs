@@ -10,6 +10,9 @@ public class TechElement : ScriptableObject
     [Tooltip("Used internally for code-based lookups")]
     public TechElementId id;
     
+    [Tooltip("Static tooltip text when cursor hovers over icon")]
+    public string iconTooltip;
+    
     [Tooltip("Probability a mutation will unlock this ability if all prerequisites are met.")]
     [Range(0, 1)] public float mutationUnlockChance;
     
