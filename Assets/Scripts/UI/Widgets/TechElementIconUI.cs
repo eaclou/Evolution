@@ -27,6 +27,6 @@ public class TechElementIconUI : MonoBehaviour
     
     void Refresh()
     {
-        tooltip.tooltipString = techElement.iconTooltip + selection.SelectedTechValue(techElement);
+        tooltip.tooltipString = techElement.iconTooltip + "\n" + selection.SelectedTechValue(techElement);
     }
 }

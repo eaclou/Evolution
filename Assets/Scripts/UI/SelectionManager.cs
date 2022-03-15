@@ -79,7 +79,19 @@ public class SelectionManager : Singleton<SelectionManager>
         var values = "";
         for (int i = 0; i < neurons.Count; i++)
         {
-            values += neurons[i].currentValue[0].ToString("F2");
+            //textStatsGraphLegend.text = "<color=#ff0000ff>Species A -----</color>\n\n<color=#00ff00ff>Species B -----</color>\n\n<color=#0000ffff>Species C -----</color>\n\n<color=#ffffffff>Species D -----</color>";
+            Color textColor = new Color(0.67f, 0.67f, 0.67f);
+            float neuronVal = (100f * neurons[i].currentValue[0]);
+            string plusMinus = "";
+            if(neuronVal < 0f) {
+                textColor = new Color(0.9f, 0.8f, 0.6f);
+            }            
+            if(neuronVal > 0f) {  
+                textColor = new Color(0.5f, 0.8f, 0.96f);
+                plusMinus = "+";
+            }
+            string hexColorCode = ColorUtility.ToHtmlStringRGB(textColor);
+            values += "<color=#" + hexColorCode + ">" + plusMinus + neuronVal.ToString("F0") + "</color>";  // neurons[i].name + " " + 
             if (i < neurons.Count - 1) values += ", ";
         }
         return values;
