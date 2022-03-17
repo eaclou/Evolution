@@ -20,7 +20,7 @@ public class AgentGenome
     {        
         ConstructRandom(initialConnectionDensity, hiddenNeurons);
         name = nameList.GetRandomName();
-        Debug.Log("Constructing random AgentGenome...");
+        //Debug.Log("Constructing random AgentGenome...");
     }
    
     void ConstructRandom(float initialConnectionDensity, int hiddenNeuronCount)
@@ -35,7 +35,7 @@ public class AgentGenome
         this.brainGenome = brainGenome;
         this.generationCount = generationCount;
         this.name = name;
-        Debug.Log("Constructing AgentGenome via mutation");
+        //Debug.Log("Constructing AgentGenome via mutation");
     }
     
     public void GenerateInitialRandomBodyGenome() {

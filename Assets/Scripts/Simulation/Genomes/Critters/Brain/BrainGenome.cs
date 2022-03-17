@@ -23,8 +23,8 @@ public class BrainGenome
     public List<LinkGenome> links;
     public List<NeuronGenome> inOutNeurons;
     public List<NeuronGenome> hiddenNeurons;
-    List<NeuronGenome> inputNeuronList = new List<NeuronGenome>();
-    List<NeuronGenome> outputNeuronList = new List<NeuronGenome>();
+    List<NeuronGenome> inputNeurons = new List<NeuronGenome>();
+    List<NeuronGenome> outputNeurons = new List<NeuronGenome>();
     
     public int linkCount => links.Count;
     
@@ -38,7 +38,7 @@ public class BrainGenome
     public void InitializeRandomBrainGenome(BodyGenome bodyGenome, float initialWeightMultiplier, float initialConnectionDensity, int numInitHiddenNeurons) {
         InitializeNewBrainGenomeLists();
         InitializeIONeurons(bodyGenome);
-        PrintNeuronCounts(initialConnectionDensity);
+        //PrintNeuronCounts(initialConnectionDensity);
         InitializeAxons(initialWeightMultiplier, initialConnectionDensity, numInitHiddenNeurons);
     }
     
@@ -50,13 +50,20 @@ public class BrainGenome
     public void InitializeIONeurons(BodyGenome bodyGenome) 
     {
         bodyGenome.InitializeBrainGenome(inOutNeurons);   
+        SortInOutNeurons();
+    }
+    
+    void SortInOutNeurons()
+    {
+        inputNeurons.Clear();
+        outputNeurons.Clear();
         
         foreach (var neuron in inOutNeurons) {
             switch (neuron.data.io) {
-                case NeuronType.In: inputNeuronList.Add(neuron); break;
-                case NeuronType.Out: outputNeuronList.Add(neuron); break;
+                case NeuronType.In: inputNeurons.Add(neuron); break;
+                case NeuronType.Out: outputNeurons.Add(neuron); break;
             }
-        }  
+        }
     }
 
     public void InitializeAxons(float initialWeightMultiplier, float initialConnectionDensity, int numInitHiddenNeurons) 
@@ -67,23 +74,22 @@ public class BrainGenome
             hiddenNeurons.Add(neuron);
         }
         
-        LinkLayers(inputNeuronList, outputNeuronList, initialConnectionDensity, initialWeightMultiplier);
-        LinkLayers(inputNeuronList, hiddenNeurons, initialConnectionDensity, initialWeightMultiplier);
-        LinkLayers(hiddenNeurons, outputNeuronList, initialConnectionDensity, initialWeightMultiplier);
+        LinkLayers(inputNeurons, outputNeurons, initialConnectionDensity, initialWeightMultiplier);
+        LinkLayers(inputNeurons, hiddenNeurons, initialConnectionDensity, initialWeightMultiplier);
+        LinkLayers(hiddenNeurons, outputNeurons, initialConnectionDensity, initialWeightMultiplier);
     }
     
     void PrintNeuronCounts(float initialConnectionDensity)
     {
         Debug.Log($"Linking layers with connection density of {initialConnectionDensity}\n" +
-                  $"{inputNeuronList.Count} input neurons to {outputNeuronList.Count} output neurons\n" +
-                  $"{inputNeuronList.Count} input neurons to {hiddenNeurons.Count} hidden neurons)" +
-                  $"{hiddenNeurons.Count} hidden neurons to {outputNeuronList.Count} output neurons");
+                  $"{inputNeurons.Count} input neurons to {outputNeurons.Count} output neurons\n" +
+                  $"{inputNeurons.Count} input neurons to {hiddenNeurons.Count} hidden neurons)" +
+                  $"{hiddenNeurons.Count} hidden neurons to {outputNeurons.Count} output neurons");
     }
 
     void LinkLayers(List<NeuronGenome> fromList, List<NeuronGenome> toList, float initialConnectionDensity, float initialWeightMultiplier) 
     {
         //int debugConnectionCount = 0;
-        
         foreach (var toElement in toList) 
         {
             foreach (var fromElement in fromList) 
@@ -94,11 +100,9 @@ public class BrainGenome
                 var randomWeight = Gaussian.GetRandomGaussian() * initialWeightMultiplier;
                 var linkGenome = new LinkGenome(fromElement, toElement, randomWeight, true);
                 links.Add(linkGenome);
-                
                 //debugConnectionCount++;
             }
         }
-        
         //Debug.Log($"{debugConnectionCount} links found out of possible {fromList.Count * toList.Count}");
     }
 
@@ -117,7 +121,7 @@ public class BrainGenome
         
         // Rebuild BodyNeuronGenomeList from scratch based on bodyGenome
         InitializeBodyNeuronList();
-        bodyGenome.InitializeBrainGenome(inOutNeurons);  
+        InitializeIONeurons(bodyGenome);
 
         hiddenNeurons = MutateHiddenNeurons(parentGenome.hiddenNeurons);
         links = MutateLinks(parentGenome.links, settings);
@@ -130,7 +134,7 @@ public class BrainGenome
 
         //RemoveVestigialLinks();
     }
-    
+
     List<NeuronGenome> MutateHiddenNeurons(List<NeuronGenome> original)
     {
         var result = new List<NeuronGenome>();
@@ -180,14 +184,14 @@ public class BrainGenome
     {
         foreach (var neuron in hiddenNeurons)
         {
-            inputNeuronList.Add(neuron);
-            outputNeuronList.Add(neuron);
+            inputNeurons.Add(neuron);
+            outputNeurons.Add(neuron);
         }
         
-        if (inputNeuronList.Count <= 0 || outputNeuronList.Count <= 0)
+        if (inputNeurons.Count <= 0 || outputNeurons.Count <= 0)
         {
             Debug.LogError("Cannot create new list because input or output list count is zero.  " + 
-                           $"Input count = {inputNeuronList.Count}, output count = {outputNeuronList.Count}");
+                           $"Input count = {inputNeurons.Count}, output count = {outputNeurons.Count}");
             return;
         }
 
@@ -197,24 +201,14 @@ public class BrainGenome
         int maxChecks = 8;
         for (int k = 0; k < maxChecks; k++) 
         {
-            int randInputID = Random.Range(0, inputNeuronList.Count);
-            var from = inputNeuronList[randInputID];
+            int randInputID = Random.Range(0, inputNeurons.Count);
+            var from = inputNeurons[randInputID];
 
-            int randOutputID = Random.Range(0, outputNeuronList.Count);
-            var to = outputNeuronList[randOutputID];
+            int randOutputID = Random.Range(0, outputNeurons.Count);
+            var to = outputNeurons[randOutputID];
 
-            // * WPP: delegate to function
-            bool linkExists = false;    // Dictionary might be faster??? *****
-            foreach (var link in links) 
-            {
-                if (link.from != from || link.to != to) 
-                    continue;
-                    
-                linkExists = true;
-                break;
-            }
-            if (linkExists) continue;
-                
+            if (LinkExists(from, to)) continue;
+
             float randomWeight = Gaussian.GetRandomGaussian() * settings.brainWeightMutationStepSize;
             LinkGenome linkGenome = new LinkGenome(from, to, randomWeight, true);                    
             links.Add(linkGenome);
@@ -222,6 +216,15 @@ public class BrainGenome
             //Debug.Log("New Link! from: [" + fromNID.moduleID.ToString() + ", " + fromNID.neuronID.ToString() + "], to: [" + toNID.moduleID.ToString() + ", " + toNID.neuronID.ToString() + "]");
             break;
         }
+    }
+    
+    bool LinkExists(NeuronGenome from, NeuronGenome to)
+    {
+        foreach (var link in links)
+            if (link.from == from && link.to == to)
+                return true;
+        
+        return false;        
     }
     
     // Finds a link and expands it

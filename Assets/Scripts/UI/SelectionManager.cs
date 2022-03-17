@@ -41,7 +41,7 @@ public class SelectionManager : Singleton<SelectionManager>
         if (hasAgent) 
         {
             unlockedTech = currentSelection.candidate.candidateGenome.bodyGenome.unlockedTech;
-            PrintTech();
+            //PrintTech();
         }
     }
     

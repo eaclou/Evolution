@@ -6,14 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="64a03a69-0c33-4641-98d6-062c7a4ddd72" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Core/GameOptions.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Core/GameOptions.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Core/GameOptionsManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Core/GameOptionsManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/Brain.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/Brain.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/MasterGenomePool.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/MasterGenomePool.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Tech Tree/TechElement.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Tech Tree/TechElement.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/QualitySettingData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Settings/QualitySettingData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePortraitPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePortraitPanel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/AgentGenome.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/AgentGenome.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/BrainGenome.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/BrainGenome.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,12 +39,10 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Scripts/Saving/SaveData.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Saving/AccessSaveData.cs" />
       <option value="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/AgentTechElement.cs" />
       <option value="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/TechTree.cs" />
       <option value="$PROJECT_DIR$/Assets/Data Containers/Tech Tree/TechElement.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/BrainGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/Quality of Life/Statics/RandomStatics.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/InitialGenomeInfo.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Initialization/HueRange.cs" />
@@ -96,6 +88,8 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/MasterGenomePool.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePortraitPanel.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/AgentGenome.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/BrainGenome.cs" />
     </changedPaths>
   </component>
   <component name="MarkdownSettingsMigration">
@@ -178,7 +172,7 @@
       <workItem from="1645425796257" duration="5768000" />
       <workItem from="1646552507872" duration="4344000" />
       <workItem from="1647046701935" duration="17810000" />
-      <workItem from="1647503447204" duration="2371000" />
+      <workItem from="1647503447204" duration="4567000" />
     </task>
     <servers />
   </component>
