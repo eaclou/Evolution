@@ -7,33 +7,34 @@ public class AgentGenome
     [ReadOnly] public int generationCount = 0;
     [ReadOnly] public BodyGenome bodyGenome;
     [ReadOnly] public BrainGenome brainGenome;
+    public string name;
+    Lookup lookup => Lookup.instance;
+    NameList nameList => lookup.nameList;
     
     //public AgentGenome() { Debug.LogError("Default AgentGenomeConstructor"); ConstructRandom(0.1f, 0); }
 
+    public void IncrementGenerationCount() {
+        generationCount++;
+    }
     public AgentGenome(float initialConnectionDensity, int hiddenNeurons)
-    {
+    {        
         ConstructRandom(initialConnectionDensity, hiddenNeurons);
+        name = nameList.GetRandomName();
         Debug.Log("Constructing random AgentGenome...");
     }
-    
-    /*public AgentGenome(MutationSettingsInstance mutationSettings, float lerpV) 
-    {
-        int numberOfHiddenNeurons = Mathf.RoundToInt(4f * lerpV);  //***EAC CHANGE!
-        float brainInitialConnectionDensity = mutationSettings.brainInitialConnectionChance * lerpV;
-        ConstructRandom(brainInitialConnectionDensity, numberOfHiddenNeurons);
-    }*/
-    
+   
     void ConstructRandom(float initialConnectionDensity, int hiddenNeuronCount)
     {
         bodyGenome = new BodyGenome();
         brainGenome = new BrainGenome(bodyGenome, initialConnectionDensity, hiddenNeuronCount);
     }
 
-    public AgentGenome(BodyGenome bodyGenome, BrainGenome brainGenome, int generationCount)
+    public AgentGenome(BodyGenome bodyGenome, BrainGenome brainGenome, int generationCount, string name)
     {
         this.bodyGenome = bodyGenome; 
         this.brainGenome = brainGenome;
         this.generationCount = generationCount;
+        this.name = name;
         Debug.Log("Constructing AgentGenome via mutation");
     }
     

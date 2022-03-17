@@ -24,7 +24,10 @@ public class CreaturePanelUI : MonoBehaviour
     public TooltipUI tooltipBrain;
     public TooltipUI tooltipGenome;
     public TooltipUI tooltipAppearance;
-   //public TooltipUI tooltipSpeciesIcon;
+    public TooltipUI tooltipGenerationCount;
+
+    [SerializeField]
+    Text textGenerationCount;
 
     [SerializeField]
     Button buttonOpenClose;
@@ -111,28 +114,20 @@ public class CreaturePanelUI : MonoBehaviour
         imageCurAction.sprite = mostRecentActionState.sprite;
         tooltipCurrentAction.tooltipString = mostRecentActionState.text;
 
-        //tooltipSpeciesIcon.tooltipString = "Species #" + agent.speciesIndex + "\nAvg Life: " + totalTicksAlive.ToString("F0");
-
         foreach (var panelMode in panelModes)
             panelMode.SetActive(curPanelMode);
 
         if (agent == null) return;
 
         speciesIconUI.GetComponent<Image>().material = simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].coatOfArmsMat;
-        speciesIconUI.tooltip.tooltipString = "Species " + simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].identifier;
-        //speciesIconUI.GetComponent<Image>().material.SetTexture("_MainTex", speciesIconUI.linkedPool.GetCoatOfArms());
-        //speciesCoatOfArmsImage.sprite = Sprite.Create(SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].GetCoatOfArms(), speciesCoatOfArmsImage.rectTransform.rect, Vector2.zero);;
+        speciesIconUI.tooltip.tooltipString = "Crest of Species " + simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].representativeCandidate.candidateGenome.name.Substring(0, 1);
         
-        //SpriteRenderer renderer = speciesCoatOfArmsImage.gameObject.GetComponent<SpriteRenderer>();
-        //if (renderer == null) {
-        //    renderer = speciesCoatOfArmsImage.gameObject.AddComponent<SpriteRenderer>();            
-        //}
-        //renderer.sprite = speciesCoatOfArmsImage.sprite;  
-        
-
         tooltipBrain.tooltipString = "BRAIN" + agent.curActionState + " (" + mostRecentActionState.id + ")";
         tooltipGenome.tooltipString = "Genome???";
         tooltipAppearance.tooltipString = "GEN " + agent.candidateRef.candidateGenome.generationCount + ", Axons: " + (agent.candidateRef.candidateGenome.brainGenome.links.Count + ", IO: " + agent.candidateRef.candidateGenome.brainGenome.inOutNeurons.Count + ", H: " + agent.candidateRef.candidateGenome.brainGenome.hiddenNeurons.Count);//"APPEARANCE";
+
+        tooltipGenerationCount.tooltipString = "Generation #: " + agent.candidateRef.candidateGenome.generationCount.ToString();
+        textGenerationCount.text = agent.candidateRef.candidateGenome.generationCount.ToString();
     }
     
     public void SetPanelMode(StringSO mode) {

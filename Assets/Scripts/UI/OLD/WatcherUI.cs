@@ -119,7 +119,7 @@ public class WatcherUI : MonoBehaviour {
             Color textColorSecondary = new Color(textHueSecondary.x, textHueSecondary.y, textHueSecondary.z);
             textTargetLayer.color = textColorPrimary;
             
-            textTargetLayer.text = "Species " + agent.speciesIndex + ":  " + agent.candidateRef.candidateGenome.bodyGenome.coreGenome.name;
+            textTargetLayer.text = "Species " + agent.speciesIndex + ":  " + agent.candidateRef.candidateGenome.name;
 
             //textNewInspectAgentName.text = "Critter #" + agent.candidateRef.candidateID.ToString(); //.candidateGenome.bodyGenome.coreGenome.name;
             //textNewInspectAgentName.color = textColorSecondary; // uiManagerRef.colorVertebratesLayer;

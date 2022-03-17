@@ -112,8 +112,8 @@
 
 				const float tilePercentage = (1.0 / 8.0);
 				float2 patternUV = genericStrokeData.uv;
-				float randPatternIDX = critterInitData.bodyPatternX; // ** This is now inside CritterInitData!!!!!
-				float randPatternIDY = critterInitData.bodyPatternY; //  fmod(bodyStrokeData.brushTypeY, 4); // ********** UPDATE!!! **************
+				float randPatternIDX = critterInitData.bodyPatternX; 
+				float randPatternIDY = critterInitData.bodyPatternY; 
 				patternUV *= tilePercentage; // randVariation eventually
 				patternUV.x += tilePercentage * randPatternIDX;
 				patternUV.y += tilePercentage * randPatternIDY;				

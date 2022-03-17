@@ -81,7 +81,7 @@ public class GenomeButton : MonoBehaviour
         backgroundImage.sprite = iconSprite;
         //tooltip.genomeViewerUIRef = uiManagerRef.genomeViewerUI;
 
-        tooltip.tooltipString = "" + candidate.name + "\nAge " + candidate.performanceData.totalTicksAlive;// + ", " + statusStr;
+        tooltip.tooltipString = "" + candidate.candidateGenome.name + "\nAge " + candidate.performanceData.totalTicksAlive;// + ", " + statusStr;
         //uiManagerRef.speciesOverviewUI.leaderboardGenomeButtonsList.Add(buttonScript);
     }
     

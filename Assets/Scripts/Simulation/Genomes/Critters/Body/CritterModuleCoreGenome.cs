@@ -8,14 +8,13 @@ using Random = UnityEngine.Random;
 public class CritterModuleCoreGenome 
 {
     Lookup lookup => Lookup.instance;
-    NeuralMap map => lookup.neuralMap;
-    NameList nameList => lookup.nameList;
+    NeuralMap map => lookup.neuralMap;    
     InitialGenomeInfo genomeInfo => lookup.genomeInitialization;
 
     public readonly BrainModuleID moduleID = BrainModuleID.Core;
 
-    public int generation;
-    public string name; // * WPP: duplicate field, also present in CandidateAgentData
+    //public int generation;
+    //public string name; // * WPP: duplicate field, also present in CandidateAgentData
 
     // 4 main sections: 
     //    Mouth/Snout
@@ -203,32 +202,6 @@ public class CritterModuleCoreGenome
         None
     } 
 
-    //public SkillsDamage[] skillDamage;  // up to 2 skills per category -- if choose same skill for both slots, use upgraded version of that skill    
-    //public SkillsHealth[] skillHealth;
-    //public SkillsSpeed[] skillSpeed;    // first skill at 70% specialization, second at 95%
-    //public SkillsEnergy[] skillEnergy;
-    
-    /*public enum SkillsDamage {
-        TailStrike,
-        MegaBite,
-        AmbushBite,
-    }
-    public enum SkillsSpeed {
-        Evade,
-        Sprint,
-        Whirlpool,  // spin in place and create current
-    }
-    public enum SkillsHealth {
-        ActiveHeal,
-        CurlUpArmor,
-        BonusFoodSpecEfficiency,  // can more easily eat any kind of food        
-    }
-    public enum SkillsEnergy {
-        SecondWind,
-        Burrow,
-        Stun,
-    }*/
-
     // List of Shape/Form modifiers here???:::
     //public CritterGenomeInterpretor.MaskDataSin maskDataSinTemp;
 
@@ -325,8 +298,8 @@ public class CritterModuleCoreGenome
     
 
     public void InitializeRandom() {
-        generation = 0;
-        name = nameList.GetRandomName();
+        //generation = 0;
+        //name = nameList.GetRandomName();
         
         isPassive = RandomStatics.CoinToss();
 
@@ -367,26 +340,7 @@ public class CritterModuleCoreGenome
     void AddNeuron(string name) { masterList.Add(map.GetData(name)); }
 
     public void SetToMutatedCopyOfParentGenome(CritterModuleCoreGenome parentGenome, MutationSettingsInstance settings) {
-        string parentName = parentGenome.name;
-        //int parentNameLength = parentName;
-        int randIndex = Random.Range(0, parentName.Length - 1);
         
-        string frontHalf = parentName.Substring(0, randIndex);
-        string middleChar = parentName.Substring(randIndex, 1);
-        string backHalf = parentName.Substring(randIndex + 1);
-        name = parentName;
-        
-        if (RandomStatics.CoinToss(.05f)) {
-            middleChar = RandomStatics.GetRandomLetter();
-        }
-
-        frontHalf += middleChar;
-
-        name = RandomStatics.CoinToss(.025f) ? backHalf + frontHalf : frontHalf + backHalf;
-
-        // This is incremented elsewhere (simManager at time of reproduction)
-        generation = parentGenome.generation; 
-
         isPassive = UtilityMutationFunctions.GetMutatedBool(parentGenome.isPassive, 0.033f);
 
         //float slotMult = settings.mutationStrengthSlot;

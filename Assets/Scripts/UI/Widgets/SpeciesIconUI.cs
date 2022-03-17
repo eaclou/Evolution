@@ -36,7 +36,8 @@ public class SpeciesIconUI : MonoBehaviour
         image.color = Color.white;
 
         image.material = pool.coatOfArmsMat;
-        image.material.SetPass(0);
+        //image.material.SetPass(0);
+
         
         //sprite = Sprite.Create(pool.GetCoatOfArms(), image.rectTransform.rect, Vector2.one * 0.5f);
         //sprite.name = "whoaSprite!";
@@ -61,7 +62,7 @@ public class SpeciesIconUI : MonoBehaviour
     
     public void UpdateSpeciesIconDisplay(int panelPixelSize, bool isSelected) 
     {
-        string toolString = "Species " + linkedPool.representativeCandidate.name.Substring(0, 1);
+        string toolString = "Species " + linkedPool.representativeCandidate.candidateGenome.name.Substring(0, 1);
         
         // POSITION
         currentCoords = Vector2.Lerp(currentCoords, targetCoords, 0.67f);
@@ -74,7 +75,9 @@ public class SpeciesIconUI : MonoBehaviour
         //imageColor2.color = colorSec;
         
         transform.localScale = isSelected ? new Vector3(1.2f, 1.2f, 1f) : Vector3.one;
-        image.color = isSelected ? Color.white : Color.gray * 0.5f;
+        //image.color = isSelected ? Color.white : Color.gray * 0.5f;
+
+        linkedPool.coatOfArmsMat.SetFloat("_IsSelected", isSelected ? 1f : 0f);
 
         toolString += linkedPool.isExtinct ? "\n(Extinct)" : "\nAvg Life: " + linkedPool.avgCandidateData.performanceData.totalTicksAlive.ToString("F0");
         //imageColor3.color = linkedPool.isExtinct ? Color.black : Color.white;

@@ -35,6 +35,10 @@ public class TheRenderKing : Singleton<TheRenderKing>
 
     [SerializeField]
     public Shader coatOfArmsShader;
+    [SerializeField]
+    public Texture2D patternTex;
+    [SerializeField]
+    public Texture2D shapeTex;
     /// Max number of threads that can be executed by a shader group
     const int maxShaderThreads = 1024;
 
@@ -1074,23 +1078,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
     }
     
     #endregion
-    
-    const int textureResolution = 64;
-
-    public Texture2D GenerateSpeciesCoatOfArms(CritterModuleAppearanceGenome appearance) {
-        Texture2D newTex = new Texture2D(textureResolution, textureResolution);
         
-        for (int x = 0; x < textureResolution; x++) {
-            for (int y = 0; y < textureResolution; y++) {
-                var hue = x < textureResolution / 2 ? appearance.huePrimary : appearance.hueSecondary;
-                var pixColor = new Color(hue.x, hue.y, hue.z);
-                newTex.SetPixel(x, y, pixColor);
-            }
-        }
-        newTex.Apply();
-        return newTex;
-    }
-    
     public Vector4[] GetDepthAtObjectPositions(Vector4[] positionsArray) 
     {
         ComputeBuffer objectDataInFluidCoordsCBuffer = new ComputeBuffer(positionsArray.Length, sizeof(float) * 4);

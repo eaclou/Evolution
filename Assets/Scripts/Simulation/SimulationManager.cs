@@ -1061,7 +1061,7 @@ public class SimulationManager : Singleton<SimulationManager>
         // -- Select a ParentGenome from the leaderboardList and create a mutated copy (childGenome):  
         AgentGenome newGenome = sourceSpeciesPool.GetGenomeFromFitnessLottery();
         newGenome = sourceSpeciesPool.Mutate(newGenome, true, true);
-        newGenome.bodyGenome.coreGenome.generation++;
+        //newGenome.IncrementGenerationCount();
 
         // -- Check which species this new childGenome should belong to (most likely its parent, but maybe it creates a new species or better fits in with a diff existing species)        
         //sourceSpeciesPool.AddNewCandidateGenome(newGenome);

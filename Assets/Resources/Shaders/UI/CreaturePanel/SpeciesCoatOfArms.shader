@@ -9,8 +9,10 @@
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
-        LOD 100
+        Tags{ "RenderType" = "Transparent" }
+		ZWrite Off
+		//Cull Off
+		Blend SrcAlpha OneMinusSrcAlpha
 
         Pass
         {
@@ -18,7 +20,7 @@
             #pragma vertex vert
             #pragma fragment frag
             // make fog work
-            #pragma multi_compile_fog
+           // #pragma multi_compile_fog
 
             #include "UnityCG.cginc"
 
@@ -31,36 +33,46 @@
             struct v2f
             {
                 float2 uv : TEXCOORD0;
-                UNITY_FOG_COORDS(1)
+                //UNITY_FOG_COORDS(1)
                 float4 vertex : SV_POSITION;
             };
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
 			sampler2D _PatternTex;
-
-			uniform float _CurFrame;
-			uniform float _NumRows;
-			uniform float _NumColumns;
-
+			uniform float _PatternX;
+			uniform float _PatternY;
 			uniform float4 _TintPri;
 			uniform float4 _TintSec;
+			uniform float _IsSelected;
 
             v2f vert (appdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-                UNITY_TRANSFER_FOG(o,o.vertex);
+                //UNITY_TRANSFER_FOG(o,o.vertex);
+
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-                // sample the texture
-                fixed4 col = tex2D(_MainTex, i.uv);
+                const float tilePercentage = (1.0 / 8.0);
+				float2 patternUV = i.uv; // ????
+				float randPatternIDX = _PatternX; 
+				float randPatternIDY = _PatternY; 
+				patternUV *= tilePercentage; // randVariation eventually
+				patternUV.x += tilePercentage * randPatternIDX;
+				patternUV.y += tilePercentage * randPatternIDY;
+				fixed4 patternTexSample = tex2D(_PatternTex, patternUV);
+				float4 col = lerp(_TintPri, _TintSec, patternTexSample.x);
+				float4 maskColor = tex2D(_MainTex, i.uv);
+				col.a = maskColor.a;
+				float3 borderHue = lerp(float3(0,0,0), float3(1,1,1), _IsSelected);
+				col.rgb = lerp(col.rgb, borderHue, maskColor.x);
                 // apply fog
-                UNITY_APPLY_FOG(i.fogCoord, col);
+                //UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;
             }
             ENDCG

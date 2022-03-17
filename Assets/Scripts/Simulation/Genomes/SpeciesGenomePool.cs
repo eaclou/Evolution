@@ -17,7 +17,7 @@ public class SpeciesGenomePool
     [NonSerialized]
     public MutationSettingsInstance mutationSettings;  // Or remove this later to keep everything saveable?
 
-    public string identifier;
+    public string speciesName;
     public CandidateAgentData representativeCandidate;
     public CandidateAgentData foundingCandidate;
     public CandidateAgentData longestLivedCandidate;
@@ -55,7 +55,7 @@ public class SpeciesGenomePool
     public List<CandidateAgentData> avgCandidateDataYearList;
     public CandidateAgentData avgCandidateData;
 
-    private Texture2D coatOfArmsTex;
+    //private Texture2D coatOfArmsTex;
     public Material coatOfArmsMat;
 
     //public float avgLifespan = 0f;
@@ -75,7 +75,9 @@ public class SpeciesGenomePool
         parentSpeciesID = parentID;
         mutationSettings = settings;
         timeStepCreated = timeStep;
-        timeStepExtinct = 2000000000;  
+        timeStepExtinct = 2000000000;
+
+        speciesName = ID.ToString();
     }
 
     private void InitShared() {
@@ -99,33 +101,34 @@ public class SpeciesGenomePool
         depthLevel = depth;
         Vector3 newHue = Random.insideUnitSphere;
         
-        foundingGenome.candidateGenome.bodyGenome.coreGenome.name = MutateName(foundingGenome.candidateGenome.bodyGenome.coreGenome.name);
+        foundingGenome.candidateGenome.name = MutateName(foundingGenome.candidateGenome.name);
         foundingGenome.candidateGenome.bodyGenome.appearanceGenome.BlendHue(newHue, 0.75f);
         
         //string debugTxt = "";
-        for (int i = 0; i < 64; i++) {
-            //mutationSettings.bodyCoreSizeMutationChance = 0.5f;
-            //mutationSettings.bodyCoreMutationStepSize = 0.1f;
-            //mutationSettingsRef.mutationStrengthSlot = 0.15f;
-
+        for (int i = 0; i < 64; i++) {            
             AgentGenome agentGenome = Mutate(foundingGenome.candidateGenome, true, true);            
-            //int tempNumHiddenNeurons = 0;
-            //agentGenome.InitializeRandomBrainFromCurrentBody(0.5f, mutationSettingsRef.initialConnectionChance, tempNumHiddenNeurons);
-
+            
             CandidateAgentData candidate = new CandidateAgentData(agentGenome, speciesID);
             candidateGenomesList.Add(candidate);
             leaderboardGenomesList.Add(candidate);
-
             //debugTxt += "" + candidate.candidateGenome.brainGenome.linkList[0].weight.ToString("F2") + "  ";
         }
-
         //Debug.Log("SPECIES CREATED! " + debugTxt);
         representativeCandidate = foundingGenome;
 
         coatOfArmsMat = new Material(TheRenderKing.instance.coatOfArmsShader);
-        coatOfArmsTex = TheRenderKing.instance.GenerateSpeciesCoatOfArms(foundingGenome.candidateGenome.bodyGenome.appearanceGenome);
+        //coatOfArmsTex = TheRenderKing.instance.GenerateSpeciesCoatOfArms(foundingGenome.candidateGenome.bodyGenome.appearanceGenome);
         coatOfArmsMat.SetPass(0);
-        coatOfArmsMat.SetTexture("_MainTex", coatOfArmsTex);
+        coatOfArmsMat.SetTexture("_MainTex", TheRenderKing.instance.shapeTex);
+        coatOfArmsMat.SetTexture("_PatternTex", TheRenderKing.instance.patternTex);
+        coatOfArmsMat.SetFloat("_PatternX", foundingGenome.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX);
+        coatOfArmsMat.SetFloat("_PatternX", foundingGenome.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY);
+        Vector3 huePri = foundingGenome.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+        Vector3 hueSec = foundingGenome.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
+        coatOfArmsMat.SetColor("_TintPri", new Color(huePri.x, huePri.y, huePri.z));
+        coatOfArmsMat.SetColor("_TintSec", new Color(hueSec.x, hueSec.y, hueSec.z));
+        coatOfArmsMat.SetFloat("_IsSelected", 0f);
+		
     }
     
     string MutateName(string original)
@@ -148,11 +151,7 @@ public class SpeciesGenomePool
         
         return newName;
     }
-
-    public Texture2D GetCoatOfArms() {
-        return coatOfArmsTex;
-    }
-    
+        
     public void ProcessExtinction(int curTimeStep) {
         isExtinct = true;
         timeStepExtinct = curTimeStep;
@@ -296,6 +295,20 @@ public class SpeciesGenomePool
 
     public AgentGenome Mutate(AgentGenome parentGenome, bool bodySettings, bool brainSettings) {
         //AgentGenome parentGenome = leaderboardGenomesList[selectedIndex].candidateGenome;
+
+        //***EAC Creature NAME mutation here???
+        string parentName = parentGenome.name;
+        int randIndex = Random.Range(0, parentName.Length - 1);        
+        string frontHalf = parentName.Substring(0, randIndex);
+        string middleChar = parentName.Substring(randIndex, 1);
+        string backHalf = parentName.Substring(randIndex + 1);          
+        if (RandomStatics.CoinToss(.05f)) {
+            middleChar = RandomStatics.GetRandomLetter();
+        }
+        frontHalf += middleChar;
+        string newName = RandomStatics.CoinToss(.025f) ? backHalf + frontHalf : frontHalf + backHalf;
+
+        //--------------------------------------------------------------------------------------------------------------------
         
         tempMutationSettings = bodySettings ? mutationSettings : cachedNoneMutationSettings;
         BodyGenome newBodyGenome = new BodyGenome(parentGenome.bodyGenome, tempMutationSettings);
@@ -303,7 +316,7 @@ public class SpeciesGenomePool
         tempMutationSettings = brainSettings ? mutationSettings : cachedNoneMutationSettings;
         BrainGenome newBrainGenome = new BrainGenome(parentGenome.brainGenome, newBodyGenome, tempMutationSettings);
 
-        return new AgentGenome(newBodyGenome, newBrainGenome, parentGenome.generationCount + 1);
+        return new AgentGenome(newBodyGenome, newBrainGenome, parentGenome.generationCount + 1, newName);
     }
     
     public void UpdateLongestLife(Agent agent)

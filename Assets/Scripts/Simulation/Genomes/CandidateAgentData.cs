@@ -88,7 +88,7 @@ public class CandidateAgentData
     //public List<float> evaluationScoresList;  // fitness scores of agents with this genome
     public bool allEvaluationsComplete = false; // * WPP: always false
     public bool isBeingEvaluated = false;
-    public string name;
+    //public string name;
     
     public PerformanceData performanceData;
 
@@ -122,7 +122,7 @@ public class CandidateAgentData
         allEvaluationsComplete = false;  
         isBeingEvaluated = false;
 
-        name = GenerateTempCritterName();
+        //name = GenerateTempCritterName();
 
         candidateEventDataList = new List<CandidateEventData>();
         performanceData = new PerformanceData();
