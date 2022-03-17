@@ -37,6 +37,9 @@ public class CreaturePaperDollUI : MonoBehaviour
     Image imageMeterBarStomach;
     [SerializeField]
     Image imageMeterBarWaste;
+
+    [SerializeField]
+    Image imageGrowthPercent;
     
     public void Tick() {
         if (agent == null || agent.coreModule == null) return;
@@ -52,20 +55,23 @@ public class CreaturePaperDollUI : MonoBehaviour
             
             var lifeStageData = lookup.GetAgentLifeStageData(agent.curLifeStage, agent.isYoung);
 
-            tooltipState.tooltipString = lifeStageData.stateName + ", Lifespan: " + agent.ageCounter + ", Size: " + agent.currentBiomass.ToString("F3");
+            
+            tooltipState.tooltipString = lifeStageData.stateName + "\nAge: " + agent.ageCounter + "\nSize: " + (agent.sizePercentage * 100f).ToString("F0") + "% Grown";// + agent.currentBiomass.ToString("F3");
             tooltipImage.sprite = lifeStageData.icon;
 
             tooltipHealth.tooltipString = "Health: " + (agent.coreModule.health * 100f).ToString("F0") + "%";          
             imageMeterBarHealth.transform.localScale = new Vector3(1f, agent.coreModule.health, 1f);
         
             tooltipEnergy.tooltipString = "Energy: " + agent.coreModule.energy.ToString("F0");
-            imageMeterBarEnergy.transform.localScale = new Vector3(1f, Mathf.Clamp01(agent.coreModule.energy * 0.0025f), 1f);
+            imageMeterBarEnergy.transform.localScale = new Vector3(1f, Mathf.Clamp01(agent.coreModule.energy * 0.005f), 1f);
         
             tooltipStomachFood.tooltipString = "Stomach: " + (agent.coreModule.stomachContentsPercent * 100f).ToString("F0");
             imageMeterBarStomach.transform.localScale = new Vector3(1f, agent.coreModule.stomachContentsPercent, 1f);
         
             tooltipWaste.tooltipString = "Waste: (tbd)"; // + agent.coreModule.was.ToString("F0");
             imageMeterBarWaste.transform.localScale = new Vector3(1f, 0f, 1f);
+
+            imageGrowthPercent.transform.localScale = Vector3.one * agent.sizePercentage;
         }
         else {
             

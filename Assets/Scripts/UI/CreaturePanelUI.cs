@@ -120,13 +120,13 @@ public class CreaturePanelUI : MonoBehaviour
         if (agent == null) return;
 
         speciesIconUI.GetComponent<Image>().material = simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].coatOfArmsMat;
-        speciesIconUI.tooltip.tooltipString = "Crest of Species " + simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].representativeCandidate.candidateGenome.name.Substring(0, 1);
+        speciesIconUI.tooltip.tooltipString = "Species " + simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].representativeCandidate.candidateGenome.name.Substring(0, 1);
         
-        tooltipBrain.tooltipString = "BRAIN" + agent.curActionState + " (" + mostRecentActionState.id + ")";
-        tooltipGenome.tooltipString = "Genome???";
-        tooltipAppearance.tooltipString = "GEN " + agent.candidateRef.candidateGenome.generationCount + ", Axons: " + (agent.candidateRef.candidateGenome.brainGenome.links.Count + ", IO: " + agent.candidateRef.candidateGenome.brainGenome.inOutNeurons.Count + ", H: " + agent.candidateRef.candidateGenome.brainGenome.hiddenNeurons.Count);//"APPEARANCE";
+        tooltipBrain.tooltipString = "BRAIN:\n" + (agent.candidateRef.candidateGenome.brainGenome.hiddenNeurons.Count + agent.candidateRef.candidateGenome.brainGenome.inOutNeurons.Count) + " Neurons, " + agent.candidateRef.candidateGenome.brainGenome.links.Count + " Axons\n" + "Action: " + mostRecentActionState.id;
+        //tooltipGenome.tooltipString = "Genome???";
+        //tooltipAppearance.tooltipString = "GEN " + agent.candidateRef.candidateGenome.generationCount + ", Axons: " + (agent.candidateRef.candidateGenome.brainGenome.links.Count + ", IO: " + agent.candidateRef.candidateGenome.brainGenome.inOutNeurons.Count + ", H: " + agent.candidateRef.candidateGenome.brainGenome.hiddenNeurons.Count);//"APPEARANCE";
 
-        tooltipGenerationCount.tooltipString = "Generation #: " + agent.candidateRef.candidateGenome.generationCount.ToString();
+        tooltipGenerationCount.tooltipString = "Generation " + agent.candidateRef.candidateGenome.generationCount.ToString();
         textGenerationCount.text = agent.candidateRef.candidateGenome.generationCount.ToString();
     }
     
