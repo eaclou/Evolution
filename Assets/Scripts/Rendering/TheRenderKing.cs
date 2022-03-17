@@ -2062,7 +2062,6 @@ public class TheRenderKing : Singleton<TheRenderKing>
     private void SetToolbarPortraitCritterInitData(AgentGenome genome) 
     {
         var body = genome.bodyGenome;
-        // ERROR: body is null on simulation startup on Low simulation complexity
         var appearance = body.appearanceGenome; 
         
         // simManager.masterGenomePool.completeSpeciesPoolsList[simManager.uiManager.globalResourcesUI.selectedSpeciesIndex].representativeGenome;

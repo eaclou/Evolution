@@ -44,11 +44,11 @@ public class LoadingPanelUI : MonoBehaviour
         audioManager.BeginFadeMenuToGame(warmupTime); 
     }
     
-    // * If this gets complicated, delegate to ProgressEvent    
+    // If this gets complicated, delegate to ProgressEvent    
     IEnumerator WarmUpRoutine() {
         yield return new WaitForSeconds(warmupTime * refreshWarmupPercent);
         Refresh("", 4);
         yield return new WaitForSeconds(warmupTime * (1 - refreshWarmupPercent));
-        simulationManager.LoadingWarmupComplete();
+        //simulationManager.LoadingWarmupComplete();  // WPP: moved to UIManager to clear runtime error
     }
 }

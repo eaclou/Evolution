@@ -136,25 +136,25 @@ public class UIManager : Singleton<UIManager>
         if(simulationManager.vegetationManager != null) {
             plantDistance = (simulationManager.vegetationManager.closestPlantParticleData.worldPos - mousePositionOnWater).magnitude;
         }
+        
         microbeDistance = 1f;
         if (simulationManager.zooplanktonManager != null) {
             microbeDistance = (simulationManager.zooplanktonManager.closestAnimalParticlePosition2D - mousePositionOnWater).magnitude;
-        }                    
+        }  
+                          
         tooltipActive = false;
         foreach (var tip in tooltips)
         {
-            
             if (!GetTooltipCondition(tip.id))
-                
                 continue;
             
-
             ActivateTooltip(tip);
             tooltipActive = true;
             break;
         }
         panelTooltip.SetActive(tooltipActive);
     }
+    
     void ActivateTooltip(TooltipData data)
     {
         tooltipId = data.id;
@@ -165,9 +165,9 @@ public class UIManager : Singleton<UIManager>
     {
         textTooltip.text = text;
         textTooltip.color = color;
-        panelTooltip.SetActive(true);   
-        
+        panelTooltip.SetActive(true);
     }
+    
     public void EnterTooltipObject(TooltipUI tip) {
         isTooltipHover = true;
         curTooltip = tip;        
@@ -179,7 +179,6 @@ public class UIManager : Singleton<UIManager>
     
     string GetTooltipString(TooltipId id)
     {
-        
         switch (id)
         {
             //*** EAC Moving the logic to CreaturePanelUI to update Tooltip text for matching neurons
@@ -414,7 +413,11 @@ public class UIManager : Singleton<UIManager>
         //Debug.Log("Let there be not nothing!");
         //simulationManager._BigBangOn = true;
         TransitionToNewGameState(GameState.Playing);
+        Invoke(nameof(WarmupComplete), 0.15f);
     }
+    
+    /// Hackfix for TheRenderKing error where body genome of agent portrait was null
+    void WarmupComplete() { simulationManager.LoadingWarmupComplete(); }
     
     public void UnlockBrushes() {
         brushesUI.Unlock();
