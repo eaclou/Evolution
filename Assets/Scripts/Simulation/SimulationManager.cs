@@ -1371,7 +1371,7 @@ public class SimulationManager : Singleton<SimulationManager>
     {
         numAgents = qualitySettings.GetAgentCount(simulationComplexity);
         numEggSacks = qualitySettings.GetEggSackCount(simulationComplexity);
-        numInitialHiddenNeurons = qualitySettings.GetHiddenNeuronCont(simulationComplexity);
+        numInitialHiddenNeurons = qualitySettings.GetHiddenNeuronCount(simulationComplexity);
         fluidManager.SetResolution(fluidPhysicsQuality);
         //Debug.Log("ApplyQualitySettings() numAgents: " + numAgents);
     }

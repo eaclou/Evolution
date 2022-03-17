@@ -59,7 +59,7 @@ public class MasterGenomePool
             //float lerpV = 0.5f;
             
             SpeciesGenomePool newSpecies = new SpeciesGenomePool(i, -1, 0, 0, mutationSettings);
-            AgentGenome seedGenome = new AgentGenome(mutationSettings.brainInitialConnectionChance,simulation.numInitialHiddenNeurons);
+            AgentGenome seedGenome = new AgentGenome(mutationSettings.brainInitialConnectionChance, simulation.numInitialHiddenNeurons);
 
             newSpecies.FirstTimeInitialize(new CandidateAgentData(seedGenome, i), 0);
             currentlyActiveSpeciesIDList.Add(i);

@@ -1,11 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
 
-public class GameOptionsManager : MonoBehaviour {
-
+public class GameOptionsManager : MonoBehaviour 
+{
     public AudioManager audioManager;
     public Toggle toggleFullscreen;
     public Dropdown dropdownResolution;
@@ -21,8 +20,8 @@ public class GameOptionsManager : MonoBehaviour {
     
     public QualitySettingData qualitySettings;
 
-    private void OnEnable() {
-
+    private void OnEnable() 
+    {
         gameOptions = new GameOptions();
 
         // example of hardcoded Ui listener rather than through inspector:
@@ -42,9 +41,9 @@ public class GameOptionsManager : MonoBehaviour {
         dropdownSimulationComplexity.value = qualitySettings.GetBindingIndex(gameOptions.simulationComplexity);      
     }
 
-    private void Start() {
-        //Initialize Audio Levels to 3/4:
-
+    private void Start() 
+    {
+        // Initialize Audio Levels to 3/4:
         gameOptions.masterVolume = sliderMasterVolume.value;
         OnSliderMasterVolume(gameOptions.masterVolume);
 
@@ -66,20 +65,19 @@ public class GameOptionsManager : MonoBehaviour {
         // a bit awkward but it should work for finding dropdownMenu index of current resolution:
         Dictionary<string, int> existingResolutionsDict = new Dictionary<string, int>();
         
-        for(int i = 0; i < rawResolutionsArray.Length; i++) {
+        //for (int i = 0; i < rawResolutionsArray.Length; i++) {
+        foreach (var resolution in rawResolutionsArray) 
+        {
             int minResolutionWidth = 1024;
             int minResolutionHeight = 768;
 
             // Only consider resolutions larger than a minimum size:
-            if (rawResolutionsArray[i].width >= minResolutionWidth && rawResolutionsArray[i].height >= minResolutionHeight) {
-                if(existingResolutionsDict.ContainsKey(rawResolutionsArray[i].ToString())) {
-                    //already in, do nothing
-                }
-                else {
-                    // Add this to existing list:
-                    existingResolutionsDict.Add(rawResolutionsArray[i].ToString(), supportedResolutionsList.Count); 
-                    supportedResolutionsList.Add(rawResolutionsArray[i]);
-                }
+            if (resolution.width >= minResolutionWidth && resolution.height >= minResolutionHeight &&
+                !existingResolutionsDict.ContainsKey(resolution.ToString())) 
+            {
+                // Add this to existing list:
+                existingResolutionsDict.Add(resolution.ToString(), supportedResolutionsList.Count); 
+                supportedResolutionsList.Add(resolution);
             }          
         }        
         resolutionsArray = supportedResolutionsList.ToArray();
@@ -89,14 +87,13 @@ public class GameOptionsManager : MonoBehaviour {
         foreach(Resolution resolution in resolutionsArray) {
             dropdownResolution.options.Add(new Dropdown.OptionData(resolution.ToString()));
         }
-        // Start with current resolution selected?
-        Resolution currentRes = Screen.currentResolution;
-        int currentDropdownIndex = 0;
-        if(existingResolutionsDict.ContainsKey(currentRes.ToString())) {
-            currentDropdownIndex = existingResolutionsDict[currentRes.ToString()];
-        }
-        dropdownResolution.value = currentDropdownIndex;
         
+        // Start with current resolution selected?
+        string currentRes = Screen.currentResolution.ToString();
+        int currentDropdownIndex = existingResolutionsDict.ContainsKey(currentRes) ? 
+            existingResolutionsDict[currentRes] : 0;
+
+        dropdownResolution.value = currentDropdownIndex;
         dropdownResolution.RefreshShownValue();
     }
     
@@ -107,7 +104,8 @@ public class GameOptionsManager : MonoBehaviour {
 
     public void OnDropdownResolution() {
         gameOptions.resolutionIndex = dropdownResolution.value;
-        Screen.SetResolution(resolutionsArray[dropdownResolution.value].width, resolutionsArray[dropdownResolution.value].height, Screen.fullScreen);
+        var resolution = resolutionsArray[dropdownResolution.value];
+        Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreen);
     }
 
     public void OnDropdownVSync() {
@@ -117,7 +115,6 @@ public class GameOptionsManager : MonoBehaviour {
 
     public void OnDropdownFluidPhysicsQuality() {
         gameOptions.fluidPhysicsQuality = qualitySettings.GetBindingId(dropdownFluidPhysicsQuality.value);
-
         // Actually change resolution in FluidManager!!! ******************************
     }
 
@@ -133,19 +130,16 @@ public class GameOptionsManager : MonoBehaviour {
 
     public void OnSliderMusicVolume(float value) {
         gameOptions.masterVolume = sliderMusicVolume.value;
-
         audioManager.AdjustMusicVolume(value); // converts 0-1 to decibel range   
     }
 
     public void OnSliderEffectsVolume(float value) {
         gameOptions.masterVolume = sliderEffectsVolume.value;
-
         audioManager.AdjustEffectsVolume(value); // converts 0-1 to decibel range   
     }
 
     public void OnSliderAmbientVolume(float value) {
         gameOptions.masterVolume = sliderAmbientVolume.value;
-
         audioManager.AdjustAmbientVolume(value); // converts 0-1 to decibel range   
     }
 
@@ -155,7 +149,6 @@ public class GameOptionsManager : MonoBehaviour {
     }
     public void LoadOptions() {
         gameOptions = JsonUtility.FromJson<GameOptions>(File.ReadAllText(Application.persistentDataPath + "/options.json"));
-
         // Apply all settings here!!!! **********************************
     }
 }

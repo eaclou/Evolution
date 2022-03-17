@@ -16,8 +16,8 @@ public class QualitySettingData : ScriptableObject
     public int GetEggSackCount(int index) { return bindings[index].numberEggSacks; }
     public int GetEggSackCount(QualitySettingId id) { return GetBinding(id).numberEggSacks; }
     
-    public int GetHiddenNeuronCont(int index) { return bindings[index].numberInitialHiddenNeurons; }
-    public int GetHiddenNeuronCont(QualitySettingId id) { return GetBinding(id).numberInitialHiddenNeurons; }
+    public int GetHiddenNeuronCount(int index) { return bindings[index].numberInitialHiddenNeurons; }
+    public int GetHiddenNeuronCount(QualitySettingId id) { return GetBinding(id).numberInitialHiddenNeurons; }
 
     public int GetResolution(int index) { return bindings[index].resolution; }
     public int GetResolution(QualitySettingId id) { return GetBinding(id).resolution; }

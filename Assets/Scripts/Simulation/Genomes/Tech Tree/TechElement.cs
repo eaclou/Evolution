@@ -57,12 +57,12 @@ public class TechElement : ScriptableObject
         return false;        
     }
     
-    public bool Contains(MetaNeuron value)
+    public bool ContainsNeuron(MetaNeuron id)
     {
-        foreach (var unlock in unlocks)
-            if (unlock == value)
+        foreach (var neuron in unlocks)
+            if (neuron == id)
                 return true;
-        
+                
         return false;
     }
 }
@@ -106,5 +106,65 @@ public enum TechElementId
     CorpseDir,
     CorpseDist,
     CorpseVel,
-    EggDir
+    EggDir,
+    Unknown,
 }
+
+// Inserted by Git for some reason, delete if not intentional
+/*
+    Heterotrophic,
+    Jaw,
+    SimpleMouth,
+    Teeth,
+    VocalCords,
+    Dash,
+    DorsalFin,
+    Faster,
+    LimbDifferentiation,
+    Maneuver,
+    Spin,
+    Spines,
+    TailFin,
+    AnimalDiet,
+    DigestiveTract,
+    EggDiet,
+    Eggs,
+    FatCells,
+    Intestines,
+    Lysosomes,
+    MicrobeDiet,
+    PlantDiet,
+    Stomach,
+    FoodSensor,
+    MicrobeSensor,
+    PlantSensor,
+    AnimalSensor,
+    CorpseSensor,
+    EggSensor,
+    WaterSensor,
+    Ears,
+    Eyes,
+    Proximity,
+    Targeting,
+    Biometrics,
+    Clock,
+    Dream,
+    Hormones,
+    Proprioception,
+    SensoryGanglia,
+    Sleep,
+    BiteResistant,
+    BodySize,
+    Brain,
+    Catalysts,
+    Gills,
+    Mitochondria,
+    Organs,
+    Plates,
+    Poisonous,
+    Scales,
+    SpinalCord,
+    VenomGland,
+    NerveCells,
+    Unknown,
+*/

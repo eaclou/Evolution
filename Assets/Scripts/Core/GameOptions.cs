@@ -1,10 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System;
 
-[System.Serializable]
-public class GameOptions {
-
+[Serializable]
+public class GameOptions 
+{
     public bool isFullscreen;
     public int vSync;
     public QualitySettingId fluidPhysicsQuality; 

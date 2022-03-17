@@ -122,7 +122,7 @@ public class Brain
         var result = new List<Neuron>();
 
         foreach (var neuron in neurons)
-            if (tech.Contains(neuron.data))
+            if (tech.ContainsNeuron(neuron.data))
                 result.Add(neuron);
                 
         return result;

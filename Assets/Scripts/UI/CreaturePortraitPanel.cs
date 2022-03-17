@@ -29,7 +29,6 @@ public class CreaturePortraitPanel : MonoBehaviour
         
         SetColors(candidate.candidateGenome.bodyGenome.appearanceGenome);
     }
-
     
     public void SetColors(CritterModuleAppearanceGenome appearance)
     {
