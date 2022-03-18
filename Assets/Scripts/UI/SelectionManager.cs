@@ -28,12 +28,16 @@ public class SelectionManager : Singleton<SelectionManager>
             currentSelection.agent = agent;
             theRenderKing.InitializeCreaturePortrait(currentSelection.candidate.candidateGenome);
             uiManager.genomeViewerUI.brainGenomeImage.SetTexture(currentSelection.candidate.candidateGenome.brainGenome);
+            
+            CameraManager.instance.targetAgent = agent;
+            CameraManager.instance.targetAgentTransform = agent.bodyGO.transform;
+            CameraManager.instance.targetAgentIndex = agent.index;
             break;
         }
         
         currentSelection.isGenomeOnly = !hasAgent;
-        
-        SetHistorySelectedSpeciesUI(candidate.speciesID);
+        currentSelection.historySelectedSpeciesID = currentSelection.candidate.speciesID;  
+        //SetHistorySelectedSpeciesUI(candidate.speciesID);
         uiManager.historyPanelUI.InitializePanel();
         //uiManager.historyPanelUI.RefreshFocusedAgent(currentSelection.agent);
         uiManager.speciesOverviewUI.RebuildGenomeButtons();
@@ -63,8 +67,19 @@ public class SelectionManager : Singleton<SelectionManager>
 
     public bool IsSelected(CandidateAgentData candidate) { return candidate.candidateID == currentSelection.candidate.candidateID; }
     
-    public void SetHistorySelectedSpeciesUI(int id) {
-        currentSelection.historySelectedSpeciesID = id;        
+    public void SetSelectedFromSpeciesUI(int speciesID) {
+        //currentSelection.historySelectedSpeciesID = id;  
+        if(speciesID == currentSelection.historySelectedSpeciesID) {
+            return;
+        }
+
+        SpeciesGenomePool pool = simulation.masterGenomePool.completeSpeciesPoolsList[speciesID];
+        CandidateAgentData cand = pool.foundingCandidate;
+        if(!pool.isExtinct && pool.candidateGenomesList.Count > 0) {
+            cand = pool.candidateGenomesList[0];
+        }
+        SetSelected(cand);
+        Debug.Log("Selected! " + speciesID + ",  " + cand.candidateID);
     }
     
     // WPP: simplified search by using cached values

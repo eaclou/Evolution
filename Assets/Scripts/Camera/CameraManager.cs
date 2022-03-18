@@ -61,6 +61,10 @@ public class CameraManager : Singleton<CameraManager>
         UpdateCam();
     }
 
+    public void ToggleFollow() {
+        isFollowingAgent = !isFollowingAgent;
+    }
+
     private void UpdateCam() 
     {
         // Calculate where the focus pivot should be:

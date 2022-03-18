@@ -17,6 +17,10 @@ public class MinimapPanel : MonoBehaviour
     public Material uiKnowledgeMapViewerMat;
     public GameObject groupMinimap;
     public Image imageCameraViewArea;
+    [SerializeField]
+    public Button buttonOpenClose;
+    [SerializeField]
+    public Button buttonToggleFollow;
 
     private TrophicSlot selectedTrophicSlot => trophicLayers.selectedSlot;
     
@@ -40,6 +44,20 @@ public class MinimapPanel : MonoBehaviour
         float endAlt = 350f;
         float zoomLevel01 = Mathf.Clamp01((camAltitude - startAlt) / (endAlt - startAlt));
         imageCameraViewArea.transform.localScale = Vector3.one * Mathf.Lerp(0.15f, 2.5f, zoomLevel01);
+
+        Color toggleButtonColor = new Color(0.75f, 0.35f, 0.2f);
+        TooltipUI tooltip = buttonToggleFollow.GetComponent<TooltipUI>();
+        tooltip.tooltipString = "Follow Creature";
+        if(cameraManager.isFollowingAgent) {
+            toggleButtonColor = new Color(0.2f, 0.75f, 0.5f);
+            tooltip.tooltipString = "Stop Following";
+        }
+        buttonToggleFollow.GetComponent<Image>().color = toggleButtonColor;
+
+    }
+
+    public void ClickToggleFollow() {
+        cameraManager.ToggleFollow();
     }
         
     void SetKnowledgeMapViewer(TrophicLayerSO data) { SetKnowledgeMapViewer(data, GetRenderTexture(data.id)); }
@@ -81,10 +99,11 @@ public class MinimapPanel : MonoBehaviour
         uiKnowledgeMapViewerMat.SetFloat("_Gamma", data.gamma);         
     }
     
-    public void SetPanelOpen(bool value)
+    public void ClickOpenClosePanel()
     {
-        isOpen = value;
-        groupMinimap.SetActive(value);
+        isOpen = !isOpen;
+        groupMinimap.SetActive(isOpen);
+        buttonOpenClose.GetComponentInChildren<Text>().text = isOpen ? ">" : "<";
     }
     
     public void SelectTrophicSlot(TrophicLayerSO data) { trophicLayers.SetSlot(data); }

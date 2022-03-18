@@ -441,7 +441,7 @@ public class HistoryPanelUI : MonoBehaviour
         }
         else 
         {
-            selectionManager.SetHistorySelectedSpeciesUI(iconUI.speciesID);
+            selectionManager.SetSelectedFromSpeciesUI(iconUI.speciesID);
             uiManagerRef.speciesOverviewUI.RebuildGenomeButtons();
         }
     }
