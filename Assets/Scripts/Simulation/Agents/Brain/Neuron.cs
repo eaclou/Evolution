@@ -12,7 +12,7 @@ public class Neuron
     public int index => genome.index;
     
     public float inputTotal;
-    public float[] currentValue;
+    public float[] currentValue = new float[1];
     public float previousValue;  // * Not used
 
     public Neuron(NeuronGenome genome) { this.genome = genome; }

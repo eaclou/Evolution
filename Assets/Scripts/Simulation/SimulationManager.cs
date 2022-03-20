@@ -804,6 +804,7 @@ public class SimulationManager : Singleton<SimulationManager>
         }
     }
     
+    /// Recycles dead agents
     private void CheckForNullAgents() { 
         foreach (var agent in agents) {
             if (agent.isNull) {
@@ -1021,15 +1022,15 @@ public class SimulationManager : Singleton<SimulationManager>
         speciesPool.UpdateMostEaten(agent);
     }
     
-    // *** Confirm these are set up alright       
-    public void ProcessNullAgent(Agent agentRef) {   // (Upon Agent Death:)
+    /// Upon Agent Death  
+    public void ProcessNullAgent(Agent agent) {   
         numAgentsDied++;
         // Look up the connected CandidateGenome & its speciesID
-        CandidateAgentData candidateData = agentRef.candidateRef;
+        CandidateAgentData candidateData = agent.candidateRef;
         
-        int agentSpeciesIndex = agentRef.speciesIndex;
+        int agentSpeciesIndex = agent.speciesIndex;
         if(candidateData == null) {
-            Debug.LogError("candidateData NULL (" + agentRef.index + ") species " + agentSpeciesIndex);
+            Debug.LogError("candidateData NULL (" + agent.index + ") species " + agentSpeciesIndex);
         }
         
         int candidateSpeciesIndex = candidateData.speciesID;
@@ -1040,12 +1041,12 @@ public class SimulationManager : Singleton<SimulationManager>
         //Debug.Log("masterGenomePool.completeSpeciesPoolsList: " + masterGenomePool.completeSpeciesPoolsList.Count.ToString());
         SpeciesGenomePool speciesPool = masterGenomePool.completeSpeciesPoolsList[agentSpeciesIndex];
         var avgPerformanceData = speciesPool.avgCandidateData.performanceData;
-        var agentPerformanceData = agentRef.candidateRef.performanceData;  //***EC  - something fishy!!!!!!*****  
+        var agentPerformanceData = agent.candidateRef.performanceData;  //***EC  - something fishy!!!!!!*****  
 
-        UpdateRecords(agentRef);
+        UpdateRecords(agent);
 
         // save fitness score
-        candidateData.ProcessCompletedEvaluation(agentRef);
+        candidateData.ProcessCompletedEvaluation(agent);
         
         // check if it has finished all of its evaluations
         if(candidateData.numCompletedEvaluations >= numAgentEvaluationsPerGenome) {
@@ -1071,10 +1072,10 @@ public class SimulationManager : Singleton<SimulationManager>
             // i.e. Set curLifecycle to .AwaitingRespawn ^
             // then new Agents should use the next available genome from the updated ToBeEvaluated pool      
         
-        agentRef.SetToAwaitingRespawn();
-        cameraManager.DidFollowedCreatureDie(agentRef);
+        agent.SetToAwaitingRespawn();
+        cameraManager.DidFollowedCreatureDie(agent);
 
-        ProcessAgentScores(agentRef);
+        ProcessAgentScores(agent);
     }
     
     // ********** RE-IMPLEMENT THIS LATER!!!! ******************************************************************************

@@ -82,7 +82,8 @@ public class Brain
     {
         // NAIVE APPROACH:
         // run through all links and save sum values in target neurons
-        foreach (var axon in axons) {
+        foreach (var axon in axons) 
+        {
             float curVal = 0f;
             if (axon.from.currentValue != null) {
                 curVal = axon.from.currentValue[0];
@@ -92,14 +93,21 @@ public class Brain
             axon.to.inputTotal += axon.weight * curVal;
         }
         
-        // Once all axons are calculated, process the neurons:
-        foreach (var neuron in neurons) {
-            if (neuron.currentValue == null) neuron.currentValue = new float[1]; // null reference error fix
-            neuron.previousValue = neuron.currentValue[0]; // Save previous state
+        // Once all axons are calculated, process the neurons
+        foreach (var neuron in neurons) 
+        {
+            // Prevent null reference
+            if (neuron.currentValue == null) 
+                neuron.currentValue = new float[1]; 
+            
+            // Save previous state
+            neuron.previousValue = neuron.currentValue[0];
+             
             if (neuron.neuronType != NeuronType.In) {
                 neuron.currentValue[0] = TransferFunctions.Evaluate(TransferFunctions.TransferFunction.RationalSigmoid, neuron.inputTotal);
             }
-            // now zero out inputSum:
+            
+            // Zero out inputSum
             neuron.inputTotal = 0f;
         }
     }

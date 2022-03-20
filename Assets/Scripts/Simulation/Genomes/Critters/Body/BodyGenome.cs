@@ -88,11 +88,32 @@ public class BodyGenome
     void AddNeuron(string name) { masterList.Add(map.GetData(name)); }
 
     // Mutable by Player
-    // Add body-sensor/effector mutations here and cleanup Brain Genome:
-    void SetToMutatedCopyOfParentGenome(BodyGenome parentBodyGenome, MutationSettingsInstance settings) {
-        appearanceGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.appearanceGenome, settings);
-        coreGenome.SetToMutatedCopyOfParentGenome(parentBodyGenome.coreGenome, settings);
+    // Add body-sensor/effector mutations here and cleanup Brain Genome
+    void SetToMutatedCopyOfParentGenome(BodyGenome parent, MutationSettingsInstance settings) 
+    {
+        appearanceGenome.SetToMutatedCopyOfParentGenome(parent.appearanceGenome, settings);
+        coreGenome.SetToMutatedCopyOfParentGenome(parent.coreGenome, settings);
         unlockedTech = unlockedTech.GetMutatedCopy();
+        newlyUnlockedNeuronInfo = GetNewlyUnlockedNeurons(parent);
+    }
+    
+    public List<MetaNeuron> newlyUnlockedNeuronInfo = new List<MetaNeuron>();
+
+    List<MetaNeuron> GetNewlyUnlockedNeurons(BodyGenome parent)
+    {
+        var newTech = new List<TechElement>();
+        foreach (var tech in unlockedTech.values)
+            if (!parent.unlockedTech.Contains(tech))
+                newTech.Add(tech);
+                
+        var newMetaNeurons = new List<MetaNeuron>();
+        foreach (var tech in newTech)
+            foreach (var unlock in tech.unlocks)
+                newMetaNeurons.Add(unlock);
+                
+        //Debug.Log($"Agent created with {newMetaNeurons.Count} " +
+        //          $"new neuron templates from {newTech.Count} new tech");  // OK
+        return newMetaNeurons;
     }
 }
 
