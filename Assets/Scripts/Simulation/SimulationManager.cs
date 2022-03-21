@@ -90,7 +90,7 @@ public class SimulationManager : Singleton<SimulationManager>
     private int numAgentEvaluationsPerGenome = 1;
 
     public int simAgeTimeSteps = 0;
-    private int numStepsInSimYear = 4096;
+    private int numStepsInSimYear = 4096 * 2;
     private int simAgeYearCounter = 0;
     public int curSimYear = 0;
     
