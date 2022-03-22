@@ -105,7 +105,7 @@ public class SpeciesGenomePool
         foundingGenome.candidateGenome.bodyGenome.appearanceGenome.BlendHue(newHue, 0.75f);
         
         //string debugTxt = "";
-        for (int i = 0; i < 64; i++) {            
+        for (int i = 0; i < 16; i++) {            
             AgentGenome agentGenome = Mutate(foundingGenome.candidateGenome, true, true);            
             
             CandidateAgentData candidate = new CandidateAgentData(agentGenome, speciesID);

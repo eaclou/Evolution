@@ -191,12 +191,6 @@ public class HistoryPanelUI : MonoBehaviour
         worldTreeLineDataCBuffer?.Release();
         worldTreeLineDataCBuffer = new ComputeBuffer(worldTreeBufferCount, sizeof(float) * 7);
         
-        // Create species lines
-        for(int line = 0; line < worldTreeNumSpeciesLines; line++) {
-            for (int i = 0; i < worldTreeNumPointsPerLine; i++) {
-                CreateSpeciesLine(line, i, cursorCoords, worldTreeLines);
-            }
-        }
         
         // Create creature lines
         for(int line = 0; line < worldTreeNumCreatureLines; line++) {
@@ -204,6 +198,14 @@ public class HistoryPanelUI : MonoBehaviour
                 CreateCreatureLine(line, i, cursorCoords, worldTreeLines);
             }
         }
+
+        // Create species lines (on top)
+        for(int line = 0; line < worldTreeNumSpeciesLines; line++) {
+            for (int i = 0; i < worldTreeNumPointsPerLine; i++) {
+                CreateSpeciesLine(line, i, cursorCoords, worldTreeLines);
+            }
+        }
+        
         
         worldTreeLineDataCBuffer.SetData(worldTreeLines);
     }
@@ -351,7 +353,7 @@ public class HistoryPanelUI : MonoBehaviour
             data.color = Color.white;
         }
 
-        if (isPopulationMode || isTimelineMode) {
+        if (isTimelineMode) {//if (isPopulationMode || isTimelineMode) {
             data.worldPos = Vector3.zero;
             data.color = new Color(0f, 0f, 0f, 0f);
         }
@@ -434,7 +436,7 @@ public class HistoryPanelUI : MonoBehaviour
                 curPanelMode = HistoryPanelMode.SpeciesPopulation;
                 //int indexLast = Mathf.Max(0, iconUI.linkedPool.candidateGenomesList.Count - 1);
                 //if (iconUI.linkedPool.candidateGenomesList.Count == 0) return;
-
+                
                 //uiManagerRef.selectionManager.SetFocusedCandidateGenome(iconUI.linkedPool.candidateGenomesList[0]);
                 //uiManagerRef.speciesOverviewUI.buttons[0].ClickedThisButton();
             }
