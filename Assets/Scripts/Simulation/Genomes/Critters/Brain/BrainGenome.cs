@@ -10,9 +10,16 @@ public class BrainGenome
     Lookup lookup => Lookup.instance;
     MetaNeuron hiddenTemplate => lookup.hiddenTemplate;
     
+    float initialWeightMultiplier;
+    float initialConnectionChance;
+    int initialHiddenNeuronCount;
+    
     public BrainGenome(BodyGenome bodyGenome, float initialConnectionDensity, int hiddenNeuronCount) 
     {
-        InitializeRandomBrainGenome(bodyGenome, 1f, initialConnectionDensity, hiddenNeuronCount); 
+        initialWeightMultiplier = 1f;
+        initialConnectionChance = initialConnectionDensity;
+        initialHiddenNeuronCount = hiddenNeuronCount;
+        InitializeRandomBrainGenome(bodyGenome); 
     }
     
     public BrainGenome(BrainGenome parentGenome, BodyGenome bodyGenome, MutationSettingsInstance mutationSettings)
@@ -35,28 +42,13 @@ public class BrainGenome
         links = new List<LinkGenome>();
     }
 
-    public void InitializeRandomBrainGenome(BodyGenome bodyGenome, float initialWeightMultiplier, float initialConnectionDensity, int numInitHiddenNeurons) {
+    public void InitializeRandomBrainGenome(BodyGenome bodyGenome) {
         InitializeNewBrainGenomeLists();
         InitializeIONeurons(bodyGenome);
-        //PrintNeuronCounts(initialConnectionDensity);
-        InitializeAxons(GetNewlyUnlockedNeurons(bodyGenome), initialWeightMultiplier, initialConnectionDensity, numInitHiddenNeurons);
+        //PrintNeuronCounts();
+        InitializeAxons();
     }
-    
-    List<NeuronGenome> GetNewlyUnlockedNeurons(BodyGenome genome)
-    {
-        var result = new List<NeuronGenome>();
-        
-        foreach (var neuron in inOutNeurons)
-            foreach (var newNeuron in genome.newlyUnlockedNeuronInfo)
-                if (neuron.data == newNeuron)
-                    result.Add(neuron);
-        
-        // NG: both zero, not called as often as expected
-        Debug.Log($"New brain created with {genome.newlyUnlockedNeuronInfo.Count} " +
-                  $"new neuron templates, resulting in {result.Count} new neurons");
-        return result;
-    }
-    
+
     void InitializeBodyNeuronList() {
         if (inOutNeurons == null) inOutNeurons = new List<NeuronGenome>();
         else inOutNeurons.Clear();
@@ -65,40 +57,48 @@ public class BrainGenome
     public void InitializeIONeurons(BodyGenome bodyGenome) 
     {
         bodyGenome.InitializeBrainGenome(inOutNeurons);   
-        SortInOutNeurons();
+        SortIONeurons();
     }
     
-    void SortInOutNeurons()
+    void SortIONeurons()
     {
         inputNeurons.Clear();
         outputNeurons.Clear();
         
-        foreach (var neuron in inOutNeurons) {
-            switch (neuron.data.io) {
-                case NeuronType.In: inputNeurons.Add(neuron); break;
-                case NeuronType.Out: outputNeurons.Add(neuron); break;
-            }
-        }
+        foreach (var neuron in inOutNeurons) 
+            SortIONeuron(neuron);
+    }
+    
+    void SortIONeuron(NeuronGenome neuron)
+    {
+        switch (neuron.data.io) 
+        {
+            case NeuronType.In: 
+                if (!inputNeurons.Contains(neuron)) 
+                    inputNeurons.Add(neuron); 
+                break;
+            case NeuronType.Out: 
+                if (!outputNeurons.Contains(neuron)) 
+                    outputNeurons.Add(neuron); 
+                break;
+        }        
     }
 
-    public void InitializeAxons(List<NeuronGenome> newNeurons, float initialWeightMultiplier, float initialConnectionDensity, int numInitHiddenNeurons) 
+    public void InitializeAxons() 
     {
-        for (int i = 0; i < numInitHiddenNeurons; i++) {
+        for (int i = 0; i < initialHiddenNeuronCount; i++) {
             var neuron = new NeuronGenome(hiddenTemplate, i);
             hiddenNeurons.Add(neuron);
         }
         
-        LinkLayers(inputNeurons, outputNeurons, initialConnectionDensity, initialWeightMultiplier);
-        LinkLayers(inputNeurons, hiddenNeurons, initialConnectionDensity, initialWeightMultiplier);
-        LinkLayers(hiddenNeurons, outputNeurons, initialConnectionDensity, initialWeightMultiplier);
-        
-        foreach (var neuron in newNeurons)
-            LinkNeuronToLayer(neuron, initialWeightMultiplier, initialConnectionDensity);
+        LinkLayers(inputNeurons, outputNeurons, initialConnectionChance, initialWeightMultiplier);
+        LinkLayers(inputNeurons, hiddenNeurons, initialConnectionChance, initialWeightMultiplier);
+        LinkLayers(hiddenNeurons, outputNeurons, initialConnectionChance, initialWeightMultiplier);
     }
     
-    void PrintNeuronCounts(float initialConnectionDensity)
+    void PrintNeuronCounts()
     {
-        Debug.Log($"Linking layers with connection density of {initialConnectionDensity}\n" +
+        Debug.Log($"Linking layers with connection density of {initialConnectionChance}\n" +
                   $"{inputNeurons.Count} input neurons to {outputNeurons.Count} output neurons\n" +
                   $"{inputNeurons.Count} input neurons to {hiddenNeurons.Count} hidden neurons)" +
                   $"{hiddenNeurons.Count} hidden neurons to {outputNeurons.Count} output neurons");
@@ -119,22 +119,6 @@ public class BrainGenome
         var randomWeight = Gaussian.GetRandomGaussian() * weightMultiplier;
         var linkGenome = new LinkGenome(from, to, randomWeight, true);
         links.Add(linkGenome);        
-    }
-
-    /// For neurons created post-initialization, such as from mutations
-    public void LinkNeuronToLayer(NeuronGenome neuron, float connectionChance, float weight)
-    {
-        switch (neuron.io)
-        {
-            case NeuronType.In:
-                foreach (var outputNeuron in outputNeurons)
-                    RequestConnection(neuron, outputNeuron, connectionChance, weight);
-                break;
-            case NeuronType.Out:
-                foreach (var inputNeuron in inputNeurons)
-                    RequestConnection(inputNeuron, neuron, connectionChance, weight);
-                break;
-        }
     }
 
     public void SetToMutatedCopyOfParentGenome(BrainGenome parentGenome, BodyGenome bodyGenome, MutationSettingsInstance settings) 
@@ -163,6 +147,14 @@ public class BrainGenome
         if (RandomStatics.CoinToss(settings.brainCreateNewHiddenNodeChance)) 
             AddNewHiddenNeuron();
 
+        var newNeurons = GetNewlyUnlockedNeurons(bodyGenome);
+        //Debug.Log($"Initializing axons with {newNeurons.Count} new neurons from " +
+        //          $"{bodyGenome.newlyUnlockedNeuronInfo.Count} new tech.");
+        foreach (var neuron in newNeurons)
+        {
+            SortIONeuron(neuron);
+            LinkNeuronToLayer(neuron);
+        }
         //RemoveVestigialLinks();
     }
 
@@ -209,6 +201,36 @@ public class BrainGenome
         }
         
         return result;
+    }
+    
+    List<NeuronGenome> GetNewlyUnlockedNeurons(BodyGenome genome)
+    {
+        var result = new List<NeuronGenome>();
+        
+        foreach (var neuron in inOutNeurons)
+        foreach (var newNeuron in genome.newlyUnlockedNeuronInfo)
+            if (neuron.data == newNeuron)
+                result.Add(neuron);
+        
+        return result;
+    }
+    
+    /// For neurons created post-initialization, such as from mutations
+    public void LinkNeuronToLayer(NeuronGenome neuron)
+    {
+        switch (neuron.io)
+        {
+            case NeuronType.In:
+                //Debug.Log($"Requesting connections from {neuron.data.name} to {outputNeurons.Count} output neurons");
+                foreach (var outputNeuron in outputNeurons)
+                    RequestConnection(neuron, outputNeuron, initialConnectionChance, initialWeightMultiplier);
+                break;
+            case NeuronType.Out:
+                //Debug.Log($"Requesting connections from input neurons {inputNeurons.Count} to {neuron.data.name}");
+                foreach (var inputNeuron in inputNeurons)
+                    RequestConnection(inputNeuron, neuron, initialConnectionChance, initialWeightMultiplier);
+                break;
+        }
     }
     
     void AddNewLink(MutationSettingsInstance settings)

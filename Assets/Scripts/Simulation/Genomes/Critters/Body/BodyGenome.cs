@@ -110,9 +110,7 @@ public class BodyGenome
         foreach (var tech in newTech)
             foreach (var unlock in tech.unlocks)
                 newMetaNeurons.Add(unlock);
-                
-        //Debug.Log($"Agent created with {newMetaNeurons.Count} " +
-        //          $"new neuron templates from {newTech.Count} new tech");  // OK
+        
         return newMetaNeurons;
     }
 }

@@ -4,11 +4,6 @@ using System.Collections.Generic;
 [Serializable]
 public class LinkGenome 
 {
-    public BrainModuleID fromModuleID => from.moduleID;
-    public int fromNeuronID => from.index;
-    public BrainModuleID toModuleID => to.moduleID;
-    public int toNeuronID => to.index;
-    
     public NeuronGenome from;
     public NeuronGenome to;
     
@@ -33,14 +28,4 @@ public class LinkGenome
                 
         return false;
     }
-    
-    // WPP: remove
-    /*public LinkGenome(BrainModuleID fromModuleID, int fromNeuronID, BrainModuleID toModuleID, int toNeuronID, float weight, bool enabled) {
-        this.fromModuleID = fromModuleID;
-        this.fromNeuronID = fromNeuronID;
-        this.toModuleID = toModuleID;
-        this.toNeuronID = toNeuronID;
-        this.weight = weight;
-        this.enabled = enabled;
-    }*/
 }
