@@ -87,12 +87,12 @@ public class Agent : MonoBehaviour {
 
     public AgentActionState curActionState; // { get => data.curActionState; set => data.curActionState = value; }
 
-    public int gestationDurationTimeSteps = 120;
+    public int gestationDurationTimeSteps = 240;
     //public int _GestationDurationTimeSteps => gestationDurationTimeSteps;
     
     public int maxAgeTimeSteps = 100000;
     
-    private int growthScalingSkipFrames = 16;
+    private int growthScalingSkipFrames = 32;
 
     public float sizePercentage = 0f;
     
@@ -739,7 +739,7 @@ public class Agent : MonoBehaviour {
         currentBiomass = settingsRef.agentSettings._BaseInitMass;
         biomassAtDeath = currentBiomass; // avoid divide by 0
         fullsizeBiomass = currentBiomass * 100f;
-        coreModule.energy = currentBiomass * 1024f;  // should be proportional to body size??
+        coreModule.energy = currentBiomass * 256f;  // should be proportional to body size??
         
         mouthRef.Enable();
         //isCooldown = false;
@@ -1132,12 +1132,12 @@ public class Agent : MonoBehaviour {
         float turnSharpness = -Vector2.Dot(throttleDir, headForwardDir) * 0.5f + 0.5f;
         float headTurn = Vector2.Dot(throttleDir, headRightDir) * -1f * turnSharpness;
         float headTurnSign = Mathf.Clamp(Vector2.Dot(throttleDir, headRightDir) * -10000f, -1f, 1f);
-          
+
         // get size in 0-1 range from minSize to maxSize: // **** NOT ACCURATE!!!!
         //float sizeValue = Mathf.Clamp01(coreModule.speedBonus * (candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength - 0.2f) / 2f);  // Mathf.Clamp01((fullSizeBoundingBox.x - 0.1f) / 2.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
 
-        float swimSpeed = 60f * coreModule.speedBonus; // Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
-        float turnRate = 30f * coreModule.speedBonus; //10 // Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
+        float swimSpeed = 24f;// * coreModule.speedBonus; // Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
+        float turnRate = 12f;// * coreModule.speedBonus; //10 // Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
         
         /*float dashBonus = 1f;
         if(isDashing) {                

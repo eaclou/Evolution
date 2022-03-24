@@ -102,7 +102,8 @@ public class EnvironmentFluidManager : Singleton<EnvironmentFluidManager>
     }
     
     public void RerollForcePoints() {
-        CreateForcePoints(1f, 64f, 128f);
+        Debug.Log("Reroll force points");
+        CreateForcePoints(0.025f, 64f, 256f);
     }
     
     public void Tick(VegetationManager vegetationManagerRef) {
@@ -190,7 +191,7 @@ public class EnvironmentFluidManager : Singleton<EnvironmentFluidManager>
         float baseTierLerp = Mathf.Clamp01((float)curTierWaterCurrents / 10f);
         float targetSpeed = 2.24f * baseTierLerp; // Mathf.Lerp(0f, 15f, baseTierLerp * baseTierLerp * baseTierLerp);
 
-        forceMultiplier = targetSpeed; // Mathf.Lerp(forceMultiplier, targetSpeed, lerpAmount);
+        forceMultiplier = 20f; // targetSpeed; // Mathf.Lerp(forceMultiplier, targetSpeed, lerpAmount);
     }
     
     private void SetClimateInitial() {
@@ -237,7 +238,7 @@ public class EnvironmentFluidManager : Singleton<EnvironmentFluidManager>
         for(int i = 0; i < maxNumForcePoints; i++) {
             ForcePoint agentPoint = new ForcePoint();
             
-            float forceStrength = magnitude * 0.1f;
+            float forceStrength = magnitude;
             agentPoint.posX = Random.Range(0f, 1f);
             agentPoint.posY = Random.Range(0f, 1f);
             agentPoint.velX = Random.Range(-1f, 1f) * forceStrength;
