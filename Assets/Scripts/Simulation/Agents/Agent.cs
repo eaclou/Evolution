@@ -148,7 +148,7 @@ public class Agent : MonoBehaviour {
     public float wasteProducedLastFrame = 0f;
     public float oxygenUsedLastFrame = 0f;
     //public float currentReproductiveStockpile = 0f;
-    private float fullsizeBiomass = 1f;
+    public float fullsizeBiomass = 1f;
     public float biomassAtDeath = 1f;
     
     private Vector3 prevPos;  // use this instead of sampling rigidbody
@@ -739,7 +739,7 @@ public class Agent : MonoBehaviour {
         currentBiomass = settingsRef.agentSettings._BaseInitMass;
         biomassAtDeath = currentBiomass; // avoid divide by 0
         fullsizeBiomass = currentBiomass * 100f;
-        coreModule.energy = currentBiomass * 512f;  // should be proportional to body size??
+        coreModule.energy = currentBiomass * 1024f;  // should be proportional to body size??
         
         mouthRef.Enable();
         //isCooldown = false;

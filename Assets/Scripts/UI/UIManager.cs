@@ -191,7 +191,7 @@ public class UIManager : Singleton<UIManager>
                 //}
             }
             case TooltipId.Time: return "TIME: " + ((float)simulationManager.simAgeTimeSteps * cursorX / 360f).ToString("F0");
-            case TooltipId.Agent: return "Critter " + cameraManager.mouseHoverAgentRef.candidateRef.candidateGenome.name + "\nBiomass: " + cameraManager.mouseHoverAgentRef.currentBiomass.ToString("F2");
+            case TooltipId.Agent: return "Critter " + cameraManager.mouseHoverAgentRef.candidateRef.candidateGenome.name + "\nAge: " + cameraManager.mouseHoverAgentRef.ageCounter + "\nSize: " + (cameraManager.mouseHoverAgentRef.currentBiomass / cameraManager.mouseHoverAgentRef.fullsizeBiomass * 100f).ToString("F0") + "% Grown";
             case TooltipId.Algae: return "Algae #" + simulationManager.vegetationManager.closestPlantParticleData.index;
             case TooltipId.Microbe: return "Microbe #" + simulationManager.zooplanktonManager.closestAnimalParticleData.index;
             case TooltipId.Sensor: return "Sensor #" + (simulationManager.simAgeTimeSteps * cursorX / 360f).ToString("F0");
