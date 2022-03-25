@@ -67,7 +67,8 @@ public class PlaceNeuronsAtUI : MonoBehaviour
     {
         var placement = GetPlacement(neuron);
         return placement != null ? 
-            GetRadialOffset(neuron, placement) : 
+            GetRadialOffsetPosition(neuron, placement) : 
+            //GetPlacementPosition(placement) : 
             Vector3.zero + Random.insideUnitSphere * 0.01f;        
     }
     
@@ -80,13 +81,24 @@ public class PlaceNeuronsAtUI : MonoBehaviour
                 return placement;
         
         return null;
-    } 
+    }
     
-    Vector3 GetRadialOffset(Neuron neuron, UIPlacement icon)
+    /// Simple calculation for debugging
+    Vector3 GetPlacementPosition(UIPlacement placement)
     {
+        // ERROR: moves neuron after one frame
+        var anchor = placement.location.anchoredPosition;
+        return new Vector3(anchor.x, anchor.y, 0f);
+    }
+
+    Vector3 GetRadialOffsetPosition(Neuron neuron, UIPlacement icon)
+    {
+        //Vector2 anchor = icon.location.anchoredPosition;
+        //Vector3 iconPosition = new Vector3(anchor.x, anchor.y, 0f);
+        Vector3 iconPosition = icon.location.localPosition;
         float radialDistance = (neuron.index % 3 - GetModuloOffset(neuron.neuronType)) * -16f;
-        Vector2 clockHand = icon.location.localPosition.normalized;
-        Vector3 newPos = icon.location.localPosition;
+        Vector2 clockHand = iconPosition.normalized;
+        Vector3 newPos = iconPosition;
         Vector2 offset = clockHand * radialDistance;
         newPos.x += offset.x;
         newPos.y += offset.y;
