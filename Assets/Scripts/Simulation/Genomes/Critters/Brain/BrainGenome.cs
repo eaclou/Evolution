@@ -208,9 +208,9 @@ public class BrainGenome
         var result = new List<NeuronGenome>();
         
         foreach (var neuron in inOutNeurons)
-        foreach (var newNeuron in genome.newlyUnlockedNeuronInfo)
-            if (neuron.data == newNeuron)
-                result.Add(neuron);
+            foreach (var newNeuron in genome.newlyUnlockedNeuronInfo)
+                if (neuron.data == newNeuron)
+                    result.Add(neuron);
         
         return result;
     }
