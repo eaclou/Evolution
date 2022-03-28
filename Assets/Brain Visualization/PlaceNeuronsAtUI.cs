@@ -6,6 +6,7 @@ public class PlaceNeuronsAtUI : MonoBehaviour
 {
     [SerializeField] UIPlacement[] uiPlacements;
 
+    private const float panelSizePixels = 128f;
     #region WPP: condensed repetition
     /// INCOMPLETE: visualization is finicky about placement
     /// ui placement may need to be mapped to a valid area
@@ -102,7 +103,7 @@ public class PlaceNeuronsAtUI : MonoBehaviour
         Vector2 offset = clockHand * radialDistance;
         newPos.x += offset.x;
         newPos.y += offset.y;
-        return newPos/160f + Random.insideUnitSphere * 0.01f;
+        return newPos/panelSizePixels + Random.insideUnitSphere * 0.001f;
     }
     
     float GetModuloOffset(NeuronType io)
