@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-
 public class VisualizeSelectedBrain : MonoBehaviour
 {
     UIManager ui => UIManager.instance;
@@ -34,8 +33,6 @@ public class VisualizeSelectedBrain : MonoBehaviour
         Debug.Log(neuronString);
         */
         visualization.Initialize(neurons, axons, ref sockets, inputNeurons.Count, outputNeurons.Count);
-
-        
     }
     
     List<Neuron> neurons = new List<Neuron>();

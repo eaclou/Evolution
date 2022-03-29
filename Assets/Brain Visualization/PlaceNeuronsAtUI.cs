@@ -4,73 +4,27 @@ using Random = UnityEngine.Random;
 
 public class PlaceNeuronsAtUI : MonoBehaviour
 {
+    [SerializeField] float randomOffset = 0.001f;
+    [SerializeField] RectTransform panel;
     [SerializeField] UIPlacement[] uiPlacements;
-
-    private const float panelSizePixels = 128f;
-    #region WPP: condensed repetition
-    /// INCOMPLETE: visualization is finicky about placement
-    /// ui placement may need to be mapped to a valid area
-    //***EAC IF TWO OR MORE NEURONS SHARE SAME EXACT POSITION IT CREATES A DIVIDE BY ZERO ERROR!!!!!!!!!***
-    /*public Vector3 GetInputNeuronPosition(Neuron neuron)
-    {
-        var data = neuron.genome.data;
-
-        foreach (var placement in uiPlacements) 
-        {
-            if (placement.id == data.iconID) 
-            {
-                float radialDistance = ((neuron.index % 3) + 0.4f) * -16f;
-                Vector2 clockHand = placement.location.localPosition.normalized;
-                Vector3 newPos = placement.location.localPosition;
-                Vector2 offset = clockHand * radialDistance;
-                newPos.x += offset.x;
-                newPos.y += offset.y;
-                return (newPos / 160f) + Random.insideUnitSphere * 0.01f;
-            }
-        }        
-        
-        Debug.LogError($"Unable to find placement for {neuron.moduleID} {data}");
-        return Vector3.zero + Random.insideUnitSphere * 0.01f;
-    }*/
-
-    /*public Vector3 GetOutputNeuronPosition(Neuron neuron)
-    {
-            var data = neuron.genome.data;
     
-            foreach (var placement in uiPlacements) 
-            {
-                if (placement.id == data.iconID) 
-                {
-                    // WPP: Moved to GetOffset
-                    float radialDistance = ((neuron.index % 3) - 0.2f) * -16f;
-                    Vector2 clockHand = placement.location.localPosition.normalized;
-                    Vector3 newPos = placement.location.localPosition;
-                    Vector2 offset = clockHand * radialDistance;
-                    newPos.x += offset.x;
-                    newPos.y += offset.y;
-                    return (newPos / 160f) + Random.insideUnitSphere * 0.01f;*/
-                
-                /*Vector3 localPos = Vector3.zero; // Random.insideUnitSphere * 0.001f;
-                float frac = Mathf.Clamp01((float)placement.id / (float)uiPlacements.Length);
-                float radius = 0.35f;
-                float angleRadians = Mathf.PI * frac;
-                float x = Mathf.Cos(angleRadians) * radius;
-                float y = Mathf.Sin(angleRadians) * radius;
-                localPos.x = x;
-                localPos.y = y - 0.8f;
-                return localPos + Random.insideUnitSphere * 0.001f;
-            }
-        }
-    }*/
-    #endregion
+    // WPP: replaced arbitrary constant with calculated value
+    // in OnValidate for efficiency;
+    [ReadOnly] [SerializeField] 
+    float halfPanelSize;
     
+    void OnValidate()
+    {
+        if (panel) halfPanelSize = panel.rect.width / 2f;
+    }
+
     public Vector3 GetNeuronPosition(Neuron neuron)
     {
         var placement = GetPlacement(neuron);
         return placement != null ? 
             GetRadialOffsetPosition(neuron, placement) : 
             //GetPlacementPosition(placement) : 
-            Vector3.zero + Random.insideUnitSphere * 0.01f;        
+            Vector3.zero + Random.insideUnitSphere * randomOffset;     
     }
     
     UIPlacement GetPlacement(Neuron neuron)
@@ -94,18 +48,21 @@ public class PlaceNeuronsAtUI : MonoBehaviour
 
     Vector3 GetRadialOffsetPosition(Neuron neuron, UIPlacement icon)
     {
-        //Vector2 anchor = icon.location.anchoredPosition;
-        //Vector3 iconPosition = new Vector3(anchor.x, anchor.y, 0f);
         Vector3 iconPosition = icon.location.localPosition;
+        
+        // * WPP: where do 3 and -16 come from?  If settings, expose values in inspector; 
+        // if mathematical constants, declare as constants, if based on something else, include calculation.
         float radialDistance = (neuron.index % 3 - GetModuloOffset(neuron.neuronType)) * -16f;
+        
         Vector2 clockHand = iconPosition.normalized;
         Vector3 newPos = iconPosition;
         Vector2 offset = clockHand * radialDistance;
         newPos.x += offset.x;
         newPos.y += offset.y;
-        return newPos/panelSizePixels + Random.insideUnitSphere * 0.001f;
+        return newPos/halfPanelSize + Random.insideUnitSphere * randomOffset;
     }
     
+    // * WPP: magic numbers
     float GetModuloOffset(NeuronType io)
     {
         switch (io)
