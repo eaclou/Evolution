@@ -14,36 +14,48 @@ public class GenerateBrainVisualization : MonoBehaviour
     int numNeurons => neurons.Count;
 
     #region Internal data
+    
+    /// 2-triangle Quad mesh (6 vertices)
+    private ComputeBuffer quadVerticesCBuffer;
 
-    private ComputeBuffer quadVerticesCBuffer;  // holds information for a 2-triangle Quad mesh (6 vertices)
+    /// Initial positions for each neuron
+    private ComputeBuffer neuronInitDataCBuffer;  
+    
+    /// Current value -- separate so CPU only has to push the bare-minimum data to GPU every n frames
+    private ComputeBuffer neuronFeedDataCBuffer;  
+    
+    /// Updatable purely on GPU, like neuron Positions
+    private ComputeBuffer neuronSimDataCBuffer;   
+    
+    /// Axon weights (and from/to neuron IDs?)
+    private ComputeBuffer axonInitDataCBuffer;   
+    
+    /// Axons can be updated entirely on GPU by referencing neuron positions.
+    /// Includes all spline data --> positions, vertex colors, uv, radii, pulse positions, etc.
+    private ComputeBuffer axonSimDataCBuffer;
+
+    /// Some other secondary buffers for decorations later
+    public ComputeBuffer argsCoreCBuffer; 
+    
+    private ComputeBuffer appendTrianglesCoreCBuffer;           
+    
+    private uint[] argsCore = new uint[5] { 0, 0, 0, 0, 0 };
+
+    public bool initialized;
+    
     //public ComputeBuffer floatingGlowyBitsCBuffer;  // holds information for placement and attributes of each instance of quadVertices to draw
     //public ComputeBuffer extraBallsCBuffer;
     //private ComputeBuffer axonBallCBuffer;
     //private ComputeBuffer neuronBallCBuffer;
-
-    private ComputeBuffer neuronInitDataCBuffer;  // sets initial positions for each neuron
-    private ComputeBuffer neuronFeedDataCBuffer;  // current value -- separate so CPU only has to push the bare-minimum data to GPU every n frames
-    private ComputeBuffer neuronSimDataCBuffer;   // holds data that is updatable purely on GPU, like neuron Positions
-    //private ComputeBuffer subNeuronSimDataCBuffer; 
-    private ComputeBuffer axonInitDataCBuffer;    // holds axon weights ( as well as from/to neuron IDs ?)
-    private ComputeBuffer axonSimDataCBuffer;     // axons can be updated entirely on GPU by referencing neuron positions.
-    // .^.^.^. this includes all spline data --> positions, vertex colors, uv, radii, etc., pulse positions
+    //private ComputeBuffer subNeuronSimDataCBuffer;
     //private ComputeBuffer cableInitDataCBuffer;   // initial data required to calculate positions of cables
     //private ComputeBuffer cableSimDataCBuffer;    // holds the positions of the control points of the cable's underlying bezier curve
     //private ComputeBuffer socketInitDataCBuffer;  // holds the positions of the sockets on wall that cables plug into
-    public ComputeBuffer argsCoreCBuffer;        // Some other secondary buffers for decorations later
-    private uint[] argsCore = new uint[5] { 0, 0, 0, 0, 0 };
-    
     // will likely split these out into seperate ones later to support multiple materials/layers, but all-in-one for now...
-    //private ComputeBuffer appendTrianglesCablesCBuffer; 
-    private ComputeBuffer appendTrianglesCoreCBuffer;
+    //private ComputeBuffer appendTrianglesCablesCBuffer;
     //public ComputeBuffer argsCablesCBuffer;
-    
     //private uint[] argsCables = new uint[5] { 0, 0, 0, 0, 0 };
-    
-    //int numAxons = 270;
-    public bool initialized;
-    
+    //int numAxons = 270;    
     #endregion
     
     #region Structs for compute buffers
@@ -51,7 +63,8 @@ public class GenerateBrainVisualization : MonoBehaviour
     public struct NeuronInitData 
     {
         public float radius;
-        public float type;  // in/out/hidden
+        /// in/out/hidden
+        public float type;  
         public float age;
         
         public NeuronInitData(float type)
@@ -63,7 +76,8 @@ public class GenerateBrainVisualization : MonoBehaviour
     }
     
     public struct NeuronFeedData {
-        public float curValue;  // [-1,1]  // set by CPU continually
+        /// Continually set by CPU
+        public float curValue;  // [-1,1]   
     }
 
     // Set once at start
@@ -78,6 +92,8 @@ public class GenerateBrainVisualization : MonoBehaviour
             weight = axon.weight;
             fromID = axon.from.index;
             toID = axon.to.index;
+            Debug.Log($"Creating axon from {axon.from.neuronType} {axon.from.data.name} to " +
+                      $"{axon.to.neuronType} {axon.to.data.name}");
         }
     }
     
