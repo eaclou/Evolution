@@ -188,30 +188,30 @@ public class CritterModuleCore : IBrainModule
         energyBonus = Mathf.Lerp(0.75f, 1.5f, talentSpecUtilityNorm);
     }
     
-    public void MapNeuron(MetaNeuron data, Neuron neuron)
+    public void GetNeuralValue(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
-        neuron.currentValue = GetNeuralValue(neuron.index);
+        neuron.currentValue = GetNeuralValue(neuron.name);
     }
 
-    float[] GetNeuralValue(int neuronID)
+    float[] GetNeuralValue(string neuronID)
     {
         switch(neuronID)
         {
-            case 0: return bias;
-            case 21: return mouthTriggerOutputs;
-            case 24: return isContact;
-            case 25: return contactForceX;
-            case 26: return contactForceY;
-            case 27: return hitPoints;
-            case 28: return stamina;
-            case 204: return energyStored;
-            case 205: return foodStored;
-            case 206: return mouthFeedEffector;
-            case 207: return mouthAttackEffector;
-            case 208: return defendEffector;
-            case 209: return dashEffector;
-            case 210: return healEffector;
+            case "Bias": return bias;
+            case "isMouthTrigger": return mouthTriggerOutputs;
+            case "isContact": return isContact;
+            case "contactForceX": return contactForceX;
+            case "contactForceY": return contactForceY;
+            case "hitPoints": return hitPoints;
+            case "stamina": return stamina;
+            case "energyStored": return energyStored;
+            case "foodStored": return foodStored;
+            case "mouthFeedEffector": return mouthFeedEffector;
+            case "mouthAttackEffector": return mouthAttackEffector;
+            case "defendEffector": return defendEffector;
+            case "dashEffector": return dashEffector;
+            case "healEffector": return healEffector;
             default: return null;
         }
     }

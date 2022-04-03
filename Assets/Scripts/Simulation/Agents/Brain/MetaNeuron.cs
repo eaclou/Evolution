@@ -46,5 +46,5 @@ public class NeuronGenome
 
 public interface IBrainModule
 {
-    void MapNeuron(MetaNeuron data, Neuron neuron);
+    void GetNeuralValue(MetaNeuron data, Neuron neuron);
 }

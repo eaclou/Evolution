@@ -34,26 +34,26 @@ public class CritterModuleThreats : IBrainModule
         enemyThreatRating = new float[1];
     }
 
-    public void MapNeuron(MetaNeuron data, Neuron neuron)
+    public void GetNeuralValue(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
-        neuron.currentValue = GetNeuralValue(neuron.index);
+        neuron.currentValue = GetNeuralValue(neuron.name);
     }
 
-    float[] GetNeuralValue(int neuronID)
+    float[] GetNeuralValue(string neuronID)
     {
         switch (neuronID)
         {
-            case 14: return enemyPosX;
-            case 15: return enemyPosY;
-            case 16: return enemyVelX;
-            case 17: return enemyVelY;
-            case 18: return enemyDirX;
-            case 19: return enemyDirY;
-            case 200: return enemyRelSize;
-            case 201: return enemyHealth;
-            case 202: return enemyGrowthStage;
-            case 203: return enemyThreatRating;
+            case "enemyPosX": return enemyPosX;
+            case "enemyPosY": return enemyPosY;
+            case "enemyVelX": return enemyVelX;
+            case "enemyVelY": return enemyVelY;
+            case "enemyDirX": return enemyDirX;
+            case "enemyDirY": return enemyDirY;
+            case "enemyRelSize": return enemyRelSize;
+            case "enemyHealth": return enemyHealth;
+            case "enemyGrowthStage": return enemyGrowthStage;
+            case "enemyThreatRating": return enemyThreatRating;
             default: return null;
         }
     }
@@ -63,6 +63,7 @@ public class CritterModuleThreats : IBrainModule
         Vector2 enemyPos = Vector2.zero;
         Vector2 enemyDir = Vector2.zero;
         Vector2 enemyVel = Vector2.zero;
+        
         if(agent.coreModule.nearestEnemyAgent) 
         {
             enemyPos = new Vector2(agent.coreModule.nearestEnemyAgent.bodyRigidbody.transform.localPosition.x - agent.ownPos.x, agent.coreModule.nearestEnemyAgent.bodyRigidbody.transform.localPosition.y - agent.ownPos.y);

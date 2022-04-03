@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 
-// Future use
+/// Future use
 public class CritterModuleTarget : IBrainModule
 {
     public BrainModuleID moduleID => BrainModuleID.Undefined;
     
-    public void MapNeuron(MetaNeuron data, Neuron neuron) { }
+    public void GetNeuralValue(MetaNeuron data, Neuron neuron) { }
 }

@@ -20,22 +20,22 @@ public class CritterModuleFriends : IBrainModule
         friendDirY = new float[1];
     }
 
-    public void MapNeuron(MetaNeuron data, Neuron neuron)
+    public void GetNeuralValue(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
-        neuron.currentValue = GetNeuralValue(neuron.index);
+        neuron.currentValue = GetNeuralValue(neuron.name);
     }
 
-    float[] GetNeuralValue(int neuronID)
+    float[] GetNeuralValue(string neuronID)
     {
         switch(neuronID)
         {
-            case 8: return friendPosX;
-            case 9: return friendPosY;
-            case 10: return friendVelX;
-            case 11: return friendVelY;
-            case 12: return friendDirX;
-            case 13: return friendDirY;
+            case "friendPosX": return friendPosX;
+            case "friendPosY": return friendPosY;
+            case "friendVelX": return friendVelX;
+            case "friendVelY": return friendVelY;
+            case "friendDirX": return friendDirX;
+            case "friendDirY": return friendDirY;
             default: return null;
         }
     }

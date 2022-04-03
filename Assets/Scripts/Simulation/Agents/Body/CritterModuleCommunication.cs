@@ -30,26 +30,25 @@ public class CritterModuleCommunication : IBrainModule
         outComm3 = new float[1]; 
     }
     
-    public void MapNeuron(MetaNeuron data, Neuron neuron)
+    public void GetNeuralValue(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
-        neuron.currentValue = GetNeuralValue(neuron.index);
+        neuron.currentValue = GetNeuralValue(neuron.name);
     }
 
-    // * Use name from MetaNeuron
-    // + consider using Reflection (match SO name field to variable name) to eliminate switch statement
-    float[] GetNeuralValue(int neuronID)
+    // * Consider using Reflection (match SO name field to variable name) to eliminate switch statement
+    float[] GetNeuralValue(string neuronID)
     {
         switch (neuronID)
         {
-            case 40: return inComm0;
-            case 41: return inComm1;
-            case 42: return inComm2;
-            case 43: return inComm3;
-            case 103: return outComm0;
-            case 104: return outComm1;
-            case 105: return outComm2;
-            case 106: return outComm3;
+            case "InComm0": return inComm0;
+            case "InComm1": return inComm1;
+            case "InComm2": return inComm2;
+            case "InComm3": return inComm3;
+            case "OutComm0": return outComm0;
+            case "OutComm1": return outComm1;
+            case "OutComm2": return outComm2;
+            case "OutComm3": return outComm3;
             default: return null;
         }
     }

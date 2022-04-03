@@ -24,40 +24,37 @@ public class CritterModuleMovement : IBrainModule
     public float speedBonus = 1f;
     public float turnBonus = 1f;
 	
-    public CritterModuleMovement(AgentGenome agentGenome) {
-        ownVelX = new float[1]; // 20
-        ownVelY = new float[1]; // 21
-
-        facingDirX = new float[1];  // 207
-        facingDirY = new float[1];  // 208
-        
-        throttleX = new float[1]; // 0
-        throttleY = new float[1]; // 1
-
-        dash = new float[1]; // 2
+    public CritterModuleMovement(AgentGenome agentGenome) 
+    {
+        ownVelX = new float[1];
+        ownVelY = new float[1];
+        facingDirX = new float[1];
+        facingDirY = new float[1];
+        throttleX = new float[1];
+        throttleY = new float[1];
+        dash = new float[1];
         
         float invAspectRatio = agentGenome.bodyGenome.coreGenome.creatureAspectRatio;
-
         speedBonus = Mathf.Lerp(0.7f, 1.4f, 1f - invAspectRatio);
     }
 
-    public void MapNeuron(MetaNeuron data, Neuron neuron)
+    public void GetNeuralValue(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
-        neuron.currentValue = GetNeuralValue(neuron.index);
+        neuron.currentValue = GetNeuralValue(neuron.name);
     }
 
-    float[] GetNeuralValue(int neuronID)
+    float[] GetNeuralValue(string neuronID)
     {
         switch(neuronID)
         {
-            case 20: return ownVelX;
-            case 21: return ownVelY;
-            case 207: return facingDirX;
-            case 208: return facingDirY;
-            case 100: return throttleX;
-            case 101: return throttleY;
-            case 102: return dash;
+            case "ownVelX": return ownVelX;
+            case "ownVelY": return ownVelY;
+            case "facingDirX": return facingDirX;
+            case "facingDirY": return facingDirY;
+            case "throttleX": return throttleX;
+            case "throttleY": return throttleY;
+            case "dash": return dash;
             default: return null;
         }
     }

@@ -295,7 +295,7 @@ public class Agent : MonoBehaviour {
         if (data.moduleID == BrainModuleID.Undefined)
             neuron.Zero();
         else
-            GetModule(data.moduleID)?.MapNeuron(data, neuron);
+            GetModule(data.moduleID)?.GetNeuralValue(data, neuron);
     }
     
     IBrainModule GetModule(BrainModuleID id)

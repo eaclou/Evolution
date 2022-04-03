@@ -147,43 +147,43 @@ public class CritterModuleFood : IBrainModule
         }*/
     }
     
-    public void MapNeuron(MetaNeuron data, Neuron neuron)
+    public void GetNeuralValue(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
-        neuron.currentValue = GetNeuralValue(neuron.index);
+        neuron.currentValue = GetNeuralValue(neuron.name);
     }
 
-    float[] GetNeuralValue(int neuronID)
+    float[] GetNeuralValue(string neuronID)
     {
         switch(neuronID)
         {
-            case 1: return nutrientDensity;
-            case 2: return nutrientGradX;
-            case 3: return nutrientGradY;
-            case 4: return foodPlantPosX;
-            case 5: return foodPlantPosY;
-            case 6: return foodPlantDistance;
-            case 7: return foodPlantVelX;
-            case 8: return foodPlantVelY;
-            case 9: return foodPlantDirX;
-            case 10: return foodPlantDirY;
-            case 11: return foodPlantQuality;
-            case 12: return foodPlantRelSize;
-            case 13: return foodEggDistance;
-            case 14: return foodEggDirX;
-            case 15: return foodEggDirY;
-            case 16: return foodCorpseDistance;
-            case 17: return foodCorpseDirX;
-            case 18: return foodCorpseDirY;
-            case 24: return foodAnimalPosX;
-            case 25: return foodAnimalPosY;
-            case 26: return foodAnimalDistance;
-            case 27: return foodAnimalVelX;
-            case 28: return foodAnimalVelY;
-            case 29: return foodAnimalDirX;
-            case 30: return foodAnimalDirY;
-            case 31: return foodAnimalQuality;
-            case 32: return foodAnimalRelSize;
+            case "nutrientDensity": return nutrientDensity;
+            case "nutrientGradX": return nutrientGradX;
+            case "nutrientGradY": return nutrientGradY;
+            case "foodPosX": return foodPlantPosX;
+            case "foodPosY": return foodPlantPosY;
+            case "foodDistance": return foodPlantDistance;
+            case "foodVelX": return foodPlantVelX;
+            case "foodVelY": return foodPlantVelY;
+            case "foodDirX": return foodPlantDirX;
+            case "foodDirY": return foodPlantDirY;
+            case "foodQuality": return foodPlantQuality;
+            case "foodRelSize": return foodPlantRelSize;
+            case "distanceToEgg": return foodEggDistance;
+            case "eggDirX": return foodEggDirX;
+            case "eggDirY": return foodEggDirY;
+            case "distanceToCorpse": return foodCorpseDistance;
+            case "corpseDirX": return foodCorpseDirX;
+            case "corpseDirY": return foodCorpseDirY;
+            case "animalPosX": return foodAnimalPosX;
+            case "animalPosY": return foodAnimalPosY;
+            case "animalDistance": return foodAnimalDistance;
+            case "animalVelX": return foodAnimalVelX;
+            case "animalVelY": return foodAnimalVelY;
+            case "animalDirX": return foodAnimalDirX;
+            case "animalDirY": return foodAnimalDirY;
+            case "animalQuality": return foodAnimalQuality;
+            case "animalRelSize": return foodAnimalRelSize;
             default: return null;
         }
     }

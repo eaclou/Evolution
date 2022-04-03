@@ -8,19 +8,20 @@ public class CritterModuleEnvironment : IBrainModule
     public float[] waterDepth;
     public float[] waterVelX;
     public float[] waterVelY;
-
-    public float[] waterGradX;  // plan B
-    public float[] waterGradY;  // plan B
-
+    
     public float[] depthGradX; // start up and go clockwise!    
     public float[] depthGradY;
-    public float[] depthSouth;
-    public float[] depthWest;
+    
+    // WPP: Not used (no templates)
+    //public float[] waterGradX;  // plan B
+    //public float[] waterGradY;  // plan B    
+    //public float[] depthSouth;
+    //public float[] depthWest;
 
-    public float[] velTopRightX;
-    public float[] velTopLeftY;    
-    public float[] velBottomLeftX;
-    public float[] velBottomRightY;
+    //public float[] velTopRightX;
+    //public float[] velTopLeftY;    
+    //public float[] velBottomLeftX;
+    //public float[] velBottomRightY;
     
     public CritterModuleEnvironment(BodyGenomeData genomeData) {
         this.genomeData = genomeData;
@@ -31,36 +32,36 @@ public class CritterModuleEnvironment : IBrainModule
 
         depthGradX = new float[1]; 
         depthGradY = new float[1]; 
-        depthSouth = new float[1];       
-        depthWest = new float[1]; 
+        //depthSouth = new float[1];       
+        //depthWest = new float[1]; 
 
-        velTopRightX = new float[1]; 
-        velTopLeftY = new float[1]; 
-        velBottomLeftX = new float[1];
-        velBottomRightY = new float[1];
+        //velTopRightX = new float[1]; 
+        //velTopLeftY = new float[1]; 
+        //velBottomLeftX = new float[1];
+        //velBottomRightY = new float[1];
     }
 
-    public void MapNeuron(MetaNeuron data, Neuron neuron)
+    public void GetNeuralValue(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
-        neuron.currentValue = GetNeuralValue(neuron.index);
+        neuron.currentValue = GetNeuralValue(neuron.name);
     }
     
-    float[] GetNeuralValue(int neuronID)
+    float[] GetNeuralValue(string neuronID)
     {
         switch (neuronID)
         {
-            case 1: return waterDepth;
-            case 2: return waterVelX;
-            case 3: return waterVelY;
-            case 4: return depthGradX;
-            case 5: return depthGradY;
-            case 6: return depthSouth;
-            case 7: return depthWest;
-            case 8: return velTopRightX;
-            case 9: return velTopLeftY;
-            case 10: return velBottomLeftX;
-            case 11: return velBottomRightY;
+            case "depth": return waterDepth;
+            case "velX": return waterVelX;
+            case "velY": return waterVelY;
+            case "depthGradX": return depthGradX;
+            case "depthGradY": return depthGradY;
+            //case 6: return depthSouth;
+            //case 7: return depthWest;
+            //case 8: return velTopRightX;
+            //case 9: return velTopLeftY;
+            //case 10: return velBottomLeftX;
+            //case 11: return velBottomRightY;
             default: return null;
         }
     }
