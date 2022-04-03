@@ -150,10 +150,11 @@ public class CritterModuleFood : IBrainModule
     public void GetNeuralValue(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
-        neuron.currentValue = GetNeuralValue(neuron.name);
+        neuron.currentValue = (float[])GetType().GetField(neuron.name).GetValue(this);
     }
 
-    float[] GetNeuralValue(string neuronID)
+    // WPP: using reflection
+    /*float[] GetNeuralValue(string neuronID)
     {
         switch(neuronID)
         {
@@ -186,7 +187,7 @@ public class CritterModuleFood : IBrainModule
             case "animalRelSize": return foodAnimalRelSize;
             default: return null;
         }
-    }
+    }*/
 
     public void Tick(Agent agent) {
         /*if(genome.useNutrients) {

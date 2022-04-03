@@ -5,6 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Pond Water/Brain/Meta Neuron", fileName = "Meta Neuron")]
 public class MetaNeuron : ScriptableObject
 {
+    [Tooltip("Must match variable name in corresponding module")]
     public new string name;
     public NeuronType io;
     public BrainModuleID moduleID;

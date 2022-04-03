@@ -46,7 +46,7 @@ public class CritterModuleCore : IBrainModule
     //public Vector2 nearestEggSackPos;
 
     // WPP: added abstraction for more intuitive interface
-    float[] _mouthTriggerOutputs;
+    public float[] _mouthTriggerOutputs;
     public float[] mouthTriggerOutputs
     {
         get
@@ -191,10 +191,15 @@ public class CritterModuleCore : IBrainModule
     public void GetNeuralValue(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
-        neuron.currentValue = GetNeuralValue(neuron.name);
+        
+        // Example error checking on name, apply to other modules if needed
+        var field = GetType().GetField(neuron.name);
+        if (field == null) Debug.LogError($"Cannot find matching field for {neuron.name} in CritterModuleCore");
+        else neuron.currentValue = (float[])field.GetValue(this);
     }
 
-    float[] GetNeuralValue(string neuronID)
+    // WPP: replaced with reflection
+    /*float[] GetNeuralValue(string neuronID)
     {
         switch(neuronID)
         {
@@ -214,7 +219,7 @@ public class CritterModuleCore : IBrainModule
             case "healEffector": return healEffector;
             default: return null;
         }
-    }
+    }*/
 
     public void Tick() {
         //temperature[0] = 0f;

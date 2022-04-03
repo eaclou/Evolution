@@ -81,8 +81,8 @@ public class BodyGenome
     
     void AddNonConditionalNeurons()
     {
-        AddNeuron("Bias");
-        AddNeuron("isMouthTrigger");        
+        AddNeuron("bias");
+        AddNeuron("_mouthTriggerOutputs");        
         //AddNeuron("mouthFeedEffector");  // This only works with Collider2Ds, won't detect Plants or Microbes
         //AddNeuron("throttleX");
         //AddNeuron("throttleY");

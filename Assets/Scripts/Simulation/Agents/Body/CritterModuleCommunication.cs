@@ -33,11 +33,11 @@ public class CritterModuleCommunication : IBrainModule
     public void GetNeuralValue(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
-        neuron.currentValue = GetNeuralValue(neuron.name);
+        neuron.currentValue = (float[])GetType().GetField(neuron.name).GetValue(this);
     }
 
-    // * Consider using Reflection (match SO name field to variable name) to eliminate switch statement
-    float[] GetNeuralValue(string neuronID)
+    // WPP: replaced with reflection
+    /*float[] GetNeuralValue(string neuronID)
     {
         switch (neuronID)
         {
@@ -51,7 +51,7 @@ public class CritterModuleCommunication : IBrainModule
             case "OutComm3": return outComm3;
             default: return null;
         }
-    }
+    }*/
 
     public void Tick(Agent agent) 
     {

@@ -37,10 +37,11 @@ public class CritterModuleThreats : IBrainModule
     public void GetNeuralValue(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
-        neuron.currentValue = GetNeuralValue(neuron.name);
+        neuron.currentValue = (float[])GetType().GetField(neuron.name).GetValue(this);
     }
 
-    float[] GetNeuralValue(string neuronID)
+    // WPP: replaced with reflection
+    /*float[] GetNeuralValue(string neuronID)
     {
         switch (neuronID)
         {
@@ -56,7 +57,7 @@ public class CritterModuleThreats : IBrainModule
             case "enemyThreatRating": return enemyThreatRating;
             default: return null;
         }
-    }
+    }*/
 
     public void Tick(Agent agent) 
     {

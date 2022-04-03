@@ -41,10 +41,11 @@ public class CritterModuleMovement : IBrainModule
     public void GetNeuralValue(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
-        neuron.currentValue = GetNeuralValue(neuron.name);
+        neuron.currentValue = (float[])GetType().GetField(neuron.name).GetValue(this);
+        //GetNeuralValue(neuron.name);
     }
 
-    float[] GetNeuralValue(string neuronID)
+    /*float[] GetNeuralValue(string neuronID)
     {
         switch(neuronID)
         {
@@ -57,7 +58,7 @@ public class CritterModuleMovement : IBrainModule
             case "dash": return dash;
             default: return null;
         }
-    }
+    }*/
 
     public void Tick(Agent agent) 
     {
