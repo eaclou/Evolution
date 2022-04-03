@@ -7,33 +7,33 @@ public class CritterModuleCommunication : IBrainModule
     public float[] inComm0;
     public float[] inComm1;
     public float[] inComm2;
-    public float[] inComm3;  // 44 In?
+    public float[] inComm3;
         
     public float[] outComm0;
     public float[] outComm1;
     public float[] outComm2;
-    public float[] outComm3;  // 7 Out?
+    public float[] outComm3;
     
     bool canCommunicate;
     
     public void Initialize(bool canCommunicate) {
         this.canCommunicate = canCommunicate;
     
-        inComm0 = new float[1]; // 40
-        inComm1 = new float[1]; // 41
-        inComm2 = new float[1]; // 42
-        inComm3 = new float[1]; // 43 
+        inComm0 = new float[1];
+        inComm1 = new float[1];
+        inComm2 = new float[1];
+        inComm3 = new float[1]; 
         // 44 Total Inputs                
-        outComm0 = new float[1]; // 3
-        outComm1 = new float[1]; // 4
-        outComm2 = new float[1]; // 5
-        outComm3 = new float[1]; // 6 
+        outComm0 = new float[1];
+        outComm1 = new float[1];
+        outComm2 = new float[1];
+        outComm3 = new float[1]; 
     }
     
     public void MapNeuron(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
-        neuron.currentValue = GetNeuralValue(data.id);
+        neuron.currentValue = GetNeuralValue(neuron.index);
     }
 
     // * Use name from MetaNeuron

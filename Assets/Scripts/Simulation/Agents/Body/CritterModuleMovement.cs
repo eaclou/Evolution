@@ -44,27 +44,9 @@ public class CritterModuleMovement : IBrainModule
     public void MapNeuron(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
-        neuron.currentValue = GetNeuralValue(data.id);
-        //neuron.neuronType = data.io;
+        neuron.currentValue = GetNeuralValue(neuron.index);
     }
 
-    /*public void MapNeuron(NID nid, Neuron neuron) 
-    {
-        if (moduleID != nid.moduleID) return;
-        neuron.neuronType = GetIO(nid.neuronID);    
-        neuron.currentValue = GetNeuralValue(nid.neuronID);
-    }
-    
-    NeuronType GetIO(int neuronID)
-    {
-        switch (neuronID)
-        {
-            case 207: return NeuronType.In;
-            case 208: return NeuronType.In;
-            default: return neuralMap.GetIO(neuronID);
-        }
-    }*/
-    
     float[] GetNeuralValue(int neuronID)
     {
         switch(neuronID)

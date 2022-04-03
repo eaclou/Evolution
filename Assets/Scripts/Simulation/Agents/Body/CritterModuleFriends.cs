@@ -12,18 +12,18 @@ public class CritterModuleFriends : IBrainModule
     public float[] friendDirY;
 
     public CritterModuleFriends() {
-        friendPosX = new float[1]; // 8
-        friendPosY = new float[1]; // 9
-        friendVelX = new float[1]; // 10
-        friendVelY = new float[1]; // 11
-        friendDirX = new float[1]; // 12
-        friendDirY = new float[1]; // 13
+        friendPosX = new float[1];
+        friendPosY = new float[1];
+        friendVelX = new float[1];
+        friendVelY = new float[1];
+        friendDirX = new float[1];
+        friendDirY = new float[1];
     }
 
     public void MapNeuron(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
-        neuron.currentValue = GetNeuralValue(data.id);
+        neuron.currentValue = GetNeuralValue(neuron.index);
     }
 
     float[] GetNeuralValue(int neuronID)

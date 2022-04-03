@@ -152,20 +152,20 @@ public class CritterModuleCore : IBrainModule
     public void Initialize(CritterModuleCoreGenome genome) {
         this.genome = genome;
         
-        bias = new float[1];   //0
+        bias = new float[1];
 
-        //temperature = new float[1]; // 22
-        //pressure = new float[1]; // 23
-        isContact = new float[1]; // 24
-        contactForceX = new float[1]; // 25
-        contactForceY = new float[1]; // 26
+        //temperature = new float[1];
+        //pressure = new float[1];
+        isContact = new float[1];
+        contactForceX = new float[1];
+        contactForceY = new float[1];
 
-        hitPoints = new float[1]; // 27
-        stamina = new float[1]; // 28
-        energyStored = new float[1];  // 204
-        foodStored = new float[1];  // 205
+        hitPoints = new float[1];
+        stamina = new float[1];
+        energyStored = new float[1];
+        foodStored = new float[1];
                         
-        mouthFeedEffector = new float[1];  // 206
+        mouthFeedEffector = new float[1];
         mouthAttackEffector = new float[1];
         defendEffector = new float[1];
         dashEffector = new float[1];
@@ -191,7 +191,7 @@ public class CritterModuleCore : IBrainModule
     public void MapNeuron(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
-        neuron.currentValue = GetNeuralValue(data.id);
+        neuron.currentValue = GetNeuralValue(neuron.index);
     }
 
     float[] GetNeuralValue(int neuronID)
@@ -237,6 +237,7 @@ public class CritterModuleCore : IBrainModule
     }
 }
 
+#region old code
 /*public void DirectDamageToRandomBodyPart(float damage)
 {
     int rand = Random.Range(0, 3);
@@ -255,4 +256,5 @@ public class CritterModuleCore : IBrainModule
     coreModule.healthBody -= damage * UnityEngine.Random.Range(0f, 1f);
     coreModule.healthExternal -= damage * UnityEngine.Random.Range(0f, 1f);
 }*/
+#endregion
 

@@ -51,9 +51,9 @@ public class VisualizeSelectedBrain : MonoBehaviour
 
         // Place input and output neurons before hidden neurons
         // because hidden neurons are between connected input and output neurons.
-        int offset = 0;
+        /*int offset = 0;
         for (int i = 0; i < inputNeurons.Count; i++) 
-            sockets[i + offset].position = placement.GetNeuronPosition(inputNeurons[i]);    
+            sockets[i + offset].position = placement.GetNeuronPosition(inputNeurons[i]);
             
         offset = inputNeurons.Count;
         for (int i = 0; i < outputNeurons.Count; i++)
@@ -63,8 +63,12 @@ public class VisualizeSelectedBrain : MonoBehaviour
         for (int i = 0; i < hiddenNeurons.Count; i++) {
             sockets[i + offset].position = placement.GetHiddenNeuronPosition(hiddenNeurons[i]);
             //Debug.Log("HID " + sockets[i + offset].position);
-        }
+        }*/
         
+        // WPP: delegated branching to placement to simplify interface
+        for (int i = 0; i < sockets.Length; i++)
+            sockets[i].position = placement.GetNeuronPosition(neurons[i]);
+
         return sockets;
     }
     
@@ -76,7 +80,7 @@ public class VisualizeSelectedBrain : MonoBehaviour
     
         foreach (var neuron in neurons) 
         {
-            switch (neuron.neuronType)
+            switch (neuron.data.io)
             {
                 case NeuronType.In: inputNeurons.Add(neuron); break;
                 case NeuronType.Out: outputNeurons.Add(neuron); break;

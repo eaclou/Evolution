@@ -337,7 +337,11 @@ public class CritterModuleCoreGenome
         }
     }
     
-    void AddNeuron(string name) { masterList.Add(map.GetData(name)); }
+    void AddNeuron(string name) 
+    {
+        var neuron = map.GetData(name, masterList.Count); 
+        masterList.Add(neuron); 
+    }
 
     public void SetToMutatedCopyOfParentGenome(CritterModuleCoreGenome parentGenome, MutationSettingsInstance settings) {
         

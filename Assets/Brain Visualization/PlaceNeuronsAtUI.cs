@@ -17,8 +17,15 @@ public class PlaceNeuronsAtUI : MonoBehaviour
     {
         if (panel) halfPanelSize = panel.rect.width / 2f;
     }
-
+    
     public Vector3 GetNeuronPosition(Neuron neuron)
+    {
+        return neuron.io == NeuronType.Hidden ? 
+            GetHiddenNeuronPosition(neuron) : 
+            GetIONeuronPosition(neuron);
+    }
+
+    Vector3 GetIONeuronPosition(Neuron neuron)
     {
         var placement = GetPlacement(neuron);
         return placement != null ? 
@@ -52,7 +59,7 @@ public class PlaceNeuronsAtUI : MonoBehaviour
         
         // * WPP: where do 3 and -16 come from?  If settings, expose values in inspector; 
         // if mathematical constants, declare as constants, if based on something else, include calculation.
-        float radialDistance = (neuron.index % 3 - GetModuloOffset(neuron.neuronType)) * -16f;
+        float radialDistance = (neuron.index % 3 - GetModuloOffset(neuron.io)) * -16f;
         
         Vector2 clockHand = iconPosition.normalized;
         Vector3 newPos = iconPosition;
@@ -74,7 +81,7 @@ public class PlaceNeuronsAtUI : MonoBehaviour
     } 
     
     /// INCOMPLETE
-    public Vector3 GetHiddenNeuronPosition(Neuron neuron)
+    Vector3 GetHiddenNeuronPosition(Neuron neuron)
     {   
         // Get input location
         // Get output location

@@ -43,16 +43,8 @@ public class CritterModuleEnvironment : IBrainModule
     public void MapNeuron(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
-        neuron.currentValue = GetNeuralValue(data.id);
-        //neuron.neuronType = data.io;
+        neuron.currentValue = GetNeuralValue(neuron.index);
     }
-
-    /*public void MapNeuron(NID nid, Neuron neuron) 
-    {
-        if (moduleID != nid.moduleID) return;
-        neuron.neuronType = neuralMap.GetIO(nid.neuronID);    
-        neuron.currentValue = GetNeuralValue(nid.neuronID);
-    }*/
     
     float[] GetNeuralValue(int neuronID)
     {
@@ -84,7 +76,10 @@ public class CritterModuleEnvironment : IBrainModule
             //depthSouth[0] = agent.depthSouth;
             //depthWest[0] = agent.depthWest;
         }
+    }
+}
 
+#region Old code
         //int rayLayer = LayerMask.GetMask("EnvironmentCollision");
         //float raycastMaxLength = genome.maxRange;        
         //Debug.Log(LayerMask.GetMask("EnvironmentCollision"));
@@ -152,5 +147,4 @@ public class CritterModuleEnvironment : IBrainModule
             }
             distTopLeft[0] = (raycastMaxLength - distance) / raycastMaxLength;  
         }*/
-    }
-}
+#endregion

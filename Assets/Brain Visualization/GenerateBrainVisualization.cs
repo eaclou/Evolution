@@ -92,8 +92,8 @@ public class GenerateBrainVisualization : MonoBehaviour
             weight = axon.weight;
             fromID = axon.from.index;
             toID = axon.to.index;
-            Debug.Log($"Creating axon from {axon.from.neuronType} {axon.from.data.name} to " +
-                      $"{axon.to.neuronType} {axon.to.data.name}");
+            //Debug.Log($"Creating axon from {axon.from.neuronType} {axon.from.data.name} to " +
+            //          $"{axon.to.neuronType} {axon.to.data.name}");   // OK
         }
     }
     
@@ -248,7 +248,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         neuronSimDataCBuffer.GetData(nPos);
         string neuronText = neurons.Count + " Neurons\n";
         for (int i = 0; i < sockets.Length; i++) {
-            neuronText += i + "[" + neurons[i].neuronType + "] " + sockets[i].position + ", " + nPos[i] + ", " + neurons[i].name + "\n";
+            neuronText += i + "[" + neurons[i].io + "] " + sockets[i].position + ", " + nPos[i] + ", " + neurons[i].name + "\n";
         }        
         Debug.Log(neuronText);
     }
@@ -265,10 +265,10 @@ public class GenerateBrainVisualization : MonoBehaviour
     {
         var fromNeuron = neurons[fromID];
         var toNeuron = neurons[toID];
-        Debug.Log($"Connecting from {fromNeuron.neuronType} {fromNeuron.name} " +
-                  $"to {toNeuron.neuronType} {toNeuron.name}");
+        Debug.Log($"Connecting from {fromNeuron.io} {fromNeuron.name} " +
+                  $"to {toNeuron.io} {toNeuron.name}");
                   
-        if (fromNeuron.neuronType == NeuronType.Out)
+        if (fromNeuron.io == NeuronType.Out)
             Debug.LogError("Creating connection starting from an output neuron");
     }
     
@@ -276,7 +276,7 @@ public class GenerateBrainVisualization : MonoBehaviour
 
     void InitializeComputeBuffers(ref SocketInitData[] sockets, int inputNeuronCount, int outputNeuronCount) 
     {
-        if (argsCoreCBuffer != null) argsCoreCBuffer.Dispose();
+        argsCoreCBuffer?.Dispose();
         argsCoreCBuffer = new ComputeBuffer(1, argsCore.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
         //if (argsCablesCBuffer != null) argsCablesCBuffer.Dispose();
         //argsCablesCBuffer = new ComputeBuffer(1, argsCables.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
@@ -384,7 +384,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         NeuronInitData[] neuronInitDataArray = new NeuronInitData[neurons.Count]; //[numNeurons]; 
         
         for (int x = 0; x < neuronInitDataArray.Length; x++) {
-            NeuronInitData neuronData = new NeuronInitData((float)neurons[x].neuronType / 2.0f);
+            NeuronInitData neuronData = new NeuronInitData((float)neurons[x].io / 2.0f);
             neuronInitDataArray[x] = neuronData;
         }
         
@@ -407,7 +407,7 @@ public class GenerateBrainVisualization : MonoBehaviour
     // For now only one seed data
     void InitializeAxons()
     {
-        //Debug.Log($"Initializing {axons.Count} axons");
+        // Debug.Log($"Initializing {axons.Count} axons");
         axonInitDataCBuffer?.Release();
         axonInitDataCBuffer = new ComputeBuffer(axons.Count, sizeof(float) * 1 + sizeof(int) * 2);
         
@@ -416,35 +416,8 @@ public class GenerateBrainVisualization : MonoBehaviour
         for (int x = 0; x < axonInitDataArray.Length; x++) 
         {
             AxonInitData axonData = new AxonInitData(axons[x]); //*** EAC
-            
-            // WPP: simplified, removed repetition, stop search on finding matching ID
             axonData.fromID = GetNewConnectionId(axonData.fromID);
             axonData.toID = GetNewConnectionId(axonData.toID);
-            /*int fromOld = axonData.fromID;
-            int fromNew = 0;
-            for (int f = 0; f < neurons.Count; f++) 
-            {
-                if (fromOld == neurons[f].index) 
-                {
-                    fromNew = f;
-                    continue;
-                }
-            }
-            
-            int toOld = axonData.toID;
-            int toNew = 0;
-            for(int t = 0; t < neurons.Count; t++) 
-            {
-                if (toOld == neurons[t].index) 
-                {
-                    toNew = t;
-                    continue;
-                }
-            }
-            
-            axonData.fromID = fromNew;
-            axonData.toID = toNew;*/
-            
             axonInitDataArray[x] = axonData;
             //PrintConnection(axonData.fromID, axonData.toID);  // Result: OK
         }

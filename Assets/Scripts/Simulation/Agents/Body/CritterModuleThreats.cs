@@ -21,23 +21,23 @@ public class CritterModuleThreats : IBrainModule
     public float[] enemyThreatRating;
 
     public CritterModuleThreats() {
-        enemyPosX = new float[1]; // 14
-        enemyPosY = new float[1]; // 15
-        enemyVelX = new float[1]; // 16
-        enemyVelY = new float[1]; // 17
-        enemyDirX = new float[1]; // 18
-        enemyDirY = new float[1]; // 19
+        enemyPosX = new float[1];
+        enemyPosY = new float[1];
+        enemyVelX = new float[1];
+        enemyVelY = new float[1];
+        enemyDirX = new float[1];
+        enemyDirY = new float[1];
 
-        enemyRelSize = new float[1];  // 200
-        enemyHealth = new float[1];   // 201
-        enemyGrowthStage = new float[1]; // 202
-        enemyThreatRating = new float[1]; // 203
+        enemyRelSize = new float[1];
+        enemyHealth = new float[1];
+        enemyGrowthStage = new float[1];
+        enemyThreatRating = new float[1];
     }
 
     public void MapNeuron(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
-        neuron.currentValue = GetNeuralValue(data.id);
+        neuron.currentValue = GetNeuralValue(neuron.index);
     }
 
     float[] GetNeuralValue(int neuronID)

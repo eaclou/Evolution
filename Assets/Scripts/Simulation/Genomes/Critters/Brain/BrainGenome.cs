@@ -87,7 +87,7 @@ public class BrainGenome
     public void InitializeAxons() 
     {
         for (int i = 0; i < initialHiddenNeuronCount; i++) {
-            var neuron = new NeuronGenome(hiddenTemplate, i);
+            var neuron = new NeuronGenome(hiddenTemplate, inOutNeurons.Count + i);
             hiddenNeurons.Add(neuron);
         }
         
@@ -293,7 +293,7 @@ public class BrainGenome
             
         // Create new neuron
         //NeuronGenome newNeuronGenome = new NeuronGenome("HidNew", NeuronType.Hid, BrainModuleID.Undefined, hiddenNeurons.Count);
-        var newHiddenNeuron = new NeuronGenome(hiddenTemplate, hiddenNeurons.Count);
+        var newHiddenNeuron = new NeuronGenome(hiddenTemplate, inOutNeurons.Count + hiddenNeurons.Count);
         hiddenNeurons.Add(newHiddenNeuron);
         
         // create 2 new links

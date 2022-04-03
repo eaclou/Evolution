@@ -103,7 +103,7 @@ public class Brain
             // Save previous state
             neuron.previousValue = neuron.currentValue[0];
              
-            if (neuron.neuronType != NeuronType.In) {
+            if (neuron.io != NeuronType.In) {
                 neuron.currentValue[0] = TransferFunctions.Evaluate(TransferFunctions.TransferFunction.RationalSigmoid, neuron.inputTotal);
             }
             
@@ -130,7 +130,7 @@ public class Brain
         var result = new List<Neuron>();
 
         foreach (var neuron in neurons)
-            if (tech.ContainsNeuron(neuron.data))
+            if (tech.ContainsNeuron(neuron.data.template))
                 result.Add(neuron);
                 
         return result;

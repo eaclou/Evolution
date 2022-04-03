@@ -150,7 +150,7 @@ public class CritterModuleFood : IBrainModule
     public void MapNeuron(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
-        neuron.currentValue = GetNeuralValue(data.id);
+        neuron.currentValue = GetNeuralValue(neuron.index);
     }
 
     float[] GetNeuralValue(int neuronID)

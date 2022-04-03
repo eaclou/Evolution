@@ -102,7 +102,7 @@ public class EnvironmentFluidManager : Singleton<EnvironmentFluidManager>
     }
     
     public void RerollForcePoints() {
-        Debug.Log("Reroll force points");
+        //Debug.Log("Reroll force points");
         CreateForcePoints(0.025f, 64f, 256f);
     }
     

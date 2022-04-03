@@ -74,7 +74,7 @@ public class TestBrainVisualization : MonoBehaviour
         SocketInitData[] sockets = new SocketInitData[neuronCount];
         
         for (int i = 0; i < neuronCount; i++) {
-            var list = neurons[i].neuronType == NeuronType.In ? inputNeurons : outputNeurons;
+            var list = neurons[i].io == NeuronType.In ? inputNeurons : outputNeurons;
             list.Add(neurons[i]);
         }
         

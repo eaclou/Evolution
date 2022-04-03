@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 /// Static neuron data
 [CreateAssetMenu(menuName = "Pond Water/Brain/Meta Neuron", fileName = "Meta Neuron")]
@@ -8,13 +9,12 @@ public class MetaNeuron : ScriptableObject
     public NeuronType io;
     public BrainModuleID moduleID;
     public BrainIconID iconID;
-    [Tooltip("Auto-generates index, probably obsolete")]
-    public int id;
-    
-    public NeuronGenome GetNeuronGenome(int index = -1) { return new NeuronGenome(this, index); }
+
+    public NeuronGenome GetNeuronGenome(int index) { return new NeuronGenome(this, index); }
 }
 
 /// Differentiates neuron templates with the same static data (needed for hidden neurons).
+[Serializable]
 public class NeuronGenome
 {
     public BrainModuleID moduleID => data.moduleID;
@@ -24,13 +24,13 @@ public class NeuronGenome
     public int index;
 
     /// Create new NeuronGenome from static data
-    public NeuronGenome(MetaNeuron data, int index = -1)
+    public NeuronGenome(MetaNeuron data, int index)
     {
-        if (!data) 
-            Debug.LogError("Neuron genome created without data!");
+        if (!data) Debug.LogError("Neuron genome created without data!");
+        //Debug.Log($"{data.name} {index}");
             
         this.data = data;
-        this.index = index == -1 ? data.id : index;
+        this.index = index;
     }
     
     /// Copy existing NeuronGenome

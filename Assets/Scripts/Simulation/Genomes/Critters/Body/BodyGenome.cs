@@ -65,15 +65,18 @@ public class BodyGenome
     public void InitializeBrainGenome(List<NeuronGenome> masterList)
     {
         this.masterList = masterList;
-    
+        
+        int index = masterList.Count; 
         foreach (var tech in unlockedTech.values)
+        {
             foreach (var template in tech.unlocks)
-                masterList.Add(template.GetNeuronGenome());
+            {
+                masterList.Add(template.GetNeuronGenome(index));
+                index++;
+            }
+        }
                 
         AddNonConditionalNeurons();
-
-        // * Unable to remove (yet) as this depends on talent specializations
-        //coreGenome.AppendModuleNeuronsToMasterList(masterList);
     }
     
     void AddNonConditionalNeurons()
@@ -85,7 +88,12 @@ public class BodyGenome
         //AddNeuron("throttleY");
     }
     
-    void AddNeuron(string name) { masterList.Add(map.GetData(name)); }
+    void AddNeuron(string name) 
+    {
+        var neuron = map.GetData(name, masterList.Count); 
+        //Debug.Log($"{neuron.data.name} {neuron.index}");
+        masterList.Add(neuron);
+    }
 
     // Mutable by Player
     // Add body-sensor/effector mutations here and cleanup Brain Genome
