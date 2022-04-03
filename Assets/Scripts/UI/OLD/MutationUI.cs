@@ -1,10 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-// * WPP Refactor: cut down on repetition & conditionals, use consistent formatting, expose magic values (or use constants), 
-// replace if/else blocks with switch statements, use getters to shorten reference chains, removed unused logic & variables
-public class MutationUI : MonoBehaviour 
-{
+public class MutationUI : MonoBehaviour {
     UIManager uiManagerRef => UIManager.instance;
     
     public bool isUnlocked;
@@ -72,11 +69,11 @@ public class MutationUI : MonoBehaviour
 
     public void PointerEnter() {
         isPointerOver = true;
-        //Debug.Log("PointerEnter");
+        Debug.Log("PointerEnter");
     }
     public void PointerExits() {
         isPointerOver = false;
-        //Debug.Log("PointerExits");
+        Debug.Log("PointerExits");
     }
 	
     private void UpdateUI(TrophicLayersManager layerManager) {
@@ -101,8 +98,12 @@ public class MutationUI : MonoBehaviour
         imageMutationPanelThumbnailB.gameObject.SetActive(true);
         imageMutationPanelThumbnailC.gameObject.SetActive(true);
         imageMutationPanelThumbnailD.gameObject.SetActive(true);
-        
-        buttonToolbarMutateConfirm.gameObject.SetActive(selectedToolbarMutationID >= 0);
+
+        buttonToolbarMutateConfirm.gameObject.SetActive(false);
+        if(selectedToolbarMutationID >= 0) {
+            buttonToolbarMutateConfirm.gameObject.SetActive(true);
+            
+        }
 
         TrophicSlot slotRef = uiManagerRef.worldSpiritHubUI.selectedWorldSpiritSlot;
 
@@ -116,7 +117,7 @@ public class MutationUI : MonoBehaviour
         imageMutationPanelCurPortrait.gameObject.SetActive(true);
         imageMutationPanelNewPortrait.gameObject.SetActive(true);
 
-        if (slotRef.kingdomID == KingdomId.Decomposers) { 
+        if(slotRef.kingdomID == KingdomId.Decomposers) { 
             UpdateDecomposerUI();
         }
         else if (slotRef.id == KnowledgeMapId.Algae)
@@ -210,10 +211,11 @@ public class MutationUI : MonoBehaviour
         mutationThumbnailDecomposersMatD.SetInt("_PatternRow", vegetationManager.decomposerSlotGenomeMutations[3].patternRowID);
         mutationThumbnailDecomposersMatD.SetInt("_PatternColumn", vegetationManager.decomposerSlotGenomeMutations[3].patternColumnID);
         mutationThumbnailDecomposersMatD.SetFloat("_PatternThreshold", vegetationManager.decomposerSlotGenomeMutations[3].patternThreshold);
+
     }
     
-    private void UpdateAlgaeUI(TrophicLayersManager layerManager) 
-    {
+    private void UpdateAlgaeUI(TrophicLayersManager layerManager) {
+        
         textMutationParameters.text = "Metabolic Rate:\nEfficiency:";
         float deltaMetabolism = vegetationManager.algaeSlotGenomeMutations[selectedToolbarMutationID].metabolicRate -
                         vegetationManager.algaeSlotGenomeCurrent.metabolicRate;
@@ -267,6 +269,7 @@ public class MutationUI : MonoBehaviour
         mutationThumbnailDecomposersMatD.SetInt("_PatternRow", vegetationManager.algaeSlotGenomeMutations[3].patternRowID);
         mutationThumbnailDecomposersMatD.SetInt("_PatternColumn", vegetationManager.algaeSlotGenomeMutations[3].patternColumnID);
         mutationThumbnailDecomposersMatD.SetFloat("_PatternThreshold", vegetationManager.algaeSlotGenomeMutations[3].patternThreshold);
+
     }
     
     private string GetStringDelta(float delta) {
@@ -578,13 +581,13 @@ public class MutationUI : MonoBehaviour
         animatorMutationUI.SetBool("_IsSelectedC", false);
         animatorMutationUI.SetBool("_IsSelectedD", false);
 
-        if (selectedToolbarMutationID == 0) {
+        if(selectedToolbarMutationID == 0) {
             animatorMutationUI.SetBool("_IsSelectedA", true);
         }
-        else if (selectedToolbarMutationID == 1) {
+        else if(selectedToolbarMutationID == 1) {
             animatorMutationUI.SetBool("_IsSelectedB", true);
         }
-        else if (selectedToolbarMutationID == 2) {
+        else if(selectedToolbarMutationID == 2) {
             animatorMutationUI.SetBool("_IsSelectedC", true);
         }
         else {
