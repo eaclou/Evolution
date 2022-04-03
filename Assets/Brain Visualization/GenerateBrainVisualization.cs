@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+// WPP: trivial functionality, data stored in NeuronData.iconPosition -> consider removal
 public struct SocketInitData 
 {
     public Vector3 position;
@@ -397,10 +398,9 @@ public class GenerateBrainVisualization : MonoBehaviour
         neuronFeedDataCBuffer = new ComputeBuffer(numNeurons, sizeof(float) * 1);
         NeuronFeedData[] neuronValuesArray = new NeuronFeedData[numNeurons];
         
-        for(int i = 0; i < neuronValuesArray.Length; i++) {
-            neuronValuesArray[i].curValue = neurons[i].currentValue[0];
-        }
-        
+        for (int i = 0; i < neuronValuesArray.Length; i++)
+            neuronValuesArray[i].curValue = neurons[i].currentValue;
+
         neuronFeedDataCBuffer.SetData(neuronValuesArray);
     }
     
@@ -451,7 +451,7 @@ public class GenerateBrainVisualization : MonoBehaviour
 
         NeuronFeedData[] neuronValuesArray = new NeuronFeedData[neurons.Count];
         for (int i = 0; i < neuronValuesArray.Length; i++) {
-            neuronValuesArray[i].curValue = neurons[i].currentValue[0];
+            neuronValuesArray[i].curValue = neurons[i].currentValue;
         }
         neuronFeedDataCBuffer.SetData(neuronValuesArray);
 

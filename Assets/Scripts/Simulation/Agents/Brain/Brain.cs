@@ -72,7 +72,7 @@ public class Brain
     
     public void ResetBrainState() {
         foreach (var neuron in neurons) {
-            neuron.currentValue[0] = 0f;
+            neuron.currentValue = 0f;
             neuron.previousValue = 0f;
         }
     }
@@ -84,10 +84,8 @@ public class Brain
         // run through all links and save sum values in target neurons
         foreach (var axon in axons) 
         {
-            float curVal = 0f;
-            if (axon.from.currentValue != null) {
-                curVal = axon.from.currentValue[0];
-            }
+            float curVal = axon.from.currentValue;
+            
             // Find input neuron, multiply its value by the axon weight, and add that to output neuron total:
             //neurons[axon.to].inputTotal += axon.weight * neurons[axon.from].currentValue[0];
             axon.to.inputTotal += axon.weight * curVal;
@@ -96,15 +94,11 @@ public class Brain
         // Once all axons are calculated, process the neurons
         foreach (var neuron in neurons) 
         {
-            // Prevent null reference
-            if (neuron.currentValue == null) 
-                neuron.currentValue = new float[1]; 
-            
             // Save previous state
-            neuron.previousValue = neuron.currentValue[0];
+            neuron.previousValue = neuron.currentValue;
              
             if (neuron.io != NeuronType.In) {
-                neuron.currentValue[0] = TransferFunctions.Evaluate(TransferFunctions.TransferFunction.RationalSigmoid, neuron.inputTotal);
+                neuron.currentValue = TransferFunctions.Evaluate(TransferFunctions.TransferFunction.RationalSigmoid, neuron.inputTotal);
             }
             
             // Zero out inputSum
@@ -116,7 +110,7 @@ public class Brain
         Debug.Log("neuronCount: " + neurons.Count);
         string neuronText = "";
         for (int i = 0; i < neurons.Count; i++) {
-            neuronText += "Neuron " + i + ": " + neurons[i].currentValue.Length + "\n";
+            neuronText += "Neuron " + i + ": " + neurons[i].currentValues.Length + "\n";
         }
         string axonText = "";
         for (int j = 0; j < axons.Count; j++) {

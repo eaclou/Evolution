@@ -48,7 +48,7 @@ public class VisualizeSelectedBrain : MonoBehaviour
         SocketInitData[] sockets = new SocketInitData[neurons.Count];
         //Debug.Log($"sockets: {sockets.Length}, input: {inputNeurons.Count}, output: {outputNeurons.Count}, " +
         //          $"hidden: {hiddenNeurons.Count}, total: {inputNeurons.Count + outputNeurons.Count + hiddenNeurons.Count}");
-
+        
         // Place input and output neurons before hidden neurons
         // because hidden neurons are between connected input and output neurons.
         /*int offset = 0;
@@ -64,10 +64,10 @@ public class VisualizeSelectedBrain : MonoBehaviour
             sockets[i + offset].position = placement.GetHiddenNeuronPosition(hiddenNeurons[i]);
             //Debug.Log("HID " + sockets[i + offset].position);
         }*/
-        
         // WPP: delegated branching to placement to simplify interface
+        // + placement calculated during neuron creation
         for (int i = 0; i < sockets.Length; i++)
-            sockets[i].position = placement.GetNeuronPosition(neurons[i]);
+            sockets[i].position = neurons[i].data.iconPosition;
 
         return sockets;
     }

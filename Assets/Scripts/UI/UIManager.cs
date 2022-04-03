@@ -38,6 +38,7 @@ public class UIManager : Singleton<UIManager>
     public CreaturePaperDollUI creaturePaperDollUI;
     public CreatureLifeEventsLogUI creatureLifeEventsLogUI;
     public MinimapPanel minimapUI;
+    public PlaceNeuronsAtUI placeNeuronsAtUI;
         
     public GameOptionsManager gameOptionsManager;    
     

@@ -6,44 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="64a03a69-0c33-4641-98d6-062c7a4ddd72" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Communication/In Comm 0.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Communication/In Comm 0.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Communication/In Comm 1.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Communication/In Comm 1.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Communication/In Comm 2.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Communication/In Comm 2.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Communication/In Comm 3.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Communication/In Comm 3.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Communication/Out Comm 0.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Communication/Out Comm 0.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Communication/Out Comm 1.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Communication/Out Comm 1.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Communication/Out Comm 2.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Communication/Out Comm 2.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Communication/Out Comm 3.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Communication/Out Comm 3.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Bias.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Bias.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Mouth Trigger.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Core/Mouth Trigger.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Environment/Depth.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Environment/Depth.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Environment/X Velocity.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Environment/X Velocity.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Environment/Y Velocity.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Environment/Y Velocity.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Corpse Distance.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Corpse Distance.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Corpse X Direction.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Corpse X Direction.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Corpse Y Direction.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Corpse Y Direction.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Egg Distance.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Egg Distance.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Egg X Direction.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Egg X Direction.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Egg Y Direction.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Egg Y Direction.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Microbe Distance.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Microbe Distance.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Microbe Quality.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Microbe Quality.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Microbe Relative Size.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Microbe Relative Size.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Microbe X Direction.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Microbe X Direction.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Microbe X Position.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Microbe X Position.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Microbe X Velocity.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Microbe X Velocity.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Microbe Y Direction.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Microbe Y Direction.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Microbe Y Position.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Microbe Y Position.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Microbe Y Velocity.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Microbe Y Velocity.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Plant Distance.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Plant Distance.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Plant Quality.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Plant Quality.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Plant Relative Size.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Plant Relative Size.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Plant X Direction.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Plant X Direction.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Plant X Position.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Plant X Position.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Plant X Velocity.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Plant X Velocity.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Plant Y Direction.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Plant Y Direction.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Plant Y Position.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Plant Y Position.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Plant Y Velocity.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Data Containers/Neurons/Food/Plant Y Velocity.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Brain Visualization/VisualizeSelectedBrain.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Brain Visualization/VisualizeSelectedBrain.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/UIManager.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/UIManager.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCommunication.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCommunication.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCore.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCore.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleEnvironment.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleEnvironment.cs" afterDir="false" />
@@ -51,8 +17,10 @@
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleFriends.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleFriends.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleMovement.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleMovement.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleThreats.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleThreats.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/MetaNeuron.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/MetaNeuron.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/BodyGenome.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/BodyGenome.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/Brain.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/Brain.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/Neuron.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/Neuron.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/SelectionManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/SelectionManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -106,8 +74,6 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/AgentGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Rendering/TheRenderKing.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/LoadingPanelUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/SelectionManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePortraitPanel.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/LinkGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Tech Tree/InitialUnlockedTechInfo.cs" />
@@ -117,24 +83,26 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/BrainGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Fluid/EnvironmentFluidManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/TestBrainVisualization.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/Brain.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/Neuron.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/NeuralMap.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/CritterModuleCoreGenome.cs" />
-      <option value="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" />
-      <option value="$PROJECT_DIR$/Assets/Brain Visualization/VisualizeSelectedBrain.cs" />
       <option value="$PROJECT_DIR$/Assets/Brain Visualization/PlaceNeuronsAtUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleTarget.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleMovement.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleFriends.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleFood.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleEnvironment.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCommunication.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleThreats.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/BodyGenome.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCore.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/MetaNeuron.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/UIManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Brain Visualization/VisualizeSelectedBrain.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/Brain.cs" />
+      <option value="$PROJECT_DIR$/Assets/Brain Visualization/GenerateBrainVisualization.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCommunication.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleCore.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleEnvironment.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleFood.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleFriends.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleMovement.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleThreats.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/Neuron.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/SelectionManager.cs" />
     </changedPaths>
   </component>
   <component name="MarkdownSettingsMigration">

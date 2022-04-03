@@ -195,7 +195,7 @@ public class CritterModuleCore : IBrainModule
         // Example error checking on name, apply to other modules if needed
         var field = GetType().GetField(neuron.name);
         if (field == null) Debug.LogError($"Cannot find matching field for {neuron.name} in CritterModuleCore");
-        else neuron.currentValue = (float[])field.GetValue(this);
+        else neuron.currentValues = (float[])field.GetValue(this);
     }
 
     // WPP: replaced with reflection

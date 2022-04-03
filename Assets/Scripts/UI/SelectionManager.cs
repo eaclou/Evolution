@@ -97,7 +97,7 @@ public class SelectionManager : Singleton<SelectionManager>
         {
             //textStatsGraphLegend.text = "<color=#ff0000ff>Species A -----</color>\n\n<color=#00ff00ff>Species B -----</color>\n\n<color=#0000ffff>Species C -----</color>\n\n<color=#ffffffff>Species D -----</color>";
             Color textColor = new Color(0.67f, 0.67f, 0.67f);
-            float neuronVal = 100f * neurons[i].currentValue[0];
+            float neuronVal = 100f * neurons[i].currentValue;
             string plusMinus = "";
             if (neuronVal < 0f) {
                 textColor = new Color(0.9f, 0.8f, 0.6f);

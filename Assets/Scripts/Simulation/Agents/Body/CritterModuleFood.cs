@@ -150,7 +150,7 @@ public class CritterModuleFood : IBrainModule
     public void GetNeuralValue(MetaNeuron data, Neuron neuron)
     {
         if (moduleID != data.moduleID) return;
-        neuron.currentValue = (float[])GetType().GetField(neuron.name).GetValue(this);
+        neuron.currentValues = (float[])GetType().GetField(neuron.name).GetValue(this);
     }
 
     // WPP: using reflection

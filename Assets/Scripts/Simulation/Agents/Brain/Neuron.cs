@@ -4,6 +4,9 @@ using UnityEngine;
 [Serializable]
 public class Neuron 
 {
+    UIManager ui => UIManager.instance;
+    PlaceNeuronsAtUI placement => ui.placeNeuronsAtUI;
+
     NeuronGenome _genome;
     public NeuronGenome genome
     {
@@ -11,7 +14,7 @@ public class Neuron
         set
         {
             _genome = value;
-            data = new NeuronData(this);
+            data = new NeuronData(this, placement.GetNeuronPosition(this));
         }
     }
     
@@ -24,7 +27,23 @@ public class Neuron
     
     [Header("Dynamic Data")]
     public float inputTotal;
-    public float[] currentValue = new float[1];
+    
+    // WPP: Added to eliminate need for external null reference checking and simplify interface
+    public float[] currentValues = new float[1];
+    public float currentValue
+    {
+        get
+        {
+            if (currentValues == null) currentValues = new float[1];
+            return currentValues[0];
+        }
+        set
+        {
+            if (currentValues == null) currentValues = new float[1];
+            currentValues[0] = value;
+        }
+    }
+    
     public float previousValue;  // * Not used
     
     public Neuron(NeuronGenome genome) { this.genome = genome; }
@@ -32,7 +51,7 @@ public class Neuron
 
     public void Zero()
     {
-        currentValue = new float[1];
+        currentValue = 0f;
         previousValue = 0f;
     }
     
@@ -48,22 +67,15 @@ public struct NeuronData
     public BrainModuleID moduleID;  // * Not used
     public string name;
     public int index;
-    // * TBD: add icon position
+    public Vector3 iconPosition;
     
-    public NeuronData(Neuron neuron)
+    public NeuronData(Neuron neuron, Vector3 iconPosition)
     {
         template = neuron.genome.data;
         name = template.name;
         index = neuron.genome.index;
         io = template.io;
-        moduleID = template.moduleID;        
-    }    
+        moduleID = template.moduleID;
+        this.iconPosition = iconPosition;
+    }
 }
-
-// * WPP: need to modify TestBrainVisualization to condense into above constructor
-/*public Neuron(int index, int inputCount)
-{
-    neuronType = index < inputCount ? NeuronType.In : NeuronType.Out;
-    currentValue = new float[1];
-    currentValue[0] = Random.Range(-2f, 2f);
-}*/
