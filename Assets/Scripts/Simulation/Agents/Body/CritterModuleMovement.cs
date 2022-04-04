@@ -23,6 +23,8 @@ public class CritterModuleMovement : IBrainModule
     public float accelBonus = 1f;
     public float speedBonus = 1f;
     public float turnBonus = 1f;
+    
+    public Vector2 throttle => new Vector2(throttleX[0], throttleY[0]);
 	
     public CritterModuleMovement(AgentGenome agentGenome) 
     {

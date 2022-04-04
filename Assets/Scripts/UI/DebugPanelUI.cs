@@ -148,7 +148,7 @@ public class DebugPanelUI : MonoBehaviour
             debugTxtAgent += "\nCurVel: " + agent.curVel.ToString("F3") + ", CurAccel: " + agent.curAccel.ToString("F3") + ", AvgVel: " + agent.avgVel.ToString("F3") + "\n";
 
             debugTxtAgent += "\nWater Depth: " + agent.waterDepth.ToString("F3") + ", Vel: " + (agent.avgFluidVel * 10f).ToString("F3") + "\n";
-            debugTxtAgent += "Throttle: [ " + movementModule.throttleX[0].ToString("F3") + ", " + movementModule.throttleY[0].ToString("F3") + " ]\n";
+            debugTxtAgent += "Throttle: [ " + movementModule.throttle.ToString("F3") + " ]\n";
             debugTxtAgent += "FeedEffector: " + coreModule.mouthFeedEffector[0].ToString("F2") + "\n";
             debugTxtAgent += "AttackEffector: " + coreModule.mouthAttackEffector[0].ToString("F2") + "\n";
             debugTxtAgent += "DefendEffector: " + coreModule.defendEffector[0].ToString("F2") + "\n";
