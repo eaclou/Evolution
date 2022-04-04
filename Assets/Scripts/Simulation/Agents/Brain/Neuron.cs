@@ -14,7 +14,8 @@ public class Neuron
         set
         {
             _genome = value;
-            data = new NeuronData(this, placement.GetNeuronPosition(this));
+            data = new NeuronData(this);
+            data.iconPosition = placement.GetNeuronPosition(this);
         }
     }
     
@@ -69,13 +70,13 @@ public struct NeuronData
     public int index;
     public Vector3 iconPosition;
     
-    public NeuronData(Neuron neuron, Vector3 iconPosition)
+    public NeuronData(Neuron neuron)
     {
         template = neuron.genome.data;
         name = template.name;
         index = neuron.genome.index;
         io = template.io;
         moduleID = template.moduleID;
-        this.iconPosition = iconPosition;
+        iconPosition = Vector3.zero;
     }
 }

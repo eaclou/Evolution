@@ -78,23 +78,19 @@ public class PlaceNeuronsAtUI : MonoBehaviour
             case NeuronType.Out: return 0.2f;
             default: return 0.1f;
         }
-    } 
+    }
     
-    /// INCOMPLETE
+    const float hiddenRadius = 0.25f;
+    const float hiddenVariance = 0.01f;
+
     Vector3 GetHiddenNeuronPosition(Neuron neuron)
-    {   
-        // Get input location
-        // Get output location
-        // Calculate & return intermediate location
-        Vector3 localPos = Vector3.zero; // Random.insideUnitSphere * 0.001f;
-        float frac = (float)neuron.index / 5f;
-        float radius = 0.25f;
-        float angleRadians = Mathf.PI * 2f * frac;
-        float x = Mathf.Cos(angleRadians) * radius;
-        float y = Mathf.Sin(angleRadians) * radius;
-        localPos.x = x;
-        localPos.y = y + 0.1f;
-        return localPos + Random.insideUnitSphere * 0.01f;
+    {
+        Vector3 localPos = Vector3.zero;
+        float pointOnCircle = (float)neuron.index / 5f;
+        float angleRadians = Mathf.PI * 2 * pointOnCircle;
+        localPos.x = Mathf.Cos(angleRadians) * hiddenRadius;
+        localPos.y = Mathf.Sin(angleRadians) * hiddenRadius + 0.1f;
+        return localPos + Random.insideUnitSphere * hiddenVariance;
     }
 
     [Serializable]

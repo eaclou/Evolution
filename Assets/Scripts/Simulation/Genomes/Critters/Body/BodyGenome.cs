@@ -66,16 +66,10 @@ public class BodyGenome
     {
         this.masterList = masterList;
         
-        int index = masterList.Count; 
         foreach (var tech in unlockedTech.values)
-        {
             foreach (var template in tech.unlocks)
-            {
-                masterList.Add(template.GetNeuronGenome(index));
-                index++;
-            }
-        }
-                
+                masterList.Add(template.GetNeuronGenome(masterList.Count));
+
         AddNonConditionalNeurons();
     }
     

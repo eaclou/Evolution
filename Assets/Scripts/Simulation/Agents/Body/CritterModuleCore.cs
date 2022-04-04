@@ -60,6 +60,8 @@ public class CritterModuleCore : IBrainModule
     public bool objectInRangeOfMouth { set => mouthTriggerOutputs[0] = value ? 1f : 0f; }
     
     
+    // Need to use arrays instead of floats here so that they are reference type
+    // and changes that occur in neuron will also be reflected here 
     //public float[] temperature;
     //public float[] pressure;
     public float[] isContact;
