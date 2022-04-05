@@ -39,7 +39,7 @@ public class CreaturePanelUI : MonoBehaviour
     [SerializeField] PanelModeData[] panelModes;
     [SerializeField] StringSO startingPanelMode;
 
-    private bool isPanelOpen = true;
+    private bool isPanelOpen = false;
 
     public Sprite spriteBrainButton;
 

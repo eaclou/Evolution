@@ -7,15 +7,15 @@ public class GenomeViewerUI : MonoBehaviour {
 
     public BrainGenomeImage brainGenomeImage;
     public GameObject panelGenomeSensors;    
-    public GameObject panelPerformanceBehavior;
-    public GameObject panelEaten;
+    //public GameObject panelPerformanceBehavior;
+    //public GameObject panelEaten;
     
         
     public void UpdateUI() {
         
         panelGenomeSensors.SetActive(true);
-        panelPerformanceBehavior.SetActive(true);
-        panelEaten.SetActive(true);
+        //panelPerformanceBehavior.SetActive(true);
+        //panelEaten.SetActive(true);
     }    
     
     [Serializable]
@@ -26,7 +26,7 @@ public class GenomeViewerUI : MonoBehaviour {
         
         public void SetActive(bool value)
         {
-            panel.SetActive(value);
+            panel.SetActive(value);            
             image.color = value ? Color.white : Color.gray;
         }
     }

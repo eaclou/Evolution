@@ -7,7 +7,7 @@ public class SpecializationPanel : MonoBehaviour
     //CritterModuleCoreGenome coreGenome => selectionManager.currentSelection.candidate.candidateGenome.bodyGenome.coreGenome;
     [SerializeField] TechElementIconUI[] techElementIcons;
     [SerializeField] TechTree techTree;
-    [SerializeField] Color inactiveColor = new Color(0.1f, 0.1f, 0.1f);
+    [SerializeField] Color inactiveColor = new Color(0.1f, 0.1f, 0.1f, 0f);
     [SerializeField] float activeScale = 1f;
     [SerializeField] float inactiveScale = 0.5f;
     //[SerializeField] StatUI attack;

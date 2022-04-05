@@ -27,13 +27,16 @@ public class BrainGenomeImage : MonoBehaviour
         for (int x = 0; x < width; x++) 
         {                              
             Color testColor;
+            Vector3 huePri = SelectionManager.instance.currentSelection.candidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+            Vector3 hueSec = SelectionManager.instance.currentSelection.candidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
+            //image.color = value ?  : new Color(hueSec.x, hueSec.y, hueSec.z);
 
             if (brain.linkCount > x) 
             {
                 float weightVal = brain.links[x].weight;
-                testColor = new Color(weightVal * 0.5f + 0.5f, weightVal * 0.5f + 0.5f, weightVal * 0.5f + 0.5f);
-                
-                if(weightVal < -0.25f) 
+                testColor = new Color(Mathf.Lerp(huePri.x, hueSec.x, weightVal * 0.5f + 0.5f), Mathf.Lerp(huePri.y, hueSec.y, weightVal * 0.5f + 0.5f), Mathf.Lerp(huePri.z, hueSec.z, weightVal * 0.5f + 0.5f));
+                //testColor = 
+                /*if(weightVal < -0.25f) 
                 {
                     testColor = Color.Lerp(testColor, Color.black, 0.15f);
                 }
@@ -44,7 +47,7 @@ public class BrainGenomeImage : MonoBehaviour
                 else 
                 {
                     testColor = Color.Lerp(testColor, Color.gray, 0.15f);
-                }
+                }*/
             }
             else 
             {

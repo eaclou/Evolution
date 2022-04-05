@@ -53,13 +53,15 @@ public class PlaceNeuronsAtUI : MonoBehaviour
         return new Vector3(anchor.x, anchor.y, 0f);
     }
 
+    const float offsetDistance = -12f;
+
     Vector3 GetRadialOffsetPosition(Neuron neuron, UIPlacement icon)
     {
         Vector3 iconPosition = icon.location.localPosition;
         
         // * WPP: where do 3 and -16 come from?  If settings, expose values in inspector; 
         // if mathematical constants, declare as constants, if based on something else, include calculation.
-        float radialDistance = (neuron.index % 3 - GetModuloOffset(neuron.io)) * -16f;
+        float radialDistance = (neuron.index % 2) * offsetDistance;
         
         Vector2 clockHand = iconPosition.normalized;
         Vector3 newPos = iconPosition;
@@ -69,27 +71,17 @@ public class PlaceNeuronsAtUI : MonoBehaviour
         return newPos/halfPanelSize + Random.insideUnitSphere * randomOffset;
     }
     
-    // * WPP: magic numbers
-    float GetModuloOffset(NeuronType io)
-    {
-        switch (io)
-        {
-            case NeuronType.In: return 0.4f;
-            case NeuronType.Out: return 0.2f;
-            default: return 0.1f;
-        }
-    }
     
-    const float hiddenRadius = 0.25f;
-    const float hiddenVariance = 0.01f;
+    const float hiddenRadius = 0.33f;
+    const float hiddenVariance = 0.001f;
 
     Vector3 GetHiddenNeuronPosition(Neuron neuron)
     {
         Vector3 localPos = Vector3.zero;
-        float pointOnCircle = (float)neuron.index / 5f;
+        float pointOnCircle = (float)neuron.index / 7f;
         float angleRadians = Mathf.PI * 2 * pointOnCircle;
         localPos.x = Mathf.Cos(angleRadians) * hiddenRadius;
-        localPos.y = Mathf.Sin(angleRadians) * hiddenRadius + 0.1f;
+        localPos.y = Mathf.Sin(angleRadians) * hiddenRadius;
         return localPos + Random.insideUnitSphere * hiddenVariance;
     }
 

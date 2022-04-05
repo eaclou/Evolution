@@ -271,6 +271,9 @@ public class GenerateBrainVisualization : MonoBehaviour
                   
         if (fromNeuron.io == NeuronType.Out)
             Debug.LogError("Creating connection starting from an output neuron");
+
+        if (toNeuron.io == NeuronType.In)
+            Debug.LogError("Creating connection going to an input neuron");
     }
     
     #endregion
@@ -416,10 +419,12 @@ public class GenerateBrainVisualization : MonoBehaviour
         for (int x = 0; x < axonInitDataArray.Length; x++) 
         {
             AxonInitData axonData = new AxonInitData(axons[x]); //*** EAC
-            axonData.fromID = GetNewConnectionId(axonData.fromID);
-            axonData.toID = GetNewConnectionId(axonData.toID);
+            //var fromNeuron = axons[x].from;
+            //var toNeuron = neurons[toID];
+            axonData.fromID = axons[x].from.index; // GetNewConnectionId(axonData.fromID);
+            axonData.toID = axons[x].to.index; //GetNewConnectionId(axonData.toID);
             axonInitDataArray[x] = axonData;
-            //PrintConnection(axonData.fromID, axonData.toID);  // Result: OK
+            PrintConnection(axonData.fromID, axonData.toID);  // Result: OK
         }
         
         axonInitDataCBuffer.SetData(axonInitDataArray);
