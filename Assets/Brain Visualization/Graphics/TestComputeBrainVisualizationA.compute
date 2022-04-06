@@ -25,8 +25,8 @@ AppendStructuredBuffer<Triangle> appendTrianglesCablesCBuffer;
 
 static const float3 inNeuronsBaseColor = float3(0.4, 0.85, 1);
 static const float3 outNeuronsBaseColor = float3(1, 0.9, 0.4);
-static const float3 positiveValuesBaseColor = float3(0.5, 1, 0.5);
-static const float3 negativeValuesBaseColor = float3(1, 0.5, 0.5);
+static const float3 positiveValuesBaseColor = float3(0.35, 0.85, 1);
+static const float3 negativeValuesBaseColor = float3(1, 0.75, 0.25);
 
 static const float3 cableBaseColor = float3(0.8, 0.1, 0.1);
 
@@ -325,10 +325,10 @@ void CSGenerateNeuronTriangles (uint3 id : SV_DispatchThreadID)
 	float3 topLeft = origin + normalTopLeft * GetNeuronRadius(neuronID, normalTopLeft);
 	float3 topRight = origin + normalTopRight * GetNeuronRadius(neuronID, normalTopRight);
 
-	float3 colorIn = inNeuronsBaseColor * 1;
-	float3 colorOut = outNeuronsBaseColor * 1;
-	float inOut = neuronInitDataCBuffer[neuronID].type;
-	float3 faceColor = lerp(colorIn, colorOut, neuronFeedDataCBuffer[neuronID].curValue * 0.5f + 0.5f);      //inOut) * abs(neuronFeedDataCBuffer[neuronID].curValue) * 1.0;
+	float3 colorNeg = negativeValuesBaseColor * 1;
+	float3 colorPos = positiveValuesBaseColor * 1;
+	//float inOut = neuronInitDataCBuffer[neuronID].type;
+	float3 faceColor = lerp(colorNeg, colorPos, neuronFeedDataCBuffer[neuronID].curValue * 0.5f + 0.5f);      //inOut) * abs(neuronFeedDataCBuffer[neuronID].curValue) * 1.0;
 		
 	Triangle triTop;
 	triTop.vertA = bottomLeft;
