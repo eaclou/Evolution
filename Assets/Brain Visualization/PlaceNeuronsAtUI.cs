@@ -53,15 +53,16 @@ public class PlaceNeuronsAtUI : MonoBehaviour
         return new Vector3(anchor.x, anchor.y, 0f);
     }
 
-    const float offsetDistance = -12f;
+    const float offsetDistance = -16f;
 
     Vector3 GetRadialOffsetPosition(Neuron neuron, UIPlacement icon)
     {
         Vector3 iconPosition = icon.location.localPosition;
-        
+
         // * WPP: where do 3 and -16 come from?  If settings, expose values in inspector; 
         // if mathematical constants, declare as constants, if based on something else, include calculation.
-        float radialDistance = (neuron.index % 2) * offsetDistance;
+        float minOffsetDist = 1.5f;
+        float radialDistance = (minOffsetDist + (neuron.index % 2)) * offsetDistance;
         
         Vector2 clockHand = iconPosition.normalized;
         Vector3 newPos = iconPosition;
@@ -72,7 +73,7 @@ public class PlaceNeuronsAtUI : MonoBehaviour
     }
     
     
-    const float hiddenRadius = 0.33f;
+    const float hiddenRadius = 0.36f;
     const float hiddenVariance = 0.001f;
 
     Vector3 GetHiddenNeuronPosition(Neuron neuron)

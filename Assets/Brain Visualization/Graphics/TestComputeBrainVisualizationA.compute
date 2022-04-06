@@ -328,8 +328,10 @@ void CSGenerateNeuronTriangles (uint3 id : SV_DispatchThreadID)
 	float3 colorNeg = negativeValuesBaseColor * 1;
 	float3 colorPos = positiveValuesBaseColor * 1;
 	//float inOut = neuronInitDataCBuffer[neuronID].type;
-	float3 faceColor = lerp(colorNeg, colorPos, neuronFeedDataCBuffer[neuronID].curValue * 0.5f + 0.5f);      //inOut) * abs(neuronFeedDataCBuffer[neuronID].curValue) * 1.0;
-		
+	float darkenFactor = saturate((abs(neuronFeedDataCBuffer[neuronID].curValue) - 0.25) * 4.0);
+	float3 faceColor = lerp(colorNeg, colorPos, neuronFeedDataCBuffer[neuronID].curValue * 0.5 + 0.5);      //inOut) * abs(neuronFeedDataCBuffer[neuronID].curValue) * 1.0;
+	faceColor *= darkenFactor;	
+
 	Triangle triTop;
 	triTop.vertA = bottomLeft;
 	triTop.normA = normalBottomLeft;
@@ -509,13 +511,22 @@ void CSGenerateAxonTriangles (uint3 id : SV_DispatchThreadID)
 	float3 bottomRight = normalBottomRight * GetAxonRadius(id.x, t0, frac(angle1)) + sample0.origin;
 	float3 topLeft = normalTopLeft * GetAxonRadius(id.x, t1, frac(angle0)) + sample1.origin;
 	float3 topRight = normalTopRight * GetAxonRadius(id.x, t1, frac(angle1)) + sample1.origin;
+
 	
-	float3 colorIn = inNeuronsBaseColor * 1;
-	float3 colorOut = outNeuronsBaseColor * 1;
-	float inOut0 = neuronInitDataCBuffer[axonInitDataCBuffer[id.x].fromID].type;
-	float inOut1 = neuronInitDataCBuffer[axonInitDataCBuffer[id.x].toID].type;
-	float3 color0 = lerp(colorIn, colorOut, inOut0);
-	float3 color1 = lerp(colorIn, colorOut, inOut1);
+	float3 colorNeg = negativeValuesBaseColor * 1;
+	float3 colorPos = positiveValuesBaseColor * 1;
+	
+	
+
+
+	
+	
+	float inOut0 = neuronFeedDataCBuffer[axonInitDataCBuffer[id.x].fromID].curValue * 0.5 + 0.5;
+	float darkenFactor0 = saturate((abs(neuronFeedDataCBuffer[axonInitDataCBuffer[id.x].fromID].curValue) - 0.25) * 4.0);
+	float inOut1 = neuronFeedDataCBuffer[axonInitDataCBuffer[id.x].toID].curValue * 0.5 + 0.5;
+	float darkenFactor1 = saturate((abs(neuronFeedDataCBuffer[axonInitDataCBuffer[id.x].toID].curValue) - 0.25) * 4.0);
+	float3 color0 = lerp(colorNeg, colorPos, inOut0) * darkenFactor0;
+	float3 color1 = lerp(colorNeg, colorPos, inOut1) * darkenFactor1;
 	float3 colBottom = lerp(color0, color1, idy * tInc) * abs(axonInitDataCBuffer[id.x].weight) * 0.25;
 	float3 colTop = lerp(color0, color1, (idy + 1.0) * tInc) * abs(axonInitDataCBuffer[id.x].weight) * 0.25;
 		
@@ -532,9 +543,6 @@ void CSGenerateAxonTriangles (uint3 id : SV_DispatchThreadID)
 	float nearestNeuronCurValue1 = lerp(neuronFeedDataCBuffer[axonInitDataCBuffer[id.x].fromID].curValue, neuronFeedDataCBuffer[axonInitDataCBuffer[id.x].toID].curValue, round((idy + 1.0) * tInc));
 	float3 nearestNeuronColor1 = lerp(color0, color1, round((idy + 1.0) * tInc)) * abs(nearestNeuronCurValue1) * 3.0;
 
-	//colBottom = lerp(colBottom * pulseMultiplier0 * 1.0, nearestNeuronColor0, 0);
-	//colTop = lerp(colTop * pulseMultiplier1 * 1.0, nearestNeuronColor1, 0);
-	//float3 faceColor = lerp(colorIn, colorOut, inOut) * abs(neuronFeedDataCBuffer[neuronID].curValue) * 5.0;
 	colBottom = lerp(colBottom, nearestNeuronColor0, distToSideScreenEdge0 * distToSideScreenEdge0 * distToSideScreenEdge0 - 0.12) * saturate(abs(axonInitDataCBuffer[id.x].weight));
 	colTop = lerp(colTop, nearestNeuronColor1, distToSideScreenEdge1 * distToSideScreenEdge1 * distToSideScreenEdge1 - 0.12) * saturate(abs(axonInitDataCBuffer[id.x].weight));
 	

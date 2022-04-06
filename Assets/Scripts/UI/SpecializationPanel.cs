@@ -25,6 +25,7 @@ public class SpecializationPanel : MonoBehaviour
             bool hasTech = selectionManager.SelectedAgentHasTech(tech.techElement);
             tech.color = hasTech ? techTree.CategoryColor(tech.techElement) : inactiveColor;
             tech.scale = Vector3.one * (hasTech ? activeScale : inactiveScale);
+            tech.gameObject.SetActive(hasTech);
         }
     }
 }
