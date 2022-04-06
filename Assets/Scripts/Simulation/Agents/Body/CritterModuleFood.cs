@@ -64,21 +64,19 @@ public class CritterModuleFood : IBrainModule
     public void Initialize(BodyGenomeData genome) {
         this.genome = genome;
         
-        // * WPP: Vulnerable to index out of range errors (such as in UI)
-        // consider initializing in variable declarations and leaving values at zero
-        if(genome.useNutrients) {
+        if (genome.useNutrients) {
             nutrientDensity = new float[1];
             nutrientGradX = new float[1];
             nutrientGradY = new float[1];
         }
-        if(genome.useFoodPosition) {
+        if (genome.useFoodPosition) {
             foodPlantPosX = new float[1];
             foodPlantPosY = new float[1];
             
             foodAnimalPosX = new float[1];
             foodAnimalPosY = new float[1];
         }
-        if(genome.useFoodVelocity) {
+        if (genome.useFoodVelocity) {
             foodPlantVelX = new float[1];
             foodPlantVelY = new float[1];
             foodAnimalVelX = new float[1];
@@ -147,47 +145,9 @@ public class CritterModuleFood : IBrainModule
         }*/
     }
     
-    public void GetNeuralValue(MetaNeuron data, Neuron neuron)
-    {
-        if (moduleID != data.moduleID) return;
+    public void GetNeuralValue(MetaNeuron data, Neuron neuron) {
         neuron.currentValues = (float[])GetType().GetField(neuron.name).GetValue(this);
     }
-
-    // WPP: using reflection
-    /*float[] GetNeuralValue(string neuronID)
-    {
-        switch(neuronID)
-        {
-            case "nutrientDensity": return nutrientDensity;
-            case "nutrientGradX": return nutrientGradX;
-            case "nutrientGradY": return nutrientGradY;
-            case "foodPosX": return foodPlantPosX;
-            case "foodPosY": return foodPlantPosY;
-            case "foodDistance": return foodPlantDistance;
-            case "foodVelX": return foodPlantVelX;
-            case "foodVelY": return foodPlantVelY;
-            case "foodDirX": return foodPlantDirX;
-            case "foodDirY": return foodPlantDirY;
-            case "foodQuality": return foodPlantQuality;
-            case "foodRelSize": return foodPlantRelSize;
-            case "distanceToEgg": return foodEggDistance;
-            case "eggDirX": return foodEggDirX;
-            case "eggDirY": return foodEggDirY;
-            case "distanceToCorpse": return foodCorpseDistance;
-            case "corpseDirX": return foodCorpseDirX;
-            case "corpseDirY": return foodCorpseDirY;
-            case "animalPosX": return foodAnimalPosX;
-            case "animalPosY": return foodAnimalPosY;
-            case "animalDistance": return foodAnimalDistance;
-            case "animalVelX": return foodAnimalVelX;
-            case "animalVelY": return foodAnimalVelY;
-            case "animalDirX": return foodAnimalDirX;
-            case "animalDirY": return foodAnimalDirY;
-            case "animalQuality": return foodAnimalQuality;
-            case "animalRelSize": return foodAnimalRelSize;
-            default: return null;
-        }
-    }*/
 
     public void Tick(Agent agent) {
         /*if(genome.useNutrients) {

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+// * WPP: redundant, serves same purpose as Axon
+
 [Serializable]
 public class LinkGenome 
 {
@@ -8,16 +10,14 @@ public class LinkGenome
     public NeuronGenome to;
     
     public float weight;    // multiplier on signal
-    public bool enabled;
     
     public float normalizedWeight => weight * 0.5f + 0.5f;
     
-    public LinkGenome(NeuronGenome from, NeuronGenome to, float weight, bool enabled)
+    public LinkGenome(NeuronGenome from, NeuronGenome to, float weight)
     {
         this.from = from;
         this.to = to;
         this.weight = weight;
-        this.enabled = enabled;
     }
     
     public bool IsInList(List<NeuronGenome> list)

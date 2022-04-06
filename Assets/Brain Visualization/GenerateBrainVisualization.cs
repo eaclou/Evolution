@@ -254,7 +254,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         Debug.Log(neuronText);
     }
 
-    public void PrintAxonPositions(List<Axon> axons) {
+    /*public void PrintAxonPositions(List<Axon> axons) {
         string axonText = axons.Count + " Axons\n";
         for (int i = 0; i < axons.Count; i++) {
             axonText += i + "[" + axons[i].from.name + axons[i].from.index + "->" + axons[i].to.name + axons[i].to.index + ", " + axons[i].weight + "\n";
@@ -274,7 +274,7 @@ public class GenerateBrainVisualization : MonoBehaviour
 
         if (toNeuron.io == NeuronType.In)
             Debug.LogError("Creating connection going to an input neuron");
-    }
+    }*/
     
     #endregion
 
@@ -424,7 +424,7 @@ public class GenerateBrainVisualization : MonoBehaviour
             axonData.fromID = axons[x].from.index; // GetNewConnectionId(axonData.fromID);
             axonData.toID = axons[x].to.index; //GetNewConnectionId(axonData.toID);
             axonInitDataArray[x] = axonData;
-            PrintConnection(axonData.fromID, axonData.toID);  // Result: OK
+            //PrintConnection(axonData.fromID, axonData.toID);
         }
         
         axonInitDataCBuffer.SetData(axonInitDataArray);
@@ -432,14 +432,15 @@ public class GenerateBrainVisualization : MonoBehaviour
         axonSimDataCBuffer = new ComputeBuffer(axons.Count, sizeof(float) * 13);
     }
     
-    int GetNewConnectionId(int oldID)
+    // WPP: not used
+    /*int GetNewConnectionId(int oldID)
     {
         for (int i = 0; i < neurons.Count; i++)
             if (oldID == neurons[i].index)
                 return i;
 
         return 0;
-    } 
+    } */
     
     void UpdateNeuronBuffer(string kernelName, int x, int y)
     {

@@ -2,10 +2,6 @@
 
 public class CritterModuleThreats : IBrainModule
 {
-    Lookup lookup => Lookup.instance;
-    NeuralMap neuralMap => lookup.neuralMap;
-
-    public int parentID;
     public BrainModuleID moduleID => BrainModuleID.ThreatSensors;
 
     public float[] enemyPosX;
@@ -34,31 +30,10 @@ public class CritterModuleThreats : IBrainModule
         enemyThreatRating = new float[1];
     }
 
-    public void GetNeuralValue(MetaNeuron data, Neuron neuron)
-    {
-        if (moduleID != data.moduleID) return;
+    public void GetNeuralValue(MetaNeuron data, Neuron neuron) {
         neuron.currentValues = (float[])GetType().GetField(neuron.name).GetValue(this);
     }
-
-    // WPP: replaced with reflection
-    /*float[] GetNeuralValue(string neuronID)
-    {
-        switch (neuronID)
-        {
-            case "enemyPosX": return enemyPosX;
-            case "enemyPosY": return enemyPosY;
-            case "enemyVelX": return enemyVelX;
-            case "enemyVelY": return enemyVelY;
-            case "enemyDirX": return enemyDirX;
-            case "enemyDirY": return enemyDirY;
-            case "enemyRelSize": return enemyRelSize;
-            case "enemyHealth": return enemyHealth;
-            case "enemyGrowthStage": return enemyGrowthStage;
-            case "enemyThreatRating": return enemyThreatRating;
-            default: return null;
-        }
-    }*/
-
+    
     public void Tick(Agent agent) 
     {
         Vector2 enemyPos = Vector2.zero;

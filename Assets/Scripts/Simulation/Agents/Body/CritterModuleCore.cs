@@ -4,10 +4,6 @@
 public class CritterModuleCore : IBrainModule
 {
     SettingsManager settings => SettingsManager.instance;
-    Lookup lookup => Lookup.instance;
-    NeuralMap neuralMap => lookup.neuralMap;
-
-    public int parentID;
     public BrainModuleID moduleID => genome.moduleID;
 
     // **** LOOK INTO::: close in its own class or store in bigger array rather than all individual length-one arrays? 
@@ -45,7 +41,6 @@ public class CritterModuleCore : IBrainModule
     public Agent nearestEnemyAgent;
     //public Vector2 nearestEggSackPos;
 
-    // WPP: added abstraction for more intuitive interface
     public float[] _mouthTriggerOutputs;
     public float[] mouthTriggerOutputs
     {
@@ -192,38 +187,14 @@ public class CritterModuleCore : IBrainModule
     
     public void GetNeuralValue(MetaNeuron data, Neuron neuron)
     {
-        if (moduleID != data.moduleID) return;
-        
         // Example error checking on name, apply to other modules if needed
         var field = GetType().GetField(neuron.name);
         if (field == null) Debug.LogError($"Cannot find matching field for {neuron.name} in CritterModuleCore");
         else neuron.currentValues = (float[])field.GetValue(this);
     }
 
-    // WPP: replaced with reflection
-    /*float[] GetNeuralValue(string neuronID)
+    public void Tick() 
     {
-        switch(neuronID)
-        {
-            case "Bias": return bias;
-            case "isMouthTrigger": return mouthTriggerOutputs;
-            case "isContact": return isContact;
-            case "contactForceX": return contactForceX;
-            case "contactForceY": return contactForceY;
-            case "hitPoints": return hitPoints;
-            case "stamina": return stamina;
-            case "energyStored": return energyStored;
-            case "foodStored": return foodStored;
-            case "mouthFeedEffector": return mouthFeedEffector;
-            case "mouthAttackEffector": return mouthAttackEffector;
-            case "defendEffector": return defendEffector;
-            case "dashEffector": return dashEffector;
-            case "healEffector": return healEffector;
-            default: return null;
-        }
-    }*/
-
-    public void Tick() {
         //temperature[0] = 0f;
         //pressure[0] = 0f;
         isContact[0] = 0f;
@@ -235,13 +206,9 @@ public class CritterModuleCore : IBrainModule
         foodStored[0] = stomachContentsPercent; // / stomachCapacity;
     }
 
-    public void DirectDamage(float damage) {
-        health -= damage;
-    }
+    public void DirectDamage(float damage) { health -= damage; }
 
-    public void SetAllHealth(float value) {
-        health = value;
-    }
+    public void SetAllHealth(float value) { health = value; }
 }
 
 #region old code

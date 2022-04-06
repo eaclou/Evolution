@@ -40,27 +40,9 @@ public class CritterModuleMovement : IBrainModule
         speedBonus = Mathf.Lerp(0.7f, 1.4f, 1f - invAspectRatio);
     }
 
-    public void GetNeuralValue(MetaNeuron data, Neuron neuron)
-    {
-        if (moduleID != data.moduleID) return;
+    public void GetNeuralValue(MetaNeuron data, Neuron neuron) {
         neuron.currentValues = (float[])GetType().GetField(neuron.name).GetValue(this);
-        //GetNeuralValue(neuron.name);
     }
-
-    /*float[] GetNeuralValue(string neuronID)
-    {
-        switch(neuronID)
-        {
-            case "ownVelX": return ownVelX;
-            case "ownVelY": return ownVelY;
-            case "facingDirX": return facingDirX;
-            case "facingDirY": return facingDirY;
-            case "throttleX": return throttleX;
-            case "throttleY": return throttleY;
-            case "dash": return dash;
-            default: return null;
-        }
-    }*/
 
     public void Tick(Agent agent) 
     {

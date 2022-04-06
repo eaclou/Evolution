@@ -41,31 +41,9 @@ public class CritterModuleEnvironment : IBrainModule
         //velBottomRightY = new float[1];
     }
 
-    public void GetNeuralValue(MetaNeuron data, Neuron neuron)
-    {
-        if (moduleID != data.moduleID) return;
+    public void GetNeuralValue(MetaNeuron data, Neuron neuron) {
         neuron.currentValues = (float[])GetType().GetField(neuron.name).GetValue(this);
     }
-    
-    // WPP: replaced with reflection
-    /*float[] GetNeuralValue(string neuronID)
-    {
-        switch (neuronID)
-        {
-            case "depth": return waterDepth;
-            case "velX": return waterVelX;
-            case "velY": return waterVelY;
-            case "depthGradX": return depthGradX;
-            case "depthGradY": return depthGradY;
-            //case 6: return depthSouth;
-            //case 7: return depthWest;
-            //case 8: return velTopRightX;
-            //case 9: return velTopLeftY;
-            //case 10: return velBottomLeftX;
-            //case 11: return velBottomRightY;
-            default: return null;
-        }
-    }*/
 
     public void Tick(Agent agent) {
         if (genomeData.useWaterStats) {

@@ -65,7 +65,6 @@ public struct NeuronData
 {
     public MetaNeuron template;
     public NeuronType io; 
-    public BrainModuleID moduleID;  // * Not used
     public string name;
     public int index;
     public Vector3 iconPosition;
@@ -76,7 +75,6 @@ public struct NeuronData
         name = template.name;
         index = neuron.genome.index;
         io = template.io;
-        moduleID = template.moduleID;
         iconPosition = Vector3.zero;
     }
 }

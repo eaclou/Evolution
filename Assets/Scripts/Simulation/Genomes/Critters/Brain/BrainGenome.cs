@@ -117,7 +117,7 @@ public class BrainGenome
         var connectNeurons = RandomStatics.CoinToss(connectionChance);
         if (!connectNeurons) return;
         var randomWeight = Gaussian.GetRandomGaussian() * weightMultiplier;
-        var linkGenome = new LinkGenome(from, to, randomWeight, true);
+        var linkGenome = new LinkGenome(from, to, randomWeight);
         links.Add(linkGenome);        
     }
 
@@ -184,7 +184,7 @@ public class BrainGenome
         
         foreach (var element in original)
         {
-            LinkGenome newLinkGenome = new LinkGenome(element.from, element.to, element.weight, true);
+            LinkGenome newLinkGenome = new LinkGenome(element.from, element.to, element.weight);
             
             // Remove fully??? *****
             if (RandomStatics.CoinToss(settings.brainRemoveLinkChance))
@@ -263,7 +263,7 @@ public class BrainGenome
             if (LinkExists(from, to)) continue;
 
             float randomWeight = Gaussian.GetRandomGaussian() * settings.brainWeightMutationStepSize;
-            LinkGenome linkGenome = new LinkGenome(from, to, randomWeight, true);                    
+            LinkGenome linkGenome = new LinkGenome(from, to, randomWeight);                    
             links.Add(linkGenome);
 
             //Debug.Log("New Link! from: [" + fromNID.moduleID.ToString() + ", " + fromNID.neuronID.ToString() + "], to: [" + toNID.moduleID.ToString() + ", " + toNID.neuronID.ToString() + "]");
@@ -297,11 +297,10 @@ public class BrainGenome
         hiddenNeurons.Add(newHiddenNeuron);
         
         // create 2 new links
-        LinkGenome linkGenome1 = new LinkGenome(links[randLinkID].from, newHiddenNeuron, 1f, true);
-        LinkGenome linkGenome2 = new LinkGenome(newHiddenNeuron, links[randLinkID].to, links[randLinkID].weight, true);
+        LinkGenome linkGenome1 = new LinkGenome(links[randLinkID].from, newHiddenNeuron, 1f);
+        LinkGenome linkGenome2 = new LinkGenome(newHiddenNeuron, links[randLinkID].to, links[randLinkID].weight);
 
         // delete old link
-        links[randLinkID].enabled = false; // *** not needed? ****
         links.RemoveAt(randLinkID);
             
         // add new links

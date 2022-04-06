@@ -20,26 +20,9 @@ public class CritterModuleFriends : IBrainModule
         friendDirY = new float[1];
     }
 
-    public void GetNeuralValue(MetaNeuron data, Neuron neuron)
-    {
-        if (moduleID != data.moduleID) return;
+    public void GetNeuralValue(MetaNeuron data, Neuron neuron) {
         neuron.currentValues = (float[])GetType().GetField(neuron.name).GetValue(this);
     }
-
-    // WPP: using reflection
-    /*float[] GetNeuralValue(string neuronID)
-    {
-        switch(neuronID)
-        {
-            case "friendPosX": return friendPosX;
-            case "friendPosY": return friendPosY;
-            case "friendVelX": return friendVelX;
-            case "friendVelY": return friendVelY;
-            case "friendDirX": return friendDirX;
-            case "friendDirY": return friendDirY;
-            default: return null;
-        }
-    }*/
 
     public void Tick(Agent agent) {
         Vector2 friendPos = Vector2.zero;

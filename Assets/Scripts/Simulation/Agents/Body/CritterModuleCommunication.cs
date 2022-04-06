@@ -30,28 +30,9 @@ public class CritterModuleCommunication : IBrainModule
         outComm3 = new float[1]; 
     }
     
-    public void GetNeuralValue(MetaNeuron data, Neuron neuron)
-    {
-        if (moduleID != data.moduleID) return;
+    public void GetNeuralValue(MetaNeuron data, Neuron neuron) {
         neuron.currentValues = (float[])GetType().GetField(neuron.name).GetValue(this);
     }
-
-    // WPP: replaced with reflection
-    /*float[] GetNeuralValue(string neuronID)
-    {
-        switch (neuronID)
-        {
-            case "InComm0": return inComm0;
-            case "InComm1": return inComm1;
-            case "InComm2": return inComm2;
-            case "InComm3": return inComm3;
-            case "OutComm0": return outComm0;
-            case "OutComm1": return outComm1;
-            case "OutComm2": return outComm2;
-            case "OutComm3": return outComm3;
-            default: return null;
-        }
-    }*/
 
     public void Tick(Agent agent) 
     {
