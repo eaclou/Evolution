@@ -480,10 +480,10 @@ public class HistoryPanelUI : MonoBehaviour
     public void OpenClose() {
         isPanelOpen = !isPanelOpen;
         if(isPanelOpen) {
-            buttonOpenClose.GetComponentInChildren<Text>().text = "<";
+            buttonOpenClose.GetComponentInChildren<Text>().text = ">";
         }
         else {
-            buttonOpenClose.GetComponentInChildren<Text>().text = ">";
+            buttonOpenClose.GetComponentInChildren<Text>().text = "<";
         }
         historyPanelAnimator.SetBool("_IsPanelOpen", isPanelOpen);
     }

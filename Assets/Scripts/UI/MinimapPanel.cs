@@ -22,21 +22,31 @@ public class MinimapPanel : MonoBehaviour
     [SerializeField]
     public Button buttonToggleFollow;
 
+    [SerializeField]
+    Animator minimapPanelAnimator;
+
     private TrophicSlot selectedTrophicSlot => trophicLayers.selectedSlot;
     
     public void Tick() {
-        if (!isOpen) {            
-            return;
+        if(Screen.height - Input.mousePosition.y < 64 && Screen.width - Input.mousePosition.x < 64) {            
+            MouseEnterOpenCloseButtonArea();            
+        }
+        else {
+            MouseExitOpenCloseButtonArea();
         }
 
         uiKnowledgeMapViewerMat.SetTexture("_AltitudeTex", theRenderKing.baronVonTerrain.terrainHeightDataRT);
         uiKnowledgeMapViewerMat.SetTexture("_ResourceGridTex", simulationManager.vegetationManager.resourceGridRT1);
         uiKnowledgeMapViewerMat.SetFloat("_WaterLevel", SimulationManager._GlobalWaterLevel);
         
-        //var state = GetStateID(selectedTrophicSlot);
-        //SetKnowledgeMapViewer(state);
         SetKnowledgeMapViewer(selectedTrophicSlot.data);
 
+        imageCameraViewArea.gameObject.SetActive(isOpen);
+
+        if (!isOpen) {            
+            return;
+        }
+        
         float unitConversion = 360f / 256f;
         imageCameraViewArea.transform.localPosition = new Vector3(cameraManager.curCameraFocusPivotPos.x * unitConversion, cameraManager.curCameraFocusPivotPos.y * unitConversion, 0f);
         float camAltitude = -cameraManager.cameraRef.transform.position.z;
@@ -99,12 +109,26 @@ public class MinimapPanel : MonoBehaviour
         uiKnowledgeMapViewerMat.SetFloat("_Gamma", data.gamma);         
     }
     
-    public void ClickOpenClosePanel()
-    {
+    public void OpenClose() {
         isOpen = !isOpen;
-        groupMinimap.SetActive(isOpen);
-        buttonOpenClose.GetComponentInChildren<Text>().text = isOpen ? ">" : "<";
+        if(isOpen) {
+            buttonOpenClose.GetComponentInChildren<Text>().text = ">";
+        }
+        else {
+            buttonOpenClose.GetComponentInChildren<Text>().text = "<";
+        }
+        minimapPanelAnimator.SetBool("PanelOpen", isOpen);
     }
+    public void MouseEnterOpenCloseButtonArea() {
+        
+        Animator OpenCloseButtonAnimator = buttonOpenClose.GetComponent<Animator>();
+        OpenCloseButtonAnimator.SetBool("ON", true);
+    }
+    public void MouseExitOpenCloseButtonArea() {
+        Animator OpenCloseButtonAnimator = buttonOpenClose.GetComponent<Animator>();
+        OpenCloseButtonAnimator.SetBool("ON", false);
+    }  
+    
     
     public void SelectTrophicSlot(TrophicLayerSO data) { trophicLayers.SetSlot(data); }
 }

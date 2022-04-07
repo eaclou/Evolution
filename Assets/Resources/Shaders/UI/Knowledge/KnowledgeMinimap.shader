@@ -98,7 +98,7 @@
 				finalColor.a *= terrainHeightTex.a;
 				
 
-				//return col;
+				//return float4(0.5, 1, 0, 1);
 				return finalColor;
 				
 				//return col;
