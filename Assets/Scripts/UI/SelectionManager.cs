@@ -77,6 +77,13 @@ public class SelectionManager : Singleton<SelectionManager>
         CandidateAgentData cand = pool.foundingCandidate;
         if(!pool.isExtinct && pool.candidateGenomesList.Count > 0) {
             cand = pool.candidateGenomesList[0];
+            foreach(var candidate in pool.candidateGenomesList) {
+                if(candidate.causeOfDeath == "Alive!") {
+                    cand = candidate;
+                    break;
+                }
+            }
+            
         }
         SetSelected(cand);
         Debug.Log("Selected! " + speciesID + ",  " + cand.candidateID);
