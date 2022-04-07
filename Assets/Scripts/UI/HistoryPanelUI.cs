@@ -93,6 +93,13 @@ public class HistoryPanelUI : MonoBehaviour
     
     public bool isGraphMode;
 
+    private bool isPanelOpen = false;
+
+    [SerializeField]
+    Animator historyPanelAnimator;
+    [SerializeField]
+    Button buttonOpenClose;
+
     // How to sync rendered geo with UI buttons???
 
     /*void Start() {
@@ -469,6 +476,26 @@ public class HistoryPanelUI : MonoBehaviour
             curPanelMode = 0;
         }
     }
+
+    public void OpenClose() {
+        isPanelOpen = !isPanelOpen;
+        if(isPanelOpen) {
+            buttonOpenClose.GetComponentInChildren<Text>().text = "<";
+        }
+        else {
+            buttonOpenClose.GetComponentInChildren<Text>().text = ">";
+        }
+        historyPanelAnimator.SetBool("_IsPanelOpen", isPanelOpen);
+    }
+    public void MouseEnterOpenCloseButtonArea() {
+        
+        Animator OpenCloseButtonAnimator = buttonOpenClose.GetComponent<Animator>();
+        OpenCloseButtonAnimator.SetBool("ON", true);
+    }
+    public void MouseExitOpenCloseButtonArea() {
+        Animator OpenCloseButtonAnimator = buttonOpenClose.GetComponent<Animator>();
+        OpenCloseButtonAnimator.SetBool("ON", false);
+    }    
     
     public void ClickedSelectedCreatureEvents() {
         curPanelMode = HistoryPanelMode.CreatureTimeline;
@@ -476,6 +503,13 @@ public class HistoryPanelUI : MonoBehaviour
     
     public void Tick() 
     {
+        if(Screen.height - Input.mousePosition.y < 64 && Input.mousePosition.x < 64) {            
+            MouseEnterOpenCloseButtonArea();            
+        }
+        else {
+            MouseExitOpenCloseButtonArea();
+        }
+
         textPanelStateDebug.text = "MODE: " + selectionManager.currentSelection.historySelectedSpeciesID + selectionManager.currentSelection.candidate.speciesID;
         buttonToggleExtinct.gameObject.SetActive(false);
         float targetStartTimeStep = 0f;
