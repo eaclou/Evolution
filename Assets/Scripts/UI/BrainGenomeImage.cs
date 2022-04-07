@@ -21,7 +21,7 @@ public class BrainGenomeImage : MonoBehaviour
     // * WPP: expose values in editor
     public void SetTexture(BrainGenome brain) 
     {
-        int width = Mathf.Min(WIDTH, brain.linkCount);
+        int width = Mathf.Min(WIDTH, brain.axonCount);
         texture.Resize(width, 1);
 
         for (int x = 0; x < width; x++) 
@@ -31,9 +31,9 @@ public class BrainGenomeImage : MonoBehaviour
             Vector3 hueSec = SelectionManager.instance.currentSelection.candidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
             //image.color = value ?  : new Color(hueSec.x, hueSec.y, hueSec.z);
 
-            if (brain.linkCount > x) 
+            if (brain.axonCount > x) 
             {
-                float weightVal = brain.links[x].weight;
+                float weightVal = brain.axons.all[x].weight;
                 testColor = new Color(Mathf.Lerp(huePri.x, hueSec.x, weightVal * 0.5f + 0.5f), Mathf.Lerp(huePri.y, hueSec.y, weightVal * 0.5f + 0.5f), Mathf.Lerp(huePri.z, hueSec.z, weightVal * 0.5f + 0.5f));
                 //testColor = 
                 /*if(weightVal < -0.25f) 

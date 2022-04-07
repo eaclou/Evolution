@@ -44,7 +44,7 @@ public class AgentGenome
         bodyGenome.GenerateInitialRandomBodyGenome();        
     }
 
-    public void PrintBrainGenome() {
+    /*public void PrintBrainGenome() {
         string neuronText = "";
         neuronText += (brainGenome.inOutNeurons.Count + brainGenome.hiddenNeurons.Count) + " Neurons (" + brainGenome.hiddenNeurons.Count + ")\n";
         foreach (var neuronGenome in brainGenome.inOutNeurons) {
@@ -61,5 +61,5 @@ public class AgentGenome
                         linkGenome.to.moduleID + "," + linkGenome.to.index + ") " + linkGenome.weight + "\n";
         }
         Debug.Log(linkText);
-    }
+    }*/
 }

@@ -7,11 +7,7 @@ public class PlaceNeuronsAtUI : MonoBehaviour
     [SerializeField] float randomOffset = 0.001f;
     [SerializeField] RectTransform panel;
     [SerializeField] UIPlacement[] uiPlacements;
-    
-    // WPP: replaced arbitrary constant with calculated value
-    // in OnValidate for efficiency;
-    [ReadOnly] [SerializeField] 
-    float halfPanelSize;
+    [ReadOnly] [SerializeField] float halfPanelSize;
     
     void OnValidate()
     {
@@ -30,27 +26,18 @@ public class PlaceNeuronsAtUI : MonoBehaviour
         var placement = GetPlacement(neuron);
         return placement != null ? 
             GetRadialOffsetPosition(neuron, placement) : 
-            //GetPlacementPosition(placement) : 
             Vector3.zero + Random.insideUnitSphere * randomOffset;     
     }
     
     UIPlacement GetPlacement(Neuron neuron)
     {
-        var data = neuron.genome.data;
+        var data = neuron.template;
 
         foreach (var placement in uiPlacements)
             if (placement.id == data.iconID)
                 return placement;
         
         return null;
-    }
-    
-    /// Simple calculation for debugging
-    Vector3 GetPlacementPosition(UIPlacement placement)
-    {
-        // ERROR: moves neuron after one frame
-        var anchor = placement.location.anchoredPosition;
-        return new Vector3(anchor.x, anchor.y, 0f);
     }
 
     const float offsetDistance = -16f;
@@ -59,8 +46,6 @@ public class PlaceNeuronsAtUI : MonoBehaviour
     {
         Vector3 iconPosition = icon.location.localPosition;
 
-        // * WPP: where do 3 and -16 come from?  If settings, expose values in inspector; 
-        // if mathematical constants, declare as constants, if based on something else, include calculation.
         float minOffsetDist = 1.5f;
         float radialDistance = (minOffsetDist + (neuron.index % 2)) * offsetDistance;
         

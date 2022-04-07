@@ -24,6 +24,6 @@ public class GenomeOverviewPanel : MonoBehaviour
         
         textGeneration.text = "Gen: " + genome.generationCount;
         textBodySize.text = "Size: " + (100f * core.creatureBaseLength).ToString("F0") + ", Aspect 1:" + (1f / core.creatureAspectRatio).ToString("F0");
-        textBrainSize.text = "Brain Size: " + brain.inOutNeurons.Count + "--" + brain.links.Count;
+        textBrainSize.text = "Brain Size: " + brain.neurons.inOutCount + "--" + brain.axonCount;
     }
 }

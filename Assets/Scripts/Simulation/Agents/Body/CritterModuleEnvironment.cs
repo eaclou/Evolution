@@ -1,8 +1,6 @@
 ﻿
 public class CritterModuleEnvironment : IBrainModule
 {
-    public BrainModuleID moduleID => BrainModuleID.EnvironmentSensors;
-    
     BodyGenomeData genomeData;
     
     public float[] waterDepth;
@@ -41,7 +39,7 @@ public class CritterModuleEnvironment : IBrainModule
         //velBottomRightY = new float[1];
     }
 
-    public void GetNeuralValue(MetaNeuron data, Neuron neuron) {
+    public void SetNeuralValue(Neuron neuron) {
         neuron.currentValues = (float[])GetType().GetField(neuron.name).GetValue(this);
     }
 

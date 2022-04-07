@@ -58,39 +58,37 @@ public class BodyGenome
         appearanceGenome.InitializeRandom();
         coreGenome.InitializeRandom();
     }
-    
-    List<NeuronGenome> masterList = new List<NeuronGenome>();
-    
+
     /// Creates neurons based on state of "use" variables
-    public void InitializeBrainGenome(List<NeuronGenome> masterList)
+    public List<Neuron> GetUnlockedNeurons(int priorCount)
     {
-        this.masterList = masterList;
+        var result = new List<Neuron>();
         
         foreach (var tech in unlockedTech.values)
             foreach (var template in tech.unlocks)
-                masterList.Add(template.GetNeuronGenome(masterList.Count));
+                result.Add(template.GetNeuron(priorCount + result.Count));
 
-        AddNonConditionalNeurons();
-    }
-    
-    void AddNonConditionalNeurons()
-    {
-        AddNeuron("bias");
-        AddNeuron("_mouthTriggerOutputs");        
+        result.Add(map.GetData("bias", priorCount + result.Count)); 
+        result.Add(map.GetData("_mouthTriggerOutputs", priorCount + result.Count));
+         
+        return result;
+
+        //AddNeuron("bias");
+        //AddNeuron("_mouthTriggerOutputs");        
         //AddNeuron("mouthFeedEffector");  // This only works with Collider2Ds, won't detect Plants or Microbes
         //AddNeuron("throttleX");
         //AddNeuron("throttleY");
     }
     
-    void AddNeuron(string name) 
+    /*void AddNeuron(string name) 
     {
         var neuron = map.GetData(name, masterList.Count); 
         //Debug.Log($"{neuron.data.name} {neuron.index}");
         masterList.Add(neuron);
-    }
+    }*/
 
-    // Mutable by Player
-    // Add body-sensor/effector mutations here and cleanup Brain Genome
+    /// Mutable by Player
+    /// Add body-sensor/effector mutations here and cleanup Brain Genome
     void SetToMutatedCopyOfParentGenome(BodyGenome parent, MutationSettingsInstance settings) 
     {
         appearanceGenome.SetToMutatedCopyOfParentGenome(parent.appearanceGenome, settings);

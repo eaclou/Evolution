@@ -348,14 +348,14 @@ public class SpeciesGenomePool
         }
     }
     
-    public LinkGenome GetLeaderboardLinkGenome(int index, int linkedListIndex)
+    public Axon GetLeaderboardLinkGenome(int index, int linkedListIndex)
     {
         AgentGenome genome = GetLeaderboardGenome(index);
 
-        if (genome.brainGenome.linkCount > linkedListIndex)
+        if (genome.brainGenome.axonCount > linkedListIndex)
             return null;
             
-        return genome.brainGenome.links[linkedListIndex];
+        return genome.brainGenome.axons.all[linkedListIndex];
     }
     
     public AgentGenome GetLeaderboardGenome(int index)

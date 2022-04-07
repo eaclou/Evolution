@@ -5,8 +5,6 @@ using UnityEngine;
 [System.Serializable]
 public class CritterModuleAppearanceGenome 
 {
-    public BrainModuleID moduleID => BrainModuleID.Appearance;
-	
     // BODY:
     //public Vector2 sizeAndAspectRatio;
 

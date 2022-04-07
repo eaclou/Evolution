@@ -179,7 +179,7 @@ public class Agent : MonoBehaviour {
     public Agent predatorAgentRef;  // * Not used
     public Agent preyAgentRef;      // * Not used
 
-    public EggSack parentEggSackRef;  // instead of using own fixed embry development duration - look up parentEggSack and use its counter?
+    public EggSack parentEggSackRef;  // instead of using own fixed embryo development duration - look up parentEggSack and use its counter?
     public bool isAttachedToParentEggSack = false;
 
     public EggSack childEggSackRef;
@@ -210,7 +210,6 @@ public class Agent : MonoBehaviour {
     {
         cooldown.duration = duration; 
         UseAbility(cooldown);
-        
     }
     
     public bool isDead => curLifeStage == AgentLifeStage.Dead;
@@ -289,15 +288,7 @@ public class Agent : MonoBehaviour {
 
         audioManager.PlayCritterBite(ownPos);
     }
-    
-    public void MapNeuronToModule(MetaNeuron data, Neuron neuron)
-    {
-        if (data.moduleID == BrainModuleID.Undefined)
-            neuron.Zero();
-        else
-            GetModule(data.moduleID)?.GetNeuralValue(data, neuron);
-    }
-    
+
     IBrainModule GetModule(BrainModuleID id)
     {
         switch (id)
@@ -318,7 +309,18 @@ public class Agent : MonoBehaviour {
     }
     
     public void TickBrain() {
-        brain.BrainMasterFunction();
+        foreach (var neuron in brain.genome.neurons.inOut)
+            SetNeuronValue(neuron);
+    
+        brain.TickAxons();
+    }
+    
+    public void SetNeuronValue(Neuron neuron)
+    {
+        if (neuron.template.moduleID == BrainModuleID.Undefined)
+            neuron.currentValue = 0f;
+        else
+            GetModule(neuron.template.moduleID)?.SetNeuralValue(neuron);
     }
     
     // Updates internal state of body - i.e health, energy etc. -- updates input Neuron values!!!
@@ -688,7 +690,7 @@ public class Agent : MonoBehaviour {
     private void TickEgg() {        
         lifeStageTransitionTimeStepCounter++;
 
-        if(isBeingSwallowed) {
+        if (isBeingSwallowed) {
             //Debug.Log("TickEgg() isBeingSwallowed! " + index.ToString() + " --> " + predatorAgentRef.index.ToString());
         }
 
@@ -698,7 +700,7 @@ public class Agent : MonoBehaviour {
         int frameNum = lifeStageTransitionTimeStepCounter % growthScalingSkipFrames;
         bool resizeCollider = false;
         
-        if(frameNum == 1) {
+        if (frameNum == 1) {
             resizeCollider = true;
             // *** WPP: magic number -> what does 250 represent?
             bodyRigidbody.AddForce(250f * bodyRigidbody.mass * Time.deltaTime * Random.insideUnitCircle, ForceMode2D.Impulse);
@@ -900,11 +902,12 @@ public class Agent : MonoBehaviour {
     public void TickActions() {
         //AgentActionState currentState = AgentActionState.Default;
         
-        float horizontalMovementInput = movementModule.throttleX[0]; // Mathf.Lerp(horAI, horHuman, humanControlLerp);
-        float verticalMovementInput = movementModule.throttleY[0]; // Mathf.Lerp(verAI, verHuman, humanControlLerp);
+        // WPP: calculated with getter in movement module
+        //float horizontalMovementInput = movementModule.throttleX[0]; // Mathf.Lerp(horAI, horHuman, humanControlLerp);
+        //float verticalMovementInput = movementModule.throttleY[0]; // Mathf.Lerp(verAI, verHuman, humanControlLerp);
         
         // Facing Direction:
-        throttle = new Vector2(horizontalMovementInput, verticalMovementInput);        
+        throttle = movementModule.throttle; //new Vector2(horizontalMovementInput, verticalMovementInput);        
         smoothedThrottle = Vector2.Lerp(smoothedThrottle, throttle, smoothedThrottleLerp);
         Vector2 throttleForwardDir = throttle.normalized;
 
@@ -1156,7 +1159,7 @@ public class Agent : MonoBehaviour {
         //float turnRatePenalty = Mathf.Lerp(0.25f, 1f, 1f - sizeValue);
 
         // Head turn:
-        float torqueForce = Mathf.Lerp(headTurn, headTurnSign, 0.05f) * forcePenalty * turnRate * this.bodyRigidbody.mass * fatigueMultiplier * bitingPenalty * Time.deltaTime;
+        float torqueForce = Mathf.Lerp(headTurn, headTurnSign, 0.05f) * forcePenalty * turnRate * bodyRigidbody.mass * fatigueMultiplier * bitingPenalty * Time.deltaTime;
         torqueForce = Mathf.Min(torqueForce, 50000.55f);
         bodyRigidbody.AddTorque(torqueForce, ForceMode2D.Impulse); 
     }

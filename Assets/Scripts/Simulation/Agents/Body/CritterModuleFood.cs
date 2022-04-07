@@ -7,9 +7,7 @@ public class CritterModuleFood : IBrainModule
     SimulationManager simulation => SimulationManager.instance;
     VegetationManager vegetation => simulation.vegetationManager;
     ZooplanktonManager microbes => simulation.zooplanktonManager;
-
-    public BrainModuleID moduleID => BrainModuleID.FoodSensors;
-
+    
     public int nearestFoodParticleIndex = -1;  // debugging ** TEMP
     public Vector2 nearestFoodParticlePos;
     public float nearestFoodParticleAmount;
@@ -145,7 +143,7 @@ public class CritterModuleFood : IBrainModule
         }*/
     }
     
-    public void GetNeuralValue(MetaNeuron data, Neuron neuron) {
+    public void SetNeuralValue(Neuron neuron) {
         neuron.currentValues = (float[])GetType().GetField(neuron.name).GetValue(this);
     }
 
@@ -188,22 +186,22 @@ public class CritterModuleFood : IBrainModule
         Vector2 animalParticleDir = critterToAnimalParticle.normalized;
         float nearestAnimalParticleDistance = Mathf.Clamp01((sensorRange - critterToAnimalParticle.magnitude) / sensorRange); // inverted dist(proximity) 0-1
         
-        if(genome.useFoodStats) {
+        if (genome.useFoodStats) {
             foodPlantQuality[0] = 1f; // *** temp until particles can decay naturally
             foodPlantRelSize[0] = nearestFoodParticleAmount;
 
             foodAnimalQuality[0] = 1f; // *** temp until particles can decay naturally
             foodAnimalRelSize[0] = nearestAnimalParticleAmount;
         }
-        if(genome.useFoodPosition) {
+        if (genome.useFoodPosition) {
             foodPlantPosX[0] = Mathf.Clamp(critterToFoodParticle.x / sensorRange, -1f, 1f);
             foodPlantPosY[0] = Mathf.Clamp(critterToFoodParticle.y / sensorRange, -1f, 1f);
 
             foodAnimalPosX[0] = Mathf.Clamp(critterToAnimalParticle.x / sensorRange, -1f, 1f);
             foodAnimalPosY[0] = Mathf.Clamp(critterToAnimalParticle.y / sensorRange, -1f, 1f);
         }
-        if(genome.useFoodVelocity) { }
-        if(genome.useFoodDirection) {
+        if (genome.useFoodVelocity) { }
+        if (genome.useFoodDirection) {
             foodPlantDirX[0] = foodParticleDir.x;
             foodPlantDirY[0] = foodParticleDir.y;
             foodPlantDistance[0] = nearestFoodParticleDistance;

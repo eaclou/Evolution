@@ -12,11 +12,17 @@ public class MetaNeuron : ScriptableObject
     public BrainModuleID moduleID;
     public BrainIconID iconID;
 
-    public NeuronGenome GetNeuronGenome(int index) { return new NeuronGenome(this, index); }
+    public Neuron GetNeuron(int index) { return new Neuron(this, index); }
 }
 
+public interface IBrainModule
+{
+    void SetNeuralValue(Neuron neuron);
+}
+
+// WPP: redundant with Neuron
 /// Differentiates neuron templates with the same static data (needed for hidden neurons).
-[Serializable]
+/*[Serializable]
 public class NeuronGenome
 {
     public BrainModuleID moduleID => data.moduleID;
@@ -44,9 +50,4 @@ public class NeuronGenome
         data = original.data;
         index = original.index;
     }
-}
-
-public interface IBrainModule
-{
-    void GetNeuralValue(MetaNeuron data, Neuron neuron);
-}
+}*/

@@ -429,8 +429,8 @@ public class MasterGenomePool
         float dSensory = dFoodSpecDecay + dFoodSpecPlant + dFoodSpecMeat + dUseComms + dUseWaterStats + dUseCardinals + dUseDiagonals +
                          dUseNutrients + dUseFoodPos + dUseFoodVel + dUseFoodDir + dUseFoodStats + dUseFoodEgg + dUseFoodCorpse + dUseFriendPos + dUseFriendVel + dUseFriendDir +
                          dUseThreatPos + dUseThreatVel + dUseThreatDir + dUseThreatStats;
-        float dNeurons = Mathf.Abs(newGenome.brainGenome.hiddenNeurons.Count - repGenome.brainGenome.hiddenNeurons.Count);
-        float dAxons = Mathf.Abs(newGenome.brainGenome.linkCount - repGenome.brainGenome.linkCount) / (float)repGenome.brainGenome.inOutNeurons.Count;
+        float dNeurons = Mathf.Abs(newGenome.brainGenome.neurons.hiddenCount - repGenome.brainGenome.neurons.hiddenCount);
+        float dAxons = Mathf.Abs(newGenome.brainGenome.axonCount - repGenome.brainGenome.axonCount) / (float)repGenome.brainGenome.neurons.inOutCount;
 
         float dSpecialization = (new Vector4(newCore.talentSpecializationAttack, newCore.talentSpecializationDefense, newCore.talentSpecializationSpeed, newCore.talentSpecializationUtility).normalized - 
                                  new Vector4(repCore.talentSpecializationAttack, repCore.talentSpecializationDefense, repCore.talentSpecializationSpeed, repCore.talentSpecializationUtility).normalized).magnitude;

@@ -30,8 +30,8 @@ public class CritterModuleCommunication : IBrainModule
         outComm3 = new float[1]; 
     }
     
-    public void GetNeuralValue(MetaNeuron data, Neuron neuron) {
-        neuron.currentValues = (float[])GetType().GetField(neuron.name).GetValue(this);
+    public void SetNeuralValue(Neuron neuron) {
+        neuron.currentValue = ((float[])GetType().GetField(neuron.name).GetValue(this))[0];
     }
 
     public void Tick(Agent agent) 

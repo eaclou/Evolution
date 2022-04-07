@@ -2,8 +2,6 @@
 
 public class CritterModuleFriends : IBrainModule
 {
-    public BrainModuleID moduleID => BrainModuleID.FriendSensors;
-
     public float[] friendPosX;
     public float[] friendPosY;
     public float[] friendVelX;
@@ -20,7 +18,7 @@ public class CritterModuleFriends : IBrainModule
         friendDirY = new float[1];
     }
 
-    public void GetNeuralValue(MetaNeuron data, Neuron neuron) {
+    public void SetNeuralValue(Neuron neuron) {
         neuron.currentValues = (float[])GetType().GetField(neuron.name).GetValue(this);
     }
 

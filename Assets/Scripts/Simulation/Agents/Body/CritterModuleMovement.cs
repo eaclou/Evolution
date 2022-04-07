@@ -2,8 +2,6 @@
 
 public class CritterModuleMovement : IBrainModule
 {
-    public BrainModuleID moduleID => BrainModuleID.Movement;
-
     public float[] ownVelX;
     public float[] ownVelY;
 
@@ -40,7 +38,7 @@ public class CritterModuleMovement : IBrainModule
         speedBonus = Mathf.Lerp(0.7f, 1.4f, 1f - invAspectRatio);
     }
 
-    public void GetNeuralValue(MetaNeuron data, Neuron neuron) {
+    public void SetNeuralValue(Neuron neuron) {
         neuron.currentValues = (float[])GetType().GetField(neuron.name).GetValue(this);
     }
 

@@ -318,8 +318,8 @@ public class CritterModuleCoreGenome
         data = genomeInfo.GetInitialGenomeData();
     }
 
-    List<NeuronGenome> masterList;
-    public void AppendModuleNeuronsToMasterList(List<NeuronGenome> masterList)
+    List<Neuron> masterList;
+    public void AppendModuleNeuronsToMasterList(List<Neuron> masterList)
     {
         this.masterList = masterList;
 

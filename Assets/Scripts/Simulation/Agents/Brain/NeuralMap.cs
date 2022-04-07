@@ -7,11 +7,11 @@ public class NeuralMap : ScriptableObject
     public MetaNeuron hiddenTemplate;
     [SerializeField] MetaNeuron[] catalog;
 
-    public NeuronGenome GetData(string name, int index)
+    public Neuron GetData(string name, int index)
     {
         foreach (var item in catalog)
             if (item.name == name)
-                return item.GetNeuronGenome(index);
+                return item.GetNeuron(index);
                 
         Debug.LogError($"Unable to find neuron data for {name}");
         return null;

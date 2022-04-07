@@ -17,7 +17,4 @@ public class StartPositionGenome {
         startPosition = pos;
         agentStartRotation = rot;
     }
-
-    /// WPP: Not used, remove
-    public void InitializeRandomGenome() { }
 }

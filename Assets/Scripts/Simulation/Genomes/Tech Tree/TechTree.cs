@@ -1,11 +1,10 @@
 ﻿using System;
 using UnityEngine;
 
-// * Not clear if this is needed, consider removal
 [CreateAssetMenu(menuName = "Pond Water/Tech Tree/Tree")]
 public class TechTree : ScriptableObject
 {
-    public TechElement[] elements;
+    public TechElement[] elements;  // * Not used
     public TechCategoryData[] categories;
     
     public bool HasPrerequisites(TechElement[] abilities, TechElement requestedAbility)
@@ -15,9 +14,17 @@ public class TechTree : ScriptableObject
     
     public Color CategoryColor(TechElement element)
     {
+        if (!element) 
+        {
+            //Debug.LogError($"Cannot find category color for null TechElement");
+            return Color.gray;
+        }
+    
         foreach (var category in categories)
+        {
             if (category.category == element.category)
                 return category.color;
+        }
                 
         return Color.gray;
     }

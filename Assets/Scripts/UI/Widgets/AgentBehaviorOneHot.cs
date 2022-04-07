@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 // REFACTOR: excessive conditional nesting, expose hardcoded values, 
 // inconsistent formatting, shorten reference chains, remove commented-out code
+
+/// Updates UI for selected agent stats
 public class AgentBehaviorOneHot : MonoBehaviour 
 {
     public BehaviorBar behaviorBarRest;
@@ -156,7 +158,6 @@ public class AgentBehaviorOneHot : MonoBehaviour
 
         //textOther.gameObject.SetActive(false);
         throttleGO.gameObject.SetActive(false);
-        
     }
     
     public void UpdateBars(Agent agent) 

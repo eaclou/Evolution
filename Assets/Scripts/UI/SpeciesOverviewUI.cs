@@ -175,7 +175,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
         {
             for(int y = 0; y < height; y++) 
             {
-                LinkGenome linkGenome = pool.GetLeaderboardLinkGenome(x, y);
+                Axon linkGenome = pool.GetLeaderboardLinkGenome(x, y);
                 Color testColor = linkGenome == null ? CLEAR : Color.Lerp(negativeColor, positiveColor, linkGenome.normalizedWeight);
                 speciesPoolGenomeTex.SetPixel(x, y, testColor);
             }

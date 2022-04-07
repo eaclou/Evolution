@@ -2,8 +2,6 @@
 
 public class CritterModuleThreats : IBrainModule
 {
-    public BrainModuleID moduleID => BrainModuleID.ThreatSensors;
-
     public float[] enemyPosX;
     public float[] enemyPosY;
     public float[] enemyVelX;
@@ -30,7 +28,7 @@ public class CritterModuleThreats : IBrainModule
         enemyThreatRating = new float[1];
     }
 
-    public void GetNeuralValue(MetaNeuron data, Neuron neuron) {
+    public void SetNeuralValue(Neuron neuron) {
         neuron.currentValues = (float[])GetType().GetField(neuron.name).GetValue(this);
     }
     

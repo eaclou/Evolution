@@ -4,7 +4,6 @@
 public class CritterModuleCore : IBrainModule
 {
     SettingsManager settings => SettingsManager.instance;
-    public BrainModuleID moduleID => genome.moduleID;
 
     // **** LOOK INTO::: close in its own class or store in bigger array rather than all individual length-one arrays? 
     public float[] bias;
@@ -185,7 +184,7 @@ public class CritterModuleCore : IBrainModule
         energyBonus = Mathf.Lerp(0.75f, 1.5f, talentSpecUtilityNorm);
     }
     
-    public void GetNeuralValue(MetaNeuron data, Neuron neuron)
+    public void SetNeuralValue(Neuron neuron)
     {
         // Example error checking on name, apply to other modules if needed
         var field = GetType().GetField(neuron.name);

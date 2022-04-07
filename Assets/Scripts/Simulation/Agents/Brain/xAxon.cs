@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Serves same purpose as LinkGenome -> removed this, renamed other
+
+/*using System;
 
 [Serializable]
 public class Axon 
@@ -16,4 +18,4 @@ public class Axon
         if (from == null || to == null)
             UnityEngine.Debug.LogError("Initializing axon to null neuron");
     }
-}
+}*/

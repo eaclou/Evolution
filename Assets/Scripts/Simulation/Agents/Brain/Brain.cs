@@ -5,30 +5,36 @@ using UnityEngine;
 [Serializable]
 public class Brain 
 {
-    public List<Neuron> neurons;
-    public List<Axon> axons;
+    public List<Neuron> allNeurons => genome.neurons.all;
+    public List<Neuron> inputNeurons => genome.neurons.input;
+    public List<Axon> allAxons => genome.axons.all;
+    
+    public BrainGenome genome;
 
     public Brain(BrainGenome genome, Agent agent) {
        // Debug.Log("Brain constructed with " + genome.inOutNeurons.Count + " neurons.");
-        RebuildBrain(genome, agent);
+        this.genome = genome;
+        //RebuildBrain(genome, agent);
     }
 
     /// Create Neurons and Axons
-    public void RebuildBrain(BrainGenome genome, Agent agent) 
+   /*public void RebuildBrain(BrainGenome genome, Agent agent) 
     {
         //Debug.Log($"Rebuilding brain with {genome.inOutNeurons.Count} neurons in genome, " +
         //          $"and {genome.linkCount} links in genome");
         
-        neurons = new List<Neuron>();
+        this.genome = genome;
+        //neurons = new List<Neuron>();
         
-        RebuildNeurons(genome.inOutNeurons, agent);
-        RebuildNeurons(genome.hiddenNeurons, agent);
+        //RebuildNeurons(genome.inOutNeurons, agent);
+        //RebuildNeurons(genome.hiddenNeurons, agent);
 
-        RebuildAxons(genome);
+        //RebuildAxons(genome);
         //PrintBrain();
-    }
+    }*/
     
-    void RebuildAxons(BrainGenome genome)
+    // WPP: get data from BrainGenome, ensuring lists are in sync
+    /*void RebuildAxons(BrainGenome genome)
     {
         axons = new List<Axon>();
         
@@ -51,7 +57,7 @@ public class Brain
         }        
     }
 
-    Neuron GetMatchingNeuron(List<Neuron> list, NeuronGenome genome)
+    Neuron GetMatchingNeuron(List<Neuron> list, Neuron genome)
     {
         foreach (var item in list)
             if (item.IsMe(genome))
@@ -60,73 +66,89 @@ public class Brain
         return null;        
     }
     
-    void RebuildNeurons(List<NeuronGenome> neuronGenomes, Agent agent)
+    void RebuildNeurons(List<Neuron> neuronGenomes, Agent agent)
     {
         foreach (var genome in neuronGenomes)
         {
             Neuron neuron = new Neuron(genome);
-            agent.MapNeuronToModule(genome.data, neuron);
+            agent.MapNeuronToModule(genome.template, neuron);
             neurons.Add(neuron);
         }
-    }
+    }*/
     
     public void ResetBrainState() {
-        foreach (var neuron in neurons) {
+        foreach (var neuron in allNeurons) {
             neuron.currentValue = 0f;
-            neuron.previousValue = 0f;
         }
     }
 
     /// Ticks state of brain forward 1 time-step
-    public void BrainMasterFunction() 
+    /// NAIVE APPROACH
+    public void TickAxons() 
     {
-        // NAIVE APPROACH:
-        // run through all links and save sum values in target neurons
-        foreach (var axon in axons) 
-        {
-            float curVal = axon.from.currentValue;
-            
-            // Find input neuron, multiply its value by the axon weight, and add that to output neuron total:
-            //neurons[axon.to].inputTotal += axon.weight * neurons[axon.from].currentValue[0];
-            axon.to.inputTotal += axon.weight * curVal;
-        }
-        
-        // Once all axons are calculated, process the neurons
-        foreach (var neuron in neurons) 
-        {
-            // Save previous state
-            neuron.previousValue = neuron.currentValue;
-             
-            if (neuron.io != NeuronType.In) {
+        ValidateAxons();
+    
+        // Clear all neurons' input signals
+        foreach (var neuron in allNeurons)
+            neuron.inputTotal = 0f;        
+    
+        // Find input neuron, multiply its value by the axon's weight, and add that to output neuron's total
+        foreach (var axon in allAxons)
+            axon.to.inputTotal += axon.weight * axon.from.currentValue;
+
+        // Process the output & hidden neurons' input signals
+        foreach (var neuron in allNeurons)
+            if (neuron.io != NeuronType.In) 
                 neuron.currentValue = TransferFunctions.Evaluate(TransferFunctions.TransferFunction.RationalSigmoid, neuron.inputTotal);
-            }
-            
-            // Zero out inputSum
-            neuron.inputTotal = 0f;
-        }
     }
     
-    public void PrintBrain() {
-        Debug.Log("neuronCount: " + neurons.Count);
-        string neuronText = "";
-        for (int i = 0; i < neurons.Count; i++) {
-            neuronText += "Neuron " + i + ": " + neurons[i].currentValues.Length + "\n";
-        }
-        string axonText = "";
-        for (int j = 0; j < axons.Count; j++) {
-            axonText += "Axon " + j + ": (" + axons[j].from.index + "," + axons[j].to.index + ") " + axons[j].weight + "\n";
-        }
-        Debug.Log(neuronText + "\n" + axonText);
+    #region Hackfix for mismatch between axon connection targets and actual neurons
+    void ValidateAxons()
+    {
+        foreach (var axon in allAxons)
+            if (!allNeurons.Contains(axon.from))
+                axon.from = FindNeuron(axon.from);
+                
+        foreach (var axon in allAxons)
+            if (!allNeurons.Contains(axon.to))
+                axon.to = FindNeuron(axon.to);
     }
+    
+    Neuron FindNeuron(Neuron invalidNeuron)
+    {
+        foreach (var neuron in allNeurons)
+            if (neuron.index == invalidNeuron.index)
+                return neuron;
+                
+        return invalidNeuron;
+    }
+    #endregion
     
     public List<Neuron> GetNeuronsByTechElement(TechElement tech)
     {
         var result = new List<Neuron>();
 
-        foreach (var neuron in neurons)
+        foreach (var neuron in allNeurons)
             if (tech.ContainsNeuron(neuron.data.template))
                 result.Add(neuron);
                 
         return result;
     }
+    
+    #region Debug
+    
+    public void PrintBrain() {
+        Debug.Log("neuronCount: " + allNeurons.Count);
+        string neuronText = "";
+        for (int i = 0; i < allNeurons.Count; i++) {
+            neuronText += "Neuron " + i + ": " + allNeurons[i].currentValues.Length + "\n";
+        }
+        string axonText = "";
+        for (int j = 0; j < allAxons.Count; j++) {
+            axonText += "Axon " + j + ": (" + allAxons[j].from.index + "," + allAxons[j].to.index + ") " + allAxons[j].weight + "\n";
+        }
+        Debug.Log(neuronText + "\n" + axonText);
+    }
+    
+    #endregion
 }
