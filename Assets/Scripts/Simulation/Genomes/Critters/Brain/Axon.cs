@@ -28,11 +28,12 @@ public class Axon
                 return true;
             }
             
-            if (item.name == from.name || item.name == to.name)
+            // Hackfix applied in Brain.ValidateAxons
+            /*if (item.name == from.name || item.name == to.name)
             {
                 Debug.LogError("Connection found by name, not by reference");
                 return true;
-            }
+            }*/
         }
                 
         return false;

@@ -15,6 +15,7 @@ public class Brain
        // Debug.Log("Brain constructed with " + genome.inOutNeurons.Count + " neurons.");
         this.genome = genome;
         //RebuildBrain(genome, agent);
+        ValidateAxons();
     }
 
     /// Create Neurons and Axons
@@ -86,8 +87,6 @@ public class Brain
     /// NAIVE APPROACH
     public void TickAxons() 
     {
-        ValidateAxons();
-    
         // Clear all neurons' input signals
         foreach (var neuron in allNeurons)
             neuron.inputTotal = 0f;        

@@ -282,11 +282,12 @@ public class BrainGenome
                 return true;
             }
         
-            if (axon.from.name == from.name && axon.to.name == to.name)
+            // Hackfix applied in Brain.ValidateAxons
+            /*if (axon.from.name == from.name && axon.to.name == to.name)
             {
                 Debug.LogError("Axon found by name, not by reference");
                 return true;
-            }
+            }*/
         }
         
         return false;        
