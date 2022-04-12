@@ -99,6 +99,7 @@ public class MasterGenomePool
 
                 if(completeSpeciesPoolsList[idList].candidateGenomesList.Count < 1) {
                     ExtinctifySpecies(idList);
+                    Debug.Log("EXTINCTIFY " + leastFitSpeciesID.ToString() + ", " + idList + ", fitness: " + worstFitness);
                 }
             }
         }
@@ -108,7 +109,7 @@ public class MasterGenomePool
                 // OK to KILL!!!
                 FlagSpeciesExtinct(leastFitSpeciesID);
                 //completeSpeciesPoolsList[leastFitSpeciesID].isFlaggedForExtinction = true;
-                //Debug.Log("FLAG EXTINCT: " + leastFitSpeciesID.ToString());
+                Debug.Log("FLAG EXTINCT: " + leastFitSpeciesID.ToString());
             }
         }
     }
