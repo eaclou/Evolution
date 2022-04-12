@@ -54,10 +54,10 @@ public class GameManager : Singleton<GameManager> {
     }
     */
 
-    // $$$$$$ THIS IS THE MAIN CODE THREAD HOOK!!! $$$$$$$$$
-    private void FixedUpdate() {        
+    /// $$$$$$ THIS IS THE MAIN CODE THREAD HOOK!!! $$$$$$$$$
+    private void FixedUpdate() 
+    {        
         // Depending on GameState, execute Frame:
-
         switch(currentGameState) 
         {
             case GameState.MainMenu:
@@ -66,8 +66,7 @@ public class GameManager : Singleton<GameManager> {
                 break;
             case GameState.Loading:
                 // Check on status of Simulation manager, wait for it to be fully loaded and ready to go:                
-                if(simulationManager.loadingComplete && simulationManager._BigBangOn) 
-                {
+                if (simulationManager.loadingComplete && simulationManager._BigBangOn) {
                     TransitionToGameState(GameState.Playing);
                 }
                 break;

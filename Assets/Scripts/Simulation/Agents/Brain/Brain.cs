@@ -11,14 +11,15 @@ public class Brain
     
     public BrainGenome genome;
 
-    public Brain(BrainGenome genome, Agent agent) {
+    public Brain(BrainGenome genome) {
        // Debug.Log("Brain constructed with " + genome.inOutNeurons.Count + " neurons.");
         this.genome = genome;
         //RebuildBrain(genome, agent);
-        ValidateAxons();
+        genome.ValidateAxons();
     }
 
-    /// Create Neurons and Axons
+   #region [WPP] Obsolete: data stored/synced in BrainGenome, referenced here
+   /// Create Neurons and Axons
    /*public void RebuildBrain(BrainGenome genome, Agent agent) 
     {
         //Debug.Log($"Rebuilding brain with {genome.inOutNeurons.Count} neurons in genome, " +
@@ -33,8 +34,7 @@ public class Brain
         //RebuildAxons(genome);
         //PrintBrain();
     }*/
-    
-    // WPP: get data from BrainGenome, ensuring lists are in sync
+   
     /*void RebuildAxons(BrainGenome genome)
     {
         axons = new List<Axon>();
@@ -76,6 +76,7 @@ public class Brain
             neurons.Add(neuron);
         }
     }*/
+    #endregion
     
     public void ResetBrainState() {
         foreach (var neuron in allNeurons) {
@@ -100,29 +101,7 @@ public class Brain
             if (neuron.io != NeuronType.In) 
                 neuron.currentValue = TransferFunctions.Evaluate(TransferFunctions.TransferFunction.RationalSigmoid, neuron.inputTotal);
     }
-    
-    #region Hackfix for mismatch between axon connection targets and actual neurons
-    void ValidateAxons()
-    {
-        foreach (var axon in allAxons)
-            if (!allNeurons.Contains(axon.from))
-                axon.from = FindNeuron(axon.from);
-                
-        foreach (var axon in allAxons)
-            if (!allNeurons.Contains(axon.to))
-                axon.to = FindNeuron(axon.to);
-    }
-    
-    Neuron FindNeuron(Neuron invalidNeuron)
-    {
-        foreach (var neuron in allNeurons)
-            if (neuron.index == invalidNeuron.index)
-                return neuron;
-                
-        return invalidNeuron;
-    }
-    #endregion
-    
+
     public List<Neuron> GetNeuronsByTechElement(TechElement tech)
     {
         var result = new List<Neuron>();

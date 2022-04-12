@@ -22,7 +22,6 @@ public static class TransferFunctions {
     public static TransferFunction GetRandomTransferFunction() {
         int numFunctions = (int)TransferFunction.NumberOfTypes;
         int randFunction = (int)Random.Range(0f, numFunctions);
-        //Random.Range(0f, numFunctions);
         TransferFunction returnFunction = (TransferFunction)randFunction;
         return returnFunction;
     }
@@ -74,7 +73,7 @@ public static class TransferFunctions {
         }
     }
 
-    // Transfer Function Definitions 
+    #region Transfer function definitions 
     private static float sigmoid(float x) {
         return 1.0f / (1.0f + (float)Math.Exp(-x));
     }
@@ -132,19 +131,9 @@ public static class TransferFunctions {
         return x > 0f ? 1f : 0f;
     }
     
-    // WPP: simplified logic
     private static float ThresholdNegPos(float x) {
-        /*float newVal;
-        if (x > 0.5f)
-            newVal = 1f;
-        else if (x < -0.5f) {
-            newVal = 0f;
-        }
-        else {
-            newVal = 0f;
-        }
-        return newVal;*/
         return x > 0.5f ? 1f : 0f;
     }
+    #endregion
 }
 

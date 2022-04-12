@@ -72,20 +72,7 @@ public class BodyGenome
         result.Add(map.GetData("_mouthTriggerOutputs", priorCount + result.Count));
          
         return result;
-
-        //AddNeuron("bias");
-        //AddNeuron("_mouthTriggerOutputs");        
-        //AddNeuron("mouthFeedEffector");  // This only works with Collider2Ds, won't detect Plants or Microbes
-        //AddNeuron("throttleX");
-        //AddNeuron("throttleY");
     }
-    
-    /*void AddNeuron(string name) 
-    {
-        var neuron = map.GetData(name, masterList.Count); 
-        //Debug.Log($"{neuron.data.name} {neuron.index}");
-        masterList.Add(neuron);
-    }*/
 
     /// Mutable by Player
     /// Add body-sensor/effector mutations here and cleanup Brain Genome

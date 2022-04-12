@@ -808,6 +808,9 @@ public class SimulationManager : Singleton<SimulationManager>
     private void CheckForNullAgents() { 
         foreach (var agent in agents) {
             if (agent.isNull) {
+                // NG
+                if (agent.brain.genome.HasInvalidAxons())
+                    Debug.LogError("Invalid axon(s) detected: SimulationManager.CheckForNullAgents");
                 ProcessNullAgent(agent);
             }
         } 
@@ -1023,18 +1026,18 @@ public class SimulationManager : Singleton<SimulationManager>
     }
     
     /// Upon Agent Death  
-    public void ProcessNullAgent(Agent agent) {   
+    public void ProcessNullAgent(Agent agent) {
         numAgentsDied++;
         // Look up the connected CandidateGenome & its speciesID
         CandidateAgentData candidateData = agent.candidateRef;
         
         int agentSpeciesIndex = agent.speciesIndex;
-        if(candidateData == null) {
+        if (candidateData == null) {
             Debug.LogError("candidateData NULL (" + agent.index + ") species " + agentSpeciesIndex);
         }
         
         int candidateSpeciesIndex = candidateData.speciesID;
-        if(agentSpeciesIndex != candidateSpeciesIndex) {
+        if (agentSpeciesIndex != candidateSpeciesIndex) {
             Debug.LogError("agentSpeciesIndex (" + agentSpeciesIndex + " != candidateSpeciesIndex (" + candidateSpeciesIndex);
         }
         
@@ -1049,7 +1052,7 @@ public class SimulationManager : Singleton<SimulationManager>
         candidateData.ProcessCompletedEvaluation(agent);
         
         // check if it has finished all of its evaluations
-        if(candidateData.numCompletedEvaluations >= numAgentEvaluationsPerGenome) {
+        if (candidateData.numCompletedEvaluations >= numAgentEvaluationsPerGenome) {
             // If it has, then push the candidate to Leaderboard List so it is eligible for reproduction
             // and remove it from the ToBeEvaluated pool
             speciesPool.ProcessCompletedCandidate(candidateData, masterGenomePool);
@@ -1061,6 +1064,11 @@ public class SimulationManager : Singleton<SimulationManager>
                 
         // -- Select a ParentGenome from the leaderboardList and create a mutated copy (childGenome):  
         AgentGenome newGenome = sourceSpeciesPool.GetGenomeFromFitnessLottery();
+        
+        // NG: downstream error from CheckForNullAgents
+        //if (newGenome.brainGenome.HasInvalidAxons())
+        //    Debug.LogError("SimulationManager.ProcessNullAgent(): invalid axon(s) detected");
+        
         newGenome = sourceSpeciesPool.Mutate(newGenome, true, true);
         //newGenome.IncrementGenerationCount();
 

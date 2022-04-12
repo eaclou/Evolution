@@ -16,6 +16,10 @@ public class Axon
         this.from = from;
         this.to = to;
         this.weight = weight;
+        
+        // NG on mutate path only. Downstream error of BrainGenome.SetToMutatedCopyOfParentGenome
+        //if (from.io == to.io && from.io != NeuronType.Hidden)  
+        //    Debug.LogError($"Invalid axon on construction: matching IO {from.io}");
     }
     
     public bool IsInList(List<Neuron> list)
@@ -47,7 +51,7 @@ public class AxonList
     public List<Axon> inOut = new List<Axon>();
     public List<Axon> inHidden = new List<Axon>();
     public List<Axon> hiddenOut = new List<Axon>();
-    // * Consider adding hidden-hidden list
+    public List<Axon> hiddenHidden = new List<Axon>();
     
     public void Add(Axon axon)
     {
@@ -91,11 +95,17 @@ public class AxonList
             return inHidden;
         if (from == NeuronType.Hidden && to == NeuronType.Out)
             return hiddenOut;
+        if (from == NeuronType.Hidden && to == NeuronType.Hidden)
+            return hiddenHidden;
             
-        Debug.LogError($"Invalid axon connecting {axon.from.io} {axon.from.name} " +
-                       $"to {axon.to.io} {axon.to.name}");
+        //if (!IsValid(axon))     // NG
+        //    Debug.LogError($"Invalid axon: matching io {from} - {to}");
+        
         return null;
     }
+    
+    public bool IsValid(Axon axon) { return IsValid(axon.from, axon.to); }
+    public bool IsValid(Neuron from, Neuron to) { return from.io != to.io || from.io == NeuronType.Hidden; }
     
     public void PrintCounts()
     {

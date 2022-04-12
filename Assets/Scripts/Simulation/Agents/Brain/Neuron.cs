@@ -172,6 +172,8 @@ public class NeuronList
             Remove(item);
     }
     
+    public Neuron RandomNeuron(List<Neuron> list) { return list[Random.Range(0, list.Count)]; }
+    
     public void PrintCounts() 
     { 
         Debug.Log($"Neurons: {inCount} input, {hiddenCount} hidden, " +

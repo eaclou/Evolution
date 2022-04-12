@@ -1,6 +1,6 @@
-﻿using System;
+﻿/*
+using System;
 
-// * WPP: Obsolete
 /// Neuron Identifier
 [Serializable]
 public struct NID 
@@ -15,3 +15,4 @@ public struct NID
         this.neuronID = neuronID;
     }
 }
+*/

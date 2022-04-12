@@ -26,23 +26,28 @@ public class BrainGenome
         initialConnectionChance = initialConnectionDensity;
         initialHiddenNeuronCount = hiddenNeuronCount;
         InitializeRandomBrainGenome(bodyGenome); 
+        
+        if (HasInvalidAxons())    // OK
+            Debug.LogError("Invalid axons detected: initial construction");
     }
     
-    public BrainGenome(BrainGenome parentGenome, BodyGenome bodyGenome, MutationSettingsInstance mutationSettings)
+    public BrainGenome(BrainGenome parent, BodyGenome self, MutationSettingsInstance mutationSettings)
     {
-        SetToMutatedCopyOfParentGenome(parentGenome, bodyGenome, mutationSettings);
+        SetToMutatedCopy(parent, self, mutationSettings);
+        
+        if (HasInvalidAxons())   // NG
+            Debug.LogError("Invalid axons detected: mutation construction");
     }
 
-    public void InitializeNewBrainGenomeLists() 
+    public void ClearNeuronsAndAxons() 
     {
         neurons.Clear();
         axons.Clear();
     }
 
-    public void InitializeRandomBrainGenome(BodyGenome bodyGenome) {
-        InitializeNewBrainGenomeLists();
-        neurons.Clear();
-        
+    public void InitializeRandomBrainGenome(BodyGenome bodyGenome) 
+    {
+        ClearNeuronsAndAxons();
         InitializeIONeurons(bodyGenome);
         InitializeAxons();
     }
@@ -54,13 +59,15 @@ public class BrainGenome
 
     public void InitializeIONeurons(BodyGenome bodyGenome) 
     {
+        neurons.ClearSublist(neurons.inOut);
+
         var newNeurons = bodyGenome.GetUnlockedNeurons(neurons.allCount);
         foreach (var neuron in newNeurons)
             neurons.Add(neuron);
         //SortIONeurons();
     }
 
-    // WPP: obsolete with list management system
+    #region [WPP] Obsolete with list management system
     /*void SortIONeurons()
     {
         inputNeurons.Clear();
@@ -84,6 +91,7 @@ public class BrainGenome
                 break;
         }        
     }*/
+    #endregion
 
     public void InitializeAxons() 
     {
@@ -110,12 +118,15 @@ public class BrainGenome
         var connectNeurons = RandomStatics.CoinToss(connectionChance);
         if (!connectNeurons) return;
         
+        if (from.io == to.io)  // OK
+            Debug.LogError($"Connection requested between matching io {from.io}");
+        
         var randomWeight = Gaussian.GetRandomGaussian() * weightMultiplier;
-        var axon = new Axon(from, to, randomWeight);
+        var axon = new Axon(from, to, randomWeight);  // OK
         axons.Add(axon);
     }
 
-    public void SetToMutatedCopyOfParentGenome(BrainGenome parentGenome, BodyGenome bodyGenome, MutationSettingsInstance settings) 
+    public void SetToMutatedCopy(BrainGenome parentGenome, BodyGenome bodyGenome, MutationSettingsInstance settings) 
     {
         /*
         //this.bodyNeuronList = parentGenome.bodyNeuronList; // UNSUSTAINABLE!!! might work now since all neuronLists are identical ******
@@ -130,21 +141,28 @@ public class BrainGenome
         
         // Rebuild BodyNeuronGenomeList from scratch based on bodyGenome
         //InitializeBodyNeuronList();
-        neurons.ClearSublist(neurons.inOut);
-        InitializeIONeurons(bodyGenome);
+        
+        // NG: downstream error of SpeciesGenomePool.Mutate()
+        //if (HasInvalidAxons(parentGenome))
+        //    Debug.LogError("BrainGenome.SetToMutatedCopy(): Invalid axon(s) detected");
 
+        // * WPP: this seems excessive...
+        InitializeIONeurons(bodyGenome);
         //hiddenNeurons = MutateHiddenNeurons(parentGenome.hiddenNeurons);
         neurons.Sync(neurons.hidden, MutateHiddenNeurons(parentGenome.neurons.hidden));
-        
+        //ValidateAxons();
+
         var mutatedAxons = MutateLinks(parentGenome.axons.all, settings);
         axons.Reset(mutatedAxons);
 
         //neurons.PrintCounts();
         //axons.PrintCounts();
 
+        // * WPP: how many times should this run (current is once/generation)?
         if (RandomStatics.CoinToss(settings.brainCreateNewLinkChance))
-            AddNewLink(settings);
-
+            AddRandomConnection(settings);
+        
+        // * WPP: how many times should this run (current is once/generation)?
         if (RandomStatics.CoinToss(settings.brainCreateNewHiddenNodeChance)) 
             AddNewHiddenNeuron();
 
@@ -180,26 +198,32 @@ public class BrainGenome
         return result;       
     }
     
+    /// Creates a mutated copy of a list of axons.
+    /// Modifies weights and potentially removes axons.
     List<Axon> MutateLinks(List<Axon> original, MutationSettingsInstance settings)
     {
         var result = new List<Axon>();
         
         foreach (var element in original)
         {
-            Axon newLinkGenome = new Axon(element.from, element.to, element.weight);
-            
-            // Remove fully??? *****
-            if (RandomStatics.CoinToss(settings.brainRemoveLinkChance))
-                newLinkGenome.weight = 0f;
+            //if (!axons.IsValid(element))   // NG
+            //    Debug.LogError($"Invalid mutated axon: matching io {element.from.io} - {element.to.io}");        
+        
+            Axon newAxon = new Axon(element.from, element.to, element.weight);   // NG
 
+            // Random chance of removing each axon
+            if (RandomStatics.CoinToss(settings.brainRemoveLinkChance))
+                continue;
+
+            // Random chance of modifying weight of each axon
             if (RandomStatics.CoinToss(settings.brainWeightMutationChance)) 
             {
                 float randomWeight = Gaussian.GetRandomGaussian();
-                newLinkGenome.weight += Mathf.Lerp(0f, randomWeight, settings.brainWeightMutationStepSize);
+                newAxon.weight += Mathf.Lerp(0f, randomWeight, settings.brainWeightMutationStepSize);
             }
 
-            newLinkGenome.weight *= settings.brainWeightDecayAmount;
-            result.Add(newLinkGenome);
+            newAxon.weight *= settings.brainWeightDecayAmount;
+            result.Add(newAxon);
         }
         
         return result;
@@ -235,7 +259,7 @@ public class BrainGenome
         }
     }
     
-    void AddNewLink(MutationSettingsInstance settings)
+    void AddRandomConnection(MutationSettingsInstance settings)
     {
         // What is this?!
         /*foreach (var neuron in hiddenNeurons)
@@ -257,15 +281,20 @@ public class BrainGenome
         int maxChecks = 8;
         for (int k = 0; k < maxChecks; k++) 
         {
-            var from = neurons.input[Random.Range(0, neurons.inCount)];
-            var to = neurons.output[Random.Range(0, neurons.outCount)];
+            // WPP: only adds in->out connections 
+            // (should also allow for in->hidden, hidden->hidden, and hidden->out)
+            var from = neurons.RandomNeuron(neurons.input);
+            var to = neurons.RandomNeuron(neurons.output);
 
             if (LinkExists(from, to)) continue;
+            
+            if (!axons.IsValid(from, to))   // OK
+                Debug.LogError($"Invalid random connection: matching io {from} - {to}");
 
             float randomWeight = Gaussian.GetRandomGaussian() * settings.brainWeightMutationStepSize;
-            Axon linkGenome = new Axon(from, to, randomWeight);                    
-            axons.Add(linkGenome);
-            
+            Axon axon = new Axon(from, to, randomWeight);    // OK                
+            axons.Add(axon);
+
             break;
         }
     }
@@ -294,7 +323,7 @@ public class BrainGenome
     }
     
     /// Replaces an In -> Out connection with In -> Hidden -> Out
-    /// (assumes no hidden -> hidden connections)
+    /// or extends a chain of hidden neurons
     void AddNewHiddenNeuron()
     {
         if (axonCount == 0)
@@ -307,17 +336,17 @@ public class BrainGenome
         var newHiddenNeuron = new Neuron(hiddenTemplate, neurons.all.Count);
         neurons.Add(newHiddenNeuron);
         
-        // Create 2 new links
-        var removedAxon = axons.inOut[Random.Range(0, axons.inOut.Count)];
-        var inToHidden = new Axon(removedAxon.from, newHiddenNeuron, 1f);
-        var hiddenToOut = new Axon(newHiddenNeuron, removedAxon.to, removedAxon.weight);
+        // Create 2 new axons
+        var removed = axons.all[Random.Range(0, axons.all.Count)];
+        var newInput = new Axon(removed.from, newHiddenNeuron, 1f);
+        var newOutput = new Axon(newHiddenNeuron, removed.to, removed.weight);
 
-        // Delete old link
-        axons.Remove(removedAxon);
+        // Delete old axon
+        axons.Remove(removed);
             
         // Add new links
-        axons.Add(inToHidden);
-        axons.Add(hiddenToOut);
+        axons.Add(newInput);
+        axons.Add(newOutput);
     }
 
     // WPP: what is the purpose of this?
@@ -344,6 +373,40 @@ public class BrainGenome
             for (int k = axonsToRemoveIndicesList.Count - 1; k >= 0; k--)
                 axons.Remove(axonsToRemoveIndicesList[k]);
     }
+    
+    public bool HasInvalidAxons() { return HasInvalidAxons(this); }
+    public bool HasInvalidAxons(BrainGenome brain)
+    {
+        foreach (var axon in brain.axons.all)
+            if (!axons.IsValid(axon))
+                return true;
+                
+        return false;
+    }
+    
+    #region Hackfix for mismatch between axon connection targets and actual neurons
+    
+    public void ValidateAxons()
+    {
+        foreach (var axon in axons.all)
+            if (!neurons.all.Contains(axon.from))
+                axon.from = FindNeuron(axon.from);
+                
+        foreach (var axon in axons.all)
+            if (!neurons.all.Contains(axon.to))
+                axon.to = FindNeuron(axon.to);
+    }
+    
+    Neuron FindNeuron(Neuron invalidNeuron)
+    {
+        foreach (var neuron in neurons.all)
+            if (neuron.index == invalidNeuron.index)
+                return neuron;
+                
+        return invalidNeuron;
+    }
+    
+    #endregion
 }
 
 

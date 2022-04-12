@@ -244,7 +244,6 @@ public class Agent : MonoBehaviour {
     public void InitiateBeingSwallowed(Agent predatorAgent)
     {
         //curLifeStage = Agent.AgentLifeStage.Dead; // ....
-
         //isInert = false; // *** is this still used? ... (sorta...)
 
         colliderBody.enabled = false;
@@ -1319,7 +1318,7 @@ public class Agent : MonoBehaviour {
         
         ReconstructAgentGameObjects(genome, null, spawnWorldPos, true, globalWaterLevel);
 
-        brain = new Brain(genome.brainGenome, this); 
+        brain = new Brain(genome.brainGenome); 
         isInert = false;
     }
     
@@ -1342,7 +1341,7 @@ public class Agent : MonoBehaviour {
         
         ReconstructAgentGameObjects(genome, parentEggSack, parentEggSack.gameObject.transform.position + spawnOffset, false, globalWaterLevel);
 
-        brain = new Brain(genome.brainGenome, this);   
+        brain = new Brain(genome.brainGenome);   
         isInert = false;
     }
 

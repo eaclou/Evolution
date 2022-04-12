@@ -106,8 +106,7 @@ public class SpeciesGenomePool
         
         //string debugTxt = "";
         for (int i = 0; i < 16; i++) {            
-            AgentGenome agentGenome = Mutate(foundingGenome.candidateGenome, true, true);            
-            
+            AgentGenome agentGenome = Mutate(foundingGenome.candidateGenome, true, true);
             CandidateAgentData candidate = new CandidateAgentData(agentGenome, speciesID);
             candidateGenomesList.Add(candidate);
             leaderboardGenomesList.Add(candidate);
@@ -128,7 +127,6 @@ public class SpeciesGenomePool
         coatOfArmsMat.SetColor("_TintPri", new Color(huePri.x, huePri.y, huePri.z));
         coatOfArmsMat.SetColor("_TintSec", new Color(hueSec.x, hueSec.y, hueSec.z));
         coatOfArmsMat.SetFloat("_IsSelected", 0f);
-		
     }
     
     string MutateName(string original)
@@ -293,10 +291,17 @@ public class SpeciesGenomePool
     // Avoid use of local variables in Mutate() for efficiency
     MutationSettingsInstance tempMutationSettings;
 
-    public AgentGenome Mutate(AgentGenome parentGenome, bool bodySettings, bool brainSettings) {
+    public AgentGenome Mutate(AgentGenome parentGenome, bool bodySettings, bool brainSettings) 
+    {
+        // NG: downstream error from SimulationManager.ProcessNullAgent()
+        //if (parentGenome.brainGenome.HasInvalidAxons(parentGenome.brainGenome))
+        //    Debug.LogError("SpeciesGenomePool.Mutate(): Invalid axon(s) detected");
+    
         //AgentGenome parentGenome = leaderboardGenomesList[selectedIndex].candidateGenome;
 
-        //***EAC Creature NAME mutation here???
+        // WPP: delegated to function
+        string newName = GetMutatedName(parentGenome.name);
+        /*
         string parentName = parentGenome.name;
         int randIndex = Random.Range(0, parentName.Length - 1);        
         string frontHalf = parentName.Substring(0, randIndex);
@@ -307,9 +312,8 @@ public class SpeciesGenomePool
         }
         frontHalf += middleChar;
         string newName = RandomStatics.CoinToss(.025f) ? backHalf + frontHalf : frontHalf + backHalf;
+        */
 
-        //--------------------------------------------------------------------------------------------------------------------
-        
         tempMutationSettings = bodySettings ? mutationSettings : cachedNoneMutationSettings;
         BodyGenome newBodyGenome = new BodyGenome(parentGenome.bodyGenome, tempMutationSettings);
 
@@ -317,6 +321,20 @@ public class SpeciesGenomePool
         BrainGenome newBrainGenome = new BrainGenome(parentGenome.brainGenome, newBodyGenome, tempMutationSettings);
 
         return new AgentGenome(newBodyGenome, newBrainGenome, parentGenome.generationCount + 1, newName);
+    }
+    
+    string GetMutatedName(string parentName)
+    {
+        int randomIndex = Random.Range(0, parentName.Length - 1);
+        
+        string frontHalf = parentName.Substring(0, randomIndex);
+        string middleChar = RandomStatics.CoinToss(.05f) ?
+            RandomStatics.GetRandomLetter() :
+            parentName.Substring(randomIndex, 1);
+        frontHalf += middleChar;    
+        string backHalf = parentName.Substring(randomIndex + 1);
+        
+        return RandomStatics.CoinToss(.025f) ? backHalf + frontHalf : frontHalf + backHalf;    
     }
     
     public void UpdateLongestLife(Agent agent)
