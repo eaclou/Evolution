@@ -8,32 +8,23 @@ public class MinimapPanel : MonoBehaviour
     TrophicLayersManager trophicLayers => simulationManager.trophicLayersManager;
     TheRenderKing theRenderKing => TheRenderKing.instance;
     EnvironmentFluidManager fluidManager => EnvironmentFluidManager.instance;
-    //Lookup lookup => Lookup.instance;
-    
 
-    public bool isOpen = true;  
     public Text textTitle;
     public Image imageKnowledgeMapTextureViewer;
     public Material uiKnowledgeMapViewerMat;
     public GameObject groupMinimap;
     public Image imageCameraViewArea;
     [SerializeField]
-    public Button buttonOpenClose;
+    public OpenCloseButton openCloseButton;
     [SerializeField]
     public Button buttonToggleFollow;
 
-    [SerializeField]
-    Animator minimapPanelAnimator;
+    TrophicSlot selectedTrophicSlot => trophicLayers.selectedSlot;
+    bool isOpen => openCloseButton.isOpen;
 
-    private TrophicSlot selectedTrophicSlot => trophicLayers.selectedSlot;
-    
     public void Tick() {
-        if(Screen.height - Input.mousePosition.y < 64 && Screen.width - Input.mousePosition.x < 64) {            
-            MouseEnterOpenCloseButtonArea();            
-        }
-        else {
-            MouseExitOpenCloseButtonArea();
-        }
+        var mouseInOpenCloseArea = Screen.height - Input.mousePosition.y < 64 && Screen.width - Input.mousePosition.x < 64;
+        openCloseButton.SetMouseEnter(mouseInOpenCloseArea);
 
         uiKnowledgeMapViewerMat.SetTexture("_AltitudeTex", theRenderKing.baronVonTerrain.terrainHeightDataRT);
         uiKnowledgeMapViewerMat.SetTexture("_ResourceGridTex", simulationManager.vegetationManager.resourceGridRT1);
@@ -96,8 +87,6 @@ public class MinimapPanel : MonoBehaviour
     
     void SetKnowledgeMapViewer(TrophicLayerSO data, RenderTexture renderTexture)
     {
-        //var data = lookup.GetKnowledgeMapData(id);
-
         textTitle.text = "WORLD MAP"; // data.title;      
         imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
         uiKnowledgeMapViewerMat.SetTexture("_MainTex", renderTexture);
@@ -109,26 +98,30 @@ public class MinimapPanel : MonoBehaviour
         uiKnowledgeMapViewerMat.SetFloat("_Gamma", data.gamma);         
     }
     
-    public void OpenClose() {
+    public void SelectTrophicSlot(TrophicLayerSO data) { trophicLayers.SetSlot(data); }
+
+    // WPP 4/12/22: delegated to OpenCloseButton
+    /*public void OpenClose() {
         isOpen = !isOpen;
-        if(isOpen) {
-            buttonOpenClose.GetComponentInChildren<Text>().text = ">";
-        }
-        else {
-            buttonOpenClose.GetComponentInChildren<Text>().text = "<";
-        }
+        var text = isOpen ? ">" : "<";
+        openCloseButton.text.text = text;
         minimapPanelAnimator.SetBool("PanelOpen", isOpen);
     }
+    
     public void MouseEnterOpenCloseButtonArea() {
-        
-        Animator OpenCloseButtonAnimator = buttonOpenClose.GetComponent<Animator>();
-        OpenCloseButtonAnimator.SetBool("ON", true);
+        if (!gameObject.activeInHierarchy) return;
+        openCloseButton.animator.SetBool("ON", true);
     }
+    
     public void MouseExitOpenCloseButtonArea() {
-        Animator OpenCloseButtonAnimator = buttonOpenClose.GetComponent<Animator>();
-        OpenCloseButtonAnimator.SetBool("ON", false);
+        if (!gameObject.activeInHierarchy) return;
+        openCloseButton.animator.SetBool("ON", false);
     }  
     
-    
-    public void SelectTrophicSlot(TrophicLayerSO data) { trophicLayers.SetSlot(data); }
+    [Serializable]
+    public struct OpenCloseButton
+    {
+        public Animator animator;
+        public Text text;
+    }*/
 }

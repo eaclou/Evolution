@@ -5,15 +5,14 @@ using UnityEngine.UI;
 
 public class CreaturePanelUI : MonoBehaviour
 {
+    SelectionManager selection => SelectionManager.instance;
     SimulationManager simulationManager => SimulationManager.instance;
     CameraManager cameraManager => CameraManager.instance;
     TheRenderKing theRenderKing => TheRenderKing.instance;
     
-    Agent agent => SelectionManager.instance.currentSelection.agent;
+    Agent agent => selection.currentSelection.agent;
     float totalTicksAlive => simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].avgCandidateData.performanceData.totalTicksAlive;
-
-    [SerializeField]
-    Animator CreaturePanelAnimator;
+    
     [SerializeField] Color onColor = Color.white;
     [SerializeField] Color offColor = Color.gray;
 
@@ -30,7 +29,7 @@ public class CreaturePanelUI : MonoBehaviour
     Text textGenerationCount;
 
     [SerializeField]
-    Button buttonOpenClose;
+    OpenCloseButton openCloseButton;
         
     [SerializeField] AgentActionStateData[] actionStates;
     [SerializeField] AgentActionStateData defaultActionState;
@@ -39,7 +38,7 @@ public class CreaturePanelUI : MonoBehaviour
     [SerializeField] PanelModeData[] panelModes;
     [SerializeField] StringSO startingPanelMode;
 
-    private bool isPanelOpen = false;
+    private bool isPanelOpen => openCloseButton.isOpen;
 
     public Sprite spriteBrainButton;
 
@@ -62,11 +61,10 @@ public class CreaturePanelUI : MonoBehaviour
     }
 
     public void UpdateAgentActionStateData(int candID, AgentActionState actionState) {
-        if(SelectionManager.instance.currentSelection.candidate.candidateID != candID) return;
+        if (selection.currentSelection.candidate.candidateID != candID) return;
         
-        for(int i = 0; i < actionStates.Length; i++) {
+        for (int i = 0; i < actionStates.Length; i++) {
             if (actionStates[i].id == actionState) {
-                
                 mostRecentActionState = actionStates[i];
             }
         }
@@ -80,9 +78,11 @@ public class CreaturePanelUI : MonoBehaviour
         critterPortraitStrokesCBuffer = new ComputeBuffer(1 * theRenderKing.GetNumStrokesPerCritter(), theRenderKing.GetMemorySizeCritterStrokeData());
     }
 
+    // WPP: delegated to OpenCloseButton
+    /*
     public void OpenClose() {
         isPanelOpen = !isPanelOpen;
-        if(isPanelOpen) {
+        if (isPanelOpen) {
             buttonOpenClose.GetComponentInChildren<Text>().text = "<";
         }
         else {
@@ -90,26 +90,24 @@ public class CreaturePanelUI : MonoBehaviour
         }
         CreaturePanelAnimator.SetBool("PanelOFF", !isPanelOpen);
     }
+    
     public void MouseEnterOpenCloseButtonArea() {
-        
         Animator OpenCloseButtonAnimator = buttonOpenClose.GetComponent<Animator>();
         OpenCloseButtonAnimator.SetBool("ON", true);
     }
+    
     public void MouseExitOpenCloseButtonArea() {
         Animator OpenCloseButtonAnimator = buttonOpenClose.GetComponent<Animator>();
         OpenCloseButtonAnimator.SetBool("ON", false);
-    }    
+    }
+    */    
     
     public void Tick() 
     {
         if (!curPanelMode) return;
     
-        if(Screen.height - Input.mousePosition.y < 64 && Math.Abs((Screen.width / 2) - Input.mousePosition.x) < 128) {            
-            MouseEnterOpenCloseButtonArea();            
-        }
-        else {
-            MouseExitOpenCloseButtonArea();
-        }
+        var mouseInOpenCloseArea = Screen.height - Input.mousePosition.y < 64 && Math.Abs((Screen.width / 2) - Input.mousePosition.x) < 128;
+        openCloseButton.SetMouseEnter(mouseInOpenCloseArea);
         
         imageCurAction.sprite = mostRecentActionState.sprite;
         tooltipCurrentAction.tooltipString = mostRecentActionState.text;
@@ -122,7 +120,11 @@ public class CreaturePanelUI : MonoBehaviour
         speciesIconUI.GetComponent<Image>().material = simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].coatOfArmsMat;
         speciesIconUI.tooltip.tooltipString = "Species " + simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].representativeCandidate.candidateGenome.name.Substring(0, 1);
         
-        tooltipBrain.tooltipString = "BRAIN:\n" + (agent.candidateRef.candidateGenome.brainGenome.neurons.hiddenCount + agent.candidateRef.candidateGenome.brainGenome.neurons.inOutCount) + " Neurons, " + agent.candidateRef.candidateGenome.brainGenome.axonCount + " Axons\n" + "Action: " + mostRecentActionState.id;
+        tooltipBrain.tooltipString = "BRAIN:\n" + 
+            (agent.candidateRef.candidateGenome.brainGenome.neurons.hiddenCount + 
+            agent.candidateRef.candidateGenome.brainGenome.neurons.inOutCount) + " Neurons, " + 
+            agent.candidateRef.candidateGenome.brainGenome.axonCount + " Axons\n" + "Action: " + 
+            mostRecentActionState.id;
         //tooltipGenome.tooltipString = "Genome???";
         //tooltipAppearance.tooltipString = "GEN " + agent.candidateRef.candidateGenome.generationCount + ", Axons: " + (agent.candidateRef.candidateGenome.brainGenome.links.Count + ", IO: " + agent.candidateRef.candidateGenome.brainGenome.inOutNeurons.Count + ", H: " + agent.candidateRef.candidateGenome.brainGenome.hiddenNeurons.Count);//"APPEARANCE";
 

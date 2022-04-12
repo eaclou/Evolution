@@ -91,12 +91,10 @@ public class HistoryPanelUI : MonoBehaviour
     
     public bool isGraphMode;
 
-    private bool isPanelOpen = false;
+    bool isPanelOpen => openCloseButton.isOpen;
 
     [SerializeField]
-    Animator historyPanelAnimator;
-    [SerializeField]
-    Button buttonOpenClose;
+    OpenCloseButton openCloseButton;
 
     public void InitializePanel() {
         InitializeSpeciesIcons();
@@ -136,7 +134,7 @@ public class HistoryPanelUI : MonoBehaviour
             Vector2 eventCoords = Vector2.zero;
             eventCoords.x = (float)(candidate.candidateEventDataList[i].eventFrame - candidate.performanceData.timeStepHatched) / (float)(simManager.simAgeTimeSteps - candidate.performanceData.timeStepHatched);
             eventCoords.x *= displayWidth + marginLeft;
-            eventCoords.y = (1f - ( (float)candidate.candidateEventDataList[i].type / 12f)) * displayHeight + marginBottom;
+            eventCoords.y = (1f - ((float)candidate.candidateEventDataList[i].type / 12f)) * displayHeight + marginBottom;
             creatureEventIcons[i].UpdateIconPrefabData(candidate.candidateEventDataList[i], i);
             creatureEventIcons[i].SetTargetCoords(eventCoords);
             creatureEventIcons[i].SetDisplay();
@@ -152,6 +150,7 @@ public class HistoryPanelUI : MonoBehaviour
     {
         // * WPP: comment suggests checking for matching species, but code is checking candidate ID, not species ID
         // + design goals of this if/else branch unclear
+        
         // Same species
         if (focusHasChanged)
         {
@@ -187,14 +186,14 @@ public class HistoryPanelUI : MonoBehaviour
         worldTreeLineDataCBuffer = new ComputeBuffer(worldTreeBufferCount, sizeof(float) * 7);
         
         // Create species lines
-        for(int line = 0; line < worldTreeNumSpeciesLines; line++) {
+        for (int line = 0; line < worldTreeNumSpeciesLines; line++) {
             for (int i = 0; i < worldTreeNumPointsPerLine; i++) {
                 CreateSpeciesLine(line, i, cursorCoords, worldTreeLines);
             }
         }
         
         // Create creature lines
-        for(int line = 0; line < worldTreeNumCreatureLines; line++) {
+        for (int line = 0; line < worldTreeNumCreatureLines; line++) {
             for (int i = 0; i < worldTreeNumPointsPerLine; i++) {
                 CreateCreatureLine(line, i, cursorCoords, worldTreeLines);
             }
@@ -214,7 +213,6 @@ public class HistoryPanelUI : MonoBehaviour
         WorldTreeLineData data = new WorldTreeLineData();
 
         //if (isAllSpeciesMode)
-        //{
         if (isGraphMode) 
         {
             int graphDataYearIndexStart = 0;
@@ -297,8 +295,7 @@ public class HistoryPanelUI : MonoBehaviour
             }
             data.worldPos = new Vector3(xCoord, yCoord, zCoord);
         }
-        //}
-        
+
         //if (curPanelMode == HistoryPanelMode.SpeciesPopulation || curPanelMode == HistoryPanelMode.CreatureTimeline) {
         //    data.worldPos = Vector3.zero;
         //    data.color = new Color(0f, 0f, 0f, 0f);
@@ -415,7 +412,7 @@ public class HistoryPanelUI : MonoBehaviour
     
     public void ClickSpeciesIcon(SpeciesIconUI iconUI) 
     {
-        if(iconUI.speciesID == selectionManager.currentSelection.historySelectedSpeciesID) 
+        if (iconUI.speciesID == selectionManager.currentSelection.historySelectedSpeciesID) 
         {
             Debug.Log("ClickSpeciesIcon(SpeciesIconUI iconUI) " + curPanelMode);
             if (isPopulationMode) 
@@ -443,53 +440,29 @@ public class HistoryPanelUI : MonoBehaviour
     public void ClickButtonToggleExtinct() { }
     
     public void ClickButtonBack() {
-        if(curPanelMode == HistoryPanelMode.SpeciesPopulation) {
+        if (curPanelMode == HistoryPanelMode.SpeciesPopulation) {
             curPanelMode = HistoryPanelMode.AllSpecies;
         } 
-        if(curPanelMode == HistoryPanelMode.CreatureTimeline) {
+        if (curPanelMode == HistoryPanelMode.CreatureTimeline) {
             curPanelMode = HistoryPanelMode.SpeciesPopulation;
         }        
     }
     
     public void ClickButtonModeCycle() {
         curPanelMode++;
-        if((int)curPanelMode >= 4) {
+        if ((int)curPanelMode >= 4) {
             curPanelMode = 0;
         }
     }
 
-    public void OpenClose() {
-        isPanelOpen = !isPanelOpen;
-        if(isPanelOpen) {
-            buttonOpenClose.GetComponentInChildren<Text>().text = ">";
-        }
-        else {
-            buttonOpenClose.GetComponentInChildren<Text>().text = "<";
-        }
-        historyPanelAnimator.SetBool("_IsPanelOpen", isPanelOpen);
-    }
-    public void MouseEnterOpenCloseButtonArea() {
-        
-        Animator OpenCloseButtonAnimator = buttonOpenClose.GetComponent<Animator>();
-        OpenCloseButtonAnimator.SetBool("ON", true);
-    }
-    public void MouseExitOpenCloseButtonArea() {
-        Animator OpenCloseButtonAnimator = buttonOpenClose.GetComponent<Animator>();
-        OpenCloseButtonAnimator.SetBool("ON", false);
-    }    
-    
     public void ClickedSelectedCreatureEvents() {
         curPanelMode = HistoryPanelMode.CreatureTimeline;
     }
     
     public void Tick() 
     {
-        if(Screen.height - Input.mousePosition.y < 64 && Input.mousePosition.x < 64) {            
-            MouseEnterOpenCloseButtonArea();            
-        }
-        else {
-            MouseExitOpenCloseButtonArea();
-        }
+        var mouseInOpenCloseArea = Screen.height - Input.mousePosition.y < 64 && Input.mousePosition.x < 64;
+        openCloseButton.SetMouseEnter(mouseInOpenCloseArea);
 
         textPanelStateDebug.text = "MODE: " + selectionManager.currentSelection.historySelectedSpeciesID + selectionManager.currentSelection.candidate.speciesID;
         buttonToggleExtinct.gameObject.SetActive(false);
@@ -617,7 +590,6 @@ public class HistoryPanelUI : MonoBehaviour
         }
     }
     
-   
     private void UpdateSpeciesIconsSinglePop() {
         foreach (var icon in speciesIcons) {         
             // DEFAULTS
@@ -709,4 +681,29 @@ public class HistoryPanelUI : MonoBehaviour
     private void OnDisable() {
         worldTreeLineDataCBuffer?.Release();
     }
+    
+    // WPP 4/12/22: delegated to OpenCloseButton
+    /*public void OpenClose() {
+        isPanelOpen = !isPanelOpen;
+        var text = isPanelOpen ? ">" : "<";
+        openCloseButton.text.text = text;
+        historyPanelAnimator.SetBool("_IsPanelOpen", isPanelOpen);
+    }
+    
+    public void MouseEnterOpenCloseButtonArea() {
+        if (!gameObject.activeInHierarchy) return;
+        openCloseButton.animator.SetBool("ON", true);
+    }
+    
+    public void MouseExitOpenCloseButtonArea() {
+        if (!gameObject.activeInHierarchy) return;
+        openCloseButton.animator.SetBool("ON", false);
+    }
+    
+    [Serializable]
+    public struct OpenCloseButton
+    {
+        public Animator animator;
+        public Text text;
+    }*/
 }

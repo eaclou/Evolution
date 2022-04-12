@@ -27,16 +27,23 @@ public class BrainGenome
         initialHiddenNeuronCount = hiddenNeuronCount;
         InitializeRandomBrainGenome(bodyGenome); 
         
-        if (HasInvalidAxons())    // OK
-            Debug.LogError("Invalid axons detected: initial construction");
+        MonoSim.instance.SimInvoke(DelayPrintAxonError, 0.2f);
     }
     
+    void DelayPrintAxonError()
+    {
+        Debug.Log($"Normal Construction failure: {HasInvalidAxons()}");
+    }
+
     public BrainGenome(BrainGenome parent, BodyGenome self, MutationSettingsInstance mutationSettings)
     {
+        if (HasInvalidAxons(parent)) // NG
+            Debug.LogError("Invalid axons detected in parent: mutation construction");
+    
         SetToMutatedCopy(parent, self, mutationSettings);
         
-        if (HasInvalidAxons())   // NG
-            Debug.LogError("Invalid axons detected: mutation construction");
+        //if (HasInvalidAxons())   // NG: downstream error of parent
+        //    Debug.LogError("Invalid axons detected: mutation construction");
     }
 
     public void ClearNeuronsAndAxons() 
