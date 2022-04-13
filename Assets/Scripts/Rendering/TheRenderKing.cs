@@ -2660,25 +2660,25 @@ public class TheRenderKing : Singleton<TheRenderKing>
 
         #region Dead code (please delete)
         //if (simManager.trophicLayersManager.GetAgentsOnOff()) {
-            /*critterUberStrokeShadowMat.SetPass(0);
-            critterUberStrokeShadowMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-            critterUberStrokeShadowMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-            critterUberStrokeShadowMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-            critterUberStrokeShadowMat.SetBuffer("critterGenericStrokesCBuffer", critterGenericStrokesCBuffer); 
-            critterUberStrokeShadowMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-            critterUberStrokeShadowMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
-            //critterUberStrokeShadowMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
-            critterUberStrokeShadowMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            critterUberStrokeShadowMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
-            critterUberStrokeShadowMat.SetFloat("_MapSize", SimulationManager._MapSize);
-            critterUberStrokeShadowMat.SetFloat("_Turbidity", simManager.fogAmount);     
-            critterUberStrokeShadowMat.SetFloat("_MinFog", minimumFogDensity);  
-            critterUberStrokeShadowMat.SetFloat("_Density", Mathf.Lerp(0.15f, 1f, Mathf.Clamp01(simManager.simResourceManager.curGlobalDecomposers / 100f)));  
-            critterUberStrokeShadowMat.SetVector("_FogColor", simManager.fogColor);  
-            critterUberStrokeShadowMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel); 
-            //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterUberStrokeShadowMat, 0, MeshTopology.Triangles, 6, critterGenericStrokesCBuffer.count);
-            */
+        critterUberStrokeShadowMat.SetPass(0);
+        critterUberStrokeShadowMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        critterUberStrokeShadowMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        critterUberStrokeShadowMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        critterUberStrokeShadowMat.SetBuffer("critterGenericStrokesCBuffer", mainCritterStrokesCBuffer); 
+        critterUberStrokeShadowMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+        critterUberStrokeShadowMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
+        //critterUberStrokeShadowMat.SetTexture("_VelocityTex", fluidManager._VelocityA);
+        critterUberStrokeShadowMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        critterUberStrokeShadowMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+        critterUberStrokeShadowMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        critterUberStrokeShadowMat.SetFloat("_Turbidity", simManager.fogAmount);     
+        critterUberStrokeShadowMat.SetFloat("_MinFog", minimumFogDensity);  
+        critterUberStrokeShadowMat.SetFloat("_Density", Mathf.Lerp(0.15f, 1f, Mathf.Clamp01(simManager.simResourceManager.curGlobalDecomposers / 100f)));  
+        critterUberStrokeShadowMat.SetVector("_FogColor", simManager.fogColor);  
+        critterUberStrokeShadowMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel); 
+        //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
+        cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterUberStrokeShadowMat, 0, MeshTopology.Triangles, 6, mainCritterStrokesCBuffer.count);
+            
             /*
                     eggSackShadowDisplayMat.SetPass(0);
                     eggSackShadowDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
@@ -2726,18 +2726,18 @@ public class TheRenderKing : Singleton<TheRenderKing>
             cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterInspectHighlightMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
         }*/
 
-        /*if(simManager.trophicLayersManager.GetZooplanktonOnOff()) {
-            animalParticleShadowDisplayMat.SetPass(0);
-            animalParticleShadowDisplayMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
-            animalParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
-            animalParticleShadowDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-            animalParticleShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-            animalParticleShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-            animalParticleShadowDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
-            animalParticleShadowDisplayMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel);
-            cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
+        
+        animalParticleShadowDisplayMat.SetPass(0);
+        animalParticleShadowDisplayMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
+        animalParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
+        animalParticleShadowDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        animalParticleShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        animalParticleShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+        animalParticleShadowDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
+        animalParticleShadowDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
+        cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
     
-        }*/
+        
         #endregion
         
         float isHighlight = 0f;

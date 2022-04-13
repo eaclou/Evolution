@@ -479,14 +479,14 @@ public struct CritterInitData
 
         // Mag range: 2 --> 0.5
         // freq range: 1 --> 2
-        swimMagnitude = Mathf.Lerp(0.225f, 1.1f, swimLerp); 
-        swimFrequency = Mathf.Lerp(1.5f, 0.6f, swimLerp);   
+        swimMagnitude = Mathf.Lerp(0.1f, 0.71f, swimLerp); 
+        swimFrequency = Mathf.Lerp(1.05f, 0.4f, swimLerp);   
         swimAnimSpeed = 6f;
 
         bodyCoord = bodyGenome.coreGenome.bodyCoord;
         headCoord = bodyGenome.coreGenome.headCoord;
         mouthCoord = bodyGenome.coreGenome.mouthCoord;
-        bendiness = 1f; 
+        bendiness = 0.75f; 
         speciesID = 0; 
         
         // what grid cell of texture sheet to use

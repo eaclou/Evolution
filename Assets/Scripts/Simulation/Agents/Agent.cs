@@ -184,7 +184,7 @@ public class Agent : MonoBehaviour {
 
     public EggSack childEggSackRef;
     public bool isPregnantAndCarryingEggs = false;
-    public int pregnancyRefactoryDuration = 2400;
+    public int pregnancyRefactoryDuration = 1200;
     
     IAgentAbility activeAbility;
     IAgentAbility attack;
@@ -791,7 +791,7 @@ public class Agent : MonoBehaviour {
     }
     
     public void BeginPregnancy(EggSack developingEggSackRef) {
-        //Debug.Log("BeginPregnancy! [" + developingEggSackRef.index.ToString() + "]");
+        Debug.Log("BeginPregnancy! [" + developingEggSackRef.index.ToString() + "] agent# " + this.index);
         
         isPregnantAndCarryingEggs = true;
         childEggSackRef = developingEggSackRef;
