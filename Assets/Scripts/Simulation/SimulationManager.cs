@@ -808,8 +808,6 @@ public class SimulationManager : Singleton<SimulationManager>
     private void CheckForNullAgents() { 
         foreach (var agent in agents) {
             if (agent.isNull) {
-                if (agent.brain.genome.HasInvalidAxons())  // OK
-                    Debug.LogError($"Invalid axons found in agent {agent.index}");
                 ProcessNullAgent(agent);
             }
         } 

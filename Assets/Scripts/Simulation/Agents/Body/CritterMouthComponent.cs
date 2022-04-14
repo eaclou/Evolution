@@ -71,6 +71,7 @@ public class CritterMouthComponent : MonoBehaviour
         {            
             if (i >= edibleObjectsInRange.Count) continue;
             RequestFeedBiteAgent(edibleObjectsInRange[i]);
+            if (i >= edibleObjectsInRange.Count) continue;
             RequestBiteEggSack(edibleObjectsInRange[i]);
         }
     }

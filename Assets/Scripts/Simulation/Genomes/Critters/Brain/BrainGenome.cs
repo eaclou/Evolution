@@ -204,10 +204,8 @@ public class BrainGenome
         int maxChecks = 8;
         for (int k = 0; k < maxChecks; k++) 
         {
-            // WPP: only adds in->out connections 
-            // (should also allow for in->hidden, hidden->hidden, and hidden->out)
-            var from = neurons.RandomNeuron(neurons.input);
-            var to = neurons.RandomNeuron(neurons.output);
+            var from = neurons.RandomNeuron(neurons.inHidden);
+            var to = neurons.RandomNeuron(neurons.hiddenOut);
 
             if (LinkExists(from, to)) continue;
 
@@ -219,7 +217,6 @@ public class BrainGenome
         }
     }
     
-    // Axons not sharing references, hackfix applied in Brain.ValidateAxons
     bool LinkExists(Neuron from, Neuron to)
     {
         foreach (var axon in axons.all)
@@ -298,18 +295,6 @@ public class BrainGenome
         return false;
     }
     
-    #region Hackfix for mismatch between axon connection targets and actual neurons
-    
-    public void ValidateAxons()
-    {
-        foreach (var axon in axons.all)
-            if (!neurons.all.Contains(axon.from))
-                axon.from = FindNeuron(axon.from);
-                
-        foreach (var axon in axons.all)
-            if (!neurons.all.Contains(axon.to))
-                axon.to = FindNeuron(axon.to);
-    }
     
     Neuron FindNeuron(Neuron invalidNeuron)
     {
@@ -320,8 +305,6 @@ public class BrainGenome
         //Debug.LogError($"Unable to find neuron [{invalidNeuron.index}] {invalidNeuron.name}");
         return invalidNeuron;
     }
-    
-    #endregion
 }
 
 

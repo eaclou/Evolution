@@ -84,6 +84,8 @@ public class NeuronList
     public List<Neuron> hidden = new List<Neuron>();
     public List<Neuron> input = new List<Neuron>();
     public List<Neuron> output = new List<Neuron>();
+    public List<Neuron> inHidden = new List<Neuron>();
+    public List<Neuron> hiddenOut = new List<Neuron>();
     
     public int inCount => input.Count;
     public int outCount => output.Count;
@@ -98,17 +100,24 @@ public class NeuronList
         neuron.data.index = all.Count;
         all.Add(neuron);
         
+        // Consider storing associations in a ScriptableObject if this gets more complex.
         switch (neuron.io)
         {
             case NeuronType.In: 
                 input.Add(neuron); 
                 inOut.Add(neuron);
+                inHidden.Add(neuron);
                 break;
             case NeuronType.Out: 
                 output.Add(neuron); 
                 inOut.Add(neuron);
+                hiddenOut.Add(neuron);
                 break;
-            case NeuronType.Hidden: hidden.Add(neuron); break;
+            case NeuronType.Hidden: 
+                hidden.Add(neuron); 
+                inHidden.Add(neuron);
+                hiddenOut.Add(neuron);
+                break;
         }
     }
         
@@ -117,18 +126,25 @@ public class NeuronList
         if (!all.Contains(neuron)) return;
 
         all.Remove(neuron);
-            
+        
+        // Consider storing associations in a ScriptableObject if this gets more complex.
         switch (neuron.io)
         {
             case NeuronType.In: 
                 input.Remove(neuron); 
                 inOut.Remove(neuron);
+                inHidden.Remove(neuron);
                 break;
             case NeuronType.Out: 
                 output.Remove(neuron); 
                 inOut.Remove(neuron);
+                hiddenOut.Remove(neuron);
                 break;
-            case NeuronType.Hidden: hidden.Remove(neuron); break;
+            case NeuronType.Hidden: 
+                hidden.Remove(neuron); 
+                inHidden.Remove(neuron);
+                hiddenOut.Remove(neuron);
+                break;
         }        
     }
         
@@ -139,6 +155,8 @@ public class NeuronList
         input.Clear();
         output.Clear();
         hidden.Clear();
+        inHidden.Clear();
+        hiddenOut.Clear();
     }
         
     public void Sync(List<Neuron> listToModify, List<Neuron> referenceList)
