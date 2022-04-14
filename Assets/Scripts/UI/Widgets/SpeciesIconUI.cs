@@ -62,7 +62,7 @@ public class SpeciesIconUI : MonoBehaviour
     
     public void UpdateSpeciesIconDisplay(int panelPixelSize, bool isSelected) 
     {
-        string toolString = "Species " + linkedPool.representativeCandidate.candidateGenome.name.Substring(0, 1);
+        string toolString = "Species " + linkedPool.speciesID;
         
         // POSITION
         currentCoords = Vector2.Lerp(currentCoords, targetCoords, 0.67f);

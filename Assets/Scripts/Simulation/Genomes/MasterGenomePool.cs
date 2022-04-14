@@ -93,13 +93,15 @@ public class MasterGenomePool
             if (fitness < worstFitness) {
                 worstFitness = fitness;
                 leastFitSpeciesID = idList;
+                
             }
             if (completeSpeciesPoolsList[idList].isFlaggedForExtinction) {
                 noCurrentlyExtinctFlaggedSpecies = false;
 
                 if (completeSpeciesPoolsList[idList].candidateGenomesList.Count < 1) {
                     ExtinctifySpecies(idList);
-                    Debug.Log("EXTINCTIFY " + leastFitSpeciesID + ", " + idList + ", fitness: " + worstFitness);
+                    Debug.Log("EXTINCTIFY " + leastFitSpeciesID + ", " + idList + ", fitness: " + worstFitness + ", #evals: " + completeSpeciesPoolsList[leastFitSpeciesID].numAgentsEvaluated);
+                    Debug.Log("0, " + completeSpeciesPoolsList[0].avgCandidateData.performanceData.totalTicksAlive + ", #evals: " + completeSpeciesPoolsList[0].numAgentsEvaluated);
                 }
             }
         }
@@ -109,14 +111,14 @@ public class MasterGenomePool
                 // OK to KILL!!!
                 FlagSpeciesExtinct(leastFitSpeciesID);
                 //completeSpeciesPoolsList[leastFitSpeciesID].isFlaggedForExtinction = true;
-                Debug.Log("FLAG EXTINCT: " + leastFitSpeciesID);
+                Debug.Log("FLAG EXTINCT: " + leastFitSpeciesID + ", fitness: " + completeSpeciesPoolsList[leastFitSpeciesID].avgCandidateData.performanceData.totalTicksAlive + ", " + completeSpeciesPoolsList[leastFitSpeciesID].candidateGenomesList.Count + " Cands");
             }
         }
     }
 
     public void FlagSpeciesExtinct(int speciesID) {
         completeSpeciesPoolsList[speciesID].isFlaggedForExtinction = true;
-        Debug.Log("FLAG EXTINCT: " + speciesID);
+        //Debug.Log("FLAG EXTINCT: " + speciesID);
     }
     
     public void ExtinctifySpecies(int speciesID) {
@@ -133,9 +135,6 @@ public class MasterGenomePool
         currentlyActiveSpeciesIDList.RemoveAt(listIndex);
         completeSpeciesPoolsList[speciesID].ProcessExtinction(simulation.simAgeTimeSteps);
 
-        //Signal RenderKing/TreeOfLifeManager to update:
-        //simManagerRef.uiManager.treeOfLifeManager.RemoveExtinctSpecies(speciesID);
-        //simManagerRef.theRenderKing.TreeOfLifeExtinctSpecies(speciesID);
     }
 
     public SpeciesGenomePool SelectNewGenomeSourceSpecies(bool weighted, float weightedAmount) {

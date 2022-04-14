@@ -45,7 +45,10 @@ public class CreaturePanelUI : MonoBehaviour
     [SerializeField]
     public SpeciesIconUI speciesIconUI;
 
-    private StringSO curPanelMode;
+    private StringSO curPanelMode; // deprecate
+
+    [SerializeField]
+    Text debugText;
 
     // PORTRAIT!!!!
     public ComputeBuffer portraitCritterInitDataCBuffer;
@@ -106,6 +109,10 @@ public class CreaturePanelUI : MonoBehaviour
 
         tooltipGenerationCount.tooltipString = "Generation " + agent.candidateRef.candidateGenome.generationCount.ToString();
         textGenerationCount.text = agent.candidateRef.candidateGenome.generationCount.ToString();
+
+        float reqMass = SettingsManager.instance.agentSettings._BaseInitMass * SettingsManager.instance.agentSettings._MinPregnancyFactor;
+        float agentMass = agent.currentBiomass * SettingsManager.instance.agentSettings._MaxPregnancyProportion;
+        debugText.text = "Agent# " + agent.index + "\nCandidateID: " + agent.candidateRef.candidateID + "\nreqMass: " + reqMass + ", agentMass: " + agentMass.ToString("F2");
     }
     
     public void SetPanelMode(StringSO mode) {

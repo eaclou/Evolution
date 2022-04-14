@@ -9,8 +9,10 @@ public struct SocketInitData
 
 public class GenerateBrainVisualization : MonoBehaviour 
 {
-    List<Neuron> neurons;
-    List<Axon> axons;
+    [ReadOnly]
+    public List<Neuron> neurons;
+    [ReadOnly]
+    public List<Axon> axons;
     
     int numNeurons => neurons.Count;
 
