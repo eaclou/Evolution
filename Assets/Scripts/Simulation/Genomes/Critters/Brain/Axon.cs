@@ -10,7 +10,7 @@ public class Axon
     public Neuron to;
     public float weight;    // multiplier on signal
     
-    public int index;
+    public int index = -1;
     public int uniqueID;
     
     public float normalizedWeight => weight * 0.5f + 0.5f;
@@ -57,6 +57,10 @@ public class AxonList
         axon.index = all.Count;
         all.Add(axon);
         GetSublist(axon)?.Add(axon);
+        
+        if (!IsValid(axon))   // OK
+            Debug.LogError($"Invalid axon [{axon.index}] connecting neurons " +
+                           $"{axon.from.index} to {axon.to.index}");
     }
     
     public void Remove(Axon axon)
@@ -76,12 +80,12 @@ public class AxonList
         hiddenOut.Clear();
     }
     
-    public void Reset(List<Axon> list)
+    /*public void Reset(List<Axon> list)
     {
         Clear();
         foreach (var axon in list)
             Add(axon);
-    }
+    }*/
     
     List<Axon> GetSublist(Axon axon)
     {

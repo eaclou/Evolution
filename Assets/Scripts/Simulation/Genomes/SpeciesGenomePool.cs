@@ -293,33 +293,14 @@ public class SpeciesGenomePool
 
     public AgentGenome Mutate(AgentGenome parentGenome, bool bodySettings, bool brainSettings) 
     {
-        // NG: downstream error from SimulationManager.ProcessNullAgent()
-        if (parentGenome.brainGenome.HasInvalidAxons(parentGenome.brainGenome))
-            Debug.LogError("SpeciesGenomePool.Mutate(): Invalid axon(s) detected");
-    
-        //AgentGenome parentGenome = leaderboardGenomesList[selectedIndex].candidateGenome;
-
-        // WPP: delegated to function
         string newName = GetMutatedName(parentGenome.name);
-        /*
-        string parentName = parentGenome.name;
-        int randIndex = Random.Range(0, parentName.Length - 1);        
-        string frontHalf = parentName.Substring(0, randIndex);
-        string middleChar = parentName.Substring(randIndex, 1);
-        string backHalf = parentName.Substring(randIndex + 1);          
-        if (RandomStatics.CoinToss(.05f)) {
-            middleChar = RandomStatics.GetRandomLetter();
-        }
-        frontHalf += middleChar;
-        string newName = RandomStatics.CoinToss(.025f) ? backHalf + frontHalf : frontHalf + backHalf;
-        */
 
         tempMutationSettings = bodySettings ? mutationSettings : cachedNoneMutationSettings;
         BodyGenome newBodyGenome = new BodyGenome(parentGenome.bodyGenome, tempMutationSettings);
 
         tempMutationSettings = brainSettings ? mutationSettings : cachedNoneMutationSettings;
         BrainGenome newBrainGenome = new BrainGenome(parentGenome.brainGenome, newBodyGenome, tempMutationSettings);
-
+        
         return new AgentGenome(newBodyGenome, newBrainGenome, parentGenome.generationCount + 1, newName);
     }
     

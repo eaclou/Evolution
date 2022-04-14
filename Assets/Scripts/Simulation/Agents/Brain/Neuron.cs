@@ -33,7 +33,6 @@ public class Neuron
         {
             if (currentValues == null) currentValues = new float[1];
             currentValues[0] = value;
-            //Debug.Log(value); // NG: always zero
         }
     }
     
@@ -61,7 +60,7 @@ public class NeuronData
     public string name;
     public int index;
     public Vector3 iconPosition;
-    public int uniqueID;  // Debug: tests if reference to neuron is shared (it is not)
+    public int uniqueID;
     
     public NeuronData(MetaNeuron template)
     {
@@ -142,15 +141,12 @@ public class NeuronList
         hidden.Clear();
     }
         
-    public void Sync(List<Neuron> oldList, List<Neuron> newList)
+    public void Sync(List<Neuron> listToModify, List<Neuron> referenceList)
     {
-        foreach (var item in newList)
-            if (!oldList.Contains(item))
-                Add(item);
-                    
-        foreach (var item in oldList)
-            if (!newList.Contains(item))
-                Remove(item);
+        ClearSublist(listToModify);
+        
+        foreach (var neuron in referenceList)
+            Add(new Neuron(neuron));
     }
         
     public void ClearSublist(List<Neuron> list)

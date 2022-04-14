@@ -11,16 +11,15 @@ public class AgentGenome
     Lookup lookup => Lookup.instance;
     NameList nameList => lookup.nameList;
     
-    //public AgentGenome() { Debug.LogError("Default AgentGenomeConstructor"); ConstructRandom(0.1f, 0); }
-
     public void IncrementGenerationCount() {
         generationCount++;
     }
+    
     public AgentGenome(float initialConnectionDensity, int hiddenNeurons)
     {        
         ConstructRandom(initialConnectionDensity, hiddenNeurons);
         name = nameList.GetRandomName();
-        //Debug.Log("Constructing random AgentGenome...");
+        //Debug.Log($"Constructing random AgentGenome, brain has {brainGenome.axonCount} axons");
     }
    
     void ConstructRandom(float initialConnectionDensity, int hiddenNeuronCount)
@@ -35,7 +34,7 @@ public class AgentGenome
         this.brainGenome = brainGenome;
         this.generationCount = generationCount;
         this.name = name;
-        //Debug.Log("Constructing AgentGenome via mutation");
+        //Debug.Log($"Constructing AgentGenome via mutation, brain has {brainGenome.axonCount} axons");
     }
     
     public void GenerateInitialRandomBodyGenome() {

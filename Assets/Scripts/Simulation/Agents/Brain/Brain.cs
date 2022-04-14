@@ -12,72 +12,11 @@ public class Brain
     public BrainGenome genome;
 
     public Brain(BrainGenome genome) {
-       // Debug.Log("Brain constructed with " + genome.inOutNeurons.Count + " neurons.");
         this.genome = genome;
         //RebuildBrain(genome, agent);
         genome.ValidateAxons();
     }
 
-   #region [WPP] Obsolete: data stored/synced in BrainGenome, referenced here
-   /// Create Neurons and Axons
-   /*public void RebuildBrain(BrainGenome genome, Agent agent) 
-    {
-        //Debug.Log($"Rebuilding brain with {genome.inOutNeurons.Count} neurons in genome, " +
-        //          $"and {genome.linkCount} links in genome");
-        
-        this.genome = genome;
-        //neurons = new List<Neuron>();
-        
-        //RebuildNeurons(genome.inOutNeurons, agent);
-        //RebuildNeurons(genome.hiddenNeurons, agent);
-
-        //RebuildAxons(genome);
-        //PrintBrain();
-    }*/
-   
-    /*void RebuildAxons(BrainGenome genome)
-    {
-        axons = new List<Axon>();
-        
-        if (genome.linkCount <= 0)
-        {
-            Debug.LogError("Cannot rebuild axons because genome has zero links");
-            return;
-        }
-        
-        foreach (var link in genome.links) 
-        {
-            var from = GetMatchingNeuron(neurons, link.from);
-            var to = GetMatchingNeuron(neurons, link.to);
-            
-            if (from == null || to == null)
-                continue;
-            
-            Axon axon = new Axon(from, to, link.weight);
-            axons.Add(axon);
-        }        
-    }
-
-    Neuron GetMatchingNeuron(List<Neuron> list, Neuron genome)
-    {
-        foreach (var item in list)
-            if (item.IsMe(genome))
-                return item;
-                
-        return null;        
-    }
-    
-    void RebuildNeurons(List<Neuron> neuronGenomes, Agent agent)
-    {
-        foreach (var genome in neuronGenomes)
-        {
-            Neuron neuron = new Neuron(genome);
-            agent.MapNeuronToModule(genome.template, neuron);
-            neurons.Add(neuron);
-        }
-    }*/
-    #endregion
-    
     public void ResetBrainState() {
         foreach (var neuron in allNeurons) {
             neuron.currentValue = 0f;
@@ -130,3 +69,63 @@ public class Brain
     
     #endregion
 }
+
+#region [WPP] Obsolete: data stored/synced in BrainGenome, referenced here
+/// Create Neurons and Axons
+/*public void RebuildBrain(BrainGenome genome, Agent agent) 
+ {
+     //Debug.Log($"Rebuilding brain with {genome.inOutNeurons.Count} neurons in genome, " +
+     //          $"and {genome.linkCount} links in genome");
+     
+     this.genome = genome;
+     //neurons = new List<Neuron>();
+     
+     //RebuildNeurons(genome.inOutNeurons, agent);
+     //RebuildNeurons(genome.hiddenNeurons, agent);
+
+     //RebuildAxons(genome);
+     //PrintBrain();
+ }*/
+   
+/*void RebuildAxons(BrainGenome genome)
+{
+    axons = new List<Axon>();
+    
+    if (genome.linkCount <= 0)
+    {
+        Debug.LogError("Cannot rebuild axons because genome has zero links");
+        return;
+    }
+    
+    foreach (var link in genome.links) 
+    {
+        var from = GetMatchingNeuron(neurons, link.from);
+        var to = GetMatchingNeuron(neurons, link.to);
+        
+        if (from == null || to == null)
+            continue;
+        
+        Axon axon = new Axon(from, to, link.weight);
+        axons.Add(axon);
+    }        
+}
+
+Neuron GetMatchingNeuron(List<Neuron> list, Neuron genome)
+{
+    foreach (var item in list)
+        if (item.IsMe(genome))
+            return item;
+            
+    return null;        
+}
+
+void RebuildNeurons(List<Neuron> neuronGenomes, Agent agent)
+{
+    foreach (var genome in neuronGenomes)
+    {
+        Neuron neuron = new Neuron(genome);
+        agent.MapNeuronToModule(genome.template, neuron);
+        neurons.Add(neuron);
+    }
+}*/
+#endregion
