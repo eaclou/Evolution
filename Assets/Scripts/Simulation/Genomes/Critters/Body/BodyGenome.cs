@@ -63,16 +63,16 @@ public class BodyGenome
     }
 
     /// Creates neurons based on state of "use" variables
-    public List<Neuron> GetUnlockedNeurons(int priorCount)
+    public List<Neuron> GetUnlockedNeurons()
     {
         var result = new List<Neuron>();
         
         foreach (var tech in unlockedTech.values)
             foreach (var template in tech.unlocks)
-                result.Add(template.GetNeuron(priorCount + result.Count));
+                result.Add(template.GetNeuron());
 
-        result.Add(map.GetData("bias", priorCount + result.Count)); 
-        result.Add(map.GetData("_mouthTriggerOutputs", priorCount + result.Count));
+        result.Add(map.GetData("bias")); 
+        result.Add(map.GetData("_mouthTriggerOutputs"));
          
         return result;
     }

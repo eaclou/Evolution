@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 [Serializable]
 public class Axon 
@@ -9,6 +10,9 @@ public class Axon
     public Neuron to;
     public float weight;    // multiplier on signal
     
+    public int index;
+    public int uniqueID;
+    
     public float normalizedWeight => weight * 0.5f + 0.5f;
     
     public Axon(Neuron from, Neuron to, float weight)
@@ -16,6 +20,7 @@ public class Axon
         this.from = from;
         this.to = to;
         this.weight = weight;
+        uniqueID = Random.Range(int.MinValue, int.MaxValue);
         
         // NG on mutate path only. Downstream error of BrainGenome.SetToMutatedCopyOfParentGenome
         //if (from.io == to.io && from.io != NeuronType.Hidden)  
@@ -31,13 +36,6 @@ public class Axon
                 Debug.Log("Connection already in list");
                 return true;
             }
-            
-            // Hackfix applied in Brain.ValidateAxons
-            /*if (item.name == from.name || item.name == to.name)
-            {
-                Debug.LogError("Connection found by name, not by reference");
-                return true;
-            }*/
         }
                 
         return false;
@@ -56,6 +54,7 @@ public class AxonList
     public void Add(Axon axon)
     {
         if (all.Contains(axon)) return;
+        axon.index = all.Count;
         all.Add(axon);
         GetSublist(axon)?.Add(axon);
     }

@@ -8,19 +8,6 @@ public class Neuron
 {
     UIManager ui => UIManager.instance;
     PlaceNeuronsAtUI placement => ui.placeNeuronsAtUI;
-
-    // WPP: moved to constructors
-    /*NeuronGenome _genome;
-    public NeuronGenome genome
-    {
-        get => _genome;
-        set
-        {
-            _genome = value;
-            data = new NeuronData(this);
-            data.iconPosition = placement.GetNeuronPosition(this);
-        }
-    }*/
     
     /// Static data
     [Header("Static Data")] 
@@ -50,19 +37,18 @@ public class Neuron
         }
     }
     
-    /// Deep copy
-    public Neuron(Neuron original) { GenerateStaticData(original.template, original.index); }
+    /// Copy existing neuron
+    public Neuron(Neuron original) { GenerateStaticData(original.template); }
 
-    //public Neuron(NeuronGenome genome) { this.genome = genome; }
-    public Neuron(MetaNeuron template, int index) { GenerateStaticData(template, index); }
+    // Create a new neuron from template data
+    public Neuron(MetaNeuron template) { GenerateStaticData(template); }
     
-    void GenerateStaticData(MetaNeuron template, int index)
+    void GenerateStaticData(MetaNeuron template)
     {
-        data = new NeuronData(template, index);
+        data = new NeuronData(template);
         data.iconPosition = placement.GetNeuronPosition(this);        
     }
     
-    //public bool IsMe(NeuronGenome other) { return data.template == other.data && genome.index == other.index; }
     public bool IsMe(Neuron other) { return template == other.template && index == other.index; }
 }
 
@@ -75,16 +61,16 @@ public class NeuronData
     public string name;
     public int index;
     public Vector3 iconPosition;
-    public int randomID;  // Debug: tests if reference to neuron is shared (it is not)
+    public int uniqueID;  // Debug: tests if reference to neuron is shared (it is not)
     
-    public NeuronData(MetaNeuron template, int index)
+    public NeuronData(MetaNeuron template)
     {
         this.template = template;
         name = template.name;
-        this.index = index;
         io = template.io;
         iconPosition = Vector3.zero;
-        randomID = Random.Range(int.MinValue, int.MaxValue);
+        uniqueID = Random.Range(int.MinValue, int.MaxValue);
+        index = -1;  // Will be set when added to list
     }
 }
 
@@ -110,8 +96,9 @@ public class NeuronList
     {
         if (all.Contains(neuron)) return;
             
+        neuron.data.index = all.Count;
         all.Add(neuron);
-            
+        
         switch (neuron.io)
         {
             case NeuronType.In: 

@@ -339,7 +339,7 @@ public class CritterModuleCoreGenome
     
     void AddNeuron(string name) 
     {
-        var neuron = map.GetData(name, masterList.Count); 
+        var neuron = map.GetData(name); 
         masterList.Add(neuron); 
     }
 

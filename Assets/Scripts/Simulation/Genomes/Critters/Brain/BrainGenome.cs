@@ -57,52 +57,20 @@ public class BrainGenome
         InitializeIONeurons(bodyGenome);
         InitializeAxons();
     }
-
-    /*void InitializeBodyNeuronList() {
-        if (inOutNeurons == null) inOutNeurons = new List<Neuron>();
-        else inOutNeurons.Clear();
-    }*/
-
+    
     public void InitializeIONeurons(BodyGenome bodyGenome) 
     {
         neurons.ClearSublist(neurons.inOut);
 
-        var newNeurons = bodyGenome.GetUnlockedNeurons(neurons.allCount);
+        var newNeurons = bodyGenome.GetUnlockedNeurons();
         foreach (var neuron in newNeurons)
             neurons.Add(neuron);
-        //SortIONeurons();
     }
-
-    #region [WPP] Obsolete with list management system
-    /*void SortIONeurons()
-    {
-        inputNeurons.Clear();
-        outputNeurons.Clear();
-        
-        foreach (var neuron in inOutNeurons) 
-            SortIONeuron(neuron);
-    }
-    
-    void SortIONeuron(Neuron neuron)
-    {
-        switch (neuron.data.io) 
-        {
-            case NeuronType.In: 
-                if (!inputNeurons.Contains(neuron)) 
-                    inputNeurons.Add(neuron); 
-                break;
-            case NeuronType.Out: 
-                if (!outputNeurons.Contains(neuron)) 
-                    outputNeurons.Add(neuron); 
-                break;
-        }        
-    }*/
-    #endregion
 
     public void InitializeAxons() 
     {
         for (int i = 0; i < initialHiddenNeuronCount; i++) {
-            var neuron = new Neuron(hiddenTemplate, neurons.inOutCount + i);
+            var neuron = new Neuron(hiddenTemplate);
             neurons.Add(neuron);
         }
         
@@ -338,7 +306,7 @@ public class BrainGenome
         }
         
         // Create new hidden neuron
-        var newHiddenNeuron = new Neuron(hiddenTemplate, neurons.all.Count);
+        var newHiddenNeuron = new Neuron(hiddenTemplate);
         neurons.Add(newHiddenNeuron);
         
         // Create 2 new axons

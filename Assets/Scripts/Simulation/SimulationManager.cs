@@ -807,9 +807,9 @@ public class SimulationManager : Singleton<SimulationManager>
     /// Recycles dead agents
     private void CheckForNullAgents() { 
         foreach (var agent in agents) {
-            if (agent.brain.genome.HasInvalidAxons())  // NG on all life stages
-                Debug.LogError($"Invalid axon(s) detected: SimulationManager.CheckForNullAgents " +
-                               $"{agent.curLifeStage}, agent {agent.index}");
+            //if (agent.brain.genome.HasInvalidAxons())  // NG on all life stages
+            //    Debug.LogError($"Invalid axon(s) detected: SimulationManager.CheckForNullAgents " +
+            //                   $"{agent.curLifeStage}, agent {agent.index}");
             if (agent.isNull) {
                 ProcessNullAgent(agent);
             }

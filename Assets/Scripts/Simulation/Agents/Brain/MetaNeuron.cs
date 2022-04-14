@@ -12,7 +12,7 @@ public class MetaNeuron : ScriptableObject
     public BrainModuleID moduleID;
     public BrainIconID iconID;
 
-    public Neuron GetNeuron(int index) { return new Neuron(this, index); }
+    public Neuron GetNeuron() { return new Neuron(this); }
 }
 
 public interface IBrainModule
