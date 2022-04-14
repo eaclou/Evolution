@@ -6,15 +6,15 @@
   <component name="ChangeListManager">
     <list default="true" id="64a03a69-0c33-4641-98d6-062c7a4ddd72" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Animations/UI/CreaturePanel/CreaturePanelUI.controller" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Animations/UI/CreaturePanel/CreaturePanelUI.controller" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Animations/UI/HistoryPanel/HistoryPanelUI.controller" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Animations/UI/HistoryPanel/HistoryPanelUI.controller" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/CreaturePanelUI.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/CreaturePanelUI.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/HistoryPanelUI.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/HistoryPanelUI.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/PanelMinimap.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/PanelMinimap.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/MainScene01.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Animations/UI/Playing.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/Neuron.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/Neuron.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/BodyGenome.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/BodyGenome.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/Axon.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/Axon.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/BrainGenome.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/BrainGenome.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/SpeciesGenomePool.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/SpeciesGenomePool.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePanelUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePanelUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/HistoryPanel.meta" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/HistoryPanelUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/HistoryPanelUI.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/MinimapPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/MinimapPanel.cs" afterDir="false" />
     </list>
@@ -87,19 +87,19 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Body/CritterModuleThreats.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/NID.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/TransferFunctions.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/Neuron.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/BodyGenome.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/Brain.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/Axon.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/SpeciesGenomePool.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Agent.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Core/GameManager.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/BrainGenome.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/MinimapPanel.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OpenCloseButton.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Agents/Brain/Neuron.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/Axon.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/HistoryPanelUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/CreaturePanelUI.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/OpenCloseButton.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/MinimapPanel.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Body/BodyGenome.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/SpeciesGenomePool.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/BrainGenome.cs" />
     </changedPaths>
   </component>
   <component name="MarkdownSettingsMigration">
@@ -194,7 +194,8 @@
       <workItem from="1649308851782" duration="9341000" />
       <workItem from="1649361494855" duration="8675000" />
       <workItem from="1649707573093" duration="11811000" />
-      <workItem from="1649793491093" duration="5378000" />
+      <workItem from="1649793491093" duration="6571000" />
+      <workItem from="1649879891984" duration="6744000" />
     </task>
     <servers />
   </component>

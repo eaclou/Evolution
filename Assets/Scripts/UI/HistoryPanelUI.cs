@@ -663,7 +663,7 @@ public class HistoryPanelUI : MonoBehaviour
         }        
     }
     
-    // WPP: prevent attempts to access destroyed objects
+    /// Prevent attempts to access destroyed objects
     void ClearDeadSpeciesIcons()
     {
         for (int i = speciesIcons.Count - 1; i >= 0; i--)
@@ -681,29 +681,4 @@ public class HistoryPanelUI : MonoBehaviour
     private void OnDisable() {
         worldTreeLineDataCBuffer?.Release();
     }
-    
-    // WPP 4/12/22: delegated to OpenCloseButton
-    /*public void OpenClose() {
-        isPanelOpen = !isPanelOpen;
-        var text = isPanelOpen ? ">" : "<";
-        openCloseButton.text.text = text;
-        historyPanelAnimator.SetBool("_IsPanelOpen", isPanelOpen);
-    }
-    
-    public void MouseEnterOpenCloseButtonArea() {
-        if (!gameObject.activeInHierarchy) return;
-        openCloseButton.animator.SetBool("ON", true);
-    }
-    
-    public void MouseExitOpenCloseButtonArea() {
-        if (!gameObject.activeInHierarchy) return;
-        openCloseButton.animator.SetBool("ON", false);
-    }
-    
-    [Serializable]
-    public struct OpenCloseButton
-    {
-        public Animator animator;
-        public Text text;
-    }*/
 }

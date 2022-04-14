@@ -78,30 +78,6 @@ public class CreaturePanelUI : MonoBehaviour
         critterPortraitStrokesCBuffer = new ComputeBuffer(1 * theRenderKing.GetNumStrokesPerCritter(), theRenderKing.GetMemorySizeCritterStrokeData());
     }
 
-    // WPP: delegated to OpenCloseButton
-    /*
-    public void OpenClose() {
-        isPanelOpen = !isPanelOpen;
-        if (isPanelOpen) {
-            buttonOpenClose.GetComponentInChildren<Text>().text = "<";
-        }
-        else {
-            buttonOpenClose.GetComponentInChildren<Text>().text = ">";
-        }
-        CreaturePanelAnimator.SetBool("PanelOFF", !isPanelOpen);
-    }
-    
-    public void MouseEnterOpenCloseButtonArea() {
-        Animator OpenCloseButtonAnimator = buttonOpenClose.GetComponent<Animator>();
-        OpenCloseButtonAnimator.SetBool("ON", true);
-    }
-    
-    public void MouseExitOpenCloseButtonArea() {
-        Animator OpenCloseButtonAnimator = buttonOpenClose.GetComponent<Animator>();
-        OpenCloseButtonAnimator.SetBool("ON", false);
-    }
-    */    
-    
     public void Tick() 
     {
         if (!curPanelMode) return;

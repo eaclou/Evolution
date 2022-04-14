@@ -4,7 +4,7 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 
 [Serializable]
-public class Neuron 
+public class Neuron
 {
     UIManager ui => UIManager.instance;
     PlaceNeuronsAtUI placement => ui.placeNeuronsAtUI;
@@ -26,7 +26,7 @@ public class Neuron
     [Header("Static Data")] 
     [ReadOnly] public NeuronData data;
     public MetaNeuron template => data.template;
-    public NeuronType io => data.io; 
+    public NeuronType io => data.io;
     public string name => data.name;
     public int index => data.index;
     

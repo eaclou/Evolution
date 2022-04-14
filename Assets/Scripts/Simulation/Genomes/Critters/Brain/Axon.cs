@@ -105,7 +105,13 @@ public class AxonList
     }
     
     public bool IsValid(Axon axon) { return IsValid(axon.from, axon.to); }
-    public bool IsValid(Neuron from, Neuron to) { return from.io != to.io || from.io == NeuronType.Hidden; }
+    
+    public bool IsValid(Neuron from, Neuron to) 
+    { 
+        return from.io != to.io || 
+        from.io == NeuronType.Hidden ||
+        to.io == NeuronType.In; 
+    }
     
     public void PrintCounts()
     {

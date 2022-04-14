@@ -294,8 +294,8 @@ public class SpeciesGenomePool
     public AgentGenome Mutate(AgentGenome parentGenome, bool bodySettings, bool brainSettings) 
     {
         // NG: downstream error from SimulationManager.ProcessNullAgent()
-        //if (parentGenome.brainGenome.HasInvalidAxons(parentGenome.brainGenome))
-        //    Debug.LogError("SpeciesGenomePool.Mutate(): Invalid axon(s) detected");
+        if (parentGenome.brainGenome.HasInvalidAxons(parentGenome.brainGenome))
+            Debug.LogError("SpeciesGenomePool.Mutate(): Invalid axon(s) detected");
     
         //AgentGenome parentGenome = leaderboardGenomesList[selectedIndex].candidateGenome;
 

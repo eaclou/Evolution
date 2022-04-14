@@ -807,10 +807,10 @@ public class SimulationManager : Singleton<SimulationManager>
     /// Recycles dead agents
     private void CheckForNullAgents() { 
         foreach (var agent in agents) {
+            if (agent.brain.genome.HasInvalidAxons())  // NG on all life stages
+                Debug.LogError($"Invalid axon(s) detected: SimulationManager.CheckForNullAgents " +
+                               $"{agent.curLifeStage}, agent {agent.index}");
             if (agent.isNull) {
-                // NG
-                if (agent.brain.genome.HasInvalidAxons())
-                    Debug.LogError("Invalid axon(s) detected: SimulationManager.CheckForNullAgents");
                 ProcessNullAgent(agent);
             }
         } 
@@ -1064,11 +1064,7 @@ public class SimulationManager : Singleton<SimulationManager>
                 
         // -- Select a ParentGenome from the leaderboardList and create a mutated copy (childGenome):  
         AgentGenome newGenome = sourceSpeciesPool.GetGenomeFromFitnessLottery();
-        
-        // NG: downstream error from CheckForNullAgents
-        //if (newGenome.brainGenome.HasInvalidAxons())
-        //    Debug.LogError("SimulationManager.ProcessNullAgent(): invalid axon(s) detected");
-        
+
         newGenome = sourceSpeciesPool.Mutate(newGenome, true, true);
         //newGenome.IncrementGenerationCount();
 

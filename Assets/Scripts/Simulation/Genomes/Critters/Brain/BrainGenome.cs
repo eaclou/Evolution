@@ -6,6 +6,7 @@ using Playcraft;
 
 // * WPP: merge with Brain, delegate static and dynamic data to a struct and class, respectively
 
+/// Stores/process brain data, wires up neurons and axons.
 [Serializable]
 public class BrainGenome 
 {
@@ -27,18 +28,16 @@ public class BrainGenome
         initialHiddenNeuronCount = hiddenNeuronCount;
         InitializeRandomBrainGenome(bodyGenome); 
         
-        MonoSim.instance.SimInvoke(DelayPrintAxonError, 0.2f);
+        //MonoSim.instance.SimInvoke(DelayPrintAxonError, 2f);  // OK
     }
     
-    void DelayPrintAxonError()
-    {
-        Debug.Log($"Normal Construction failure: {HasInvalidAxons()}");
-    }
+    //void DelayPrintAxonError() { Debug.Log($"Normal Construction failure: {HasInvalidAxons()}"); }  // OK
 
+    // * Consider looking at the BodyGenome -> mutation could be happening before construction
     public BrainGenome(BrainGenome parent, BodyGenome self, MutationSettingsInstance mutationSettings)
     {
-        if (HasInvalidAxons(parent)) // NG
-            Debug.LogError("Invalid axons detected in parent: mutation construction");
+        //if (HasInvalidAxons(parent)) // NG
+        //    Debug.LogError("Invalid axons detected in parent: mutation construction");
     
         SetToMutatedCopy(parent, self, mutationSettings);
         
@@ -153,7 +152,6 @@ public class BrainGenome
         //if (HasInvalidAxons(parentGenome))
         //    Debug.LogError("BrainGenome.SetToMutatedCopy(): Invalid axon(s) detected");
 
-        // * WPP: this seems excessive...
         InitializeIONeurons(bodyGenome);
         //hiddenNeurons = MutateHiddenNeurons(parentGenome.hiddenNeurons);
         neurons.Sync(neurons.hidden, MutateHiddenNeurons(parentGenome.neurons.hidden));
@@ -165,11 +163,11 @@ public class BrainGenome
         //neurons.PrintCounts();
         //axons.PrintCounts();
 
-        // * WPP: how many times should this run (current is once/generation)?
+        // TBD: add logic to make this happen more than once (requires design decisions)
         if (RandomStatics.CoinToss(settings.brainCreateNewLinkChance))
             AddRandomConnection(settings);
         
-        // * WPP: how many times should this run (current is once/generation)?
+        // TBD: add logic to make this happen more than once (requires design decisions)        
         if (RandomStatics.CoinToss(settings.brainCreateNewHiddenNodeChance)) 
             AddNewHiddenNeuron();
 
@@ -385,8 +383,15 @@ public class BrainGenome
     public bool HasInvalidAxons(BrainGenome brain)
     {
         foreach (var axon in brain.axons.all)
+        {
             if (!axons.IsValid(axon))
+            {
+                //Debug.LogError($"Invalid axon {axon.index} detected connecting " +
+                //               $"{axon.to.io} {axon.to.name} {axon.to.data.randomID} " +
+                //               $"to {axon.from.io} {axon.from.name} {axon.from.data.randomID}");
                 return true;
+            }
+        }
                 
         return false;
     }
@@ -404,6 +409,7 @@ public class BrainGenome
                 axon.to = FindNeuron(axon.to);
     }
     
+    // * Index may not be reliable
     Neuron FindNeuron(Neuron invalidNeuron)
     {
         foreach (var neuron in neurons.all)

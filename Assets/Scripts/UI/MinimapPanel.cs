@@ -99,29 +99,4 @@ public class MinimapPanel : MonoBehaviour
     }
     
     public void SelectTrophicSlot(TrophicLayerSO data) { trophicLayers.SetSlot(data); }
-
-    // WPP 4/12/22: delegated to OpenCloseButton
-    /*public void OpenClose() {
-        isOpen = !isOpen;
-        var text = isOpen ? ">" : "<";
-        openCloseButton.text.text = text;
-        minimapPanelAnimator.SetBool("PanelOpen", isOpen);
-    }
-    
-    public void MouseEnterOpenCloseButtonArea() {
-        if (!gameObject.activeInHierarchy) return;
-        openCloseButton.animator.SetBool("ON", true);
-    }
-    
-    public void MouseExitOpenCloseButtonArea() {
-        if (!gameObject.activeInHierarchy) return;
-        openCloseButton.animator.SetBool("ON", false);
-    }  
-    
-    [Serializable]
-    public struct OpenCloseButton
-    {
-        public Animator animator;
-        public Text text;
-    }*/
 }

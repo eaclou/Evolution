@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// Applies parameters for generating a brain, including keeping track of sensors, abilities, etc.
+/// Interfaces between the brain and the rest of the brain.
+/// Also has some body parameters.
 public class BodyGenome 
 {
     Lookup lookup => Lookup.instance;
