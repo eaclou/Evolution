@@ -117,15 +117,15 @@
 				//float2 screenUV = i.screenUV.xy / i.screenUV.w;
 				//float4 frameBufferColor = tex2D(_RenderedSceneRT, screenUV);  //  Color of brushtroke source					
 				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
-				float depth = saturate((_GlobalWaterLevel - altitudeTex.x) * 2);
+				float depth = saturate((_GlobalWaterLevel - altitudeTex.x) * 1);
 				float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
 				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV);
 
 				//frameBufferColor.rgb *= 0.75; // = lerp(frameBufferColor.rgb, particleColor, 0.25);
 				float4 finalColor = float4(0,0,0,1);
 				finalColor.rgb = lerp(finalColor.rgb, terrainColorTex.rgb, (0.5 + 0.5 * depth)); //GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(0,0,0,0));
-				finalColor.a = brushColor.a * 0.25;
-
+				finalColor.a = brushColor.a * 0.175;
+				finalColor.rgb *= 0.55;
 				return finalColor;
 			}
 			ENDCG
