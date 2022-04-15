@@ -243,7 +243,7 @@ public class CritterModuleCoreGenome
             coordinateTypeID = MaskCoordinateType.Polygonize;
             functionTypeID = MaskFunctionType.Cos;
             origin = Random.Range(0f, 1f); // normalized along length of creature
-            amplitude = Random.Range(0f, 1f); 
+            amplitude = Random.Range(0f, 0.01f); 
             cycleDistance = Random.Range(0f, 1f); 
             phase = Random.Range(0f, 1f); 
             numPolyEdges = Random.Range(1, maxPolyEdges); 
@@ -306,7 +306,7 @@ public class CritterModuleCoreGenome
         shapeModifiersList = new List<ShapeModifierData>();
         masksList = new List<MaskData>();
         
-        ShapeModifierData initModifier = new ShapeModifierData(Random.Range(0f, 1f), 1f);
+        ShapeModifierData initModifier = new ShapeModifierData(Random.Range(0f, 0.01f), 1f);
 
         // Masks for this modifier:
         MaskData maskData = new MaskData(7);

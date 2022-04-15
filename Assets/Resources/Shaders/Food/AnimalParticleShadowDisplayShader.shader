@@ -33,6 +33,7 @@
 			sampler2D _TerrainColorTex;
 			uniform float _MapSize;
 			uniform float _GlobalWaterLevel;
+			uniform float _MaxAltitude;	
 
 			StructuredBuffer<AnimalParticleData> animalParticleDataCBuffer;			
 			StructuredBuffer<float3> quadVerticesCBuffer;
@@ -80,7 +81,7 @@
 				float swimAnimMask = t * saturate(1.0 - particleData.isDecaying); //saturate(1.0 - uv.y); //saturate(1.0 - t);
 				
 				float3 worldPosition = particleData.worldPos; // float3(curvePos,0) + float3(offset, 0.0);
-				worldPosition.x += (swimAnimOffset * swimAnimMask) * width;
+				//worldPosition.x += (swimAnimOffset * swimAnimMask) * width;
 				// REFRACTION:
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / _MapSize, 0, 0)).yzw;				
 				float refractionStrength = 0.15;
@@ -91,12 +92,19 @@
 				
 				float2 altUV = particleData.worldPos.xy / _MapSize;
 				o.altitudeUV = altUV;
-				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x;								
-				worldPosition.z = -(altitudeRaw * 2 - 1) * 10;
-
-				float2 vertexOffset = quadPoint.xy * width * 6;
+				
+				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x;
+				float zPos = -altitudeRaw * _MaxAltitude;
+				
+				//*** TEMP::::: ****
+				float spriteScale = (sqrt(particleData.biomass) * 0.15 + 0.04 + (0.06 * hoverMask + 0.02 * selectedMask)) * 1;
+				//spriteScale = 0.1;
+				float2 vertexOffset = quadPoint.xy * spriteScale;
+				float2 forward = normalize(particleData.velocity);
+				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
+				float2 rotatedPoint = float2(vertexOffset.x * right + vertexOffset.y * forward);
 				//vertexOffset.xy *= 4;
-				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition.xy + vertexOffset, worldPosition.z, 1.0)));			
+				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition.xy + rotatedPoint, zPos, 1.0)));			
 				o.uv = uv; //quadVerticesCBuffer[id].xy + 0.5f;	
 				/////////////////////////////////////////////////////
 				
@@ -112,12 +120,15 @@
 			{
 				float4 brushColor = tex2D(_MainTex, i.uv);									
 				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
-				float depth = saturate((_GlobalWaterLevel - altitudeTex.x) * 2);
+				float depth = saturate((_GlobalWaterLevel - altitudeTex.x) * 1);
 				//float4 waterSurfaceTex = tex2D(_WaterSurfaceTex, i.altitudeUV);
 				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV);
+				//float4 finalColor = float4(0,0,0,1);
+				//finalColor.rgb = lerp(finalColor.rgb, terrainColorTex.rgb, (0.5 + 0.5 * depth)); //GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(0,0,0,0));
+				//finalColor.a = brushColor.a * 1;
 				float4 finalColor = float4(0,0,0,1);
-				finalColor.rgb = lerp(finalColor.rgb, terrainColorTex.rgb, (0.5 + 0.5 * depth)); //GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(0,0,0,0));
-				finalColor.a = brushColor.a * 1;
+				finalColor.rgb = lerp(finalColor.rgb, terrainColorTex.rgb * 0.75, depth); //GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(0,0,0,0));
+				
 
 				return finalColor;
 				

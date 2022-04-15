@@ -97,7 +97,7 @@ public class CreaturePanelUI : MonoBehaviour
         if (!agent) return;
 
         speciesIconUI.GetComponent<Image>().material = simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].coatOfArmsMat;
-        speciesIconUI.tooltip.tooltipString = "Species " + simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].representativeCandidate.candidateGenome.name.Substring(0, 1);
+        speciesIconUI.tooltip.tooltipString = "Species " + agent.speciesIndex;
         
         tooltipBrain.tooltipString = "BRAIN:\n" + 
             (agent.candidateRef.candidateGenome.brainGenome.neurons.hiddenCount + 
@@ -112,7 +112,7 @@ public class CreaturePanelUI : MonoBehaviour
 
         float reqMass = SettingsManager.instance.agentSettings._BaseInitMass * SettingsManager.instance.agentSettings._MinPregnancyFactor;
         float agentMass = agent.currentBiomass * SettingsManager.instance.agentSettings._MaxPregnancyProportion;
-        debugText.text = "Agent# " + agent.index + "\nCandidateID: " + agent.candidateRef.candidateID + "\nreqMass: " + reqMass + ", agentMass: " + agentMass.ToString("F2");
+        debugText.text = "Agent# " + agent.index + "\nCandidateID: " + agent.candidateRef.candidateID + "\nreqMass: " + reqMass + ", agentMass: " + agentMass.ToString("F2") + "\nSpecies#cands: " + simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].candidateGenomesList.Count;
     }
     
     public void SetPanelMode(StringSO mode) {

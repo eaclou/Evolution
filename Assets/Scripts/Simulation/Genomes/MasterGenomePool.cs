@@ -101,8 +101,15 @@ public class MasterGenomePool
 
                 if (completeSpeciesPoolsList[idList].candidateGenomesList.Count < 1) {
                     ExtinctifySpecies(idList);
-                    Debug.Log("EXTINCTIFY " + leastFitSpeciesID + ", " + idList + ", fitness: " + worstFitness + ", #evals: " + completeSpeciesPoolsList[leastFitSpeciesID].numAgentsEvaluated);
-                    Debug.Log("0, " + completeSpeciesPoolsList[0].avgCandidateData.performanceData.totalTicksAlive + ", #evals: " + completeSpeciesPoolsList[0].numAgentsEvaluated);
+                    Debug.Log("EXTINCTIFY " + idList + ", fitness: " + fitness + ", curWorst: " + leastFitSpeciesID + " (" + worstFitness);
+                    string readout = "";
+                    foreach(int id in currentlyActiveSpeciesIDList) {
+                        if(id == leastFitSpeciesID) {
+                            readout += "[LEAST FIT] ";
+                        }
+                        readout += "Species " + id + ", fitness: " + completeSpeciesPoolsList[id].avgCandidateData.performanceData.totalTicksAlive + ", " + completeSpeciesPoolsList[id].candidateGenomesList.Count + " Cands\n";
+                    }
+                    Debug.Log(readout);
                 }
             }
         }

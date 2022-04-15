@@ -133,7 +133,7 @@
 				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0));
 				float seaFloorAltitude = -altitudeRaw * _MaxAltitude;
 				worldPosition.z = -max(_GlobalWaterLevel, altitudeRaw) * _MaxAltitude;
-				worldPosition.z = lerp(worldPosition.z, seaFloorAltitude, particleData.isDecaying);
+				//worldPosition.z = lerp(worldPosition.z, seaFloorAltitude, particleData.isDecaying);
 				
 				float2 vertexOffset = quadPoint.xy * 1; // * width;
 				//vertexOffset.xy *= 4;
@@ -141,7 +141,7 @@
 				//*** TEMP::::: ****
 				float spriteScale = (sqrt(particleData.biomass) * 0.15 + 0.04 + (0.06 * hoverMask + 0.02 * selectedMask)) * 1;
 				//spriteScale = 0.1;
-				vertexOffset.xy = quadPoint.xy * spriteScale * lerp(1, 5, _CamDistNormalized); // scales w/ camera a bit
+				vertexOffset.xy = quadPoint.xy * spriteScale; // scales w/ camera a bit
 
 				float2 forward = normalize(particleData.velocity);
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
@@ -165,7 +165,7 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				return float4(1,0.6,1,1);
+				return float4(1,0.6,1 * i.status.y,1);
 
 				float4 texColor = float4(1,1,1,1); // *********************************************************** tex2D(_MainTex, i.uv);
 				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV) * 0.5 + 0.5;

@@ -32,7 +32,7 @@ public class CritterModuleAppearanceGenome
         huePrimary = new Vector3(Random.Range(0.1f, 1f), Random.Range(0.1f, 1f), Random.Range(0.1f, 1f));
         hueSecondary = new Vector3(Random.Range(0.1f, 1f), Random.Range(0.1f, 1f), Random.Range(0.1f, 1f));
         bodyStrokeBrushTypeX = Random.Range(0, 8);
-        bodyStrokeBrushTypeY = Random.Range(0, 4);
+        bodyStrokeBrushTypeY = Random.Range(0, 8);
         
         eyeGenome = new EyeGenome();
         eyeGenome.localPos = new Vector2(Random.Range(0.45f, 1f), Random.Range(0.4f, 1f));

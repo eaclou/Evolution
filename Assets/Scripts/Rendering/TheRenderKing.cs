@@ -2658,7 +2658,9 @@ public class TheRenderKing : Singleton<TheRenderKing>
 
         DisplayFloatyBits();
 
-        #region Dead code (please delete)
+        float isHighlight = 0f;
+
+        
         //if (simManager.trophicLayersManager.GetAgentsOnOff()) {
         critterUberStrokeShadowMat.SetPass(0);
         critterUberStrokeShadowMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -2679,22 +2681,23 @@ public class TheRenderKing : Singleton<TheRenderKing>
         //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
         cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterUberStrokeShadowMat, 0, MeshTopology.Triangles, 6, mainCritterStrokesCBuffer.count);
             
-            /*
-                    eggSackShadowDisplayMat.SetPass(0);
-                    eggSackShadowDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
-                    eggSackShadowDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
-                    eggSackShadowDisplayMat.SetBuffer("eggDataCBuffer", simManager.simStateData.eggDataCBuffer);
-                    eggSackShadowDisplayMat.SetBuffer("eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
-                    eggSackShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-                    eggSackShadowDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-                    eggSackShadowDisplayMat.SetFloat("_MaxAltitude", baronVonTerrain.maxAltitude);
-                    eggSackShadowDisplayMat.SetFloat("_GlobalWaterLevel", baronVonWater._GlobalWaterLevel); 
-                    eggSackShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-                    eggSackShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                    eggSackShadowDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
-                    //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
-                    cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggSackShadowDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.eggDataCBuffer.count);
-            */
+        
+        eggSackShadowDisplayMat.SetPass(0);
+        eggSackShadowDisplayMat.SetBuffer("critterInitDataCBuffer", simManager.simStateData.critterInitDataCBuffer);
+        eggSackShadowDisplayMat.SetBuffer("critterSimDataCBuffer", simManager.simStateData.critterSimDataCBuffer);
+        eggSackShadowDisplayMat.SetBuffer("eggDataCBuffer", simManager.simStateData.eggDataCBuffer);
+        eggSackShadowDisplayMat.SetBuffer("eggSackSimDataCBuffer", simManager.simStateData.eggSackSimDataCBuffer);
+        eggSackShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        eggSackShadowDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        eggSackShadowDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+        eggSackShadowDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel); 
+        eggSackShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+        eggSackShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        eggSackShadowDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
+        //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
+        cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggSackShadowDisplayMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.eggDataCBuffer.count);
+        
+        #region Dead code (please delete)
         //}
 
         /*if(!simManager.uiManager.tolInspectOn) {
@@ -2725,22 +2728,24 @@ public class TheRenderKing : Singleton<TheRenderKing>
             critterInspectHighlightMat.SetInt("_SelectedSpecies", simManager.uiManager.treeOfLifeManager.selectedID);
             cmdBufferTest.DrawProcedural(Matrix4x4.identity, critterInspectHighlightMat, 0, MeshTopology.Triangles, 6, simManager.simStateData.critterInitDataCBuffer.count);
         }*/
-
+        #endregion
         
         animalParticleShadowDisplayMat.SetPass(0);
         animalParticleShadowDisplayMat.SetBuffer("animalParticleDataCBuffer", simManager.zooplanktonManager.animalParticlesCBuffer);
         animalParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
         animalParticleShadowDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        animalParticleShadowDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+        animalParticleShadowDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(zooplanktonManager.selectedAnimalParticleIndex));
+        animalParticleShadowDisplayMat.SetInt("_ClosestParticleID", Mathf.RoundToInt(zooplanktonManager.closestZooplanktonToCursorIndex));
+        animalParticleShadowDisplayMat.SetFloat("_IsSelected", 0f);
+        animalParticleShadowDisplayMat.SetFloat("_IsHover", uiManager.zooplanktonHighlight * isHighlight);
+        animalParticleShadowDisplayMat.SetFloat("_IsHighlight", uiManager.zooplanktonHighlight * isHighlight); 
         animalParticleShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         animalParticleShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
         animalParticleShadowDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
         animalParticleShadowDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
         cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.zooplanktonManager.animalParticlesCBuffer.count);
     
-        
-        #endregion
-        
-        float isHighlight = 0f;
         
         #region Dead code (please delete)
         /*if (simManager.uiManager.watcherUI.watcherSelectedTrophicSlotRef != null) { // && simManager.uiManager.panelFocus == PanelFocus.Watcher) {
@@ -2753,36 +2758,35 @@ public class TheRenderKing : Singleton<TheRenderKing>
                 //isSelectedPlant = 1f;
             }
         }*/
-
-            /*
-                // floating plants  shadows:
-                plantParticleShadowDisplayMat.SetPass(0);
-                plantParticleShadowDisplayMat.SetBuffer("plantParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
-                plantParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-                plantParticleShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
-                plantParticleShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
-                plantParticleShadowDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
-                plantParticleShadowDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
-                plantParticleShadowDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
-                plantParticleShadowDisplayMat.SetFloat("_MinFog", minimumFogDensity);  
-                plantParticleShadowDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
-                plantParticleShadowDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.selectedPlantParticleIndex));
-                plantParticleShadowDisplayMat.SetInt("_HoverParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index));                
-                plantParticleShadowDisplayMat.SetFloat("_IsSelected", isSelectedPlant); // isSelected);
-                plantParticleShadowDisplayMat.SetFloat("_IsHover", simManager.uiManager.watcherUI.isPlantParticleHighlight * isHighlight);
-                plantParticleShadowDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
-                plantParticleShadowDisplayMat.SetVector("_FogColor", simManager.fogColor);                  
-                plantParticleShadowDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1); 
-                plantParticleShadowDisplayMat.SetTexture("_SpiritBrushTex", spiritBrushRT);
-                plantParticleShadowDisplayMat.SetVector("_SunDir", sunDirection);
-                plantParticleShadowDisplayMat.SetVector("_WorldSpaceCameraPosition", new Vector4(mainRenderCam.transform.position.x, mainRenderCam.transform.position.y, mainRenderCam.transform.position.z, 0f));
-                plantParticleShadowDisplayMat.SetVector("_Color0", baronVonTerrain.stoneSlotGenomeCurrent.color); // new Vector4(0.9f, 0.9f, 0.8f, 1f));
-                plantParticleShadowDisplayMat.SetVector("_Color1", baronVonTerrain.pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
-                plantParticleShadowDisplayMat.SetVector("_Color2", baronVonTerrain.sandSlotGenomeCurrent.color);
-                //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); 
-                cmdBufferMain.DrawProcedural(Matrix4x4.identity, plantParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.vegetationManager.plantParticlesCBuffer.count * 32);
-        */
         #endregion
+            
+        // floating plants  shadows:
+        plantParticleShadowDisplayMat.SetPass(0);
+        plantParticleShadowDisplayMat.SetBuffer("plantParticleDataCBuffer", simManager.vegetationManager.plantParticlesCBuffer);
+        plantParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        plantParticleShadowDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+        plantParticleShadowDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        plantParticleShadowDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
+        plantParticleShadowDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        plantParticleShadowDisplayMat.SetFloat("_Turbidity", simManager.fogAmount);     
+        plantParticleShadowDisplayMat.SetFloat("_MinFog", minimumFogDensity);  
+        plantParticleShadowDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+        plantParticleShadowDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.selectedPlantParticleIndex));
+        plantParticleShadowDisplayMat.SetInt("_HoverParticleIndex", Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index));                
+        plantParticleShadowDisplayMat.SetFloat("_IsSelected", 0f); // isSelected);
+        plantParticleShadowDisplayMat.SetFloat("_IsHover", uiManager.plantHighlight * isHighlight);
+        plantParticleShadowDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
+        plantParticleShadowDisplayMat.SetVector("_FogColor", simManager.fogColor);                  
+        plantParticleShadowDisplayMat.SetTexture("_ResourceGridTex", simManager.vegetationManager.resourceGridRT1); 
+        plantParticleShadowDisplayMat.SetTexture("_SpiritBrushTex", spiritBrushRT);
+        plantParticleShadowDisplayMat.SetVector("_SunDir", sunDirection);
+        plantParticleShadowDisplayMat.SetVector("_WorldSpaceCameraPosition", new Vector4(mainRenderCam.transform.position.x, mainRenderCam.transform.position.y, mainRenderCam.transform.position.z, 0f));
+        plantParticleShadowDisplayMat.SetVector("_Color0", baronVonTerrain.stoneSlotGenomeCurrent.color); // new Vector4(0.9f, 0.9f, 0.8f, 1f));
+        plantParticleShadowDisplayMat.SetVector("_Color1", baronVonTerrain.pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
+        plantParticleShadowDisplayMat.SetVector("_Color2", baronVonTerrain.sandSlotGenomeCurrent.color);
+        //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID); 
+        cmdBufferMain.DrawProcedural(Matrix4x4.identity, plantParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.vegetationManager.plantParticlesCBuffer.count * 32);
+       
 
         DisplayPlantParticles(isHighlight);
 

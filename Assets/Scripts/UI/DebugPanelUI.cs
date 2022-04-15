@@ -138,8 +138,8 @@ public class DebugPanelUI : MonoBehaviour
                         " ), Dir: ( " + foodModule.foodPlantDirX[0].ToString("F2") +
                         ", " + foodModule.foodPlantDirY[0].ToString("F2") + " )" +
                         "\n";
-            debugTxtAgent += "\nNutrients: " + foodModule.nutrientDensity[0].ToString("F4") + ", Stamina: " + coreModule.stamina[0].ToString("F3") + "\n";
-            debugTxtAgent += "Gradient Dir: (" + foodModule.nutrientGradX[0].ToString("F2") + ", " + foodModule.nutrientGradY[0].ToString("F2") + ")\n";
+            //debugTxtAgent += "\nNutrients: " + foodModule.nutrientDensity[0].ToString("F4") + ", Stamina: " + coreModule.stamina[0].ToString("F3") + "\n";
+            //debugTxtAgent += "Gradient Dir: (" + foodModule.nutrientGradX[0].ToString("F2") + ", " + foodModule.nutrientGradY[0].ToString("F2") + ")\n";
             //debugTxtAgent += "Total Food Eaten -- Decay: n/a, Plant: " + agentRef.totalFoodEatenPlant.ToString("F2") + ", Meat: " + agentRef.totalFoodEatenZoop.ToString("F2") + "\nFood Stored: " + agentRef.coreModule.foodStored[0].ToString() + ", Corpse Food Amount: " + agentRef.currentBiomass.ToString("F3") + "\n";
 
             //debugTxtAgent += "\nFullSize: " + agentRef.fullSizeBoundingBox.ToString() + ", Volume: " + agentRef.fullSizeBodyVolume.ToString() + "\n";
