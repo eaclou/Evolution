@@ -14,10 +14,10 @@ public class MasterGenomePool
     public static int nextCandidateIndex = 0;
 
     public int maxNumActiveSpecies = 8;
-    private int targetNumSpecies = 3;
+    private int targetNumSpecies = 4;
     public float speciesSimilarityDistanceThreshold = 12f;
     private int minNumGuaranteedEvalsForNewSpecies = 128;
-    int numInitSpecies = 4;
+    int numInitSpecies = 1;
 
     [SerializeField] float oldestSpeciesRerollChance = 0.33f;
 
@@ -92,9 +92,10 @@ public class MasterGenomePool
             float fitness = completeSpeciesPoolsList[idList].avgCandidateData.performanceData.totalTicksAlive;
             if (fitness < worstFitness) {
                 worstFitness = fitness;
-                leastFitSpeciesID = idList;
+                leastFitSpeciesID = currentlyActiveSpeciesIDList[idList];
                 
             }
+
             if (completeSpeciesPoolsList[idList].isFlaggedForExtinction) {
                 noCurrentlyExtinctFlaggedSpecies = false;
 
@@ -111,7 +112,14 @@ public class MasterGenomePool
                 // OK to KILL!!!
                 FlagSpeciesExtinct(leastFitSpeciesID);
                 //completeSpeciesPoolsList[leastFitSpeciesID].isFlaggedForExtinction = true;
-                Debug.Log("FLAG EXTINCT: " + leastFitSpeciesID + ", fitness: " + completeSpeciesPoolsList[leastFitSpeciesID].avgCandidateData.performanceData.totalTicksAlive + ", " + completeSpeciesPoolsList[leastFitSpeciesID].candidateGenomesList.Count + " Cands");
+                string readout = "";
+                foreach(int id in currentlyActiveSpeciesIDList) {
+                    if(id == leastFitSpeciesID) {
+                        readout += "EXTINCT ";
+                    }
+                    readout += "Species " + id + ", fitness: " + completeSpeciesPoolsList[id].avgCandidateData.performanceData.totalTicksAlive + ", " + completeSpeciesPoolsList[id].candidateGenomesList.Count + " Cands\n";
+                }
+                Debug.Log(readout);
             }
         }
     }
