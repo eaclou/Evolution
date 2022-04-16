@@ -92,31 +92,28 @@ public class BrainGenome
     {
         InitializeIONeurons(bodyGenome);
         MutateHiddenNeurons(parentGenome.neurons.hidden);
+        
+        var newNeurons = GetNewlyUnlockedNeurons(bodyGenome);
+        
+        foreach (var neuron in newNeurons)
+            neurons.Add(neuron);
 
         foreach (var axon in parentGenome.axons.all)
             axons.Add(new Axon(FindNeuron(axon.from), FindNeuron(axon.to), axon.weight));
         
         MutateAxons(axons.all, settings);
-        //neurons.PrintCounts();
-        //axons.PrintCounts();
 
+        foreach (var neuron in newNeurons)
+            LinkNeuronToLayer(neuron);
+            
         // TBD: add logic to make this happen more than once (requires design decisions)
         if (RandomStatics.CoinToss(settings.brainCreateNewLinkChance))
             AddRandomConnection(settings);
-        
+            
         // TBD: add logic to make this happen more than once (requires design decisions)     
         if (RandomStatics.CoinToss(settings.brainCreateNewHiddenNodeChance)) 
             AddNewHiddenNeuron();
 
-        var newNeurons = GetNewlyUnlockedNeurons(bodyGenome);
-        //Debug.Log($"Initializing axons with {newNeurons.Count} new neurons from " +
-        //          $"{bodyGenome.newlyUnlockedNeuronInfo.Count} new tech.");
-        
-        foreach (var neuron in newNeurons)
-        {
-            neurons.Add(neuron);
-            LinkNeuronToLayer(neuron);
-        }
         //RemoveVestigialLinks();
     }
 
@@ -296,14 +293,16 @@ public class BrainGenome
     }
     
     
-    Neuron FindNeuron(Neuron invalidNeuron)
+    Neuron FindNeuron(Neuron oldNeuron)
     {
         foreach (var neuron in neurons.all)
-            if (neuron.index == invalidNeuron.index && neuron.name == invalidNeuron.name)
+            if (neuron.name == oldNeuron.name)
                 return neuron;
-                
-        //Debug.LogError($"Unable to find neuron [{invalidNeuron.index}] {invalidNeuron.name}");
-        return invalidNeuron;
+        
+        // Reconsider what should happen here if it comes up (create new neuron with old data?)
+        Debug.LogError($"Unable to find neuron [{oldNeuron.index}] {oldNeuron.name}");
+        
+        return oldNeuron;
     }
 }
 

@@ -231,6 +231,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         computeShader.SetFloat("time", Time.fixedTime);
     }
     
+    
     public void Initialize(Brain brain, ref SocketInitData[] sockets)
     {
         this.brain = brain;
@@ -267,23 +268,20 @@ public class GenerateBrainVisualization : MonoBehaviour
     {
         var fromNeuron = neurons[fromID];
         var toNeuron = neurons[toID];
-        var message = $"Connecting from [{fromNeuron.index} = {fromID}] {fromNeuron.io} {fromNeuron.name} " + 
-            $"to [{toNeuron.index} = {toID}] {toNeuron.io} {toNeuron.name}, " +
-            $"across axon [{axons[axonID].index} = {axonID}]";
-                  
-        // OK
-        /*if (neurons[fromID].index != fromID)
+        Debug.Log($"axon [{axons[axonID].index}] connecting " + 
+            $"from [{fromNeuron.index}] {fromNeuron.io} '{fromNeuron.name}' " + 
+            $"to [{toNeuron.index}] {toNeuron.io} '{toNeuron.name}'");
+        
+        if (neurons[fromID].index != fromID)
             Debug.LogError("Index mismatch on source neuron");
         if (neurons[toID].index != toID)
             Debug.LogError("Index mismatch on destination neuron");
         if (axons[axonID].index != axonID)
-            Debug.LogError("Index mismatch on axon");*/
-                  
-        // NG
+            Debug.LogError("Index mismatch on axon");
         if (fromNeuron.io == NeuronType.Out)
-            Debug.LogError($"Axon starting from an output neuron: {message}");
+            Debug.LogError($"Axon starting from an output neuron");
         if (toNeuron.io == NeuronType.In)
-            Debug.LogError($"Axon going to an input neuron: {message}");
+            Debug.LogError($"Axon going to an input neuron");
     }
     
     #endregion
@@ -432,7 +430,7 @@ public class GenerateBrainVisualization : MonoBehaviour
             axonData.fromID = axons[x].from.index;
             axonData.toID = axons[x].to.index; 
             axonInitDataArray[x] = axonData;
-            PrintConnection(axonData.fromID, axonData.toID, x);
+            //PrintConnection(axonData.fromID, axonData.toID, x);
         }
         
         axonInitDataCBuffer.SetData(axonInitDataArray);

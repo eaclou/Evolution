@@ -14,7 +14,7 @@ public class Neuron
     [ReadOnly] public NeuronData data;
     public MetaNeuron template => data.template;
     public NeuronType io => data.io;
-    public string name => data.name;
+    public string name { get => data.name; set => data.name = value; }
     public int index { get => data.index; set => data.index = value; }
     
     [Header("Dynamic Data")]
@@ -114,13 +114,13 @@ public class NeuronList
                 hiddenOut.Add(neuron);
                 break;
             case NeuronType.Hidden: 
-                hidden.Add(neuron); 
+                AddHidden(neuron); 
                 inHidden.Add(neuron);
                 hiddenOut.Add(neuron);
                 break;
         }
     }
-        
+
     public void Remove(Neuron neuron)
     {
         if (!all.Contains(neuron)) return;
@@ -141,7 +141,7 @@ public class NeuronList
                 hiddenOut.Remove(neuron);
                 break;
             case NeuronType.Hidden: 
-                hidden.Remove(neuron); 
+                RemoveHidden(neuron); 
                 inHidden.Remove(neuron);
                 hiddenOut.Remove(neuron);
                 break;
@@ -179,6 +179,27 @@ public class NeuronList
     {
         for (int i = 0; i < all.Count; i++)
             all[i].index = i;
+    }
+    
+    MetaNeuron hiddenTemplate => Lookup.instance.hiddenTemplate;
+    string hiddenName => $"{hiddenTemplate.name} {hidden.Count}";
+
+    void AddHidden(Neuron neuron)
+    {
+        neuron.name = hiddenName;
+        hidden.Add(neuron);
+    }
+    
+    void RemoveHidden(Neuron neuron)
+    {
+        hidden.Remove(neuron);
+        RefreshHidden();
+    }
+    
+    void RefreshHidden()
+    {
+        for (int i = 0; i < hidden.Count; i++)
+            hidden[i].name = hiddenName;
     }
     
     public Neuron RandomNeuron(List<Neuron> list) { return list[Random.Range(0, list.Count)]; }
