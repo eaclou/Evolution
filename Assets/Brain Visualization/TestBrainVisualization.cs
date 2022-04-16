@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-// TEMP DISABLED
+// TEMP DISABLED - requires Agent
 // Assumes full connectivity
 public class TestBrainVisualization : MonoBehaviour
 {
@@ -35,19 +35,12 @@ public class TestBrainVisualization : MonoBehaviour
 
         var sockets = CreateSockets(neurons);
         
-        brainVisualization.Initialize(neurons, axons, ref sockets, inputNeurons.Count, outputNeurons.Count);
+        //brainVisualization.Initialize(neurons, axons, ref sockets, inputNeurons.Count, outputNeurons.Count);
     }
     
     List<Neuron> CreateNeurons(int inputCount)
     {
         var neurons = new List<Neuron>();
-        
-        for (int i = 0; i < neuronCount; i++) 
-        {
-            //Neuron neuron = new Neuron(i, inputCount);
-            //neurons.Add(neuron);
-        }
-        
         return neurons;
     }
     

@@ -9,12 +9,12 @@ public struct SocketInitData
 
 public class GenerateBrainVisualization : MonoBehaviour 
 {
-    [ReadOnly]
-    public List<Neuron> neurons;
-    [ReadOnly]
-    public List<Axon> axons;
-    
+    [ReadOnly] public Brain brain;
+    List<Neuron> neurons => brain.allNeurons;
+    List<Axon> axons => brain.allAxons;
     int numNeurons => neurons.Count;
+    int inputCount => brain.inputNeurons.Count;
+    int outputCount => brain.outputNeurons.Count;
 
     #region Internal data
     
@@ -231,13 +231,12 @@ public class GenerateBrainVisualization : MonoBehaviour
         computeShader.SetFloat("time", Time.fixedTime);
     }
     
-    public void Initialize(List<Neuron> neurons, List<Axon> axons, ref SocketInitData[] sockets, int inputCount, int outputCount)
+    public void Initialize(Brain brain, ref SocketInitData[] sockets)
     {
-        this.neurons = neurons;
-        this.axons = axons;
+        this.brain = brain;
         //Debug.Log($"Initializing brain visualization with {neurons.Count} neurons and {axons.Count} axons");
 
-        InitializeComputeBuffers(ref sockets, inputCount, outputCount);
+        InitializeComputeBuffers(ref sockets);
         initialized = true;
 
         //PrintNeuronPositions(neurons, ref sockets);
@@ -256,7 +255,7 @@ public class GenerateBrainVisualization : MonoBehaviour
         Debug.Log(neuronText);
     }
 
-    /*public void PrintAxonPositions(List<Axon> axons) {
+    public void PrintAxonPositions(List<Axon> axons) {
         string axonText = axons.Count + " Axons\n";
         for (int i = 0; i < axons.Count; i++) {
             axonText += i + "[" + axons[i].from.name + axons[i].from.index + "->" + axons[i].to.name + axons[i].to.index + ", " + axons[i].weight + "\n";
@@ -264,23 +263,32 @@ public class GenerateBrainVisualization : MonoBehaviour
         Debug.Log(axonText);
     }
     
-    void PrintConnection(int fromID, int toID)
+    void PrintConnection(int fromID, int toID, int axonID)
     {
         var fromNeuron = neurons[fromID];
         var toNeuron = neurons[toID];
-        Debug.Log($"Connecting from {fromNeuron.io} {fromNeuron.name} " +
-                  $"to {toNeuron.io} {toNeuron.name}");
+        var message = $"Connecting from [{fromNeuron.index} = {fromID}] {fromNeuron.io} {fromNeuron.name} " + 
+            $"to [{toNeuron.index} = {toID}] {toNeuron.io} {toNeuron.name}, " +
+            $"across axon [{axons[axonID].index} = {axonID}]";
                   
+        // OK
+        /*if (neurons[fromID].index != fromID)
+            Debug.LogError("Index mismatch on source neuron");
+        if (neurons[toID].index != toID)
+            Debug.LogError("Index mismatch on destination neuron");
+        if (axons[axonID].index != axonID)
+            Debug.LogError("Index mismatch on axon");*/
+                  
+        // NG
         if (fromNeuron.io == NeuronType.Out)
-            Debug.LogError("Creating connection starting from an output neuron");
-
+            Debug.LogError($"Axon starting from an output neuron: {message}");
         if (toNeuron.io == NeuronType.In)
-            Debug.LogError("Creating connection going to an input neuron");
-    }*/
+            Debug.LogError($"Axon going to an input neuron: {message}");
+    }
     
     #endregion
 
-    void InitializeComputeBuffers(ref SocketInitData[] sockets, int inputNeuronCount, int outputNeuronCount) 
+    void InitializeComputeBuffers(ref SocketInitData[] sockets) 
     {
         argsCoreCBuffer?.Dispose();
         argsCoreCBuffer = new ComputeBuffer(1, argsCore.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
@@ -416,34 +424,22 @@ public class GenerateBrainVisualization : MonoBehaviour
         axonInitDataCBuffer?.Release();
         axonInitDataCBuffer = new ComputeBuffer(axons.Count, sizeof(float) * 1 + sizeof(int) * 2);
         
-        AxonInitData[] axonInitDataArray = new AxonInitData[axons.Count]; 
-        
+        AxonInitData[] axonInitDataArray = new AxonInitData[axons.Count];
+
         for (int x = 0; x < axonInitDataArray.Length; x++) 
         {
-            AxonInitData axonData = new AxonInitData(axons[x]); //*** EAC
-            //var fromNeuron = axons[x].from;
-            //var toNeuron = neurons[toID];
-            axonData.fromID = axons[x].from.index; // GetNewConnectionId(axonData.fromID);
-            axonData.toID = axons[x].to.index; //GetNewConnectionId(axonData.toID);
+            AxonInitData axonData = new AxonInitData(axons[x]);
+            axonData.fromID = axons[x].from.index;
+            axonData.toID = axons[x].to.index; 
             axonInitDataArray[x] = axonData;
-            //PrintConnection(axonData.fromID, axonData.toID);
+            PrintConnection(axonData.fromID, axonData.toID, x);
         }
         
         axonInitDataCBuffer.SetData(axonInitDataArray);
         axonSimDataCBuffer?.Release();
         axonSimDataCBuffer = new ComputeBuffer(axons.Count, sizeof(float) * 13);
     }
-    
-    // WPP: not used
-    /*int GetNewConnectionId(int oldID)
-    {
-        for (int i = 0; i < neurons.Count; i++)
-            if (oldID == neurons[i].index)
-                return i;
 
-        return 0;
-    } */
-    
     void UpdateNeuronBuffer(string kernelName, int x, int y)
     {
         int kernelID = SetShaderBuffer(shaderComputeBrain, kernelName);

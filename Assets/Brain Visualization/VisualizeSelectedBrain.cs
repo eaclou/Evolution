@@ -20,9 +20,7 @@ public class VisualizeSelectedBrain : MonoBehaviour
     void RefreshAgent(Agent agent)
     {
         this.agent = agent;
-        //neurons = agent.brain.allNeurons;
-        //axons = agent.brain.allAxons;
-        
+
         //Debug.Log($"Selected agent brain has {neurons.Count} neurons and {axons.Count} axons");
         var sockets = CreateSockets();
         /*
@@ -32,14 +30,13 @@ public class VisualizeSelectedBrain : MonoBehaviour
         }
         Debug.Log(neuronString);
         */
-        visualization.Initialize(neurons, axons, ref sockets, inputNeuronCount, outputNeuronCount);
+        visualization.Initialize(agent.brain, ref sockets);
     }
     
     Agent agent;
     List<Neuron> neurons => agent.brain.allNeurons;
     int inputNeuronCount => agent.brain.inputNeurons.Count;
     int outputNeuronCount => agent.brain.genome.neurons.output.Count;
-    List<Axon> axons => agent.brain.allAxons;
     
     SocketInitData[] CreateSockets()
     {

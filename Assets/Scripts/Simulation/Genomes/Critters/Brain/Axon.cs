@@ -60,6 +60,7 @@ public class AxonList
         if (!all.Contains(axon)) return;
         all.Remove(axon);
         GetSublist(axon)?.Remove(axon);
+        RefreshIndicies();
     }
     
     public void Remove(int index) { Remove(all[index]); }
@@ -96,6 +97,12 @@ public class AxonList
         return from.io != to.io || 
         from.io == NeuronType.Hidden ||
         to.io == NeuronType.In; 
+    }
+    
+    void RefreshIndicies()
+    {
+        for (int i = 0; i < all.Count; i++)
+            all[i].index = i;
     }
     
     public void PrintCounts()

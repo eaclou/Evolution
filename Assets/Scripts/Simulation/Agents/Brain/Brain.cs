@@ -7,6 +7,7 @@ public class Brain
 {
     public List<Neuron> allNeurons => genome.neurons.all;
     public List<Neuron> inputNeurons => genome.neurons.input;
+    public List<Neuron> outputNeurons => genome.neurons.output;
     public List<Axon> allAxons => genome.axons.all;
     
     public BrainGenome genome;

@@ -15,7 +15,7 @@ public class Neuron
     public MetaNeuron template => data.template;
     public NeuronType io => data.io;
     public string name => data.name;
-    public int index => data.index;
+    public int index { get => data.index; set => data.index = value; }
     
     [Header("Dynamic Data")]
     public float inputTotal;
@@ -145,7 +145,9 @@ public class NeuronList
                 inHidden.Remove(neuron);
                 hiddenOut.Remove(neuron);
                 break;
-        }        
+        }
+        
+        RefreshIndicies();       
     }
         
     public void Clear()
@@ -171,6 +173,12 @@ public class NeuronList
     {
         foreach (var item in list)
             Remove(item);
+    }
+    
+    void RefreshIndicies()
+    {
+        for (int i = 0; i < all.Count; i++)
+            all[i].index = i;
     }
     
     public Neuron RandomNeuron(List<Neuron> list) { return list[Random.Range(0, list.Count)]; }
