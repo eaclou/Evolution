@@ -27,7 +27,7 @@ public class SpeciesGenomePool
     public List<CandidateAgentData> leaderboardGenomesList;
     public List<CandidateAgentData> candidateGenomesList;
 
-    public int maxLeaderboardGenomePoolSize = 24;    
+    public int maxLeaderboardGenomePoolSize = 32;    
     public int numAgentsEvaluated = 0;
      
     public int yearCreated = -1;

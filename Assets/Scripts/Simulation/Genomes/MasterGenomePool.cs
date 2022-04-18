@@ -15,8 +15,8 @@ public class MasterGenomePool
 
     public int maxNumActiveSpecies = 6;
     private int targetNumSpecies = 4;
-    public float speciesSimilarityDistanceThreshold = 12f;
-    private int minNumGuaranteedEvalsForNewSpecies = 32;
+    public float speciesSimilarityDistanceThreshold = 16f;
+    private int minNumGuaranteedEvalsForNewSpecies = 128;
     int numInitSpecies = 1;
 
     [SerializeField] float oldestSpeciesRerollChance = 0.33f;

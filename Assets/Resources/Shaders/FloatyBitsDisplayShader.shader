@@ -14,8 +14,8 @@
 		Tags{ "RenderType" = "Transparent" }
 		ZWrite Off
 		Cull Off
-		Blend SrcAlpha One
-		//Blend SrcAlpha OneMinusSrcAlpha
+		//Blend SrcAlpha One
+		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{
@@ -75,12 +75,12 @@
 				float random2 = rand(float2(random1, random1));
 				float random3 = rand(float2(random1 - _Time.y * 21.34, random2));
 
-				float randomAspect = lerp(0.75, 1.36, random1);
-				float randomValue = rand(float2(inst, randomAspect * 10));
-				float randomScale = lerp(0.75, 1.4, random2) * 0.6;
+				float randomAspect = lerp(0.85, 1.216, random1);
+				float randomValue = rand(float2(inst, randomAspect * random3));
+				float randomScale = lerp(0.0385, 0.045, random2);
 				
-				float2 dir = float2(0,1); // normalize(velocity);
-				float2 scale = 0.1 * float2(0.095 * randomAspect, 0.15 * (1.0 / randomAspect)) * randomScale; //float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 25 + 1.61));
+				float2 dir = normalize(velocity);
+				float2 scale = float2(randomAspect, (1.0 / randomAspect)) * randomScale; //float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 25 + 1.61));
 				//scale.y *= (1.0 + velMag * 10.0);
 				quadPoint *= float3(scale, 1.0); // * (_CamDistNormalized * 0.98 + 0.02); 
 
@@ -103,23 +103,22 @@
 				float isUnderwaterMask = saturate((_GlobalWaterLevel - altitudeRaw) * 34);
 				float waveHeight = waterSurfaceData.x * isUnderwaterMask;
 
-				
 				//float seaFloorAltitude = -altitudeRaw * _MaxAltitude;
 				//float waterAltitude = -(_GlobalWaterLevel + waveHeight * 0.152) * _MaxAltitude; 
 				//worldPosition.z = min(seaFloorAltitude, waterAltitude);
 				worldPosition.z = -max(_GlobalWaterLevel, altitudeRaw) * _MaxAltitude;
-				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(rotatedPoint, 0.0f));
+				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1)) + float4(rotatedPoint, 0));
 				float brightness = (random1);
 				dotLight *= brightness;
 				o.color = float4(dotLight, floatyBitData.age, dotLight, alpha * 1); // float4(randomValue, randomValue, randomValue, 1 / (length(velocity) * 50 + 1.15));
-				o.uv = quadVerticesCBuffer[id] + 0.5f;
+				o.uv = quadVerticesCBuffer[id] + 0.5;
 				
 				return o;
 			}
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				return float4(0.4,1,0.7,1);
+				return float4(0.08,0.2,0.12,1);
 				//return float4(0.21,0.71,0.91,0.1);
 
 				float4 texColor = tex2D(_MainTex, i.uv);  // Read Brush Texture

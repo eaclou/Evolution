@@ -184,7 +184,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
     private int numStrokesPerCritterSkinDetail = 128;
     private ComputeBuffer mainCritterStrokesCBuffer;    
 
-    private int numFloatyBits = maxShaderThreads;
+    private int numFloatyBits = maxShaderThreads * 32;
     private ComputeBuffer floatyBitsCBuffer;
 
     private BasicStrokeData[] obstacleStrokeDataArray;
@@ -797,13 +797,13 @@ public class TheRenderKing : Singleton<TheRenderKing>
         for (int i = 0; i < numFloatyBits; i++) {
             //floatyBitsInitPos[i] = new Vector4(UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), 1f, 0f);
             FloatyBitData data = new FloatyBitData();
-            data.coords = Vector2.zero; // new Vector2(UnityEngine.Random.Range(0.25f, 0.35f), UnityEngine.Random.Range(0.65f, 0.75f)); // (UnityEngine.Random.Range(0.2f, 0.8f), UnityEngine.Random.Range(0.2f, 0.8f), 1f, 0f);
+            data.coords = new Vector2(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
             data.vel = new Vector2(1f, 0f);
             data.heading = new Vector2(1f, 0f);
             //int numGroups = 4;
             //int randGroup = UnityEngine.Random.Range(0, numGroups);
             //float startGroupAge = (float)randGroup / (float)numGroups;
-            data.age = 1.0f; // startGroupAge; // (float)i / (float)numFloatyBits;
+            data.age = UnityEngine.Random.Range(0f, 1f); // startGroupAge; // (float)i / (float)numFloatyBits;
             floatyBitsInitPos[i] = data;
         }
         
