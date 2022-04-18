@@ -9,19 +9,23 @@ public class PlaceNeuronsAtUI : MonoBehaviour
     [SerializeField] UIPlacement[] uiPlacements;
     [ReadOnly] [SerializeField] float halfPanelSize;
     
+    [SerializeField] float hiddenRadius = 0.36f;
+    [SerializeField] float hiddenVariance = 0.001f;
+    [SerializeField] int hiddenSlotCount = 7;
+    
     void OnValidate()
     {
         if (panel) halfPanelSize = panel.rect.width / 2f;
     }
     
-    public Vector3 GetNeuronPosition(Neuron neuron)
+    public Vector3 GetNeuronPosition(NeuronData neuron)
     {
         return neuron.io == NeuronType.Hidden ? 
-            GetHiddenNeuronPosition(neuron) : 
+            GetHiddenNeuronPosition(neuron.index) : 
             GetIONeuronPosition(neuron);
     }
 
-    Vector3 GetIONeuronPosition(Neuron neuron)
+    Vector3 GetIONeuronPosition(NeuronData neuron)
     {
         var placement = GetPlacement(neuron);
         return placement != null ? 
@@ -29,7 +33,7 @@ public class PlaceNeuronsAtUI : MonoBehaviour
             Vector3.zero + Random.insideUnitSphere * randomOffset;     
     }
     
-    UIPlacement GetPlacement(Neuron neuron)
+    UIPlacement GetPlacement(NeuronData neuron)
     {
         var data = neuron.template;
 
@@ -42,7 +46,7 @@ public class PlaceNeuronsAtUI : MonoBehaviour
 
     const float offsetDistance = -16f;
 
-    Vector3 GetRadialOffsetPosition(Neuron neuron, UIPlacement icon)
+    Vector3 GetRadialOffsetPosition(NeuronData neuron, UIPlacement icon)
     {
         Vector3 iconPosition = icon.location.localPosition;
 
@@ -56,19 +60,16 @@ public class PlaceNeuronsAtUI : MonoBehaviour
         newPos.y += offset.y;
         return newPos/halfPanelSize + Random.insideUnitSphere * randomOffset;
     }
-    
-    
-    const float hiddenRadius = 0.36f;
-    const float hiddenVariance = 0.001f;
 
-    Vector3 GetHiddenNeuronPosition(Neuron neuron)
+    Vector3 GetHiddenNeuronPosition(int index)
     {
-        Vector3 localPos = Vector3.zero;
-        float pointOnCircle = (float)neuron.index / 7f;
+        Vector3 localPosition = Vector3.zero;
+        int slot = index % hiddenSlotCount;
+        float pointOnCircle = (float)slot / hiddenSlotCount;
         float angleRadians = Mathf.PI * 2 * pointOnCircle;
-        localPos.x = Mathf.Cos(angleRadians) * hiddenRadius;
-        localPos.y = Mathf.Sin(angleRadians) * hiddenRadius;
-        return localPos + Random.insideUnitSphere * hiddenVariance;
+        localPosition.x = Mathf.Cos(angleRadians) * hiddenRadius;
+        localPosition.y = Mathf.Sin(angleRadians) * hiddenRadius;
+        return localPosition + Random.insideUnitSphere * hiddenVariance;
     }
 
     [Serializable]

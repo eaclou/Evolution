@@ -6,16 +6,13 @@ using Random = UnityEngine.Random;
 [Serializable]
 public class Neuron
 {
-    UIManager ui => UIManager.instance;
-    PlaceNeuronsAtUI placement => ui.placeNeuronsAtUI;
-    
     /// Static data
     [Header("Static Data")] 
     [ReadOnly] public NeuronData data;
     public MetaNeuron template => data.template;
     public NeuronType io => data.io;
     public string name { get => data.name; set => data.name = value; }
-    public int index { get => data.index; set => data.index = value; }
+    public int index { get => data.index; set => data.SetIndex(value); }
     
     [Header("Dynamic Data")]
     public float inputTotal;
@@ -42,11 +39,7 @@ public class Neuron
     // Create a new neuron from template data
     public Neuron(MetaNeuron template) { GenerateStaticData(template); }
     
-    void GenerateStaticData(MetaNeuron template)
-    {
-        data = new NeuronData(template);
-        data.iconPosition = placement.GetNeuronPosition(this);        
-    }
+    void GenerateStaticData(MetaNeuron template) { data = new NeuronData(template); }
     
     public bool IsMe(Neuron other) { return template == other.template && index == other.index; }
 }
@@ -55,6 +48,9 @@ public class Neuron
 [Serializable]
 public class NeuronData
 {
+    UIManager ui => UIManager.instance;
+    PlaceNeuronsAtUI placement => ui.placeNeuronsAtUI;
+
     public MetaNeuron template;
     public NeuronType io; 
     public string name;
@@ -69,7 +65,12 @@ public class NeuronData
         io = template.io;
         iconPosition = Vector3.zero;
         uniqueID = Random.Range(int.MinValue, int.MaxValue);
-        index = -1;  // Will be set when added to list
+    }
+    
+    public void SetIndex(int value)
+    {
+        index = value;
+        iconPosition = placement.GetNeuronPosition(this); 
     }
 }
 
@@ -97,7 +98,7 @@ public class NeuronList
     {
         if (all.Contains(neuron)) return;
             
-        neuron.data.index = all.Count;
+        neuron.index = all.Count;
         all.Add(neuron);
         
         // Consider storing associations in a ScriptableObject if this gets more complex.

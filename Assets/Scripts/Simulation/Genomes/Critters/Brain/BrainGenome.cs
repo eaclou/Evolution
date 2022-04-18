@@ -295,12 +295,14 @@ public class BrainGenome
     
     Neuron FindNeuron(Neuron oldNeuron)
     {
+        var nameToFind = oldNeuron.name;
+
         foreach (var neuron in neurons.all)
-            if (neuron.name == oldNeuron.name)
+            if (neuron.name == nameToFind)
                 return neuron;
-        
+
         // Reconsider what should happen here if it comes up (create new neuron with old data?)
-        Debug.LogError($"Unable to find neuron [{oldNeuron.index}] {oldNeuron.name}");
+        Debug.LogError($"Unable to find neuron [{oldNeuron.index}] {nameToFind}");
         
         return oldNeuron;
     }
