@@ -126,7 +126,7 @@
 				//float4 finalColor = float4(0,0,0,1);
 				//finalColor.rgb = lerp(finalColor.rgb, terrainColorTex.rgb, (0.5 + 0.5 * depth)); //GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(0,0,0,0));
 				//finalColor.a = brushColor.a * 1;
-				float4 finalColor = float4(0,0,0,1);
+				float4 finalColor = float4(0,0,0,0.7);
 				finalColor.rgb = lerp(finalColor.rgb, terrainColorTex.rgb * 0.75, depth); //GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(0,0,0,0));
 				
 

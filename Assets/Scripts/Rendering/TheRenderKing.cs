@@ -604,7 +604,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         baronVonTerrain.Initialize();
         baronVonWater.Initialize();
 
-        for (int i = 0; i < simManager.numEggSacks; i++) {
+        for (int i = 0; i < simManager.maxEggSacks; i++) {
             UpdateDynamicFoodBuffers(i);
         }
 
@@ -620,10 +620,10 @@ public class TheRenderKing : Singleton<TheRenderKing>
         //InitializeWaterSplineMeshBuffer(); // same for water splines
         InitializeFluidRenderMesh();
         
-        obstacleStrokesCBuffer = new ComputeBuffer(simManager.numAgents + simManager.numEggSacks, sizeof(float) * 10);
+        obstacleStrokesCBuffer = new ComputeBuffer(simManager.maxAgents + simManager.maxEggSacks, sizeof(float) * 10);
         obstacleStrokeDataArray = new BasicStrokeData[obstacleStrokesCBuffer.count];
 
-        colorInjectionStrokesCBuffer = new ComputeBuffer(simManager.numAgents + simManager.numEggSacks, sizeof(float) * 10);
+        colorInjectionStrokesCBuffer = new ComputeBuffer(simManager.maxAgents + simManager.maxEggSacks, sizeof(float) * 10);
         colorInjectionStrokeDataArray = new BasicStrokeData[colorInjectionStrokesCBuffer.count];
 
         InitializeCritterUberStrokesBuffer();   // In-World        
@@ -651,7 +651,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
    
     // Most of this will be populated piece-meal later as critters are generated:
     private void InitializeCritterUberStrokesBuffer() {
-        int bufferLength = simManager.numAgents * GetNumStrokesPerCritter();
+        int bufferLength = simManager.maxAgents * GetNumStrokesPerCritter();
         mainCritterStrokesCBuffer = new ComputeBuffer(bufferLength, GetMemorySizeCritterStrokeData());
     }
     
@@ -1231,9 +1231,9 @@ public class TheRenderKing : Singleton<TheRenderKing>
 
     public void UpdateDynamicFoodBuffers(int eggSackIndex) {
         // *** Hard-coded 64 Fruits per food object!!!! *** BEWARE!!!
-        ComputeBuffer eggsUpdateCBuffer = new ComputeBuffer(simManager.numEggSacks, sizeof(float) * 8 + sizeof(int) * 1);
+        ComputeBuffer eggsUpdateCBuffer = new ComputeBuffer(simManager.maxEggSacks, sizeof(float) * 8 + sizeof(int) * 1);
 
-        EggData[] eggDataArray = new EggData[simManager.numEggSacks];
+        EggData[] eggDataArray = new EggData[simManager.maxEggSacks];
         for (int i = 0; i < eggDataArray.Length; i++) {
             eggDataArray[i] = new EggData(eggSackIndex, 0.25f, simManager.eggSacks[eggSackIndex].transform.position);
             /*eggDataArray[i].eggSackIndex = eggSackIndex;

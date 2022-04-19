@@ -60,18 +60,15 @@ public class SimulationManager : Singleton<SimulationManager>
     private int agentGridCellResolution = 1;  // How much to subdivide the map in order to detect nearest-neighbors more efficiently --> to not be O(n^2)
     public MapGridCell[][] mapGridCellArray;
 
-    // * WPP Rename to maxAgents (use array size to calculate numAgents if helpful)
-    // * or remove the hard cap entirely and scale down the pond to create a soft cap
     [NonSerialized]
-    public int numAgents = 64;
+    public int maxAgents = 64;
 
     public Agent[] agents;
     public EggSackGenome[] eggSackGenomes;
     
     public EggSack[] eggSacks;
     
-    // * See comment above re numAgents
-    public int numEggSacks = 48;
+    public int maxEggSacks = 48;
 
     public int numAgentsBorn = 0;
     public int numAgentsDied = 0;
@@ -80,7 +77,7 @@ public class SimulationManager : Singleton<SimulationManager>
 
     public int curApproxGen = 1;
 
-    public int numInitialHiddenNeurons = 2;
+    public int numInitialHiddenNeurons = 2; // used?
             
     private int numAgentsProcessed = 0;
 
@@ -306,7 +303,7 @@ public class SimulationManager : Singleton<SimulationManager>
         masterGenomePool.FirstTimeInitialize(cachedVertebrateMutationSettings);  //(settingsManager.mutationSettingsVertebrates);   
 
         // EGGSACKS:
-        eggSackGenomes = new EggSackGenome[numEggSacks];
+        eggSackGenomes = new EggSackGenome[maxEggSacks];
 
         for(int i = 0; i < eggSackGenomes.Length; i++) {
             EggSackGenome eggSackGenome = new EggSackGenome(i);
@@ -324,13 +321,13 @@ public class SimulationManager : Singleton<SimulationManager>
     }
     
     private void InstantiateAgentArrayImmediate() {
-        agents = new Agent[numAgents];
+        agents = new Agent[maxAgents];
         for (int i = 0; i < agents.Length; i++)
             InstantiateAgent(i);          
     }
     
     private IEnumerator InstantiateAgentArrayOverTime() {
-        agents = new Agent[numAgents];
+        agents = new Agent[maxAgents];
         for (int i = 0; i < agents.Length; i++) {
             InstantiateAgent(i);
             yield return null;     
@@ -353,20 +350,20 @@ public class SimulationManager : Singleton<SimulationManager>
     }
     
     private void LoadingInitializePlantParticles() {
-        vegetationManager.InitializePlantParticles(numAgents, computeShaderPlantParticles);
+        vegetationManager.InitializePlantParticles(maxAgents, computeShaderPlantParticles);
     }   
      
     private void LoadingInitializeResourceGrid() {        
-        vegetationManager.InitializeResourceGrid(numAgents, computeShaderResourceGrid); 
+        vegetationManager.InitializeResourceGrid(maxAgents, computeShaderResourceGrid); 
         vegetationManager.InitializeDecomposersGrid();
     }
     
     private void LoadingInitializeAnimalParticles() {
-        zooplanktonManager.InitializeAnimalParticles(numAgents, computeShaderAnimalParticles);
+        zooplanktonManager.InitializeAnimalParticles(maxAgents, computeShaderAnimalParticles);
     }
     
     private void LoadingInstantiateEggSacks() {
-        eggSacks = new EggSack[numEggSacks];
+        eggSacks = new EggSack[maxEggSacks];
         
         for (int i = 0; i < eggSacks.Length; i++) {
             var eggSackGO = spawner.Spawn(lookup.eggSack, Vector3.zero);
@@ -633,7 +630,7 @@ public class SimulationManager : Singleton<SimulationManager>
         float result = 0f;
         int aliveCreatures = 0;
         
-        for (int a = 0; a < numAgents; a++) {
+        for (int a = 0; a < maxAgents; a++) {
             if(agents[a].isAwaitingRespawn ||
                linkedSpeciesID != -1 && linkedSpeciesID != agents[a].speciesIndex) 
                 continue;
@@ -801,6 +798,9 @@ public class SimulationManager : Singleton<SimulationManager>
             if (eggSacks[f].isDepleted) {
                 ProcessDeadEggSack(f);                              
             }
+            if(eggSacks[f].isNull) {
+                ProcessDeadEggSack(f); 
+            }
         }
     }
     
@@ -815,7 +815,7 @@ public class SimulationManager : Singleton<SimulationManager>
     
     // AUTO-SPAWN  *** revisit 
     private void CheckForReadyToSpawnAgents() {      
-        int respawnThreshold = 1;
+        int respawnThreshold = 3;
         
         for (int a = 0; a < agents.Length; a++) {
             if(agentRespawnCounter <= respawnThreshold || !agents[a].isAwaitingRespawn)
@@ -934,7 +934,8 @@ public class SimulationManager : Singleton<SimulationManager>
         }
         // No eggSack found:
         else { 
-            Vector3 randWorldPos = new Vector3(Random.Range(_MapSize * 0.4f, _MapSize * 0.6f), Random.Range(_MapSize * 0.4f, _MapSize * 0.6f), 0f);// GetRandomFoodSpawnPosition().startPosition;
+            
+            Vector3 randWorldPos = new Vector3(Random.Range(_MapSize * 0.48f, _MapSize * 0.52f), Random.Range(_MapSize * 0.48f, _MapSize * 0.52f), 0f);// GetRandomFoodSpawnPosition().startPosition;
             
             Vector2 spawnWorldPos = new Vector2(randWorldPos.x, randWorldPos.y);
             Vector4 altitudeSample = SampleTexture(theRenderKing.baronVonTerrain.terrainHeightDataRT, spawnWorldPos / _MapSize);
@@ -952,7 +953,7 @@ public class SimulationManager : Singleton<SimulationManager>
     List<int> GetValidEggSackIndices(int speciesIndex) {
         List<int> validEggSackIndicesList = new List<int>();
             
-        for (int i = 0; i < numEggSacks; i++) {  
+        for (int i = 0; i < maxEggSacks; i++) {  
             if (eggSacks[i].isMature && 
                 eggSacks[i].lifeStageTransitionTimeStepCounter < eggSacks[i]._MatureDurationTimeSteps &&
                 eggSacks[i].speciesIndex == speciesIndex) {
@@ -1081,7 +1082,7 @@ public class SimulationManager : Singleton<SimulationManager>
     
     // ********** RE-IMPLEMENT THIS LATER!!!! ******************************************************************************
     private void SpawnAgentFromEggSack(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex, EggSack parentEggSack) {
-        //Debug.Log("Spawn Creature #" + agentIndex.ToString() + " (" + numAgentsBorn.ToString() + ") FromEggSack " + parentEggSack.index.ToString() + "  " + parentEggSack._PrevPos.ToString());
+        //Debug.Log("Spawn Creature #" + agentIndex.ToString() + " (" + numAgentsBorn.ToString() + ") FromEggSack " + parentEggSack.index.ToString() + "  " + parentEggSack.prevPos.ToString());
 
         numAgentsBorn++;
         //currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounter;
@@ -1110,14 +1111,14 @@ public class SimulationManager : Singleton<SimulationManager>
         eggSack.speciesIndex = randEggSpeciesIndex;
 
         // Check for timer?
-        if (eggSackRespawnCounter <= 3)
+        if (eggSackRespawnCounter <= 24)
             return;
             
         // How many active EggSacks are there in play?
         int totalSuitableParentAgents = 0;
         List<int> suitableParentAgentsList = new List<int>();
         
-        for (int i = 0; i < numAgents; i++) 
+        for (int i = 0; i < maxAgents; i++) 
         {
             if (agents[i].speciesIndex == eggSacks[eggSackIndex].speciesIndex &&
                agents[i].isMature &&
@@ -1171,7 +1172,8 @@ public class SimulationManager : Singleton<SimulationManager>
             else 
             {
                 // Wait? SpawnImmaculate?
-                int respawnCooldown = 1000;
+                //Debug.Log(" Wait? SpawnImmaculate?");
+                int respawnCooldown = 543;
                 
                 if (eggSackRespawnCounter <= respawnCooldown)
                     continue;
@@ -1179,7 +1181,7 @@ public class SimulationManager : Singleton<SimulationManager>
                 //Debug.Log("eggSackRespawnCounter > respawnCooldown");
                 List<int> eligibleAgentIndicesList = new List<int>();
                 
-                for (int a = 0; a < numAgents; a++) 
+                for (int a = 0; a < maxAgents; a++) 
                 {
                     if (agents[a].isInert) continue;
                     eligibleAgentIndicesList.Add(a);
@@ -1192,7 +1194,8 @@ public class SimulationManager : Singleton<SimulationManager>
                 int agentIndex = eligibleAgentIndicesList[randListIndex];
             
                 eggSack.parentAgentIndex = agentIndex;
-                eggSack.InitializeEggSackFromGenome(eggSackIndex, agents[agentIndex].candidateRef.candidateGenome, null, GetRandomFoodSpawnPosition().startPosition);
+                Vector3 startPos = Vector3.Lerp(new Vector3(128f, 128f, 0f), GetRandomFoodSpawnPosition().startPosition, 0.5f);
+                eggSack.InitializeEggSackFromGenome(eggSackIndex, agents[agentIndex].candidateRef.candidateGenome, null, startPos);
 
                 // TEMP::: TESTING!!!
                 eggSack.currentBiomass = settingsManager.agentSettings._BaseInitMass;
@@ -1214,7 +1217,7 @@ public class SimulationManager : Singleton<SimulationManager>
 
         simResourceManager.SetGlobalBiomassVolumes(totalEggSackVolume, totalCarrionVolume, totalAgentBiomass, weightedAvgLerpVal);
                 
-        float approxGen = (float)numAgentsBorn / (float)(numAgents - 1);
+        float approxGen = (float)numAgentsBorn / (float)(maxAgents - 1);
         if (approxGen > curApproxGen) {
             curApproxGen++;            
         }
@@ -1371,8 +1374,8 @@ public class SimulationManager : Singleton<SimulationManager>
     
     public void ApplyQualitySettings() 
     {
-        numAgents = qualitySettings.GetAgentCount(simulationComplexity);
-        numEggSacks = qualitySettings.GetEggSackCount(simulationComplexity);
+        maxAgents = qualitySettings.GetAgentCount(simulationComplexity);
+        maxEggSacks = qualitySettings.GetEggSackCount(simulationComplexity);
         numInitialHiddenNeurons = qualitySettings.GetHiddenNeuronCount(simulationComplexity);
         fluidManager.SetResolution(fluidPhysicsQuality);
         //Debug.Log("ApplyQualitySettings() numAgents: " + numAgents);

@@ -144,13 +144,13 @@ public class SimulationStateData {
         agentSimDataCBuffer = new ComputeBuffer(agentSimDataArray.Length, sizeof(float) * 18);
         */
         
-        critterInitDataArray = new CritterInitData[simManager.numAgents];
+        critterInitDataArray = new CritterInitData[simManager.maxAgents];
         for(int i = 0; i < critterInitDataArray.Length; i++) {
             critterInitDataArray[i] = new CritterInitData();
         }
         critterInitDataCBuffer = new ComputeBuffer(critterInitDataArray.Length, GetCritterInitDataSize());
 
-        critterSimDataArray = new CritterSimData[simManager.numAgents];
+        critterSimDataArray = new CritterSimData[simManager.maxAgents];
         for(int i = 0; i < critterSimDataArray.Length; i++) {
             critterSimDataArray[i] = new CritterSimData();
         }
@@ -168,7 +168,7 @@ public class SimulationStateData {
         }
         agentMovementAnimDataCBuffer = new ComputeBuffer(agentMovementAnimDataArray.Length, sizeof(float) * 4);
         */
-        eggSackSimDataArray = new EggSackSimData[simManager.numEggSacks];
+        eggSackSimDataArray = new EggSackSimData[simManager.maxEggSacks];
         for (int i = 0; i < eggSackSimDataArray.Length; i++) {
             eggSackSimDataArray[i] = new EggSackSimData();
         }
@@ -178,8 +178,8 @@ public class SimulationStateData {
         //for (int i = 0; i < stemDataArray.Length; i++) {
         //    stemDataArray[i] = new StemData();
         //}
-        foodStemDataCBuffer = new ComputeBuffer(simManager.numEggSacks, sizeof(float) * 7 + sizeof(int) * 1);
-        foodLeafDataCBuffer = new ComputeBuffer(simManager.numEggSacks * 16, sizeof(float) * 7 + sizeof(int) * 1);
+        foodStemDataCBuffer = new ComputeBuffer(simManager.maxEggSacks, sizeof(float) * 7 + sizeof(int) * 1);
+        foodLeafDataCBuffer = new ComputeBuffer(simManager.maxEggSacks * 16, sizeof(float) * 7 + sizeof(int) * 1);
         eggDataCBuffer = new ComputeBuffer(eggSackSimDataCBuffer.count * 64, sizeof(float) * 8 + sizeof(int) * 1);
 
         /*predatorSimDataArray = new PredatorSimData[simManager._NumPredators];
@@ -189,21 +189,21 @@ public class SimulationStateData {
         predatorSimDataCBuffer = new ComputeBuffer(predatorSimDataArray.Length, sizeof(float) * 5);
         */
 
-        fluidVelocitiesAtAgentPositionsArray = new Vector2[simManager.numAgents];
-        fluidVelocitiesAtEggSackPositionsArray = new Vector2[simManager.numEggSacks];
+        fluidVelocitiesAtAgentPositionsArray = new Vector2[simManager.maxAgents];
+        fluidVelocitiesAtEggSackPositionsArray = new Vector2[simManager.maxEggSacks];
         //fluidVelocitiesAtPredatorPositionsArray = new Vector2[simManager._NumPredators];
-        agentFluidPositionsArray = new Vector4[simManager.numAgents];
-        eggSackFluidPositionsArray = new Vector4[simManager.numEggSacks];
+        agentFluidPositionsArray = new Vector4[simManager.maxAgents];
+        eggSackFluidPositionsArray = new Vector4[simManager.maxEggSacks];
         //predatorFluidPositionsArray = new Vector4[simManager._NumPredators];
 
-        depthAtAgentPositionsArray = new Vector4[simManager.numAgents];
+        depthAtAgentPositionsArray = new Vector4[simManager.maxAgents];
 
         //Logger.Log("depthAtAgentPositionsArray " + fluidVelocitiesAtAgentPositionsArray.Length + ", " + agentFluidPositionsArray.Length);
     }
 
     public void PopulateSimDataArrays() {
         // CRITTER INIT: // *** MOVE INTO OWN FUNCTION -- update more efficiently with compute shader?
-        for(int i = 0; i < simManager.numAgents; i++) 
+        for(int i = 0; i < simManager.maxAgents; i++) 
         {
             if (simManager.agents[i].isAwaitingRespawn) 
                 continue;
@@ -330,7 +330,7 @@ public class SimulationStateData {
         critterInitDataCBuffer.SetData(critterInitDataArray);        
         critterSimDataCBuffer.SetData(critterSimDataArray);
         
-        for (int i = 0; i < simManager.numEggSacks; i++) {
+        for (int i = 0; i < simManager.maxEggSacks; i++) {
             Vector3 eggSackPos = simManager.eggSacks[i].transform.position;
             //int speciesSize = simManager._NumAgents / 4;
             //int eggSpecies = Mathf.FloorToInt((float)i / (float)simManager._NumEggSacks * 4f);

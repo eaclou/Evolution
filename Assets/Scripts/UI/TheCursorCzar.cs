@@ -112,7 +112,7 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
             if (!clicked)
                 return; 
             
-            uiManagerRef.OnAgentSelected?.Invoke(agent);
+            //uiManagerRef.OnAgentSelected?.Invoke(agent); //***EAC what does this do?
             selectionManager.SetSelected(agent.candidateRef);
             cameraManager.SetFollowing(KnowledgeMapId.Animals);
         }

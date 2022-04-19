@@ -141,7 +141,7 @@
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward, 0);  // Rotate localRotation by AgentRotation
 
-				float leafScale = 1.05 * (saturate(particleData.biomass * 3 + 0.1) * 0.35 * particleData.isActive + hoverMask * 0.3);
+				float leafScale = 0.25 * (saturate(particleData.biomass * 3 + 0.1) * 0.35 * particleData.isActive + hoverMask * 0.3);
 				o.worldPos = float4(worldPosition, 0);
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition + rotatedPoint * leafScale, 1.0)));
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
@@ -154,6 +154,9 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
+				
+				/*
+				///older shading model:
 				//Diffuse
 				float pixelOffset = 1.0 / 256;  // resolution  // **** THIS CAN"T BE HARDCODED AS FINAL ****"
 				// ************  PRE COMPUTE THIS IN A TEXTURE!!!!!! ************************
@@ -194,23 +197,13 @@
 
 				//return float4(1,1,1,1);
 				return outColor;
-				
-				//float4 texColor = tex2D(_MainTex, i.uv);
-				//float4 terrainColor = tex2D(_TerrainColorTex, i.worldPos.xy / _MapSize);
-				
-				//float4 finalCol = terrainColor * 0.7;
-				//finalCol.a = 1;
-				//return finalCol;
-				/*
-				fixed4 col = tex2D(_MainTex, i.uv) * i.color;
-				col.rgb = lerp(col, float3(0.81, 0.79, 0.65) * 0.1, i.color.x * 0.6);
-				col.rgb = lerp(col, float3(0.6, 1, 0.4) * 1, 0.25);
-				col.rgb = lerp(col.rgb, terrainColor.rgb, 0.37);
-				//col.rgb += i.color.w * 2.5;
-				col.a = texColor.a;
-
-				return col;
 				*/
+				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
+				float depth = saturate((_GlobalWaterLevel - altitudeTex.x) * 1);
+				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV);
+				float4 finalColor = float4(0,0,0,0.75);
+				finalColor.rgb = lerp(finalColor.rgb, terrainColorTex.rgb * 0.75, depth);
+				return finalColor;
 			}
 		ENDCG
 		}

@@ -75,10 +75,10 @@
 				float3 worldNormal = genericStrokeData.worldNormal;
 				float3 worldTangent = normalize(lerp(genericStrokeData.worldTangent, -neighborAlignTangent, genericStrokeData.neighborAlign));
 				float3 worldBitangent = cross(worldNormal, worldTangent);
-				
+								
 				float3 quadVertexOffset = quadVerticesCBuffer[id].x * worldBitangent * genericStrokeData.scale.x + quadVerticesCBuffer[id].y * worldTangent * genericStrokeData.scale.y;
 				quadVertexOffset *= (1 - critterSimData.decayPercentage);
-				quadVertexOffset *= 2;
+				//quadVertexOffset *= 2;
 				// old //float3 vertexWorldPos = critterWorldPos + strokeBindPos + quadVerticesCBuffer[id] * 0.645 * length(genericStrokeData.scale);
 				float3 vertexWorldPos = genericStrokeData.worldPos + quadVertexOffset * 1.25 * lerp(critterInitData.spawnSizePercentage, 1, critterSimData.growthPercentage) * 1;
 								
@@ -101,8 +101,10 @@
 				o.uv = quadVerticesCBuffer[id].xy + 0.5;	
 				float4 screenUV = ComputeScreenPos(o.vertex);
 				o.screenUV = screenUV;
-		
-				float alpha = saturate((critterSimData.embryoPercentage - 0.995) * 200);
+										
+				//o.color = float4(specTest * 0.65 + hue * crudeDiffuse, alpha); //genericStrokeData.bindPos.x * 0.5 + 0.5, genericStrokeData.bindPos.z * 0.33 + 0.5, genericStrokeData.bindPos.y * 0.5 + 0.5, 1);
+				
+				float alpha = saturate((critterSimData.embryoPercentage - 0.995) * 200) * saturate((0.9 - critterSimData.decayPercentage) * 999);
 
 				o.color = float4(1,1,1,alpha);
 				
@@ -122,7 +124,7 @@
 				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV);
 
 				//frameBufferColor.rgb *= 0.75; // = lerp(frameBufferColor.rgb, particleColor, 0.25);
-				float4 finalColor = float4(0,0,0,1);
+				float4 finalColor = float4(0,0,0,i.color.a);
 				finalColor.rgb = lerp(finalColor.rgb, terrainColorTex.rgb * 0.75, depth); //GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(0,0,0,0));
 				//finalColor.a = brushColor.a * 0.175;
 				//finalColor.rgb *= 0.55;

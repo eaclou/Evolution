@@ -17,14 +17,14 @@ public class EggSack : MonoBehaviour {
     public bool isNull => curLifeStage == EggLifeStage.Null;
     public bool isMature => curLifeStage == EggLifeStage.Mature;
 
-    private float pregnancyPercentageOfTotalGrowTime = 0.5f;
+    private float pregnancyPercentageOfTotalGrowTime = 0.25f;
     private int birthDurationTimeSteps = 30;
-    private int growDurationTimeSteps = 640;
+    private int growDurationTimeSteps = 240;
 
-    private int matureDurationTimeSteps = 210;  // buffer time for late bloomers to spawn
+    private int matureDurationTimeSteps = 1000;  // buffer time for late bloomers to spawn
     public int _MatureDurationTimeSteps => matureDurationTimeSteps;
 
-    private int decayDurationTimeSteps = 720;  // how long it takes to rot/decay
+    private int decayDurationTimeSteps = 1440;  // how long it takes to rot/decay
 
     public float individualEggMaxSize = 0.1f;
     public int maxNumEggs = 64;
@@ -86,11 +86,15 @@ public class EggSack : MonoBehaviour {
 
     public void InitializeEggSackFromGenome(int index, AgentGenome agentGenome, Agent parentAgent, Vector3 startPos) {
         //currentBiomass = 0.01f; // immaculate eggsacks given free mass?
-
+        string debugTxT = "NULL";
         if (parentAgent) {  
             parentAgentIndex = parentAgent.index;
+            debugTxT = "" + parentAgent.speciesIndex;
         }
+        else {
 
+        }
+        //Debug.Log(debugTxT + "InitializeEggSackFromGenome(int index" + index + ", AgentGenome agentGenome" + ", parentAgentIndex: " + parentAgentIndex + ", Vector3 startPos " + startPos);
         this.index = index;        
         fullSize = Vector2.one * (agentGenome.bodyGenome.GetFullsizeBoundingBox().x + agentGenome.bodyGenome.GetFullsizeBoundingBox().y) * 0.5f; // new Vector2(agentGenome.bodyGenome.fullsizeBoundingBox.x, agentGenome.bodyGenome.fullsizeBoundingBox.y) * 1f;
                

@@ -118,7 +118,7 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				return float4(0.08,0.2,0.12,1);
+				return float4(float3(0.32,0.6,0.8) * 0.75,0.7);
 				//return float4(0.21,0.71,0.91,0.1);
 
 				float4 texColor = tex2D(_MainTex, i.uv);  // Read Brush Texture

@@ -18,6 +18,8 @@ public class SelectionManager : Singleton<SelectionManager>
         }
         currentSelection.candidate = candidate;
 
+        
+
         // Check if corresponding agent exists:
         bool hasAgent = false;
         foreach (var agent in simulation.agents) {
@@ -26,9 +28,9 @@ public class SelectionManager : Singleton<SelectionManager>
             
             hasAgent = true;
             currentSelection.agent = agent;
+            uiManager.OnAgentSelected?.Invoke(agent);
             theRenderKing.InitializeCreaturePortrait(currentSelection.candidate.candidateGenome);
             uiManager.genomeViewerUI.brainGenomeImage.SetTexture(currentSelection.candidate.candidateGenome.brainGenome);
-            
             CameraManager.instance.targetAgent = agent;
             CameraManager.instance.targetAgentTransform = agent.bodyGO.transform;
             CameraManager.instance.targetAgentIndex = agent.index;
@@ -42,8 +44,9 @@ public class SelectionManager : Singleton<SelectionManager>
         //uiManager.historyPanelUI.RefreshFocusedAgent(currentSelection.agent);
         uiManager.speciesOverviewUI.RebuildGenomeButtons();
         
+
         if (hasAgent) 
-        {
+        {            
             unlockedTech = currentSelection.candidate.candidateGenome.bodyGenome.unlockedTech;
             //PrintTech();
         }

@@ -157,7 +157,7 @@ public class DebugPanelUI : MonoBehaviour
             
             //+++++++++++++++++++++++++++++++++++++ CRITTER: ++++++++++++++++++++++++++++++++++++++++++++
             string debugTxtGlobalSim = "";
-            debugTxtGlobalSim += "\n\nNumChildrenBorn: " + simulation.numAgentsBorn + ", numDied: " + simulation.numAgentsDied + ", ~Gen: " + ((float)simulation.numAgentsBorn / (float)simulation.numAgents);
+            debugTxtGlobalSim += "\n\nNumChildrenBorn: " + simulation.numAgentsBorn + ", numDied: " + simulation.numAgentsDied + ", ~Gen: " + ((float)simulation.numAgentsBorn / (float)simulation.maxAgents);
             debugTxtGlobalSim += "\nSimulation Age: " + simulation.simAgeTimeSteps;
             debugTxtGlobalSim += "\nYear " + simulation.curSimYear + "\n\n";
             int numActiveSpecies = masterGenomePool.currentlyActiveSpeciesIDList.Count;
@@ -171,7 +171,7 @@ public class DebugPanelUI : MonoBehaviour
                 //int numBorn = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].numAgentsEvaluated;
                 int speciesPopSize = 0;
                 //float avgFitness = simManager.masterGenomePool.completeSpeciesPoolsList[speciesID].avgPerformanceData.totalTicksAlive;
-                for (int a = 0; a < simulation.numAgents; a++) {
+                for (int a = 0; a < simulation.maxAgents; a++) {
                     if (simulation.agents[a].speciesIndex == speciesID) {
                         speciesPopSize++;
                     }
