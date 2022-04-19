@@ -1113,7 +1113,8 @@ public class SimulationManager : Singleton<SimulationManager>
         // Check for timer?
         if (eggSackRespawnCounter <= 24)
             return;
-            
+        
+        int respawnCooldown = 543;
         // How many active EggSacks are there in play?
         int totalSuitableParentAgents = 0;
         List<int> suitableParentAgentsList = new List<int>();
@@ -1135,73 +1136,74 @@ public class SimulationManager : Singleton<SimulationManager>
                 
                 if(reqMass < agentMass) 
                 {
-                    //Debug.Log("RequiredMass met! " + reqMass.ToString() + " biomass: " + agentsArray[i].currentBiomass.ToString() + ", _BaseInitMass: " + settingsManager.agentSettings._BaseInitMass.ToString());
+                    
                     totalSuitableParentAgents++;
                     suitableParentAgentsList.Add(i);
                 }
-            }                
-        
-            if (totalSuitableParentAgents > 0) 
-            {
-                // At Least ONE fertile Agent available:
-                int parentAgentIndex = suitableParentAgentsList[Random.Range(0, totalSuitableParentAgents)];
-                Agent parentAgent = agents[parentAgentIndex];
-
-                //Debug.Log("BeginPregnancy! Egg[" + eggSackIndex.ToString() + "]  Agent[" + randParentAgentIndex.ToString() + "]");
-                if(parentAgent.childEggSackRef && parentAgent.isPregnantAndCarryingEggs) 
-                {
-                    Debug.Log("DOUBLE PREGNANT!! egg[" + parentAgent.childEggSackRef.index + "]  Agent[" + parentAgentIndex + "]");
-                }
-
-                // RespawnFood
-                // *** REFACTOR -- Need to sync egg and agent genomes to match each other
-                EggSackGenome newEggSackGenome = new EggSackGenome(eggSackIndex);
-                newEggSackGenome.SetToMutatedCopyOfParentGenome(eggSackGenomes[eggSackIndex], cachedVertebrateMutationSettings);
-                eggSackGenomes[eggSackIndex] = newEggSackGenome;
-                
-                // Transfer Energy from ParentAgent to childEggSack!!! ******
-                eggSack.InitializeEggSackFromGenome(eggSackIndex, 
-                    parentAgent.candidateRef.candidateGenome, 
-                    parentAgent, 
-                    GetRandomFoodSpawnPosition().startPosition);
-                    
-                parentAgent.BeginPregnancy(eggSacks[eggSackIndex]);
-                
-                eggSackRespawnCounter = 0;
             }
-            else 
+        }
+
+
+        if (totalSuitableParentAgents > 0) 
+        {
+            Debug.Log("RequiredMass met! (totalSuitableParentAgents > 0)  " + settingsManager.agentSettings._BaseInitMass.ToString());
+            // At Least ONE fertile Agent available:
+            int parentAgentIndex = suitableParentAgentsList[Random.Range(0, totalSuitableParentAgents)];
+            Agent parentAgent = agents[parentAgentIndex];
+
+            //Debug.Log("BeginPregnancy! Egg[" + eggSackIndex.ToString() + "]  Agent[" + randParentAgentIndex.ToString() + "]");
+            if(parentAgent.childEggSackRef && parentAgent.isPregnantAndCarryingEggs) 
             {
-                // Wait? SpawnImmaculate?
-                //Debug.Log(" Wait? SpawnImmaculate?");
-                int respawnCooldown = 543;
+                Debug.Log("DOUBLE PREGNANT!! egg[" + parentAgent.childEggSackRef.index + "]  Agent[" + parentAgentIndex + "]");
+            }
+
+            // RespawnFood
+            // *** REFACTOR -- Need to sync egg and agent genomes to match each other
+            EggSackGenome newEggSackGenome = new EggSackGenome(eggSackIndex);
+            newEggSackGenome.SetToMutatedCopyOfParentGenome(eggSackGenomes[eggSackIndex], cachedVertebrateMutationSettings);
+            eggSackGenomes[eggSackIndex] = newEggSackGenome;
                 
-                if (eggSackRespawnCounter <= respawnCooldown)
-                    continue;
-                //{  // try to encourage more pregnancies?
-                //Debug.Log("eggSackRespawnCounter > respawnCooldown");
-                List<int> eligibleAgentIndicesList = new List<int>();
-                
-                for (int a = 0; a < maxAgents; a++) 
-                {
-                    if (agents[a].isInert) continue;
-                    eligibleAgentIndicesList.Add(a);
-                }
-                
-                if (eligibleAgentIndicesList.Count <= 0)
-                    continue;
+            // Transfer Energy from ParentAgent to childEggSack!!! ******
+            eggSack.InitializeEggSackFromGenome(eggSackIndex, 
+                parentAgent.candidateRef.candidateGenome, 
+                parentAgent, 
+                GetRandomFoodSpawnPosition().startPosition);
                     
-                int randListIndex = Random.Range(0, eligibleAgentIndicesList.Count);
-                int agentIndex = eligibleAgentIndicesList[randListIndex];
+            parentAgent.BeginPregnancy(eggSacks[eggSackIndex]);
+            Debug.Log("BeginPregnancy!!  Agent[" + parentAgentIndex + "] EggSack[" + eggSack.index + "]");
+            eggSackRespawnCounter = 0;
+        }
+        else 
+        {
+            // Wait? SpawnImmaculate?
             
-                eggSack.parentAgentIndex = agentIndex;
-                Vector3 startPos = Vector3.Lerp(new Vector3(128f, 128f, 0f), GetRandomFoodSpawnPosition().startPosition, 0.5f);
-                eggSack.InitializeEggSackFromGenome(eggSackIndex, agents[agentIndex].candidateRef.candidateGenome, null, startPos);
-
-                // TEMP::: TESTING!!!
-                eggSack.currentBiomass = settingsManager.agentSettings._BaseInitMass;
-                eggSackRespawnCounter = 0;
+                
+            if (eggSackRespawnCounter <= respawnCooldown)
+                return;
+            //{  // try to encourage more pregnancies?
+            //Debug.Log("eggSackRespawnCounter > respawnCooldown");
+            List<int> eligibleAgentIndicesList = new List<int>();
+                
+            for (int a = 0; a < maxAgents; a++) 
+            {
+                if (agents[a].isInert) continue;
+                eligibleAgentIndicesList.Add(a);
             }
-        }        
+                
+            if (eligibleAgentIndicesList.Count <= 0)
+                return;
+                    
+            int randListIndex = Random.Range(0, eligibleAgentIndicesList.Count);
+            int agentIndex = eligibleAgentIndicesList[randListIndex];
+            
+            eggSack.parentAgentIndex = agentIndex;
+            Vector3 startPos = Vector3.Lerp(new Vector3(128f, 128f, 0f), GetRandomFoodSpawnPosition().startPosition, 0.5f);
+            eggSack.InitializeEggSackFromGenome(eggSackIndex, agents[agentIndex].candidateRef.candidateGenome, null, startPos);
+            Debug.Log(" Wait? SpawnImmaculate? " + eggSackIndex);
+            // TEMP::: TESTING!!!
+            eggSack.currentBiomass = settingsManager.agentSettings._BaseInitMass;
+            eggSackRespawnCounter = 0;
+        }
     }
         
     private void ProcessAgentScores(Agent agent) {

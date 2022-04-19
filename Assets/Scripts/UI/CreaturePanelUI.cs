@@ -26,6 +26,9 @@ public class CreaturePanelUI : MonoBehaviour
     public TooltipUI tooltipGenerationCount;
 
     [SerializeField]
+    Image imagePregnancy;
+
+    [SerializeField]
     Text textGenerationCount;
 
     [SerializeField]
@@ -61,6 +64,11 @@ public class CreaturePanelUI : MonoBehaviour
     
         foreach (var panelMode in panelModes)
             panelMode.Initialize(onColor, offColor);
+    }
+
+    public void ClickParentGenome() {
+        CandidateAgentData cand = SelectionManager.instance.currentSelection.candidate;
+        //cand.candidateID
     }
 
     public void UpdateAgentActionStateData(int candID, AgentActionState actionState) {
@@ -109,10 +117,31 @@ public class CreaturePanelUI : MonoBehaviour
 
         tooltipGenerationCount.tooltipString = "Generation " + agent.candidateRef.candidateGenome.generationCount.ToString();
         textGenerationCount.text = agent.candidateRef.candidateGenome.generationCount.ToString();
-
+        
         float reqMass = SettingsManager.instance.agentSettings._BaseInitMass * SettingsManager.instance.agentSettings._MinPregnancyFactor;
         float agentMass = agent.currentBiomass * SettingsManager.instance.agentSettings._MaxPregnancyProportion;
         debugText.text = "Agent# " + agent.index + "\nCandidateID: " + agent.candidateRef.candidateID + "\nreqMass: " + reqMass + ", agentMass: " + agentMass.ToString("F2") + "\nSpecies#cands: " + simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].candidateGenomesList.Count;
+
+        TooltipUI pregnantTooltip = imagePregnancy.GetComponent<TooltipUI>();
+        pregnantTooltip.tooltipString = "Progress To Pregnancy: " + (Mathf.Clamp01(agentMass / reqMass) * 100f).ToString("F0") + " %";
+        if (agent.isPregnantAndCarryingEggs) {
+            imagePregnancy.color = Color.white;
+            imagePregnancy.gameObject.transform.localScale = Vector3.one;
+            pregnantTooltip.tooltipString = "PREGNANT";
+        }
+        else {
+            imagePregnancy.gameObject.transform.localScale = Vector3.one * Mathf.Clamp01(agentMass / reqMass);
+            imagePregnancy.color = Color.gray;
+        }
+
+        if(agent.curLifeStage != AgentLifeStage.Mature) {
+            imagePregnancy.gameObject.transform.localScale = Vector3.zero;
+            imagePregnancy.color = Color.black;
+            pregnantTooltip.tooltipString = "";
+        }
+        else {
+            
+        }
     }
     
     public void SetPanelMode(StringSO mode) {

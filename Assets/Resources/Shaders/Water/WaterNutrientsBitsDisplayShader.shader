@@ -113,10 +113,10 @@
 
 				float4 resourceGridSample = tex2Dlod(_ResourceGridTex, float4(uv, 0, 0));
 				
-				float2 scale = 0.022 * alpha; // waterQuadData.localScale * 4;
+				float2 scale = 0.1 * alpha; // waterQuadData.localScale * 4;
 
 				float bonusAmplitude = saturate(resourceGridSample.x * 1.5);//  cos((float)inst * 91204.119273 + _Time.y * 70.9128397) * 0.5 + 0.5;
-				bonusAmplitude = bonusAmplitude * bonusAmplitude;  // carve out
+				bonusAmplitude = bonusAmplitude;  // carve out
 
 				float sizeNorm = _CamDistNormalized * (0.5 + bonusAmplitude * 0.5) * 0.57 * alpha;
 				scale = float2(sizeNorm, sizeNorm);

@@ -50,7 +50,7 @@ public class BaronVonWater : RenderBaron
     public ComputeBuffer waterChains0CBuffer;
     public ComputeBuffer waterChains1CBuffer;
 
-    private int numNutrientsBits = 1024 * 4;
+    private int numNutrientsBits = 1024 * 8;
     private int numSurfaceBits = 1024 * 8;
     private int numDebrisBits = 1024 * 4;
     public ComputeBuffer waterNutrientsBitsCBuffer;

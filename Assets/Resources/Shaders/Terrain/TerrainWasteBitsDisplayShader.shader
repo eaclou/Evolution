@@ -190,7 +190,7 @@
 			{	
 				float4 quadTex = tex2D(_MainTex, i.quadUV);
 				float wasteVal = i.color.x; //(waste)
-				float maskVal = quadTex.a * 0.99;
+				float maskVal = quadTex.a * 0.925;
 
 				float alpha = 0;
 				if(wasteVal > (1.0 - maskVal)) {

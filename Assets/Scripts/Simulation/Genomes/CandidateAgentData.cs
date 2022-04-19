@@ -82,6 +82,7 @@ public struct PerformanceData {
 public class CandidateAgentData 
 {
     public int candidateID;
+    public int parentID;
     public int speciesID;
     public AgentGenome candidateGenome;
     public int numCompletedEvaluations = 0;
@@ -110,6 +111,24 @@ public class CandidateAgentData
     public string causeOfDeath = "";
     public List<CandidateEventData> candidateEventDataList;
     
+    public CandidateAgentData(CandidateAgentData cand, int speciesID) {
+        //Debug.Log("NewCandidateData: " + MasterGenomePool.nextCandidateIndex.ToString());
+        MasterGenomePool.nextCandidateIndex++;
+        causeOfDeath = "Alive!";
+        candidateID = MasterGenomePool.nextCandidateIndex;
+        this.speciesID = speciesID;
+        candidateGenome = cand.candidateGenome;
+        numCompletedEvaluations = 0;
+        //evaluationScoresList = new List<float>();
+        allEvaluationsComplete = false;  
+        isBeingEvaluated = false;
+
+        this.parentID = cand.parentID;
+        //name = GenerateTempCritterName();
+
+        candidateEventDataList = new List<CandidateEventData>();
+        performanceData = new PerformanceData();
+    }
     public CandidateAgentData(AgentGenome genome, int speciesID) {
         //Debug.Log("NewCandidateData: " + MasterGenomePool.nextCandidateIndex.ToString());
         MasterGenomePool.nextCandidateIndex++;
@@ -122,6 +141,7 @@ public class CandidateAgentData
         allEvaluationsComplete = false;  
         isBeingEvaluated = false;
 
+        this.parentID = 0; //????
         //name = GenerateTempCritterName();
 
         candidateEventDataList = new List<CandidateEventData>();

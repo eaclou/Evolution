@@ -2859,7 +2859,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         {
             DisplayEggStrokes();
             DisplayCritterDebugGenericStrokes();
-            DisplayEggCover();
+            DisplayEggCover(); // currently being used as pins above creatures' heads
         }
 
         baronVonWater.DisplayNutrients();

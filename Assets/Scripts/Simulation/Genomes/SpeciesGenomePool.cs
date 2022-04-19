@@ -179,7 +179,7 @@ public class SpeciesGenomePool
             }
         }
         else {
-            candidateData = new CandidateAgentData(representativeCandidate.candidateGenome, speciesID);
+            candidateData = new CandidateAgentData(representativeCandidate, speciesID);
             Debug.LogError("GetNextAvailableCandidate(): candidateData representativeGenome!!!! " + candidateData);
         }
         
