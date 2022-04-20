@@ -665,47 +665,13 @@ public class SimulationManager : Singleton<SimulationManager>
     private void ApplyFluidForcesToDynamicObjects() {
         for (int i = 0; i < agents.Length; i++) {
             agents[i].ApplyFluidForces(i);
-            /*Vector4 depthSample = simStateData.depthAtAgentPositionsArray[i]; 
-            agents[i].waterDepth = _GlobalWaterLevel - depthSample.x;
             
-            bool depthSampleInitialized = depthSample.y != 0f && depthSample.z != 0f;
-            agents[i].depthGradient = depthSampleInitialized ? 
-                new Vector2(depthSample.y, depthSample.z).normalized :
-                Vector2.zero;
-                                    //***** world boundary *****
-            if (depthSample.x > _GlobalWaterLevel || depthSample.w < 0.1f) //(floorDepth < agentSize)
-            {
-                float wallForce = 12.0f; // Mathf.Clamp01(agentSize - floorDepth) / agentSize;
-                Vector2 gradient = agents[i].depthGradient; // new Vector2(depthSample.y, depthSample.z); //.normalized;
-                agents[i].bodyRigidbody.AddForce(agents[i].bodyRigidbody.mass * wallForce * -gradient, ForceMode2D.Impulse);
-
-                float damage = wallForce * 0.015f;  
-                
-                if(depthSample.w < 0.51f) {
-                    damage *= 0.33f;
-                }
-                
-                float defendBonus = 1f;
-                
-                if(agents[i].coreModule != null && agents[i].isMature) 
-                {
-                    defendBonus = agents[i].isDefending ? 0f : 1.5f;
-                    damage *= defendBonus;
-                    
-                    agents[i].candidateRef.performanceData.totalDamageTaken += damage;
-                    agents[i].coreModule.isContact[0] = 1f;
-                    agents[i].coreModule.contactForceX[0] = gradient.x;
-                    agents[i].coreModule.contactForceY[0] = gradient.y;
-                    agents[i].TakeDamage(damage);
-                }
-            }
-            
-            agents[i].bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[i] * 64f * agents[i].bodyRigidbody.mass, ForceMode2D.Impulse);
-            agents[i].avgFluidVel = Vector2.Lerp(agents[i].avgFluidVel, simStateData.fluidVelocitiesAtAgentPositionsArray[i], 0.25f);*/
         }
-        //for (int i = 0; i < eggSackArray.Length; i++) { // *** cache rigidBody reference 
-        //    eggSackArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtEggSackPositionsArray[i] * 16f * eggSackArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse); //
-        //}
+        for (int i = 0; i < eggSacks.Length; i++) { // *** cache rigidBody reference 
+            eggSacks[i].rigidbodyRef.AddForce(simStateData.fluidVelocitiesAtEggSackPositionsArray[i] * 48f * eggSacks[i].rigidbodyRef.mass, ForceMode2D.Impulse);
+            //eggSackArray[i].GetComponent<Rigidbody2D>().AddForce(simStateData.fluidVelocitiesAtEggSackPositionsArray[i] * 16f * eggSackArray[i].GetComponent<Rigidbody2D>().mass, ForceMode2D.Impulse); //
+        }
+        
     }
     
     public void TickPlayerStirTool()
@@ -1136,7 +1102,7 @@ public class SimulationManager : Singleton<SimulationManager>
                 
                 if(reqMass < agentMass) 
                 {
-                    Debug.Log("if(reqMass < agentMass) ");
+                    //Debug.Log("if(reqMass < agentMass) ");
                     totalSuitableParentAgents++;
                     suitableParentAgentsList.Add(i);
                 }
@@ -1146,7 +1112,7 @@ public class SimulationManager : Singleton<SimulationManager>
 
         if (totalSuitableParentAgents > 0) 
         {
-            Debug.Log("RequiredMass met! (totalSuitableParentAgents > 0)  " + settingsManager.agentSettings._BaseInitMass.ToString());
+            //Debug.Log("RequiredMass met! (totalSuitableParentAgents > 0)  " + settingsManager.agentSettings._BaseInitMass.ToString());
             // At Least ONE fertile Agent available:
             int parentAgentIndex = suitableParentAgentsList[Random.Range(0, totalSuitableParentAgents)];
             Agent parentAgent = agents[parentAgentIndex];

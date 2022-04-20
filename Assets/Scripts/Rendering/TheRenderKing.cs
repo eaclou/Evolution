@@ -2370,7 +2370,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         cmdBufferSlotPortraitDisplay.SetRenderTarget(slotPortraitRenderCamera.targetTexture); // needed???
         cmdBufferSlotPortraitDisplay.ClearRenderTarget(true, true, new Color(54f / 255f, 73f / 255f, 61f / 255f, 0f), 1.0f);  // clear -- needed???
         cmdBufferSlotPortraitDisplay.SetViewProjectionMatrices(slotPortraitRenderCamera.worldToCameraMatrix, slotPortraitRenderCamera.projectionMatrix);
-        
+        /*
         // MEDIUM STROKES!!!!
         baronVonTerrain.groundStrokesMedDisplayMat.SetPass(0);
         baronVonTerrain.groundStrokesMedDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -2392,7 +2392,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color1", baronVonTerrain.pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
         baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color2", baronVonTerrain.sandSlotGenomeCurrent.color);                    
         cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesMedDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.terrainStoneStrokesCBuffer.count);
-        
+        */
         toolbarSpeciesPortraitStrokesMat.SetPass(0);
         toolbarSpeciesPortraitStrokesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         toolbarSpeciesPortraitStrokesMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
@@ -2788,7 +2788,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         cmdBufferMain.DrawProcedural(Matrix4x4.identity, plantParticleShadowDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, simManager.vegetationManager.plantParticlesCBuffer.count * 32);
        
 
-        DisplayPlantParticles(isHighlight);
+        DisplayPlantParticles();
 
         #region Dead code (delegate or delete)
         // STIR STICK!!!!
@@ -2853,7 +2853,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         */
         #endregion
         
-        DisplayAnimalParticles(isHighlight);
+        DisplayAnimalParticles();
 
         if (simManager.trophicLayersManager.IsLayerOn(KnowledgeMapId.Animals)) 
         {
@@ -2955,9 +2955,9 @@ public class TheRenderKing : Singleton<TheRenderKing>
         cmdBufferMain.DrawProcedural(Matrix4x4.identity, floatyBitsDisplayMat, 0, MeshTopology.Triangles, 6, floatyBitsCBuffer.count);
     }
     
-    void DisplayPlantParticles(float isHighlight)
+    void DisplayPlantParticles()
     {
-        float isSelectedPlant = 0f;     // * WPP: hard coded value
+        
 
         plantParticleDisplayMat.SetPass(0);
         plantParticleDisplayMat.SetBuffer("plantParticleDataCBuffer", vegetationManager.plantParticlesCBuffer);
@@ -2974,8 +2974,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
         plantParticleDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(vegetationManager.selectedPlantParticleIndex));
         plantParticleDisplayMat.SetInt("_HoverParticleIndex", Mathf.RoundToInt(vegetationManager.closestPlantParticleData.index));
         //Debug.Log("_SelectedParticleIndex: " + Mathf.RoundToInt(simManager.vegetationManager.selectedPlantParticleIndex).ToString() + ", _HoverParticleIndex: " + Mathf.RoundToInt(simManager.vegetationManager.closestPlantParticleData.index).ToString());
-        plantParticleDisplayMat.SetFloat("_IsSelected", isSelectedPlant); // isSelected);
-        plantParticleDisplayMat.SetFloat("_IsHover", uiManager.plantHighlight * isHighlight);
+        plantParticleDisplayMat.SetFloat("_IsSelected", UIManager.instance.GetIsHighlightPlants()); // isSelected);
+        plantParticleDisplayMat.SetFloat("_IsHover", UIManager.instance.GetIsHighlightPlants());
         plantParticleDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
         plantParticleDisplayMat.SetVector("_FogColor", simManager.fogColor);
         plantParticleDisplayMat.SetVector("_SunDir", sunDirection);
@@ -2985,9 +2985,11 @@ public class TheRenderKing : Singleton<TheRenderKing>
     }
     
     // Add shadow pass eventually
-    void DisplayAnimalParticles(float isHighlight)
+    void DisplayAnimalParticles()
     {
         float isSelectedMicrobes = 0f; //***EC -- revisit
+        
+        //plantDistance < hitboxRadius && plantDistance < microbeDistance;
 
         animalParticleDisplayMat.SetPass(0);
         animalParticleDisplayMat.SetBuffer("animalParticleDataCBuffer", zooplanktonManager.animalParticlesCBuffer);
@@ -2999,8 +3001,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
         animalParticleDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(zooplanktonManager.selectedAnimalParticleIndex));
         animalParticleDisplayMat.SetInt("_ClosestParticleID", Mathf.RoundToInt(zooplanktonManager.closestZooplanktonToCursorIndex));
         animalParticleDisplayMat.SetFloat("_IsSelected", isSelectedMicrobes);
-        animalParticleDisplayMat.SetFloat("_IsHover", uiManager.zooplanktonHighlight * isHighlight);
-        animalParticleDisplayMat.SetFloat("_IsHighlight", uiManager.zooplanktonHighlight * isHighlight); 
+        animalParticleDisplayMat.SetFloat("_IsHover", UIManager.instance.GetIsHighlightMicrobes());
+        animalParticleDisplayMat.SetFloat("_IsHighlight", UIManager.instance.GetIsHighlightMicrobes()); 
         animalParticleDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         animalParticleDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
         animalParticleDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized); 

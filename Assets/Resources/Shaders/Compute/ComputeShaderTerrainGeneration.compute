@@ -224,7 +224,7 @@ void CSSimDecomposerBitsData (uint3 id : SV_DispatchThreadID)
 		else {
 			
 			float2 vel = VelocityRead.SampleLevel(_LinearRepeat, uv, 0).xy;
-			float speedMult = 0.0075;
+			float speedMult = 0.00075;
 
 			decomposerBitData.speed = length(vel);
 	
@@ -248,7 +248,7 @@ void CSSimDecomposerBitsData (uint3 id : SV_DispatchThreadID)
 				grad = normalize(lerp(float2(dX, dY), normalize(float2(spawnNoise1,1)), 0));
 			}
 		
-			decomposerBitData.heading = grad;
+			//decomposerBitData.heading = grad;
 			decomposerBitData.worldPos = float3(nextPos * _MapSize, 0);		
 		}
 	}

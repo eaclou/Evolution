@@ -19,6 +19,8 @@ public class CreaturePanelUI : MonoBehaviour
     [SerializeField]
     Image imageCurAction;
 
+    [SerializeField]
+    public TooltipUI tooltipOpenCloseButton;
     public TooltipUI tooltipCurrentAction;
     public TooltipUI tooltipBrain;
     public TooltipUI tooltipGenome;
@@ -43,6 +45,8 @@ public class CreaturePanelUI : MonoBehaviour
 
     private bool isPanelOpen => openCloseButton.isOpen;
 
+    
+
     public Sprite spriteBrainButton;
 
     [SerializeField]
@@ -64,6 +68,8 @@ public class CreaturePanelUI : MonoBehaviour
     
         foreach (var panelMode in panelModes)
             panelMode.Initialize(onColor, offColor);
+
+        openCloseButton.SetHighlight(true);
     }
 
     public void ClickParentGenome() {
@@ -107,6 +113,8 @@ public class CreaturePanelUI : MonoBehaviour
         if(agent.curLifeStage == AgentLifeStage.Dead) {
             imageCurAction.gameObject.SetActive(false);
         }
+
+        tooltipOpenCloseButton.tooltipString = isPanelOpen ? "Hide Creature Panel" : "Open Creature Panel";
 
         speciesIconUI.GetComponent<Image>().material = simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].coatOfArmsMat;
         speciesIconUI.tooltip.tooltipString = "Species " + agent.speciesIndex;

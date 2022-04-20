@@ -18,7 +18,7 @@ public class EggSack : MonoBehaviour {
     public bool isMature => curLifeStage == EggLifeStage.Mature;
 
     private float pregnancyPercentageOfTotalGrowTime = 0.25f;
-    private int birthDurationTimeSteps = 30;
+    private int birthDurationTimeSteps = 90;
     private int growDurationTimeSteps = 240;
 
     private int matureDurationTimeSteps = 1000;  // buffer time for late bloomers to spawn

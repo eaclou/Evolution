@@ -88,7 +88,7 @@ public class UIManager : Singleton<UIManager>
 
     public bool isTooltipHover = false;
     public TooltipUI curTooltip;
-    //public string tooltipString;
+    
     float cursorX => theCursorCzar.GetCursorPixelCoords().x;
     Vector2 mousePositionOnWater => theCursorCzar.curMousePositionOnWaterPlane2D;
     TooltipId tooltipId;
@@ -114,6 +114,8 @@ public class UIManager : Singleton<UIManager>
     {
         public TooltipId id;
         public Color color;
+        public Sprite icon;
+        public string text;
     }
     
     public enum TooltipId
@@ -130,6 +132,22 @@ public class UIManager : Singleton<UIManager>
     
     #endregion
 
+    public float GetIsHighlightMicrobes() {
+        if(microbeDistance < hitboxRadius && microbeDistance < plantDistance) {
+            return 1f;
+        }
+        else {
+            return 0f;
+        }
+    }
+    public float GetIsHighlightPlants() {
+        if(plantDistance < hitboxRadius && plantDistance < microbeDistance) {
+            return 1f;
+        }
+        else {
+            return 0f;
+        }
+    }
     // TOOLTIPS TEMP:
     void TickTooltip()
     {
@@ -159,13 +177,28 @@ public class UIManager : Singleton<UIManager>
     void ActivateTooltip(TooltipData data)
     {
         tooltipId = data.id;
-        ActivateTooltip(GetTooltipString(data.id), data.color);
+        ActivateTooltip(GetTooltipString(data.id), data.color, data.icon);
     }
 
-    void ActivateTooltip(string text, Color color)
+    void ActivateTooltip(string text, Color color, Sprite icon)
     {
         textTooltip.text = text;
         textTooltip.color = color;
+
+             
+        if(curTooltip.GetComponent<Image>() != null) {
+            theCursorCzar.imageTooltipIcon.sprite = curTooltip.GetComponent<Image>().sprite;
+            
+        }
+        else {
+            //theCursorCzar.imageTooltipIcon.sprite = null;
+            
+        }
+        if(icon != null) {
+            theCursorCzar.imageTooltipIcon.sprite = icon;
+        } 
+        theCursorCzar.imageTooltipIcon.color = color;
+        //theCursorCzar.imageTooltipIcon.gameObject.SetActive(icon != null);  
         panelTooltip.SetActive(true);
     }
     
@@ -192,9 +225,22 @@ public class UIManager : Singleton<UIManager>
                 //}
             }
             case TooltipId.Time: return "TIME: " + ((float)simulationManager.simAgeTimeSteps * cursorX / 360f).ToString("F0");
-            case TooltipId.Agent: return "Critter " + cameraManager.mouseHoverAgentRef.candidateRef.candidateGenome.name + "\nAge: " + cameraManager.mouseHoverAgentRef.ageCounter + "\nSize: " + (cameraManager.mouseHoverAgentRef.currentBiomass / cameraManager.mouseHoverAgentRef.fullsizeBiomass * 100f).ToString("F0") + "% Grown";
-            case TooltipId.Algae: return "Algae #" + simulationManager.vegetationManager.closestPlantParticleData.index;
-            case TooltipId.Microbe: return "Microbe #" + simulationManager.zooplanktonManager.closestAnimalParticleData.index;
+            case TooltipId.Agent: {
+                string critterString = "Critter " + cameraManager.mouseHoverAgentRef.candidateRef.candidateGenome.name + "-" + cameraManager.mouseHoverAgentRef.candidateRef.candidateID + "\nSize: " + (cameraManager.mouseHoverAgentRef.currentBiomass / cameraManager.mouseHoverAgentRef.fullsizeBiomass * 100f).ToString("F0") + "% Grown";
+                if(cameraManager.mouseHoverAgentRef.curLifeStage == AgentLifeStage.Dead) {
+                    critterString = "Critter " + cameraManager.mouseHoverAgentRef.candidateRef.candidateGenome.name + "-" + cameraManager.mouseHoverAgentRef.candidateRef.candidateID + "\n[DEAD] " + ((1f - cameraManager.mouseHoverAgentRef.currentBiomass / cameraManager.mouseHoverAgentRef.biomassAtDeath) * 100f).ToString("F0") + "% Decayed";
+                }
+                return critterString;
+                    // + "\nAge: " + cameraManager.mouseHoverAgentRef.ageCounter
+            }
+            case TooltipId.Algae: {
+                string plantStatusString = simulationManager.vegetationManager.closestPlantParticleData.isDecaying > 0.5f ? "[DEAD] " : "[ALIVE] ";
+                return "Algae #" + simulationManager.vegetationManager.closestPlantParticleData.index + "\n" + plantStatusString +"Size: " + simulationManager.vegetationManager.closestPlantParticleData.biomass.ToString("F2");
+            }
+            case TooltipId.Microbe: {
+                string microbeStatusString = simulationManager.zooplanktonManager.closestAnimalParticleData.isDecaying > 0.5f ? "[DEAD] " : "[ALIVE] ";
+                return "Microbe #" + simulationManager.zooplanktonManager.closestAnimalParticleData.index + "\n" + microbeStatusString + "Size: " + simulationManager.zooplanktonManager.closestAnimalParticleData.biomass.ToString("F2");
+            }
             case TooltipId.Sensor: return "Sensor #" + (simulationManager.simAgeTimeSteps * cursorX / 360f).ToString("F0");
             case TooltipId.Specialization: return "Specializations"; //***EAC EGGSACK???
             case TooltipId.Status: return "STATUS";
@@ -415,6 +461,7 @@ public class UIManager : Singleton<UIManager>
         //simulationManager._BigBangOn = true;
         TransitionToNewGameState(GameState.Playing);
         Invoke(nameof(WarmupComplete), 0.15f);
+        ExitTooltipObject();
     }
     
     /// Hackfix for TheRenderKing error where body genome of agent portrait was null

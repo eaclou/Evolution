@@ -52,12 +52,15 @@ public class CritterModuleCore : IBrainModule
         }
     }
     public bool objectInRangeOfMouth { set => mouthTriggerOutputs[0] = value ? 1f : 0f; }
-    
-    
+
+
     // Need to use arrays instead of floats here so that they are reference type
     // and changes that occur in neuron will also be reflected here 
     //public float[] temperature;
     //public float[] pressure;
+    private int contactSensorDuration = 15;
+    private int contactFrameCounter = 0;
+    private bool isContactEvent = false;
     public float[] isContact;
     public float[] contactForceX;
     public float[] contactForceY;
@@ -108,7 +111,21 @@ public class CritterModuleCore : IBrainModule
     public float plantEatenPercent => Mathf.Clamp01(stomachContentsPlant / (totalStomachContents + 0.0000001f));
     public float meatEatenPercent => Mathf.Clamp01(stomachContentsMeat / (totalStomachContents + 0.0000001f));
     public float decayEatenPercent => Mathf.Clamp01(stomachContentsDecay / (totalStomachContents + 0.0000001f));
-        
+     
+    public void requestContactEvent(float gradX, float gradY) {
+        isContactEvent = true;
+        contactFrameCounter = 0;
+        isContact[0] = 1f;
+        contactForceX[0] = gradX;
+        contactForceY[0] = gradY;
+    }
+    private void EndContactEvent() {
+        isContact[0] = 0f;
+        contactForceX[0] = 0f;
+        contactForceY[0] = 0f;
+        isContactEvent = false;
+        contactFrameCounter = 0;
+    }
     // *** Remember to Re-Implement dietary specialization!!! ****
     // How much of what was eaten is actually digested this frame (absolute value)
     public void TickDigestion(float totalMassDigested)
@@ -196,9 +213,20 @@ public class CritterModuleCore : IBrainModule
     {
         //temperature[0] = 0f;
         //pressure[0] = 0f;
-        isContact[0] = 0f;
-        contactForceX[0] = 0f;
-        contactForceY[0] = 0f;
+        if(isContactEvent) {
+            if(contactFrameCounter >= contactSensorDuration) {
+                //end
+                EndContactEvent();
+            }
+            else {
+
+            }
+            contactFrameCounter++;            
+        }
+        else {
+
+        }
+        
         hitPoints[0] = Mathf.Max(health, 0f);
         //stamina[0] = stamina; // set in Agent.cs
         energyStored[0] = Mathf.Clamp01(energy * 0.001f);  // Mathf.Clamp01(energyRaw / maxEnergyStorage); //***EAC will need to be changed once energy is adjusted

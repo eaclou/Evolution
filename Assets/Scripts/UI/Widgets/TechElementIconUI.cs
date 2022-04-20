@@ -31,6 +31,7 @@ public class TechElementIconUI : MonoBehaviour
     void Refresh()
     {
         tooltip.tooltipString = techElement.iconTooltip + "\n" + selection.SelectedTechValue(techElement);
+        
     }
     
     public void SetActive(bool hasTech)

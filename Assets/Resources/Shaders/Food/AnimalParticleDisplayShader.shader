@@ -139,7 +139,7 @@
 				//vertexOffset.xy *= 4;
 
 				//*** TEMP::::: ****
-				float spriteScale = (sqrt(particleData.biomass) * 0.15 + 0.04 + (0.06 * hoverMask + 0.02 * selectedMask)) * 1;
+				float spriteScale = (sqrt(particleData.biomass) * 0.08 + 0.04 + (0.04 * hoverMask + 0.02 * selectedMask)) * 1;
 				//spriteScale = 0.1;
 				vertexOffset.xy = quadPoint.xy * spriteScale; // scales w/ camera a bit
 
@@ -165,7 +165,11 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				float4 col = lerp(float4(0.43, 0.2, 0.35, 0.7), float4(1,0.6,1 * i.status.y,1), 1 - i.status.x);
+				float4 col = lerp(float4(0.43, 0.2, 0.35, 0.7), float4(1,0.6,1 * i.status.y,1), 1 - i.status.x);				
+				if(i.highlight.x >= 0.5) {
+					col = float4(1,1,1,1);
+				}
+				
 				return col;
 
 				float4 texColor = float4(1,1,1,1); // *********************************************************** tex2D(_MainTex, i.uv);

@@ -6,6 +6,7 @@ public class TooltipUI : MonoBehaviour
 
     public string tooltipString;    
     public int elementID;  // * Not used
+    //sprite??? (icon)
     
     public void OnHoverStart() {
         ui.EnterTooltipObject(this);

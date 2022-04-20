@@ -1270,9 +1270,9 @@ public class Agent : MonoBehaviour {
         //mouthRef.Disable();
         //mouseclickcollider MCC
         mouseClickCollider.direction = 1; // Y-Axis ???
-        mouseClickCollider.center = new Vector3(0f, 0f, (waterLevel * 2f - 1f) * -10f); //Vector3.zero; // new Vector3(0f, 0f, 1f);
+        mouseClickCollider.center = new Vector3(0f, 0f, 0f); // (waterLevel * 2f - 1f) * -10f); //Vector3.zero; // new Vector3(0f, 0f, 1f);
         mouseClickCollider.radius = fullSizeBoundingBox.x / 2f * sizePercentage;
-        mouseClickCollider.radius *= 5.14f; // ** TEMP
+        mouseClickCollider.radius *= 1.1514f; // ** TEMP
         mouseClickCollider.height = fullSizeBoundingBox.y / 2f * sizePercentage;
     }
 
@@ -1393,14 +1393,15 @@ public class Agent : MonoBehaviour {
                 damage *= defendBonus;
                 
                 candidateRef.performanceData.totalDamageTaken += damage;
-                coreModule.isContact[0] = 1f;
-                coreModule.contactForceX[0] = gradient.x;
-                coreModule.contactForceY[0] = gradient.y;
+                coreModule.requestContactEvent(gradient.x, gradient.y);
+                //coreModule.isContact[0] = 1f;
+                //coreModule.contactForceX[0] = gradient.x;
+                //coreModule.contactForceY[0] = gradient.y;
                 TakeDamage(damage);
             }
         }
         
-        bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[index] * 64f * bodyRigidbody.mass, ForceMode2D.Impulse);
+        bodyRigidbody.AddForce(simStateData.fluidVelocitiesAtAgentPositionsArray[index] * 48f * bodyRigidbody.mass, ForceMode2D.Impulse);
         avgFluidVel = Vector2.Lerp(avgFluidVel, simStateData.fluidVelocitiesAtAgentPositionsArray[index], 0.25f);
     }
 }

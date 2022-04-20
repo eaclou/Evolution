@@ -8,6 +8,7 @@ public class OpenCloseButton : MonoBehaviour
     public Text text;
     [Tooltip("True: panel will open on start")]
     public bool isOpen;
+    private bool neverOpened = true;
     
     const string activatePanel = "PanelOpen";
     const string activateButton = "ON";
@@ -22,6 +23,10 @@ public class OpenCloseButton : MonoBehaviour
         var symbol = isOpen ? ">" : "<";
         text.text = symbol;
         panelAnimator.SetBool(activatePanel, isOpen);  
+        if(value) {
+            neverOpened = false;
+            SetHighlight(false);
+        }
         //Debug.Log($"SetOpen {value} {symbol}");      
     }
     
@@ -29,6 +34,11 @@ public class OpenCloseButton : MonoBehaviour
     {
         if (!gameObject.activeInHierarchy) return;
         buttonAnimator.SetBool(activateButton, value);
+    }
+
+    public void SetHighlight(bool high) {
+        
+        buttonAnimator.SetBool("HIGHLIGHT", high);
     }
     
     public void MouseEnter() { SetMouseEnter(true); }

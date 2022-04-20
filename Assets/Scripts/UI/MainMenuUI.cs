@@ -118,7 +118,8 @@ public class MainMenuUI : MonoBehaviour
         else 
         {
             gameManager.ResumePlaying();
-        }          
+        }
+        UIManager.instance.ExitTooltipObject();
     }
     
 }

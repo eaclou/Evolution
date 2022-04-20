@@ -137,13 +137,13 @@
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward, 0);  // Rotate localRotation by AgentRotation
 
-				float leafScale = (saturate(particleData.biomass * 3 + 0.1) * 0.05 * particleData.isActive + hoverMask * 0.3) * lerp(0.8, 3.6, _CamDistNormalized);
+				float leafScale = (saturate(particleData.biomass * 3 + 0.1) * 0.05 * particleData.isActive + hoverMask * 0.03);
 				o.worldPos = float4(worldPosition, 0);
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition + rotatedPoint * leafScale, 1.0)));
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
 				o.uv = uv;	
 				
-				o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), particleData.rootedness, max(hoverMask * 0.5, selectedMask));
+				o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), particleData.rootedness, max(hoverMask, selectedMask));
 				o.hue = float4(particleData.colorA, 1);
 				return o;
 
@@ -214,6 +214,9 @@
 				
 				finalColor.a *= tex2D(_MainTex, i.uv).a;
 				finalColor.a = 1;
+				if(i.color.a > 0.5) {
+					finalColor.rgb = float3(1,1,1);
+				}
 				return finalColor;
 
 				//return float4(1,1,1,1);
