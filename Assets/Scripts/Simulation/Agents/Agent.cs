@@ -87,7 +87,7 @@ public class Agent : MonoBehaviour {
 
     public AgentActionState curActionState; // { get => data.curActionState; set => data.curActionState = value; }
 
-    public int gestationDurationTimeSteps = 240;
+    public int gestationDurationTimeSteps = 90;
     //public int _GestationDurationTimeSteps => gestationDurationTimeSteps;
     
     public int maxAgeTimeSteps = 100000;
@@ -184,7 +184,7 @@ public class Agent : MonoBehaviour {
 
     public EggSack childEggSackRef;
     public bool isPregnantAndCarryingEggs = false;
-    public int pregnancyRefactoryDuration = 1200;
+    public int pregnancyRefactoryDuration = 420;
     
     IAgentAbility activeAbility;
     IAgentAbility attack;
@@ -791,7 +791,7 @@ public class Agent : MonoBehaviour {
     }
     
     public void BeginPregnancy(EggSack developingEggSackRef) {
-        Debug.Log("BeginPregnancy! [" + developingEggSackRef.index.ToString() + "] agent# " + this.index);
+        //Debug.Log("BeginPregnancy! [" + developingEggSackRef.index.ToString() + "] agent# " + this.index);
         
         isPregnantAndCarryingEggs = true;
         childEggSackRef = developingEggSackRef;
@@ -802,8 +802,8 @@ public class Agent : MonoBehaviour {
         // probably 0.05 * 2 = 0.1   for now
         if(curProportion > starterMass) { // Good to go!
             //Debug.Log("Pregnancy! " + " curMass: " + currentBiomass.ToString() + ", reqMass: " + starterMass.ToString() + ", curProp: " + curProportion.ToString());
-            currentBiomass -= settingsRef.agentSettings._BaseInitMass;
-            childEggSackRef.currentBiomass = starterMass;     // * TROUBLE!!!
+            currentBiomass -= settingsRef.agentSettings._BaseInitMass * 3;
+            childEggSackRef.currentBiomass = starterMass * 2;     // * TROUBLE!!!
 
             RegisterAgentEvent(simManager.simAgeTimeSteps, "Pregnant! " + starterMass, 0.5f, 10);
         }
@@ -829,6 +829,7 @@ public class Agent : MonoBehaviour {
         // probably 0.05 * 2 = 0.1   for now
         if (curProportion > starterMass) { // Good to go!
             isSexuallyMature = true;
+            //Debug.Log("Agent " + this.index + " has reached sexual maturity!");
         }
     }
     

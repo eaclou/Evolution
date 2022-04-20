@@ -158,14 +158,15 @@
 				o.color.a = saturate(particleData.age * 0.5); //  1.0 - oldAgeMask; // particleData.isDecaying;
 				o.highlight = float2(hoverMask, selectedMask);
 				float blah = (1.0 - (particleData.biomass / particleData.extra0)) * particleData.isDecaying;
-				o.status = float2(particleData.isActive, blah);
+				o.status = float2(particleData.isDecaying, blah);
 
 				return o;
 			}			
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				return float4(1,0.6,1 * i.status.y,1);
+				float4 col = lerp(float4(0.43, 0.2, 0.35, 0.7), float4(1,0.6,1 * i.status.y,1), 1 - i.status.x);
+				return col;
 
 				float4 texColor = float4(1,1,1,1); // *********************************************************** tex2D(_MainTex, i.uv);
 				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV) * 0.5 + 0.5;

@@ -103,6 +103,10 @@ public class CreaturePanelUI : MonoBehaviour
             panelMode.SetActive(curPanelMode);
 
         if (!agent) return;
+        imageCurAction.gameObject.SetActive(true);
+        if(agent.curLifeStage == AgentLifeStage.Dead) {
+            imageCurAction.gameObject.SetActive(false);
+        }
 
         speciesIconUI.GetComponent<Image>().material = simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].coatOfArmsMat;
         speciesIconUI.tooltip.tooltipString = "Species " + agent.speciesIndex;
@@ -123,14 +127,15 @@ public class CreaturePanelUI : MonoBehaviour
         debugText.text = "Agent# " + agent.index + "\nCandidateID: " + agent.candidateRef.candidateID + "\nreqMass: " + reqMass + ", agentMass: " + agentMass.ToString("F2") + "\nSpecies#cands: " + simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].candidateGenomesList.Count;
 
         TooltipUI pregnantTooltip = imagePregnancy.GetComponent<TooltipUI>();
-        pregnantTooltip.tooltipString = "Progress To Pregnancy: " + (Mathf.Clamp01(agentMass / reqMass) * 100f).ToString("F0") + " %";
+        pregnantTooltip.tooltipString = "PREGNANT: " + (Mathf.Clamp01(agentMass / reqMass) * 100f).ToString("F0") + " %";
         if (agent.isPregnantAndCarryingEggs) {
             imagePregnancy.color = Color.white;
             imagePregnancy.gameObject.transform.localScale = Vector3.one;
             pregnantTooltip.tooltipString = "PREGNANT";
         }
         else {
-            imagePregnancy.gameObject.transform.localScale = Vector3.one * Mathf.Clamp01(agentMass / reqMass);
+            imagePregnancy.gameObject.transform.localScale = Vector3.zero;
+            //imagePregnancy.gameObject.transform.localScale = Vector3.one * Mathf.Clamp01(agentMass / reqMass);
             imagePregnancy.color = Color.gray;
         }
 

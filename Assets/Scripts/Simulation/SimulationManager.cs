@@ -1114,7 +1114,7 @@ public class SimulationManager : Singleton<SimulationManager>
         if (eggSackRespawnCounter <= 24)
             return;
         
-        int respawnCooldown = 543;
+        int respawnCooldown = 433;
         // How many active EggSacks are there in play?
         int totalSuitableParentAgents = 0;
         List<int> suitableParentAgentsList = new List<int>();
@@ -1122,10 +1122,10 @@ public class SimulationManager : Singleton<SimulationManager>
         for (int i = 0; i < maxAgents; i++) 
         {
             if (agents[i].speciesIndex == eggSacks[eggSackIndex].speciesIndex &&
-               agents[i].isMature &&
+               agents[i].isSexuallyMature &&
                !agents[i].isPregnantAndCarryingEggs &&
-               agents[i].pregnancyRefactoryComplete &&
-               agents[i].childEggSackRef) 
+               agents[i].pregnancyRefactoryComplete)// &&
+               //agents[i].childEggSackRef) 
             {
                 //if(agentsArray[i].pregnancyRefactoryTimeStepCounter > agentsArray[i].pregnancyRefactoryDuration) 
 
@@ -1136,7 +1136,7 @@ public class SimulationManager : Singleton<SimulationManager>
                 
                 if(reqMass < agentMass) 
                 {
-                    
+                    Debug.Log("if(reqMass < agentMass) ");
                     totalSuitableParentAgents++;
                     suitableParentAgentsList.Add(i);
                 }
@@ -1170,7 +1170,7 @@ public class SimulationManager : Singleton<SimulationManager>
                 GetRandomFoodSpawnPosition().startPosition);
                     
             parentAgent.BeginPregnancy(eggSacks[eggSackIndex]);
-            Debug.Log("BeginPregnancy!!  Agent[" + parentAgentIndex + "] EggSack[" + eggSack.index + "]");
+            //Debug.Log("BeginPregnancy!!  Agent[" + parentAgentIndex + "] EggSack[" + eggSack.index + "]");
             eggSackRespawnCounter = 0;
         }
         else 
@@ -1199,7 +1199,7 @@ public class SimulationManager : Singleton<SimulationManager>
             eggSack.parentAgentIndex = agentIndex;
             Vector3 startPos = Vector3.Lerp(new Vector3(128f, 128f, 0f), GetRandomFoodSpawnPosition().startPosition, 0.5f);
             eggSack.InitializeEggSackFromGenome(eggSackIndex, agents[agentIndex].candidateRef.candidateGenome, null, startPos);
-            Debug.Log(" Wait? SpawnImmaculate? " + eggSackIndex);
+            //Debug.Log(" Wait? SpawnImmaculate? " + eggSackIndex);
             // TEMP::: TESTING!!!
             eggSack.currentBiomass = settingsManager.agentSettings._BaseInitMass;
             eggSackRespawnCounter = 0;

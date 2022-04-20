@@ -2370,7 +2370,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         cmdBufferSlotPortraitDisplay.SetRenderTarget(slotPortraitRenderCamera.targetTexture); // needed???
         cmdBufferSlotPortraitDisplay.ClearRenderTarget(true, true, new Color(54f / 255f, 73f / 255f, 61f / 255f, 0f), 1.0f);  // clear -- needed???
         cmdBufferSlotPortraitDisplay.SetViewProjectionMatrices(slotPortraitRenderCamera.worldToCameraMatrix, slotPortraitRenderCamera.projectionMatrix);
-        /*
+        
         // MEDIUM STROKES!!!!
         baronVonTerrain.groundStrokesMedDisplayMat.SetPass(0);
         baronVonTerrain.groundStrokesMedDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -2392,7 +2392,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color1", baronVonTerrain.pebblesSlotGenomeCurrent.color); // new Vector4(0.7f, 0.8f, 0.9f, 1f));
         baronVonTerrain.groundStrokesMedDisplayMat.SetVector("_Color2", baronVonTerrain.sandSlotGenomeCurrent.color);                    
         cmdBufferSlotPortraitDisplay.DrawProcedural(Matrix4x4.identity, baronVonTerrain.groundStrokesMedDisplayMat, 0, MeshTopology.Triangles, 6, baronVonTerrain.terrainStoneStrokesCBuffer.count);
-        */
+        
         toolbarSpeciesPortraitStrokesMat.SetPass(0);
         toolbarSpeciesPortraitStrokesMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         toolbarSpeciesPortraitStrokesMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
@@ -2884,7 +2884,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         }
         */
 
-        /*
+        
          // CURSOR PARTICLES!
         cursorParticlesDisplayMat.SetPass(0);
         
@@ -2895,7 +2895,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         cursorParticlesDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
         cursorParticlesDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
         cmdBufferMain.DrawProcedural(Matrix4x4.identity, cursorParticlesDisplayMat, 0, MeshTopology.Triangles, 6, cursorParticlesCBuffer0.count);
-    */
+    
     #endregion
 
         // Fluid Render Article:
