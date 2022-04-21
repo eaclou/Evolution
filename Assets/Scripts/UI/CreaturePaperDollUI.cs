@@ -56,7 +56,7 @@ public class CreaturePaperDollUI : MonoBehaviour
             var lifeStageData = lookup.GetAgentLifeStageData(agent.curLifeStage, agent.isYoung);
 
             
-            tooltipState.tooltipString = lifeStageData.stateName + "\nSize: " + (agent.currentBiomass / agent.fullsizeBiomass * 100f).ToString("F0") + "% Grown";// + agent.currentBiomass.ToString("F3");
+            tooltipState.tooltipString = lifeStageData.stateName + "  " + agent.ageCounter + "\nSize: " + (agent.currentBiomass / agent.fullsizeBiomass * 100f).ToString("F0") + "% Grown";// + agent.currentBiomass.ToString("F3");
             tooltipImage.sprite = lifeStageData.icon;
 
             tooltipHealth.tooltipString = "Health: " + (agent.coreModule.health * 100f).ToString("F0") + "%";          
