@@ -97,7 +97,7 @@
 				float zPos = -altitudeRaw * _MaxAltitude;
 				
 				//*** TEMP::::: ****
-				float spriteScale = (sqrt(particleData.biomass) * 0.15 + 0.04 + (0.06 * hoverMask + 0.02 * selectedMask)) * 1;
+				float spriteScale = (sqrt(particleData.biomass) * 0.1 + 0.04 + (0.06 * hoverMask + 0.02 * selectedMask)) * 1;
 				//spriteScale = 0.1;
 				float2 vertexOffset = quadPoint.xy * spriteScale;
 				float2 forward = normalize(particleData.velocity);

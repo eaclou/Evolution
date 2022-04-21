@@ -82,16 +82,16 @@
 				CritterSimData critterSimData = critterSimDataCBuffer[inst];
 
 				float3 worldPosition = critterSimData.worldPos;
-				worldPosition.y += 0.5;
-				worldPosition.z -= 0.5;
+				//worldPosition.y += 0.5;
+				//worldPosition.z -= 0.5;
 														
 				float random1 = rand(float2(inst, inst));
 				float random2 = rand(float2(random1, random1));
 
 				//float randomScale = lerp(0.86, 1, random2);	
 				
-				float scale = critterSimData.growthPercentage * (critterInitData.boundingBoxSize.x + critterInitData.boundingBoxSize.y) * 4.5 + 0.001; // length(eggData.localScale) * length(rawData.fullSize) * saturate(rawData.growth * 1.5f) * randomScale * (1.0 + rawData.decay);
-				scale *= _CamDistNormalized;
+				float scale = critterSimData.growthPercentage * (critterInitData.boundingBoxSize.x + critterInitData.boundingBoxSize.y) * 4.85 + 0.0021; // length(eggData.localScale) * length(rawData.fullSize) * saturate(rawData.growth * 1.5f) * randomScale * (1.0 + rawData.decay);
+				//scale *= _CamDistNormalized;
 				// Rotation of Billboard center around Agent's Center (no effect if localPos and localDir are zero/default)'
 				float2 forwardAgent = critterSimData.heading;
 				float2 rightAgent = float2(forwardAgent.y, -forwardAgent.x);
@@ -138,7 +138,7 @@
 
 				// *****
 				random2 = 0;
-				o.color = float4(lerp(primaryHue, secondaryHue, random2), 1); 
+				o.color = float4(lerp(primaryHue, secondaryHue, random2), eggMask); 
 				o.frameLerp = frameLerp - row0;
 				o.uv = float4(uv0, uv1);
 				o.quadCoords = quadVerticesCBuffer[id].xy;	

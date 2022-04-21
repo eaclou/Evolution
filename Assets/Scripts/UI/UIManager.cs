@@ -126,7 +126,7 @@ public class UIManager : Singleton<UIManager>
         Algae,
         Microbe,
         Sensor,
-        Specialization,
+        EggSack,
         Status
     }
     
@@ -242,7 +242,7 @@ public class UIManager : Singleton<UIManager>
                 return "Microbe #" + simulationManager.zooplanktonManager.closestAnimalParticleData.index + "\n" + microbeStatusString + "Size: " + simulationManager.zooplanktonManager.closestAnimalParticleData.biomass.ToString("F2");
             }
             case TooltipId.Sensor: return "Sensor #" + (simulationManager.simAgeTimeSteps * cursorX / 360f).ToString("F0");
-            case TooltipId.Specialization: return "Specializations"; //***EAC EGGSACK???
+            case TooltipId.EggSack: return "EggSack " + cameraManager.mouseHoverEggSackRef.index + "\nSpecies: " + cameraManager.mouseHoverEggSackRef.speciesIndex + ", Size: " + cameraManager.mouseHoverEggSackRef.currentBiomass.ToString("F2"); //***EAC EGGSACK???
             case TooltipId.Status: return "STATUS";
             default: return "";
         }
@@ -258,7 +258,7 @@ public class UIManager : Singleton<UIManager>
             case TooltipId.Algae: return plantDistance < hitboxRadius && plantDistance < microbeDistance;
             case TooltipId.Microbe: return microbeDistance < hitboxRadius && microbeDistance < plantDistance;
             case TooltipId.Sensor: return cursorInSpeciesHistoryPanel;    // ERROR: same as Year
-            case TooltipId.Specialization: return isTooltipHover;
+            case TooltipId.EggSack: return cameraManager.isMouseHoverEggSack;
             case TooltipId.Status: return isTooltipHover;
             default: return false;
         }

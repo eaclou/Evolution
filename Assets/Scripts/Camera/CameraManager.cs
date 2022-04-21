@@ -20,6 +20,10 @@ public class CameraManager : Singleton<CameraManager>
     public bool isMouseHoverAgent = false;
     public Agent mouseHoverAgentRef;
 
+    public int mouseHoverEggSackIndex = 0;
+    public bool isMouseHoverEggSack = false;
+    public EggSack mouseHoverEggSackRef;
+
     public bool isFollowingPlantParticle = false;
     public Vector2 targetPlantWorldPos;
     public bool isFollowingAnimalParticle = false;
@@ -176,6 +180,16 @@ public class CameraManager : Singleton<CameraManager>
         float zoomSpeed = zoomValue * masterZoomSpeed * zoomSpeedMult * Time.deltaTime;
 
         masterTargetDistance += zoomSpeed;
+    }
+
+    public void MouseOverEggSack(EggSack eggSack, bool value) {
+        SetMouseHoverEggSack(eggSack, value);
+    }
+    public void SetMouseHoverEggSack(EggSack egg, bool value)
+    {
+        isMouseHoverEggSack = value;
+        mouseHoverEggSackRef = egg;
+        mouseHoverEggSackIndex = egg ? egg.index : 0;
     }
 
     public void MouseOverAgent(Agent agent, bool clicked)

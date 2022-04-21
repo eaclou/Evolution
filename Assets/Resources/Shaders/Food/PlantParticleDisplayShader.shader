@@ -153,11 +153,15 @@
 			{
 				float4 texColor = tex2D(_MainTex, i.uv);
 				
-				fixed4 col = texColor * i.color;
+				fixed4 col = texColor;
 				col.rgb = lerp(float3(0.4, 0.97, 0.3), i.hue.rgb, 0.325);
-				col.rgb = lerp(col, float3(0.81, 0.79, 0.65) * 0.1, i.color.x * 0.6);
-				
-				
+				col.a = 1;
+				//col.rgb = lerp(col, float3(0.61, 0.79, 0.65) * 0.1, i.color.x * 0.);
+				col.rgb = lerp(col.rgb, float3(0.651, 0.8379, 0.55) * 0.4, i.color.x * 0.75);
+				if(i.color.a > 0.5) {
+					col.rgb = float3(1,1,1);
+				}
+				return col;
 				
 				//Diffuse
 				float pixelOffset = 1.0 / 256;  // resolution  // **** THIS CAN"T BE HARDCODED AS FINAL ****"
@@ -210,9 +214,10 @@
 				finalColor.rgb = lerp(finalColor.rgb, data.waterFogColor.rgb, fogAmount);
 				finalColor.rgb += lerp(float3(0,0,0), reflectionColor.xyz, reflectionColor.w);
 				
-				finalColor.rgb += data.spiritBrushTex.y;
+				//finalColor.rgb += data.spiritBrushTex.y;
 				
 				finalColor.a *= tex2D(_MainTex, i.uv).a;
+				finalColor.rgb *= (0.5 + 0.5 * i.color.x);
 				finalColor.a = 1;
 				if(i.color.a > 0.5) {
 					finalColor.rgb = float3(1,1,1);
@@ -220,7 +225,7 @@
 				return finalColor;
 
 				//return float4(1,1,1,1);
-				return finalColor;
+				//return finalColor;
 			}
 		ENDCG
 		}

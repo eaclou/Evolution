@@ -102,6 +102,7 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
         Physics.Raycast(ray, out RaycastHit hit, 1000f, layerMask);  // *** USE DEDICATED LAYER FOR THIS CHECK!!!! *********
 
         cameraManager.SetMouseHoverAgent(null, false);
+        cameraManager.SetMouseHoverEggSack(null, false);
         isHoverClickableSpirit = false;
                 
         if (!hit.collider) return;
@@ -120,10 +121,20 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
         }
         else if (!clicked) 
         {
+            //Testing: eggsack hover detection:
+        EggSack eggSack = hit.collider.gameObject.GetComponentInParent<EggSack>();
+        if (eggSack) {
+            if (eggSack.curLifeStage == EggSack.EggLifeStage.Null) return;
+                //Debug.Log("HorizontalOrVerticalLayoutGroup EGGSACK");
+                cameraManager.MouseOverEggSack(eggSack, true);
+            }
             isHoverClickableSpirit = true;
             //Debug.Log("_IsHoverClickableSpirit ON: [ ");
         }
         //Debug.Log("CLICKED ON: [ " + hit.collider.gameObject.name + " ] Ray= " + ray.ToString() + ", hit= " + hit.point.ToString());
+
+        
+        
     }
     
 	public void Tick() {

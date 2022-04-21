@@ -2987,8 +2987,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
     // Add shadow pass eventually
     void DisplayAnimalParticles()
     {
-        float isSelectedMicrobes = 0f; //***EC -- revisit
-        
+        //float isSelectedMicrobes = 0f; //***EC -- revisit        
         //plantDistance < hitboxRadius && plantDistance < microbeDistance;
 
         animalParticleDisplayMat.SetPass(0);
@@ -3000,7 +2999,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         animalParticleDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
         animalParticleDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(zooplanktonManager.selectedAnimalParticleIndex));
         animalParticleDisplayMat.SetInt("_ClosestParticleID", Mathf.RoundToInt(zooplanktonManager.closestZooplanktonToCursorIndex));
-        animalParticleDisplayMat.SetFloat("_IsSelected", isSelectedMicrobes);
+        animalParticleDisplayMat.SetFloat("_IsSelected", 0f);
         animalParticleDisplayMat.SetFloat("_IsHover", UIManager.instance.GetIsHighlightMicrobes());
         animalParticleDisplayMat.SetFloat("_IsHighlight", UIManager.instance.GetIsHighlightMicrobes()); 
         animalParticleDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
@@ -3023,6 +3022,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         eggSackStrokeDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
         eggSackStrokeDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
         eggSackStrokeDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
+        eggSackStrokeDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
         cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggSackStrokeDisplayMat, 0, MeshTopology.Triangles, 6, simStateData.eggDataCBuffer.count);
     }
     

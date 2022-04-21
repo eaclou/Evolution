@@ -133,10 +133,14 @@
 				float4 pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0)); // *** Revisit to better understand!!!! ***
 				float4 screenUV = ComputeScreenPos(pos);
 				o.screenUV = screenUV;
+				
+				//float3 worldPosition = float3(particleData.worldPos, zPos);
 
 				float2 altUV = worldPosition.xy / _MapSize;	
 				o.altitudeUV = altUV;
-				worldPosition.z = -tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x * _MaxAltitude;
+				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x;
+				float zPos = -altitudeRaw * _MaxAltitude;
+				worldPosition.z = zPos;
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint1, 0.0));
 				o.worldPos = worldPosition;

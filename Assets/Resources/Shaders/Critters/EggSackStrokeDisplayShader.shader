@@ -5,7 +5,7 @@
 		_MainTex ("Main Texture", 2D) = "white" {}  // stem texture sheet
 		_MatureToDecayTex ("_MatureToDecayTex", 2D) = "white" {}
 		_WaterSurfaceTex ("_WaterSurfaceTex", 2D) = "black" {}
-		
+		_AltitudeTex ("_AltitudeTex", 2D) = "gray" {}
 	}
 	SubShader
 	{		
@@ -29,6 +29,7 @@
 			sampler2D _MainTex;
 			sampler2D _MatureToDecayTex;
 			sampler2D _WaterSurfaceTex;
+			sampler2D _AltitudeTex;
 			
 			StructuredBuffer<CritterInitData> critterInitDataCBuffer;
 			StructuredBuffer<CritterSimData> critterSimDataCBuffer;
@@ -97,19 +98,7 @@
 
 				float randomScale = lerp(1, 1.25, random2);				
 				float scale = length(rawData.fullSize) * saturate(rawData.growth) * randomScale * 0.35;
-				//scale *= saturate(rawData.growth) * 0.35 + 0.65;
-
-				//float2 forward1 = rawData.heading; //rotatedPoint0;
-				//float2 right1 = float2(forward1.y, -forward1.x);
-
-				//float2 offsetFromParentCenter = eggData.localCoords * rawData.fullSize * 0.5 * (rawData.growth * 0.75 + 0.25); //scale;				
-				//offsetFromParentCenter = float2(offsetFromParentCenter.x * right1 + offsetFromParentCenter.y * forward1);
-				
-				//float3 worldPosition = float3(rawData.worldPos + offsetFromParentCenter, orderVal * scale + (1.0 + scale * 0.15));    //float3(rawData.worldPos, -random2);
-				// Rotation of Billboard center around Agent's Center (no effect if localPos and localDir are zero/default)'
-				//float2 forwardAgent = rawData.heading;
-				//float2 rightAgent = float2(forwardAgent.y, -forwardAgent.x);
-							
+						
 				quadPoint *= scale * 0.4 * saturate((1.0 - rawData.decay));
 
 				// Figure out final facing Vectors!!!
@@ -129,6 +118,10 @@
 				
 				// *** $^@$%^#$% TESTING @#^*******
 				float3 worldPosition = float3(eggData.worldPos, 0); //orderVal * scale + (1.0 + scale * 0.15));
+				float2 altUV = worldPosition.xy / _MapSize;					
+				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x;
+				float zPos = -max(_GlobalWaterLevel, altitudeRaw) * _MaxAltitude;
+				worldPosition.z = zPos;
 
 				// REFRACTION:
 				//float2 offset = worldPosition.xy; //skinStrokeData.worldPos;				

@@ -165,7 +165,7 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				float4 col = lerp(float4(0.43, 0.2, 0.35, 0.7), float4(1,0.6,1 * i.status.y,1), 1 - i.status.x);				
+				float4 col = lerp(float4(0.5473, 0.22, 0.735, 0.7), float4(0.91,0.56,1,1), 1 - i.status.x);				
 				if(i.highlight.x >= 0.5) {
 					col = float4(1,1,1,1);
 				}
