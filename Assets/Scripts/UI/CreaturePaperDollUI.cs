@@ -64,7 +64,7 @@ public class CreaturePaperDollUI : MonoBehaviour
         
             tooltipEnergy.tooltipString = "Energy: " + agent.coreModule.energy.ToString("F0");
             imageMeterBarEnergy.transform.localScale = new Vector3(1f, Mathf.Clamp01(agent.coreModule.energy * 0.005f), 1f);
-        
+                   
             tooltipStomachFood.tooltipString = "Stomach: " + (agent.coreModule.stomachContentsPercent * 100f).ToString("F0");
             imageMeterBarStomach.transform.localScale = new Vector3(1f, agent.coreModule.stomachContentsPercent, 1f);
         

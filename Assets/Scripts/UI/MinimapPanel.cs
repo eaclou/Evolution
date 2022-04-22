@@ -18,13 +18,19 @@ public class MinimapPanel : MonoBehaviour
     public OpenCloseButton openCloseButton;
     [SerializeField]
     public Button buttonToggleFollow;
+    [SerializeField]
+    TooltipUI tooltipOpenCloseButton;
 
     TrophicSlot selectedTrophicSlot => trophicLayers.selectedSlot;
     bool isOpen => openCloseButton.isOpen;
 
+    public void Start() {
+        openCloseButton.SetHighlight(true);
+    }
     public void Tick() {
         var mouseInOpenCloseArea = Screen.height - Input.mousePosition.y < 64 && Screen.width - Input.mousePosition.x < 64;
         openCloseButton.SetMouseEnter(mouseInOpenCloseArea);
+        tooltipOpenCloseButton.tooltipString = isOpen ? "Hide Minimap Panel" : "Open Minimap Panel";
 
         uiKnowledgeMapViewerMat.SetTexture("_AltitudeTex", theRenderKing.baronVonTerrain.terrainHeightDataRT);
         uiKnowledgeMapViewerMat.SetTexture("_ResourceGridTex", simulationManager.vegetationManager.resourceGridRT1);

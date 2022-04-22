@@ -60,7 +60,7 @@ public class HistoryPanelUI : MonoBehaviour
         CreatureTimeline
     }
     
-    private HistoryPanelMode curPanelMode;
+    private HistoryPanelMode curPanelMode = HistoryPanelMode.SpeciesPopulation;
 
     public void SetCurPanelMode(HistoryPanelMode mode) {
         curPanelMode = mode;
@@ -95,10 +95,16 @@ public class HistoryPanelUI : MonoBehaviour
 
     [SerializeField]
     OpenCloseButton openCloseButton;
+    [SerializeField]
+    TooltipUI tooltipOpenCloseButton;
 
+    public void Start() {
+        openCloseButton.SetHighlight(true);
+    }
     public void InitializePanel() {
         InitializeSpeciesIcons();
         GenerateCreatureEventIcons();
+        
     }
     
     private void GenerateCreatureEventIcons() {
@@ -432,6 +438,7 @@ public class HistoryPanelUI : MonoBehaviour
         }
         selectionManager.SetSelectedFromSpeciesUI(iconUI.speciesID);
         uiManagerRef.speciesOverviewUI.RebuildGenomeButtons();
+        uiManagerRef.ExitTooltipObject();
     }
     
     public void ClickButtonToggleGraphMode() {
@@ -464,6 +471,7 @@ public class HistoryPanelUI : MonoBehaviour
     {
         var mouseInOpenCloseArea = Screen.height - Input.mousePosition.y < 64 && Input.mousePosition.x < 64;
         openCloseButton.SetMouseEnter(mouseInOpenCloseArea);
+        tooltipOpenCloseButton.tooltipString = isPanelOpen ? "Hide Timeline Panel" : "Open Timeline Panel";
 
         textPanelStateDebug.text = "MODE: " + selectionManager.currentSelection.historySelectedSpeciesID + selectionManager.currentSelection.candidate.speciesID;
         buttonToggleExtinct.gameObject.SetActive(false);

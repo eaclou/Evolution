@@ -18,6 +18,9 @@ public class SpeciesIconUI : MonoBehaviour
 
     public TooltipUI tooltip;
 
+    public Text text;
+    public Text textDropShadow;
+
     //public Sprite sprite;
     //public Image imageColor1;
     //public Image imageColor2;
@@ -37,6 +40,7 @@ public class SpeciesIconUI : MonoBehaviour
 
         image.material = pool.coatOfArmsMat;
         //image.material.SetPass(0);
+        
 
         
         //sprite = Sprite.Create(pool.GetCoatOfArms(), image.rectTransform.rect, Vector2.one * 0.5f);
@@ -63,7 +67,8 @@ public class SpeciesIconUI : MonoBehaviour
     public void UpdateSpeciesIconDisplay(int panelPixelSize, bool isSelected) 
     {
         string toolString = "Species " + linkedPool.speciesID;
-        
+        text.text = linkedPool.speciesID.ToString();
+        textDropShadow.text = linkedPool.speciesID.ToString();
         // POSITION
         currentCoords = Vector2.Lerp(currentCoords, targetCoords, 0.67f);
         transform.localPosition = new Vector3(currentCoords.x * (float)panelPixelSize, currentCoords.y * (float)panelPixelSize, 0f);

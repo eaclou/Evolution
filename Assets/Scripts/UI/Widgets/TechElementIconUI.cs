@@ -12,6 +12,7 @@ public class TechElementIconUI : MonoBehaviour
     [SerializeField] float refreshRate = 0.1f;
     [ReadOnly] public TechElementIconData data;
     [ReadOnly] [SerializeField] bool hasTech;
+    private bool isHover = false;
     
     public Color color { set => image.color = value; }
     public Vector3 scale { set => transform.localScale = value; }
@@ -20,18 +21,20 @@ public class TechElementIconUI : MonoBehaviour
     {
         InvokeRepeating(nameof(Refresh), 0f, refreshRate);
         tooltip.OnHoverStart();
+        isHover = true;
     }
     
     public void OnHoverExit() 
     {
         CancelInvoke(nameof(Refresh)); 
         tooltip.OnHoverExit();
+        isHover = false;
     }
     
     void Refresh()
     {
         tooltip.tooltipString = techElement.iconTooltip + "\n" + selection.SelectedTechValue(techElement);
-        
+        //scale = Vector3.one * 1.25f;
     }
     
     public void SetActive(bool hasTech)
@@ -40,6 +43,9 @@ public class TechElementIconUI : MonoBehaviour
         color = hasTech ? data.activeColor : data.inactiveColor;
         scale = Vector3.one * (hasTech ? data.activeScale : data.inactiveScale);
         gameObject.SetActive(hasTech);
+        if(selection.currentSelection.agent == null) {
+            return;
+        }
         bool isCurAction = false;
         if(this.techElement.id == TechElementId.Predation && selection.currentSelection.agent.curActionState == AgentActionState.Feeding) {
             isCurAction = true; }
@@ -50,7 +56,12 @@ public class TechElementIconUI : MonoBehaviour
 
         if(isCurAction) {
             color = Color.white;
-            scale = Vector3.one * 1.2f;
+            scale = Vector3.one;
+        }
+
+        if(isHover) {
+            //color = Color.white;
+            scale = Vector3.one * 1.25f;
         }
     }
 }

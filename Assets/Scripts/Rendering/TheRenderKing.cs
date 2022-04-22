@@ -3067,6 +3067,15 @@ public class TheRenderKing : Singleton<TheRenderKing>
         eggCoverDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized);
         eggCoverDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
         eggCoverDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        eggCoverDisplayMat.SetInt("_HoverID", cameraManager.mouseHoverAgentIndex);
+        eggCoverDisplayMat.SetInt("_SelectedID", 0); 
+                                       
+        float isHoverCritter = cameraManager.isMouseHoverAgent ? 1f : 0f;
+        float isHighlightCritter = isHoverCritter;
+        
+        eggCoverDisplayMat.SetFloat("_HighlightOn", isHighlightCritter);
+        eggCoverDisplayMat.SetFloat("_IsHover", isHoverCritter);
+        eggCoverDisplayMat.SetFloat("_IsSelected", cameraManager.isFollowingAgent ? 1f : 0f);
         //eggCoverDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
         cmdBufferMain.DrawProcedural(Matrix4x4.identity, eggCoverDisplayMat, 0, MeshTopology.Triangles, 6, simStateData.critterInitDataCBuffer.count);
     }

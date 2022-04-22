@@ -114,7 +114,7 @@ public class ClockPanelUI : MonoBehaviour
         currentSeason = (Season)seasonInt;
         textCurYear.text = (cursorYear + 1) + "\n" + currentSeason;
         
-        clockFaceGroup.transform.localPosition = new Vector3(Mathf.Min(360f, theCursorCzar.GetCursorPixelCoords().x), 300f, 0f);
+        clockFaceGroup.transform.localPosition = new Vector3(Mathf.Max(36f,Mathf.Min(360f - 36f, theCursorCzar.GetCursorPixelCoords().x)), 300f, 0f);
                 
         //**** PLANET!!!!!!
         if(imageClockPlanet) {            

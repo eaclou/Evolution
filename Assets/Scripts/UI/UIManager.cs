@@ -185,6 +185,9 @@ public class UIManager : Singleton<UIManager>
         textTooltip.text = text;
         textTooltip.color = color;
 
+        if(curTooltip == null) {
+            return;
+        }
              
         if(curTooltip.GetComponent<Image>() != null) {
             theCursorCzar.imageTooltipIcon.sprite = curTooltip.GetComponent<Image>().sprite;

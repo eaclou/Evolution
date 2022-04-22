@@ -118,6 +118,8 @@ public class CreaturePanelUI : MonoBehaviour
 
         speciesIconUI.GetComponent<Image>().material = simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].coatOfArmsMat;
         speciesIconUI.tooltip.tooltipString = "Species " + agent.speciesIndex;
+        speciesIconUI.text.text = agent.speciesIndex.ToString();
+        speciesIconUI.textDropShadow.text = agent.speciesIndex.ToString();
         
         tooltipBrain.tooltipString = "BRAIN:\n" + 
             (agent.candidateRef.candidateGenome.brainGenome.neurons.hiddenCount + 

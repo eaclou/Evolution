@@ -36,15 +36,22 @@
 			uniform float _MaxAltitude;
 			uniform float _GlobalWaterLevel;
 			uniform float _CamDistNormalized;
+
+			uniform float _HighlightOn;
+			uniform int _HoverID;
+			uniform int _SelectedID;
+			uniform float _IsHover;			
+			uniform float _IsSelected;
 			
 			struct v2f
 			{
 				float4 pos : SV_POSITION;
 				float4 uv : TEXCOORD0;  // uv of the brushstroke quad itself, particle texture	
 				float4 color : TEXCOORD1;
-				//int foodIndex : TEXCOORD2;
+				float4 highlight : TEXCOORD2;
 				float frameLerp : TEXCOORD3;
 				float2 quadCoords : TEXCOORD4;
+
 			};
 
 			float rand(float2 co) {   // OUTPUT is in [0,1] RANGE!!!
@@ -80,6 +87,8 @@
 				
 				CritterInitData critterInitData = critterInitDataCBuffer[inst];
 				CritterSimData critterSimData = critterSimDataCBuffer[inst];
+				//CritterGenericStrokeData genericStrokeData = critterGenericStrokesCBuffer[inst];
+				uint agentIndex = inst;
 
 				float3 worldPosition = critterSimData.worldPos;
 				//worldPosition.y += 0.5;
@@ -136,6 +145,10 @@
 				float3 primaryHue = critterInitDataCBuffer[inst].primaryHue;
 				float3 secondaryHue = critterInitDataCBuffer[inst].secondaryHue;
 
+				float hoverMask = 1.0 - saturate(abs(agentIndex - _HoverID));
+				float selectedMask = 1.0 - saturate(abs(agentIndex - _SelectedID));
+				o.highlight = float4(hoverMask, selectedMask, 0, 0);
+
 				// *****
 				random2 = 0;
 				o.color = float4(lerp(primaryHue, secondaryHue, random2), eggMask); 
@@ -169,6 +182,9 @@
 				
 				finalGrowColor.a *= growBrushColor.r * i.color.a;
 
+				if(i.highlight.x > 0.5) {
+					finalGrowColor.rgb = 1;
+				}
 				
 				return finalGrowColor;
 			}
