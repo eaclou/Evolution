@@ -131,8 +131,8 @@
 				float alpha = fadeIn * fadeOut;
 				alpha *= worldActiveMask;
 				
-				float2 scale = 6; // * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * (_DetritusDensityLerp * 3.14 + 0.5);
-				float wasteVal = saturate(tex2Dlod(_ResourceGridTex, float4(uv, 0, 0)).y * 3);
+				float2 scale = 5; // * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * (_DetritusDensityLerp * 3.14 + 0.5);
+				float wasteVal = saturate(tex2Dlod(_ResourceGridTex, float4(uv, 0, 0)).y);
 				//scale = scale * (wasteTex * 0.8 + 0.2);
 				//scale.y *= 4.5;
 				quadPoint *= float3(scale, 1.0);

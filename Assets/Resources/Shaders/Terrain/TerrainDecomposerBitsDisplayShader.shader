@@ -138,14 +138,14 @@
 
 				worldPosition.z = -altitudeRaw * _MaxAltitude;
 				
-				float2 scale = float2(1,1) * 1.853641 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
+				float2 scale = float2(1,1) * 1.0853641 * alpha; //groundBitData.localScale * alpha * (_CamDistNormalized * 0.75 + 0.25) * 2.0;
 			
 				float4 resourceGridSample = tex2Dlod(_ResourceGridTex, float4(uv, 0, 0));
 				float decomposerAmount = resourceGridSample.z;
 				//float decomposerMinMask = saturate(decomposerAmount * 100);
 				//float wasteAmount = saturate(resourceGridSample.y) * decomposerMinMask;
 
-				float sizeFadeMask = saturate(decomposerAmount * 100); // saturate((1.0 - altitude) * 4 - 2);
+				float sizeFadeMask = saturate(decomposerAmount * 1); // saturate((1.0 - altitude) * 4 - 2);
 				quadPoint *= float3(scale, 1.0) * sizeFadeMask;
 								
 				float4 fluidVelocity = tex2Dlod(_VelocityTex, float4(worldPosition.xy / 256, 0, 2));
@@ -251,9 +251,10 @@
 				finalColor.rgb = lerp(finalColor.rgb, data.waterFogColor.rgb, fogAmount);
 				finalColor.rgb += lerp(float3(0,0,0), reflectionColor.xyz, reflectionColor.w);
 								
-				finalColor.rgb += data.spiritBrushTex.y * 0.025;
+				//finalColor.rgb += data.spiritBrushTex.y * 0.025;
 				
-				finalColor.a *= tex2D(_MainTex, i.quadUV).a * i.color.a;
+				finalColor.a *= i.color.a * tex2D(_MainTex, i.quadUV).r;
+				finalColor.rgb *= tex2D(_MainTex, i.quadUV).r * 0.5 + 0.5;
 				return finalColor;
 				// What information is needed and when in order to properly render??? *******
 				// Ground Terrain baseAlbedo color? -- either precompute or blend btw stone/pebble/sand colors

@@ -40,6 +40,18 @@ public class TechElementIconUI : MonoBehaviour
         color = hasTech ? data.activeColor : data.inactiveColor;
         scale = Vector3.one * (hasTech ? data.activeScale : data.inactiveScale);
         gameObject.SetActive(hasTech);
+        bool isCurAction = false;
+        if(this.techElement.id == TechElementId.Predation && selection.currentSelection.agent.curActionState == AgentActionState.Feeding) {
+            isCurAction = true; }
+        if(this.techElement.id == TechElementId.Swim && selection.currentSelection.agent.curActionState == AgentActionState.Default) {
+            isCurAction = true; }
+        if(this.techElement.id == TechElementId.Attack && selection.currentSelection.agent.curActionState == AgentActionState.Attacking) {
+            isCurAction = true; }
+
+        if(isCurAction) {
+            color = Color.white;
+            scale = Vector3.one * 1.2f;
+        }
     }
 }
 

@@ -90,13 +90,13 @@
 
 				//float randomScale = lerp(0.86, 1, random2);	
 				
-				float scale = critterSimData.growthPercentage * (critterInitData.boundingBoxSize.x + critterInitData.boundingBoxSize.y) * 4.85 + 0.0021; // length(eggData.localScale) * length(rawData.fullSize) * saturate(rawData.growth * 1.5f) * randomScale * (1.0 + rawData.decay);
+				float scale = critterSimData.growthPercentage * (critterInitData.boundingBoxSize.x + critterInitData.boundingBoxSize.y) * 1.285 + 0.0021; // length(eggData.localScale) * length(rawData.fullSize) * saturate(rawData.growth * 1.5f) * randomScale * (1.0 + rawData.decay);
 				//scale *= _CamDistNormalized;
 				// Rotation of Billboard center around Agent's Center (no effect if localPos and localDir are zero/default)'
 				float2 forwardAgent = critterSimData.heading;
 				float2 rightAgent = float2(forwardAgent.y, -forwardAgent.x);
 							
-				//quadPoint *= scale * 0.5; // * ((1.0 - rawData.decay) * 0.75 + 0.25);
+				quadPoint *= scale; // * ((1.0 - rawData.decay) * 0.75 + 0.25);
 				
 				float eggMask = 1.0 - saturate(saturate(critterSimData.embryoPercentage - 0.995) * 1000);
 				//quadPoint *= eggMask;
@@ -110,7 +110,7 @@
 				float refractionStrength = 2.45;
 				//worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 				
-				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(quadPoint * lerp(0.1, 2.5, _CamDistNormalized), 0.0));
+				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(quadPoint, 0.0));
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)) + float4(rotatedPoint, 0.0));
 				
 				float2 uv0 = quadVerticesCBuffer[id] + 0.5; // full texture

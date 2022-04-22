@@ -108,6 +108,7 @@
 				float depth = saturate(-altitude + _GlobalWaterLevel);
 				float refractionStrength = depth * 4.5;
 				worldPosition.xy += -surfaceNormal.xy * refractionStrength;
+				worldPosition.z = -altitude * _MaxAltitude;
 				
 				float random1 = rand(float2(inst, inst));
 				float random2 = rand(float2(random1, random1));
