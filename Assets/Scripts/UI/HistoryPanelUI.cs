@@ -51,6 +51,13 @@ public class HistoryPanelUI : MonoBehaviour
     GameObject tempPanelLifeEvents;
     [SerializeField] int maxNumCreatureEventIcons;
 
+    [SerializeField]
+    GameObject panelNudgeMessage;
+    [SerializeField]
+    Text textNudgeMessage;
+    [SerializeField]
+    TooltipUI tooltipNudgeMessage;
+
     private float displayWidth => 1f - marginLeft - marginRight;
     private float displayHeight => 1f - marginTop - marginMiddle - marginBottom - clockHeight;
 
@@ -72,7 +79,7 @@ public class HistoryPanelUI : MonoBehaviour
     }
     
     public ComputeBuffer worldTreeLineDataCBuffer;
-    private int worldTreeNumPointsPerLine = 128;    
+    private int worldTreeNumPointsPerLine = 64;    
     private int worldTreeNumSpeciesLines = 32;
     private int worldTreeNumCreatureLines = 32;
     private int worldTreeBufferCount => worldTreeNumPointsPerLine * (worldTreeNumSpeciesLines * worldTreeNumCreatureLines);
@@ -98,8 +105,26 @@ public class HistoryPanelUI : MonoBehaviour
     [SerializeField]
     TooltipUI tooltipOpenCloseButton;
 
+    private bool isNudgeOn = false;
+    [ReadOnly]
+    public int nudgeCounter;
     public void Start() {
         openCloseButton.SetHighlight(true);
+    }
+    public void SetNudgeTooltip(string str) {
+        tooltipNudgeMessage.tooltipString = str;
+    }
+    public void TriggerNudgeMessage(string str) {
+        textNudgeMessage.text = str;
+        panelNudgeMessage.SetActive(true);
+        isNudgeOn = true;
+        nudgeCounter = 0;
+    }
+    public void CloseNudgeMessage() {
+        textNudgeMessage.text = "";
+        panelNudgeMessage.SetActive(false);
+        isNudgeOn = false;
+        nudgeCounter = 0;
     }
     public void InitializePanel() {
         InitializeSpeciesIcons();
@@ -265,6 +290,10 @@ public class HistoryPanelUI : MonoBehaviour
                 //alpha = 1f;
             }
 
+            if(curPanelMode != HistoryPanelMode.AllSpecies) {
+                alpha = 0f;
+            }
+
             data.worldPos = new Vector3(xCoord, yCoord, zCoord);
             data.color = new Color(hue.x, hue.y, hue.z, alpha);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
         }
@@ -292,13 +321,17 @@ public class HistoryPanelUI : MonoBehaviour
                 hue = Vector3.one;
                 zCoord = -0.1f;
             }                        
-            data.color = new Color(hue.x, hue.y, hue.z, alpha); // Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
+            // Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
 
             xCoord = xCoord * displayWidth + marginLeft;  // rescaling --> make this more robust
             yCoord = yCoord * displayHeight + marginBottom;
             if((new Vector2(xCoord, yCoord) - cursorCoords).magnitude < 0.05f) {
                 data.color = Color.white;
             }
+            if(curPanelMode != HistoryPanelMode.AllSpecies) {
+                alpha = 0f;
+            }
+            data.color = new Color(hue.x, hue.y, hue.z, alpha); 
             data.worldPos = new Vector3(xCoord, yCoord, zCoord);
         }
 
@@ -386,6 +419,9 @@ public class HistoryPanelUI : MonoBehaviour
             color.g *= 0.35f; 
             color.b *= 0.35f; 
         }
+        if (curPanelMode == HistoryPanelMode.AllSpecies) {
+            color.a = 0f;
+        }
         
         return color;
     }
@@ -469,6 +505,13 @@ public class HistoryPanelUI : MonoBehaviour
     
     public void Tick() 
     {
+        if(isNudgeOn) {
+            nudgeCounter++;
+            if(nudgeCounter >= 420) {
+                CloseNudgeMessage();                
+            }
+        }
+
         var mouseInOpenCloseArea = Screen.height - Input.mousePosition.y < 64 && Input.mousePosition.x < 64;
         openCloseButton.SetMouseEnter(mouseInOpenCloseArea);
         tooltipOpenCloseButton.tooltipString = isPanelOpen ? "Hide Timeline Panel" : "Open Timeline Panel";
@@ -503,6 +546,7 @@ public class HistoryPanelUI : MonoBehaviour
                 //buttonToggleExtinct.gameObject.SetActive(false);
                 buttonToggleGraphMode.gameObject.SetActive(false);
                 buttonSelCreatureEventsLink.gameObject.SetActive(true);
+                buttonSelCreatureEventsLink.gameObject.transform.localPosition = new Vector3(360f, 180f, 0f);
                 break;
             case HistoryPanelMode.CreatureTimeline:
                 tempPanelSpeciesPop.SetActive(false);

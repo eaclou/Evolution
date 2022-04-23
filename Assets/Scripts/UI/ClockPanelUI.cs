@@ -112,7 +112,7 @@ public class ClockPanelUI : MonoBehaviour
         int cursorYear = Mathf.FloorToInt(cursorTimeStep / (float)simulation.GetNumTimeStepsPerYear());
         int seasonInt = Mathf.FloorToInt(cursorTimeStep / (float)simulation.GetNumTimeStepsPerYear() * 4f) % 4;
         currentSeason = (Season)seasonInt;
-        textCurYear.text = (cursorYear + 1) + "\n" + currentSeason;
+        textCurYear.text = (cursorYear + 1).ToString(); // + "\n" + currentSeason;
         
         clockFaceGroup.transform.localPosition = new Vector3(Mathf.Max(36f,Mathf.Min(360f - 36f, theCursorCzar.GetCursorPixelCoords().x)), 300f, 0f);
                 
@@ -126,26 +126,26 @@ public class ClockPanelUI : MonoBehaviour
         // MOON:
         if(imageClockMoon) {            
             Vector2 moonDir = GetMoonDir(cursorTimeStep);
-            imageClockMoon.rectTransform.localPosition = new Vector3(moonDir.x * 16f, moonDir.y * 16f, 0f);
+            imageClockMoon.rectTransform.localPosition = new Vector3(moonDir.x * 8f, moonDir.y * 8f, 0f);
             imageClockMoon.rectTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * sunOrbitPhase);
             imageClockHandB.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * GetMoonOrbitPhase(cursorTimeStep));
         }
         // SUN:
         if(imageClockSun) {
             Vector2 sunDir = GetSunDir(cursorTimeStep);
-            imageClockSun.rectTransform.localPosition = new Vector3(sunDir.x * 32f, sunDir.y * 32f, 0f);
+            imageClockSun.rectTransform.localPosition = new Vector3(sunDir.x * 16f, sunDir.y * 16f, 0f);
             imageClockHandC.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * GetSunOrbitPhase(cursorTimeStep));
         }
     }
 
     public float GetPlanetSpinPhase(float timeStep) {
         float phase = clockPlanetRPM * timeStep;
-        return phase;
+        return -phase;
     }
     
     public float GetMoonOrbitPhase(float timeStep) {
         float phase = clockMoonRPM * timeStep;
-        return phase;
+        return -phase;
     }
     
     public Vector2 GetMoonDir(float timeStep) {        
@@ -156,7 +156,7 @@ public class ClockPanelUI : MonoBehaviour
     
     public float GetSunOrbitPhase(float timeStep) {
         float phase = clockSunRPM * timeStep;
-        return phase;
+        return -phase;
     }
     
     public Vector2 GetSunDir(float timeStep) {        
@@ -222,7 +222,7 @@ public class ClockPanelUI : MonoBehaviour
             
             float timeStep = xCoord * timeRange;
             
-            data.pos = new Vector3(xCoord, yCoord + 0.8333f, 0f);
+            data.pos = new Vector3(xCoord, yCoord + 0.9f, 0f);
             data.radius = clockRadiusEarth / (totalDistanceTraveled * clockZoomSpeed);
             data.color = Color.white;
             data.animPhase = 0.25f;
@@ -251,7 +251,7 @@ public class ClockPanelUI : MonoBehaviour
             float xCoord = stampWorldPosX / totalDistanceTraveled;
             float yCoord = stampWorldPosY / totalDistanceTraveled;
                         
-            data.pos = new Vector3(xCoord, yCoord + 0.8333f, 0f);
+            data.pos = new Vector3(xCoord, yCoord + 0.9f, 0f);
             data.radius = clockRadiusMoon / (totalDistanceTraveled * clockZoomSpeed);
             data.color = Color.white;
             data.animPhase = 0.75f;
@@ -284,7 +284,7 @@ public class ClockPanelUI : MonoBehaviour
             float xCoord = stampWorldPosX / totalDistanceTraveled;
             float yCoord = stampWorldPosY / totalDistanceTraveled;
             
-            data.pos = new Vector3(xCoord, yCoord + 0.8333f, 0f);
+            data.pos = new Vector3(xCoord, yCoord + 0.9f, 0f);
             data.radius = clockRadiusSun / (totalDistanceTraveled * clockZoomSpeed);
             data.color = Color.white;
             float timeStep = xCoord * (float)simulation.simAgeTimeSteps;            

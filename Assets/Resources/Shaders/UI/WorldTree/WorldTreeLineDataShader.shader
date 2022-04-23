@@ -89,7 +89,7 @@
 				float3 worldPosition = float3(vertexCoord, 0) * _IsOn;								
 				*/
 				WorldTreeLineData data = worldTreeLineDataCBuffer[inst];
-				float3 worldPosition = data.worldPos + quadData * 0.016;
+				float3 worldPosition = data.worldPos + quadData * 0.03;
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.color = data.color; // tex2Dlod(_KeyTex, float4(0,((float)_SelectedWorldStatsID + 0.5) / 32.0,0,0));

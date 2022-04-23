@@ -199,7 +199,10 @@ public class UIManager : Singleton<UIManager>
         }
         if(icon != null) {
             theCursorCzar.imageTooltipIcon.sprite = icon;
-        } 
+        }
+        
+        //theCursorCzar.imageTooltipIcon.gameObject.SetActive(icon == null);
+        
         theCursorCzar.imageTooltipIcon.color = color;
         //theCursorCzar.imageTooltipIcon.gameObject.SetActive(icon != null);  
         panelTooltip.SetActive(true);
@@ -231,7 +234,8 @@ public class UIManager : Singleton<UIManager>
             case TooltipId.Agent: {
                 string critterString = "Critter " + cameraManager.mouseHoverAgentRef.candidateRef.candidateGenome.name + "-" + cameraManager.mouseHoverAgentRef.candidateRef.candidateID + "\nSize: " + (cameraManager.mouseHoverAgentRef.currentBiomass / cameraManager.mouseHoverAgentRef.fullsizeBiomass * 100f).ToString("F0") + "% Grown";
                 if(cameraManager.mouseHoverAgentRef.curLifeStage == AgentLifeStage.Dead) {
-                    critterString = "Critter " + cameraManager.mouseHoverAgentRef.candidateRef.candidateGenome.name + "-" + cameraManager.mouseHoverAgentRef.candidateRef.candidateID + "\n[DEAD] " + ((1f - cameraManager.mouseHoverAgentRef.currentBiomass / cameraManager.mouseHoverAgentRef.biomassAtDeath) * 100f).ToString("F0") + "% Decayed";
+                    string deathBy = cameraManager.mouseHoverAgentRef.candidateRef.causeOfDeath;                    
+                    critterString = "Critter " + cameraManager.mouseHoverAgentRef.candidateRef.candidateGenome.name + "-" + cameraManager.mouseHoverAgentRef.candidateRef.candidateID + "\n[" + deathBy + "] " + ((1f - cameraManager.mouseHoverAgentRef.currentBiomass / cameraManager.mouseHoverAgentRef.biomassAtDeath) * 100f).ToString("F0") + "% Decayed";
                 }
                 return critterString;
                     // + "\nAge: " + cameraManager.mouseHoverAgentRef.ageCounter

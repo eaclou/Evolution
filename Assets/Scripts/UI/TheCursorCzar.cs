@@ -118,6 +118,9 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
             //uiManagerRef.OnAgentSelected?.Invoke(agent); //***EAC what does this do?
             selectionManager.SetSelected(agent.candidateRef);
             cameraManager.SetFollowing(KnowledgeMapId.Animals);
+            if(!uiManagerRef.creaturePanelUI.isPanelOpen) {
+                uiManagerRef.creaturePanelUI.openCloseButton.SetOpen(true);
+            }
         }
         else if (!clicked) 
         {

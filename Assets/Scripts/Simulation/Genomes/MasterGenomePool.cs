@@ -16,7 +16,7 @@ public class MasterGenomePool
     public int maxNumActiveSpecies = 6;
     private int targetNumSpecies = 4;
     public float speciesSimilarityDistanceThreshold = 16f;
-    private int minNumGuaranteedEvalsForNewSpecies = 128;
+    private int minNumGuaranteedEvalsForNewSpecies = 256;
     int numInitSpecies = 1;
 
     [SerializeField] float oldestSpeciesRerollChance = 0.33f;
@@ -142,6 +142,8 @@ public class MasterGenomePool
 
     public void FlagSpeciesExtinct(int speciesID) {
         completeSpeciesPoolsList[speciesID].isFlaggedForExtinction = true;
+
+        uiManager.historyPanelUI.TriggerNudgeMessage("SPECIES " + speciesID + " IS ENDANGERED!");
         //Debug.Log("FLAG EXTINCT: " + speciesID);
     }
     
@@ -158,7 +160,7 @@ public class MasterGenomePool
 
         currentlyActiveSpeciesIDList.RemoveAt(listIndex);
         completeSpeciesPoolsList[speciesID].ProcessExtinction(simulation.simAgeTimeSteps);
-
+        uiManager.historyPanelUI.TriggerNudgeMessage("SPECIES " + speciesID + " HAS GONE EXTINCT!");
     }
 
     public SpeciesGenomePool SelectNewGenomeSourceSpecies(bool weighted, float weightedAmount) {
@@ -298,6 +300,7 @@ public class MasterGenomePool
 
             Color color = new Color(newGenome.bodyGenome.appearanceGenome.huePrimary.x, newGenome.bodyGenome.appearanceGenome.huePrimary.y, newGenome.bodyGenome.appearanceGenome.huePrimary.z);
             panelPendingClickPrompt.Narrate("A new species has emerged! agentname: " + newGenome.name, color);
+            
         }
 
         if (!assignedToNewSpecies) 
@@ -325,14 +328,15 @@ public class MasterGenomePool
             // *** ???
             Debug.Log($"assignedToNewSpecies closestDistanceSpeciesID: {closestSpeciesID}, score: {closestDistance}");
             completeSpeciesPoolsList[closestSpeciesID].AddNewCandidateGenome(newGenome);
+
         }
         
         if(currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies) {
-            speciesSimilarityDistanceThreshold *= 0.97f;  // lower while creating treeOfLifeUI
+            speciesSimilarityDistanceThreshold *= 0.984f;  // lower while creating treeOfLifeUI
         }
         else {
             speciesSimilarityDistanceThreshold *= 1.05f;
-            speciesSimilarityDistanceThreshold = Mathf.Min(speciesSimilarityDistanceThreshold, 6f); // cap
+            speciesSimilarityDistanceThreshold = Mathf.Min(speciesSimilarityDistanceThreshold, 16f); // cap
         }
 
         CheckForExtinction();

@@ -34,7 +34,7 @@ public class CreaturePanelUI : MonoBehaviour
     Text textGenerationCount;
 
     [SerializeField]
-    OpenCloseButton openCloseButton;
+    public OpenCloseButton openCloseButton;
         
     [SerializeField] AgentActionStateData[] actionStates;
     [SerializeField] AgentActionStateData defaultActionState;
@@ -43,7 +43,7 @@ public class CreaturePanelUI : MonoBehaviour
     [SerializeField] PanelModeData[] panelModes;
     [SerializeField] StringSO startingPanelMode;
 
-    private bool isPanelOpen => openCloseButton.isOpen;
+    public bool isPanelOpen => openCloseButton.isOpen;
 
     
 
@@ -110,7 +110,7 @@ public class CreaturePanelUI : MonoBehaviour
 
         if (!agent) return;
         imageCurAction.gameObject.SetActive(true);
-        if(agent.curLifeStage == AgentLifeStage.Dead) {
+        if(agent.curLifeStage == AgentLifeStage.Dead || agent.candidateRef.candidateID != selection.currentSelection.candidate.candidateID) {
             imageCurAction.gameObject.SetActive(false);
         }
 

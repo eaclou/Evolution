@@ -54,7 +54,7 @@ public class TechElementIconUI : MonoBehaviour
         if(this.techElement.id == TechElementId.Attack && selection.currentSelection.agent.curActionState == AgentActionState.Attacking) {
             isCurAction = true; }
 
-        if(isCurAction) {
+        if(isCurAction && selection.currentSelection.agent.curLifeStage == AgentLifeStage.Mature && !selection.currentSelection.isGenomeOnly) {
             color = Color.white;
             scale = Vector3.one;
         }

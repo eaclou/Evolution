@@ -44,7 +44,7 @@ public class CreaturePaperDollUI : MonoBehaviour
     public void Tick() {
         if (agent == null || agent.coreModule == null) return;
         CandidateAgentData candidate = selectionManager.currentSelection.candidate;
-        if(agent.curLifeStage != AgentLifeStage.Mature) {
+        if(agent.curLifeStage != AgentLifeStage.Mature || candidate.candidateID != agent.candidateRef.candidateID) {
             panelStatusBars.SetActive(false);
         }
         else {
@@ -56,7 +56,7 @@ public class CreaturePaperDollUI : MonoBehaviour
             var lifeStageData = lookup.GetAgentLifeStageData(agent.curLifeStage, agent.isYoung);
 
             
-            tooltipState.tooltipString = "Age: " + agent.ageCounter + "  "  + lifeStageData.stateName + "\nSize: " + (agent.currentBiomass / agent.fullsizeBiomass * 100f).ToString("F0") + "% Grown";// + agent.currentBiomass.ToString("F3");
+            tooltipState.tooltipString = "Age: " + agent.ageCounter + "  "  + lifeStageData.stateName + " [" + agent.candidateRef.causeOfDeath + "]\nSize: " + (agent.currentBiomass / agent.fullsizeBiomass * 100f).ToString("F0") + "% Grown";// + agent.currentBiomass.ToString("F3");
             tooltipImage.sprite = lifeStageData.icon;
 
             tooltipHealth.tooltipString = "Health: " + (agent.coreModule.health * 100f).ToString("F0") + "%";          

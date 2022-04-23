@@ -192,7 +192,7 @@ public class Agent : MonoBehaviour {
     IAgentAbility defend;
     IAgentAbility feed;
     Cooldown cooldown;
-    
+        
     public float totalEaten => candidateRef.performanceData.totalEaten;
     public Vector3 position { get => bodyGO.transform.position; set => bodyGO.transform.position = value; }
         
@@ -381,6 +381,7 @@ public class Agent : MonoBehaviour {
     
     private void InitializeDeath(CauseOfDeathSO data) {
         InitializeDeath(data.causeOfDeath, data.eventMessage);
+        //causeOfDeath = data;
     }
     
     private void InitializeDeath(string causeOfDeath, string deathEvent) 

@@ -105,7 +105,7 @@ public class CritterModuleCore : IBrainModule
     public float stomachSpace => stomachCapacity - totalStomachContents;
     public float totalStomachContents => stomachContentsPlant + stomachContentsMeat + stomachContentsDecay;
     public float stomachContentsPercent => totalStomachContents / stomachCapacity;
-    public bool stomachEmpty => stomachContentsPercent <= 0f;
+    public bool stomachEmpty => stomachContentsPercent <= 0.0001f;
     public bool isFull => stomachContentsPercent >= 1f;
     
     public float plantEatenPercent => Mathf.Clamp01(stomachContentsPlant / (totalStomachContents + 0.0000001f));

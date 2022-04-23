@@ -1238,7 +1238,7 @@ public class SimulationManager : Singleton<SimulationManager>
     // **********EC Move this to MasterGenomePool class?
     public void AddNewSpecies(AgentGenome newGenome, int parentSpeciesID) {  
         int newSpeciesID = masterGenomePool.completeSpeciesPoolsList.Count;
-               
+                       
         SpeciesGenomePool newSpecies = new SpeciesGenomePool(newSpeciesID, parentSpeciesID, curSimYear, simAgeTimeSteps, cachedVertebrateMutationSettings);
         AgentGenome foundingGenome = newGenome; // newSpecies.Mutate(newGenome, true, true); //
         SpeciesGenomePool parentSpeciesPool = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID];
@@ -1266,6 +1266,9 @@ public class SimulationManager : Singleton<SimulationManager>
         }
 
         uiManager.historyPanelUI.AddNewSpeciesToPanel(newSpecies);
+
+        uiManager.historyPanelUI.TriggerNudgeMessage("A NEW SPECIES [" + newSpeciesID + "] HAS EMERGED!");
+        uiManager.historyPanelUI.SetNudgeTooltip("On timestep " + SimulationManager.instance.simAgeTimeSteps + ", Species " + newSpeciesID + " evolved from progenitor species " + parentSpeciesID + "\nFounding Creature: " + newGenome.name);
     }
     
     private StartPositionGenome GetInitialAgentSpawnPosition() {
