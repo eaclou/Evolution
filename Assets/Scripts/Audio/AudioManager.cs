@@ -48,14 +48,15 @@ public class AudioManager : Singleton<AudioManager>
     public void PlayCritterAttack(Vector2 position) { PlaySound(audioSourceCritterAttack01, position); }
     public void PlayCritterDefend(Vector2 position) { PlaySound(audioSourceCritterDefend01, position); }
     
-    // WPP 11/26/21 refactored from Play"" methods above into below generic function
-    /*
-    float volume = GetSFXVolumeFromPos(pos);
-        if (volume > 0.01f) {
-        audioSourceCritterAttack01.volume = volume;
-        audioSourceCritterAttack01.Play();
+    public void PlayCritterAction(Vector2 position, AgentActionState actionState)
+    {
+        switch (actionState)
+        {
+            case AgentActionState.Attacking: PlayCritterAttack(position); break;
+            case AgentActionState.Dashing: PlayCritterDash(position); break;
+            case AgentActionState.Defending: PlayCritterDefend(position); break;
+        }
     }
-    */
     
     void PlaySound(AudioSource sound, Vector2 position)
     {

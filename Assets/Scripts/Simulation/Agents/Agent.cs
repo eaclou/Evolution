@@ -24,6 +24,8 @@ public class Agent : MonoBehaviour {
     SettingsManager settingsRef => SettingsManager.instance;
     SimulationManager simManager => SimulationManager.instance;
     AudioManager audioManager => AudioManager.instance;
+    UIManager uiManager => UIManager.instance;
+    CreaturePanelUI creaturePanel => uiManager.creaturePanelUI;
     //private PerformanceData performanceData;
     //public float totalFoodEatenDecay = 0f;
     
@@ -469,8 +471,18 @@ public class Agent : MonoBehaviour {
                 biomassAtDeath = 1f; // ??               
                 break;
             default:
-                Debug.LogError("NO SUCH ENUM ENTRY IMPLEMENTED, YOU FOOL!!! (" + curLifeStage + ")");
+                Debug.LogError($"NO SUCH ENUM ENTRY IMPLEMENTED, YOU FOOL!!! ({curLifeStage})");
                 break;
+        }
+    }
+    
+    private void RegisterAgentEvent(AgentActionState actionState)
+    {
+        switch (actionState)
+        {
+            case AgentActionState.Attacking: RegisterAgentEvent(simManager.simAgeTimeSteps, "Attacked!", 1f, 6); break;
+            case AgentActionState.Defending: RegisterAgentEvent(simManager.simAgeTimeSteps, "Defended!", 1f, 7); break;
+            case AgentActionState.Dashing: RegisterAgentEvent(simManager.simAgeTimeSteps, "Dashed!", 1f, 8); break;
         }
     }
     
@@ -544,7 +556,7 @@ public class Agent : MonoBehaviour {
         //amount *= coreModule.foodEfficiencyMeat;
         //coreModule.stomachContentsTotal01 += (amount / coreModule.stomachCapacity);
         
-        if(coreModule.stomachContentsPercent > 1f) {
+        if (coreModule.stomachContentsPercent > 1f) {
             return;
             //float overStuffAmount = coreModule.stomachContentsNorm - 1f;
             //ProcessDamageReceived(overStuffAmount);
@@ -757,7 +769,7 @@ public class Agent : MonoBehaviour {
         mouthRef.isAttacking = isAttacking;
         //ProcessSwallowing();
 
-        if(isSwallowingPrey) {
+        if (isSwallowingPrey) {
             //Debug.Log("Holy SH!T a creature was eaten! " + index.ToString() + " --> " + preyAgentRef.index.ToString());
             //mouthRef.BiteCorpseFood(preyAgentRef, currentBiomass * 0.05f);
         }
@@ -793,7 +805,7 @@ public class Agent : MonoBehaviour {
     
     public void BeginPregnancy(EggSack developingEggSackRef) {
         //Debug.Log("BeginPregnancy! [" + developingEggSackRef.index.ToString() + "] agent# " + this.index);
-        
+
         isPregnantAndCarryingEggs = true;
         childEggSackRef = developingEggSackRef;
 
@@ -801,21 +813,21 @@ public class Agent : MonoBehaviour {
         float starterMass = settingsRef.agentSettings._BaseInitMass * settingsRef.agentSettings._MinPregnancyFactor;
         float curProportion = currentBiomass * settingsRef.agentSettings._MaxPregnancyProportion;
         // probably 0.05 * 2 = 0.1   for now
-        if(curProportion > starterMass) { // Good to go!
-            //Debug.Log("Pregnancy! " + " curMass: " + currentBiomass.ToString() + ", reqMass: " + starterMass.ToString() + ", curProp: " + curProportion.ToString());
+        // Good to go!
+        if (curProportion > starterMass) { 
+            //Debug.Log("Pregnancy! " + " curMass: " + currentBiomass + ", reqMass: " + starterMass + ", curProp: " + curProportion);
             currentBiomass -= settingsRef.agentSettings._BaseInitMass * 3;
             childEggSackRef.currentBiomass = starterMass * 2;     // * TROUBLE!!!
-
             RegisterAgentEvent(simManager.simAgeTimeSteps, "Pregnant! " + starterMass, 0.5f, 10);
         }
         else {
-            Debug.LogError("Something went wrong!! " + " curMass: " + currentBiomass + ", reqMass: " + starterMass.ToString() + ", curProp: " + curProportion.ToString() );
+            Debug.LogError("Something went wrong!! " + " curMass: " + currentBiomass + ", reqMass: " + starterMass + ", curProp: " + curProportion );
         }
     }
     
     public void AbortPregnancy() {
         //childEggSackRef
-        if(childEggSackRef) {
+        if (childEggSackRef) {
             childEggSackRef.ParentDiedWhilePregnant();
             childEggSackRef = null;
         }        
@@ -903,16 +915,11 @@ public class Agent : MonoBehaviour {
     public void TickActions() {
         //AgentActionState currentState = AgentActionState.Default;
         
-        // WPP: calculated with getter in movement module
-        //float horizontalMovementInput = movementModule.throttleX[0]; // Mathf.Lerp(horAI, horHuman, humanControlLerp);
-        //float verticalMovementInput = movementModule.throttleY[0]; // Mathf.Lerp(verAI, verHuman, humanControlLerp);
-        
         // Facing Direction:
         throttle = movementModule.throttle; //new Vector2(horizontalMovementInput, verticalMovementInput);        
         smoothedThrottle = Vector2.Lerp(smoothedThrottle, throttle, smoothedThrottleLerp);
-        Vector2 throttleForwardDir = throttle.normalized;
 
-        if(isDead || isEgg) {
+        if (isDead || isEgg) {
             throttle = Vector2.zero;
             smoothedThrottle = Vector2.zero;
         }
@@ -927,7 +934,7 @@ public class Agent : MonoBehaviour {
             bool isEatingPlant = foodParticleEatAmount > 0f;
             bool isEatingAnimal = animalParticleEatAmount > 0f;
             
-            if(isEatingPlant) {
+            if (isEatingPlant) {
                 //mouthRef.InitiatePassiveBite();
                 //float sizeEfficiencyPlant = Mathf.Lerp(settings.minSizeFeedingEfficiencyDecay, settings.maxSizeFeedingEfficiencyDecay, sizeValue);
                 //Debug.Log("Agent[" + index.ToString() + "], Ate Plant: " + foodParticleEatAmount.ToString());
@@ -935,14 +942,13 @@ public class Agent : MonoBehaviour {
                 EatFoodPlant(foodParticleEatAmount);                
             }
 
-            if(isEatingAnimal) {
+            if (isEatingAnimal) {
                 //float sizeEfficiencyPlant = Mathf.Lerp(settings.minSizeFeedingEfficiencyDecay, settings.maxSizeFeedingEfficiencyDecay, sizeValue);
                 candidateRef.performanceData.totalFoodEatenZoop += animalParticleEatAmount;
                 //animalParticleEatAmount *= 0.98f;
                 
                 //Debug.Log("Agent[" + index.ToString() + "], Ate Zooplankton: " + animalParticleEatAmount.ToString());
                 EatFoodMeat(animalParticleEatAmount); // * sizeEfficiencyPlant);    
-                
             }
 
             mouthRef.lastBiteFoodAmount += foodParticleEatAmount + animalParticleEatAmount;
@@ -1016,65 +1022,83 @@ public class Agent : MonoBehaviour {
         }
         */
     }
+    
+    /// Temporary debug variable to view state of isFreeToAct in inspector
+    public bool _isFreeToAct;
 
     private void SelectAction() {
         curActionState = AgentActionState.Default;
 
-        // * Some of these should not be checked if tech is not available
         float[] effectorValues = { 0.001f, coreModule.mouthFeedEffector[0], 
             coreModule.mouthAttackEffector[0], coreModule.defendEffector[0],
             coreModule.dashEffector[0], coreModule.healEffector[0] };
             
         float mostActiveEffectorValue = FloatMath.GetHighest(effectorValues);
+        _isFreeToAct = isFreeToAct;
         
         if (coreModule.healEffector[0] >= mostActiveEffectorValue) {
             isResting = isFreeToAct;
                 
-            if(isFreeToAct) {
+            if (isResting) {
                 candidateRef.performanceData.totalTicksRested++;
             }
+            //Debug.Log($"Agent {index} healing");   // OK
             curActionState = AgentActionState.Resting;
-            UIManager.instance.creaturePanelUI.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
+            creaturePanel.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
         }
 
         if (coreModule.mouthFeedEffector[0] >= mostActiveEffectorValue) {
             curActionState = AgentActionState.Feeding;
             UseAbility(feed);
-            UIManager.instance.creaturePanelUI.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
+            //Debug.Log($"Agent {index} feeding");  // OK
+            creaturePanel.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
         }
         
         if (!isFreeToAct) {
-            UIManager.instance.creaturePanelUI.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
+            creaturePanel.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
             return;
         }
         else {
             curActionState = AgentActionState.Default;
-            UIManager.instance.creaturePanelUI.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
+            creaturePanel.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
         }
 
         if (coreModule.mouthAttackEffector[0] >= mostActiveEffectorValue) {
-            curActionState = AgentActionState.Attacking;
-            UseAbility(attack);
-            RegisterAgentEvent(simManager.simAgeTimeSteps, "Attacked!", 1f, 6);
-            audioManager.PlayCritterAttack(ownPos);
-            UIManager.instance.creaturePanelUI.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
-            
+            UseAbility(AgentActionState.Attacking);
         }
-        if (coreModule.dashEffector[0] >= mostActiveEffectorValue) {
-            curActionState = AgentActionState.Dashing;
-            UseAbility(dash);
-            RegisterAgentEvent(simManager.simAgeTimeSteps, "Dashed!", 1f, 8);
-            audioManager.PlayCritterDash(ownPos);
-            UIManager.instance.creaturePanelUI.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
+        else if (coreModule.dashEffector[0] >= mostActiveEffectorValue) {
+            UseAbility(AgentActionState.Dashing);
         }
-        if (coreModule.defendEffector[0] >= mostActiveEffectorValue) {
-            curActionState = AgentActionState.Defending;
-            UseAbility(defend);
-            RegisterAgentEvent(simManager.simAgeTimeSteps, "Defended!", 1f, 7);
-            audioManager.PlayCritterDefend(ownPos);
-            
-            UIManager.instance.creaturePanelUI.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
+        else if (coreModule.defendEffector[0] >= mostActiveEffectorValue) {
+            UseAbility(AgentActionState.Defending);
         }    
+    }
+
+    private void UseAbility(AgentActionState actionState)
+    {
+        // NG: Attack occurs very rarely, dashing/defending not observed
+        Debug.Log($"Agent [{index}] {actionState}");
+        
+        curActionState = actionState;
+        var ability = GetAbilityFromActionState(actionState);
+        if (ability == null) return;
+        
+        UseAbility(ability);
+        audioManager.PlayCritterAction(ownPos, actionState);
+        creaturePanel.UpdateAgentActionStateData(candidateRef.candidateID, actionState);
+        RegisterAgentEvent(actionState);
+    }
+    
+    private IAgentAbility GetAbilityFromActionState(AgentActionState actionState)
+    {
+        switch (actionState)
+        {
+            case AgentActionState.Attacking: return attack;
+            case AgentActionState.Dashing: return dash;
+            case AgentActionState.Defending: return defend;
+            case AgentActionState.Feeding: return feed;
+            default: return null;
+        }
     }
     
     private void UseAbility(IAgentAbility ability)

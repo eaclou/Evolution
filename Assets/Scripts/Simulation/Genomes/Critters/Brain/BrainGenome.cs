@@ -90,6 +90,10 @@ public class BrainGenome
 
     public void SetToMutatedCopy(BrainGenome parentGenome, BodyGenome bodyGenome, MutationSettingsInstance settings) 
     {
+        initialConnectionChance = parentGenome.initialConnectionChance;
+        initialWeightMultiplier = parentGenome.initialWeightMultiplier;
+        initialHiddenNeuronCount = parentGenome.initialHiddenNeuronCount;
+    
         InitializeIONeurons(bodyGenome);
         MutateHiddenNeurons(parentGenome.neurons.hidden);
         
@@ -103,6 +107,7 @@ public class BrainGenome
         
         MutateAxons(axons.all, settings);
 
+        //Debug.Log($"Agent created with {newNeurons.Count} new neurons");
         foreach (var neuron in newNeurons)
             LinkNeuronToLayer(neuron);
             
@@ -173,6 +178,8 @@ public class BrainGenome
                     RequestConnection(neuron, outputNeuron, initialConnectionChance, initialWeightMultiplier);
                 break;
             case NeuronType.Out:
+                //Debug.Log($"Linking {neuron.name} to input layer.  " +        // OK
+                //          $"Connection chance = {initialConnectionChance}, weight = {initialWeightMultiplier}");
                 foreach (var inputNeuron in neurons.input)
                     RequestConnection(inputNeuron, neuron, initialConnectionChance, initialWeightMultiplier);
                 break;
