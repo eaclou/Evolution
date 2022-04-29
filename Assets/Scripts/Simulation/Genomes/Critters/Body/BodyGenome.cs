@@ -67,9 +67,15 @@ public class BodyGenome
     {
         var result = new List<Neuron>();
         
-        foreach (var tech in unlockedTech.values)
-            foreach (var template in tech.unlocks)
+        foreach (var tech in unlockedTech.values) {
+            foreach (var template in tech.unlocks) {
+                if (!template) {
+                    Debug.LogError($"null metaneuron entry in {tech.name} unlocks");
+                    continue;
+                }
                 result.Add(template.GetNeuron());
+            }
+        }
 
         result.Add(map.GetData("bias")); 
         result.Add(map.GetData("_mouthTriggerOutputs"));
