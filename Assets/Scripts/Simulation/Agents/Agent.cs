@@ -965,8 +965,6 @@ public class Agent : MonoBehaviour {
 
         float rotationInRadians = (bodyRigidbody.transform.localRotation.eulerAngles.z + 90f) * Mathf.Deg2Rad;
         facingDirection = new Vector2(Mathf.Cos(rotationInRadians), Mathf.Sin(rotationInRadians));
-                
-        //curActionState = currentState;
     }
     
     public void TickMetabolism() {
@@ -1082,7 +1080,6 @@ public class Agent : MonoBehaviour {
 
         audioManager.PlayCritterAction(ownPos, actionState);
         RegisterAgentEvent(actionState);
-        //creaturePanel.UpdateAgentActionStateData(candidateRef.candidateID, actionState);
     }
     
     private IAgentAbility GetAbilityFromActionState(AgentActionState actionState)
