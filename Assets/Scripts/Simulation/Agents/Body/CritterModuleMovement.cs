@@ -10,7 +10,6 @@ public class CritterModuleMovement : IBrainModule
 
     public float[] throttleX;
     public float[] throttleY;
-    public float[] dash;
 
     public float smallestCreatureBaseSpeed = 75f;
     public float largestCreatureBaseSpeed = 150f;
@@ -32,14 +31,15 @@ public class CritterModuleMovement : IBrainModule
         facingDirY = new float[1];
         throttleX = new float[1];
         throttleY = new float[1];
-        dash = new float[1];
         
         float invAspectRatio = agentGenome.bodyGenome.coreGenome.creatureAspectRatio;
         speedBonus = Mathf.Lerp(0.7f, 1.4f, 1f - invAspectRatio);
     }
 
     public void SetNeuralValue(Neuron neuron) {
-        neuron.currentValues = (float[])GetType().GetField(neuron.name).GetValue(this);
+        var field = GetType().GetField(neuron.name);
+        if (field == null) Debug.LogError($"Cannot find matching field for {neuron.name} in CritterModuleMovement");
+        else neuron.currentValues = (float[])field.GetValue(this);
     }
 
     public void Tick(Agent agent) 

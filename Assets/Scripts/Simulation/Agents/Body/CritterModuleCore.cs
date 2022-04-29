@@ -52,8 +52,7 @@ public class CritterModuleCore : IBrainModule
         }
     }
     public bool objectInRangeOfMouth { set => mouthTriggerOutputs[0] = value ? 1f : 0f; }
-
-
+    
     // Need to use arrays instead of floats here so that they are reference type
     // and changes that occur in neuron will also be reflected here 
     //public float[] temperature;
@@ -70,11 +69,11 @@ public class CritterModuleCore : IBrainModule
     public float[] energyStored;
     public float[] foodStored;
     
-    public float[] mouthFeedEffector;
-    public float[] mouthAttackEffector;
-    public float[] defendEffector;
-    public float[] dashEffector;
-    public float[] healEffector;
+    public float[] feed;
+    public float[] attack;
+    public float[] defend;
+    public float[] dash;
+    public float[] heal;
     
     public float damageBonus;
     public float speedBonus;
@@ -119,6 +118,7 @@ public class CritterModuleCore : IBrainModule
         contactForceX[0] = gradX;
         contactForceY[0] = gradY;
     }
+    
     private void EndContactEvent() {
         isContact[0] = 0f;
         contactForceX[0] = 0f;
@@ -126,6 +126,7 @@ public class CritterModuleCore : IBrainModule
         isContactEvent = false;
         contactFrameCounter = 0;
     }
+    
     // *** Remember to Re-Implement dietary specialization!!! ****
     // How much of what was eaten is actually digested this frame (absolute value)
     public void TickDigestion(float totalMassDigested)
@@ -178,11 +179,11 @@ public class CritterModuleCore : IBrainModule
         energyStored = new float[1];
         foodStored = new float[1];
                         
-        mouthFeedEffector = new float[1];
-        mouthAttackEffector = new float[1];
-        defendEffector = new float[1];
-        dashEffector = new float[1];
-        healEffector = new float[1];
+        feed = new float[1];
+        attack = new float[1];
+        defend = new float[1];
+        dash = new float[1];
+        heal = new float[1];
                                                                           
         energy = 1f;
         
@@ -213,20 +214,13 @@ public class CritterModuleCore : IBrainModule
     {
         //temperature[0] = 0f;
         //pressure[0] = 0f;
-        if(isContactEvent) {
+        if (isContactEvent) {
             if(contactFrameCounter >= contactSensorDuration) {
-                //end
                 EndContactEvent();
-            }
-            else {
-
             }
             contactFrameCounter++;            
         }
-        else {
 
-        }
-        
         hitPoints[0] = Mathf.Max(health, 0f);
         //stamina[0] = stamina; // set in Agent.cs
         energyStored[0] = Mathf.Clamp01(energy * 0.001f);  // Mathf.Clamp01(energyRaw / maxEnergyStorage); //***EAC will need to be changed once energy is adjusted

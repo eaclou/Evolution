@@ -162,11 +162,11 @@ public class AgentBehaviorOneHot : MonoBehaviour
     
     public void UpdateBars(Agent agent) 
     {
-        float bite = agent.coreModule.mouthFeedEffector[0];
-        float guard = agent.coreModule.defendEffector[0];
-        float rest = agent.coreModule.healEffector[0];
-        float dash = agent.coreModule.dashEffector[0];
-        float attack = agent.coreModule.mouthAttackEffector[0];
+        float bite = agent.feedEffector;
+        float guard = agent.defendEffector;
+        float rest = agent.healEffector;
+        float dash = agent.dashEffector;
+        float attack = agent.attackEffector;
         float highestPriority = Mathf.Max(rest, Mathf.Max(dash, Mathf.Max(guard, Mathf.Max(bite, attack))));
 
         Color activeColor = Color.white;

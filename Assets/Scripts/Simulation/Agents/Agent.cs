@@ -73,8 +73,11 @@ public class Agent : MonoBehaviour {
     public int defendFrameCounter => defend.frameCount;
     public int defendDuration { get => data.defendDuration; set => data.defendDuration = value; }
     public int defendCooldown { get => data.defendCooldown; set => data.defendCooldown = value; }
+    
     // * WPP: same functionality as isFreeToAct -> pick one to use and delete other
-    public bool isResting { get => data.isResting; set => data.isResting = value; } 
+    //public bool isResting { get => data.isResting; set => data.isResting = value; } 
+    public bool isResting => curActionState == AgentActionState.Resting && isFreeToAct;
+    
     public bool isCooldown => cooldown.inProcess;
     public int cooldownFrameCounter => cooldown.frameCount;
     public int cooldownDuration { get => data.cooldownDuration; set => data.cooldownDuration = value; }
@@ -86,9 +89,7 @@ public class Agent : MonoBehaviour {
     public CandidateAgentData candidateRef;
     
     public bool isYoung => curLifeStage == AgentLifeStage.Mature && !isSexuallyMature;
-
-    public AgentActionState curActionState; // { get => data.curActionState; set => data.curActionState = value; }
-
+    
     public int gestationDurationTimeSteps = 90;
     //public int _GestationDurationTimeSteps => gestationDurationTimeSteps;
     
@@ -1023,70 +1024,65 @@ public class Agent : MonoBehaviour {
         */
     }
     
-    /// Temporary debug variable to view state of isFreeToAct in inspector
-    public bool _isFreeToAct;
+    public AgentActionState curActionState;
 
-    private void SelectAction() {
-        curActionState = AgentActionState.Default;
-
-        float[] effectorValues = { 0.001f, coreModule.mouthFeedEffector[0], 
-            coreModule.mouthAttackEffector[0], coreModule.defendEffector[0],
-            coreModule.dashEffector[0], coreModule.healEffector[0] };
-            
-        float mostActiveEffectorValue = FloatMath.GetHighest(effectorValues);
-        _isFreeToAct = isFreeToAct;
-        
-        if (coreModule.healEffector[0] >= mostActiveEffectorValue) {
-            isResting = isFreeToAct;
-                
-            if (isResting) {
-                candidateRef.performanceData.totalTicksRested++;
-            }
-            //Debug.Log($"Agent {index} healing");   // OK
-            curActionState = AgentActionState.Resting;
-            creaturePanel.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
-        }
-
-        if (coreModule.mouthFeedEffector[0] >= mostActiveEffectorValue) {
-            curActionState = AgentActionState.Feeding;
-            UseAbility(feed);
-            //Debug.Log($"Agent {index} feeding");  // OK
-            creaturePanel.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
-        }
-        
-        if (!isFreeToAct) {
+    private void SelectAction() 
+    {
+        if (!isFreeToAct) 
+        {
             creaturePanel.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
             return;
         }
-        else {
-            curActionState = AgentActionState.Default;
-            creaturePanel.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
-        }
+        
+        curActionState = GetCurrentActionState();
+        UseAbility(curActionState);
+        creaturePanel.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
+    }
 
-        if (coreModule.mouthAttackEffector[0] >= mostActiveEffectorValue) {
-            UseAbility(AgentActionState.Attacking);
-        }
-        else if (coreModule.dashEffector[0] >= mostActiveEffectorValue) {
-            UseAbility(AgentActionState.Dashing);
-        }
-        else if (coreModule.defendEffector[0] >= mostActiveEffectorValue) {
-            UseAbility(AgentActionState.Defending);
-        }    
+    public float feedEffector => coreModule.feed[0];
+    public float dashEffector => coreModule.dash[0];
+    public float attackEffector => coreModule.attack[0];
+    public float defendEffector => coreModule.defend[0];
+    public float healEffector => coreModule.heal[0];
+    
+    private AgentActionState GetCurrentActionState()
+    {
+        float[] effectorValues = { 0.001f, feedEffector, attackEffector, defendEffector, dashEffector, healEffector };
+            
+        float mostActiveEffectorValue = FloatMath.GetHighest(effectorValues);
+
+        if (healEffector >= mostActiveEffectorValue) 
+            return AgentActionState.Resting;
+        if (feedEffector >= mostActiveEffectorValue)
+            return AgentActionState.Feeding;
+        if (attackEffector >= mostActiveEffectorValue) 
+            return AgentActionState.Attacking;
+        if (dashEffector >= mostActiveEffectorValue) 
+            return AgentActionState.Dashing;
+        if (defendEffector >= mostActiveEffectorValue) 
+            return AgentActionState.Defending;
+
+        return AgentActionState.Default;
     }
 
     private void UseAbility(AgentActionState actionState)
     {
-        // NG: Attack occurs very rarely, dashing/defending not observed
-        Debug.Log($"Agent [{index}] {actionState}");
-        
-        curActionState = actionState;
+        //Debug.Log($"Agent [{index}] {actionState}");
+        if (actionState == AgentActionState.Resting) {
+            candidateRef.performanceData.totalTicksRested++;
+            return;
+        }
+
         var ability = GetAbilityFromActionState(actionState);
-        if (ability == null) return;
+        if (ability != null) UseAbility(ability);
         
-        UseAbility(ability);
+        if (actionState == AgentActionState.Feeding) {
+            return;
+        }
+
         audioManager.PlayCritterAction(ownPos, actionState);
-        creaturePanel.UpdateAgentActionStateData(candidateRef.candidateID, actionState);
         RegisterAgentEvent(actionState);
+        //creaturePanel.UpdateAgentActionStateData(candidateRef.candidateID, actionState);
     }
     
     private IAgentAbility GetAbilityFromActionState(AgentActionState actionState)
@@ -1290,7 +1286,7 @@ public class Agent : MonoBehaviour {
         
         mouthRef.agentIndex = index;
         //mouthRef.agent = this;
-        isResting = false;
+        //isResting = false;
 
         //mouthRef.Disable();
         //mouseclickcollider MCC

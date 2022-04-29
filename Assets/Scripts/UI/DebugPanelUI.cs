@@ -149,11 +149,11 @@ public class DebugPanelUI : MonoBehaviour
 
             debugTxtAgent += "\nWater Depth: " + agent.waterDepth.ToString("F3") + ", Vel: " + (agent.avgFluidVel * 10f).ToString("F3") + "\n";
             debugTxtAgent += "Throttle: [ " + movementModule.throttle.ToString("F3") + " ]\n";
-            debugTxtAgent += "FeedEffector: " + coreModule.mouthFeedEffector[0].ToString("F2") + "\n";
-            debugTxtAgent += "AttackEffector: " + coreModule.mouthAttackEffector[0].ToString("F2") + "\n";
-            debugTxtAgent += "DefendEffector: " + coreModule.defendEffector[0].ToString("F2") + "\n";
-            debugTxtAgent += "DashEffector: " + coreModule.dashEffector[0].ToString("F2") + "\n";
-            debugTxtAgent += "HealEffector: " + coreModule.healEffector[0].ToString("F2") + "\n";
+            debugTxtAgent += "FeedEffector: " + agent.feedEffector.ToString("F2") + "\n";
+            debugTxtAgent += "AttackEffector: " + agent.attackEffector.ToString("F2") + "\n";
+            debugTxtAgent += "DefendEffector: " + agent.defendEffector.ToString("F2") + "\n";
+            debugTxtAgent += "DashEffector: " + agent.dashEffector.ToString("F2") + "\n";
+            debugTxtAgent += "HealEffector: " + agent.healEffector.ToString("F2") + "\n";
             
             //+++++++++++++++++++++++++++++++++++++ CRITTER: ++++++++++++++++++++++++++++++++++++++++++++
             string debugTxtGlobalSim = "";

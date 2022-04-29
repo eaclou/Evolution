@@ -110,7 +110,7 @@ public class CreaturePanelUI : MonoBehaviour
 
         if (!agent) return;
         imageCurAction.gameObject.SetActive(true);
-        if(agent.curLifeStage == AgentLifeStage.Dead || agent.candidateRef.candidateID != selection.currentSelection.candidate.candidateID) {
+        if (agent.curLifeStage == AgentLifeStage.Dead || agent.candidateRef.candidateID != selection.currentSelection.candidate.candidateID) {
             imageCurAction.gameObject.SetActive(false);
         }
 
@@ -149,13 +149,10 @@ public class CreaturePanelUI : MonoBehaviour
             imagePregnancy.color = Color.gray;
         }
 
-        if(agent.curLifeStage != AgentLifeStage.Mature) {
+        if (agent.curLifeStage != AgentLifeStage.Mature) {
             imagePregnancy.gameObject.transform.localScale = Vector3.zero;
             imagePregnancy.color = Color.black;
             pregnantTooltip.tooltipString = "";
-        }
-        else {
-            
         }
     }
     

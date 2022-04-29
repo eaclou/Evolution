@@ -30,7 +30,6 @@ public class AgentData
     public int dashCooldown;
     public int defendDuration;
     public int defendCooldown;
-    public bool isResting;
     public int cooldownDuration; 
     public bool isMarkedForDeathByUser;
     public AgentActionState curActionState;
@@ -61,7 +60,7 @@ public class AgentData
         dashCooldown = original.dashCooldown;
         defendDuration = original.defendDuration;
         defendCooldown = original.defendCooldown;
-        isResting = original.isResting;
+        //isResting = original.isResting;
         cooldownDuration = original.cooldownDuration;
         isMarkedForDeathByUser = original.isMarkedForDeathByUser;
         curActionState = original.curActionState;
