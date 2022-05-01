@@ -1043,11 +1043,20 @@ public class Agent : MonoBehaviour {
     public float defendEffector => coreModule.defend[0];
     public float healEffector => coreModule.heal[0];
     
+    public float GetMostActiveEffectorValue(float minimum) {
+        return Mathf.Max(GetMostActiveEffectorValue(), minimum);
+    }
+    
+    public float GetMostActiveEffectorValue() {
+        float[] effectorValues = { feedEffector, attackEffector, defendEffector, dashEffector, healEffector };
+        return FloatMath.GetHighest(effectorValues);
+    }
+    
     private AgentActionState GetCurrentActionState()
     {
-        float[] effectorValues = { 0.001f, feedEffector, attackEffector, defendEffector, dashEffector, healEffector };
-            
-        float mostActiveEffectorValue = FloatMath.GetHighest(effectorValues);
+        //float[] effectorValues = { 0.001f, feedEffector, attackEffector, defendEffector, dashEffector, healEffector };
+        //float mostActiveEffectorValue = FloatMath.GetHighest(effectorValues);
+        var mostActiveEffectorValue = GetMostActiveEffectorValue(0.001f);
 
         if (healEffector >= mostActiveEffectorValue) 
             return AgentActionState.Resting;

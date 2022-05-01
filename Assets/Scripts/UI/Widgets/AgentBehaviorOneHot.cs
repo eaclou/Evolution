@@ -12,13 +12,15 @@ public class AgentBehaviorOneHot : MonoBehaviour
     SelectionData currentSelection => selectionManager.currentSelection;
     Agent agent => currentSelection.agent;
     CandidateAgentData fossil => currentSelection.candidate;
-
-    public BehaviorBar behaviorBarRest;
+    
+    // WPP: condensed into array for iteration
+    public BehaviorBar[] behaviorBars;
+    /*public BehaviorBar behaviorBarRest;
     public BehaviorBar behaviorBarDash;
     public BehaviorBar behaviorBarGuard;
     public BehaviorBar behaviorBarBite;
     public BehaviorBar behaviorBarAttack;
-    public BehaviorBar behaviorBarOther;
+    public BehaviorBar behaviorBarOther;*/
 
     public BehaviorBar outComm0;
     public BehaviorBar outComm1;
@@ -33,7 +35,6 @@ public class AgentBehaviorOneHot : MonoBehaviour
     public GameObject food1;
     public GameObject food2;
     
-
     // WPP: Removed GetComponent calls, use nested struct pattern to store references
     public void UpdateExtras(CandidateAgentData candidate) 
     {
@@ -117,56 +118,24 @@ public class AgentBehaviorOneHot : MonoBehaviour
         sigmaFood2 -= 90f;
         food2.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood2);
     }
-    
-    // WPP: extract method
-    public void UpdateBarsForFossil() 
-    {
-        UpdateBar(behaviorBarRest);
-        UpdateBar(behaviorBarDash);
-        UpdateBar(behaviorBarGuard);
-        UpdateBar(behaviorBarBite);
-        UpdateBar(behaviorBarAttack);
-        /*behaviorBarRest.transform.localScale = Vector3.one;
-        UpdateBarColor(behaviorBarRest.image, 0f, false);
-        behaviorBarRest.tooltip.tooltipString = "Rest";
 
-        behaviorBarDash.transform.localScale = Vector3.one;
-        UpdateBarColor(behaviorBarDash.image, 0f, false);
-        behaviorBarDash.tooltip.tooltipString = "Dash";
-
-        behaviorBarGuard.transform.localScale = Vector3.one; 
-        UpdateBarColor(behaviorBarGuard.image, 0f, false);
-        behaviorBarGuard.tooltip.tooltipString = "Guard";
-
-        behaviorBarBite.transform.localScale = Vector3.one; 
-        UpdateBarColor(behaviorBarBite.image, 0f, false);
-        behaviorBarBite.tooltip.tooltipString = "Bite";
-
-        behaviorBarAttack.transform.localScale = Vector3.one;
-        UpdateBarColor(behaviorBarAttack.image, 0f, false);
-        behaviorBarAttack.tooltip.tooltipString = "Attack";*/
-
-        throttleGO.gameObject.SetActive(false);
-    }
-    
-    float bite => agent.feedEffector;
-    float guard => agent.defendEffector;
-    float rest => agent.healEffector;
-    float dash => agent.dashEffector;
-    float attack => agent.attackEffector; 
-    
-    float highestPriority;
-
-    // WPP: extract method
+    // WPP: extracted method, iterate through array
     public void UpdateBarsForLiveAgent() 
     {
-        highestPriority = Mathf.Max(rest, Mathf.Max(dash, Mathf.Max(guard, Mathf.Max(bite, attack))));
+        // WPP: use static function with wrapper in Agent for common operation
+        float highestPriority = agent.GetMostActiveEffectorValue();
+        //highestPriority = Mathf.Max(rest, Mathf.Max(dash, Mathf.Max(guard, Mathf.Max(bite, attack))));
+
+        foreach (var bar in behaviorBars)
+            UpdateBar(bar, GetEffectorValueForBehavior(bar.type), highestPriority);
         
-        UpdateBar(behaviorBarRest, rest);
+        // WPP: 1st pass refactor: extract method
+        /*UpdateBar(behaviorBarRest, rest);
         UpdateBar(behaviorBarDash, dash);
         UpdateBar(behaviorBarGuard, guard);
         UpdateBar(behaviorBarBite, bite);
-        UpdateBar(behaviorBarAttack, attack);
+        UpdateBar(behaviorBarAttack, attack);*/
+        
         /*bool isActive = rest >= highestPriority && !agent.isCooldown;
         //textRest.color = isActive ? activeColor : inactiveColor;
         behaviorBarRest.transform.localScale = new Vector3(rest * 0.1f + 0.9f, rest * 0.1f + 0.9f,  1f);
@@ -208,17 +177,60 @@ public class AgentBehaviorOneHot : MonoBehaviour
         }
     }
     
+    // * Consider moving to Agent if this functionality is useful elsewhere
+    float GetEffectorValueForBehavior(BehaviorType behavior)
+    {
+        switch (behavior)
+        {
+            case BehaviorType.Attack: return agent.attackEffector;
+            case BehaviorType.Bite: return agent.feedEffector;
+            case BehaviorType.Dash: return agent.dashEffector;
+            case BehaviorType.Guard: return agent.defendCooldown;
+            case BehaviorType.Rest: return agent.healEffector;
+            default: return 0f;
+        }
+    }
+    
     //[SerializeField] Color activeColor = Color.white;
     //[SerializeField] Color inactiveColor = Color.clear;
     
     /// For live agent
-    void UpdateBar(BehaviorBar bar, float effectorValue)
+    void UpdateBar(BehaviorBar bar, float effectorValue, float highestPriority)
     {
         bool isActive = effectorValue >= highestPriority && !agent.isCooldown;
         //textRest.color = isActive ? activeColor : inactiveColor;
         bar.transform.localScale = new Vector3(1f, effectorValue * 0.1f + 0.9f,  1f);
-        UpdateBarColor(behaviorBarRest.image, effectorValue, isActive);
+        UpdateBarColor(bar.image, effectorValue, isActive);
         bar.SetTooltip(effectorValue);
+    }
+    
+    // WPP: extract method, iterate through array
+    public void UpdateBarsForFossil() 
+    {
+        foreach (var bar in behaviorBars)
+            UpdateBar(bar);
+        
+        /*behaviorBarRest.transform.localScale = Vector3.one;
+        UpdateBarColor(behaviorBarRest.image, 0f, false);
+        behaviorBarRest.tooltip.tooltipString = "Rest";
+
+        behaviorBarDash.transform.localScale = Vector3.one;
+        UpdateBarColor(behaviorBarDash.image, 0f, false);
+        behaviorBarDash.tooltip.tooltipString = "Dash";
+
+        behaviorBarGuard.transform.localScale = Vector3.one; 
+        UpdateBarColor(behaviorBarGuard.image, 0f, false);
+        behaviorBarGuard.tooltip.tooltipString = "Guard";
+
+        behaviorBarBite.transform.localScale = Vector3.one; 
+        UpdateBarColor(behaviorBarBite.image, 0f, false);
+        behaviorBarBite.tooltip.tooltipString = "Bite";
+
+        behaviorBarAttack.transform.localScale = Vector3.one;
+        UpdateBarColor(behaviorBarAttack.image, 0f, false);
+        behaviorBarAttack.tooltip.tooltipString = "Attack";*/
+
+        throttleGO.gameObject.SetActive(false);
     }
     
     /// For fossil
@@ -297,6 +309,7 @@ public class AgentBehaviorOneHot : MonoBehaviour
     [Serializable]
     public class BehaviorBar
     {
+        public BehaviorType type;
         public Image image;
         public TooltipUI tooltip;
         public string tooltipLabel;
@@ -312,5 +325,15 @@ public class AgentBehaviorOneHot : MonoBehaviour
         public void SetTooltip() {
             tooltip.tooltipString = tooltipLabel;
         }
+    }
+    
+    public enum BehaviorType 
+    {
+        Rest,
+        Dash,
+        Guard,
+        Bite,
+        Attack,
+        Other,
     }
 }
