@@ -16,24 +16,21 @@ public class CreatureBrainActivityUI : MonoBehaviour
     private int callTickCounter = 90;
 
     private int critterIndex;
-    private Agent agent;
+    private Agent agent => selectionManager.currentSelection.agent;
 
     public void Tick() {
-        //critterIndex = cameraManager.targetAgentIndex;
-        agent = SelectionManager.instance.currentSelection.agent;// simulationManager.agents[critterIndex];
-        
-        if (agent == null || agent.coreModule == null || agent.communicationModule == null)
+        if (!agent || agent.coreModule == null || agent.communicationModule == null)
             return;
 
         if(agent.candidateRef.candidateID == selectionManager.currentSelection.candidate.candidateID) {
-            UpdateBrainLive(agent);
+            UpdateBrainLive();
         }
         else {
             UpdateBrainFossil(selectionManager.currentSelection.candidate);
         }
     }
     
-    private void UpdateBrainLive(Agent agent) {
+    private void UpdateBrainLive() {
         int curActivityID = agent.GetActivityID();
 
         newInspectAgentCurActivityMat.SetInt("_CurActivityID", curActivityID);
@@ -43,7 +40,7 @@ public class CreatureBrainActivityUI : MonoBehaviour
         newInspectAgentThrottleMat.SetFloat("_AgentCoordX", agent.ownPos.x / SimulationManager._MapSize);
         newInspectAgentThrottleMat.SetFloat("_AgentCoordY", agent.ownPos.y / SimulationManager._MapSize);
         
-        agentBehaviorOneHot.UpdateBars(agent);
+        agentBehaviorOneHot.UpdateBarsForLiveAgent();
 
         // * WPP: what concept does this condition represent? -> convert to getter in Agent
         callTickCounter = agent.communicationModule.outComm3[0] > 0.25f ? 
@@ -61,7 +58,7 @@ public class CreatureBrainActivityUI : MonoBehaviour
         newInspectAgentThrottleMat.SetFloat("_AgentCoordX", 0f);
         newInspectAgentThrottleMat.SetFloat("_AgentCoordY", 0f);
         
-        agentBehaviorOneHot.UpdateBars(candidate);
+        agentBehaviorOneHot.UpdateBarsForFossil();
 
         // * WPP: what concept does this condition represent? -> convert to getter in Agent
         callTickCounter = agent.communicationModule.outComm3[0] > 0.25f ? 

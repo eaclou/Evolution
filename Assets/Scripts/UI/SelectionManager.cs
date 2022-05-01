@@ -122,6 +122,7 @@ public class SelectionManager : Singleton<SelectionManager>
         }
         return values;
     }
+}
 
     public class SelectionData {
         public int historySelectedSpeciesID;
@@ -129,7 +130,6 @@ public class SelectionManager : Singleton<SelectionManager>
         public Agent agent;
         public bool isGenomeOnly;
     }
-}
 
 //public CandidateAgentData focusedCandidate; 
 /*public void SetFocusedCandidateGenome(SpeciesGenomePool selectedPool, SelectionGroup group, int index) {

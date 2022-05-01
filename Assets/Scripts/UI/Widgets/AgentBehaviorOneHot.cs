@@ -8,6 +8,11 @@ using UnityEngine.UI;
 /// Updates UI for selected agent stats
 public class AgentBehaviorOneHot : MonoBehaviour 
 {
+    SelectionManager selectionManager => SelectionManager.instance;
+    SelectionData currentSelection => selectionManager.currentSelection;
+    Agent agent => currentSelection.agent;
+    CandidateAgentData fossil => currentSelection.candidate;
+
     public BehaviorBar behaviorBarRest;
     public BehaviorBar behaviorBarDash;
     public BehaviorBar behaviorBarGuard;
@@ -21,11 +26,7 @@ public class AgentBehaviorOneHot : MonoBehaviour
     public BehaviorBar outComm3;
 
     public GameObject throttleGO;
-    //public GameObject mouthTriggerGO;
-    //public GameObject isContactGO;
     public GameObject contactForceGO;
-
-    //public GameObject waterDepthGO;
     public GameObject waterVelGO;
 
     public GameObject food0;
@@ -34,13 +35,8 @@ public class AgentBehaviorOneHot : MonoBehaviour
     
 
     // WPP: Removed GetComponent calls, use nested struct pattern to store references
-    public void UpdateExtras(CandidateAgentData candidate) {
-        //textRest.gameObject.SetActive(false);
-        //textDash.gameObject.SetActive(false);
-        //textGuard.gameObject.SetActive(false);
-        //textBite.gameObject.SetActive(false);
-        //textAttack.gameObject.SetActive(false);
-        //textOther.gameObject.SetActive(false);
+    public void UpdateExtras(CandidateAgentData candidate) 
+    {
         outComm0.image.color = Color.Lerp(Color.black, Color.white, 0f);
         outComm0.tooltip.tooltipString = "OutComm0";
         outComm1.image.color = Color.Lerp(Color.black, Color.white, 0f);
@@ -72,13 +68,6 @@ public class AgentBehaviorOneHot : MonoBehaviour
     
     public void UpdateExtras(Agent agentRef) 
     {
-        /*
-        waterDepthGO.GetComponent<Text>().text = "Water Depth: " + agentRef.waterDepth.ToString() + 
-                                                 "\ncontact:(" + agentRef.coreModule.contactForceX[0].ToString() + ", " + agentRef.coreModule.contactForceY[0].ToString() + ")" +
-                                                 "\nmeat eaten: " + (agentRef.candidateRef.performanceData.totalFoodEatenZoop * 1000f).ToString("F0") + 
-                                                 "\nplants eaten: " + (agentRef.candidateRef.performanceData.totalFoodEatenPlant * 1000f).ToString("F0");
-       */
-        
         outComm0.image.color = Color.Lerp(Color.black, Color.white, agentRef.communicationModule.outComm0[0]);
         outComm0.tooltip.tooltipString = "OutComm0: " + agentRef.communicationModule.outComm0[0].ToString("F2");
         outComm1.image.color = Color.Lerp(Color.black, Color.white, agentRef.communicationModule.outComm1[0]);
@@ -129,12 +118,15 @@ public class AgentBehaviorOneHot : MonoBehaviour
         food2.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood2);
     }
     
-    public void UpdateBars(CandidateAgentData candidate) 
+    // WPP: extract method
+    public void UpdateBarsForFossil() 
     {
-        Color activeColor = Color.white;
-        Color inactiveColor = Color.clear;
-
-        behaviorBarRest.transform.localScale = Vector3.one;
+        UpdateBar(behaviorBarRest);
+        UpdateBar(behaviorBarDash);
+        UpdateBar(behaviorBarGuard);
+        UpdateBar(behaviorBarBite);
+        UpdateBar(behaviorBarAttack);
+        /*behaviorBarRest.transform.localScale = Vector3.one;
         UpdateBarColor(behaviorBarRest.image, 0f, false);
         behaviorBarRest.tooltip.tooltipString = "Rest";
 
@@ -152,62 +144,59 @@ public class AgentBehaviorOneHot : MonoBehaviour
 
         behaviorBarAttack.transform.localScale = Vector3.one;
         UpdateBarColor(behaviorBarAttack.image, 0f, false);
-        behaviorBarAttack.tooltip.tooltipString = "Attack";
+        behaviorBarAttack.tooltip.tooltipString = "Attack";*/
 
-        //UpdateBarColor(behaviorBarOther.GetComponent<Image>(), 0f, false);
-
-        //textOther.gameObject.SetActive(false);
         throttleGO.gameObject.SetActive(false);
     }
     
-    public void UpdateBars(Agent agent) 
+    float bite => agent.feedEffector;
+    float guard => agent.defendEffector;
+    float rest => agent.healEffector;
+    float dash => agent.dashEffector;
+    float attack => agent.attackEffector; 
+    
+    float highestPriority;
+
+    // WPP: extract method
+    public void UpdateBarsForLiveAgent() 
     {
-        float bite = agent.feedEffector;
-        float guard = agent.defendEffector;
-        float rest = agent.healEffector;
-        float dash = agent.dashEffector;
-        float attack = agent.attackEffector;
-        float highestPriority = Mathf.Max(rest, Mathf.Max(dash, Mathf.Max(guard, Mathf.Max(bite, attack))));
-
-        Color activeColor = Color.white;
-        Color inactiveColor = Color.clear;
-
-        bool isActive = rest >= highestPriority && !agent.isCooldown;
+        highestPriority = Mathf.Max(rest, Mathf.Max(dash, Mathf.Max(guard, Mathf.Max(bite, attack))));
+        
+        UpdateBar(behaviorBarRest, rest);
+        UpdateBar(behaviorBarDash, dash);
+        UpdateBar(behaviorBarGuard, guard);
+        UpdateBar(behaviorBarBite, bite);
+        UpdateBar(behaviorBarAttack, attack);
+        /*bool isActive = rest >= highestPriority && !agent.isCooldown;
         //textRest.color = isActive ? activeColor : inactiveColor;
-
         behaviorBarRest.transform.localScale = new Vector3(rest * 0.1f + 0.9f, rest * 0.1f + 0.9f,  1f);
         UpdateBarColor(behaviorBarRest.image, rest, isActive);
         behaviorBarRest.tooltip.tooltipString = "Rest: " + rest.ToString("F2");
         
         isActive = dash >= highestPriority && !agent.isCooldown;
         //textDash.color = isActive ? activeColor : inactiveColor;
-
         behaviorBarDash.transform.localScale = Vector3.one * (dash * 0.1f + 0.9f); // new Vector3(dash * 0.5f + 0.5f, dash * 0.5f + 0.5f, 1f);
         UpdateBarColor(behaviorBarDash.image, dash, isActive);
         behaviorBarDash.tooltip.tooltipString = "Dash: " + dash.ToString("F2");
 
         isActive = guard >= highestPriority && !agent.isCooldown;
         //textGuard.color = isActive ? activeColor : inactiveColor;
-
         behaviorBarGuard.transform.localScale = Vector3.one * (guard * 0.1f + 0.9f); // new Vector3(guard * 0.5f + 0.5f, guard * 0.5f + 0.5f,  1f);
         UpdateBarColor(behaviorBarGuard.image, guard, isActive);
         behaviorBarGuard.tooltip.tooltipString = "Guard: " + guard.ToString("F2");
 
         isActive = bite >= highestPriority && !agent.isCooldown;
         //textBite.color = isActive ? activeColor : inactiveColor;
-
         behaviorBarBite.transform.localScale = Vector3.one * (bite * 0.1f + 0.9f); // new Vector3(bite * 0.5f + 0.5f, bite * 0.5f + 0.5f, 1f);
         UpdateBarColor(behaviorBarBite.image, bite, isActive);
         behaviorBarBite.tooltip.tooltipString = "Bite: " + bite.ToString("F2");
 
         isActive = attack >= highestPriority && !agent.isCooldown;
         //textAttack.color = isActive ? activeColor : inactiveColor;
-
         behaviorBarAttack.transform.localScale = Vector3.one * (attack * 0.1f + 0.9f); // new Vector3(attack * 0.5f + 0.5f, attack * 0.5f + 0.5f, 1f);
         UpdateBarColor(behaviorBarAttack.image, attack, isActive);
-        behaviorBarAttack.tooltip.tooltipString = "Attack: " + attack.ToString("F2");
+        behaviorBarAttack.tooltip.tooltipString = "Attack: " + attack.ToString("F2");*/
 
-        //isActive = false;
         if (agent.isCooldown) {
             //textOther.color = Color.yellow;
             //textOther.gameObject.SetActive(true);
@@ -217,14 +206,37 @@ public class AgentBehaviorOneHot : MonoBehaviour
             //textOther.gameObject.SetActive(false);
             throttleGO.gameObject.SetActive(true);
         }
-        //behaviorBarOther.transform.localScale = Vector3.one * (other * 0.5f + 0.5f);
-        //UpdateBarColor(behaviorBarOther.GetComponent<Image>(), agent.coreModule.healEffector[0], isActive);
     }
-
-    // * WPP: iterate through a lookup data class with exposed threshold values bound to colors
-    private void UpdateBarColor(Image image, float val, bool active) 
+    
+    //[SerializeField] Color activeColor = Color.white;
+    //[SerializeField] Color inactiveColor = Color.clear;
+    
+    /// For live agent
+    void UpdateBar(BehaviorBar bar, float effectorValue)
     {
-        Color col = Color.red;
+        bool isActive = effectorValue >= highestPriority && !agent.isCooldown;
+        //textRest.color = isActive ? activeColor : inactiveColor;
+        bar.transform.localScale = new Vector3(1f, effectorValue * 0.1f + 0.9f,  1f);
+        UpdateBarColor(behaviorBarRest.image, effectorValue, isActive);
+        bar.SetTooltip(effectorValue);
+    }
+    
+    /// For fossil
+    void UpdateBar(BehaviorBar bar)
+    {
+        bar.transform.localScale = Vector3.one;
+        UpdateBarColor(bar.image, 0f, false);
+        bar.SetTooltip();
+    }
+    
+    #region Set image bar color by float value
+    
+    [SerializeField] BarColor[] barColors;
+
+    // WPP: iterate through a lookup data class with exposed threshold values bound to colors
+    private void UpdateBarColor(Image image, float effectorValue, bool active) 
+    {
+        /*Color col = Color.red;
 
         if (val < -0.25f) {
             col = Color.red;
@@ -240,15 +252,65 @@ public class AgentBehaviorOneHot : MonoBehaviour
             col *= 0.5f;
         }
         col.a = 1f;
-        image.color = col;
+        image.color = col;*/
+        
+        var color = GetBarColor(effectorValue);
+        if (!active) color *= 0.5f;
+        image.color = color;
     }
-}
-
-[Serializable]
-public class BehaviorBar
-{
-    public Image image;
-    public TooltipUI tooltip;
     
-    public Transform transform => image.transform;
+    public Color GetBarColor(float effectorValue)
+    {
+        // Editor error handling
+        if (barColors.Length <= 0)
+        {
+            Debug.LogError("Bar color array is empty");
+            return Color.gray;
+        }
+    
+        // If below lowest range, return the first value
+        if (barColors[0].IsBelowMinimum(effectorValue))
+            return barColors[0].color;
+    
+        // Default case: search through ranges to find matching color
+        foreach (var barColor in barColors)
+            if (barColor.InRange(effectorValue))
+                return barColor.color;
+                
+        // If above highest range, return the last value
+        return barColors[barColors.Length - 1].color;
+    }
+    
+    [Serializable]
+    public class BarColor
+    {
+        public Color color;
+        public Vector2 range;
+        
+        public bool InRange(float value) { return value > range.x && value <= range.y; }
+        public bool IsBelowMinimum(float value) { return value < range.x; }
+        public bool IsAboveMaximum(float value) { return value > range.y; }
+    }
+    
+    #endregion
+    
+    [Serializable]
+    public class BehaviorBar
+    {
+        public Image image;
+        public TooltipUI tooltip;
+        public string tooltipLabel;
+        
+        public Transform transform => image.transform; 
+        
+        /// For live agents
+        public void SetTooltip(float effectorValue) {
+            tooltip.tooltipString = $"{tooltipLabel}: {effectorValue.ToString("F2")}";
+        }
+        
+        /// For dead agents
+        public void SetTooltip() {
+            tooltip.tooltipString = tooltipLabel;
+        }
+    }
 }
