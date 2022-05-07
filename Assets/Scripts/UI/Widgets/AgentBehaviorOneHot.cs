@@ -2,9 +2,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-// REFACTOR: excessive conditional nesting, expose hardcoded values, 
-// inconsistent formatting, shorten reference chains, remove commented-out code
-
 /// Updates UI for selected agent stats
 public class AgentBehaviorOneHot : MonoBehaviour 
 {
@@ -13,7 +10,7 @@ public class AgentBehaviorOneHot : MonoBehaviour
     Agent agent => currentSelection.agent;
     CandidateAgentData fossil => currentSelection.candidate;
     
-    // WPP: condensed into array for iteration
+    // WPP: condensed into arrays for iteration
     public BehaviorBar[] behaviorBars;
     /*public BehaviorBar behaviorBarRest;
     public BehaviorBar behaviorBarDash;
@@ -22,91 +19,121 @@ public class AgentBehaviorOneHot : MonoBehaviour
     public BehaviorBar behaviorBarAttack;
     public BehaviorBar behaviorBarOther;*/
 
-    public BehaviorBar outComm0;
+    public BehaviorBar[] communicationBars;
+    /*public BehaviorBar outComm0;
     public BehaviorBar outComm1;
     public BehaviorBar outComm2;
-    public BehaviorBar outComm3;
+    public BehaviorBar outComm3;*/
 
     public GameObject throttleGO;
     public GameObject contactForceGO;
     public GameObject waterVelGO;
 
-    public GameObject food0;
-    public GameObject food1;
-    public GameObject food2;
+    public GameObject plantFood;
+    public GameObject animalFood;
+    public GameObject eggFood;
     
-    // WPP: Removed GetComponent calls, use nested struct pattern to store references
-    public void UpdateExtras(CandidateAgentData candidate) 
+    [Range(0, 1)] [SerializeField] float outCommLightnessOnDeath = 0f;
+    
+    // WPP: Renamed, removed unused argument & redundant logic,
+    // Removed GetComponent calls, use nested struct pattern to store references
+    public void UpdateExtrasOnDeath() 
     {
-        outComm0.image.color = Color.Lerp(Color.black, Color.white, 0f);
+        // WPP: exposed magic numbers
+        /*outComm0.image.color = Color.Lerp(Color.black, Color.white, outCommLightnessOnDeath);
         outComm0.tooltip.tooltipString = "OutComm0";
-        outComm1.image.color = Color.Lerp(Color.black, Color.white, 0f);
+        outComm1.image.color = Color.Lerp(Color.black, Color.white, outCommLightnessOnDeath);
         outComm1.tooltip.tooltipString = "OutComm1";
-        outComm2.image.color = Color.Lerp(Color.black, Color.white, 0f);
+        outComm2.image.color = Color.Lerp(Color.black, Color.white, outCommLightnessOnDeath);
         outComm2.tooltip.tooltipString = "OutComm2";
-        outComm3.image.color = Color.Lerp(Color.black, Color.white, 0f);
-        outComm3.tooltip.tooltipString = "OutComm3";
+        outComm3.image.color = Color.Lerp(Color.black, Color.white, outCommLightnessOnDeath);
+        outComm3.tooltip.tooltipString = "OutComm3";*/
+        foreach (var bar in communicationBars)
+        {
+            bar.SetImageGrayscale(outCommLightnessOnDeath);
+            bar.SetTooltip();
+        }
         
-        float sigma = 0f;
-        throttleGO.transform.rotation = Quaternion.Euler(0f, 0f, sigma);
+        contactForceGO.SetActive(false);
+
+        //float sigma = 0f;
+        //throttleGO.transform.rotation = Quaternion.Euler(0f, 0f, sigma);
+        throttleGO.transform.rotation = Quaternion.identity;;
         throttleGO.transform.localScale = Vector3.zero;
 
-        float sigmaWater = 0f;
-        waterVelGO.transform.rotation = Quaternion.Euler(0f, 0f, sigmaWater);
+        //float sigmaWater = 0f;
+        //waterVelGO.transform.rotation = Quaternion.Euler(0f, 0f, sigmaWater);
+        waterVelGO.transform.rotation = Quaternion.identity;
         waterVelGO.transform.localScale = Vector3.zero;
-
-        contactForceGO.SetActive(false);
         
-        float sigmaFood0 = 0f;
-        food0.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood0);
+        // WPP: removed unnecessary logic
+        plantFood.transform.rotation = Quaternion.identity;
+        animalFood.transform.rotation = Quaternion.identity;
+        eggFood.transform.rotation = Quaternion.identity;
+        /*float sigmaFood0 = 0f;
+        plantFood.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood0);
 
         float sigmaFood1 = 0f;
-        food1.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood1);
+        animalFood.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood1);
 
         float sigmaFood2 = 0f;
-        food2.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood2);
+        eggFood.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood2);*/
     }
     
     public void UpdateExtras(Agent agentRef) 
     {
-        outComm0.image.color = Color.Lerp(Color.black, Color.white, agentRef.communicationModule.outComm0[0]);
+        // WPP: condensed with iteration
+        for (int i = 0; i < communicationBars.Length; i++)
+        {
+            var commValue = agentRef.communicationModule.GetOutChannelValue(i);
+            communicationBars[i].SetImageGrayscale(commValue);
+            communicationBars[i].SetTooltip(commValue);
+        }
+        /*outComm0.image.color = Color.Lerp(Color.black, Color.white, agentRef.communicationModule.outComm0[0]);
         outComm0.tooltip.tooltipString = "OutComm0: " + agentRef.communicationModule.outComm0[0].ToString("F2");
         outComm1.image.color = Color.Lerp(Color.black, Color.white, agentRef.communicationModule.outComm1[0]);
         outComm1.tooltip.tooltipString = "OutComm1: " + agentRef.communicationModule.outComm1[0].ToString("F2");
         outComm2.image.color = Color.Lerp(Color.black, Color.white, agentRef.communicationModule.outComm2[0]);
         outComm2.tooltip.tooltipString = "OutComm2: " + agentRef.communicationModule.outComm2[0].ToString("F2");
         outComm3.image.color = Color.Lerp(Color.black, Color.white, agentRef.communicationModule.outComm3[0]);
-        outComm3.tooltip.tooltipString = "OutComm3: " + agentRef.communicationModule.outComm3[0].ToString("F2");
+        outComm3.tooltip.tooltipString = "OutComm3: " + agentRef.communicationModule.outComm3[0].ToString("F2");*/
 
-        if (!agentRef.candidateRef.candidateGenome.bodyGenome.data.hasComms) {
-            outComm0.tooltip.tooltipString = "OutComms (disabled)";
-            outComm1.tooltip.tooltipString = "OutComms (disabled)";
-            outComm2.tooltip.tooltipString = "OutComms (disabled)";
-            outComm3.tooltip.tooltipString = "OutComms (disabled)";
-        }
+        if (!agentRef.candidateRef.candidateGenome.bodyGenome.data.hasComms) //{
+            foreach (var bar in communicationBars)
+                bar.SetTooltip("OutComms (disable)");
+            //outComm0.tooltip.tooltipString = "OutComms (disabled)";
+            //outComm1.tooltip.tooltipString = "OutComms (disabled)";
+            //outComm2.tooltip.tooltipString = "OutComms (disabled)";
+            //outComm3.tooltip.tooltipString = "OutComms (disabled)";
+        //}
         
-        float sigma = Mathf.Atan2(agentRef.movementModule.throttleY[0], agentRef.movementModule.throttleX[0]) * Mathf.Rad2Deg;// Vector3.Angle(new Vector3(0.0f, 1.0f, 0.0f), new Vector3(agentRef.movementModule.throttleX[0], agentRef.movementModule.throttleY[0], 0.0f)); // agentRef.movementModule.throttleX[0];
-        sigma -= 90f;
-        throttleGO.transform.rotation = Quaternion.Euler(0f, 0f, sigma);
+        //float sigma = Mathf.Atan2(agentRef.movementModule.throttleY[0], agentRef.movementModule.throttleX[0]) * Mathf.Rad2Deg;// Vector3.Angle(new Vector3(0.0f, 1.0f, 0.0f), new Vector3(agentRef.movementModule.throttleX[0], agentRef.movementModule.throttleY[0], 0.0f)); // agentRef.movementModule.throttleX[0];
+        //sigma -= 90f;
+        //throttleGO.transform.rotation = Quaternion.Euler(0f, 0f, sigma);
+        ApplySigmaRotation(throttleGO, agentRef.movementModule.throttleX[0], agentRef.movementModule.throttleY[0]);
         throttleGO.transform.localScale = new Vector3(1f, agentRef.movementModule.throttle.magnitude, 1f);
 
-        float sigmaWater = Mathf.Atan2(agentRef.environmentModule.waterVelY[0], agentRef.environmentModule.waterVelX[0]) * Mathf.Rad2Deg;// Vector3.Angle(new Vector3(0.0f, 1.0f, 0.0f), new Vector3(agentRef.environmentModule.waterVelX[0], agentRef.environmentModule.waterVelY[0], 0.0f)); // agentRef.movementModule.throttleX[0];
-        sigmaWater -= 90f;
-        waterVelGO.transform.rotation = Quaternion.Euler(0f, 0f, sigmaWater);
+        //float sigmaWater = Mathf.Atan2(agentRef.environmentModule.waterVelY[0], agentRef.environmentModule.waterVelX[0]) * Mathf.Rad2Deg;// Vector3.Angle(new Vector3(0.0f, 1.0f, 0.0f), new Vector3(agentRef.environmentModule.waterVelX[0], agentRef.environmentModule.waterVelY[0], 0.0f)); // agentRef.movementModule.throttleX[0];
+        //sigmaWater -= 90f;
+        //waterVelGO.transform.rotation = Quaternion.Euler(0f, 0f, sigmaWater);
+        ApplySigmaRotation(waterVelGO, agentRef.environmentModule.waterVelX[0], agentRef.environmentModule.waterVelY[0]);
         waterVelGO.transform.localScale = new Vector3(1f, Mathf.Clamp01(new Vector2(agentRef.environmentModule.waterVelX[0], agentRef.environmentModule.waterVelY[0]).magnitude * 50f), 1f);
 
-        if (agentRef.coreModule.isContact[0] > 0.5f) {
+        var isContact = agentRef.coreModule.isContact[0] > 0.5f;
+        if (isContact) {
             //float sigmaContact = Vector3.Angle(new Vector3(0.0f, 1.0f, 0.0f), new Vector3(agentRef.coreModule.contactForceX[0], agentRef.coreModule.contactForceY[0], 0.0f)); // agentRef.movementModule.throttleX[0];
-            float sigmaContact = Mathf.Atan2(agentRef.coreModule.contactForceY[0], agentRef.coreModule.contactForceX[0]) * Mathf.Rad2Deg;
-            sigmaContact -= 90f;
-            contactForceGO.transform.rotation = Quaternion.Euler(0f, 0f, sigmaContact);
-            contactForceGO.SetActive(true);
+            //float sigmaContact = Mathf.Atan2(agentRef.coreModule.contactForceY[0], agentRef.coreModule.contactForceX[0]) * Mathf.Rad2Deg;
+            //sigmaContact -= 90f;
+            //contactForceGO.transform.rotation = Quaternion.Euler(0f, 0f, sigmaContact);
+            ApplySigmaRotation(contactForceGO, agentRef.coreModule.contactForceX[0], agentRef.coreModule.contactForceY[0]);
         }
-        else {
-            contactForceGO.SetActive(false);
-        }
+        contactForceGO.SetActive(isContact);
         
-        float sigmaFood0 = Mathf.Atan2(agentRef.foodModule.foodPlantDirY[0], agentRef.foodModule.foodPlantDirX[0]) * Mathf.Rad2Deg; // agentRef.movementModule.throttleX[0];
+        // WPP: extract method
+        ApplySigmaRotation(plantFood, agentRef.foodModule.foodPlantDirX[0], agentRef.foodModule.foodPlantDirY[0]);
+        ApplySigmaRotation(animalFood, agentRef.foodModule.foodAnimalDirX[0], agentRef.foodModule.foodAnimalDirY[0]);
+        ApplySigmaRotation(eggFood, agentRef.foodModule.foodEggDirX[0], agentRef.foodModule.foodEggDirY[0]);
+        /*float sigmaFood0 = Mathf.Atan2(agentRef.foodModule.foodPlantDirY[0], agentRef.foodModule.foodPlantDirX[0]) * Mathf.Rad2Deg; // agentRef.movementModule.throttleX[0];
         sigmaFood0 -= 90f;
         food0.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood0);
 
@@ -116,7 +143,13 @@ public class AgentBehaviorOneHot : MonoBehaviour
 
         float sigmaFood2 = Mathf.Atan2(agentRef.foodModule.foodEggDirY[0], agentRef.foodModule.foodEggDirX[0]) * Mathf.Rad2Deg; // agentRef.movementModule.throttleX[0];
         sigmaFood2 -= 90f;
-        food2.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood2);
+        food2.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood2);*/
+    }
+    
+    void ApplySigmaRotation(GameObject obj, float xDirection, float yDirection)
+    {
+        float sigma = Mathf.Atan2(yDirection, xDirection) * Mathf.Rad2Deg - 90f;
+        obj.transform.rotation = Quaternion.Euler(0f, 0f, sigma);
     }
 
     // WPP: extracted method, iterate through array
@@ -314,16 +347,24 @@ public class AgentBehaviorOneHot : MonoBehaviour
         public TooltipUI tooltip;
         public string tooltipLabel;
         
-        public Transform transform => image.transform; 
-        
+        public Transform transform => image.transform;
+
         /// For live agents
         public void SetTooltip(float effectorValue) {
-            tooltip.tooltipString = $"{tooltipLabel}: {effectorValue.ToString("F2")}";
+            SetTooltip($"{tooltipLabel}: {effectorValue.ToString("F2")}");
         }
         
         /// For dead agents
         public void SetTooltip() {
-            tooltip.tooltipString = tooltipLabel;
+            SetTooltip(tooltipLabel);
+        }
+        
+        public void SetTooltip(string value) {
+            tooltip.tooltipString = value;
+        }
+        
+        public void SetImageGrayscale(float value) {
+            image.color = Color.Lerp(Color.black, Color.white, value);
         }
     }
     

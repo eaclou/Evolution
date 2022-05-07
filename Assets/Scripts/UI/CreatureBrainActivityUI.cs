@@ -65,7 +65,7 @@ public class CreatureBrainActivityUI : MonoBehaviour
             Mathf.Min(200, callTickCounter++) : 
             Mathf.Max(0, callTickCounter--);
         
-        agentBehaviorOneHot.UpdateExtras(candidate);
+        agentBehaviorOneHot.UpdateExtrasOnDeath();
     }
 
     public void TickTooltips() {

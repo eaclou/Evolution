@@ -55,4 +55,28 @@ public class CritterModuleCommunication : IBrainModule
             inComm3[0] = 0f; 
         }
     }
+    
+    public float GetInChannelValue(int index)
+    {
+        switch (index)
+        {
+            case 0: return inComm0[0];
+            case 1: return inComm1[0];
+            case 2: return inComm2[0];
+            case 3: return inComm3[0];
+            default: Debug.LogError($"Invalid in communication channel {index}"); return 0f; 
+        }
+    }
+    
+    public float GetOutChannelValue(int index)
+    {
+        switch (index)
+        {
+            case 0: return outComm0[0];
+            case 1: return outComm1[0];
+            case 2: return outComm2[0];
+            case 3: return outComm3[0];
+            default: Debug.LogError($"Invalid out communication channel {index}"); return 0f; 
+        }
+    }
 }
