@@ -514,7 +514,6 @@ public class SimulationManager : Singleton<SimulationManager>
             }            
         }
 
-        // WPP: exposed and calculated in ScriptableObject
         fogColor = fogSettings.fogColor; 
         fogAmount = fogSettings.fogIntensity; 
         //Color.Lerp(new Color(0.15f, 0.25f, 0.52f), new Color(0.07f, 0.27f, 0.157f), Mathf.Clamp01(simResourceManager.curGlobalPlantParticles * 0.035f));
@@ -687,8 +686,8 @@ public class SimulationManager : Singleton<SimulationManager>
     
     public void PlayerToolStirOn(Vector3 origin, Vector2 forceVector, float radiusMult) {
         float magnitude = forceVector.magnitude;
-        if(magnitude == 0f) {
-            Debug.Log("ERROR null vector!");
+        if (magnitude == 0f) {
+            Debug.LogError("null vector!");
         }
         magnitude *= 0.05f;
         float maxMagnitude = 0.9f;
@@ -703,7 +702,6 @@ public class SimulationManager : Singleton<SimulationManager>
         fluidManager.StirWaterOff();
     }
 
-    // WPP: delegated sections to functions
     void PopulateGridCells() {
         ClearAllMapGridCells();
 
@@ -746,7 +744,6 @@ public class SimulationManager : Singleton<SimulationManager>
         }        
     }
     
-    // WPP: common functionality from PopulateFood/FriendCells
     (int, int) GetCellCoordinates(Vector3 position)
     {
         float xPos = position.x;
@@ -798,31 +795,35 @@ public class SimulationManager : Singleton<SimulationManager>
         }                
     }
     
-    public void AttemptToKillAgent(int speciesID, Vector2 clickPos, float brushRadius) 
+    #region Brush
+    
+    public void AttemptToKillAgent(int speciesID, Vector2 clickPosition, float brushRadius) 
     {
-        Debug.Log("AttemptToKillAgent loc: " + clickPos + " ,,, species: " + speciesID + ", brushRadius: " + brushRadius);  
+        Debug.Log($"AttemptToKillAgent at position: {clickPosition}, species: {speciesID}, brushRadius: {brushRadius}");  
 
         foreach (var agent in agents) 
         {            
             if (!agent.isMature || speciesID != agent.speciesIndex)
                 continue; 
 
-            float distToBrushCenter = (clickPos - agent.ownPos).magnitude;
+            float distanceToBrushCenter = (clickPosition - agent.ownPos).magnitude;
 
-            if(distToBrushCenter >= brushRadius) 
+            if (distanceToBrushCenter >= brushRadius) 
                 continue;
                                 
-            Debug.Log("KILL AGENT " + agent.index + " ,,, species: " + speciesID + ", distToBrushCenter: " + distToBrushCenter); 
+            Debug.Log($"KILL AGENT {agent.index}, species: {speciesID}, distToBrushCenter: {distanceToBrushCenter}"); 
             agent.isMarkedForDeathByUser = true;
         }
     }
     
-    public void AttemptToBrushSpawnAgent(int speciesIndex) {
+    public void AttemptToBrushSpawnAgent(int speciesIndex) 
+    {
         if (!TryGetIndexOfAgentAwaitingRespawn(false, out int agentIndex))
             return;
 
-        CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
-        candidateData.candidateGenome = masterGenomePool.completeSpeciesPoolsList[speciesIndex].representativeCandidate.candidateGenome;
+        var speciesPool = masterGenomePool.completeSpeciesPoolsList[speciesIndex];
+        CandidateAgentData candidateData = speciesPool.GetNextAvailableCandidate();
+        candidateData.candidateGenome = speciesPool.representativeCandidate.candidateGenome;
         
         //Debug.Log("AttemptToBrushSpawnAgent(" + a.ToString() + ") species: " + speciesIndex.ToString() + ", " + candidateData.ToString());
         //float isBrushingLerp = 0f;
@@ -834,18 +835,18 @@ public class SimulationManager : Singleton<SimulationManager>
         cursorWorldPos.x += Random.Range(-10f, 10f);
         cursorWorldPos.y += Random.Range(-10f, 10f);
         
-        Vector2 spawnWorldPos = new Vector2(cursorWorldPos.x, cursorWorldPos.y); 
-        
+        Vector2 spawnWorldPos = new Vector2(cursorWorldPos.x, cursorWorldPos.y);
         Vector4 altitudeSample = SampleTexture(theRenderKing.baronVonTerrain.terrainHeightDataRT, spawnWorldPos / _MapSize);
 
-        if(IsValidSpawnLoc(altitudeSample)) {
-            SpawnAgentImmaculate(candidateData, agentIndex, speciesIndex, spawnWorldPos);
-            candidateData.isBeingEvaluated = true;
+        if (IsValidSpawnLocation(altitudeSample)) {
+            SpawnAgentImmaculate(candidateData, agentIndex, spawnWorldPos);
         }
         else {
-            Debug.Log("AttemptToBrushSpawnAgent(" + ") pos: " + spawnWorldPos + ", alt: " + altitudeSample);
+            Debug.Log($"AttemptToBrushSpawnAgent({speciesIndex}) pos: {spawnWorldPos}, altitude: {altitudeSample}");
         }
     }
+    
+    #endregion
     
     // WPP: search logic moved from AttemptToBrushSpawnAgent
     /// Returns whether there is an agent that: 
@@ -861,11 +862,12 @@ public class SimulationManager : Singleton<SimulationManager>
         return false;
     }
     
-    private bool IsValidSpawnLoc(Vector4 altitudeSample) {
+    private bool IsValidSpawnLocation(Vector4 altitudeSample) {
         return altitudeSample.x <= _GlobalWaterLevel && altitudeSample.w >= 0.1f;
     }
     
-    private void AttemptToSpawnAgent(int agentIndex, int speciesIndex, CandidateAgentData candidateData) { 
+    private void AttemptToSpawnAgent(int agentIndex, int speciesIndex, CandidateAgentData candidateData) 
+    { 
         //Debug.Log("AttemptToSpawnAgent(" + agentIndex.ToString());
         // Which Species will the new agent belong to?
         // Random selection? Lottery-Selection among Species? Use this Agent's previous-life's Species?  Global Ranked Selection (across all species w/ modifiers) ?
@@ -878,56 +880,55 @@ public class SimulationManager : Singleton<SimulationManager>
         //CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
 
         // All candidates are currently being tested, or candidate list is empty?
-        if(candidateData == null) {
-            //Debug.Log("AttemptToSpawnAgent(" + agentIndex.ToString() + ") candidateData == null\n +" +  "   ");
+        if (candidateData == null) {
+            //Debug.Log($"Attempt to spawn agent [{agentIndex}] failed because candidateData is null");
             return;
         }
 
-        // Good to go?
         // Look for available EggSacks first:
-        EggSack parentEggSack = null;
+        List<int> validEggIndices = GetValidEggIndices(speciesIndex);
         
-        List<int> validEggSackIndicesList = GetValidEggSackIndices(speciesIndex);
-        
-        // **** BROKEN BY SPECIATION UPDATE!!! *****
-        if (validEggSackIndicesList.Count > 0) {  
-            int randIndex = Random.Range(0, validEggSackIndicesList.Count);
-            //Debug.Log("listLength:" + validEggSackIndicesList.Count.ToString() + ", randIndex = " + randIndex.ToString() + ", p: " + validEggSackIndicesList[randIndex].ToString());
-            parentEggSack = eggSacks[validEggSackIndicesList[randIndex]];
-            
-            SpawnAgentFromEggSack(candidateData, agentIndex, speciesIndex, parentEggSack);
-            candidateData.isBeingEvaluated = true;
-        }
-        // No eggSack found:
-        else { 
-            
-            Vector3 randWorldPos = new Vector3(Random.Range(_MapSize * 0.48f, _MapSize * 0.52f), Random.Range(_MapSize * 0.48f, _MapSize * 0.52f), 0f);// GetRandomFoodSpawnPosition().startPosition;
-            
-            Vector2 spawnWorldPos = new Vector2(randWorldPos.x, randWorldPos.y);
-            Vector4 altitudeSample = SampleTexture(theRenderKing.baronVonTerrain.terrainHeightDataRT, spawnWorldPos / _MapSize);
-
-            if (IsValidSpawnLoc(altitudeSample)) {
-                SpawnAgentImmaculate(candidateData, agentIndex, speciesIndex, spawnWorldPos);
-                candidateData.isBeingEvaluated = true;
-                //Debug.Log("AttemptToSpawnAgent(" + agentIndex.ToString() + "x= " + altitudeSample.x.ToString() + ", w= " + altitudeSample.w.ToString() + ", pos: " + spawnWorldPos.ToString());
-            }               
-            //Debug.Log("AttemptToSpawnAgent Immaculate (" + agentIndex.ToString() + ") speciesIndex: " + speciesIndex.ToString() + " candidates: " + masterGenomePool.completeSpeciesPoolsList[speciesIndex].candidateGenomesList.Count.ToString());
-        }       
+        if (validEggIndices.Count > 0)
+            SpawnAgentFromRandomEgg(validEggIndices, candidateData, agentIndex);
+        else 
+            SpawnAgentAtRandomPosition(candidateData, agentIndex);       
     }
     
-    /// Conditions: EggSack belongs to the right species, is at proper stage of development, and matches the species index
-    List<int> GetValidEggSackIndices(int speciesIndex) {
-        List<int> validEggSackIndicesList = new List<int>();
+    void SpawnAgentFromRandomEgg(List<int> validEggIndices, CandidateAgentData candidate, int agentIndex)
+    {
+        int randomIndex = Random.Range(0, validEggIndices.Count);
+        var parentEgg = eggSacks[validEggIndices[randomIndex]];
+            
+        SpawnAgentFromEggSack(candidate, agentIndex, parentEgg);
+        candidate.isBeingEvaluated = true;
+        //Debug.Log($"egg list length: {validEggIndices.Count}, randIndex = {randomIndex}, p: {validEggIndices[randomIndex]}");                
+    }
+    
+    void SpawnAgentAtRandomPosition(CandidateAgentData candidate, int agentIndex)
+    {
+        Vector3 randomPosition = new Vector3(Random.Range(_MapSize * 0.48f, _MapSize * 0.52f), Random.Range(_MapSize * 0.48f, _MapSize * 0.52f), 0f);
+        Vector2 spawnPosition = new Vector2(randomPosition.x, randomPosition.y);
+        Vector4 altitudeSample = SampleTexture(theRenderKing.baronVonTerrain.terrainHeightDataRT, spawnPosition / _MapSize);
+        if (!IsValidSpawnLocation(altitudeSample)) return;
+        
+        SpawnAgentImmaculate(candidate, agentIndex, spawnPosition);
+        //Debug.Log($"AttemptToSpawnAgent({agentIndex} x = {altitudeSample.x}, w = {altitudeSample.w}, position: {spawnPosition}");
+    }
+    
+    /// Gets all eggs that belong to the right species and are at the proper stage of development
+    List<int> GetValidEggIndices(int speciesIndex) 
+    {
+        List<int> result = new List<int>();
             
         for (int i = 0; i < maxEggSacks; i++) {  
             if (eggSacks[i].isMature && 
                 eggSacks[i].lifeStageTransitionTimeStepCounter < eggSacks[i]._MatureDurationTimeSteps &&
                 eggSacks[i].speciesIndex == speciesIndex) {
-                validEggSackIndicesList.Add(i);                        
+                result.Add(i);                        
             }
         }
         
-        return validEggSackIndicesList;
+        return result;
     }
     
     public Vector4 SampleTexture(RenderTexture tex, Vector2 uv) 
@@ -957,7 +958,7 @@ public class SimulationManager : Singleton<SimulationManager>
         //Debug.Log("pressedRemoveSpecies! " + trophicLayersManager.selectedTrophicSlotRef.slotID.ToString());
 
         // Need to connect UI slotID to speciesID
-        if(masterGenomePool.currentlyActiveSpeciesIDList.Count > 1) {
+        if (masterGenomePool.currentlyActiveSpeciesIDList.Count > 1) {
             masterGenomePool.ExtinctifySpecies(masterGenomePool.currentlyActiveSpeciesIDList[0]);
         }
     }
@@ -997,12 +998,12 @@ public class SimulationManager : Singleton<SimulationManager>
         
         int agentSpeciesIndex = agent.speciesIndex;
         if (candidateData == null) {
-            Debug.LogError("candidateData NULL (" + agent.index + ") species " + agentSpeciesIndex);
+            Debug.LogError($"candidateData NULL ({agent.index}) species {agentSpeciesIndex}");
         }
         
         int candidateSpeciesIndex = candidateData.speciesID;
         if (agentSpeciesIndex != candidateSpeciesIndex) {
-            Debug.LogError("agentSpeciesIndex (" + agentSpeciesIndex + " != candidateSpeciesIndex (" + candidateSpeciesIndex);
+            Debug.LogError($"agentSpeciesIndex ({agentSpeciesIndex}) != candidateSpeciesIndex ({candidateSpeciesIndex})");
         }
         
         //Debug.Log("masterGenomePool.completeSpeciesPoolsList: " + masterGenomePool.completeSpeciesPoolsList.Count.ToString());
@@ -1047,25 +1048,28 @@ public class SimulationManager : Singleton<SimulationManager>
     }
     
     // ********** RE-IMPLEMENT THIS LATER!!!! ******************************************************************************
-    private void SpawnAgentFromEggSack(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex, EggSack parentEggSack) {
-        //Debug.Log("Spawn Creature #" + agentIndex.ToString() + " (" + numAgentsBorn.ToString() + ") FromEggSack " + parentEggSack.index.ToString() + "  " + parentEggSack.prevPos.ToString());
+    private void SpawnAgentFromEggSack(CandidateAgentData sourceCandidate, int agentIndex, EggSack parentEgg) 
+    {
+        //Debug.Log("Spawn Creature #" + agentIndex + " (" + numAgentsBorn + ") FromEggSack " + parentEggSack.index + "  " + parentEggSack.prevPos);
 
         numAgentsBorn++;
         //currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounter;
-        agents[agentIndex].InitializeSpawnAgentFromEggSack(agentIndex, sourceCandidate, parentEggSack, _GlobalWaterLevel); // Spawn that genome in dead Agent's body and revive it!
+        agents[agentIndex].InitializeSpawnAgentFromEggSack(agentIndex, sourceCandidate, parentEgg, _GlobalWaterLevel); // Spawn that genome in dead Agent's body and revive it!
         theRenderKing.UpdateCritterGenericStrokesData(agents[agentIndex]); // agentIndex, sourceCandidate.candidateGenome);
-        audioManager.PlayCritterSpawn(new Vector2(parentEggSack.gameObject.transform.position.x, parentEggSack.gameObject.transform.position.y)); 
+        audioManager.PlayCritterSpawn(new Vector2(parentEgg.transform.position.x, parentEgg.transform.position.y)); 
     }
     
-    private void SpawnAgentImmaculate(CandidateAgentData sourceCandidate, int agentIndex, int speciesIndex, Vector2 spawnPos2D) {
-        //Debug.Log("SpawnAgentImmaculate! i= " + agentIndex.ToString() + ", spawnWorldPos: " + spawnPos2D.ToString());    
+    private void SpawnAgentImmaculate(CandidateAgentData sourceCandidate, int agentIndex, Vector2 spawnPos2D) 
+    {
+        //Debug.Log("SpawnAgentImmaculate! i = {agentIndex}, spawnWorldPos: {spawnPos2D});    
         
         // Spawn that genome in dead Agent's body and revive it!
         agents[agentIndex].InitializeSpawnAgentImmaculate(agentIndex, sourceCandidate, new Vector3(spawnPos2D.x, spawnPos2D.y, 0f), _GlobalWaterLevel); 
-        theRenderKing.UpdateCritterGenericStrokesData(agents[agentIndex]); //agentIndex, sourceCandidate.candidateGenome);
+        theRenderKing.UpdateCritterGenericStrokesData(agents[agentIndex]);
         numAgentsBorn++;
 
         audioManager.PlayCritterSpawn(spawnPos2D); 
+        sourceCandidate.isBeingEvaluated = true;
     }
     
     public void ProcessDeadEggSack(int eggSackIndex) {
@@ -1100,7 +1104,7 @@ public class SimulationManager : Singleton<SimulationManager>
                 float reqMass = settingsManager.agentSettings._BaseInitMass * settingsManager.agentSettings._MinPregnancyFactor;
                 float agentMass = agents[i].currentBiomass * settingsManager.agentSettings._MaxPregnancyProportion;
                 
-                if(reqMass < agentMass) 
+                if (reqMass < agentMass) 
                 {
                     //Debug.Log("if(reqMass < agentMass) ");
                     totalSuitableParentAgents++;
@@ -1172,6 +1176,7 @@ public class SimulationManager : Singleton<SimulationManager>
         }
     }
         
+    // * Agent argument not used -> consider renaming method since it does nothing with the agent
     private void ProcessAgentScores(Agent agent) {
         numAgentsProcessed++;      
         float weightedAvgLerpVal = 1f / 64f;

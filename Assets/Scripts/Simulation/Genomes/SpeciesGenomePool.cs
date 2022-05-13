@@ -168,22 +168,21 @@ public class SpeciesGenomePool
         //Debug.Log("AddNewYearlyStats " + avgCandidateData.performanceData.totalTicksAlive);
     }
 
-    public CandidateAgentData GetNextAvailableCandidate() {
-        CandidateAgentData candidateData = null; 
-        
-        if (candidateGenomesList.Count > 0) {
-            foreach (var candidate in candidateGenomesList) {
-                if (candidate.isBeingEvaluated) continue;
-                candidateData = candidate;
-                break;
-            }
-        }
-        else {
-            candidateData = new CandidateAgentData(representativeCandidate, speciesID);
-            Debug.LogError("GetNextAvailableCandidate(): candidateData representativeGenome!!!! " + candidateData);
+    /// Finds an unborn agent ready to be respawned
+    public CandidateAgentData GetNextAvailableCandidate() 
+    {
+        if (candidateGenomesList.Count <= 0)
+        {
+            var candidateData = new CandidateAgentData(representativeCandidate, speciesID);
+            Debug.LogError($"GetNextAvailableCandidate(): representativeGenome! {candidateData}");
+            return candidateData;            
         }
         
-        return candidateData;
+        foreach (var candidate in candidateGenomesList)
+            if (!candidate.isBeingEvaluated)
+                return candidate;
+        
+        return null;
     }
        
     public void ProcessCompletedCandidate(CandidateAgentData candidateData, MasterGenomePool masterGenomePool) 
@@ -383,7 +382,7 @@ public class SpeciesGenomePool
         int result = 0;
         
         foreach (var agent in candidateGenomesList) 
-            if(agent.isBeingEvaluated) 
+            if (agent.isBeingEvaluated) 
                 result++;
 
         return result;

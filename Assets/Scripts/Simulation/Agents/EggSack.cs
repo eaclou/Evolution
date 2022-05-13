@@ -79,20 +79,16 @@ public class EggSack : MonoBehaviour {
     public float wasteProducedLastFrame = 0f;
     public float oxygenUsedLastFrame = 0f;
     
-    
     public void FirstTimeInitialize() {
         fixedJoint.frequency = springJointMaxStrength;
     }
 
     public void InitializeEggSackFromGenome(int index, AgentGenome agentGenome, Agent parentAgent, Vector3 startPos) {
         //currentBiomass = 0.01f; // immaculate eggsacks given free mass?
-        string debugTxT = "NULL";
+        string debugText = "NULL";
         if (parentAgent) {  
             parentAgentIndex = parentAgent.index;
-            debugTxT = "" + parentAgent.speciesIndex;
-        }
-        else {
-
+            debugText = "" + parentAgent.speciesIndex;
         }
         //Debug.Log(debugTxT + "InitializeEggSackFromGenome(int index" + index + ", AgentGenome agentGenome" + ", parentAgentIndex: " + parentAgentIndex + ", Vector3 startPos " + startPos);
         this.index = index;        

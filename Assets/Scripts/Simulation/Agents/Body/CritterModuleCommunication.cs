@@ -48,12 +48,15 @@ public class CritterModuleCommunication : IBrainModule
             inComm3[0] = Mathf.Round(communication.outComm3[0]);   
         } 
         else 
-        {
-            inComm0[0] = 0f;
-            inComm1[0] = 0f;
-            inComm2[0] = 0f;
-            inComm3[0] = 0f; 
-        }
+            ZeroAllInChannels();
+    }
+    
+    void ZeroAllInChannels()
+    {
+        inComm0[0] = 0f;
+        inComm1[0] = 0f;
+        inComm2[0] = 0f;
+        inComm3[0] = 0f;     
     }
     
     public float GetInChannelValue(int index)

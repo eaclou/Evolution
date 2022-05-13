@@ -75,7 +75,6 @@ public class Agent : MonoBehaviour {
     public int defendCooldown { get => data.defendCooldown; set => data.defendCooldown = value; }
     
     // * WPP: same functionality as isFreeToAct -> pick one to use and delete other
-    //public bool isResting { get => data.isResting; set => data.isResting = value; } 
     public bool isResting => curActionState == AgentActionState.Resting && isFreeToAct;
     
     public bool isCooldown => cooldown.inProcess;
@@ -189,7 +188,6 @@ public class Agent : MonoBehaviour {
     public bool isPregnantAndCarryingEggs = false;
     public int pregnancyRefactoryDuration = 420;
     
-    IAgentAbility activeAbility;
     IAgentAbility attack;
     IAgentAbility dash;
     IAgentAbility defend;
@@ -350,7 +348,7 @@ public class Agent : MonoBehaviour {
         mouthRef.Tick();
     }
     
-    // STARVATION
+    /// STARVATION
     private void CheckForDeathStarvation() {
         if (coreModule.energy > 0f)
             return;
@@ -361,7 +359,7 @@ public class Agent : MonoBehaviour {
             InitializeDeath("Suffocated", "Suffocated! stomachContentsNorm: " + coreModule.stomachContentsPercent);
     }
     
-    // HEALTH FAILURE:
+    /// HEALTH FAILURE:
     public void CheckForDeathHealth() {
         if (coreModule.health > 0f)
             return;
@@ -373,18 +371,17 @@ public class Agent : MonoBehaviour {
     }
     
     private void CheckForDeathOldAge() {
-        if(ageCounter > maxAgeTimeSteps)
+        if (ageCounter > maxAgeTimeSteps)
             InitializeDeath(lookup.GetCauseOfDeath(CauseOfDeathId.OldAge));    
     }
     
     private void CheckForDeathDivineJudgment() {
-        if(isMarkedForDeathByUser)   
+        if (isMarkedForDeathByUser)   
             InitializeDeath(lookup.GetCauseOfDeath(CauseOfDeathId.DivineJudgment));    
     }
     
     private void InitializeDeath(CauseOfDeathSO data) {
         InitializeDeath(data.causeOfDeath, data.eventMessage);
-        //causeOfDeath = data;
     }
     
     private void InitializeDeath(string causeOfDeath, string deathEvent) 
@@ -430,7 +427,7 @@ public class Agent : MonoBehaviour {
             case AgentLifeStage.AwaitingRespawn:
                 break;
             case AgentLifeStage.Egg:
-                if(lifeStageTransitionTimeStepCounter >= gestationDurationTimeSteps) {
+                if (lifeStageTransitionTimeStepCounter >= gestationDurationTimeSteps) {
                     BeginHatching();
                 }
                 else {
@@ -579,7 +576,7 @@ public class Agent : MonoBehaviour {
 
         //coreModule.stomachContentsTotal01 += (amount / coreModule.stomachCapacity);
         
-        if(coreModule.stomachContentsPercent > 1f) {
+        if (coreModule.stomachContentsPercent > 1f) {
             return;
             //float overStuffAmount = coreModule.stomachContentsNorm - 1f;            
             //coreModule.stomachContentsPercent = 1f;
@@ -606,7 +603,7 @@ public class Agent : MonoBehaviour {
         damage /= coreModule.healthBonus;
 
         float defendBonus = 1f;
-        if(isDefending && defendFrameCounter < defendDuration) {
+        if (isDefending && defendFrameCounter < defendDuration) {
             RegisterAgentEvent(simManager.simAgeTimeSteps, "Blocked Bite! from #" + predatorAgentRef.index, 0.75f, 11);
         }
         else {
@@ -615,7 +612,6 @@ public class Agent : MonoBehaviour {
             TakeDamage(damage);
             RegisterAgentEvent(simManager.simAgeTimeSteps, "Bitten! (" + (damage * 100f).ToString("F0") + ") by #" + predatorAgentRef.index, 0f, 10);
         }
-        
         //coreModule.energy *= 0.5f; 
     }
     
@@ -1105,7 +1101,6 @@ public class Agent : MonoBehaviour {
     
     private void UseAbility(IAgentAbility ability)
     {
-        activeAbility = ability;
         ability.Begin();        
     }
     
@@ -1340,9 +1335,10 @@ public class Agent : MonoBehaviour {
         
         parentEggSackRef = null;
 
-        // **** Separate out this code into shared function to avoid duplicate code::::
         ResetStartingValues();
-        InitializeModules(genome);      // Modules need to be created first so that Brain can map its neurons to existing modules  
+        
+        // Modules need to be created first so that Brain can map its neurons to existing modules 
+        InitializeModules(genome);       
         
         ReconstructAgentGameObjects(genome, null, spawnWorldPos, true, globalWaterLevel);
 

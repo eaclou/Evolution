@@ -88,8 +88,9 @@ public class CandidateAgentData
     public int numCompletedEvaluations = 0;
     //public List<float> evaluationScoresList;  // fitness scores of agents with this genome
     public bool allEvaluationsComplete = false; // * WPP: always false
+    
+    /// True while agent is alive and for a little while after.  Must be false before ready to respawn.
     public bool isBeingEvaluated = false;
-    //public string name;
     
     public PerformanceData performanceData;
 
@@ -111,24 +112,24 @@ public class CandidateAgentData
     public string causeOfDeath = "";
     public List<CandidateEventData> candidateEventDataList;
     
-    public CandidateAgentData(CandidateAgentData cand, int speciesID) {
+    public CandidateAgentData(CandidateAgentData candidate, int speciesID) {
         //Debug.Log("NewCandidateData: " + MasterGenomePool.nextCandidateIndex.ToString());
         MasterGenomePool.nextCandidateIndex++;
         causeOfDeath = "Alive!";
         candidateID = MasterGenomePool.nextCandidateIndex;
         this.speciesID = speciesID;
-        candidateGenome = cand.candidateGenome;
+        candidateGenome = candidate.candidateGenome;
         numCompletedEvaluations = 0;
         //evaluationScoresList = new List<float>();
         allEvaluationsComplete = false;  
         isBeingEvaluated = false;
 
-        this.parentID = cand.parentID;
-        //name = GenerateTempCritterName();
+        parentID = candidate.parentID;
 
         candidateEventDataList = new List<CandidateEventData>();
         performanceData = new PerformanceData();
     }
+    
     public CandidateAgentData(AgentGenome genome, int speciesID) {
         //Debug.Log("NewCandidateData: " + MasterGenomePool.nextCandidateIndex.ToString());
         MasterGenomePool.nextCandidateIndex++;
@@ -141,8 +142,7 @@ public class CandidateAgentData
         allEvaluationsComplete = false;  
         isBeingEvaluated = false;
 
-        this.parentID = 0; //????
-        //name = GenerateTempCritterName();
+        parentID = 0; //????
 
         candidateEventDataList = new List<CandidateEventData>();
         performanceData = new PerformanceData();
