@@ -202,7 +202,8 @@ public class SpeciesGenomePool
             }
         }
         //Debug.Log("Removed! " + beforeCount.ToString() + " #: " + listIndex.ToString() + ", candID: " + candidateData.candidateID.ToString());
-        if (listIndex > -1) {
+        if (listIndex > -1) 
+        {
             //Debug.Log("RemoveAt(" + listIndex.ToString() + "),[" + candidateGenomesList[listIndex].candidateID.ToString() + "], candID: " + candidateData.candidateID.ToString() + ", SpeciesPool: " + this.speciesID.ToString() + ", CDSID: " + candidateData.speciesID.ToString());
             candidateGenomesList.RemoveAt(listIndex);  // Will this work? never used this before
 
@@ -211,7 +212,8 @@ public class SpeciesGenomePool
                 masterGenomePool.debugRecentlyDeletedCandidateIDsList.RemoveAt(masterGenomePool.debugRecentlyDeletedCandidateIDsList.Count - 1);
             }
         }
-        else {
+        else 
+        {
             Debug.LogError(candidateGenomesList.Count <= 0 ? "META-ERROR NO INDEX FOUND! " : 
                 $"ERROR NO INDEX FOUND! {candidateData.candidateID}, species: {speciesID}, CDSID: {candidateData.speciesID}, [0]: {candidateGenomesList[0].candidateID}");
 

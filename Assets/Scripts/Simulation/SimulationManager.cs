@@ -774,27 +774,35 @@ public class SimulationManager : Singleton<SimulationManager>
                 ProcessNullAgent(agent);
             }
         } 
-    }  
-    
-    // AUTO-SPAWN  *** revisit 
-    private void CheckForReadyToSpawnAgents() {      
-        int respawnThreshold = 3;
-        
-        for (int a = 0; a < agents.Length; a++) {
-            if(agentRespawnCounter <= respawnThreshold || !agents[a].isAwaitingRespawn)
-                continue; 
-                
-            //Debug.Log("AttemptToSpawnAgent(" + a.ToString() + ")");
-            int randomTableIndex = Random.Range(0, masterGenomePool.currentlyActiveSpeciesIDList.Count);
-            int speciesIndex = masterGenomePool.currentlyActiveSpeciesIDList[randomTableIndex];
-            SpeciesGenomePool species = masterGenomePool.completeSpeciesPoolsList[speciesIndex];
-            CandidateAgentData candidateData = species.GetNextAvailableCandidate();
-
-            AttemptToSpawnAgent(a, speciesIndex, candidateData);
-            agentRespawnCounter = 0;
-        }                
     }
     
+    const int respawnThreshold = 3;
+    
+    // AUTO-SPAWN  *** revisit 
+    private void CheckForReadyToSpawnAgents() 
+    {
+        for (int i = 0; i < agents.Length; i++) 
+        {
+            if (agentRespawnCounter <= respawnThreshold || !agents[i].isAwaitingRespawn)
+                continue; 
+                
+            //Debug.Log($"RequestSpawnAgent({i})");
+            
+            // Species selection ideas for new agent:
+            // 1: [Current implementation] Random selection
+            // 2: Lottery-Selection among Species
+            // 3: Use this Agent's previous-life's Species?  
+            // 4: Global Ranked Selection (across all species w/ modifiers)
+                
+            // WPP: create other methods and call them here, 
+            // select via switch statement that checks global options
+            var speciesIndex = masterGenomePool.GetRandomSpeciesIndex();
+            AttemptToSpawnAgent(i, speciesIndex); 
+            
+            agentRespawnCounter = 0;
+        }
+    }
+
     #region Brush
     
     public void AttemptToKillAgent(int speciesID, Vector2 clickPosition, float brushRadius) 
@@ -848,7 +856,6 @@ public class SimulationManager : Singleton<SimulationManager>
     
     #endregion
     
-    // WPP: search logic moved from AttemptToBrushSpawnAgent
     /// Returns whether there is an agent that: 
     /// is awaiting respawn if condition true, or is not awaiting respawn if condition false.
     /// If successful, sets index to the first found agent.
@@ -866,32 +873,33 @@ public class SimulationManager : Singleton<SimulationManager>
         return altitudeSample.x <= _GlobalWaterLevel && altitudeSample.w >= 0.1f;
     }
     
-    private void AttemptToSpawnAgent(int agentIndex, int speciesIndex, CandidateAgentData candidateData) 
-    { 
-        //Debug.Log("AttemptToSpawnAgent(" + agentIndex.ToString());
-        // Which Species will the new agent belong to?
-        // Random selection? Lottery-Selection among Species? Use this Agent's previous-life's Species?  Global Ranked Selection (across all species w/ modifiers) ?
-
-        // Using Random Selection as first naive implementation:
-        //int randomTableIndex = UnityEngine.Random.Range(0, masterGenomePool.currentlyActiveSpeciesIDList.Count);
-        //int speciesIndex = masterGenomePool.currentlyActiveSpeciesIDList[randomTableIndex];
+    /// Spawns the next available candidate of the selected species, if one is available
+    void AttemptToSpawnAgent(int agentIndex, int speciesIndex)
+    {
+        var speciesPool = masterGenomePool.completeSpeciesPoolsList[speciesIndex];
+        var candidate = speciesPool.GetNextAvailableCandidate();
         
-        // Find next-in-line genome waiting to be evaluated:
-        //CandidateAgentData candidateData = masterGenomePool.completeSpeciesPoolsList[speciesIndex].GetNextAvailableCandidate();
-
-        // All candidates are currently being tested, or candidate list is empty?
-        if (candidateData == null) {
-            //Debug.Log($"Attempt to spawn agent [{agentIndex}] failed because candidateData is null");
+        // Exit early if there are no agents of this species that are ready to respawn
+        if (candidate == null) return;
+        
+        SpawnAgent(agentIndex, speciesIndex, candidate);      
+    }
+    
+    private void SpawnAgent(int agentIndex, int speciesIndex, CandidateAgentData candidate) 
+    {
+        if (candidate == null)
+        {
+            Debug.LogError("Attempting to spawn agent without valid candidate data");
             return;
         }
-
-        // Look for available EggSacks first:
+    
         List<int> validEggIndices = GetValidEggIndices(speciesIndex);
         
+        // Spawn from an egg if one from the right species is ready, otherwise use a random position
         if (validEggIndices.Count > 0)
-            SpawnAgentFromRandomEgg(validEggIndices, candidateData, agentIndex);
+            SpawnAgentFromRandomEgg(validEggIndices, candidate, agentIndex);
         else 
-            SpawnAgentAtRandomPosition(candidateData, agentIndex);       
+            SpawnAgentAtRandomPosition(candidate, agentIndex);       
     }
     
     void SpawnAgentFromRandomEgg(List<int> validEggIndices, CandidateAgentData candidate, int agentIndex)
@@ -912,7 +920,7 @@ public class SimulationManager : Singleton<SimulationManager>
         if (!IsValidSpawnLocation(altitudeSample)) return;
         
         SpawnAgentImmaculate(candidate, agentIndex, spawnPosition);
-        //Debug.Log($"AttemptToSpawnAgent({agentIndex} x = {altitudeSample.x}, w = {altitudeSample.w}, position: {spawnPosition}");
+        //Debug.Log($"RequestSpawnAgent({agentIndex} x = {altitudeSample.x}, w = {altitudeSample.w}, position: {spawnPosition}");
     }
     
     /// Gets all eggs that belong to the right species and are at the proper stage of development
@@ -1054,7 +1062,9 @@ public class SimulationManager : Singleton<SimulationManager>
 
         numAgentsBorn++;
         //currentOldestAgent = agentsArray[rankedIndicesList[0]].ageCounter;
-        agents[agentIndex].InitializeSpawnAgentFromEggSack(agentIndex, sourceCandidate, parentEgg, _GlobalWaterLevel); // Spawn that genome in dead Agent's body and revive it!
+        
+        // Spawn that genome in dead Agent's body and revive it!
+        agents[agentIndex].InitializeSpawnAgentFromEggSack(agentIndex, sourceCandidate, parentEgg, _GlobalWaterLevel); 
         theRenderKing.UpdateCritterGenericStrokesData(agents[agentIndex]); // agentIndex, sourceCandidate.candidateGenome);
         audioManager.PlayCritterSpawn(new Vector2(parentEgg.transform.position.x, parentEgg.transform.position.y)); 
     }

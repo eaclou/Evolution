@@ -79,6 +79,12 @@ public class MasterGenomePool
     public void Tick() {
         speciesCreatedOrDestroyedThisFrame = false;
     }
+    
+    public int GetRandomSpeciesIndex()
+    {
+        var randomTableIndex = Random.Range(0, currentlyActiveSpeciesIDList.Count);
+        return currentlyActiveSpeciesIDList[randomTableIndex];
+    }
 
     private void CheckForExtinction() {
         if (currentlyActiveSpeciesIDList.Count <= targetNumSpecies)
@@ -164,7 +170,7 @@ public class MasterGenomePool
     }
 
     public SpeciesGenomePool SelectNewGenomeSourceSpecies(bool weighted, float weightedAmount) {
-        if(weighted) 
+        if (weighted) 
         {
             // Filter Out species which are flagged for extinction?!?!?!
             
@@ -328,10 +334,9 @@ public class MasterGenomePool
             // *** ???
             Debug.Log($"assignedToNewSpecies closestDistanceSpeciesID: {closestSpeciesID}, score: {closestDistance}");
             completeSpeciesPoolsList[closestSpeciesID].AddNewCandidateGenome(newGenome);
-
         }
         
-        if(currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies) {
+        if (currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies) {
             speciesSimilarityDistanceThreshold *= 0.984f;  // lower while creating treeOfLifeUI
         }
         else {
@@ -362,7 +367,7 @@ public class MasterGenomePool
         
         if (!foundCandidate) 
         {
-            // look through ALL species?
+            // Look through all species?
             foreach (var pool in completeSpeciesPoolsList) 
             {
                 foreach (var candidate in pool.candidateGenomesList) 
@@ -377,9 +382,11 @@ public class MasterGenomePool
             }
         }
 
-        if (!foundCandidate) {
+        if (!foundCandidate) 
+        {
             //for (int k = 0; k < debugRecentlyDeletedCandidateIDsList.Count; k++) 
-            foreach (var id in debugRecentlyDeletedCandidateIDsList) {
+            foreach (var id in debugRecentlyDeletedCandidateIDsList) 
+            {
                 if (id != ID) continue;
                 
                 foundCandidate = true;

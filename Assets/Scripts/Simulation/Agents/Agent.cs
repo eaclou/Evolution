@@ -1346,24 +1346,25 @@ public class Agent : MonoBehaviour {
         isInert = false;
     }
     
-    public void InitializeSpawnAgentFromEggSack(int agentIndex, CandidateAgentData candidateData, EggSack parentEggSack, float globalWaterLevel) {        
+    public void InitializeSpawnAgentFromEggSack(int agentIndex, CandidateAgentData candidate, EggSack parentEgg, float globalWaterLevel) 
+    {        
         index = agentIndex;
-        speciesIndex = candidateData.speciesID;
-        candidateRef = candidateData;
+        speciesIndex = candidate.speciesID;
+        candidateRef = candidate;
         AgentGenome genome = candidateRef.candidateGenome;
                 
         curLifeStage = AgentLifeStage.Egg;
-        parentEggSackRef = parentEggSack;
+        parentEggSackRef = parentEgg;
                 
         ResetStartingValues();    
         
         // Modules need to be created first so that Brain can map its neurons to existing modules    
         InitializeModules(genome);       
 
-        Vector3 spawnOffset = 0.167f * parentEggSack.curSize.magnitude * Random.insideUnitSphere;
+        Vector3 spawnOffset = 0.167f * parentEgg.curSize.magnitude * Random.insideUnitSphere;
         spawnOffset.z = 0f;
         
-        ReconstructAgentGameObjects(genome, parentEggSack, parentEggSack.gameObject.transform.position + spawnOffset, false, globalWaterLevel);
+        ReconstructAgentGameObjects(genome, parentEgg, parentEgg.gameObject.transform.position + spawnOffset, false, globalWaterLevel);
 
         brain = new Brain(genome.brainGenome);   
         isInert = false;
