@@ -643,39 +643,10 @@ public class HistoryPanelUI : MonoBehaviour
         }
     }
     
-    private void UpdateSpeciesIconsSinglePop() {
-        foreach (var icon in speciesIcons) {         
-            // DEFAULTS
-            float xCoord = -0.2f;
-            float yCoord = 0.2f;// (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);   
-
-            int prevSpeciesIndex = selectionManager.currentSelection.historySelectedSpeciesID - 1;
-            if (prevSpeciesIndex < 0) prevSpeciesIndex = masterGenomePool.completeSpeciesPoolsList.Count - 1;
-            int nextSpeciesIndex = selectionManager.currentSelection.historySelectedSpeciesID + 1;
-            if (nextSpeciesIndex >= masterGenomePool.completeSpeciesPoolsList.Count) nextSpeciesIndex = 0;
-
-            // CYCLE PREV SPECIES
-            if (icon.linkedPool.speciesID == prevSpeciesIndex) {  
-                xCoord = 0f;
-                yCoord = 1f;
-            }
-            // SELECTED
-            if (icon.linkedPool.speciesID == selectionManager.currentSelection.historySelectedSpeciesID) {   
-                xCoord = 0f;
-                yCoord = 0.5f;
-            }
-            // CYCLE NEXT SPECIES
-            if (icon.linkedPool.speciesID == nextSpeciesIndex) {   
-                xCoord = 0f;
-                yCoord = 0f;
-            }
-            
-            xCoord = xCoord * displayWidth + marginLeft;
-            yCoord = yCoord * displayHeight + marginBottom;
-
-            icon.SetTargetCoords(new Vector2(xCoord, yCoord));
-        }
-        
+    private void UpdateSpeciesIconsSinglePop() 
+    {
+        PositionSpeciesIcons();
+    
         //*** UPDATE CREATURE ICONS!!!!!! v v v
         SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[selectionManager.currentSelection.historySelectedSpeciesID];
         int numAgentsDisplayed = Mathf.Max(pool.GetNumberAgentsEvaluated(), 1); // avoid divide by 0
@@ -687,22 +658,81 @@ public class HistoryPanelUI : MonoBehaviour
                             
             CandidateAgentData cand = pool.candidateGenomesList[line];
 
-            float xCoord = 1f;                
-            float yCoord = 1f - (float)line / (float)numAgentsDisplayed;
+            float x = 1f;                
+            float y = 1f - (float)line / (float)numAgentsDisplayed;
 
             Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary * 2f;
 
             int timeStepStart = Mathf.RoundToInt(timelineStartTimeStep);            
-            if(pool.isExtinct || cand.performanceData.timeStepDied > 1) {
-                xCoord = (float)(cand.performanceData.timeStepDied - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
+            if (pool.isExtinct || cand.performanceData.timeStepDied > 1) {
+                x = (float)(cand.performanceData.timeStepDied - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
             }
             
-            xCoord = xCoord * displayWidth + marginLeft;
-            yCoord = yCoord * displayHeight + marginBottom;
+            x = x * displayWidth + marginLeft;
+            y = y * displayHeight + marginBottom;
 
             //***EAC FIX!
-            uiManagerRef.speciesOverviewUI.SetButtonPos(line, new Vector3(xCoord * (float)panelSizePixels, yCoord * (float)panelSizePixels, 0f));
+            uiManagerRef.speciesOverviewUI.SetButtonPos(line, new Vector3(x * panelSizePixels, y * panelSizePixels, 0f));
         }
+    }
+    
+    void PositionSpeciesIcons()
+    {
+        int prevSpeciesIndex = selectionManager.currentSelection.historySelectedSpeciesID - 1;
+        if (prevSpeciesIndex < 0) prevSpeciesIndex = masterGenomePool.completeSpeciesPoolsList.Count - 1;
+        
+        int nextSpeciesIndex = selectionManager.currentSelection.historySelectedSpeciesID + 1;
+        if (nextSpeciesIndex >= masterGenomePool.completeSpeciesPoolsList.Count) nextSpeciesIndex = 0;    
+    
+        foreach (var icon in speciesIcons) 
+        {
+            // WPP: extract method, moved next/prev calculations outside loop
+            /*
+            // DEFAULTS
+            float x = -0.2f;
+            float y = 0.2f; // (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);   
+            
+            // Cycle next species
+            if (icon.linkedPool.speciesID == nextSpeciesIndex) 
+            {   
+                x = 0f;
+                y = 0f;
+            }
+            // Selected
+            else if (icon.linkedPool.speciesID == selectionManager.currentSelection.historySelectedSpeciesID) 
+            {   
+                x = 0f;
+                y = 0.5f;
+            }
+            // Cycle previous species
+            else if (icon.linkedPool.speciesID == prevSpeciesIndex) 
+            {  
+                x = 0f;
+                y = 1f;
+            }
+            */
+            var coordinates = GetCoordinatesBySpeciesID(icon.linkedPool.speciesID, nextSpeciesIndex, prevSpeciesIndex);
+            coordinates.x = coordinates.x * displayWidth + marginLeft;
+            coordinates.y = coordinates.y * displayHeight + marginBottom;
+            icon.SetTargetCoords(coordinates);
+            //icon.SetTargetCoords(new Vector2(x, y));
+        }        
+    }
+    
+    Vector2 GetCoordinatesBySpeciesID(int id, int nextIndex, int priorIndex)
+    {
+        // Cycle next species
+        if (id == nextIndex) 
+            return Vector2.zero;
+        // Selected
+        if (id == selectionManager.currentSelection.historySelectedSpeciesID) 
+            return new Vector2(0, 0.5f);
+        // Cycle previous species
+        if (id == priorIndex) 
+            return new Vector2(0f, 1f);
+            
+        // Default
+        return new Vector2(-.2f, .2f);
     }
     
     /// Simple list, evenly spaced
