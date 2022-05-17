@@ -85,24 +85,12 @@ public class SpeciesIconUI : MonoBehaviour
         transform.localScale = iconState.scaleFactor * Vector3.one;
         //image.color = iconState.imageColor;
         //text.color = iconState.textColor;
-        
-        // WPP: exposed via Icon states
-        /*
-        //transform.localScale = isSelected ? new Vector3(1.2f, 1.2f, 1f) : Vector3.one;
-        //image.color = isSelected ? Color.white : Color.gray * 0.5f;
-
-        if (linkedPool.isExtinct) {
-            //text.color = Color.gray * 0.05f;
-            gameObject.transform.localScale = Vector3.one * 0.5f;
-        }
-        else {
-           // text.color = linkedPool.isFlaggedForExtinction ? Color.gray : Color.white;
-        }
-        */
     }
 
     public bool flaggedForDestruction;
     void OnDestroy() { flaggedForDestruction = true; }
+    
+    #region Icon Display States
     
     [Header("Icon display states")]
     [SerializeField] IconDisplayState extinct;
@@ -122,4 +110,6 @@ public class SpeciesIconUI : MonoBehaviour
         public Color imageColor;
         public Color textColor;
     }
+    
+    #endregion
 }
