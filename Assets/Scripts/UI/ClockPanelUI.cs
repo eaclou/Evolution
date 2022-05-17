@@ -99,8 +99,8 @@ public class ClockPanelUI : MonoBehaviour
         Spring
     }
 
-    public void Tick() {
-        
+    public void Tick() 
+    {
         float cursorCoordsX = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().x) / 360f);
         float cursorCoordsY = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().y - 720f) / 360f);                
         float curTimeStep = simulation.simAgeTimeSteps;
@@ -117,21 +117,20 @@ public class ClockPanelUI : MonoBehaviour
         clockFaceGroup.transform.localPosition = new Vector3(Mathf.Max(36f,Mathf.Min(360f - 36f, theCursorCzar.GetCursorPixelCoords().x)), 300f, 0f);
                 
         //**** PLANET!!!!!!
-        if(imageClockPlanet) {            
+        if (imageClockPlanet) {            
             imageClockPlanet.rectTransform.localPosition = Vector3.zero;            
             imageClockPlanet.rectTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * sunOrbitPhase);
             imageClockHandA.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * GetPlanetSpinPhase(cursorTimeStep));
-            
         }
         // MOON:
-        if(imageClockMoon) {            
+        if (imageClockMoon) {            
             Vector2 moonDir = GetMoonDir(cursorTimeStep);
             imageClockMoon.rectTransform.localPosition = new Vector3(moonDir.x * 8f, moonDir.y * 8f, 0f);
             imageClockMoon.rectTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * sunOrbitPhase);
             imageClockHandB.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * GetMoonOrbitPhase(cursorTimeStep));
         }
         // SUN:
-        if(imageClockSun) {
+        if (imageClockSun) {
             Vector2 sunDir = GetSunDir(cursorTimeStep);
             imageClockSun.rectTransform.localPosition = new Vector3(sunDir.x * 16f, sunDir.y * 16f, 0f);
             imageClockHandC.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * GetSunOrbitPhase(cursorTimeStep));

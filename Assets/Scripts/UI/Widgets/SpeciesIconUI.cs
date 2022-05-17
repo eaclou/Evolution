@@ -80,15 +80,13 @@ public class SpeciesIconUI : MonoBehaviour
         tooltip.tooltipString = toolString;
 
         //imageColor3.color = linkedPool.isExtinct ? Color.black : Color.white;
-
-        // WPP: exposed via Icon states
+        
         var iconState = GetIconDisplayState(isSelected, linkedPool.isExtinct);
-        if (iconState != null)
-        {
-            transform.localScale = iconState.scaleFactor * Vector3.one;
-            //image.color = iconState.imageColor;
-            //text.color = iconState.textColor;
-        }
+        transform.localScale = iconState.scaleFactor * Vector3.one;
+        //image.color = iconState.imageColor;
+        //text.color = iconState.textColor;
+        
+        // WPP: exposed via Icon states
         /*
         //transform.localScale = isSelected ? new Vector3(1.2f, 1.2f, 1f) : Vector3.one;
         //image.color = isSelected ? Color.white : Color.gray * 0.5f;
@@ -106,36 +104,22 @@ public class SpeciesIconUI : MonoBehaviour
     public bool flaggedForDestruction;
     void OnDestroy() { flaggedForDestruction = true; }
     
-    [SerializeField] IconDisplayState[] iconDisplayStates;
+    [Header("Icon display states")]
+    [SerializeField] IconDisplayState extinct;
+    [SerializeField] IconDisplayState selected;
+    [SerializeField] IconDisplayState unselected;
     
     IconDisplayState GetIconDisplayState(bool isSelected, bool isExtinct)
     {
-        foreach (var state in iconDisplayStates)
-            if (state.Applies(isSelected, isExtinct))
-                return state;
-                
-        Debug.LogError($"No display state defined for selected = {isSelected}, extinct = {isExtinct}");
-        return null;
+        if (isExtinct) return extinct;
+        return isSelected ? selected : unselected;
     }
     
     [Serializable]
-    public class IconDisplayState
+    public struct IconDisplayState
     {
-        [Header("Conditions")]
-        public Trinary isExtinct;
-        public Trinary isSelected;
-        
-        [Header("Properties")]
-        public float scaleFactor = 1f;
+        public float scaleFactor;
         public Color imageColor;
         public Color textColor;
-        
-        public bool Applies(bool isSelected, bool isExtinct)
-        {
-            var extinctCondition = new TrinaryCondition(isExtinct, this.isExtinct);
-            var selectedCondition = new TrinaryCondition(isSelected, this.isSelected);
-            TrinaryCondition[] conditions = {extinctCondition, selectedCondition};
-            return TrinaryLogic.AllConditionsMet(conditions);
-        }
     }
 }

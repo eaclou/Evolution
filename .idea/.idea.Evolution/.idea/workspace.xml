@@ -6,11 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="64a03a69-0c33-4641-98d6-062c7a4ddd72" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Evolution/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/UI/TreeOfLifeBackdropPortraitBorderMat.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/CreaturePanelUI.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/MainScene/CreaturePanelUI.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/SpeciesIconUI.prefab" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/SpeciesIconUI.prefab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Prefabs/Species Icon UI.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Prefabs/Species Icon UI.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/ClockPanelUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/ClockPanelUI.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/HistoryPanelUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/HistoryPanelUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesOverviewUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesOverviewUI.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/SpeciesIconUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/SpeciesIconUI.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -45,8 +44,6 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/Critters/Brain/NeuronGenome.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/TechElementIconUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/SpecializationPanel.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/BrainGenomeImage.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/GenomeOverviewPanel.cs" />
@@ -94,8 +91,10 @@
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/Genomes/MasterGenomePool.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/Simulation/SimulationManager.cs" />
       <option value="$PROJECT_DIR$/Assets/Playcraft/Quality of Life/Statics/TrinaryLogic.cs" />
-      <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/SpeciesIconUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/ClockPanelUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/SpeciesOverviewUI.cs" />
       <option value="$PROJECT_DIR$/Assets/Scripts/UI/HistoryPanelUI.cs" />
+      <option value="$PROJECT_DIR$/Assets/Scripts/UI/Widgets/SpeciesIconUI.cs" />
     </changedPaths>
   </component>
   <component name="MarkdownSettingsMigration">
@@ -200,7 +199,7 @@
       <workItem from="1651388129507" duration="6323000" />
       <workItem from="1651886659426" duration="3890000" />
       <workItem from="1652423370033" duration="9140000" />
-      <workItem from="1652735062642" duration="6607000" />
+      <workItem from="1652735062642" duration="10291000" />
     </task>
     <servers />
   </component>

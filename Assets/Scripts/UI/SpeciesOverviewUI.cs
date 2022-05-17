@@ -41,11 +41,10 @@ public class SpeciesOverviewUI : MonoBehaviour {
         isShowingLineage = !isShowingLineage;
         RebuildGenomeButtons();
     }
-    public void SetButtonPos(int id, Vector3 pos) {
-        if(id >= 0 && id < buttons.Count) {
-            buttons[id].gameObject.transform.localPosition = pos;
-        }
-        
+    
+    public void SetButtonPosition(int id, Vector3 position) {
+        if (id < 0 || id >= buttons.Count) return;
+        buttons[id].gameObject.transform.localPosition = position;
     }
         
     public void RebuildGenomeButtons() 
