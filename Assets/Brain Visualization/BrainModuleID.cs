@@ -53,7 +53,8 @@ public enum BrainIconID
     OutComms23,
     Defend,
     Bite,
-    EggDir
+    EggDir,
+    Oscillator
 }
 
 public enum NeuronType {

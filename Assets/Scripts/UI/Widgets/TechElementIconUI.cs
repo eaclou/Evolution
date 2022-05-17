@@ -53,6 +53,12 @@ public class TechElementIconUI : MonoBehaviour
             isCurAction = true; }
         if(this.techElement.id == TechElementId.Attack && selection.currentSelection.agent.curActionState == AgentActionState.Attacking) {
             isCurAction = true; }
+        if(this.techElement.id == TechElementId.Dash && selection.currentSelection.agent.curActionState == AgentActionState.Dashing) {
+            isCurAction = true; }
+        if(this.techElement.id == TechElementId.Protect && selection.currentSelection.agent.curActionState == AgentActionState.Defending) {
+            isCurAction = true; }
+        if(this.techElement.id == TechElementId.Sleep && selection.currentSelection.agent.curActionState == AgentActionState.Resting) {
+            isCurAction = true; }
 
         if(isCurAction && selection.currentSelection.agent.curLifeStage == AgentLifeStage.Mature && !selection.currentSelection.isGenomeOnly) {
             color = Color.white;

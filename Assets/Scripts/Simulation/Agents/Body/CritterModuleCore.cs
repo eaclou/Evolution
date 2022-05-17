@@ -60,6 +60,8 @@ public class CritterModuleCore : IBrainModule
     private int contactSensorDuration = 15;
     private int contactFrameCounter = 0;
     private bool isContactEvent = false;
+    public float[] oscillator;
+    private float oscillatorFrequency = 0.05f;
     public float[] isContact;
     public float[] contactForceX;
     public float[] contactForceY;
@@ -168,6 +170,8 @@ public class CritterModuleCore : IBrainModule
         
         bias = new float[1];
 
+        oscillator = new float[1];
+
         //temperature = new float[1];
         //pressure = new float[1];
         isContact = new float[1];
@@ -194,12 +198,12 @@ public class CritterModuleCore : IBrainModule
         stamina[0] = 1f;
         energyStored[0] = 1f;
         foodStored[0] = 0f;
-        
+
         // * WPP: expose magic numbers
-        damageBonus = Mathf.Lerp(0.33f, 2f, talentSpecAttackNorm);
-        healthBonus = Mathf.Lerp(0.33f, 2f, talentSpecDefenseNorm);
-        speedBonus = Mathf.Lerp(0.33f, 2f, talentSpecSpeedNorm);        
-        energyBonus = Mathf.Lerp(0.75f, 1.5f, talentSpecUtilityNorm);
+        damageBonus = 1f;// Mathf.Lerp(0.33f, 2f, talentSpecAttackNorm);
+        healthBonus = 1f;// Mathf.Lerp(0.33f, 2f, talentSpecDefenseNorm);
+        speedBonus = 1f;// Mathf.Lerp(0.33f, 2f, talentSpecSpeedNorm);        
+        energyBonus = 1f;// Mathf.Lerp(0.75f, 1.5f, talentSpecUtilityNorm);
     }
     
     public void SetNeuralValue(Neuron neuron)
@@ -225,6 +229,7 @@ public class CritterModuleCore : IBrainModule
         //stamina[0] = stamina; // set in Agent.cs
         energyStored[0] = Mathf.Clamp01(energy * 0.001f);  // Mathf.Clamp01(energyRaw / maxEnergyStorage); //***EAC will need to be changed once energy is adjusted
         foodStored[0] = stomachContentsPercent; // / stomachCapacity;
+        oscillator[0] = Mathf.Sin(SimulationManager.instance.simAgeTimeSteps * oscillatorFrequency);
     }
 
     public void DirectDamage(float damage) { health -= damage; }
