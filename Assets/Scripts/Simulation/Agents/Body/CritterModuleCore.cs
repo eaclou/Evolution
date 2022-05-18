@@ -1,9 +1,11 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
-[System.Serializable] // Temporary for debug purposes (view in inspector)
+[Serializable] // Temporary for debug purposes (view in inspector)
 public class CritterModuleCore : IBrainModule
 {
     SettingsManager settings => SettingsManager.instance;
+    SimulationManager simulation => SimulationManager.instance;
 
     // **** LOOK INTO::: close in its own class or store in bigger array rather than all individual length-one arrays? 
     public float[] bias;
@@ -210,7 +212,10 @@ public class CritterModuleCore : IBrainModule
     {
         // Example error checking on name, apply to other modules if needed
         var field = GetType().GetField(neuron.name);
-        if (field == null) Debug.LogError($"Cannot find matching field for {neuron.name} in CritterModuleCore");
+        if (field == null) 
+            Debug.LogError($"Cannot find matching field for {neuron.name} in CritterModuleCore.  " +
+                           "Verify that there is a float[] variable with the same name " +
+                           "and that spelling/capitalization/etc matches exactly.");
         else neuron.currentValues = (float[])field.GetValue(this);
     }
 
@@ -228,8 +233,8 @@ public class CritterModuleCore : IBrainModule
         hitPoints[0] = Mathf.Max(health, 0f);
         //stamina[0] = stamina; // set in Agent.cs
         energyStored[0] = Mathf.Clamp01(energy * 0.001f);  // Mathf.Clamp01(energyRaw / maxEnergyStorage); //***EAC will need to be changed once energy is adjusted
-        foodStored[0] = stomachContentsPercent; // / stomachCapacity;
-        oscillator[0] = Mathf.Sin(SimulationManager.instance.simAgeTimeSteps * oscillatorFrequency);
+        foodStored[0] = stomachContentsPercent;            // / stomachCapacity;
+        oscillator[0] = Mathf.Sin(simulation.simAgeTimeSteps * oscillatorFrequency);
     }
 
     public void DirectDamage(float damage) { health -= damage; }
