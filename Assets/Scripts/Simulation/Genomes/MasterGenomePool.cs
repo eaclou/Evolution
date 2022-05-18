@@ -304,9 +304,8 @@ public class MasterGenomePool
 
             speciesSimilarityDistanceThreshold += 70f;
 
-            Color color = new Color(newGenome.bodyGenome.appearanceGenome.huePrimary.x, newGenome.bodyGenome.appearanceGenome.huePrimary.y, newGenome.bodyGenome.appearanceGenome.huePrimary.z);
+            Color color = newGenome.primaryColor;
             panelPendingClickPrompt.Narrate("A new species has emerged! agentname: " + newGenome.name, color);
-            
         }
 
         if (!assignedToNewSpecies) 

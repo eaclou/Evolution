@@ -110,7 +110,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
 
     // Current Genepool
     private void RebuildGenomeButtonsCurrent(SpeciesGenomePool pool) {
-        Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;            
+        Vector3 hue = pool.foundingCandidate.primaryHue;            
         genomeLeaderboard.color = new Color(hue.x, hue.y, hue.z);
         UpdateButtons(pool.candidateGenomesList, SelectionGroup.Candidates);
     }

@@ -8,7 +8,7 @@ public class WorldLayerVertebrateGenome
     public AgentGenome representativeGenome;
     
     public void UpdateDisplayColor() {
-        Vector3 hue = representativeGenome.bodyGenome.appearanceGenome.huePrimary;
+        Vector3 hue = representativeGenome.primaryHue;
         displayColor = new Color(hue.x, hue.y, hue.z);
     }
 

@@ -29,5 +29,11 @@ namespace Playcraft
         }
         
         #endregion
+        
+        #region Conversions
+        
+        public static Color VectorToColor(Vector3 hue) { return new Color(hue.x, hue.y, hue.z); }
+        
+        #endregion
     }
 }

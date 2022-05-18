@@ -215,8 +215,8 @@ public class SimulationStateData {
             critterInitDataArray[i].spawnSizePercentage = simManager.agents[i].spawnStartingScale;
             critterInitDataArray[i].maxEnergy = Mathf.Min(simManager.agents[i].fullSizeBoundingBox.x * simManager.agents[i].fullSizeBoundingBox.y, 0.5f);
             critterInitDataArray[i].maxStomachCapacity = simManager.agents[i].coreModule.stomachCapacity;
-            critterInitDataArray[i].primaryHue = genome.bodyGenome.appearanceGenome.huePrimary;
-            critterInitDataArray[i].secondaryHue = genome.bodyGenome.appearanceGenome.hueSecondary;
+            critterInitDataArray[i].primaryHue = genome.primaryHue;
+            critterInitDataArray[i].secondaryHue = genome.secondaryHue;
             // **** UPDATE THESE!!!
             critterInitDataArray[i].biteConsumeRadius = 1f; 
             critterInitDataArray[i].biteTriggerRadius = 1f;
@@ -465,8 +465,8 @@ public struct CritterInitData
         spawnSizePercentage = 0.1f;
         maxEnergy = Mathf.Min(boundingBoxSize.x * boundingBoxSize.y, 0.5f);
         maxStomachCapacity = 1f;
-        primaryHue = bodyGenome.appearanceGenome.huePrimary;
-        secondaryHue = bodyGenome.appearanceGenome.hueSecondary;
+        primaryHue = bodyGenome.primaryHue;
+        secondaryHue = bodyGenome.secondaryHue;
         biteConsumeRadius = 1f;
         biteTriggerRadius = 1f;
         biteTriggerLength = 1f;

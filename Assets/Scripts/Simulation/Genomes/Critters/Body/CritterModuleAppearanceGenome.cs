@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using Playcraft;
 
 ///  CHANGE ALL OF THIS!!!!!!! ****
 [System.Serializable]
@@ -10,6 +11,8 @@ public class CritterModuleAppearanceGenome
 
     public Vector3 huePrimary;
     public Vector3 hueSecondary;
+    public Color primaryColor => StaticHelpers.VectorToColor(huePrimary);
+    public Color secondaryColor => StaticHelpers.VectorToColor(hueSecondary);
 
     // List of Pattern Modifiers?
 

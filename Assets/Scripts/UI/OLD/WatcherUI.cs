@@ -113,9 +113,9 @@ public class WatcherUI : MonoBehaviour {
             imageDimmingSheet.gameObject.SetActive(agent.isDecaying);  // ** dimming sheet! to show not following???? just an experiment
             //button
 
-            Vector3 textHuePrimary = agent.candidateRef.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+            Vector3 textHuePrimary = agent.candidateRef.primaryHue;
             Color textColorPrimary = new Color(textHuePrimary.x, textHuePrimary.y, textHuePrimary.z);
-            Vector3 textHueSecondary = agent.candidateRef.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
+            Vector3 textHueSecondary = agent.candidateRef.secondaryHue;
             Color textColorSecondary = new Color(textHueSecondary.x, textHueSecondary.y, textHueSecondary.z);
             textTargetLayer.color = textColorPrimary;
             

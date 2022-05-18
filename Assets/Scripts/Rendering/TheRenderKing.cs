@@ -1903,7 +1903,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
                 strokesArray[brushIndex].jawMask = -1f;
             }
             
-            Vector3 hue = Vector3.Lerp(agentGenome.bodyGenome.appearanceGenome.huePrimary, agentGenome.bodyGenome.appearanceGenome.hueSecondary, Random.Range(0f, 1f));
+            Vector3 hue = Vector3.Lerp(agentGenome.primaryHue, agentGenome.secondaryHue, Random.Range(0f, 1f));
             strokesArray[brushIndex].color = new Vector4(hue.x, hue.y, hue.z, 1f);
         }
     }
@@ -2072,8 +2072,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
         //AgentGenome genome5 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][3].representativeGenome;
 
         // NOT the best place for this:::: ***        
-        treeOfLifeBackdropPortraitBorderMat.SetColor("_TintPri", new Color(body.appearanceGenome.huePrimary.x, appearance.huePrimary.y, appearance.huePrimary.z));
-        treeOfLifeBackdropPortraitBorderMat.SetColor("_TintSec", new Color(appearance.hueSecondary.x, appearance.hueSecondary.y, appearance.hueSecondary.z));
+        treeOfLifeBackdropPortraitBorderMat.SetColor("_TintPri", appearance.primaryColor);
+        treeOfLifeBackdropPortraitBorderMat.SetColor("_TintSec", appearance.secondaryColor);
         
         CritterInitData[] toolbarPortraitCritterInitDataArray = new CritterInitData[6];
         CritterInitData initData = new CritterInitData(body);

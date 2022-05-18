@@ -193,8 +193,16 @@ public class CandidateAgentData
         performanceData = new PerformanceData(leaderboard, inverseCount);
         //SetPerformanceDataToAverage(leaderboard, inverseCount);
     }
+    
+    public Vector3 primaryHue => candidateGenome.primaryHue;
+    public Vector3 secondaryHue => candidateGenome.secondaryHue;
+    public Color primaryColor => StaticHelpers.VectorToColor(primaryHue);
+    public Color secondaryColor => StaticHelpers.VectorToColor(secondaryHue);
+}
 
-    // PerformanceData is a struct, so needs to be performed here
+#region Dead Code - consider deletion
+
+// PerformanceData is a struct, so needs to be performed here
     /*void SetPerformanceDataToAverage(List<CandidateAgentData> leaderboard, float inverseCount)
     {
         // Clear out existing values
@@ -237,4 +245,5 @@ public class CandidateAgentData
         performanceData.totalTimesDefended *= inverseCount;
         performanceData.totalTimesPregnant *= inverseCount; 
     }*/
-}
+
+#endregion

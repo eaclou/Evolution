@@ -2,6 +2,8 @@
 
 public class BrainGenomeImage : MonoBehaviour
 {
+    SelectionManager selection => SelectionManager.instance;
+
     [SerializeField] Material mat;
     [SerializeField] string mainTexture = "_MainTex";
 
@@ -27,8 +29,8 @@ public class BrainGenomeImage : MonoBehaviour
         for (int x = 0; x < width; x++) 
         {                              
             Color testColor;
-            Vector3 huePri = SelectionManager.instance.currentSelection.candidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-            Vector3 hueSec = SelectionManager.instance.currentSelection.candidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
+            Vector3 huePri = selection.currentSelection.candidate.primaryHue;
+            Vector3 hueSec = selection.currentSelection.candidate.secondaryHue;
             //image.color = value ?  : new Color(hueSec.x, hueSec.y, hueSec.z);
 
             if (brain.axonCount > x) 

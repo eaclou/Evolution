@@ -261,7 +261,7 @@ public class HistoryPanelUI : MonoBehaviour
             float y = Mathf.Lerp(valStart, valEnd, frac); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
             float z = 0f;
             
-            Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+            Vector3 hue = pool.foundingCandidate.primaryHue;
             float alpha = 1f;
             int timeStepStart = Mathf.RoundToInt(timelineStartTimeStep);
 
@@ -299,7 +299,7 @@ public class HistoryPanelUI : MonoBehaviour
             float y = 1f - ((float)pool.speciesID / (float)Mathf.Max(simManager.masterGenomePool.completeSpeciesPoolsList.Count - 1, 1)); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
             float z = 0f;
                                 
-            Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+            Vector3 hue = pool.foundingCandidate.primaryHue;
             float alpha = 1f;
             int timeStepStart = Mathf.RoundToInt(timelineStartTimeStep);
 
@@ -362,7 +362,7 @@ public class HistoryPanelUI : MonoBehaviour
         }
         
         bool inXBounds = xStart <= x && xEnd >= x;
-        Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary * 1.5f;
+        Vector3 hue = pool.foundingCandidate.primaryHue * 1.5f;
         
         data.color = GetCreatureLineColor(hue, cand, inXBounds); 
         // new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
@@ -413,7 +413,7 @@ public class HistoryPanelUI : MonoBehaviour
     private void CreateSpeciesIcon(SpeciesGenomePool pool) 
     {
         AgentGenome templateGenome = masterGenomePool.completeSpeciesPoolsList[pool.speciesID].leaderboardGenomesList[0].candidateGenome; 
-        Color color = new Color(templateGenome.bodyGenome.appearanceGenome.huePrimary.x, templateGenome.bodyGenome.appearanceGenome.huePrimary.y, templateGenome.bodyGenome.appearanceGenome.huePrimary.z);
+        Color color = templateGenome.bodyGenome.appearanceGenome.primaryColor;
         
         var icon = Instantiate(prefabSpeciesIcon).GetComponent<SpeciesIconUI>();
         icon.Initialize(speciesIcons.Count - 1, masterGenomePool.completeSpeciesPoolsList[pool.speciesID], anchorGO.transform, color);
@@ -694,7 +694,7 @@ public class HistoryPanelUI : MonoBehaviour
     {
         SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[historySelectedSpeciesID];
         int numAgentsDisplayed = Mathf.Max(pool.GetNumberAgentsEvaluated(), 1); // avoid divide by 0
-        Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary * 2f;
+        Vector3 hue = pool.foundingCandidate.primaryHue * 2f;
         int timeStepStart = Mathf.RoundToInt(timelineStartTimeStep);
 
         for (int line = 0; line < worldTreeNumCreatureLines; line++) 
@@ -712,11 +712,10 @@ public class HistoryPanelUI : MonoBehaviour
                 x = timeSinceDeath / (float)(simManager.simAgeTimeSteps - timeStepStart);
             }
             
-            x = x * displayWidth + marginLeft;
-            y = y * displayHeight + marginBottom;
+            var position = AnchorBottomLeft(x, y) * panelSizePixels;
 
             //***EAC FIX!
-            uiManagerRef.speciesOverviewUI.SetButtonPosition(line, new Vector3(x * panelSizePixels, y * panelSizePixels, 0f));
+            uiManagerRef.speciesOverviewUI.SetButtonPosition(line, new Vector3(position.x, position.y, 0f));
         }        
     }
     

@@ -109,6 +109,9 @@ public class BodyGenome
         
         return newMetaNeurons;
     }
+    
+    public Vector3 primaryHue => appearanceGenome.huePrimary;
+    public Vector3 secondaryHue => appearanceGenome.hueSecondary;
 }
 
 /// Quick-access properties, calculated by unlocked tech

@@ -55,7 +55,6 @@ public class SpeciesGenomePool
     public List<CandidateAgentData> avgCandidateDataYearList;
     public CandidateAgentData avgCandidateData;
 
-    //private Texture2D coatOfArmsTex;
     public Material coatOfArmsMat;
 
     //public float avgLifespan = 0f;
@@ -122,10 +121,8 @@ public class SpeciesGenomePool
         coatOfArmsMat.SetTexture("_PatternTex", TheRenderKing.instance.patternTex);
         coatOfArmsMat.SetFloat("_PatternX", foundingGenome.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX);
         coatOfArmsMat.SetFloat("_PatternX", foundingGenome.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY);
-        Vector3 huePri = foundingGenome.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
-        Vector3 hueSec = foundingGenome.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
-        coatOfArmsMat.SetColor("_TintPri", new Color(huePri.x, huePri.y, huePri.z));
-        coatOfArmsMat.SetColor("_TintSec", new Color(hueSec.x, hueSec.y, hueSec.z));
+        coatOfArmsMat.SetColor("_TintPri", foundingGenome.primaryColor);
+        coatOfArmsMat.SetColor("_TintSec", foundingGenome.secondaryColor);
         coatOfArmsMat.SetFloat("_IsSelected", 0f);
     }
     

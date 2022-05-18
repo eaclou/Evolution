@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using Playcraft;
 
 [Serializable]
 public class AgentGenome 
@@ -42,6 +43,11 @@ public class AgentGenome
         bodyGenome.FirstTimeInitializeCritterModuleGenomes();
         bodyGenome.GenerateInitialRandomBodyGenome();        
     }
+    
+    public Vector3 primaryHue => bodyGenome.primaryHue;
+    public Vector3 secondaryHue => bodyGenome.secondaryHue;
+    public Color primaryColor => StaticHelpers.VectorToColor(primaryHue);
+    public Color secondaryColor => StaticHelpers.VectorToColor(secondaryHue);
 
     /*public void PrintBrainGenome() {
         string neuronText = "";
