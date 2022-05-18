@@ -6,6 +6,10 @@ using Playcraft;
 [System.Serializable]
 public class CritterModuleAppearanceGenome 
 {
+    const int brushPatternXCount = 8;
+    const int brushPatternYCount = 8;
+    TwoIntRandomizer brushPatternRandomizer = new TwoIntRandomizer(brushPatternXCount, brushPatternYCount);
+    
     // BODY:
     //public Vector2 sizeAndAspectRatio;
 
@@ -29,13 +33,17 @@ public class CritterModuleAppearanceGenome
         public int eyeBrushType;
     }
 
+    // TBD: prevent overlaps in random selection
     public void InitializeRandom() 
     {
         //sizeAndAspectRatio = new Vector2(1f, 1f);
         huePrimary = new Vector3(Random.Range(0.1f, 1f), Random.Range(0.1f, 1f), Random.Range(0.1f, 1f));
         hueSecondary = new Vector3(Random.Range(0.1f, 1f), Random.Range(0.1f, 1f), Random.Range(0.1f, 1f));
-        bodyStrokeBrushTypeX = Random.Range(0, 8);
-        bodyStrokeBrushTypeY = Random.Range(0, 8);
+        
+        var pattern = brushPatternRandomizer.RandomNoRepeat();
+        Debug.Log($"Initializing appearance with brush pattern {pattern}");
+        bodyStrokeBrushTypeX = pattern.Item1; //Random.Range(0, 8);
+        bodyStrokeBrushTypeY = pattern.Item2; //Random.Range(0, 8);
         
         eyeGenome = new EyeGenome();
         eyeGenome.localPos = new Vector2(Random.Range(0.45f, 1f), Random.Range(0.4f, 1f));

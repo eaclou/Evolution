@@ -119,8 +119,8 @@ public class SpeciesGenomePool
         coatOfArmsMat.SetPass(0);
         coatOfArmsMat.SetTexture("_MainTex", TheRenderKing.instance.shapeTex);
         coatOfArmsMat.SetTexture("_PatternTex", TheRenderKing.instance.patternTex);
-        coatOfArmsMat.SetFloat("_PatternX", foundingGenome.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX);
-        coatOfArmsMat.SetFloat("_PatternX", foundingGenome.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY);
+        coatOfArmsMat.SetFloat("_PatternX", foundingGenome.bodyStrokeBrushTypeX);
+        coatOfArmsMat.SetFloat("_PatternX", foundingGenome.bodyStrokeBrushTypeY);
         coatOfArmsMat.SetColor("_TintPri", foundingGenome.primaryColor);
         coatOfArmsMat.SetColor("_TintSec", foundingGenome.secondaryColor);
         coatOfArmsMat.SetFloat("_IsSelected", 0f);

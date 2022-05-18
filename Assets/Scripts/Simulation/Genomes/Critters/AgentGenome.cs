@@ -48,6 +48,8 @@ public class AgentGenome
     public Vector3 secondaryHue => bodyGenome.secondaryHue;
     public Color primaryColor => StaticHelpers.VectorToColor(primaryHue);
     public Color secondaryColor => StaticHelpers.VectorToColor(secondaryHue);
+    public int bodyStrokeBrushTypeX => bodyGenome.bodyStrokeBrushTypeX;
+    public int bodyStrokeBrushTypeY => bodyGenome.bodyStrokeBrushTypeY;
 
     /*public void PrintBrainGenome() {
         string neuronText = "";

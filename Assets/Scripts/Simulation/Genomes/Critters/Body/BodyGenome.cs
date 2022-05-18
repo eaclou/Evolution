@@ -112,6 +112,8 @@ public class BodyGenome
     
     public Vector3 primaryHue => appearanceGenome.huePrimary;
     public Vector3 secondaryHue => appearanceGenome.hueSecondary;
+    public int bodyStrokeBrushTypeX => appearanceGenome.bodyStrokeBrushTypeX;
+    public int bodyStrokeBrushTypeY => appearanceGenome.bodyStrokeBrushTypeY;
 }
 
 /// Quick-access properties, calculated by unlocked tech

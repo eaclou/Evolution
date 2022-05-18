@@ -244,8 +244,8 @@ public class SimulationStateData {
 	        critterInitDataArray[i].headCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
             critterInitDataArray[i].mouthCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength + genome.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
             critterInitDataArray[i].bendiness = flexibilityScore;
-            critterInitDataArray[i].bodyPatternX = simManager.agents[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
-            critterInitDataArray[i].bodyPatternY = simManager.agents[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
+            critterInitDataArray[i].bodyPatternX = simManager.agents[i].candidateRef.bodyStrokeBrushTypeX;
+            critterInitDataArray[i].bodyPatternY = simManager.agents[i].candidateRef.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
             critterInitDataArray[i].speciesID = simManager.agents[i].speciesIndex;
             
             // SIMDATA ::===========================================================================================================================================================================
@@ -490,8 +490,8 @@ public struct CritterInitData
         speciesID = 0; 
         
         // what grid cell of texture sheet to use
-        bodyPatternX = bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
-        bodyPatternY = bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  
+        bodyPatternX = bodyGenome.bodyStrokeBrushTypeX;
+        bodyPatternY = bodyGenome.bodyStrokeBrushTypeY;  
     }
 }
 

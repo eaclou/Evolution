@@ -198,6 +198,8 @@ public class CandidateAgentData
     public Vector3 secondaryHue => candidateGenome.secondaryHue;
     public Color primaryColor => StaticHelpers.VectorToColor(primaryHue);
     public Color secondaryColor => StaticHelpers.VectorToColor(secondaryHue);
+    public int bodyStrokeBrushTypeX => candidateGenome.bodyStrokeBrushTypeX;
+    public int bodyStrokeBrushTypeY => candidateGenome.bodyStrokeBrushTypeY;
 }
 
 #region Dead Code - consider deletion
