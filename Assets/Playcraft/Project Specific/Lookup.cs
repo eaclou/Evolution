@@ -27,6 +27,7 @@ public class Lookup : ScriptableObject
     public TechTree techTree;
     public InitialUnlockedTechInfo baseInitialAbilities;
     public InitialGenomeInfo genomeInitialization;
+    public AchievementListInfo achievements;
 
     [Header("Colors")]
     public Color buttonActiveColor = new Color(1f, 1f, 1f, 1f);

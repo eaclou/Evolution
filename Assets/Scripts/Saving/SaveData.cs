@@ -5,11 +5,13 @@
 public class SaveData
 {
     public AgentData[] agents;
+    public AchievementData[] achievements;
     
     public SaveData() { }
     
     public SaveData(SaveData original)
     {
         agents = original.agents;
+        achievements = original.achievements;
     }
 }

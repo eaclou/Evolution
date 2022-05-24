@@ -5,7 +5,9 @@ using Playcraft;
 public class AccessSaveData : Singleton<AccessSaveData>
 {
     SimulationManager simulation => SimulationManager.instance;
-    [SerializeField] SaveData data = new SaveData();
+    Lookup lookup => Lookup.instance;
+    
+    [ReadOnly] public SaveData data = new SaveData();
     
     public int saveIndex = 1;
     string saveName => "Save Game " + saveIndex;
@@ -18,6 +20,8 @@ public class AccessSaveData : Singleton<AccessSaveData>
             data.agents[i] = simulation.agents[i].data;
             data.agents[i].position = simulation.agents[i].position;
         }
+        
+        Debug.Log(data.achievements.Length);
         
         ES3.Save(saveName, data);
     }
@@ -32,11 +36,14 @@ public class AccessSaveData : Singleton<AccessSaveData>
             return;
         }
         
-        for (int i = 0; i < data.agents.Length; i++)
+        for (int i = 0; i < data.agents.Length && i < simulation.agents.Length; i++)
         {
             simulation.agents[i].data = data.agents[i];
             simulation.agents[i].position = data.agents[i].position;
         }
+        
+        if (data.achievements == null)
+            data.achievements = lookup.achievements.Instantiate().data;
     }
     
     public void DeleteActiveSave() { ES3.DeleteFile(saveName); }

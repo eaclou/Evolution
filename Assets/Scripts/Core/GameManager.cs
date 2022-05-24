@@ -16,7 +16,8 @@ public class GameManager : Singleton<GameManager> {
     private GameState currentGameState = GameState.MainMenu;
     public GameState CurrentGameState => currentGameState;
     
-    public Profile activeProfile = new Profile();
+    //public Profile activeProfile = new Profile();
+    public bool firstTimeStartup;
 
     private void Awake() {
         //distortionCommandBuffer = new CommandBuffer();

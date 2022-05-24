@@ -11,12 +11,12 @@ public class MainMenuUI : MonoBehaviour
     [SerializeField] Animator mainMenuAnimator;
     
     GameManager gameManager => GameManager.instance;
-    Profile profile => gameManager.activeProfile;
+    //Profile profile => gameManager.activeProfile;
         
     bool firstTimeStartup
     {
-        get => profile.firstTimeStartup;
-        set => profile.firstTimeStartup = value;
+        get => gameManager.firstTimeStartup;
+        set => gameManager.firstTimeStartup = value;
     }
     
     //bool optionsMenuOn;  // Game options main menu
