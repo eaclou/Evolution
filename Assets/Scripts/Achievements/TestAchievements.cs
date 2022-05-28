@@ -12,7 +12,7 @@ public class TestAchievements : MonoBehaviour
         if (triggerUnlock && achievement)
         {
             var newUnlock = achievementsList.Unlock(achievement);
-            Debug.Log(newUnlock);
+            Debug.Log(newUnlock);  // OK - true -> false
             triggerUnlock = false;
         }
     }

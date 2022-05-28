@@ -4,10 +4,16 @@
 [Serializable] [ES3Serializable]
 public class SaveData
 {
+    Lookup lookup => Lookup.instance;
+
     public AgentData[] agents;
     public AchievementData[] achievements;
     
-    public SaveData() { }
+    public SaveData() 
+    {
+        if (!lookup) return;
+        achievements = lookup.achievements.Instantiate().data; 
+    }
     
     public SaveData(SaveData original)
     {

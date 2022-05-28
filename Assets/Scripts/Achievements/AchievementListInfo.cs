@@ -9,12 +9,15 @@ public class AchievementListInfo : ScriptableObject
     
     AchievementData[] achievements => AccessSaveData.instance.data.achievements;
     
+    public Action<AchievementInfo> onUnlock;
+    
     public bool Unlock(AchievementInfo id)
     {
         var achievement = GetAchievement(id);
         if (achievement != null && !achievement.unlocked)
         {
             achievement.unlocked = true;
+            onUnlock?.Invoke(id);
             return true;
         }
         return false;

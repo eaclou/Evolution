@@ -20,6 +20,8 @@ public class AchievementData
     public Sprite icon;
     [ReadOnly] public bool unlocked;
     
+    public AchievementData() { }
+    
     public AchievementData(AchievementInfo template)
     {
         id = template;

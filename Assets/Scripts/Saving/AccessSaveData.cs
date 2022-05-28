@@ -5,7 +5,6 @@ using Playcraft;
 public class AccessSaveData : Singleton<AccessSaveData>
 {
     SimulationManager simulation => SimulationManager.instance;
-    Lookup lookup => Lookup.instance;
     
     [ReadOnly] public SaveData data = new SaveData();
     
@@ -14,22 +13,32 @@ public class AccessSaveData : Singleton<AccessSaveData>
     
     public void Save()
     {
+        GatherAgentData();
+        ES3.Save(saveName, data);
+    }
+
+    public void Load()
+    {
+        data = ES3.Load(saveName, data);
+        DistributeAgentData();
+    }
+    
+    public void DeleteActiveSave() { ES3.DeleteFile(saveName); }
+    
+    /// Transfer agent data from simulation to profile
+    void GatherAgentData()
+    {
         data.agents = new AgentData[simulation.agents.Length];
         for (int i = 0; i < data.agents.Length; i++)
         {
             data.agents[i] = simulation.agents[i].data;
             data.agents[i].position = simulation.agents[i].position;
-        }
-        
-        Debug.Log(data.achievements.Length);
-        
-        ES3.Save(saveName, data);
+        }        
     }
     
-    public void Load()
+    /// Transfer agent data from profile to simulation
+    void DistributeAgentData()
     {
-        data = ES3.Load(saveName, data);
-        
         if (data == null)
         {
             Debug.LogError($"Data for {saveName} not found.");
@@ -40,11 +49,6 @@ public class AccessSaveData : Singleton<AccessSaveData>
         {
             simulation.agents[i].data = data.agents[i];
             simulation.agents[i].position = data.agents[i].position;
-        }
-        
-        if (data.achievements == null)
-            data.achievements = lookup.achievements.Instantiate().data;
+        }        
     }
-    
-    public void DeleteActiveSave() { ES3.DeleteFile(saveName); }
 }
