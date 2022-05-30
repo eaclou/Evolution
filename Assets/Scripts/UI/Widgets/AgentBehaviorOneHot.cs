@@ -10,20 +10,8 @@ public class AgentBehaviorOneHot : MonoBehaviour
     Agent agent => currentSelection.agent;
     CandidateAgentData fossil => currentSelection.candidate;
     
-    // WPP: condensed into arrays for iteration
     public BehaviorBar[] behaviorBars;
-    /*public BehaviorBar behaviorBarRest;
-    public BehaviorBar behaviorBarDash;
-    public BehaviorBar behaviorBarGuard;
-    public BehaviorBar behaviorBarBite;
-    public BehaviorBar behaviorBarAttack;
-    public BehaviorBar behaviorBarOther;*/
-
     public BehaviorBar[] communicationBars;
-    /*public BehaviorBar outComm0;
-    public BehaviorBar outComm1;
-    public BehaviorBar outComm2;
-    public BehaviorBar outComm3;*/
 
     public GameObject throttleGO;
     public GameObject contactForceGO;
@@ -35,19 +23,8 @@ public class AgentBehaviorOneHot : MonoBehaviour
     
     [Range(0, 1)] [SerializeField] float outCommLightnessOnDeath = 0f;
     
-    // WPP: Renamed, removed unused argument & redundant logic,
-    // Removed GetComponent calls, use nested struct pattern to store references
     public void UpdateExtrasOnDeath() 
     {
-        // WPP: exposed magic numbers
-        /*outComm0.image.color = Color.Lerp(Color.black, Color.white, outCommLightnessOnDeath);
-        outComm0.tooltip.tooltipString = "OutComm0";
-        outComm1.image.color = Color.Lerp(Color.black, Color.white, outCommLightnessOnDeath);
-        outComm1.tooltip.tooltipString = "OutComm1";
-        outComm2.image.color = Color.Lerp(Color.black, Color.white, outCommLightnessOnDeath);
-        outComm2.tooltip.tooltipString = "OutComm2";
-        outComm3.image.color = Color.Lerp(Color.black, Color.white, outCommLightnessOnDeath);
-        outComm3.tooltip.tooltipString = "OutComm3";*/
         foreach (var bar in communicationBars)
         {
             bar.SetImageGrayscale(outCommLightnessOnDeath);
@@ -55,58 +32,31 @@ public class AgentBehaviorOneHot : MonoBehaviour
         }
         
         contactForceGO.SetActive(false);
-
-        //float sigma = 0f;
-        //throttleGO.transform.rotation = Quaternion.Euler(0f, 0f, sigma);
+        
         throttleGO.transform.rotation = Quaternion.identity;;
         throttleGO.transform.localScale = Vector3.zero;
-
-        //float sigmaWater = 0f;
-        //waterVelGO.transform.rotation = Quaternion.Euler(0f, 0f, sigmaWater);
+        
         waterVelGO.transform.rotation = Quaternion.identity;
         waterVelGO.transform.localScale = Vector3.zero;
         
-        // WPP: removed unnecessary logic
         plantFood.transform.rotation = Quaternion.identity;
         animalFood.transform.rotation = Quaternion.identity;
         eggFood.transform.rotation = Quaternion.identity;
-        /*float sigmaFood0 = 0f;
-        plantFood.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood0);
-
-        float sigmaFood1 = 0f;
-        animalFood.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood1);
-
-        float sigmaFood2 = 0f;
-        eggFood.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood2);*/
     }
     
     public void UpdateExtras(Agent agentRef) 
     {
-        // WPP: condensed with iteration
         for (int i = 0; i < communicationBars.Length; i++)
         {
             var commValue = agentRef.communicationModule.GetOutChannelValue(i);
             communicationBars[i].SetImageGrayscale(commValue);
             communicationBars[i].SetTooltip(commValue);
         }
-        /*outComm0.image.color = Color.Lerp(Color.black, Color.white, agentRef.communicationModule.outComm0[0]);
-        outComm0.tooltip.tooltipString = "OutComm0: " + agentRef.communicationModule.outComm0[0].ToString("F2");
-        outComm1.image.color = Color.Lerp(Color.black, Color.white, agentRef.communicationModule.outComm1[0]);
-        outComm1.tooltip.tooltipString = "OutComm1: " + agentRef.communicationModule.outComm1[0].ToString("F2");
-        outComm2.image.color = Color.Lerp(Color.black, Color.white, agentRef.communicationModule.outComm2[0]);
-        outComm2.tooltip.tooltipString = "OutComm2: " + agentRef.communicationModule.outComm2[0].ToString("F2");
-        outComm3.image.color = Color.Lerp(Color.black, Color.white, agentRef.communicationModule.outComm3[0]);
-        outComm3.tooltip.tooltipString = "OutComm3: " + agentRef.communicationModule.outComm3[0].ToString("F2");*/
 
-        if (!agentRef.candidateRef.candidateGenome.bodyGenome.data.hasComms) //{
+        if (!agentRef.candidateRef.candidateGenome.bodyGenome.data.hasComms)
             foreach (var bar in communicationBars)
                 bar.SetTooltip("OutComms (disable)");
-            //outComm0.tooltip.tooltipString = "OutComms (disabled)";
-            //outComm1.tooltip.tooltipString = "OutComms (disabled)";
-            //outComm2.tooltip.tooltipString = "OutComms (disabled)";
-            //outComm3.tooltip.tooltipString = "OutComms (disabled)";
-        //}
-        
+
         //float sigma = Mathf.Atan2(agentRef.movementModule.throttleY[0], agentRef.movementModule.throttleX[0]) * Mathf.Rad2Deg;// Vector3.Angle(new Vector3(0.0f, 1.0f, 0.0f), new Vector3(agentRef.movementModule.throttleX[0], agentRef.movementModule.throttleY[0], 0.0f)); // agentRef.movementModule.throttleX[0];
         //sigma -= 90f;
         //throttleGO.transform.rotation = Quaternion.Euler(0f, 0f, sigma);
@@ -129,21 +79,9 @@ public class AgentBehaviorOneHot : MonoBehaviour
         }
         contactForceGO.SetActive(isContact);
         
-        // WPP: extract method
         ApplySigmaRotation(plantFood, agentRef.foodModule.foodPlantDirX[0], agentRef.foodModule.foodPlantDirY[0]);
         ApplySigmaRotation(animalFood, agentRef.foodModule.foodAnimalDirX[0], agentRef.foodModule.foodAnimalDirY[0]);
         ApplySigmaRotation(eggFood, agentRef.foodModule.foodEggDirX[0], agentRef.foodModule.foodEggDirY[0]);
-        /*float sigmaFood0 = Mathf.Atan2(agentRef.foodModule.foodPlantDirY[0], agentRef.foodModule.foodPlantDirX[0]) * Mathf.Rad2Deg; // agentRef.movementModule.throttleX[0];
-        sigmaFood0 -= 90f;
-        food0.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood0);
-
-        float sigmaFood1 = Mathf.Atan2(agentRef.foodModule.foodAnimalDirY[0], agentRef.foodModule.foodAnimalDirX[0]) * Mathf.Rad2Deg; // agentRef.movementModule.throttleX[0];
-        sigmaFood1 -= 90f;
-        food1.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood1);
-
-        float sigmaFood2 = Mathf.Atan2(agentRef.foodModule.foodEggDirY[0], agentRef.foodModule.foodEggDirX[0]) * Mathf.Rad2Deg; // agentRef.movementModule.throttleX[0];
-        sigmaFood2 -= 90f;
-        food2.transform.rotation = Quaternion.Euler(0f, 0f, sigmaFood2);*/
     }
     
     void ApplySigmaRotation(GameObject obj, float xDirection, float yDirection)
@@ -152,52 +90,12 @@ public class AgentBehaviorOneHot : MonoBehaviour
         obj.transform.rotation = Quaternion.Euler(0f, 0f, sigma);
     }
 
-    // WPP: extracted method, iterate through array
     public void UpdateBarsForLiveAgent() 
     {
-        // WPP: use static function with wrapper in Agent for common operation
         float highestPriority = agent.GetMostActiveEffectorValue();
-        //highestPriority = Mathf.Max(rest, Mathf.Max(dash, Mathf.Max(guard, Mathf.Max(bite, attack))));
 
         foreach (var bar in behaviorBars)
             UpdateBar(bar, GetEffectorValueForBehavior(bar.type), highestPriority);
-        
-        // WPP: 1st pass refactor: extract method
-        /*UpdateBar(behaviorBarRest, rest);
-        UpdateBar(behaviorBarDash, dash);
-        UpdateBar(behaviorBarGuard, guard);
-        UpdateBar(behaviorBarBite, bite);
-        UpdateBar(behaviorBarAttack, attack);*/
-        
-        /*bool isActive = rest >= highestPriority && !agent.isCooldown;
-        //textRest.color = isActive ? activeColor : inactiveColor;
-        behaviorBarRest.transform.localScale = new Vector3(rest * 0.1f + 0.9f, rest * 0.1f + 0.9f,  1f);
-        UpdateBarColor(behaviorBarRest.image, rest, isActive);
-        behaviorBarRest.tooltip.tooltipString = "Rest: " + rest.ToString("F2");
-        
-        isActive = dash >= highestPriority && !agent.isCooldown;
-        //textDash.color = isActive ? activeColor : inactiveColor;
-        behaviorBarDash.transform.localScale = Vector3.one * (dash * 0.1f + 0.9f); // new Vector3(dash * 0.5f + 0.5f, dash * 0.5f + 0.5f, 1f);
-        UpdateBarColor(behaviorBarDash.image, dash, isActive);
-        behaviorBarDash.tooltip.tooltipString = "Dash: " + dash.ToString("F2");
-
-        isActive = guard >= highestPriority && !agent.isCooldown;
-        //textGuard.color = isActive ? activeColor : inactiveColor;
-        behaviorBarGuard.transform.localScale = Vector3.one * (guard * 0.1f + 0.9f); // new Vector3(guard * 0.5f + 0.5f, guard * 0.5f + 0.5f,  1f);
-        UpdateBarColor(behaviorBarGuard.image, guard, isActive);
-        behaviorBarGuard.tooltip.tooltipString = "Guard: " + guard.ToString("F2");
-
-        isActive = bite >= highestPriority && !agent.isCooldown;
-        //textBite.color = isActive ? activeColor : inactiveColor;
-        behaviorBarBite.transform.localScale = Vector3.one * (bite * 0.1f + 0.9f); // new Vector3(bite * 0.5f + 0.5f, bite * 0.5f + 0.5f, 1f);
-        UpdateBarColor(behaviorBarBite.image, bite, isActive);
-        behaviorBarBite.tooltip.tooltipString = "Bite: " + bite.ToString("F2");
-
-        isActive = attack >= highestPriority && !agent.isCooldown;
-        //textAttack.color = isActive ? activeColor : inactiveColor;
-        behaviorBarAttack.transform.localScale = Vector3.one * (attack * 0.1f + 0.9f); // new Vector3(attack * 0.5f + 0.5f, attack * 0.5f + 0.5f, 1f);
-        UpdateBarColor(behaviorBarAttack.image, attack, isActive);
-        behaviorBarAttack.tooltip.tooltipString = "Attack: " + attack.ToString("F2");*/
 
         if (agent.isCooldown) {
             //textOther.color = Color.yellow;
@@ -223,10 +121,7 @@ public class AgentBehaviorOneHot : MonoBehaviour
             default: return 0f;
         }
     }
-    
-    //[SerializeField] Color activeColor = Color.white;
-    //[SerializeField] Color inactiveColor = Color.clear;
-    
+
     /// For live agent
     void UpdateBar(BehaviorBar bar, float effectorValue, float highestPriority)
     {
@@ -237,31 +132,10 @@ public class AgentBehaviorOneHot : MonoBehaviour
         bar.SetTooltip(effectorValue);
     }
     
-    // WPP: extract method, iterate through array
     public void UpdateBarsForFossil() 
     {
         foreach (var bar in behaviorBars)
             UpdateBar(bar);
-        
-        /*behaviorBarRest.transform.localScale = Vector3.one;
-        UpdateBarColor(behaviorBarRest.image, 0f, false);
-        behaviorBarRest.tooltip.tooltipString = "Rest";
-
-        behaviorBarDash.transform.localScale = Vector3.one;
-        UpdateBarColor(behaviorBarDash.image, 0f, false);
-        behaviorBarDash.tooltip.tooltipString = "Dash";
-
-        behaviorBarGuard.transform.localScale = Vector3.one; 
-        UpdateBarColor(behaviorBarGuard.image, 0f, false);
-        behaviorBarGuard.tooltip.tooltipString = "Guard";
-
-        behaviorBarBite.transform.localScale = Vector3.one; 
-        UpdateBarColor(behaviorBarBite.image, 0f, false);
-        behaviorBarBite.tooltip.tooltipString = "Bite";
-
-        behaviorBarAttack.transform.localScale = Vector3.one;
-        UpdateBarColor(behaviorBarAttack.image, 0f, false);
-        behaviorBarAttack.tooltip.tooltipString = "Attack";*/
 
         throttleGO.gameObject.SetActive(false);
     }
@@ -278,27 +152,8 @@ public class AgentBehaviorOneHot : MonoBehaviour
     
     [SerializeField] BarColor[] barColors;
 
-    // WPP: iterate through a lookup data class with exposed threshold values bound to colors
     private void UpdateBarColor(Image image, float effectorValue, bool active) 
     {
-        /*Color col = Color.red;
-
-        if (val < -0.25f) {
-            col = Color.red;
-        }
-        else if (val > 0.25f) {
-            col = Color.green;
-        }
-        else {
-            col = Color.gray;
-        }
-
-        if (!active) {
-            col *= 0.5f;
-        }
-        col.a = 1f;
-        image.color = col;*/
-        
         var color = GetBarColor(effectorValue);
         if (!active) color *= 0.5f;
         image.color = color;

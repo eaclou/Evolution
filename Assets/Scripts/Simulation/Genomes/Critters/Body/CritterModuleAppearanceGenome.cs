@@ -42,8 +42,8 @@ public class CritterModuleAppearanceGenome
         
         var pattern = brushPatternRandomizer.RandomNoRepeat();
         Debug.Log($"Initializing appearance with brush pattern {pattern}");
-        bodyStrokeBrushTypeX = pattern.Item1; //Random.Range(0, 8);
-        bodyStrokeBrushTypeY = pattern.Item2; //Random.Range(0, 8);
+        bodyStrokeBrushTypeX = pattern.Item1; 
+        bodyStrokeBrushTypeY = pattern.Item2; 
         
         eyeGenome = new EyeGenome();
         eyeGenome.localPos = new Vector2(Random.Range(0.45f, 1f), Random.Range(0.4f, 1f));

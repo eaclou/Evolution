@@ -14,10 +14,13 @@ public class AchievementInfo : ScriptableObject
 [Serializable] [ES3Serializable]
 public class AchievementData
 {
+    // Static data
     public AchievementInfo id;
     public string title;
     public string description;
     public Sprite icon;
+    
+    // Mutable data
     [ReadOnly] public bool unlocked;
     
     public AchievementData() { }
@@ -28,6 +31,7 @@ public class AchievementData
         title = template.data.title;
         description = template.data.description;
         icon = template.data.icon;
+        
         unlocked = false;
     }
 }

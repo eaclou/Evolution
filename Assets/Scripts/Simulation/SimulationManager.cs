@@ -797,8 +797,8 @@ public class SimulationManager : Singleton<SimulationManager>
             // WPP: create other methods and call them here, 
             // select via switch statement that checks global options
             var speciesIndex = masterGenomePool.GetRandomSpeciesIndex();
-            AttemptToSpawnAgent(i, speciesIndex); 
-            
+            AttemptToSpawnAgent(i, speciesIndex);
+
             agentRespawnCounter = 0;
         }
     }
@@ -1276,14 +1276,14 @@ public class SimulationManager : Singleton<SimulationManager>
             newSpecies.avgCandidateDataYearList.Add(yearData);                
         }
         
-        if(newSpecies.depthLevel > masterGenomePool.currentHighestDepth) {
+        if (newSpecies.depthLevel > masterGenomePool.currentHighestDepth) {
             masterGenomePool.currentHighestDepth = newSpecies.depthLevel;
         }
 
         uiManager.historyPanelUI.AddNewSpeciesToPanel(newSpecies);
 
-        uiManager.historyPanelUI.TriggerNudgeMessage("A NEW SPECIES [" + newSpeciesID + "] HAS EMERGED!");
-        uiManager.historyPanelUI.SetNudgeTooltip("On timestep " + SimulationManager.instance.simAgeTimeSteps + ", Species " + newSpeciesID + " evolved from progenitor species " + parentSpeciesID + "\nFounding Creature: " + newGenome.name);
+        uiManager.historyPanelUI.TriggerNudgeMessage($"A NEW SPECIES [{newSpeciesID}] HAS EMERGED!");
+        uiManager.historyPanelUI.SetNudgeTooltip($"On timestep {simAgeTimeSteps}, Species {newSpeciesID} evolved from progenitor species {parentSpeciesID}\nFounding Creature: {newGenome.name}");
     }
     
     private StartPositionGenome GetInitialAgentSpawnPosition() {
