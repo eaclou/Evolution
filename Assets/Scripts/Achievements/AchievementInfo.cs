@@ -5,20 +5,17 @@ using UnityEngine;
 public class AchievementInfo : ScriptableObject
 {
     public AchievementData data;
-    
-    void OnValidate() { data.id = this; }
-    
     public AchievementData Instantiate() { return new AchievementData(this); }
 }
 
-[Serializable] [ES3Serializable]
+[Serializable]
 public class AchievementData
 {
     // Static data
-    public AchievementInfo id;
+    public AchievementId id;
     public string title;
     public string description;
-    public Sprite icon;
+    //public Sprite icon;
     
     // Mutable data
     [ReadOnly] public bool unlocked;
@@ -27,13 +24,21 @@ public class AchievementData
     
     public AchievementData(AchievementInfo template)
     {
-        id = template;
+        id = template.data.id;
         title = template.data.title;
         description = template.data.description;
-        icon = template.data.icon;
+        //icon = template.data.icon;
         
         unlocked = false;
     }
+}
+
+public enum AchievementId
+{
+    Test1,
+    Test2,
+    Test3,
+    NewSpecies,
 }
 
 

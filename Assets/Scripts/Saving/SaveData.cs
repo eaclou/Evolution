@@ -1,7 +1,7 @@
 ﻿using System;
 
 /// Stores all data for a single save game
-[Serializable] [ES3Serializable]
+[Serializable]
 public class SaveData
 {
     Lookup lookup => Lookup.instance;

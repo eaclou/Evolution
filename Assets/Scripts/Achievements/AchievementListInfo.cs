@@ -9,21 +9,21 @@ public class AchievementListInfo : ScriptableObject
     
     AchievementData[] achievements => AccessSaveData.instance.data.achievements;
     
-    public Action<AchievementInfo> onUnlock;
+    public Action<AchievementData> onUnlock;
     
-    public bool Unlock(AchievementInfo id)
+    public bool SetUnlocked(AchievementId id, bool unlocked = true)
     {
         var achievement = GetAchievement(id);
-        if (achievement != null && !achievement.unlocked)
+        if (achievement != null && achievement.unlocked != unlocked)
         {
-            achievement.unlocked = true;
-            onUnlock?.Invoke(id);
+            achievement.unlocked = unlocked;
+            onUnlock?.Invoke(achievement);
             return true;
         }
         return false;
     }
     
-    public AchievementData GetAchievement(AchievementInfo id)
+    public AchievementData GetAchievement(AchievementId id)
     {
         foreach (var achievement in achievements)
             if (achievement.id == id)
@@ -34,7 +34,7 @@ public class AchievementListInfo : ScriptableObject
     }
 }
 
-[Serializable] [ES3Serializable]
+[Serializable]
 public class AchievementListData
 {
     public AchievementData[] data;

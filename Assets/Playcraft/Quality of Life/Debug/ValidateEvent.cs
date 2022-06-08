@@ -1,21 +1,34 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.Events;
 
 namespace Playcraft
 {
     public class ValidateEvent : MonoBehaviour
     {
-        [SerializeField] bool trigger;
-        [SerializeField] UnityEvent Response;
+        [SerializeField] Binding[] bindings;
     
         void OnValidate() { CheckTrigger(); }
         void Update() { CheckTrigger(); }
         
         void CheckTrigger()
         {
-            if (!trigger) return;
-            Response.Invoke();
-            trigger = false;
+            foreach (var binding in bindings)
+                binding.CheckTrigger();
+        }
+
+        [Serializable]
+        public class Binding
+        {
+            [SerializeField] bool trigger;
+            [SerializeField] UnityEvent response;   
+            
+            public void CheckTrigger()
+            {
+                if (!trigger) return;
+                response.Invoke();
+                trigger = false;
+            }
         }
     }
 }

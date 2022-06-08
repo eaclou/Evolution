@@ -1,29 +1,38 @@
 ﻿using UnityEngine;
 using Playcraft;
+using System.IO;
+using Newtonsoft.Json;
 
 /// Get and set data for the currently loaded save
 public class AccessSaveData : Singleton<AccessSaveData>
 {
     SimulationManager simulation => SimulationManager.instance;
     
-    [ReadOnly] public SaveData data = new SaveData();
+    [ReadOnly] public SaveData data;
     
     public int saveIndex = 1;
-    string saveName => "Save Game " + saveIndex;
+    string saveName => $"SaveGame{saveIndex}";
+    string saveFilePath => $"{Application.persistentDataPath}/{saveName}.json";
     
+    public void Initialize()
+    {
+        data = new SaveData();
+    }
+
     public void Save()
     {
         GatherAgentData();
-        ES3.Save(saveName, data);
+        var json = JsonConvert.SerializeObject(data);
+        File.WriteAllText(saveFilePath, json);
     }
 
     public void Load()
     {
-        data = ES3.Load(saveName, data);
+        var json = File.ReadAllText(saveFilePath);
+        data = JsonConvert.DeserializeObject<SaveData>(json);
+        
         DistributeAgentData();
     }
-    
-    public void DeleteActiveSave() { ES3.DeleteFile(saveName); }
     
     /// Transfer agent data from simulation to profile
     void GatherAgentData()

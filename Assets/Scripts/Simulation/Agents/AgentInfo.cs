@@ -9,7 +9,7 @@ public class AgentInfo : ScriptableObject
 }
 
 // * WPP: move immutable values (if any) to AgentInfo
-[Serializable] [ES3Serializable]
+[Serializable] //[ES3Serializable]
 public class AgentData
 {
     public Vector3 position;
