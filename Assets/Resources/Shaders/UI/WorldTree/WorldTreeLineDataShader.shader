@@ -88,11 +88,21 @@
 				
 				float3 worldPosition = float3(vertexCoord, 0) * _IsOn;								
 				*/
+
+				float lineWidth = 0.033;
+				WorldTreeLineData dataPrev = worldTreeLineDataCBuffer[max(0, inst - 1)];
 				WorldTreeLineData data = worldTreeLineDataCBuffer[inst];
-				float3 worldPosition = data.worldPos + quadData * 0.03;
+
+				float3 prevToThisVec = data.worldPos - dataPrev.worldPos;
+				float3 right = normalize(float3(prevToThisVec.y, -prevToThisVec.x, 0));
+
+				float3 quadOffset = quadData.x * right * lineWidth + quadData.y * prevToThisVec;
+				
+				float3 worldPosition = data.worldPos + quadOffset;
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.color = data.color; // tex2Dlod(_KeyTex, float4(0,((float)_SelectedWorldStatsID + 0.5) / 32.0,0,0));
+				
 
 				//float distToMouse = 1.0 - saturate(abs(vertexCoord.x - _MouseCoordX) * 15);
 				//o.color.xyz = lerp(o.color.xyz, float3(1, 1, 1), _MouseOn * distToMouse * 1);
