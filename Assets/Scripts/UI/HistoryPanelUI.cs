@@ -289,7 +289,7 @@ public class HistoryPanelUI : MonoBehaviour
                 alpha = 0f;
             }
 
-            data.worldPos = new Vector3(x, y, z);
+            data.worldPos = new Vector3(coordinates.x, coordinates.y, z);
             data.color = new Color(hue.x, hue.y, hue.z, alpha);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
         }
         else 
@@ -321,20 +321,16 @@ public class HistoryPanelUI : MonoBehaviour
             
             var coordinates = AnchorBottomLeft(x, y);
             if ((coordinates - cursorCoords).magnitude < 0.05f) {
-                data.color = Color.white;
+                hue = Vector3.one;
+                alpha = 1f;
             }
             if(curPanelMode != HistoryPanelMode.AllSpecies) {
                 alpha = 0f;
             }
             data.color = new Color(hue.x, hue.y, hue.z, alpha); 
-            data.worldPos = new Vector3(x, y, z);
+            data.worldPos = new Vector3(coordinates.x, coordinates.y, z);
         }
 
-        //if (curPanelMode == HistoryPanelMode.SpeciesPopulation || curPanelMode == HistoryPanelMode.CreatureTimeline) {
-        //    data.worldPos = Vector3.zero;
-        //    data.color = new Color(0f, 0f, 0f, 0f);
-        //}
-        
         worldTreeLines[index] = data;
     }
     
@@ -456,6 +452,7 @@ public class HistoryPanelUI : MonoBehaviour
         selectionManager.SetSelectedFromSpeciesUI(iconUI.speciesID);
         uiManagerRef.speciesOverviewUI.RebuildGenomeButtons();
         uiManagerRef.ExitTooltipObject();
+
     }
     
     public void ClickButtonToggleGraphMode() {

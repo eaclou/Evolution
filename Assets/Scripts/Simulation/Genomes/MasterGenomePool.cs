@@ -105,6 +105,7 @@ public class MasterGenomePool
             }
             if (pool.isFlaggedForExtinction) {
                 noCurrentlyFlaggedSpecies = false;
+                
             }
         }
         
@@ -127,20 +128,29 @@ public class MasterGenomePool
                 SpeciesGenomePool pool = completeSpeciesPoolsList[idList];
                 if(pool.isFlaggedForExtinction) {
                     float fitness = pool.avgCandidateData.performanceData.totalTicksAlive;
-                    if (pool.candidateGenomesList.Count < 1) {
-                        ExtinctifySpecies(idList);
-
-                        Debug.Log("EXTINCTIFY " + idList + ", fitness: " + fitness + ", curWorst: " + leastFitSpeciesID + " (" + worstFitness);
-                        string readout = "";
-                        foreach (int id in currentlyActiveSpeciesIDList) {
-                            if (id == leastFitSpeciesID) {
-                                readout += "[LEAST FIT] ";
-                            }
-                            readout += "Species " + id + ", fitness: " + completeSpeciesPoolsList[id].avgCandidateData.performanceData.totalTicksAlive + ", " + completeSpeciesPoolsList[id].candidateGenomesList.Count + " Cands\n";
-                        }
-                        Debug.Log(readout);
-                        return;
+                    if(fitness > worstFitness) {
+                        //revive!
+                        pool.isFlaggedForExtinction = false;
+                        Debug.Log("Species " + pool.speciesID + "Back from the brink! " + fitness + " / " + worstFitness);
                     }
+                    else {
+                        if (pool.candidateGenomesList.Count < 1) {
+                            ExtinctifySpecies(idList);
+
+                            Debug.Log("EXTINCTIFY " + idList + ", fitness: " + fitness + ", curWorst: " + leastFitSpeciesID + " (" + worstFitness);
+                            string readout = "";
+                            foreach (int id in currentlyActiveSpeciesIDList) {
+                                if (id == leastFitSpeciesID) {
+                                    readout += "[LEAST FIT] ";
+                                }
+                                readout += "Species " + id + ", fitness: " + completeSpeciesPoolsList[id].avgCandidateData.performanceData.totalTicksAlive + ", " + completeSpeciesPoolsList[id].candidateGenomesList.Count + " Cands\n";
+                            }
+                            Debug.Log(readout);
+                            return;
+                        }
+                    }
+                    
+                    
                 }
             }
         }
