@@ -89,7 +89,7 @@ public class SelectionManager : Singleton<SelectionManager>
             
         }
         SetSelected(cand);
-        Debug.Log("Selected! " + speciesID + ",  " + cand.candidateID);
+        //Debug.Log("Selected! " + speciesID + ",  " + cand.candidateID);
     }
     
     // WPP: simplified search by using cached values

@@ -236,7 +236,7 @@ public class CameraManager : Singleton<CameraManager>
             return;
         
         isFollowingAgent = false;
-        Logger.Log("followed creature died!", true);
+        //Logger.Log("followed creature died!", true);
         SelectionManager.instance.FollowedCreatureDied();
     }
     
@@ -249,15 +249,3 @@ public class CameraManager : Singleton<CameraManager>
     }    
 }
 
-/*
-public void SetTargetAgent() {
-    SetTargetAgent(simulation.agents[targetAgentIndex], targetAgentIndex);
-}
-
-public void SetTargetAgent(Agent agent, int index) 
-{
-    //Debug.Log("SetTarget! " + index.ToString());
-    targetAgent = agent;
-    targetAgentTransform = agent.bodyGO.transform;
-    targetAgentIndex = index;
-}*/

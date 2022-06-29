@@ -41,7 +41,7 @@ public class CritterModuleAppearanceGenome
         hueSecondary = new Vector3(Random.Range(0.1f, 1f), Random.Range(0.1f, 1f), Random.Range(0.1f, 1f));
         
         var pattern = brushPatternRandomizer.RandomNoRepeat();
-        Debug.Log($"Initializing appearance with brush pattern {pattern}");
+        //Debug.Log($"Initializing appearance with brush pattern {pattern}");
         bodyStrokeBrushTypeX = pattern.Item1; 
         bodyStrokeBrushTypeY = pattern.Item2; 
         

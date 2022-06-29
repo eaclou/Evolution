@@ -436,7 +436,7 @@ public class HistoryPanelUI : MonoBehaviour
     {
         if (iconUI.speciesID == historySelectedSpeciesID) 
         {
-            Debug.Log("ClickSpeciesIcon(SpeciesIconUI iconUI) " + curPanelMode);
+            //Debug.Log("ClickSpeciesIcon(SpeciesIconUI iconUI) " + curPanelMode);
             if (isPopulationMode) 
             {
                 // Acting as a "BACK" button!
