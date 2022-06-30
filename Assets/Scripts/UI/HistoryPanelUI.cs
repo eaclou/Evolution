@@ -476,7 +476,7 @@ public class HistoryPanelUI : MonoBehaviour
             curPanelMode = 0;
         }
     }
-
+    
     public void ClickedSelectedCreatureEvents() {
         curPanelMode = HistoryPanelMode.CreatureTimeline;
     }
@@ -485,7 +485,7 @@ public class HistoryPanelUI : MonoBehaviour
     {
         if(isNudgeOn) {
             nudgeCounter++;
-            if(nudgeCounter >= 420) {
+            if(nudgeCounter >= 520) {
                 CloseNudgeMessage();                
             }
         }
@@ -494,7 +494,7 @@ public class HistoryPanelUI : MonoBehaviour
         openCloseButton.SetMouseEnter(mouseInOpenCloseArea);
         tooltipOpenCloseButton.tooltipString = isPanelOpen ? "Hide Timeline Panel" : "Open Timeline Panel";
 
-        textPanelStateDebug.text = "MODE: " + historySelectedSpeciesID + currentSelection.candidate.speciesID;
+        textPanelStateDebug.text = "sel: " + historySelectedSpeciesID + ", " + currentSelection.candidate.speciesID;
         buttonToggleExtinct.gameObject.SetActive(false);
         float targetStartTimeStep = 0f;
         tempPanelSpeciesPop.SetActive(false);
@@ -534,8 +534,7 @@ public class HistoryPanelUI : MonoBehaviour
                 buttonSelCreatureEventsLink.gameObject.SetActive(false);
                 break;
         }
-        //buttonToggleExtinct.gameObject.SetActive(isAllSpeciesMode);
-
+        
         ClearDeadSpeciesIcons();
 
         foreach (var icon in speciesIcons) {
@@ -568,27 +567,12 @@ public class HistoryPanelUI : MonoBehaviour
             UpdateSpeciesIconsDefault();
             return;
         }
-        
-        var bestScore = GetMostTicksAlive();
+
+        var bestScore = uiManagerRef.speciesGraphPanelUI.maxValuesStatArray[0]; // GetMostTicksAlive();
         if (bestScore == 0f) bestScore = 1f;
         SortSpeciesIcons(bestScore);
     }
     
-    float GetMostTicksAlive()
-    {
-        float result = 0f;
-        
-        foreach (var icon in speciesIcons) 
-        {
-            var pool = icon.linkedPool;
-            var ticksAlive = (float)pool.avgCandidateDataYearList[pool.avgCandidateDataYearList.Count - 1].performanceData.totalTicksAlive;
-
-            if (ticksAlive > result)
-                result = ticksAlive;
-        }
-        
-        return result;        
-    }
     
     void SortSpeciesIcons(float bestScore)
     {
@@ -628,31 +612,7 @@ public class HistoryPanelUI : MonoBehaviour
     
         foreach (var icon in speciesIcons) 
         {
-            // WPP: extract method, moved next/prev calculations outside loop
-            /*
-            // DEFAULTS
-            float x = -0.2f;
-            float y = 0.2f; // (float)s / Mathf.Max(speciesIconsList.Count - 1, 1f);   
             
-            // Cycle next species
-            if (icon.linkedPool.speciesID == nextSpeciesIndex) 
-            {   
-                x = 0f;
-                y = 0f;
-            }
-            // Selected
-            else if (icon.linkedPool.speciesID == historySelectedSpeciesID) 
-            {   
-                x = 0f;
-                y = 0.5f;
-            }
-            // Cycle previous species
-            else if (icon.linkedPool.speciesID == prevSpeciesIndex) 
-            {  
-                x = 0f;
-                y = 1f;
-            }
-            */
             var coordinates = GetCoordinatesBySpeciesID(icon.linkedPool.speciesID, nextSpeciesIndex, prevSpeciesIndex);
             coordinates = AnchorBottomLeft(coordinates);
             icon.SetTargetCoords(coordinates);
