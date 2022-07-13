@@ -69,9 +69,9 @@ public class MasterGenomePool
         selectionManager.SetSelected(completeSpeciesPoolsList[0].candidateGenomesList[0]);
     }
 
-    public void AddNewYearlySpeciesStats(int year) {
+    public void AddNewSpeciesDataPoint(int timestep) {
         foreach (var speciesPool in completeSpeciesPoolsList) {
-            speciesPool.AddNewYearlyStats(year);
+            speciesPool.AddNewDataPoint(timestep);
         }
     }        
 

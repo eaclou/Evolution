@@ -12,6 +12,7 @@ public class SpeciesGraphPanelUI : MonoBehaviour
 
     public Texture2D statsSpeciesColorKey;
     private int maxDisplaySpecies = 32;  // **** WILL BECOME A PROBLEM!!!! ****
+    
     public Texture2D[] statsTreeOfLifeSpeciesTexArray;
     public float[] maxValuesStatArray;
     public float[] minValuesStatArray;
@@ -111,18 +112,6 @@ public class SpeciesGraphPanelUI : MonoBehaviour
             var isSelected = selectionManager.currentSelection.historySelectedSpeciesID == masterGenomePool.currentlyActiveSpeciesIDList[i] ? 1f : 0f;
             TreeOfLifeSpeciesKeyData keyData = new TreeOfLifeSpeciesKeyData(pool, isSelected, parentHue);
             
-            // WPP: use constructor
-            //Vector3 hueSecondary = pool.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
-            /*keyData.timeCreated = pool.timeStepCreated;  // Use TimeSteps instead of Years???
-            keyData.timeExtinct = pool.timeStepExtinct;
-            keyData.huePrimary = huePrimary;
-            keyData.hueSecondary = hueSecondary;
-            keyData.parentHue = parentHue;
-            keyData.isExtinct = pool.isExtinct ? 1f : 0f;
-            keyData.isOn = 1f;
-            //int selectedID = treeOfLifeManager.selectedID;
-            keyData.isSelected = selectionManager.selectedSpeciesID == masterGenomePool.currentlyActiveSpeciesIDList[i] ? 1f : 0f;*/
-
             speciesKeyDataArray[i] = keyData;
         }
         

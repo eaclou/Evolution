@@ -601,19 +601,22 @@ public class SimulationManager : Singleton<SimulationManager>
             simAgeYearCounter = 0;
 
             statsHistory.AddNewHistoricalDataEntry();            
-            AddNewSpeciesDataEntry(curSimYear);
+            //AddNewSpeciesDataEntry(curSimYear);
+            //avgCandidateDataYearList.Add(avgCandidateData); //***EAC GETTING RID OF THIS!!! // = new List<CandidateAgentData>(); // INCLUDES PerformanceData on CandidateData
             CheckForYearEvent();
         }
 
-        if (simAgeTimeSteps % 80 == 70) {
+        if (simAgeTimeSteps % 90 == 0) {
             uiManager.speciesGraphPanelUI.UpdateSpeciesTreeDataTextures(curSimYear);
             globalGraphData.AddNewEntry(simResourceManager, GetTotalAgentBiomass());
+            //Species stats for history panel:
+            AddNewSpeciesDataEntry(curSimYear);
         }
 
         if (simAgeTimeSteps % 79 == 3) {
             UpdateSimulationClimate();
             //RefreshLatestHistoricalDataEntry();
-            RefreshLatestSpeciesDataEntry();
+            //RefreshLatestSpeciesDataEntry();
             //uiManager.UpdateSpeciesTreeDataTextures(curSimYear); // shouldn't lengthen!
             //uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
             //theRenderKing.UpdateTreeOfLifeEventLineData(simEventsManager.completeEventHistoryList);
@@ -1239,8 +1242,8 @@ public class SimulationManager : Singleton<SimulationManager>
         fluidManager.UpdateSimulationClimate();
     }
     
-    private void AddNewSpeciesDataEntry(int year) {
-        masterGenomePool.AddNewYearlySpeciesStats(year);
+    private void AddNewSpeciesDataEntry(int timestep) {
+        masterGenomePool.AddNewSpeciesDataPoint(timestep);
     }
     
     private void RefreshLatestSpeciesDataEntry() { 

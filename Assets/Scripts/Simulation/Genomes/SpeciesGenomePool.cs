@@ -24,10 +24,10 @@ public class SpeciesGenomePool
     public CandidateAgentData mostEatenCandidate;
     //public Lineage Map --> avg genome over time
     public List<CandidateAgentData> hallOfFameGenomesList;
-    public List<CandidateAgentData> leaderboardGenomesList;
-    public List<CandidateAgentData> candidateGenomesList;
+    public List<CandidateAgentData> leaderboardGenomesList; // potential parents ranked
+    public List<CandidateAgentData> candidateGenomesList; // *To be born
 
-    public int maxLeaderboardGenomePoolSize = 32;    
+    public int maxLeaderboardGenomePoolSize = 64;    
     public int numAgentsEvaluated = 0;
      
     public int yearCreated = -1;
@@ -52,14 +52,22 @@ public class SpeciesGenomePool
         
     //public List<PerformanceData> avgPerformanceDataYearList;
     //public PerformanceData avgPerformanceData;
-    public List<CandidateAgentData> avgCandidateDataYearList;
+    public List<CandidateAgentData> avgCandidateDataYearList; // ***EAC Phase this out!
     public CandidateAgentData avgCandidateData;
+    public struct SpeciesDataPoint
+    {
+        public float timestep;
+        public float lifespan;
+    }
+    public List<SpeciesDataPoint> speciesDataPointsList;
 
     public Material coatOfArmsMat;
 
     //public float avgLifespan = 0f;
     public bool isFlaggedForExtinction = false;
     public bool isExtinct = false;
+
+    private int maxNumDataPointEntries = 64;
     
     public CritterModuleAppearanceGenome appearanceGenome => 
         foundingCandidate.candidateGenome.bodyGenome.appearanceGenome;
@@ -89,6 +97,7 @@ public class SpeciesGenomePool
 
         avgCandidateDataYearList = new List<CandidateAgentData>(); 
         CreateNewAverageCandidate(); // avgCandidateData = new CandidateAgentData();
+        speciesDataPointsList = new List<SpeciesDataPoint>();
     }
     
     public void FirstTimeInitialize(CandidateAgentData foundingGenome, int depth) {
@@ -114,6 +123,7 @@ public class SpeciesGenomePool
         //Debug.Log("SPECIES CREATED! " + debugTxt);
         representativeCandidate = foundingGenome;
 
+        // create species CoatOfArms:
         coatOfArmsMat = new Material(TheRenderKing.instance.coatOfArmsShader);
         //coatOfArmsTex = TheRenderKing.instance.GenerateSpeciesCoatOfArms(foundingGenome.candidateGenome.bodyGenome.appearanceGenome);
         coatOfArmsMat.SetPass(0);
@@ -153,16 +163,42 @@ public class SpeciesGenomePool
     }
 
     private void CreateNewAverageCandidate() {
-        AgentGenome blankGenome = new AgentGenome(.1f, 0);
-        avgCandidateData = new CandidateAgentData(blankGenome, speciesID);
+        if(avgCandidateData == null) {
+            AgentGenome blankGenome = new AgentGenome(0f, 0);
+            avgCandidateData = new CandidateAgentData(blankGenome, speciesID);
+        }
+        
         avgCandidateData.SetToAverage(leaderboardGenomesList);
     }
 
-    public void AddNewYearlyStats(int year) 
+    public void AddNewDataPoint(int timestep) 
     {
         CreateNewAverageCandidate(); // ***EC figure this out???        
-        avgCandidateDataYearList.Add(avgCandidateData); // = new List<CandidateAgentData>(); // INCLUDES PerformanceData on CandidateData
+        avgCandidateDataYearList.Add(avgCandidateData); //***EAC GETTING RID OF THIS!!! // = new List<CandidateAgentData>(); // INCLUDES PerformanceData on CandidateData
         //Debug.Log("AddNewYearlyStats " + avgCandidateData.performanceData.totalTicksAlive);
+        SpeciesDataPoint dataPoint = new SpeciesDataPoint();
+        dataPoint.timestep = timestep;
+        dataPoint.lifespan = avgCandidateData.performanceData.totalTicksAlive;
+
+        speciesDataPointsList.Add(dataPoint);
+        if(speciesDataPointsList.Count >= maxNumDataPointEntries) {
+            MergeDataPoints();
+        }
+    }
+    private void MergeDataPoints() {
+        float closestPairDistance = float.PositiveInfinity;
+        int closestPairStartIndex = 1;
+        for(int i = 1; i <= speciesDataPointsList.Count - 1; i++) {
+            float dist = speciesDataPointsList[i + 1].timestep - speciesDataPointsList[i].timestep;
+            if(dist <= closestPairDistance) {
+                closestPairStartIndex = i;
+            }
+        }
+        SpeciesDataPoint avgData = new SpeciesDataPoint();
+        avgData.timestep = (speciesDataPointsList[closestPairStartIndex].timestep + speciesDataPointsList[closestPairStartIndex + 1].timestep) / 2f;
+        avgData.lifespan = (speciesDataPointsList[closestPairStartIndex].lifespan + speciesDataPointsList[closestPairStartIndex + 1].lifespan) / 2f;
+        speciesDataPointsList[closestPairStartIndex] = avgData;
+        speciesDataPointsList.RemoveAt(closestPairStartIndex + 1);
     }
 
     /// Finds an unborn agent ready to be respawned

@@ -34,6 +34,7 @@ public class SelectionManager : Singleton<SelectionManager>
             CameraManager.instance.targetAgent = agent;
             CameraManager.instance.targetAgentTransform = agent.bodyGO.transform;
             CameraManager.instance.targetAgentIndex = agent.index;
+            CameraManager.instance.SetFollowing(KnowledgeMapId.Animals);
             break;
         }
         
