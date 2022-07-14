@@ -52,13 +52,10 @@ public class SpeciesGenomePool
         
     //public List<PerformanceData> avgPerformanceDataYearList;
     //public PerformanceData avgPerformanceData;
-    public List<CandidateAgentData> avgCandidateDataYearList; // ***EAC Phase this out!
+    //public List<CandidateAgentData> avgCandidateDataYearList; // ***EAC Phase this out!
     public CandidateAgentData avgCandidateData;
-    public struct SpeciesDataPoint
-    {
-        public float timestep;
-        public float lifespan;
-    }
+        
+    [SerializeField]
     public List<SpeciesDataPoint> speciesDataPointsList;
 
     public Material coatOfArmsMat;
@@ -67,7 +64,7 @@ public class SpeciesGenomePool
     public bool isFlaggedForExtinction = false;
     public bool isExtinct = false;
 
-    private int maxNumDataPointEntries = 64;
+    private int maxNumDataPointEntries = 16;
     
     public CritterModuleAppearanceGenome appearanceGenome => 
         foundingCandidate.candidateGenome.bodyGenome.appearanceGenome;
@@ -95,7 +92,7 @@ public class SpeciesGenomePool
         leaderboardGenomesList = new List<CandidateAgentData>();        
         hallOfFameGenomesList = new List<CandidateAgentData>();
 
-        avgCandidateDataYearList = new List<CandidateAgentData>(); 
+        //avgCandidateDataYearList = new List<CandidateAgentData>(); 
         CreateNewAverageCandidate(); // avgCandidateData = new CandidateAgentData();
         speciesDataPointsList = new List<SpeciesDataPoint>();
     }
@@ -174,26 +171,28 @@ public class SpeciesGenomePool
     public void AddNewDataPoint(int timestep) 
     {
         CreateNewAverageCandidate(); // ***EC figure this out???        
-        avgCandidateDataYearList.Add(avgCandidateData); //***EAC GETTING RID OF THIS!!! // = new List<CandidateAgentData>(); // INCLUDES PerformanceData on CandidateData
+        //avgCandidateDataYearList.Add(avgCandidateData); //***EAC GETTING RID OF THIS!!! // = new List<CandidateAgentData>(); // INCLUDES PerformanceData on CandidateData
         //Debug.Log("AddNewYearlyStats " + avgCandidateData.performanceData.totalTicksAlive);
         SpeciesDataPoint dataPoint = new SpeciesDataPoint();
         dataPoint.timestep = timestep;
         dataPoint.lifespan = avgCandidateData.performanceData.totalTicksAlive;
 
         speciesDataPointsList.Add(dataPoint);
-        if(speciesDataPointsList.Count >= maxNumDataPointEntries) {
+        if(speciesDataPointsList.Count > maxNumDataPointEntries) {
             MergeDataPoints();
         }
     }
     private void MergeDataPoints() {
         float closestPairDistance = float.PositiveInfinity;
         int closestPairStartIndex = 1;
-        for(int i = 1; i <= speciesDataPointsList.Count - 1; i++) {
+        for(int i = 1; i < speciesDataPointsList.Count - 3; i++) { // don't include first or last point
             float dist = speciesDataPointsList[i + 1].timestep - speciesDataPointsList[i].timestep;
             if(dist <= closestPairDistance) {
+                closestPairDistance = dist;
                 closestPairStartIndex = i;
             }
         }
+        //Debug.Log("closest dist: " + closestPairDistance)
         SpeciesDataPoint avgData = new SpeciesDataPoint();
         avgData.timestep = (speciesDataPointsList[closestPairStartIndex].timestep + speciesDataPointsList[closestPairStartIndex + 1].timestep) / 2f;
         avgData.lifespan = (speciesDataPointsList[closestPairStartIndex].lifespan + speciesDataPointsList[closestPairStartIndex + 1].lifespan) / 2f;

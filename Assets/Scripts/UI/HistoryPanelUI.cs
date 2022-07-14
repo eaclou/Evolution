@@ -247,16 +247,17 @@ public class HistoryPanelUI : MonoBehaviour
             int graphDataYearIndexStart = 0;
             int graphDataYearIndexEnd = 0;
             
-            if (pool.avgCandidateDataYearList.Count == 0) 
+            if (pool.speciesDataPointsList.Count == 0) 
                 return;
-            
+
+            float bestScoreTemp = pool.speciesDataPointsList[pool.speciesDataPointsList.Count - 1].lifespan;
             float x = (float)(point % worldTreeNumPointsPerLine) / (float)worldTreeNumPointsPerLine;
-            int count = Mathf.Max(0, pool.avgCandidateDataYearList.Count - 1);
+            int count = Mathf.Max(0, pool.speciesDataPointsList.Count - 1);
             graphDataYearIndexStart = Mathf.FloorToInt((float)count * x);
             graphDataYearIndexEnd = Mathf.CeilToInt((float)count * x);
             float frac = ((float)count * x) % 1f;
-            float valStart = (float)pool.avgCandidateDataYearList[graphDataYearIndexStart].performanceData.totalTicksAlive / uiManagerRef.speciesGraphPanelUI.maxValuesStatArray[0];
-            float valEnd = (float)pool.avgCandidateDataYearList[graphDataYearIndexEnd].performanceData.totalTicksAlive / uiManagerRef.speciesGraphPanelUI.maxValuesStatArray[0];
+            float valStart = (float)pool.speciesDataPointsList[graphDataYearIndexStart].lifespan / bestScoreTemp;
+            float valEnd = (float)pool.speciesDataPointsList[graphDataYearIndexEnd].lifespan / bestScoreTemp;
             //valEnd = Mathf.Clamp(valEnd, 0, pool.avgCandidateDataYearList.Count - 1);
             float y = Mathf.Lerp(valStart, valEnd, frac); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
             float z = 0f;
@@ -563,7 +564,7 @@ public class HistoryPanelUI : MonoBehaviour
     }
     
     private void UpdateSpeciesIconsGraphMode() {
-        if (speciesIcons[0].linkedPool.avgCandidateDataYearList.Count < 1) {
+        if (speciesIcons[0].linkedPool.speciesDataPointsList.Count < 1) {
             UpdateSpeciesIconsDefault();
             return;
         }
@@ -579,7 +580,10 @@ public class HistoryPanelUI : MonoBehaviour
         foreach (var icon in speciesIcons) 
         {
             SpeciesGenomePool pool = icon.linkedPool;
-            float totalTicksAlive = pool.avgCandidateDataYearList[pool.avgCandidateDataYearList.Count - 1].performanceData.totalTicksAlive;
+            float totalTicksAlive = 0f;
+            if(pool.speciesDataPointsList.Count > 0) {
+                totalTicksAlive = pool.speciesDataPointsList[pool.speciesDataPointsList.Count - 1].lifespan;
+            }
             float x = pool.isExtinct ? (float)pool.timeStepExtinct / Mathf.Max(1f, (float)simManager.simAgeTimeSteps) : 1f;
             float y = Mathf.Clamp01(totalTicksAlive / bestScore);
             icon.SetTargetCoords(AnchorBottomLeft(x, y));

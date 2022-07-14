@@ -606,11 +606,11 @@ public class SimulationManager : Singleton<SimulationManager>
             CheckForYearEvent();
         }
 
-        if (simAgeTimeSteps % 90 == 0) {
+        if (simAgeTimeSteps % 120 == 0) {
             uiManager.speciesGraphPanelUI.UpdateSpeciesTreeDataTextures(curSimYear);
             globalGraphData.AddNewEntry(simResourceManager, GetTotalAgentBiomass());
             //Species stats for history panel:
-            AddNewSpeciesDataEntry(curSimYear);
+            AddNewSpeciesDataEntry(simAgeTimeSteps);
         }
 
         if (simAgeTimeSteps % 79 == 3) {
@@ -1246,12 +1246,12 @@ public class SimulationManager : Singleton<SimulationManager>
         masterGenomePool.AddNewSpeciesDataPoint(timestep);
     }
     
-    private void RefreshLatestSpeciesDataEntry() { 
+    /*private void RefreshLatestSpeciesDataEntry() { 
         foreach (var list in masterGenomePool.completeSpeciesPoolsList) {
             if (list.avgCandidateDataYearList.Count <= 0) continue; 
             list.avgCandidateDataYearList[list.avgCandidateDataYearList.Count - 1] = list.avgCandidateData;
         } 
-    }
+    }*/
     
     // **********EC Move this to MasterGenomePool class?
     public void AddNewSpecies(AgentGenome newGenome, int parentSpeciesID) {  
@@ -1266,7 +1266,7 @@ public class SimulationManager : Singleton<SimulationManager>
         masterGenomePool.completeSpeciesPoolsList.Add(newSpecies);
         masterGenomePool.speciesCreatedOrDestroyedThisFrame = true;
         
-        List<CandidateAgentData> avgParentYearData = parentSpeciesPool.avgCandidateDataYearList;
+        /*List<CandidateAgentData> avgParentYearData = parentSpeciesPool.avgCandidateDataYearList;
 
         int lastIndex = Mathf.Max(0, avgParentYearData.Count - 1);
         if(lastIndex > 0) {
@@ -1277,7 +1277,7 @@ public class SimulationManager : Singleton<SimulationManager>
         
         foreach (var yearData in avgParentYearData) {
             newSpecies.avgCandidateDataYearList.Add(yearData);                
-        }
+        }*/
         
         if (newSpecies.depthLevel > masterGenomePool.currentHighestDepth) {
             masterGenomePool.currentHighestDepth = newSpecies.depthLevel;

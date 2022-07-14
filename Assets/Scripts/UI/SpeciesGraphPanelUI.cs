@@ -177,16 +177,17 @@ public class SpeciesGraphPanelUI : MonoBehaviour
                 {
                     Debug.LogError("speciesPool is null");
                 }
+                //***EAC NO LONGER USES TEXTURE AS DATA! See speciesPool datapoints
                 for (int t = 0; t < years; t++) 
                 {
                     for (int a = 0; a < statsTreeOfLifeSpeciesTexArray.Length; a++) 
                     {
                         float valStat = 0f;
-                        if(speciesPool.avgCandidateDataYearList.Count > t) 
+                        /*if(speciesPool.avgCandidateDataYearList.Count > t) 
                         {
                             valStat = (float)speciesPool.avgCandidateDataYearList[t].performanceData.totalTicksAlive; //0f;
                             //Debug.Log("valStat: " + valStat.ToString());
-                        }
+                        }*/
                         
                         if(years > 15) 
                         {
