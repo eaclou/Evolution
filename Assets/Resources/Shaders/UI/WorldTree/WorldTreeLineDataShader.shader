@@ -89,14 +89,14 @@
 				float3 worldPosition = float3(vertexCoord, 0) * _IsOn;								
 				*/
 
-				float lineWidth = 0.033;
+				float lineWidth = 0.025;
 				WorldTreeLineData dataPrev = worldTreeLineDataCBuffer[max(0, inst - 1)];
 				WorldTreeLineData data = worldTreeLineDataCBuffer[inst];
 
 				float3 prevToThisVec = data.worldPos - dataPrev.worldPos;
 				float3 right = normalize(float3(prevToThisVec.y, -prevToThisVec.x, 0));
 
-				float3 quadOffset = quadData.x * right * lineWidth + quadData.y * prevToThisVec;
+				float3 quadOffset = quadData.x * right * lineWidth + quadData.y * prevToThisVec * 1.25;
 				
 				float3 worldPosition = data.worldPos + quadOffset;
 

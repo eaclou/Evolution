@@ -250,14 +250,15 @@ public class HistoryPanelUI : MonoBehaviour
             if (pool.speciesDataPointsList.Count == 0) 
                 return;
 
+            float minScoreValue = 750f;
             float bestScoreTemp = pool.speciesDataPointsList[pool.speciesDataPointsList.Count - 1].lifespan;
             float x = (float)(point % worldTreeNumPointsPerLine) / (float)worldTreeNumPointsPerLine;
             int count = Mathf.Max(0, pool.speciesDataPointsList.Count - 1);
             graphDataYearIndexStart = Mathf.FloorToInt((float)count * x);
             graphDataYearIndexEnd = Mathf.CeilToInt((float)count * x);
             float frac = ((float)count * x) % 1f;
-            float valStart = (float)pool.speciesDataPointsList[graphDataYearIndexStart].lifespan / bestScoreTemp;
-            float valEnd = (float)pool.speciesDataPointsList[graphDataYearIndexEnd].lifespan / bestScoreTemp;
+            float valStart = (float)(pool.speciesDataPointsList[graphDataYearIndexStart].lifespan - minScoreValue) / bestScoreTemp;
+            float valEnd = (float)(pool.speciesDataPointsList[graphDataYearIndexEnd].lifespan - minScoreValue) / bestScoreTemp;
             //valEnd = Mathf.Clamp(valEnd, 0, pool.avgCandidateDataYearList.Count - 1);
             float y = Mathf.Lerp(valStart, valEnd, frac); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
             float z = 0f;

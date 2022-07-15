@@ -64,7 +64,7 @@ public class SpeciesGenomePool
     public bool isFlaggedForExtinction = false;
     public bool isExtinct = false;
 
-    private int maxNumDataPointEntries = 16;
+    private int maxNumDataPointEntries = 64;
     
     public CritterModuleAppearanceGenome appearanceGenome => 
         foundingCandidate.candidateGenome.bodyGenome.appearanceGenome;
@@ -177,6 +177,13 @@ public class SpeciesGenomePool
         dataPoint.timestep = timestep;
         dataPoint.lifespan = avgCandidateData.performanceData.totalTicksAlive;
 
+        if(SimulationManager.instance.simAgeTimeSteps - this.timeStepCreated < 1000) {
+            //SET ALL to current value:
+            foreach(SpeciesDataPoint point in speciesDataPointsList) {
+                point.lifespan = avgCandidateData.performanceData.totalTicksAlive;
+            }
+        }
+        
         speciesDataPointsList.Add(dataPoint);
         if(speciesDataPointsList.Count > maxNumDataPointEntries) {
             MergeDataPoints();
@@ -198,6 +205,8 @@ public class SpeciesGenomePool
         avgData.lifespan = (speciesDataPointsList[closestPairStartIndex].lifespan + speciesDataPointsList[closestPairStartIndex + 1].lifespan) / 2f;
         speciesDataPointsList[closestPairStartIndex] = avgData;
         speciesDataPointsList.RemoveAt(closestPairStartIndex + 1);
+
+        
     }
 
     /// Finds an unborn agent ready to be respawned
