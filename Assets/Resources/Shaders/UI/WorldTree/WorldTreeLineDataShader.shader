@@ -96,9 +96,9 @@
 				float3 prevToThisVec = data.worldPos - dataPrev.worldPos;
 				float3 right = normalize(float3(prevToThisVec.y, -prevToThisVec.x, 0));
 
-				float3 quadOffset = quadData.x * right * lineWidth + quadData.y * prevToThisVec * 1.25;
+				float3 quadOffset = quadData.x * right * lineWidth + o.uv.y * prevToThisVec * 1.125;
 				
-				float3 worldPosition = data.worldPos + quadOffset;
+				float3 worldPosition = dataPrev.worldPos + quadOffset;
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.color = data.color; // tex2Dlod(_KeyTex, float4(0,((float)_SelectedWorldStatsID + 0.5) / 32.0,0,0));

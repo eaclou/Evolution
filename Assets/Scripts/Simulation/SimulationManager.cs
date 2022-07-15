@@ -611,6 +611,18 @@ public class SimulationManager : Singleton<SimulationManager>
             globalGraphData.AddNewEntry(simResourceManager, GetTotalAgentBiomass());
             //Species stats for history panel:
             AddNewSpeciesDataEntry(simAgeTimeSteps);
+
+            float minScore = float.PositiveInfinity;
+            float maxScore = 0f;
+            foreach(SpeciesGenomePool pool in masterGenomePool.completeSpeciesPoolsList) {
+                if(pool.minScoreValue < minScore) {
+                    minScore = pool.minScoreValue;
+                }
+                if(pool.maxScoreValue > maxScore) {
+                    maxScore = pool.maxScoreValue;
+                }
+            }
+            
         }
 
         if (simAgeTimeSteps % 79 == 3) {

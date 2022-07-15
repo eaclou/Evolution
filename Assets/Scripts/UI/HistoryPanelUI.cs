@@ -81,7 +81,7 @@ public class HistoryPanelUI : MonoBehaviour
     }
     
     public ComputeBuffer worldTreeLineDataCBuffer;
-    private int worldTreeNumPointsPerLine = 64;    
+    private int worldTreeNumPointsPerLine = 32;    
     private int worldTreeNumSpeciesLines = 32;
     private int worldTreeNumCreatureLines = 32;
     private int worldTreeBufferCount => worldTreeNumPointsPerLine * (worldTreeNumSpeciesLines * worldTreeNumCreatureLines);
@@ -102,9 +102,19 @@ public class HistoryPanelUI : MonoBehaviour
     private bool isNudgeOn = false;
     [ReadOnly]
     public int nudgeCounter;
+
+    private float minScoreValue = 500f;
+    private float maxScoreValue = 1000f;
     
     public void Start() {
         openCloseButton.SetHighlight(true);
+    }
+
+    public void SetMinScore(float score) {
+        
+    }
+    public void SetMaxScore(float score) {
+        
     }
     
     public void SetNudgeTooltip(string str) {
@@ -247,45 +257,49 @@ public class HistoryPanelUI : MonoBehaviour
             int graphDataYearIndexStart = 0;
             int graphDataYearIndexEnd = 0;
             
-            if (pool.speciesDataPointsList.Count == 0) 
+            if (pool.speciesDataPointsList.Count == 0 || point >= pool.speciesDataPointsList.Count) 
                 return;
 
-            float minScoreValue = 750f;
-            float bestScoreTemp = pool.speciesDataPointsList[pool.speciesDataPointsList.Count - 1].lifespan;
-            float x = (float)(point % worldTreeNumPointsPerLine) / (float)worldTreeNumPointsPerLine;
-            int count = Mathf.Max(0, pool.speciesDataPointsList.Count - 1);
-            graphDataYearIndexStart = Mathf.FloorToInt((float)count * x);
-            graphDataYearIndexEnd = Mathf.CeilToInt((float)count * x);
-            float frac = ((float)count * x) % 1f;
-            float valStart = (float)(pool.speciesDataPointsList[graphDataYearIndexStart].lifespan - minScoreValue) / bestScoreTemp;
-            float valEnd = (float)(pool.speciesDataPointsList[graphDataYearIndexEnd].lifespan - minScoreValue) / bestScoreTemp;
+            // pool.speciesDataPointsList[pool.speciesDataPointsList.Count - 1].lifespan;
+            //float x = (float)(point % worldTreeNumPointsPerLine) / (float)worldTreeNumPointsPerLine;
+            //int dataIndex = Mathf.Min(point, pool.speciesDataPointsList.Count - 1);
+            float x = (float)pool.speciesDataPointsList[point].timestep / (float)simManager.simAgeTimeSteps;
+            //int count = Mathf.Max(0, pool.speciesDataPointsList.Count - 1);
+            //graphDataYearIndexStart = Mathf.FloorToInt((float)count * x);
+            //graphDataYearIndexEnd = Mathf.CeilToInt((float)count * x);
+            //float frac = ((float)count * x) % 1f;
+            //float valStart = (float)(pool.speciesDataPointsList[graphDataYearIndexStart].lifespan - minScoreValue) / bestScoreTemp;
+            //float valEnd = (float)(pool.speciesDataPointsList[graphDataYearIndexEnd].lifespan - minScoreValue) / bestScoreTemp;
             //valEnd = Mathf.Clamp(valEnd, 0, pool.avgCandidateDataYearList.Count - 1);
-            float y = Mathf.Lerp(valStart, valEnd, frac); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
+            float val = (float)(pool.speciesDataPointsList[point].lifespan - minScoreValue) / maxScoreValue;
+            float y = val; // Mathf.Lerp(valStart, valEnd, frac); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
             float z = 0f;
             
             Vector3 hue = pool.foundingCandidate.primaryHue;
             float alpha = 1f;
             int timeStepStart = Mathf.RoundToInt(timelineStartTimeStep);
-
+            /*
             float xStart01 = (float)(pool.timeStepCreated - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
             float xEnd01 = pool.isExtinct ? 
                 (float)(pool.timeStepExtinct - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart) : 1f;
-
+            */
             if (pool.speciesID == historySelectedSpeciesID) {
                 hue = Vector3.one;
-                z = -0.1f;
+                //z = -0.1f;
             }
-            
-            if (xStart01 > x || xEnd01 < x) {
-                hue = Vector3.zero;
-                alpha = 0f;
-            }
+
+            //if (xStart01 > x || xEnd01 < x) {
+            //    hue = Vector3.zero;
+            //    alpha = 0f;
+            //}
+
+            if (point == 0) alpha = 0f;
             
             var coordinates = AnchorBottomLeft(x, y);
 
-            if ((coordinates - cursorCoords).magnitude < 0.05f) {
-                hue = Vector3.Lerp(hue, Vector3.one, 0.8f);
-            }
+            //if ((coordinates - cursorCoords).magnitude < 0.05f) {
+            //    hue = Vector3.Lerp(hue, Vector3.one, 0.8f);
+            //}
 
             if(curPanelMode != HistoryPanelMode.AllSpecies) {
                 alpha = 0f;
@@ -369,9 +383,9 @@ public class HistoryPanelUI : MonoBehaviour
         data.worldPos = new Vector3(coordinates.x, coordinates.y, 0f);   
          
         // Mouse hover highlight                 
-        if ((coordinates - cursorCoords).magnitude < 0.05f) { 
-            data.color = Color.white;
-        }
+        //if ((coordinates - cursorCoords).magnitude < 0.05f) { 
+        //    data.color = Color.white;
+        //}
 
         if (isTimelineMode) { //if (isPopulationMode || isTimelineMode) {
             data.worldPos = Vector3.zero;
@@ -510,7 +524,8 @@ public class HistoryPanelUI : MonoBehaviour
             case HistoryPanelMode.AllSpecies:
                 buttonToggleGraphMode.gameObject.SetActive(true);
                 if (isGraphMode) {
-                    UpdateSpeciesIconsGraphMode();
+                    UpdateSpeciesIconsLineageMode();
+                    //UpdateSpeciesIconsGraphMode();
                     targetStartTimeStep = simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[0]].timeStepCreated;
                     tempPanelGraph.SetActive(true);
                 }

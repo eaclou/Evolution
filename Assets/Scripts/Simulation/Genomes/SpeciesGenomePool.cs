@@ -64,7 +64,9 @@ public class SpeciesGenomePool
     public bool isFlaggedForExtinction = false;
     public bool isExtinct = false;
 
-    private int maxNumDataPointEntries = 64;
+    private int maxNumDataPointEntries = 32;
+    public float minScoreValue;
+    public float maxScoreValue;
     
     public CritterModuleAppearanceGenome appearanceGenome => 
         foundingCandidate.candidateGenome.bodyGenome.appearanceGenome;
@@ -188,17 +190,21 @@ public class SpeciesGenomePool
         if(speciesDataPointsList.Count > maxNumDataPointEntries) {
             MergeDataPoints();
         }
+
+        minScoreValue = speciesDataPointsList[0].lifespan;
+        maxScoreValue = dataPoint.lifespan;
     }
     private void MergeDataPoints() {
         float closestPairDistance = float.PositiveInfinity;
         int closestPairStartIndex = 1;
-        for(int i = 1; i < speciesDataPointsList.Count - 3; i++) { // don't include first or last point
+        for(int i = 1; i < speciesDataPointsList.Count - 1; i++) { // don't include first or last point
             float dist = speciesDataPointsList[i + 1].timestep - speciesDataPointsList[i].timestep;
             if(dist <= closestPairDistance) {
                 closestPairDistance = dist;
                 closestPairStartIndex = i;
             }
         }
+        closestPairStartIndex = UnityEngine.Random.Range(1, speciesDataPointsList.Count - 1);
         //Debug.Log("closest dist: " + closestPairDistance)
         SpeciesDataPoint avgData = new SpeciesDataPoint();
         avgData.timestep = (speciesDataPointsList[closestPairStartIndex].timestep + speciesDataPointsList[closestPairStartIndex + 1].timestep) / 2f;
