@@ -81,7 +81,7 @@ public class HistoryPanelUI : MonoBehaviour
     }
     
     public ComputeBuffer worldTreeLineDataCBuffer;
-    private int worldTreeNumPointsPerLine = 32;    
+    private int worldTreeNumPointsPerLine = 64;    
     private int worldTreeNumSpeciesLines = 32;
     private int worldTreeNumCreatureLines = 32;
     private int worldTreeBufferCount => worldTreeNumPointsPerLine * (worldTreeNumSpeciesLines * worldTreeNumCreatureLines);

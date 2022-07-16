@@ -96,7 +96,7 @@
 				float3 prevToThisVec = data.worldPos - dataPrev.worldPos;
 				float3 right = normalize(float3(prevToThisVec.y, -prevToThisVec.x, 0));
 
-				float3 quadOffset = quadData.x * right * lineWidth + o.uv.y * prevToThisVec * 1.125;
+				float3 quadOffset = quadData.x * right * lineWidth + o.uv.y * prevToThisVec * 1.139125;
 				
 				float3 worldPosition = dataPrev.worldPos + quadOffset;
 

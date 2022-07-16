@@ -64,7 +64,7 @@ public class SpeciesGenomePool
     public bool isFlaggedForExtinction = false;
     public bool isExtinct = false;
 
-    private int maxNumDataPointEntries = 32;
+    private int maxNumDataPointEntries = 64;
     public float minScoreValue;
     public float maxScoreValue;
     
@@ -197,20 +197,26 @@ public class SpeciesGenomePool
     private void MergeDataPoints() {
         float closestPairDistance = float.PositiveInfinity;
         int closestPairStartIndex = 1;
-        for(int i = 1; i < speciesDataPointsList.Count - 1; i++) { // don't include first or last point
-            float dist = speciesDataPointsList[i + 1].timestep - speciesDataPointsList[i].timestep;
-            if(dist <= closestPairDistance) {
+        for(int i = 1; i < speciesDataPointsList.Count - 3; i++) { // don't include first or last point
+            float distFront = speciesDataPointsList[i + 1].timestep - speciesDataPointsList[i].timestep;
+            float distBack = speciesDataPointsList[i].timestep - speciesDataPointsList[i - 1].timestep;
+            float dist = distFront + distBack;
+            if(dist < closestPairDistance) {
                 closestPairDistance = dist;
                 closestPairStartIndex = i;
             }
         }
-        closestPairStartIndex = UnityEngine.Random.Range(1, speciesDataPointsList.Count - 1);
+        //closestPairStartIndex = UnityEngine.Random.Range(1, speciesDataPointsList.Count - 1);
         //Debug.Log("closest dist: " + closestPairDistance)
         SpeciesDataPoint avgData = new SpeciesDataPoint();
         avgData.timestep = (speciesDataPointsList[closestPairStartIndex].timestep + speciesDataPointsList[closestPairStartIndex + 1].timestep) / 2f;
         avgData.lifespan = (speciesDataPointsList[closestPairStartIndex].lifespan + speciesDataPointsList[closestPairStartIndex + 1].lifespan) / 2f;
-        speciesDataPointsList[closestPairStartIndex] = avgData;
-        speciesDataPointsList.RemoveAt(closestPairStartIndex + 1);
+        
+        if(this.speciesID == 0) {
+            Debug.Log("MergePoints " + closestPairStartIndex + "(" + speciesDataPointsList[closestPairStartIndex].timestep + ")<-" + (closestPairStartIndex + 1) + "(" + speciesDataPointsList[closestPairStartIndex + 1].timestep + ") " + closestPairDistance + " . " + avgData.timestep + "(" + avgData.lifespan + ")");
+        }
+        speciesDataPointsList[closestPairStartIndex + 1] = avgData;
+        speciesDataPointsList.RemoveAt(closestPairStartIndex);
 
         
     }
