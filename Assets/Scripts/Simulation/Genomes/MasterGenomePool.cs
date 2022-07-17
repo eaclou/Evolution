@@ -71,7 +71,10 @@ public class MasterGenomePool
 
     public void AddNewSpeciesDataPoint(int timestep) {
         foreach (var speciesPool in completeSpeciesPoolsList) {
-            speciesPool.AddNewDataPoint(timestep);
+            if(!speciesPool.isExtinct) {
+                speciesPool.AddNewDataPoint(timestep);
+            }
+            
         }
     }        
 

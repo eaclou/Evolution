@@ -606,23 +606,22 @@ public class SimulationManager : Singleton<SimulationManager>
             CheckForYearEvent();
         }
 
-        if (simAgeTimeSteps % 120 == 0) {
+        if (simAgeTimeSteps % 30 == 0) {
             uiManager.speciesGraphPanelUI.UpdateSpeciesTreeDataTextures(curSimYear);
             globalGraphData.AddNewEntry(simResourceManager, GetTotalAgentBiomass());
             //Species stats for history panel:
             AddNewSpeciesDataEntry(simAgeTimeSteps);
 
-            float minScore = float.PositiveInfinity;
-            float maxScore = 0f;
+            
             foreach(SpeciesGenomePool pool in masterGenomePool.completeSpeciesPoolsList) {
-                if(pool.minScoreValue < minScore) {
-                    minScore = pool.minScoreValue;
+                if(pool.minScoreValue < uiManager.historyPanelUI.minScoreValue) {
+                    uiManager.historyPanelUI.minScoreValue = pool.minScoreValue;
                 }
-                if(pool.maxScoreValue > maxScore) {
-                    maxScore = pool.maxScoreValue;
+                if(pool.maxScoreValue > uiManager.historyPanelUI.maxScoreValue) {
+                    uiManager.historyPanelUI.maxScoreValue = pool.maxScoreValue;
                 }
             }
-            
+            uiManager.historyPanelUI.minScoreValue += 5f;
         }
 
         if (simAgeTimeSteps % 79 == 3) {

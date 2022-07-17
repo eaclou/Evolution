@@ -103,20 +103,13 @@ public class HistoryPanelUI : MonoBehaviour
     [ReadOnly]
     public int nudgeCounter;
 
-    private float minScoreValue = 500f;
-    private float maxScoreValue = 1000f;
+    public float minScoreValue = 500f;
+    public float maxScoreValue = 1000f;
     
     public void Start() {
         openCloseButton.SetHighlight(true);
     }
-
-    public void SetMinScore(float score) {
         
-    }
-    public void SetMaxScore(float score) {
-        
-    }
-    
     public void SetNudgeTooltip(string str) {
         tooltipNudgeMessage.tooltipString = str;
     }

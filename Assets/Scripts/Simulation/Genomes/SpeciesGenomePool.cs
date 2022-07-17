@@ -191,7 +191,8 @@ public class SpeciesGenomePool
             MergeDataPoints();
         }
 
-        minScoreValue = speciesDataPointsList[0].lifespan;
+        int dex = Mathf.Min(speciesDataPointsList.Count - 1, 1);
+        minScoreValue = speciesDataPointsList[dex].lifespan;
         maxScoreValue = dataPoint.lifespan;
     }
     private void MergeDataPoints() {
@@ -213,7 +214,7 @@ public class SpeciesGenomePool
         avgData.lifespan = (speciesDataPointsList[closestPairStartIndex].lifespan + speciesDataPointsList[closestPairStartIndex + 1].lifespan) / 2f;
         
         if(this.speciesID == 0) {
-            Debug.Log("MergePoints " + closestPairStartIndex + "(" + speciesDataPointsList[closestPairStartIndex].timestep + ")<-" + (closestPairStartIndex + 1) + "(" + speciesDataPointsList[closestPairStartIndex + 1].timestep + ") " + closestPairDistance + " . " + avgData.timestep + "(" + avgData.lifespan + ")");
+            //Debug.Log("MergePoints " + closestPairStartIndex + "(" + speciesDataPointsList[closestPairStartIndex].timestep + ")<-" + (closestPairStartIndex + 1) + "(" + speciesDataPointsList[closestPairStartIndex + 1].timestep + ") " + closestPairDistance + " . " + avgData.timestep + "(" + avgData.lifespan + ")");
         }
         speciesDataPointsList[closestPairStartIndex + 1] = avgData;
         speciesDataPointsList.RemoveAt(closestPairStartIndex);
