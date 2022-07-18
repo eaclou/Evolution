@@ -2045,8 +2045,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
         clockPanelUI.UpdateEarthStampData();
         clockPanelUI.UpdateMoonStampData();
         clockPanelUI.UpdateSunStampData();
-        if(simManager.simAgeTimeSteps % 3 == 0)
-            uiManager.historyPanelUI.InitializeRenderBuffers();
+        //if(simManager.simAgeTimeSteps % 3 == 0)
+            //uiManager.historyPanelUI.InitializeRenderBuffers();
     }
     
     public void InitializeCreaturePortrait(AgentGenome genome) {

@@ -622,6 +622,9 @@ public class SimulationManager : Singleton<SimulationManager>
                 }
             }
             uiManager.historyPanelUI.minScoreValue += 5f;
+            uiManager.historyPanelUI.maxScoreValue -= 5f;
+
+            uiManager.historyPanelUI.InitializeRenderBuffers();
         }
 
         if (simAgeTimeSteps % 79 == 3) {

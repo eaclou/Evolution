@@ -64,7 +64,7 @@ public class SpeciesGenomePool
     public bool isFlaggedForExtinction = false;
     public bool isExtinct = false;
 
-    private int maxNumDataPointEntries = 64;
+    private int maxNumDataPointEntries = 32;
     public float minScoreValue;
     public float maxScoreValue;
     
@@ -179,28 +179,33 @@ public class SpeciesGenomePool
         dataPoint.timestep = timestep;
         dataPoint.lifespan = avgCandidateData.performanceData.totalTicksAlive;
 
-        if(SimulationManager.instance.simAgeTimeSteps - this.timeStepCreated < 1000) {
+        if(SimulationManager.instance.simAgeTimeSteps - this.timeStepCreated < 2200) {
             //SET ALL to current value:
             foreach(SpeciesDataPoint point in speciesDataPointsList) {
                 point.lifespan = avgCandidateData.performanceData.totalTicksAlive;
             }
         }
+        else {
+            
+           
+        }
+        //int dex = Mathf.Min(speciesDataPointsList.Count - 1, 16);
         
+
         speciesDataPointsList.Add(dataPoint);
         if(speciesDataPointsList.Count > maxNumDataPointEntries) {
             MergeDataPoints();
         }
 
-        int dex = Mathf.Min(speciesDataPointsList.Count - 1, 1);
-        minScoreValue = speciesDataPointsList[dex].lifespan;
         maxScoreValue = dataPoint.lifespan;
+        minScoreValue = dataPoint.lifespan; // speciesDataPointsList[0].lifespan;
     }
     private void MergeDataPoints() {
         float closestPairDistance = float.PositiveInfinity;
         int closestPairStartIndex = 1;
-        for(int i = 1; i < speciesDataPointsList.Count - 3; i++) { // don't include first or last point
-            float distFront = speciesDataPointsList[i + 1].timestep - speciesDataPointsList[i].timestep;
-            float distBack = speciesDataPointsList[i].timestep - speciesDataPointsList[i - 1].timestep;
+        for(int i = 1; i < speciesDataPointsList.Count - 2; i++) { // don't include first or last point
+            float distFront = (speciesDataPointsList[i + 1].timestep + speciesDataPointsList[i + 1].lifespan) - (speciesDataPointsList[i].timestep + speciesDataPointsList[i].lifespan);
+            float distBack = (speciesDataPointsList[i].timestep + speciesDataPointsList[i].lifespan) - (speciesDataPointsList[i - 1].timestep + speciesDataPointsList[i - 1].lifespan);
             float dist = distFront + distBack;
             if(dist < closestPairDistance) {
                 closestPairDistance = dist;

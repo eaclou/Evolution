@@ -11,7 +11,7 @@
 		//Tags { "RenderType"="Opaque" }
 		//LOD 100
 		Tags{ "RenderType" = "Transparent" }
-		ZWrite Off
+		//ZWrite Off
 		//Cull Off
 		Blend SrcAlpha OneMinusSrcAlpha
 
@@ -89,7 +89,7 @@
 				float3 worldPosition = float3(vertexCoord, 0) * _IsOn;								
 				*/
 
-				float lineWidth = 0.025;
+				float lineWidth = 0.015;
 				WorldTreeLineData dataPrev = worldTreeLineDataCBuffer[max(0, inst - 1)];
 				WorldTreeLineData data = worldTreeLineDataCBuffer[inst];
 

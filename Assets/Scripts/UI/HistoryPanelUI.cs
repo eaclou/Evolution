@@ -81,7 +81,7 @@ public class HistoryPanelUI : MonoBehaviour
     }
     
     public ComputeBuffer worldTreeLineDataCBuffer;
-    private int worldTreeNumPointsPerLine = 64;    
+    private int worldTreeNumPointsPerLine = 32;    
     private int worldTreeNumSpeciesLines = 32;
     private int worldTreeNumCreatureLines = 32;
     private int worldTreeBufferCount => worldTreeNumPointsPerLine * (worldTreeNumSpeciesLines * worldTreeNumCreatureLines);
@@ -268,7 +268,10 @@ public class HistoryPanelUI : MonoBehaviour
             float y = val; // Mathf.Lerp(valStart, valEnd, frac); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
             float z = 0f;
             
-            Vector3 hue = pool.foundingCandidate.primaryHue;
+            Vector3 hue = pool.foundingCandidate.primaryHue * 1.15f;
+            hue.x = Mathf.Clamp01(hue.x + 0.5f);
+            hue.y = Mathf.Clamp01(hue.y + 0.5f);
+            hue.z = Mathf.Clamp01(hue.z + 0.5f);
             float alpha = 1f;
             int timeStepStart = Mathf.RoundToInt(timelineStartTimeStep);
             /*
@@ -308,7 +311,11 @@ public class HistoryPanelUI : MonoBehaviour
             float y = 1f - ((float)pool.speciesID / (float)Mathf.Max(simManager.masterGenomePool.completeSpeciesPoolsList.Count - 1, 1)); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
             float z = 0f;
                                 
-            Vector3 hue = pool.foundingCandidate.primaryHue;
+            //Vector3 hue = pool.foundingCandidate.primaryHue;
+            Vector3 hue = pool.foundingCandidate.primaryHue * 1.15f;
+            hue.x = Mathf.Clamp01(hue.x + 0.5f);
+            hue.y = Mathf.Clamp01(hue.y + 0.5f);
+            hue.z = Mathf.Clamp01(hue.z + 0.5f);
             float alpha = 1f;
             int timeStepStart = Mathf.RoundToInt(timelineStartTimeStep);
 
@@ -318,10 +325,10 @@ public class HistoryPanelUI : MonoBehaviour
                 xEnd01 = (float)(pool.timeStepExtinct - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
             }
 
-            if (xStart01 > x || xEnd01 < x) {
-                hue = Vector3.zero;
-                alpha = 0f;
-            }
+            //if (xStart01 > x || xEnd01 < x) {
+            //    hue = Vector3.zero;
+            //    alpha = 0f;
+            //}
             if (pool.speciesID == historySelectedSpeciesID) {
                 hue = Vector3.one;
                 z = -0.1f;
@@ -367,13 +374,16 @@ public class HistoryPanelUI : MonoBehaviour
         }
         
         bool inXBounds = xStart <= x && xEnd >= x;
-        Vector3 hue = pool.foundingCandidate.primaryHue * 1.5f;
+        Vector3 hue = pool.foundingCandidate.primaryHue * 1.2f;
+        hue.x = Mathf.Clamp01(hue.x + 0.5f);
+        hue.y = Mathf.Clamp01(hue.y + 0.5f);
+        hue.z = Mathf.Clamp01(hue.z + 0.5f);
         
         data.color = GetCreatureLineColor(hue, cand, inXBounds); 
         // new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
         
         var coordinates = AnchorBottomLeft(x, y);
-        data.worldPos = new Vector3(coordinates.x, coordinates.y, 0f);   
+        data.worldPos = new Vector3(coordinates.x, coordinates.y, 1f);   
          
         // Mouse hover highlight                 
         //if ((coordinates - cursorCoords).magnitude < 0.05f) { 
@@ -503,7 +513,7 @@ public class HistoryPanelUI : MonoBehaviour
         openCloseButton.SetMouseEnter(mouseInOpenCloseArea);
         tooltipOpenCloseButton.tooltipString = isPanelOpen ? "Hide Timeline Panel" : "Open Timeline Panel";
 
-        textPanelStateDebug.text = "sel: " + historySelectedSpeciesID + ", " + currentSelection.candidate.speciesID;
+        textPanelStateDebug.text = "min: " + minScoreValue.ToString("F0") + ", max: " + maxScoreValue.ToString("F0");
         buttonToggleExtinct.gameObject.SetActive(false);
         float targetStartTimeStep = 0f;
         tempPanelSpeciesPop.SetActive(false);
@@ -566,8 +576,8 @@ public class HistoryPanelUI : MonoBehaviour
     private void UpdateSpeciesIconsLineageMode() {        
         for (int s = 0; s < speciesIcons.Count; s++) {
             float x = speciesIcons[s].linkedPool.isExtinct ? 
-                (float)speciesIcons[s].linkedPool.timeStepExtinct / Mathf.Max(1f, (float)simManager.simAgeTimeSteps) : 1f;
-            float y = 1f - (float)s / Mathf.Max(speciesIcons.Count - 1, 1f);
+                (float)speciesIcons[s].linkedPool.timeStepExtinct / Mathf.Max(1f, (float)simManager.simAgeTimeSteps) : 1.2f;
+            float y = 1f - (float)s / Mathf.Max(simManager.masterGenomePool.currentlyActiveSpeciesIDList.Count - 1, 1f);
             speciesIcons[s].SetTargetCoords(AnchorBottomLeft(x, y));
         }
     }
