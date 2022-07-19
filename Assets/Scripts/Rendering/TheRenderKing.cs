@@ -2040,14 +2040,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         computeShaderCritters.Dispatch(kernelIndex, mainCritterStrokesCBuffer.count / 16, 1, 1);
     }
 
-    //***EAC destined to be replaced by GPU ^ ^ ^
-    private void SimWorldTreeCPU() { 
-        clockPanelUI.UpdateEarthStampData();
-        clockPanelUI.UpdateMoonStampData();
-        clockPanelUI.UpdateSunStampData();
-        //if(simManager.simAgeTimeSteps % 3 == 0)
-            //uiManager.historyPanelUI.InitializeRenderBuffers();
-    }
+    
     
     public void InitializeCreaturePortrait(AgentGenome genome) {
         //InitializeNewCritterPortraitGenome(simManager.masterGenomePool.vertebrateSlotsGenomesCurrentArray[0].representativeGenome); // speciesPool.leaderboardGenomesList[0].candidateGenome);
@@ -2132,7 +2125,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         SimCritterGenericStrokes();
 
         // WORLDTREE
-        SimWorldTreeCPU();
+        //SimWorldTreeCPU();
 
         baronVonWater.altitudeMapRef = baronVonTerrain.terrainHeightDataRT;
         float camDist = Mathf.Clamp01(-1f * cameraManager.gameObject.transform.position.z / (400f - 10f));

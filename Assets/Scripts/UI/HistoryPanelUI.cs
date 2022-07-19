@@ -81,7 +81,7 @@ public class HistoryPanelUI : MonoBehaviour
     }
     
     public ComputeBuffer worldTreeLineDataCBuffer;
-    private int worldTreeNumPointsPerLine = 32;    
+    private int worldTreeNumPointsPerLine = 64;    
     private int worldTreeNumSpeciesLines = 32;
     private int worldTreeNumCreatureLines = 32;
     private int worldTreeBufferCount => worldTreeNumPointsPerLine * (worldTreeNumSpeciesLines * worldTreeNumCreatureLines);
@@ -247,24 +247,12 @@ public class HistoryPanelUI : MonoBehaviour
         //if (isAllSpeciesMode)
         if (isGraphMode) 
         {
-            int graphDataYearIndexStart = 0;
-            int graphDataYearIndexEnd = 0;
             
             if (pool.speciesDataPointsList.Count == 0 || point >= pool.speciesDataPointsList.Count) 
                 return;
-
-            // pool.speciesDataPointsList[pool.speciesDataPointsList.Count - 1].lifespan;
-            //float x = (float)(point % worldTreeNumPointsPerLine) / (float)worldTreeNumPointsPerLine;
-            //int dataIndex = Mathf.Min(point, pool.speciesDataPointsList.Count - 1);
+            
             float x = (float)pool.speciesDataPointsList[point].timestep / (float)simManager.simAgeTimeSteps;
-            //int count = Mathf.Max(0, pool.speciesDataPointsList.Count - 1);
-            //graphDataYearIndexStart = Mathf.FloorToInt((float)count * x);
-            //graphDataYearIndexEnd = Mathf.CeilToInt((float)count * x);
-            //float frac = ((float)count * x) % 1f;
-            //float valStart = (float)(pool.speciesDataPointsList[graphDataYearIndexStart].lifespan - minScoreValue) / bestScoreTemp;
-            //float valEnd = (float)(pool.speciesDataPointsList[graphDataYearIndexEnd].lifespan - minScoreValue) / bestScoreTemp;
-            //valEnd = Mathf.Clamp(valEnd, 0, pool.avgCandidateDataYearList.Count - 1);
-            float val = (float)(pool.speciesDataPointsList[point].lifespan - minScoreValue) / maxScoreValue;
+            float val = (float)(pool.speciesDataPointsList[point].lifespan - minScoreValue) / (maxScoreValue - minScoreValue);
             float y = val; // Mathf.Lerp(valStart, valEnd, frac); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
             float z = 0f;
             
@@ -274,20 +262,11 @@ public class HistoryPanelUI : MonoBehaviour
             hue.z = Mathf.Clamp01(hue.z + 0.5f);
             float alpha = 1f;
             int timeStepStart = Mathf.RoundToInt(timelineStartTimeStep);
-            /*
-            float xStart01 = (float)(pool.timeStepCreated - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
-            float xEnd01 = pool.isExtinct ? 
-                (float)(pool.timeStepExtinct - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart) : 1f;
-            */
+            
             if (pool.speciesID == historySelectedSpeciesID) {
                 hue = Vector3.one;
                 //z = -0.1f;
             }
-
-            //if (xStart01 > x || xEnd01 < x) {
-            //    hue = Vector3.zero;
-            //    alpha = 0f;
-            //}
 
             if (point == 0) alpha = 0f;
             
@@ -577,7 +556,7 @@ public class HistoryPanelUI : MonoBehaviour
         for (int s = 0; s < speciesIcons.Count; s++) {
             float x = speciesIcons[s].linkedPool.isExtinct ? 
                 (float)speciesIcons[s].linkedPool.timeStepExtinct / Mathf.Max(1f, (float)simManager.simAgeTimeSteps) : 1.2f;
-            float y = 1f - (float)s / Mathf.Max(simManager.masterGenomePool.currentlyActiveSpeciesIDList.Count - 1, 1f);
+            float y = 1f - (float)s / Mathf.Max(simManager.masterGenomePool.completeSpeciesPoolsList.Count - 1, 1f);
             speciesIcons[s].SetTargetCoords(AnchorBottomLeft(x, y));
         }
     }

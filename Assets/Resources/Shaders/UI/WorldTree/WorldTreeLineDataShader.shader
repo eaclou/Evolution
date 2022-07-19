@@ -12,7 +12,7 @@
 		//LOD 100
 		Tags{ "RenderType" = "Transparent" }
 		//ZWrite Off
-		//Cull Off
+		Cull Off
 		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
@@ -62,41 +62,14 @@
 				float3 quadData = quadVerticesCBuffer[id];
 				o.uv = quadData.xy + 0.5;
 				
-				
-				/*
-				// calculate positions in computeShader?				
-				float ownScore = treeOfLifeWorldStatsValuesCBuffer[inst];
-				float nextScore = treeOfLifeWorldStatsValuesCBuffer[min(inst + 1, 63)];
-
-				float instFloat = (float)inst;
-
-				float2 ownSubCoords = float2(instFloat / 64.0 - 0.0015, ownScore);
-				float2 nextSubCoords = float2(saturate((instFloat + 1.0) / 64.0 + 0.0015), nextScore);
-
-				float2 thisToNextVec = nextSubCoords - ownSubCoords;
-				
-				float2 forward = normalize(thisToNextVec);
-				float2 right = float2(forward.y, -forward.x);
-
-				float2 billboardVertexOffset = right * quadData.x * 0.01;
-
-				float lerpVal = o.uv.y;
-				
-				float2 vertexCoord = lerp(ownSubCoords, nextSubCoords, lerpVal);
-				vertexCoord += billboardVertexOffset;
-				vertexCoord.y = lerp(vertexCoord.y + 0.02, _GraphCoordStatsStart, o.uv.x);
-				
-				float3 worldPosition = float3(vertexCoord, 0) * _IsOn;								
-				*/
-
-				float lineWidth = 0.015;
+				float lineWidth = 0.01;
 				WorldTreeLineData dataPrev = worldTreeLineDataCBuffer[max(0, inst - 1)];
 				WorldTreeLineData data = worldTreeLineDataCBuffer[inst];
 
 				float3 prevToThisVec = data.worldPos - dataPrev.worldPos;
 				float3 right = normalize(float3(prevToThisVec.y, -prevToThisVec.x, 0));
 
-				float3 quadOffset = quadData.x * right * lineWidth + o.uv.y * prevToThisVec * 1.139125;
+				float3 quadOffset = quadData.x * right * lineWidth + o.uv.y * prevToThisVec * 1.09125;
 				
 				float3 worldPosition = dataPrev.worldPos + quadOffset;
 

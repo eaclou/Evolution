@@ -135,6 +135,10 @@ public class ClockPanelUI : MonoBehaviour
             imageClockSun.rectTransform.localPosition = new Vector3(sunDir.x * 16f, sunDir.y * 16f, 0f);
             imageClockHandC.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * GetSunOrbitPhase(cursorTimeStep));
         }
+        UpdateEarthStampData();
+        UpdateMoonStampData();
+        UpdateSunStampData();
+
     }
 
     public float GetPlanetSpinPhase(float timeStep) {

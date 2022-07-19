@@ -614,6 +614,9 @@ public class SimulationManager : Singleton<SimulationManager>
 
             
             foreach(SpeciesGenomePool pool in masterGenomePool.completeSpeciesPoolsList) {
+                if(pool.isExtinct || pool.isStillEvaluating) {
+                    continue;
+                }
                 if(pool.minScoreValue < uiManager.historyPanelUI.minScoreValue) {
                     uiManager.historyPanelUI.minScoreValue = pool.minScoreValue;
                 }
@@ -621,19 +624,14 @@ public class SimulationManager : Singleton<SimulationManager>
                     uiManager.historyPanelUI.maxScoreValue = pool.maxScoreValue;
                 }
             }
-            uiManager.historyPanelUI.minScoreValue += 5f;
-            uiManager.historyPanelUI.maxScoreValue -= 5f;
+            uiManager.historyPanelUI.minScoreValue += 10f;
+            uiManager.historyPanelUI.maxScoreValue -= 0.05f;
 
             uiManager.historyPanelUI.InitializeRenderBuffers();
         }
 
         if (simAgeTimeSteps % 79 == 3) {
             UpdateSimulationClimate();
-            //RefreshLatestHistoricalDataEntry();
-            //RefreshLatestSpeciesDataEntry();
-            //uiManager.UpdateSpeciesTreeDataTextures(curSimYear); // shouldn't lengthen!
-            //uiManager.UpdateTolWorldStatsTexture(statsNutrientsEachGenerationList);
-            //theRenderKing.UpdateTreeOfLifeEventLineData(simEventsManager.completeEventHistoryList);
         }
     }
     

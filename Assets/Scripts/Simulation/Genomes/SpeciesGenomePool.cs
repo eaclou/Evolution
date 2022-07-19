@@ -11,7 +11,6 @@ public class SpeciesGenomePool
 
     public int speciesID;
     public int parentSpeciesID;  // keep track of tree of life
-
     public int depthLevel;
 
     [NonSerialized]
@@ -27,7 +26,7 @@ public class SpeciesGenomePool
     public List<CandidateAgentData> leaderboardGenomesList; // potential parents ranked
     public List<CandidateAgentData> candidateGenomesList; // *To be born
 
-    public int maxLeaderboardGenomePoolSize = 64;    
+    public int maxLeaderboardGenomePoolSize = 32;    
     public int numAgentsEvaluated = 0;
      
     public int yearCreated = -1;
@@ -63,8 +62,11 @@ public class SpeciesGenomePool
     //public float avgLifespan = 0f;
     public bool isFlaggedForExtinction = false;
     public bool isExtinct = false;
+    public bool isStillEvaluating = true;
 
-    private int maxNumDataPointEntries = 32;
+    public float avgLifespan;
+
+    private int maxNumDataPointEntries = 64;
     public float minScoreValue;
     public float maxScoreValue;
     
@@ -81,8 +83,7 @@ public class SpeciesGenomePool
         parentSpeciesID = parentID;
         mutationSettings = settings;
         timeStepCreated = timeStep;
-        timeStepExtinct = 2000000000;
-
+        timeStepExtinct = 2000000000;        
         speciesName = ID.ToString();
     }
 
@@ -94,10 +95,12 @@ public class SpeciesGenomePool
         leaderboardGenomesList = new List<CandidateAgentData>();        
         hallOfFameGenomesList = new List<CandidateAgentData>();
 
-        //avgCandidateDataYearList = new List<CandidateAgentData>(); 
-        CreateNewAverageCandidate(); // avgCandidateData = new CandidateAgentData();
+        CreateNewAverageCandidate();
         speciesDataPointsList = new List<SpeciesDataPoint>();
+        isStillEvaluating = true;
+        avgLifespan = 1f;
     }
+
     
     public void FirstTimeInitialize(CandidateAgentData foundingGenome, int depth) {
         foundingCandidate = foundingGenome;        
@@ -109,7 +112,7 @@ public class SpeciesGenomePool
         Vector3 newHue = Random.insideUnitSphere;
         
         foundingGenome.candidateGenome.name = MutateName(foundingGenome.candidateGenome.name);
-        foundingGenome.candidateGenome.bodyGenome.appearanceGenome.BlendHue(newHue, 0.75f);
+        foundingGenome.candidateGenome.bodyGenome.appearanceGenome.BlendHue(newHue, 0.35f);
         
         //string debugTxt = "";
         for (int i = 0; i < 32; i++) {            
@@ -173,60 +176,54 @@ public class SpeciesGenomePool
     public void AddNewDataPoint(int timestep) 
     {
         CreateNewAverageCandidate(); // ***EC figure this out???        
-        //avgCandidateDataYearList.Add(avgCandidateData); //***EAC GETTING RID OF THIS!!! // = new List<CandidateAgentData>(); // INCLUDES PerformanceData on CandidateData
-        //Debug.Log("AddNewYearlyStats " + avgCandidateData.performanceData.totalTicksAlive);
         SpeciesDataPoint dataPoint = new SpeciesDataPoint();
         dataPoint.timestep = timestep;
-        dataPoint.lifespan = avgCandidateData.performanceData.totalTicksAlive;
-
-        if(SimulationManager.instance.simAgeTimeSteps - this.timeStepCreated < 2200) {
-            //SET ALL to current value:
-            foreach(SpeciesDataPoint point in speciesDataPointsList) {
-                point.lifespan = avgCandidateData.performanceData.totalTicksAlive;
-            }
-        }
-        else {
-            
-           
-        }
-        //int dex = Mathf.Min(speciesDataPointsList.Count - 1, 16);
-        
-
+        dataPoint.lifespan = avgLifespan; // avgCandidateData.performanceData.totalTicksAlive;
+                
         speciesDataPointsList.Add(dataPoint);
         if(speciesDataPointsList.Count > maxNumDataPointEntries) {
             MergeDataPoints();
         }
 
-        maxScoreValue = dataPoint.lifespan;
-        minScoreValue = dataPoint.lifespan; // speciesDataPointsList[0].lifespan;
+        maxScoreValue = dataPoint.lifespan + 5f;
+        minScoreValue = dataPoint.lifespan - 5f;
     }
     private void MergeDataPoints() {
         float closestPairDistance = float.PositiveInfinity;
         int closestPairStartIndex = 1;
         for(int i = 1; i < speciesDataPointsList.Count - 2; i++) { // don't include first or last point
-            float distFront = (speciesDataPointsList[i + 1].timestep + speciesDataPointsList[i + 1].lifespan) - (speciesDataPointsList[i].timestep + speciesDataPointsList[i].lifespan);
-            float distBack = (speciesDataPointsList[i].timestep + speciesDataPointsList[i].lifespan) - (speciesDataPointsList[i - 1].timestep + speciesDataPointsList[i - 1].lifespan);
+            //float distFront = (speciesDataPointsList[i + 1].timestep + speciesDataPointsList[i + 1].lifespan) - (speciesDataPointsList[i].timestep + speciesDataPointsList[i].lifespan);
+            //float distBack = (speciesDataPointsList[i].timestep + speciesDataPointsList[i].lifespan) - (speciesDataPointsList[i - 1].timestep + speciesDataPointsList[i - 1].lifespan);
+            float distFront = speciesDataPointsList[i + 1].timestep - speciesDataPointsList[i].timestep;
+            float distBack = speciesDataPointsList[i].timestep - speciesDataPointsList[i - 1].timestep;
             float dist = distFront + distBack;
             if(dist < closestPairDistance) {
                 closestPairDistance = dist;
                 closestPairStartIndex = i;
             }
         }
-        //closestPairStartIndex = UnityEngine.Random.Range(1, speciesDataPointsList.Count - 1);
-        //Debug.Log("closest dist: " + closestPairDistance)
         SpeciesDataPoint avgData = new SpeciesDataPoint();
         avgData.timestep = (speciesDataPointsList[closestPairStartIndex].timestep + speciesDataPointsList[closestPairStartIndex + 1].timestep) / 2f;
         avgData.lifespan = (speciesDataPointsList[closestPairStartIndex].lifespan + speciesDataPointsList[closestPairStartIndex + 1].lifespan) / 2f;
-        
-        if(this.speciesID == 0) {
-            //Debug.Log("MergePoints " + closestPairStartIndex + "(" + speciesDataPointsList[closestPairStartIndex].timestep + ")<-" + (closestPairStartIndex + 1) + "(" + speciesDataPointsList[closestPairStartIndex + 1].timestep + ") " + closestPairDistance + " . " + avgData.timestep + "(" + avgData.lifespan + ")");
-        }
+                
         speciesDataPointsList[closestPairStartIndex + 1] = avgData;
         speciesDataPointsList.RemoveAt(closestPairStartIndex);
-
         
     }
-
+    public void UpdateAvgData(CandidateAgentData candidateData) {
+        float numPoints = 64f;
+        avgLifespan = avgLifespan * ((numPoints - 1f) / numPoints) + candidateData.performanceData.totalTicksAlive * (1f / numPoints);
+        if(numAgentsEvaluated >= 64 && isStillEvaluating) {
+            isStillEvaluating = false;
+            Debug.Log("Species " + speciesID + " is done with initial evaluation. avgLife: " + avgLifespan);
+            
+            //SET ALL to current value:
+            foreach(SpeciesDataPoint point in speciesDataPointsList) {
+                point.lifespan = avgLifespan; // starting value// avgCandidateData.performanceData.totalTicksAlive;
+            }
+        
+        }
+    }
     /// Finds an unborn agent ready to be respawned
     public CandidateAgentData GetNextAvailableCandidate() 
     {
@@ -243,17 +240,18 @@ public class SpeciesGenomePool
         
         return null;
     }
-       
+    
     public void ProcessCompletedCandidate(CandidateAgentData candidateData, MasterGenomePool masterGenomePool) 
     {
         numAgentsEvaluated++;
+        UpdateAvgData(candidateData);
 
         leaderboardGenomesList.Insert(0, candidateData);  // place at front of leaderboard list (genomes eligible for being parents)
         if(leaderboardGenomesList.Count > maxLeaderboardGenomePoolSize) {
             leaderboardGenomesList.RemoveAt(leaderboardGenomesList.Count - 1);
         }
 
-        int beforeCount = candidateGenomesList.Count;
+        //int beforeCount = candidateGenomesList.Count;
         int listIndex = -1;
         for (int i = 0; i < candidateGenomesList.Count; i++) {
             if(candidateData.candidateID == candidateGenomesList[i].candidateID) {
