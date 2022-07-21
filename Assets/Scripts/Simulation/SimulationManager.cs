@@ -625,7 +625,7 @@ public class SimulationManager : Singleton<SimulationManager>
                 }
             }
             uiManager.historyPanelUI.minScoreValue += 10f;
-            uiManager.historyPanelUI.maxScoreValue -= 0.05f;
+            uiManager.historyPanelUI.maxScoreValue -= 0.5f;
 
             uiManager.historyPanelUI.InitializeRenderBuffers();
         }

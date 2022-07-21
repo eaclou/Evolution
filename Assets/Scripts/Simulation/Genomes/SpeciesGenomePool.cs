@@ -66,7 +66,7 @@ public class SpeciesGenomePool
 
     public float avgLifespan;
 
-    private int maxNumDataPointEntries = 64;
+    private int maxNumDataPointEntries = 32;
     public float minScoreValue;
     public float maxScoreValue;
     
@@ -186,7 +186,7 @@ public class SpeciesGenomePool
         }
 
         maxScoreValue = dataPoint.lifespan + 5f;
-        minScoreValue = dataPoint.lifespan - 5f;
+        minScoreValue = speciesDataPointsList[0].lifespan - 5f;
     }
     private void MergeDataPoints() {
         float closestPairDistance = float.PositiveInfinity;

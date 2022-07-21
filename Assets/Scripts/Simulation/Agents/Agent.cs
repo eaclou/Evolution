@@ -440,7 +440,7 @@ public class Agent : MonoBehaviour {
                 CheckForDeathHealth();
                 CheckForDeathOldAge();
                 CheckForDeathDivineJudgment();
-
+                colliderBody.enabled = true;
                 CheckForMaturity();
                 break;
             case AgentLifeStage.Dead:
