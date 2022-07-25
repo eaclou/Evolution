@@ -607,7 +607,8 @@ public class SimulationManager : Singleton<SimulationManager>
         }
 
         if (simAgeTimeSteps % 30 == 0) {
-            uiManager.speciesGraphPanelUI.UpdateSpeciesTreeDataTextures(curSimYear);
+            //uiManager.historyPanelUI.SortSpeciesIconList();
+            uiManager.speciesGraphPanelUI.UpdateSpeciesTreeDataTextures(curSimYear); // needed?
             globalGraphData.AddNewEntry(simResourceManager, GetTotalAgentBiomass());
             //Species stats for history panel:
             AddNewSpeciesDataEntry(simAgeTimeSteps);
@@ -1268,10 +1269,11 @@ public class SimulationManager : Singleton<SimulationManager>
     // **********EC Move this to MasterGenomePool class?
     public void AddNewSpecies(AgentGenome newGenome, int parentSpeciesID) {  
         int newSpeciesID = masterGenomePool.completeSpeciesPoolsList.Count;
-                       
+        
+        SpeciesGenomePool parentSpeciesPool = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID];
         SpeciesGenomePool newSpecies = new SpeciesGenomePool(newSpeciesID, parentSpeciesID, curSimYear, simAgeTimeSteps, cachedVertebrateMutationSettings);
         AgentGenome foundingGenome = newGenome; // newSpecies.Mutate(newGenome, true, true); //
-        SpeciesGenomePool parentSpeciesPool = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID];
+        
         
         newSpecies.FirstTimeInitialize(new CandidateAgentData(foundingGenome, newSpeciesID), parentSpeciesPool.depthLevel + 1);
         masterGenomePool.currentlyActiveSpeciesIDList.Add(newSpeciesID);

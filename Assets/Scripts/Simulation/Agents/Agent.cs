@@ -734,6 +734,12 @@ public class Agent : MonoBehaviour {
     }
     
     private void BeginHatching() {
+        this.candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX = SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[this.speciesIndex].foundingCandidate.bodyStrokeBrushTypeX;
+        this.candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY = SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[this.speciesIndex].foundingCandidate.bodyStrokeBrushTypeY;
+        this.candidateRef.candidateGenome.bodyGenome.appearanceGenome.BlendHue(SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[this.speciesIndex].foundingCandidate.primaryHue, 0.5f);
+        //this.candidateRef.candidateGenome.bodyGenome.appearanceGenome.hueSecondary = SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[this.speciesIndex].foundingCandidate.secondaryHue;
+        
+        
         springJoint.connectedBody = null;
         springJoint.enabled = false;
 

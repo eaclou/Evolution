@@ -16,6 +16,7 @@ public class HistoryPanelUI : MonoBehaviour
     
     /// Keeps track of spawned buttons
     private List<SpeciesIconUI> speciesIcons = new List<SpeciesIconUI>();  
+    //private List<SpeciesIconUI> speciesIconsSorted = new List<SpeciesIconUI>(); 
     private List<CreatureEventIconUI> creatureEventIcons = new List<CreatureEventIconUI>();
     //private List<CreatureIconUI> creatureIconsList;
 
@@ -78,6 +79,10 @@ public class HistoryPanelUI : MonoBehaviour
     public struct WorldTreeLineData {
         public Vector3 worldPos;
         public Vector4 color;
+        public int speciesID;
+        public int candidateID;
+        public int isAlive; // wasteful, bools dont work
+        public int isSelected; // wasteful, bools dont work
     }
     
     public ComputeBuffer worldTreeLineDataCBuffer;
@@ -85,7 +90,7 @@ public class HistoryPanelUI : MonoBehaviour
     private int worldTreeNumSpeciesLines = 32;
     private int worldTreeNumCreatureLines = 32;
     private int worldTreeBufferCount => worldTreeNumPointsPerLine * (worldTreeNumSpeciesLines * worldTreeNumCreatureLines);
-
+    private int sizeOfLineDataStruct => sizeof(float) * 7 + sizeof(int) * 4;
     public bool isAllSpeciesMode => curPanelMode == HistoryPanelMode.AllSpecies;
     bool isPopulationMode => curPanelMode == HistoryPanelMode.SpeciesPopulation;
     bool isTimelineMode => curPanelMode == HistoryPanelMode.CreatureTimeline;
@@ -105,6 +110,11 @@ public class HistoryPanelUI : MonoBehaviour
 
     public float minScoreValue = 500f;
     public float maxScoreValue = 1000f;
+
+    float graphBoundsX;
+    float graphBoundsXEnd;
+    float graphBoundsY;
+    float graphBoundsYEnd;
     
     public void Start() {
         openCloseButton.SetHighlight(true);
@@ -215,7 +225,7 @@ public class HistoryPanelUI : MonoBehaviour
         // Initialize world tree line data
         var worldTreeLines = new WorldTreeLineData[worldTreeBufferCount];
         worldTreeLineDataCBuffer?.Release();
-        worldTreeLineDataCBuffer = new ComputeBuffer(worldTreeBufferCount, sizeof(float) * 7);
+        worldTreeLineDataCBuffer = new ComputeBuffer(worldTreeBufferCount, sizeOfLineDataStruct);
         
         // Create species lines
         for (int line = 0; line < worldTreeNumSpeciesLines; line++) {
@@ -243,47 +253,46 @@ public class HistoryPanelUI : MonoBehaviour
         
         SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[line];
         WorldTreeLineData data = new WorldTreeLineData();
-
-        //if (isAllSpeciesMode)
-        if (isGraphMode) 
-        {
+                    
+        if (pool.speciesDataPointsList.Count == 0 || point >= pool.speciesDataPointsList.Count) 
+            return;
             
-            if (pool.speciesDataPointsList.Count == 0 || point >= pool.speciesDataPointsList.Count) 
-                return;
+        float x = (float)pool.speciesDataPointsList[point].timestep / (float)simManager.simAgeTimeSteps;
+        float val = (float)(pool.speciesDataPointsList[point].lifespan - minScoreValue) / (maxScoreValue - minScoreValue);
+        float y = val; // Mathf.Lerp(valStart, valEnd, frac); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
+        float z = 0f;
             
-            float x = (float)pool.speciesDataPointsList[point].timestep / (float)simManager.simAgeTimeSteps;
-            float val = (float)(pool.speciesDataPointsList[point].lifespan - minScoreValue) / (maxScoreValue - minScoreValue);
-            float y = val; // Mathf.Lerp(valStart, valEnd, frac); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
-            float z = 0f;
-            
-            Vector3 hue = pool.foundingCandidate.primaryHue;
-            hue.x = Mathf.Clamp01(hue.x + 0.45f);
-            hue.y = Mathf.Clamp01(hue.y + 0.45f);
-            hue.z = Mathf.Clamp01(hue.z + 0.45f);
-            float alpha = 1f;
-            int timeStepStart = Mathf.RoundToInt(timelineStartTimeStep);
-            
-            if (pool.speciesID == historySelectedSpeciesID) {
-                hue = Vector3.one;
-                //z = -0.1f;
-            }
-
-            if (point == 0) alpha = 0f;
-            
-            var coordinates = AnchorBottomLeft(x, y);
-
-            //if ((coordinates - cursorCoords).magnitude < 0.05f) {
-            //    hue = Vector3.Lerp(hue, Vector3.one, 0.8f);
-            //}
-
-            if(curPanelMode != HistoryPanelMode.AllSpecies) {
-                alpha = 0f;
-            }
-
-            data.worldPos = new Vector3(coordinates.x, coordinates.y, z);
-            data.color = new Color(hue.x, hue.y, hue.z, alpha);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
+        Vector3 hue = pool.foundingCandidate.primaryHue;
+        hue.x = Mathf.Clamp01(hue.x + 0.35f);
+        hue.y = Mathf.Clamp01(hue.y + 0.35f);
+        hue.z = Mathf.Clamp01(hue.z + 0.35f);
+        float alpha = 1f;
+        int timeStepStart = Mathf.RoundToInt(timelineStartTimeStep);
+         
+        data.isSelected = 0;
+        if (pool.speciesID == historySelectedSpeciesID) {
+            //hue = Vector3.one;
+            //z = -0.1f;
+            data.isSelected = 1;
         }
-        else 
+        data.isAlive = 1;
+        if (pool.isExtinct) {
+            data.isAlive = 0;
+        }
+        else {
+            //if(pool.isFlaggedForExtinction) {
+                //data.isEndangered = 1;
+            //}
+        }
+        if (point == 0) alpha = 0f;
+            
+        var coordinates = AnchorBottomLeft(x, y);
+
+        data.worldPos = new Vector3(coordinates.x, coordinates.y, z);
+        data.color = new Color(hue.x, hue.y, hue.z, alpha);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
+        
+        worldTreeLines[index] = data;
+        /*else 
         {
             // LINEAGE:
             float x = (float)point / (float)worldTreeNumPointsPerLine;
@@ -321,8 +330,8 @@ public class HistoryPanelUI : MonoBehaviour
             data.color = new Color(hue.x, hue.y, hue.z, alpha); 
             data.worldPos = new Vector3(coordinates.x, coordinates.y, z);
         }
-
-        worldTreeLines[index] = data;
+        */
+        
     }
     
     void CreateCreatureLine(int line, int point, Vector2 cursorCoords, WorldTreeLineData[] worldTreeLines)
@@ -402,14 +411,43 @@ public class HistoryPanelUI : MonoBehaviour
 
     private void CreateSpeciesIcon(SpeciesGenomePool pool) 
     {
-        AgentGenome templateGenome = masterGenomePool.completeSpeciesPoolsList[pool.speciesID].leaderboardGenomesList[0].candidateGenome; 
+        AgentGenome templateGenome = masterGenomePool.completeSpeciesPoolsList[pool.speciesID].foundingCandidate.candidateGenome; 
         Color color = templateGenome.bodyGenome.appearanceGenome.primaryColor;
         
         var icon = Instantiate(prefabSpeciesIcon).GetComponent<SpeciesIconUI>();
         icon.Initialize(speciesIcons.Count - 1, masterGenomePool.completeSpeciesPoolsList[pool.speciesID], anchorGO.transform, color);
         speciesIcons.Add(icon);
     }
-    
+
+    public void SortSpeciesIconList() {
+        /*if (speciesIconsSorted == null) {
+            speciesIconsSorted = new List<SpeciesIconUI>();
+        }
+        speciesIconsSorted.Clear();
+        
+        for(int i = 0; i<speciesIcons.Count; i++) {
+            speciesIconsSorted.Add(speciesIcons[i]);
+        }
+        
+        for(int i = 0; i < speciesIcons.Count - 1; i++) {
+            //SpeciesIconUI swapIcon = new SpeciesIconUI(); 
+            //iconA = speciesIcons[i];
+            SpeciesIconUI icon = speciesIcons[i];
+            SpeciesIconUI iconNext = speciesIcons[i+1];
+            if(icon.linkedPool.avgLifespan < iconNext.linkedPool.avgLifespan) {
+                //swapIcon = icon;
+                speciesIconsSorted[i] = iconNext;
+                speciesIconsSorted[i+1] = icon;
+            }
+            
+        }
+
+        speciesIcons.Clear();// = speciesIconsSorted;
+        for(int i = 0; i<speciesIconsSorted.Count; i++) {
+            speciesIcons.Add(speciesIconsSorted[i]);
+        }
+        */
+    }
     public void InitializeSpeciesIcons() {
         //Debug.Log("InitializeSpeciesListBars");
         int numSpecies = masterGenomePool.completeSpeciesPoolsList.Count;
@@ -496,25 +534,30 @@ public class HistoryPanelUI : MonoBehaviour
         buttonBack.gameObject.SetActive(false);
         buttonSelCreatureEventsLink.gameObject.SetActive(false);
         tempPanelLifeEvents.gameObject.SetActive(false);
+
+
         
         switch (curPanelMode)
         {
             case HistoryPanelMode.AllSpecies:
                 buttonToggleGraphMode.gameObject.SetActive(true);
-                if (isGraphMode) {
-                    UpdateSpeciesIconsLineageMode();
-                    //UpdateSpeciesIconsGraphMode();
-                    targetStartTimeStep = simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[0]].timeStepCreated;
-                    tempPanelGraph.SetActive(true);
-                }
-                else {
-                    UpdateSpeciesIconsLineageMode();
-                }
+                
+                UpdateSpeciesIconsLineageMode();
+                
+                graphBoundsY = minScoreValue;
+                graphBoundsYEnd = maxScoreValue;
+                //UpdateSpeciesIconsGraphMode();
+                targetStartTimeStep = simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[0]].timeStepCreated;
+                tempPanelGraph.SetActive(true);
+                
                 break;
             case HistoryPanelMode.SpeciesPopulation:
                 tempPanelSpeciesPop.SetActive(true);
                 UpdateSpeciesIconsSinglePop();
+
                 targetStartTimeStep = simManager.masterGenomePool.completeSpeciesPoolsList[historySelectedSpeciesID].candidateGenomesList[0].performanceData.timeStepHatched; //***EAC better less naive way to calculate this
+                graphBoundsY = simManager.masterGenomePool.completeSpeciesPoolsList[historySelectedSpeciesID].candidateGenomesList[0].performanceData.totalTicksAlive - 5;
+                graphBoundsYEnd = simManager.masterGenomePool.completeSpeciesPoolsList[historySelectedSpeciesID].candidateGenomesList[0].performanceData.totalTicksAlive + 5;
                 buttonToggleGraphMode.gameObject.SetActive(false);
                 buttonSelCreatureEventsLink.gameObject.SetActive(true);
                 buttonSelCreatureEventsLink.gameObject.transform.localPosition = new Vector3(360f, 180f, 0f);
@@ -541,18 +584,43 @@ public class HistoryPanelUI : MonoBehaviour
         UpdateCreatureEventIcons(currentSelection.candidate);
         
         timelineStartTimeStep = Mathf.Lerp(timelineStartTimeStep, targetStartTimeStep, 0.15f);
+        graphBoundsX = timelineStartTimeStep;
+        graphBoundsXEnd = simManager.simAgeTimeSteps;
+                
     }
 
     public void AddNewSpeciesToPanel(SpeciesGenomePool pool) {
         //Debug.Log("AddNewSpeciesToPanelUI: " + pool.speciesID);
         CreateSpeciesIcon(pool);
+
+        SortSpeciesIconList();
     }
     
-    private void UpdateSpeciesIconsLineageMode() {        
+    private void UpdateSpeciesIconsLineageMode() {
+        int numExtantSpecies = simManager.masterGenomePool.currentlyActiveSpeciesIDList.Count;
         for (int s = 0; s < speciesIcons.Count; s++) {
-            float x = speciesIcons[s].linkedPool.isExtinct ? 
-                (float)speciesIcons[s].linkedPool.timeStepExtinct / Mathf.Max(1f, (float)simManager.simAgeTimeSteps) : 1.2f;
-            float y = 1f - (float)s / Mathf.Max(simManager.masterGenomePool.completeSpeciesPoolsList.Count - 1, 1f);
+            float x;
+            float y;
+            SpeciesGenomePool pool = speciesIcons[s].linkedPool;
+            float totalTicksAlive = 0f;
+            if (pool.speciesDataPointsList.Count > 0) {
+                // based on lifespan rank -- but not evenly spaced, need ranked index list
+                totalTicksAlive = pool.speciesDataPointsList[pool.speciesDataPointsList.Count - 1].lifespan;
+            }
+            if (pool.isExtinct) {
+                x = (float)pool.timeStepExtinct / Mathf.Max(1f, (float)simManager.simAgeTimeSteps);
+                //y = 1f - (float)s / Mathf.Max(simManager.masterGenomePool.completeSpeciesPoolsList.Count - 1, 1f);
+            }
+            else {
+                x = 0.995f + (s % 4) * 0.005f;
+                //y = 1f - (float)s / Mathf.Max(numExtantSpecies - 1, 1f); // evenly spaced
+                if(selectionManager.currentSelection.candidate.speciesID == pool.speciesID) {
+                    x = 1.075f;
+                }
+            }
+            
+            y = Mathf.Clamp01((totalTicksAlive - this.minScoreValue) / (this.maxScoreValue - this.minScoreValue));     
+            
             speciesIcons[s].SetTargetCoords(AnchorBottomLeft(x, y));
         }
     }

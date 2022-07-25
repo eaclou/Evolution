@@ -28,6 +28,10 @@
 			struct WorldTreeLineData {
 				float3 worldPos;
 				float4 color;
+				int speciesID;
+				int candidateID;
+				int isAlive;
+				int isSelected;				
 			};
 			StructuredBuffer<float3> quadVerticesCBuffer;
 			// Change to 2x texture2D's ((1)time series data + (2)key) for data input?
@@ -45,7 +49,8 @@
 			sampler2D _BrushTex;
 
 			uniform int _SelectedWorldStatsID;
-
+			uniform int _SelectedSpeciesID;
+			uniform int _SelectedCandidateID;
 			uniform float _IsOn;
 
 			uniform float _GraphCoordStatsStart;
@@ -63,8 +68,18 @@
 				o.uv = quadData.xy + 0.5;
 				
 				float lineWidth = 0.01;
+				
 				WorldTreeLineData dataPrev = worldTreeLineDataCBuffer[max(0, inst - 1)];
 				WorldTreeLineData data = worldTreeLineDataCBuffer[inst];
+
+				float4 col = data.color;
+				if (data.isSelected) {
+					lineWidth = lineWidth * 3.0;
+					col.rgb = 1;
+				}
+				if (!data.isAlive) {
+					col.rgb = lerp(col.rgb, float3(0.05, 0.05, 0.05), 0.75);
+				}
 
 				float3 prevToThisVec = data.worldPos - dataPrev.worldPos;
 				float3 right = normalize(float3(prevToThisVec.y, -prevToThisVec.x, 0));
@@ -74,7 +89,7 @@
 				float3 worldPosition = dataPrev.worldPos + quadOffset;
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
-				o.color = data.color; // tex2Dlod(_KeyTex, float4(0,((float)_SelectedWorldStatsID + 0.5) / 32.0,0,0));
+				o.color = col; // tex2Dlod(_KeyTex, float4(0,((float)_SelectedWorldStatsID + 0.5) / 32.0,0,0));
 				
 
 				//float distToMouse = 1.0 - saturate(abs(vertexCoord.x - _MouseCoordX) * 15);
