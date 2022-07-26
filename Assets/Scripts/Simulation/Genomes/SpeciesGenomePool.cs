@@ -186,7 +186,7 @@ public class SpeciesGenomePool
         }
 
         maxScoreValue = dataPoint.lifespan + 5f;
-        minScoreValue = speciesDataPointsList[0].lifespan - 5f;
+        minScoreValue = Mathf.Max(0f, speciesDataPointsList[0].lifespan - 5f);
     }
     private void MergeDataPoints() {
         float closestPairDistance = float.PositiveInfinity;
@@ -213,15 +213,15 @@ public class SpeciesGenomePool
     public void UpdateAvgData(CandidateAgentData candidateData) {
         float numPoints = 64f;
         avgLifespan = avgLifespan * ((numPoints - 1f) / numPoints) + candidateData.performanceData.totalTicksAlive * (1f / numPoints);
-        if(numAgentsEvaluated >= 64 && isStillEvaluating) {
+        if (numAgentsEvaluated >= numPoints && isStillEvaluating) {
             isStillEvaluating = false;
             Debug.Log("Species " + speciesID + " is done with initial evaluation. avgLife: " + avgLifespan);
-            
+        }
+        if(isStillEvaluating) {
             //SET ALL to current value:
             foreach(SpeciesDataPoint point in speciesDataPointsList) {
                 point.lifespan = avgLifespan; // starting value// avgCandidateData.performanceData.totalTicksAlive;
             }
-        
         }
     }
     /// Finds an unborn agent ready to be respawned

@@ -47,14 +47,16 @@ public class SpeciesOverviewUI : MonoBehaviour {
         buttons[id].gameObject.transform.localPosition = position;
     }
         
-    public void RebuildGenomeButtons() 
+    public void RebuildGenomeButtons() // ***EAC how is this diff from Update??
     {
         SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[selectionManager.currentSelection.candidate.speciesID]; 
         
         textSpeciesLineage.gameObject.SetActive(true);
         textSpeciesLineage.text = GetLineageText(pool);
 
-        RebuildGenomeButtonsCurrent(pool);        
+        RebuildGenomeButtonsCurrent(pool);
+
+
     }
     
     // * Consider moving to static class if generally useful
@@ -97,6 +99,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
             buttons.Add(buttonObj.GetComponent<GenomeButton>());
             buttonObj.gameObject.SetActive(false);
         }
+        Debug.Log("GenerateButtonList Genome Buttons!");
     }
 
     // Current Genepool

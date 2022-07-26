@@ -67,18 +67,18 @@
 				float3 quadData = quadVerticesCBuffer[id];
 				o.uv = quadData.xy + 0.5;
 				
-				float lineWidth = 0.01;
+				float lineWidth = 0.012;
 				
 				WorldTreeLineData dataPrev = worldTreeLineDataCBuffer[max(0, inst - 1)];
 				WorldTreeLineData data = worldTreeLineDataCBuffer[inst];
 
 				float4 col = data.color;
 				if (data.isSelected) {
-					lineWidth = lineWidth * 3.0;
+					lineWidth = lineWidth * 2.4;
 					col.rgb = 1;
 				}
 				if (!data.isAlive) {
-					col.rgb = lerp(col.rgb, float3(0.05, 0.05, 0.05), 0.75);
+					col.rgb = lerp(col.rgb, float3(0.05, 0.05, 0.05), 0.55);
 				}
 
 				float3 prevToThisVec = data.worldPos - dataPrev.worldPos;

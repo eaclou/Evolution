@@ -41,9 +41,9 @@ public class SelectionManager : Singleton<SelectionManager>
         currentSelection.isGenomeOnly = !hasAgent;
         currentSelection.historySelectedSpeciesID = currentSelection.candidate.speciesID;  
         //SetHistorySelectedSpeciesUI(candidate.speciesID);
-        uiManager.historyPanelUI.InitializePanel();
+        //uiManager.historyPanelUI.InitializePanel();
         //uiManager.historyPanelUI.RefreshFocusedAgent(currentSelection.agent);
-        uiManager.speciesOverviewUI.RebuildGenomeButtons();
+        //uiManager.speciesOverviewUI.RebuildGenomeButtons();
         
 
         if (hasAgent) 

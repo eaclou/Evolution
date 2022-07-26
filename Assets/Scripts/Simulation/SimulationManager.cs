@@ -615,7 +615,7 @@ public class SimulationManager : Singleton<SimulationManager>
 
             
             foreach(SpeciesGenomePool pool in masterGenomePool.completeSpeciesPoolsList) {
-                if(pool.isExtinct || pool.isStillEvaluating) {
+                if(pool.isExtinct) {
                     continue;
                 }
                 if(pool.minScoreValue < uiManager.historyPanelUI.minScoreValue) {
@@ -625,8 +625,8 @@ public class SimulationManager : Singleton<SimulationManager>
                     uiManager.historyPanelUI.maxScoreValue = pool.maxScoreValue;
                 }
             }
-            uiManager.historyPanelUI.minScoreValue += 10f;
-            uiManager.historyPanelUI.maxScoreValue -= 0.5f;
+            uiManager.historyPanelUI.minScoreValue += 1f;
+            uiManager.historyPanelUI.maxScoreValue -= 1f;
 
             uiManager.historyPanelUI.InitializeRenderBuffers();
         }

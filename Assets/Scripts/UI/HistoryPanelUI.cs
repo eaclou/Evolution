@@ -417,6 +417,7 @@ public class HistoryPanelUI : MonoBehaviour
         var icon = Instantiate(prefabSpeciesIcon).GetComponent<SpeciesIconUI>();
         icon.Initialize(speciesIcons.Count - 1, masterGenomePool.completeSpeciesPoolsList[pool.speciesID], anchorGO.transform, color);
         speciesIcons.Add(icon);
+        Debug.Log("NEW SPECIES ICON INSTANTIATED : " + pool.speciesID);
     }
 
     public void SortSpeciesIconList() {

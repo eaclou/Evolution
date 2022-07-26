@@ -70,12 +70,6 @@ public class SpeciesIconUI : MonoBehaviour
         currentCoords = Vector2.Lerp(currentCoords, targetCoords, 0.67f);
         transform.localPosition = new Vector3(currentCoords.x * panelPixelSize, currentCoords.y * panelPixelSize, 0f);
         
-        // WPP: calculations not used, check if needed and delete if not
-        //var appearance = linkedPool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome;
-        //Color primaryColor = new Color(appearance.huePrimary.x, appearance.huePrimary.y, appearance.huePrimary.z);
-        //Color secondaryColor = new Color(appearance.hueSecondary.x, appearance.hueSecondary.y, appearance.hueSecondary.z);
-        //imageColor3.color = linkedPool.isExtinct ? Color.black : Color.white;
-        
         linkedPool.coatOfArmsMat.SetFloat("_IsSelected", isSelected ? 1f : 0f);
 
         toolString += linkedPool.isExtinct ? "\n(Extinct)" : "\nAvg Life: " + linkedPool.avgCandidateData.performanceData.totalTicksAlive.ToString("F0");
