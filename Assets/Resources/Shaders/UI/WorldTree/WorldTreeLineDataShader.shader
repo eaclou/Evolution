@@ -53,12 +53,22 @@
 			uniform int _SelectedCandidateID;
 			uniform float _IsOn;
 
-			uniform float _GraphCoordStatsStart;
+			uniform float _GraphBoundsMinX;
+			uniform float _GraphBoundsMaxX;
+			uniform float _GraphBoundsMinY;
+			uniform float _GraphBoundsMaxY;
 
 			uniform float _MouseCoordX;
 			uniform float _MouseCoordY;
 			uniform float _MouseOn;
 
+			float3 ScaleData(float3 inPos) {
+				float3 outPos = inPos;
+				outPos.x = (outPos.x - _GraphBoundsMinX) / (_GraphBoundsMaxX - _GraphBoundsMinX);
+				outPos.y = (outPos.y - _GraphBoundsMinY) / (_GraphBoundsMaxY - _GraphBoundsMinY);
+				//should be [0-1]range now??
+				return outPos;
+			}
 
 			v2f vert (uint id : SV_VertexID, uint inst : SV_InstanceID)
 			{
@@ -71,7 +81,7 @@
 				
 				WorldTreeLineData dataPrev = worldTreeLineDataCBuffer[max(0, inst - 1)];
 				WorldTreeLineData data = worldTreeLineDataCBuffer[inst];
-
+				
 				float4 col = data.color;
 				if (data.isSelected) {
 					lineWidth = lineWidth * 2.4;
@@ -81,12 +91,12 @@
 					col.rgb = lerp(col.rgb, float3(0.05, 0.05, 0.05), 0.55);
 				}
 
-				float3 prevToThisVec = data.worldPos - dataPrev.worldPos;
+				float3 prevToThisVec = ScaleData(data.worldPos) - ScaleData(dataPrev.worldPos);
 				float3 right = normalize(float3(prevToThisVec.y, -prevToThisVec.x, 0));
 
 				float3 quadOffset = quadData.x * right * lineWidth + o.uv.y * prevToThisVec * 1.09125;
 				
-				float3 worldPosition = dataPrev.worldPos + quadOffset;
+				float3 worldPosition = ScaleData(dataPrev.worldPos) + quadOffset;
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.color = col; // tex2Dlod(_KeyTex, float4(0,((float)_SelectedWorldStatsID + 0.5) / 32.0,0,0));

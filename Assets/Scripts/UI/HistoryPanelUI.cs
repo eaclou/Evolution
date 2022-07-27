@@ -256,10 +256,10 @@ public class HistoryPanelUI : MonoBehaviour
                     
         if (pool.speciesDataPointsList.Count == 0 || point >= pool.speciesDataPointsList.Count) 
             return;
-            
-        float x = (float)pool.speciesDataPointsList[point].timestep / (float)simManager.simAgeTimeSteps;
-        float val = (float)(pool.speciesDataPointsList[point].lifespan - minScoreValue) / (maxScoreValue - minScoreValue);
-        float y = val; // Mathf.Lerp(valStart, valEnd, frac); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
+
+        float x = pool.speciesDataPointsList[point].timestep; // (float)pool.speciesDataPointsList[point].timestep / (float)simManager.simAgeTimeSteps;
+        //float val = (float)(pool.speciesDataPointsList[point].lifespan - minScoreValue) / (maxScoreValue - minScoreValue);
+        float y = pool.speciesDataPointsList[point].lifespan; // Mathf.Lerp(valStart, valEnd, frac); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
         float z = 0f;
             
         Vector3 hue = pool.foundingCandidate.primaryHue;
@@ -285,8 +285,8 @@ public class HistoryPanelUI : MonoBehaviour
             //}
         }
         if (point == 0) alpha = 0f;
-            
-        var coordinates = AnchorBottomLeft(x, y);
+
+        var coordinates = AnchorBottomLeft(x, y); // new Vector2(x, y); // 
 
         data.worldPos = new Vector3(coordinates.x, coordinates.y, z);
         data.color = new Color(hue.x, hue.y, hue.z, alpha);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);

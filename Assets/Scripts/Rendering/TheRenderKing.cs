@@ -2448,6 +2448,10 @@ public class TheRenderKing : Singleton<TheRenderKing>
         worldTreeLineDataMat.SetPass(0);
         worldTreeLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         worldTreeLineDataMat.SetBuffer("worldTreeLineDataCBuffer", uiManager.historyPanelUI.worldTreeLineDataCBuffer);
+        worldTreeLineDataMat.SetFloat("_GraphBoundsMinX", 0f);
+        worldTreeLineDataMat.SetFloat("_GraphBoundsMaxX", SimulationManager.instance.simAgeTimeSteps);
+        worldTreeLineDataMat.SetFloat("_GraphBoundsMinY", uiManager.historyPanelUI.minScoreValue);
+        worldTreeLineDataMat.SetFloat("_GraphBoundsMaxY", uiManager.historyPanelUI.maxScoreValue);
         cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, worldTreeLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.historyPanelUI.worldTreeLineDataCBuffer.count);
         
         /*
