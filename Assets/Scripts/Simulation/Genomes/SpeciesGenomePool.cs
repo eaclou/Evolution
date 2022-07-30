@@ -238,7 +238,7 @@ public class SpeciesGenomePool
                 }
             }
         }
-        SmoothDataPoints(0.03f);
+        SmoothDataPoints(0.05f);
         
     }
 

@@ -94,8 +94,11 @@
 					lineWidth = lineWidth * 1.8;
 					col.rgb = lerp(col.rgb, 1, 0.8);
 				}
+				else {
+					col.rgb *= 0.67;
+				}
 				if (!data.isAlive) {
-					col.rgb = lerp(col.rgb, float3(0.05, 0.05, 0.05), 0.55);
+					col.rgb = lerp(col.rgb, float3(0.05, 0.05, 0.05), 0.255);
 				}
 
 				float3 prevToThisVec = ScaleData(data.worldPos) - ScaleData(dataPrev.worldPos);
