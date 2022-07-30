@@ -266,31 +266,28 @@ public class HistoryPanelUI : MonoBehaviour
             worldTreeNumSpeciesLines * worldTreeNumPointsPerLine +
             worldTreeNumCreatureLines * worldTreeNumPointsPerLine;
         
-
         if (line >= worldTreeNumGridLines) 
             return;
-        
+        //current bounds of graph: minValue/MaxValue, minTimestep/curTime
+        //figure out what kind of line this needs to be based on line index
         WorldTreeLineData data = new WorldTreeLineData();        
-        float x = (float)pIndex / (float)worldTreeNumPointsPerGridLine;
-        int numGridlinesDisplayed = Mathf.Max(worldTreeNumGridLines, 1); // Prevent divide by 0
-        float y = (float)line / (float)numGridlinesDisplayed;
+        float frac = (float)pIndex / (float)worldTreeNumPointsPerGridLine;
+        float x;
+        float y;
+        if(line % 2 == 0) { //horizontal
+            x = frac * simManager.simAgeTimeSteps * 1.5f;
+            y = line * 100f;
+        }
+        else { // vertical
+            x = line * 1000f;
+            y = frac * maxScoreValue * 1.5f;
+        }
         
-        //int timeStepStart = Mathf.RoundToInt(timelineStartTimeStep);// ??
-        //float xStart = (float)(pool.candidateGenomesList[line].performanceData.timeStepHatched - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
-        //float xEnd = 1f;
-        //if (pool.isExtinct || cand.performanceData.timeStepDied > 1) {
-        //    xEnd = (float)(cand.performanceData.timeStepDied - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
-        //}
-        
-        data.color = Vector4.one; // GetCreatureLineColor(hue, cand, inXBounds);         
+        data.color = Vector4.one;
+        if (pIndex == 0) data.color.w = 0f;
         var coordinates = AnchorBottomLeft(x, y);
         data.worldPos = new Vector3(coordinates.x, coordinates.y, 1f);   
-         
-        // Mouse hover highlight                 
-        //if ((coordinates - cursorCoords).magnitude < 0.05f) { 
-        //    data.color = Color.white;
-        //}
-
+       
         worldTreeLines[index] = data;
     }
     void CreateResourceLine(int line, int pIndex, Vector2 cursorCoords, WorldTreeLineData[] worldTreeLines) {
@@ -309,22 +306,10 @@ public class HistoryPanelUI : MonoBehaviour
         int numResourceLinesDisplayed = Mathf.Max(worldTreeNumResourceLines, 1); // Prevent divide by 0
         float y = (float)line / (float)numResourceLinesDisplayed;
         
-        //int timeStepStart = Mathf.RoundToInt(timelineStartTimeStep);// ??
-        //float xStart = (float)(pool.candidateGenomesList[line].performanceData.timeStepHatched - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
-        //float xEnd = 1f;
-        //if (pool.isExtinct || cand.performanceData.timeStepDied > 1) {
-        //    xEnd = (float)(cand.performanceData.timeStepDied - timeStepStart) / (float)(simManager.simAgeTimeSteps - timeStepStart);
-        //}
-        
         data.color = Vector4.one * 0.2f; // GetCreatureLineColor(hue, cand, inXBounds);         
         var coordinates = AnchorBottomLeft(x, y);
         data.worldPos = new Vector3(coordinates.x, coordinates.y, 1f);   
-         
-        // Mouse hover highlight                 
-        //if ((coordinates - cursorCoords).magnitude < 0.05f) { 
-        //    data.color = Color.white;
-        //}
-
+        
         worldTreeLines[index] = data;
     }
     void CreateSpeciesLine(int line, int point, Vector2 cursorCoords, WorldTreeLineData[] worldTreeLines)
