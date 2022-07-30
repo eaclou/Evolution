@@ -66,7 +66,7 @@ public class SpeciesGenomePool
 
     public float avgLifespan;
 
-    private int maxNumDataPointEntries = 32;
+    private int maxNumDataPointEntries = 128;
     public float minScoreValue;
     public float maxScoreValue;
     
@@ -125,6 +125,10 @@ public class SpeciesGenomePool
         //Debug.Log("SPECIES CREATED! " + debugTxt);
         representativeCandidate = foundingGenome;
 
+        if(this.speciesID != 0) {                
+            avgLifespan = SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgLifespan; // starting value// avgCandidateData.performanceData.totalTicksAlive;
+                
+        }
         // create species CoatOfArms:
         coatOfArmsMat = new Material(TheRenderKing.instance.coatOfArmsShader);
         //coatOfArmsTex = TheRenderKing.instance.GenerateSpeciesCoatOfArms(foundingGenome.candidateGenome.bodyGenome.appearanceGenome);
@@ -136,6 +140,7 @@ public class SpeciesGenomePool
         coatOfArmsMat.SetColor("_TintPri", foundingGenome.primaryColor);
         coatOfArmsMat.SetColor("_TintSec", foundingGenome.secondaryColor);
         coatOfArmsMat.SetFloat("_IsSelected", 0f);
+        //coatOfArmsMat.SetFloat("_IsEndangered", isFlaggedForExtinction ? 1f : 0f);
     }
     
     string MutateName(string original)
@@ -179,14 +184,19 @@ public class SpeciesGenomePool
         SpeciesDataPoint dataPoint = new SpeciesDataPoint();
         dataPoint.timestep = timestep;
         dataPoint.lifespan = avgLifespan; // avgCandidateData.performanceData.totalTicksAlive;
-                
+        //if(this.isStillEvaluating && this.speciesID != 0) {
+        //    dataPoint.lifespan = SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgLifespan;
+        //}        
         speciesDataPointsList.Add(dataPoint);
         if(speciesDataPointsList.Count > maxNumDataPointEntries) {
             MergeDataPoints();
         }
-
-        maxScoreValue = dataPoint.lifespan + 5f;
-        minScoreValue = Mathf.Max(0f, speciesDataPointsList[0].lifespan - 5f);
+        float bufferWidth = 75f;
+        maxScoreValue = dataPoint.lifespan + bufferWidth;
+        minScoreValue = dataPoint.lifespan - bufferWidth;
+        if (this.speciesID == 0 && SimulationManager.instance.simAgeTimeSteps < 10000) {
+            minScoreValue = Mathf.Max(0f, speciesDataPointsList[0].lifespan - bufferWidth);
+        }
     }
     private void MergeDataPoints() {
         float closestPairDistance = float.PositiveInfinity;
@@ -196,7 +206,10 @@ public class SpeciesGenomePool
             //float distBack = (speciesDataPointsList[i].timestep + speciesDataPointsList[i].lifespan) - (speciesDataPointsList[i - 1].timestep + speciesDataPointsList[i - 1].lifespan);
             float distFront = speciesDataPointsList[i + 1].timestep - speciesDataPointsList[i].timestep;
             float distBack = speciesDataPointsList[i].timestep - speciesDataPointsList[i - 1].timestep;
-            float dist = distFront + distBack;
+
+            float multiplier = 25f;
+            float bonusDist = (multiplier - (float)i * multiplier / (float)(speciesDataPointsList.Count - 1)) * 1f;
+            float dist = (distFront + distBack) / bonusDist;
             if(dist < closestPairDistance) {
                 closestPairDistance = dist;
                 closestPairStartIndex = i;
@@ -215,14 +228,64 @@ public class SpeciesGenomePool
         avgLifespan = avgLifespan * ((numPoints - 1f) / numPoints) + candidateData.performanceData.totalTicksAlive * (1f / numPoints);
         if (numAgentsEvaluated >= numPoints && isStillEvaluating) {
             isStillEvaluating = false;
+                      
             Debug.Log("Species " + speciesID + " is done with initial evaluation. avgLife: " + avgLifespan);
         }
-        if(isStillEvaluating) {
-            //SET ALL to current value:
-            foreach(SpeciesDataPoint point in speciesDataPointsList) {
-                point.lifespan = avgLifespan; // starting value// avgCandidateData.performanceData.totalTicksAlive;
+        else {
+            if(speciesID == 0 && isStillEvaluating) {
+                foreach(var dP in speciesDataPointsList) {
+                    dP.lifespan = Mathf.Lerp(dP.lifespan, avgLifespan, 0.05f);
+                }
             }
         }
+        SmoothDataPoints(0.03f);
+        
+    }
+
+    public void SmoothDataPoints(int numIter) {
+        for(int j = 0; j < numIter; j++) {
+            List<SpeciesDataPoint> swapDataPointsList = new List<SpeciesDataPoint>();
+            for (int i = 0; i < speciesDataPointsList.Count; i++) {
+                int indexPrev = Mathf.Max(0, i - 1);
+                int indexNext = Mathf.Min(i, speciesDataPointsList.Count - 1);
+                SpeciesDataPoint pointPrev = speciesDataPointsList[indexPrev];
+                SpeciesDataPoint pointCur = speciesDataPointsList[i];
+                SpeciesDataPoint pointNext = speciesDataPointsList[indexNext];
+                pointCur.lifespan = (pointPrev.lifespan + pointCur.lifespan + pointNext.lifespan) / 3f;
+                swapDataPointsList.Add(pointCur);
+            }
+            speciesDataPointsList.Clear();
+            for (int i = 0; i < swapDataPointsList.Count; i++) {
+                speciesDataPointsList.Add(swapDataPointsList[i]);
+            }
+        }
+        
+    }
+    public void SmoothDataPoints(float proportion) {
+        if (proportion > 1f) return;
+        if (proportion < 0f) return;
+        
+        List<SpeciesDataPoint> swapDataPointsList = new List<SpeciesDataPoint>();
+        for (int i = 0; i < speciesDataPointsList.Count; i++) {
+            int indexPrev = Mathf.Max(0, i - 1);
+            int indexNext = Mathf.Min(i, speciesDataPointsList.Count - 1);
+            SpeciesDataPoint pointPrev = speciesDataPointsList[indexPrev];
+            SpeciesDataPoint pointCur = speciesDataPointsList[i];
+            SpeciesDataPoint pointNext = speciesDataPointsList[indexNext];
+            float gamble = UnityEngine.Random.Range(0f, 1f);
+            
+            if(gamble < proportion && i!=0) {
+                pointCur.lifespan = (pointPrev.lifespan + pointCur.lifespan + pointNext.lifespan) / 3f;
+            }                
+            swapDataPointsList.Add(pointCur);
+        }
+        speciesDataPointsList.Clear();
+
+        for (int i = 0; i < swapDataPointsList.Count; i++) {
+            speciesDataPointsList.Add(swapDataPointsList[i]);
+        }
+        
+        
     }
     /// Finds an unborn agent ready to be respawned
     public CandidateAgentData GetNextAvailableCandidate() 

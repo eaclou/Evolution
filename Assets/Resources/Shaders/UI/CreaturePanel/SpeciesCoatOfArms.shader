@@ -45,6 +45,7 @@
 			uniform float4 _TintPri;
 			uniform float4 _TintSec;
 			uniform float _IsSelected;
+            uniform float _IsEndangered;
 
             v2f vert (appdata v)
             {
@@ -70,6 +71,9 @@
 				float4 maskColor = tex2D(_MainTex, i.uv);
 				col.a = maskColor.a;
 				float3 borderHue = lerp(float3(0,0,0), float3(1,1,1), _IsSelected);
+                if (_IsEndangered > 0.5) {
+                    borderHue = float3(1, 0, 0);
+                }
 				col.rgb = lerp(col.rgb, borderHue, maskColor.x);
                 // apply fog
                 //UNITY_APPLY_FOG(i.fogCoord, col);

@@ -608,12 +608,6 @@ public class SimulationManager : Singleton<SimulationManager>
 
         if (simAgeTimeSteps % 30 == 0) {
             //uiManager.historyPanelUI.SortSpeciesIconList();
-            uiManager.speciesGraphPanelUI.UpdateSpeciesTreeDataTextures(curSimYear); // needed?
-            globalGraphData.AddNewEntry(simResourceManager, GetTotalAgentBiomass());
-            //Species stats for history panel:
-            AddNewSpeciesDataEntry(simAgeTimeSteps);
-
-            
             foreach(SpeciesGenomePool pool in masterGenomePool.completeSpeciesPoolsList) {
                 if(pool.isExtinct) {
                     continue;
@@ -625,9 +619,49 @@ public class SimulationManager : Singleton<SimulationManager>
                     uiManager.historyPanelUI.maxScoreValue = pool.maxScoreValue;
                 }
             }
-            uiManager.historyPanelUI.minScoreValue += 1f;
-            uiManager.historyPanelUI.maxScoreValue -= 1f;
+            if(uiManager.historyPanelUI.maxScoreValue - uiManager.historyPanelUI.minScoreValue > 250f) {
+                uiManager.historyPanelUI.minScoreValue += 32.5f;
+                uiManager.historyPanelUI.maxScoreValue -= 32.5f;
 
+
+                float targetMinTimeline = 0f;
+            
+            
+                if(uiManager.historyPanelUI.isGraphMode) {
+                    targetMinTimeline = Mathf.Max(0f, simAgeTimeSteps - (uiManager.historyPanelUI.maxScoreValue - uiManager.historyPanelUI.minScoreValue) * 33f);
+                }
+                else {
+                    uiManager.historyPanelUI.minScoreValue = 0f;
+                    uiManager.historyPanelUI.minTimelineValue = 0f;
+                }
+                
+                //minTimelineTargetValue;// => 
+                uiManager.historyPanelUI.minTimelineValue = Mathf.Lerp(uiManager.historyPanelUI.minTimelineValue, targetMinTimeline, 0.25f);
+                
+                
+                //private float maxTimelineTargetValue;
+    //public float minTimelineValue;// => Mathf.Max(0f, simManager.simAgeTimeSteps - (maxScoreValue - minScoreValue) * 31.4f);
+    //public float maxTimelineValue;// => simManager.simAgeTimeSteps;
+            
+            }
+            uiManager.historyPanelUI.maxTimelineValue = simAgeTimeSteps;
+            
+            
+            uiManager.speciesGraphPanelUI.UpdateSpeciesTreeDataTextures(curSimYear); // needed?
+            globalGraphData.AddNewEntry(simResourceManager, GetTotalAgentBiomass());
+            //Species stats for history panel:
+            AddNewSpeciesDataEntry(simAgeTimeSteps);
+            var coordinates = uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.minTimelineValue, uiManager.historyPanelUI.minScoreValue);
+            theRenderKing.worldTreeLineDataMat.SetFloat("_GraphBoundsMinX", coordinates.x);
+            theRenderKing.worldTreeLineDataMat.SetFloat("_GraphBoundsMaxX", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.maxTimelineValue, uiManager.historyPanelUI.maxScoreValue).x);
+            theRenderKing.worldTreeLineDataMat.SetFloat("_GraphBoundsMinY", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.minTimelineValue, uiManager.historyPanelUI.minScoreValue).y);
+            theRenderKing.worldTreeLineDataMat.SetFloat("_GraphBoundsMaxY", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.minTimelineValue, uiManager.historyPanelUI.maxScoreValue).y);
+            theRenderKing.worldTreeLineDataMat.SetFloat("_GraphBufferLeft", uiManager.historyPanelUI.marginLeft);
+			theRenderKing.worldTreeLineDataMat.SetFloat("_GraphBufferRight", uiManager.historyPanelUI.marginRight);
+			//theRenderKing.worldTreeLineDataMat.SetFloat("_GraphBufferBottom", uiManager.historyPanelUI.marginBottom);
+			//theRenderKing.worldTreeLineDataMat.SetFloat("_GraphBufferTop", uiManager.historyPanelUI.marginTop);
+			theRenderKing.worldTreeLineDataMat.SetFloat("_GraphClockSize", uiManager.historyPanelUI.clockHeight);
+            
             uiManager.historyPanelUI.InitializeRenderBuffers();
         }
 

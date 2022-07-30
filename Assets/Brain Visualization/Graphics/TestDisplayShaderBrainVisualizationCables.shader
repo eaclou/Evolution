@@ -227,7 +227,7 @@
 				//i.angleDot = saturate(i.angleDot);
 				//i.angleDot = i.angleDot * 1;
 
-				float fakeFog = 0; //1.2 - (i.worldPos.x * 0.5 + 0.5) * 1.2;
+				float fakeFog = 0.24; //1.2 - (i.worldPos.x * 0.5 + 0.5) * 1.2;
 
 				float3 textureMaskColor = lerp(0, 1.0 - texColor, pow(1.0 - angleDot, 1.0/1.0));
 				fixed4 col = fixed4(i.col * lightDot, 1.0); //lerp(fixed4(i.col, 1.0), fixed4(textureMaskColor, 1), 1);

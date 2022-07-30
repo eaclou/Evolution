@@ -232,7 +232,7 @@
 				float3 textureMaskColor = lerp(0, 1.0 - texColor, pow(1.0 - angleDot, 1.0/1.0));
 				fixed4 col = fixed4(i.col, 1.0); //lerp(fixed4(i.col, 1.0), fixed4(textureMaskColor, 1), 1);
 				//fixed4 col = fixed4(i.col.r * textureMaskColor, i.col.g * textureMaskColor, i.col.b * textureMaskColor, 1.0) + lightDot * 0.25 + 0.1; //float4(0.6, .95, .7,1); //tex2D(_MainTex, i.uv);
-				col =saturate(col + 0.2); // lerp(col + 0.05, float4(0.1, 0.1, 0.1, 1), fakeFog);
+				col =saturate(col + 0.33); // lerp(col + 0.05, float4(0.1, 0.1, 0.1, 1), fakeFog);
 				// apply fog
 				//UNITY_APPLY_FOG(i.fogCoord, col);
 				//return float4(1,1,1,1);

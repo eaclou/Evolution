@@ -71,8 +71,9 @@ public class SpeciesIconUI : MonoBehaviour
         transform.localPosition = new Vector3(currentCoords.x * panelPixelSize, currentCoords.y * panelPixelSize, 0f);
         
         linkedPool.coatOfArmsMat.SetFloat("_IsSelected", isSelected ? 1f : 0f);
+        linkedPool.coatOfArmsMat.SetFloat("_IsEndangered", linkedPool.isFlaggedForExtinction ? 1f : 0f);
 
-        toolString += linkedPool.isExtinct ? "\n(Extinct)" : "\nAvg Life: " + linkedPool.avgCandidateData.performanceData.totalTicksAlive.ToString("F0");
+        toolString += linkedPool.isExtinct ? "\n(Extinct)" : "\nAvg Life: " + linkedPool.avgLifespan.ToString("F0");
         tooltip.tooltipString = toolString;
 
         var iconState = GetIconDisplayState(isSelected, linkedPool.isExtinct);

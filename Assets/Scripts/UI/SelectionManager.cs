@@ -67,6 +67,7 @@ public class SelectionManager : Singleton<SelectionManager>
 
     public void FollowedCreatureDied() {
         currentSelection.isGenomeOnly = true;
+        SetSelectedFromSpeciesUI(currentSelection.candidate.speciesID);
     }
 
     public bool IsSelected(CandidateAgentData candidate) { return candidate.candidateID == currentSelection.candidate.candidateID; }
