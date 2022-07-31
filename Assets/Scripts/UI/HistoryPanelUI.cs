@@ -276,10 +276,10 @@ public class HistoryPanelUI : MonoBehaviour
         float y;
         if(line % 2 == 0) { //horizontal
             x = frac * simManager.simAgeTimeSteps * 1.5f;
-            y = line * 100f;
+            y = line * 200f;
         }
         else { // vertical
-            x = line * 1000f;
+            x = line * 4000f;
             y = frac * maxScoreValue * 1.5f;
         }
         

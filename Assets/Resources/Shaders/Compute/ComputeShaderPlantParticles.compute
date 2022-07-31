@@ -211,13 +211,13 @@ void CSEatSelectedFoodParticles (uint3 id : SV_DispatchThreadID)
 	float mouthRadius = 1.0;     //critterInitData.boundingBoxSize.x * critterSimData.growthPercentage;  // **** REMEMBER TO *0.5 EVENTUALLY FOR ACCURATE SIZE
 	float particleRadius = particleData.radius;
 	float combinedRadius = (mouthRadius + particleRadius * 0.5) * isAlive01 * critterSimData.consumeOn;
-	float mass = critterSimData.currentBiomass;
+	float mass = critterSimData.currentBiomass + 0.003;
 
 	
 	if(distanceSquared < combinedRadius * combinedRadius) {	
 		
 		if(critterSimData.consumeOn > 0.5) {   // revisit
-			eatenAmount = mass * 0.1; // mouthRadius * mouthRadius * 0.025; // * critterInitData.eatEfficiencyPlant * 0.05f;		
+			eatenAmount = mass * 0.0025; // mouthRadius * mouthRadius * 0.025; // * critterInitData.eatEfficiencyPlant * 0.05f;		
 			
 			foodParticlesWrite[particleIndex].biomass = particleData.biomass - eatenAmount;
 			
@@ -280,8 +280,8 @@ void CSSpawnInitialAlgaeParticles (uint3 id : SV_DispatchThreadID)
 
 	float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
 					
-	foodParticlesWrite[id.x].radius = 1.0; //randRadius;
-	foodParticlesWrite[id.x].biomass = 0.1; //_AlgaeParticleInitMass;
+	foodParticlesWrite[id.x].radius = randRadius;
+	foodParticlesWrite[id.x].biomass = _AlgaeParticleInitMass;
 	foodParticlesWrite[id.x].isActive = 1.0;
 	foodParticlesWrite[id.x].isDecaying = 0.0;
 	foodParticlesWrite[id.x].isSwallowed = 0.0;
@@ -401,10 +401,10 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 				foodParticlesWrite[id.x].worldPos = spawnUV * _MapSize;
 					
 				PlantParticleData representativeParticle = _RepresentativeAlgaeParticleGenomeCBuffer[0];
-				
-				float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
+				//float radius = saturate(_AlgaeParticleInitMass * 5 * 1.8 + 0.04);
+				float randRadius = saturate(_AlgaeParticleInitMass * 5 * 1.8 + 0.04);  //rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
 					
-				foodParticlesWrite[id.x].radius = 1.0; // representativeParticle.radius * (0.9 + 0.2 * (1.0 - rand01)); // 1.0; //randRadius;
+				foodParticlesWrite[id.x].radius = randRadius;//; // representativeParticle.radius * (0.9 + 0.2 * (1.0 - rand01)); // 1.0; //
 				foodParticlesWrite[id.x].biomass = _AlgaeParticleInitMass * 5;
 				foodParticlesWrite[id.x].isActive = 1.0;
 				foodParticlesWrite[id.x].isDecaying = 0.0;
@@ -451,8 +451,8 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 			if(parentParticle.biomass > 0.0002 && rand01 > 0.99 && spawnAltitude > 0.5) {
 				
 				foodParticlesWrite[id.x].worldPos = spawnUV * _MapSize;
-				
-				foodParticlesWrite[id.x].radius = 1.0; //parentParticle.radius * (0.9 + 0.2 * (1.0 - rand01));  // ** UNUSED?*** // parentParticle.radius; // 1.0; //randRadius;
+				float randRadius = saturate(_AlgaeParticleInitMass * 5 * 1.8 + 0.04); 
+				foodParticlesWrite[id.x].radius = randRadius; //parentParticle.radius;// * (0.9 + 0.2 * (1.0 - rand01));  // ** UNUSED?*** // parentParticle.radius; // 1.0; //randRadius;
 				foodParticlesWrite[id.x].biomass = _AlgaeParticleInitMass * 5;
 				foodParticlesWrite[id.x].isActive = 1.0;
 				foodParticlesWrite[id.x].isDecaying = 0.0;

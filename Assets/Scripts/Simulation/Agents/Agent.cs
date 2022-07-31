@@ -489,7 +489,7 @@ public class Agent : MonoBehaviour {
     }
     
     public void EatFoodPlant(float amount) {           
-        amount = Mathf.Min(amount, coreModule.stomachSpace);
+        amount = Mathf.Min(amount, coreModule.stomachSpace * 0.2f);
         
         //amount *= coreModule.foodEfficiencyPlant;
         //coreModule.stomachContentsTotal01 += (amount / coreModule.stomachCapacity);

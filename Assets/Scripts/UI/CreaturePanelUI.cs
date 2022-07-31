@@ -39,6 +39,7 @@ public class CreaturePanelUI : MonoBehaviour
     [SerializeField] AgentActionStateData[] actionStates;
     [SerializeField] AgentActionStateData defaultActionState;
     public AgentActionStateData mostRecentActionState;
+    private AgentActionStateData lastFrameActionState;
     
     [SerializeField] PanelModeData[] panelModes;
     [SerializeField] StringSO startingPanelMode;
@@ -61,6 +62,9 @@ public class CreaturePanelUI : MonoBehaviour
     public ComputeBuffer portraitCritterInitDataCBuffer;
     public ComputeBuffer portraitCritterSimDataCBuffer;
     public ComputeBuffer critterPortraitStrokesCBuffer;
+
+    int curActionSwitchCountdown = 0;
+    bool recentlySwitchedActions = false;
     
     void Start()
     {
@@ -103,6 +107,24 @@ public class CreaturePanelUI : MonoBehaviour
         openCloseButton.SetMouseEnter(mouseInOpenCloseArea);
         
         imageCurAction.sprite = mostRecentActionState.sprite;
+        imageCurAction.color = Color.white;
+        
+        if(lastFrameActionState.id != mostRecentActionState.id) {
+            recentlySwitchedActions = true;
+            curActionSwitchCountdown = 2;
+        }
+        else {
+
+        }
+        if (recentlySwitchedActions) {
+            imageCurAction.color = Color.black;
+            curActionSwitchCountdown -= 1;
+
+            if(curActionSwitchCountdown == 0) {
+                recentlySwitchedActions = false;
+            }
+        }
+        lastFrameActionState = mostRecentActionState;
         tooltipCurrentAction.tooltipString = mostRecentActionState.text;
 
         foreach (var panelMode in panelModes)
