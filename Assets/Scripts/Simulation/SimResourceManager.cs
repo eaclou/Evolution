@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
 public class SimResourceManager {
     SettingsManager settings => SettingsManager.instance;
@@ -13,10 +15,6 @@ public class SimResourceManager {
     public float curGlobalAnimalParticles = 0f;
     public float curGlobalEggSackVolume = 0f;    
     public float curGlobalAgentBiomass = 0f;
-    public float curGlobalAgentBiomass0 = 0f;
-    public float curGlobalAgentBiomass1 = 0f;
-    public float curGlobalAgentBiomass2 = 0f;
-    public float curGlobalAgentBiomass3 = 0f;
     public float curGlobalCarrionVolume = 0f;
 
     public float curTotalMass = 0f;
@@ -44,16 +42,47 @@ public class SimResourceManager {
     public float oxygenUsedByDecomposersLastFrame = 0f;
     public float nutrientsProducedByDecomposersLastFrame = 0f;
     public float detritusRemovedByDecomposersLastFrame = 0f;
-    
+
+    public SimResource[] simResourcesArray;
+    //public List<SpeciesDataPoint> resourceDataListAlgae;
+    //public List<SpeciesDataPoint> resourceDataListPlants;
+    //public List<SpeciesDataPoint> resourceDataListMicrobes;
+    //public List<SpeciesDataPoint> resourceDataListNutrients;
+    //public List<SpeciesDataPoint> resourceDataListWaste;
+    //public List<SpeciesDataPoint> resourceDataListDecomposers;
+    //public List<SpeciesDataPoint> resourceDataListAnimals;
+    int maxNumDataPointEntries = 128;
     
 	public SimResourceManager() {
         // constructor
+        simResourcesArray = new SimResource[7];
+        simResourcesArray[0] = new SimResource("NutrientGrid", maxNumDataPointEntries, Color.yellow);
+        simResourcesArray[1] = new SimResource("AlgaeGrid", maxNumDataPointEntries, Color.cyan);
+        simResourcesArray[2] = new SimResource("DecomposerGrid", maxNumDataPointEntries, new Color(1f, 0.7f, 0.3f));
+        simResourcesArray[3] = new SimResource("WasteGrid", maxNumDataPointEntries, new Color(0.5f, 0.5f, 0.5f));
+        simResourcesArray[4] = new SimResource("Plants", maxNumDataPointEntries, new Color(0.2f, 1f, 0.3f));
+        simResourcesArray[5] = new SimResource("Microbes", maxNumDataPointEntries, new Color(0.931f, 0.1f, 1f));
+        simResourcesArray[6] = new SimResource("Animals", maxNumDataPointEntries, new Color(1f, 0.6f, 0.87f));
         // TEMP:::::
         curGlobalOxygen = 100f;
         curGlobalNutrients = 0f;
         curGlobalDecomposers = 0f;
         curGlobalDetritus = 0f;
+        
     }
+
+    
+    public void AddNewResourcesAll(int timestep) {
+        simResourcesArray[0].AddNewResourceDataEntry(timestep, curGlobalNutrients);
+        simResourcesArray[1].AddNewResourceDataEntry(timestep, curGlobalAlgaeReservoir);
+        simResourcesArray[2].AddNewResourceDataEntry(timestep, curGlobalDetritus);
+        simResourcesArray[3].AddNewResourceDataEntry(timestep, curGlobalDecomposers);
+        simResourcesArray[4].AddNewResourceDataEntry(timestep, curGlobalPlantParticles);
+        simResourcesArray[5].AddNewResourceDataEntry(timestep, curGlobalAnimalParticles);
+        simResourcesArray[6].AddNewResourceDataEntry(timestep, curGlobalAgentBiomass);
+
+    }
+    
 
     public void Tick(TrophicLayersManager trophicLayersManager, VegetationManager veggieManager) 
     {

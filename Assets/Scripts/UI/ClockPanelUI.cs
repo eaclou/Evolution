@@ -18,6 +18,8 @@ public class ClockPanelUI : MonoBehaviour
 
     [SerializeField]
     Text textCurYear;
+    [SerializeField]
+    Text textDisplayStats;
 
     [SerializeField]
     Image imageClockHandA;
@@ -98,7 +100,17 @@ public class ClockPanelUI : MonoBehaviour
         Winter,
         Spring
     }
-
+    public void UpdateResourceStats() {
+        string statsString = "";
+        foreach(var resource in simulation.simResourceManager.simResourcesArray) {
+            if(resource.resourceDataPointList.Count == 0) {
+                return;
+            }
+            statsString += resource.name + ": ( " + resource.resourceDataPointList[resource.resourceDataPointList.Count - 1].value.ToString("F0") + " / " + resource.GetMaxValue().ToString("F0") + " )\n\n";
+        }
+        textDisplayStats.text = statsString;
+        //Debug.Log(statsString);
+    }
     public void Tick() 
     {
         float cursorCoordsX = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().x) / 360f);
@@ -114,7 +126,8 @@ public class ClockPanelUI : MonoBehaviour
         currentSeason = (Season)seasonInt;
         textCurYear.text = (cursorYear + 1).ToString(); // + "\n" + currentSeason;
         
-        clockFaceGroup.transform.localPosition = new Vector3(Mathf.Max(36f,Mathf.Min(360f - 36f, theCursorCzar.GetCursorPixelCoords().x)), 300f, 0f);
+
+        clockFaceGroup.transform.localPosition = new Vector3(Mathf.Max(36f,Mathf.Min(360f - 36f, theCursorCzar.GetCursorPixelCoords().x)), 324f, 0f);
                 
         //**** PLANET!!!!!!
         if (imageClockPlanet) {            
@@ -169,6 +182,7 @@ public class ClockPanelUI : MonoBehaviour
     }
 
     public void InitializeClockBuffers() {
+
         // 'Earth Stamps
         ClockStampData[] clockEarthStampDataArray = new ClockStampData[maxNumClockEarthStamps];
         clockEarthStampDataCBuffer?.Release();

@@ -223,6 +223,7 @@ public class SpeciesGenomePool
         speciesDataPointsList.RemoveAt(closestPairStartIndex);
         
     }
+    
     public void UpdateAvgData(CandidateAgentData candidateData) {
         float numPoints = 64f;
         avgLifespan = avgLifespan * ((numPoints - 1f) / numPoints) + candidateData.performanceData.totalTicksAlive * (1f / numPoints);

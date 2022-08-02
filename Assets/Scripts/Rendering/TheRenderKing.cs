@@ -152,6 +152,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
     //public Material mutationUIVertebratesRenderTexMat;
     public Material worldTreeDisplayRTMat;      // Not used
     public Material worldTreeLineDataMat;
+    public Material resourceLineDataMat;
+    public Material gridLineDataMat;
     public Material clockOrbitLineDataMat;      // Not used
 
     public ComputeBuffer gizmoCursorPosCBuffer;
@@ -636,6 +638,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         uiManager.historyPanelUI.InitializeRenderBuffers();
         creaturePanelUI.InitializeRenderBuffers();
         clockPanelUI.InitializeClockBuffers();
+        
     }
 
     public int GetNumStrokesPerCritter() {
@@ -1032,6 +1035,10 @@ public class TheRenderKing : Singleton<TheRenderKing>
 
         worldTreeLineDataMat.SetPass(0);
         worldTreeLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        resourceLineDataMat.SetPass(0);
+        resourceLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        gridLineDataMat.SetPass(0);
+        gridLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
     }
     
     private void InitializeCommandBuffers() 
@@ -2448,23 +2455,18 @@ public class TheRenderKing : Singleton<TheRenderKing>
         worldTreeLineDataMat.SetPass(0);
         worldTreeLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         worldTreeLineDataMat.SetBuffer("worldTreeLineDataCBuffer", uiManager.historyPanelUI.worldTreeLineDataCBuffer);
-        //worldTreeLineDataMat.SetFloat("_GraphBoundsMinX", 0f);
-        //worldTreeLineDataMat.SetFloat("_GraphBoundsMaxX", SimulationManager.instance.simAgeTimeSteps);
-        //worldTreeLineDataMat.SetFloat("_GraphBoundsMinY", uiManager.historyPanelUI.minScoreValue);
-        //worldTreeLineDataMat.SetFloat("_GraphBoundsMaxY", uiManager.historyPanelUI.maxScoreValue);
         cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, worldTreeLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.historyPanelUI.worldTreeLineDataCBuffer.count);
-        
-        /*
-        clockOrbitLineDataMat.SetPass(0);
-        clockOrbitLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        clockOrbitLineDataMat.SetBuffer("clockOrbitLineDataCBuffer", clockPanelUI.clockMoonStampDataCBuffer);
-        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, clockOrbitLineDataMat, 0, MeshTopology.Triangles, 6, clockPanelUI.clockMoonStampDataCBuffer.count);
 
-        clockOrbitLineDataMat.SetPass(0);
-        clockOrbitLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        clockOrbitLineDataMat.SetBuffer("clockOrbitLineDataCBuffer", clockPanelUI.clockSunStampDataCBuffer);
-        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, clockOrbitLineDataMat, 0, MeshTopology.Triangles, 6, clockPanelUI.clockSunStampDataCBuffer.count);
-        */
+        resourceLineDataMat.SetPass(0);
+        resourceLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        resourceLineDataMat.SetBuffer("resourceLineDataCBuffer", uiManager.historyPanelUI.resourceLineDataCBuffer);
+        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, resourceLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.historyPanelUI.resourceLineDataCBuffer.count);
+
+        gridLineDataMat.SetPass(0);
+        gridLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        gridLineDataMat.SetBuffer("gridLineDataCBuffer", uiManager.historyPanelUI.gridLineDataCBuffer);
+        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, gridLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.historyPanelUI.gridLineDataCBuffer.count);
+
         Graphics.ExecuteCommandBuffer(cmdBufferWorldTree);
         worldTreeRenderCamera.Render();
 

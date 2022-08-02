@@ -930,7 +930,7 @@ public class Agent : MonoBehaviour {
             // Food calc before energy/healing/etc? **************
             //float sizeValue = BodyGenome.GetBodySizeScore01(candidateRef.candidateGenome.bodyGenome);
             // FOOD PARTICLES: Either mouth type for now:
-            float foodParticleEatAmount = simManager.vegetationManager.plantParticlesEatAmountsArray[index] * coreModule.digestEfficiencyPlant; // **************** PLANT BONUS!! HACKY
+            float foodParticleEatAmount = simManager.vegetationManager.plantParticlesEatAmountsArray[index] * coreModule.digestEfficiencyPlant * 32f; // **************** PLANT BONUS!! HACKY
             float animalParticleEatAmount = simManager.zooplanktonManager.animalParticlesEatAmountsArray[index] * coreModule.digestEfficiencyMeat;
             
             bool isEatingPlant = foodParticleEatAmount > 0f;

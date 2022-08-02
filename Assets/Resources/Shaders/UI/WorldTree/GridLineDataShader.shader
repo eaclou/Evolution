@@ -1,4 +1,4 @@
-﻿Shader "UI/WorldTree/WorldTreeLineDataShader"
+﻿Shader "UI/WorldTree/GridLineDataShader"
 {
 	Properties
 	{
@@ -25,16 +25,13 @@
 			//#include "Assets/Resources/Shaders/Inc/StructsTreeOfLife.cginc"
 			//#include "Assets/Resources/Shaders/Inc/NoiseShared.cginc"
 
-			struct WorldTreeLineData {
+			struct GridLineData {
 				float3 worldPos;
-				float4 color;
-				int speciesID;
-				int candidateID;
-				int isAlive;
-				int isSelected;				
+				float4 color;	
+				float scale;
 			};
 			StructuredBuffer<float3> quadVerticesCBuffer;
-			StructuredBuffer<WorldTreeLineData> worldTreeLineDataCBuffer;
+			StructuredBuffer<GridLineData> gridLineDataCBuffer;
 						
 			struct v2f
 			{
@@ -83,23 +80,13 @@
 				float3 quadData = quadVerticesCBuffer[id];
 				o.uv = quadData.xy + 0.5;
 				
-				float lineWidth = 0.014;
+				float lineWidth = 0.006;
 				
-				WorldTreeLineData dataPrev = worldTreeLineDataCBuffer[max(0, inst - 1)];
-				WorldTreeLineData data = worldTreeLineDataCBuffer[inst];
+				GridLineData dataPrev = gridLineDataCBuffer[max(0, inst - 1)];
+				GridLineData data = gridLineDataCBuffer[inst];
 				
 				float4 col = data.color;
-				if (data.isSelected) {
-					lineWidth = lineWidth * 1.8;
-					col.rgb = lerp(col.rgb, 1, 0.48);
-				}
-				else {
-					col.rgb *= 0.77;
-				}
-				if (!data.isAlive) {
-					col.rgb = lerp(col.rgb, float3(0.05, 0.05, 0.05), 0.255);
-				}
-
+				
 				float3 prevToThisVec = ScaleData(data.worldPos) - ScaleData(dataPrev.worldPos);
 				float3 right = normalize(float3(prevToThisVec.y, -prevToThisVec.x, 0));
 
@@ -112,6 +99,7 @@
 				//y = y * displayHeight + marginBottom;
 				worldPosition.y = worldPosition.y * graphHeight;// +_GraphClockSize; //(outPos.y - _GraphBufferBottom) / (_GraphBufferTop + _GraphClockSize - _GraphBufferBottom);
 
+				//worldPosition = float3(0.5, 0.5, 0) + quadData * 0.1;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.color = col; // tex2Dlod(_KeyTex, float4(0,((float)_SelectedWorldStatsID + 0.5) / 32.0,0,0));
 				

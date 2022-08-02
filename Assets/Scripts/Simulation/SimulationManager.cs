@@ -96,6 +96,7 @@ public class SimulationManager : Singleton<SimulationManager>
     MutationSettingsInstance GetSetVertebrateMutationSettings() { return _cachedVertebrateMutationSettings = lookup.GetMutationSettingsCopy(MutationSettingsId.Vertebrate); }
 
     
+    
     public int GetNumTimeStepsPerYear() {
         return numStepsInSimYear;
     }
@@ -658,11 +659,29 @@ public class SimulationManager : Singleton<SimulationManager>
             theRenderKing.worldTreeLineDataMat.SetFloat("_GraphBoundsMaxY", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.minTimelineValue, uiManager.historyPanelUI.maxScoreValue).y);
             theRenderKing.worldTreeLineDataMat.SetFloat("_GraphBufferLeft", uiManager.historyPanelUI.marginLeft);
 			theRenderKing.worldTreeLineDataMat.SetFloat("_GraphBufferRight", uiManager.historyPanelUI.marginRight);
-			//theRenderKing.worldTreeLineDataMat.SetFloat("_GraphBufferBottom", uiManager.historyPanelUI.marginBottom);
+            theRenderKing.worldTreeLineDataMat.SetFloat("_GraphClockSize", uiManager.historyPanelUI.clockHeight);
+
+            theRenderKing.resourceLineDataMat.SetFloat("_GraphBufferLeft", uiManager.historyPanelUI.marginLeft);
+            theRenderKing.resourceLineDataMat.SetFloat("_GraphBufferRight", uiManager.historyPanelUI.marginRight);
+            theRenderKing.resourceLineDataMat.SetFloat("_GraphClockSize", uiManager.historyPanelUI.clockHeight);
+            theRenderKing.resourceLineDataMat.SetFloat("_GraphBoundsMinX", coordinates.x);
+            theRenderKing.resourceLineDataMat.SetFloat("_GraphBoundsMaxX", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.maxTimelineValue, uiManager.historyPanelUI.maxScoreValue).x);
+            //theRenderKing.resourceLineDataMat.SetFloat("_GraphBoundsMinY", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.minTimelineValue, uiManager.historyPanelUI.minScoreValue).y);
+
+            theRenderKing.gridLineDataMat.SetFloat("_GraphBufferLeft", uiManager.historyPanelUI.marginLeft);
+            theRenderKing.gridLineDataMat.SetFloat("_GraphBufferRight", uiManager.historyPanelUI.marginRight);
+            theRenderKing.gridLineDataMat.SetFloat("_GraphClockSize", uiManager.historyPanelUI.clockHeight);
+            theRenderKing.gridLineDataMat.SetFloat("_GraphBoundsMinX", coordinates.x);
+            theRenderKing.gridLineDataMat.SetFloat("_GraphBoundsMaxX", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.maxTimelineValue, uiManager.historyPanelUI.maxScoreValue).x);
+            theRenderKing.gridLineDataMat.SetFloat("_GraphBoundsMinY", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.minTimelineValue, uiManager.historyPanelUI.minScoreValue).y);
+            theRenderKing.gridLineDataMat.SetFloat("_GraphBoundsMaxY", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.minTimelineValue, uiManager.historyPanelUI.maxScoreValue).y);
+            //theRenderKing.worldTreeLineDataMat.SetFloat("_GraphBufferBottom", uiManager.historyPanelUI.marginBottom);
 			//theRenderKing.worldTreeLineDataMat.SetFloat("_GraphBufferTop", uiManager.historyPanelUI.marginTop);
-			theRenderKing.worldTreeLineDataMat.SetFloat("_GraphClockSize", uiManager.historyPanelUI.clockHeight);
-            
+			
+
             uiManager.historyPanelUI.InitializeRenderBuffers();
+
+            simResourceManager.AddNewResourcesAll(simAgeTimeSteps);
         }
 
         if (simAgeTimeSteps % 79 == 3) {
@@ -1291,6 +1310,7 @@ public class SimulationManager : Singleton<SimulationManager>
     
     private void AddNewSpeciesDataEntry(int timestep) {
         masterGenomePool.AddNewSpeciesDataPoint(timestep);
+
     }
     
     /*private void RefreshLatestSpeciesDataEntry() { 
