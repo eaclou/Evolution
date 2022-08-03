@@ -56,6 +56,7 @@ public class SpeciesGenomePool
         
     [SerializeField]
     public List<SpeciesDataPoint> speciesDataPointsList;
+    public List<SpeciesDataPoint> creatureDataPointsList;
 
     public Material coatOfArmsMat;
 
@@ -180,6 +181,7 @@ public class SpeciesGenomePool
 
     public void AddNewDataPoint(int timestep) 
     {
+        //ADD NEW SPECIES DATA POINT::::::
         CreateNewAverageCandidate(); // ***EC figure this out???        
         SpeciesDataPoint dataPoint = new SpeciesDataPoint();
         dataPoint.timestep = timestep;
@@ -196,6 +198,14 @@ public class SpeciesGenomePool
         minScoreValue = dataPoint.lifespan - bufferWidth;
         if (this.speciesID == 0 && SimulationManager.instance.simAgeTimeSteps < 10000) {
             minScoreValue = Mathf.Max(0f, speciesDataPointsList[0].lifespan - bufferWidth);
+        }
+
+        //ADD NEW CREATURE DATAPOINTS:::::
+        foreach (var cand in candidateGenomesList) {
+            if(cand.isBeingEvaluated) {
+                cand.AddNewDataPoint(timestep, avgLifespan);
+            }
+            
         }
     }
     private void MergeDataPoints() {
@@ -235,7 +245,7 @@ public class SpeciesGenomePool
         else {
             if(speciesID == 0 && isStillEvaluating) {
                 foreach(var dP in speciesDataPointsList) {
-                    dP.lifespan = Mathf.Lerp(dP.lifespan, avgLifespan, 0.05f);
+                    //dP.lifespan = Mathf.Lerp(dP.lifespan, avgLifespan, 0.05f);
                 }
             }
         }

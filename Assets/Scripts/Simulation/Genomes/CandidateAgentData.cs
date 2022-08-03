@@ -4,6 +4,11 @@ using Playcraft;
 
 /// Stats
 public struct PerformanceData {
+    public List<SpeciesDataPoint> creatureDataPointsList;
+    public int maxNumDataPointEntries;
+    public float minScoreValue;
+    public float maxScoreValue;
+
     public float totalFoodEatenPlant;
     public float totalFoodEatenZoop;
     public float totalFoodEatenEgg;
@@ -43,7 +48,9 @@ public struct PerformanceData {
         foreach (var agent in leaderboard)
         {
             leader = agent.performanceData;
-        
+            //
+            //creatureDataPointsList = new List<SpeciesDataPoint>();
+            //maxNumDataPointEntries = 32; //***EAC
             self.totalDamageDealt += leader.totalDamageDealt;
             self.totalDamageTaken += leader.totalDamageTaken;
             self.totalFoodEatenCorpse += leader.totalFoodEatenCorpse;
@@ -147,7 +154,50 @@ public class CandidateAgentData
         candidateEventDataList = new List<CandidateEventData>();
         performanceData = new PerformanceData();
     }
-    
+
+    public void AddNewDataPoint(int timestep, float score) {
+
+        SpeciesDataPoint dataPoint = new SpeciesDataPoint();
+        dataPoint.timestep = timestep;
+        dataPoint.lifespan = score;
+        if(performanceData.creatureDataPointsList == null) {
+            performanceData.creatureDataPointsList = new List<SpeciesDataPoint>();
+            performanceData.maxNumDataPointEntries = 32; // ***EAC BAD! move to simManager or smth
+        }
+        performanceData.creatureDataPointsList.Add(dataPoint);
+        if (performanceData.creatureDataPointsList.Count > performanceData.maxNumDataPointEntries) {
+            MergeDataPoints();
+        }
+        //float bufferWidth = 75f;
+        //maxScoreValue = dataPoint.lifespan + bufferWidth;
+        //minScoreValue = dataPoint.lifespan - bufferWidth;
+        //if (this.speciesID == 0 && SimulationManager.instance.simAgeTimeSteps < 10000) {
+        //minScoreValue = Mathf.Max(0f, performanceData.creatureDataPointsList[0].lifespan - bufferWidth);
+        //}
+    }
+    private void MergeDataPoints() {
+        float closestPairDistance = float.PositiveInfinity;
+        int closestPairStartIndex = 1;
+        for(int i = 1; i < performanceData.creatureDataPointsList.Count - 2; i++) { // don't include first or last point
+            float distFront = performanceData.creatureDataPointsList[i + 1].timestep - performanceData.creatureDataPointsList[i].timestep;
+            float distBack = performanceData.creatureDataPointsList[i].timestep - performanceData.creatureDataPointsList[i - 1].timestep;
+
+            float multiplier = 25f;
+            float bonusDist = (multiplier - (float)i * multiplier / (float)(performanceData.creatureDataPointsList.Count - 1)) * 1f;
+            float dist = (distFront + distBack) / bonusDist;
+            if(dist < closestPairDistance) {
+                closestPairDistance = dist;
+                closestPairStartIndex = i;
+            }
+        }
+        SpeciesDataPoint avgData = new SpeciesDataPoint();
+        avgData.timestep = (performanceData.creatureDataPointsList[closestPairStartIndex].timestep + performanceData.creatureDataPointsList[closestPairStartIndex + 1].timestep) / 2f;
+        avgData.lifespan = (performanceData.creatureDataPointsList[closestPairStartIndex].lifespan + performanceData.creatureDataPointsList[closestPairStartIndex + 1].lifespan) / 2f;
+                
+        performanceData.creatureDataPointsList[closestPairStartIndex + 1] = avgData;
+        performanceData.creatureDataPointsList.RemoveAt(closestPairStartIndex);
+        
+    }
     private string GenerateTempCritterName() 
     {
         if (candidateID < 0)

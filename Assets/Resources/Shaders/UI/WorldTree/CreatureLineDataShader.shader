@@ -1,4 +1,4 @@
-﻿Shader "UI/WorldTree/WorldTreeLineDataShader"
+﻿Shader "UI/WorldTree/CreatureLineDataShader"
 {
 	Properties
 	{
@@ -83,7 +83,7 @@
 				float3 quadData = quadVerticesCBuffer[id];
 				o.uv = quadData.xy + 0.5;
 				
-				float lineWidth = 0.005;
+				float lineWidth = 0.0025;
 				
 				WorldTreeLineData dataPrev = worldTreeLineDataCBuffer[max(0, inst - 1)];
 				WorldTreeLineData data = worldTreeLineDataCBuffer[inst];
@@ -91,7 +91,7 @@
 				float4 col = data.color;
 				if (data.isSelected) {
 					lineWidth = lineWidth * 3.3;
-					col.rgb = lerp(col.rgb, 1, 0.48);
+					col.rgb = lerp(col.rgb, 1, 0.68);
 				}
 				else {
 					col.rgb *= 0.77;

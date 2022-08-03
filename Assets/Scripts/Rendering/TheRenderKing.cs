@@ -151,9 +151,11 @@ public class TheRenderKing : Singleton<TheRenderKing>
     public Material spiritBrushRenderMat;
     //public Material mutationUIVertebratesRenderTexMat;
     public Material worldTreeDisplayRTMat;      // Not used
-    public Material worldTreeLineDataMat;
+    //public Material worldTreeLineDataMat;
     public Material resourceLineDataMat;
     public Material gridLineDataMat;
+    public Material creatureLineDataMat;
+    public Material speciesLineDataMat;
     public Material clockOrbitLineDataMat;      // Not used
 
     public ComputeBuffer gizmoCursorPosCBuffer;
@@ -1033,8 +1035,10 @@ public class TheRenderKing : Singleton<TheRenderKing>
         treeOfLifePortraitMat.SetPass(0);
         treeOfLifePortraitMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
 
-        worldTreeLineDataMat.SetPass(0);
-        worldTreeLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        speciesLineDataMat.SetPass(0);
+        speciesLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        creatureLineDataMat.SetPass(0);
+        creatureLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         resourceLineDataMat.SetPass(0);
         resourceLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         gridLineDataMat.SetPass(0);
@@ -2452,10 +2456,15 @@ public class TheRenderKing : Singleton<TheRenderKing>
         
         clockPanelUI.RefreshMaterials();
 
-        worldTreeLineDataMat.SetPass(0);
-        worldTreeLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        worldTreeLineDataMat.SetBuffer("worldTreeLineDataCBuffer", uiManager.historyPanelUI.worldTreeLineDataCBuffer);
-        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, worldTreeLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.historyPanelUI.worldTreeLineDataCBuffer.count);
+        speciesLineDataMat.SetPass(0);
+        speciesLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        speciesLineDataMat.SetBuffer("worldTreeLineDataCBuffer", uiManager.historyPanelUI.speciesLineDataCBuffer);
+        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, speciesLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.historyPanelUI.speciesLineDataCBuffer.count);
+
+        creatureLineDataMat.SetPass(0);
+        creatureLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        creatureLineDataMat.SetBuffer("worldTreeLineDataCBuffer", uiManager.historyPanelUI.creatureLineDataCBuffer);
+        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, creatureLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.historyPanelUI.creatureLineDataCBuffer.count);
 
         resourceLineDataMat.SetPass(0);
         resourceLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
