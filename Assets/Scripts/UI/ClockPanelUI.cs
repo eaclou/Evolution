@@ -101,6 +101,10 @@ public class ClockPanelUI : MonoBehaviour
         Spring
     }
     public void UpdateResourceStats() {
+        if(!uiManager.historyPanelUI.isResourceMode) {
+            textDisplayStats.text = "";
+            return; 
+        }
         string statsString = "";
         foreach(var resource in simulation.simResourceManager.simResourcesArray) {
             if(resource.resourceDataPointList.Count == 0) {
