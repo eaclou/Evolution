@@ -235,7 +235,7 @@ public class SpeciesGenomePool
     }
     
     public void UpdateAvgData(CandidateAgentData candidateData) {
-        float numPoints = 64f;
+        float numPoints = 256f;
         avgLifespan = avgLifespan * ((numPoints - 1f) / numPoints) + candidateData.performanceData.totalTicksAlive * (1f / numPoints);
         if (numAgentsEvaluated >= numPoints && isStillEvaluating) {
             isStillEvaluating = false;
@@ -277,6 +277,8 @@ public class SpeciesGenomePool
         if (proportion < 0f) return;
         
         List<SpeciesDataPoint> swapDataPointsList = new List<SpeciesDataPoint>();
+        //int startIndex = 1; // Mathf.Min(1, speciesDataPointsList.Count);
+        //if (speciesDataPointsList.Count < 2) return;
         for (int i = 0; i < speciesDataPointsList.Count; i++) {
             int indexPrev = Mathf.Max(0, i - 1);
             int indexNext = Mathf.Min(i, speciesDataPointsList.Count - 1);
@@ -285,7 +287,7 @@ public class SpeciesGenomePool
             SpeciesDataPoint pointNext = speciesDataPointsList[indexNext];
             float gamble = UnityEngine.Random.Range(0f, 1f);
             
-            if(gamble < proportion && i!=0) {
+            if(gamble < proportion && i<2) {
                 pointCur.lifespan = (pointPrev.lifespan + pointCur.lifespan + pointNext.lifespan) / 3f;
             }                
             swapDataPointsList.Add(pointCur);

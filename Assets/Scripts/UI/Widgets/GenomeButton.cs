@@ -40,9 +40,9 @@ public class GenomeButton : MonoBehaviour
         //selectionManager.SetSelected(simulationManager.masterGenomePool.completeSpeciesPoolsList[selectionManager.currentSelection.historySelectedSpeciesID].candidateGenomesList[index]); // FindCorrespondingAgent();
     }
 
-    public void SetTargetCoords(Vector2 newCoords) {
-        targetCoords = newCoords;
-    }
+    //public void SetTargetCoords(Vector2 newCoords) {
+    //    targetCoords = newCoords;
+    //}
     
     // * Consider Refactor: move life stage to candidate    
     public void SetDisplay(CandidateAgentData candidate)
@@ -50,9 +50,9 @@ public class GenomeButton : MonoBehaviour
         var iconSprite = lookup.GetAgentLifeStageIcon(AgentLifeStage.Dead, true);   // Fossil
         
         // POSITION
-        currentCoords = Vector2.Lerp(currentCoords, targetCoords, 0.75f);
+        //currentCoords = Vector2.Lerp(currentCoords, targetCoords, 0.75f);
 
-        gameObject.transform.localPosition = new Vector3(currentCoords.x * 380f, currentCoords.y * 360f, 0f);
+        //gameObject.transform.localPosition = new Vector3(currentCoords.x * 360f, currentCoords.y * 360f, 0f);
 
         string statusStr = "";
 
@@ -111,17 +111,3 @@ public class GenomeButton : MonoBehaviour
         //public Sprite icon;
     }
 }
-
-    
-/*
-void FindCorrespondingAgent()
-{
-    var agentIndex = simulationManager.GetIndexOfFocusedAgent();
-    if (agentIndex == -1) return;
-    
-    //cameraManager.SetTargetAgent(simulationManager.agents[agentIndex], agentIndex);
-    //selectionManager.ResetCurrentFocusedCandidateGenome();
-    selectionManager.SetSelected()
-    cameraManager.isFollowingAgent = true; 
-}
-*/

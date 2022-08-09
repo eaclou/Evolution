@@ -626,29 +626,32 @@ public class SimulationManager : Singleton<SimulationManager>
                 uiManager.historyPanelUI.maxScoreValue -= 32.5f;
 
 
-                float targetMinTimeline = 0f;
-            
-            
-                if(uiManager.historyPanelUI.isGraphMode) {
-                    targetMinTimeline = Mathf.Max(0f, simAgeTimeSteps - (uiManager.historyPanelUI.maxScoreValue - uiManager.historyPanelUI.minScoreValue) * 33f);
-                }
-                else {
-                    uiManager.historyPanelUI.minScoreValue = 0f;
-                    uiManager.historyPanelUI.minTimelineValue = 0f;
-                }
-
-
-                //minTimelineTargetValue;// => 
-                uiManager.historyPanelUI.minTimelineValue = Mathf.Lerp(uiManager.historyPanelUI.minTimelineValue, targetMinTimeline, 0.25f);
-                
-                if(uiManager.historyPanelUI.isPopulationMode) {
-                    targetMinTimeline = Mathf.Max(0f, simAgeTimeSteps - (selectedPool.candidateGenomesList[0].performanceData.timeStepHatched));// uiManager.historyPanelUI.maxScoreValue - uiManager.historyPanelUI.minScoreValue) * 33f);
-                    uiManager.historyPanelUI.minScoreValue = selectedPool.avgLifespan - 250f;
-                    uiManager.historyPanelUI.maxScoreValue = selectedPool.avgLifespan + 250f;
-                }
                 
 
             }
+            float targetMinTimeline = 0f;
+            
+            //AllSpeciesView 
+            if(uiManager.historyPanelUI.isGraphMode) { // all species shown, but auto-zoom
+                targetMinTimeline = Mathf.Max(0f, simAgeTimeSteps - (uiManager.historyPanelUI.maxScoreValue - uiManager.historyPanelUI.minScoreValue) * 33f);
+            }
+            else {
+                uiManager.historyPanelUI.minScoreValue = 0f;
+                targetMinTimeline = 0f;
+            }
+            if(uiManager.historyPanelUI.isPopulationMode) {
+                targetMinTimeline = Mathf.Max(0f, selectedPool.candidateGenomesList[0].performanceData.timeStepHatched);// uiManager.historyPanelUI.maxScoreValue - uiManager.historyPanelUI.minScoreValue) * 33f);
+                uiManager.historyPanelUI.minScoreValue = selectedPool.minScoreValue;
+                uiManager.historyPanelUI.maxScoreValue = selectedPool.maxScoreValue;
+            }
+            if(uiManager.historyPanelUI.isTimelineMode) {
+                targetMinTimeline = Mathf.Max(0f, selectionManager.currentSelection.candidate.performanceData.timeStepHatched);// uiManager.historyPanelUI.maxScoreValue - uiManager.historyPanelUI.minScoreValue) * 33f);
+                uiManager.historyPanelUI.minScoreValue = selectedPool.minScoreValue - 50f;
+                uiManager.historyPanelUI.maxScoreValue = selectedPool.maxScoreValue + 50f;
+            }
+            //minTimelineTargetValue;// => 
+            uiManager.historyPanelUI.minTimelineValue = Mathf.Lerp(uiManager.historyPanelUI.minTimelineValue, targetMinTimeline, 0.44f);
+                
             uiManager.historyPanelUI.maxTimelineValue = simAgeTimeSteps;
             
             

@@ -27,8 +27,8 @@ public class AudioManager : Singleton<AudioManager>
     [SerializeField]
     public AudioSource[] soundtrackSources;
     
-    private int frameCounter = 12400;
-    private int framesPerTrack = 12500;
+    private int frameCounter = 7800;
+    private int framesPerTrack = 9000;
     private float distSqrFalloff = 110f;
 
     private float GetSFXVolumeFromPos(Vector2 position) {
@@ -87,7 +87,7 @@ public class AudioManager : Singleton<AudioManager>
 
         int numTracks = soundtrackSources.Length;
         int randTrackIndex = Random.Range(0, numTracks - 1);
-
+        Debug.Log("AudioManager Play Song #" + randTrackIndex);
         return soundtrackSources[randTrackIndex];
     }
 

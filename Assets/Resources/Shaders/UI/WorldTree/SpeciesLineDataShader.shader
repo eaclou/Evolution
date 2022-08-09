@@ -83,14 +83,14 @@
 				float3 quadData = quadVerticesCBuffer[id];
 				o.uv = quadData.xy + 0.5;
 				
-				float lineWidth = 0.0075;
+				float lineWidth = 0.03;
 				
 				WorldTreeLineData dataPrev = worldTreeLineDataCBuffer[max(0, inst - 1)];
 				WorldTreeLineData data = worldTreeLineDataCBuffer[inst];
 				
 				float4 col = data.color;
 				if (data.isSelected) {
-					lineWidth = lineWidth * 3.3;
+					lineWidth = lineWidth * 1.43;
 					col.rgb = lerp(col.rgb, 1, 0.28);
 				}
 				else {

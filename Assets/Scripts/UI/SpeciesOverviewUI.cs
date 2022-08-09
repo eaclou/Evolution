@@ -110,9 +110,9 @@ public class SpeciesOverviewUI : MonoBehaviour {
     }
     
     // Hall of fame genomes (checkpoints .. every 50 years?)
-    private void RebuildGenomeButtonsLineage(SpeciesGenomePool pool) {
-        UpdateButtons(pool.hallOfFameGenomesList, SelectionGroup.HallOfFame);
-    }
+    //private void RebuildGenomeButtonsLineage(SpeciesGenomePool pool) {
+    //    UpdateButtons(pool.hallOfFameGenomesList, SelectionGroup.HallOfFame);
+    //}
     
     private void UpdateButtons(List<CandidateAgentData> candidates, SelectionGroup groupId) {
         for(int i = 0; i < buttons.Count; i++) {
@@ -140,16 +140,12 @@ public class SpeciesOverviewUI : MonoBehaviour {
             selectedButtonData.image.color = Color.white;
             // new Vector3(selectedButtonData.image.rectTransform.localPosition.x + 24f, selectedButtonData.image.rectTransform.localPosition.y, 0f);
         }
-        panelGenomeViewer.SetActive(true);
+        //panelGenomeViewer.SetActive(true);
 
         //uiManager.historyPanelUI.buttonSelCreatureEventsLink.GetComponent<RectTransform>().localPosition = Vector3.one * 4.2f;
         
     }
-    
-    public void ClickedCreatureIcon() {
-
-    }
-
+   
     public void CycleHallOfFame() {
         ChangeSelectedGenome(SelectionGroup.HallOfFame, selectedHallOfFameIndex + 1); 
     }

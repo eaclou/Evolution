@@ -13,6 +13,7 @@ public class HistoryPanelUI : MonoBehaviour
     public Button buttonToggleGraphMode;
     public Button buttonSelCreatureEventsLink;
     public Button buttonBack;
+    public Button buttonToggleResourceView;
     
     /// Keeps track of spawned buttons
     private List<SpeciesIconUI> speciesIcons = new List<SpeciesIconUI>();  
@@ -128,7 +129,7 @@ public class HistoryPanelUI : MonoBehaviour
     private int sizeOfGridLineDataStruct => sizeof(float) * 8;
     public bool isAllSpeciesMode => curPanelMode == HistoryPanelMode.AllSpecies;
     public bool isPopulationMode => curPanelMode == HistoryPanelMode.SpeciesPopulation;
-    bool isTimelineMode => curPanelMode == HistoryPanelMode.CreatureTimeline;
+    public bool isTimelineMode => curPanelMode == HistoryPanelMode.CreatureTimeline;
     
     public bool isGraphMode;
     public bool isResourceMode;
@@ -282,14 +283,12 @@ public class HistoryPanelUI : MonoBehaviour
                 CreateSpeciesLine(line, i, cursorCoords, speciesLines);
             }
         }
-        
         // Create creature lines
         for (int line = 0; line < worldTreeNumCreatureLines; line++) {
             for (int i = 0; i < worldTreeNumPointsPerCreatureLine; i++) {
                 CreateCreatureLine(line, i, cursorCoords, creatureLines);
             }
         }
-        
         // Create Gridlines
         for (int line = 0; line < worldTreeNumGridLines; line++) {
             for (int i = 0; i < worldTreeNumPointsPerGridLine; i++) {
@@ -415,13 +414,13 @@ public class HistoryPanelUI : MonoBehaviour
     
     void CreateCreatureLine(int line, int point, Vector2 cursorCoords, CreatureLineData[] creatureLines)
     {
-        int index = line * worldTreeNumPointsPerCreatureLine + point;
+        int index = (worldTreeNumCreatureLines - 1 - line) * worldTreeNumPointsPerCreatureLine + point;
         SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[historySelectedSpeciesID];
         if (line >= pool.candidateGenomesList.Count) 
             return;
         
         CreatureLineData data = new CreatureLineData();
-        CandidateAgentData cand = pool.candidateGenomesList[line];                            
+        CandidateAgentData cand = pool.candidateGenomesList[ line];                            
         if (!cand.isBeingEvaluated || cand.performanceData.creatureDataPointsList == null || point >= cand.performanceData.creatureDataPointsList.Count) 
             return;
 
@@ -430,16 +429,16 @@ public class HistoryPanelUI : MonoBehaviour
         if (cand.isBeingEvaluated && cand.numCompletedEvaluations == 0) {
             endTimeStep = simManager.simAgeTimeSteps;
         }
-        float timeRange = endTimeStep - startTimestep;
-        float frac = ((float)point / (float)worldTreeNumPointsPerCreatureLine);
-        float x = Mathf.Lerp(startTimestep, endTimeStep, frac);
+        //float timeRange = endTimeStep - startTimestep;
+        //float frac = ((float)point / (float)worldTreeNumPointsPerCreatureLine);
+        //float x = Mathf.Lerp(startTimestep, endTimeStep, frac);
 
         int numAgentsDisplayed = Mathf.Max(pool.GetNumberAgentsEvaluated(), 1); // Prevent divide by 0
         float fraction = 1f - (float)line / numAgentsDisplayed;
-        float y = fraction * (maxScoreValue - minScoreValue) + minScoreValue;
+        //float y = fraction * (maxScoreValue - minScoreValue) + minScoreValue;
         
-        x = cand.performanceData.creatureDataPointsList[point].timestep; // (float)pool.speciesDataPointsList[point].timestep / (float)simManager.simAgeTimeSteps;
-        y = cand.performanceData.creatureDataPointsList[point].lifespan + fraction * 128 - 64; // Mathf.Lerp(valStart, valEnd, frac); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
+        float x = cand.performanceData.creatureDataPointsList[point].timestep; // (float)pool.speciesDataPointsList[point].timestep / (float)simManager.simAgeTimeSteps;
+        float y = cand.performanceData.creatureDataPointsList[point].lifespan + fraction * (maxScoreValue - minScoreValue) - (maxScoreValue - minScoreValue) * 0.5f; // Mathf.Lerp(valStart, valEnd, frac); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f; Mathf.Lerp(minScoreValue, maxScoreValue, fraction) + 
         //float z = 0f;
         
         Vector3 hue = pool.foundingCandidate.primaryHue;
@@ -451,7 +450,7 @@ public class HistoryPanelUI : MonoBehaviour
         // new Color(hue.x, hue.y, hue.z);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
         
         var coordinates = AnchorBottomLeft(x, y);
-        data.worldPos = new Vector3(coordinates.x, coordinates.y, 1f);   
+        data.worldPos = new Vector3(coordinates.x, coordinates.y, 0f);   
         data.isAlive = 1;
         if (!cand.isBeingEvaluated && cand.numCompletedEvaluations == 0 ||
             cand.performanceData.timeStepHatched <= 1 ||
@@ -581,8 +580,9 @@ public class HistoryPanelUI : MonoBehaviour
     
     public void ClickButtonToggleGraphMode() {
         isGraphMode = !isGraphMode;
-
-        isResourceMode = UnityEngine.Random.Range(0f,1f) > 0.5f ? true : false;
+    }
+    public void ClickButtonToggleResourceMode() {        
+        isResourceMode = !isResourceMode;
     }
     
     public void ClickButtonToggleExtinct() { }
@@ -620,7 +620,8 @@ public class HistoryPanelUI : MonoBehaviour
         openCloseButton.SetMouseEnter(mouseInOpenCloseArea);
         tooltipOpenCloseButton.tooltipString = isPanelOpen ? "Hide Timeline Panel" : "Open Timeline Panel";
 
-        textPanelStateDebug.text = "min: (" + minTimelineValue.ToString("F0") + ", " + minScoreValue.ToString("F0") + "), max: (" + maxTimelineValue.ToString("F0") + ", " + maxScoreValue.ToString("F0") + ")";
+        textPanelStateDebug.text = "min: (" + minTimelineValue.ToString("F0") + ", " + minScoreValue.ToString("F0") + "), max: (" + maxTimelineValue.ToString("F0") + ", " + maxScoreValue.ToString("F0") + 
+            ") " + selectionManager.currentSelection.candidate.performanceData.timeStepHatched;
         buttonToggleExtinct.gameObject.SetActive(false);
         float targetStartTimeStep = 0f;
         tempPanelSpeciesPop.SetActive(false);
@@ -634,13 +635,8 @@ public class HistoryPanelUI : MonoBehaviour
         switch (curPanelMode)
         {
             case HistoryPanelMode.AllSpecies:
-                buttonToggleGraphMode.gameObject.SetActive(true);
-                //graphBoundsY = minScoreValue;
-                //graphBoundsYEnd = maxScoreValue;
+                buttonToggleGraphMode.gameObject.SetActive(true);                
                 UpdateSpeciesIconsLineageMode();
-                
-                
-                //UpdateSpeciesIconsGraphMode();
                 targetStartTimeStep = simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[0]].timeStepCreated;
                 tempPanelGraph.SetActive(true);
                 
@@ -678,7 +674,7 @@ public class HistoryPanelUI : MonoBehaviour
 
         UpdateCreatureEventIcons(currentSelection.candidate);
         
-        timelineStartTimeStep = Mathf.Lerp(timelineStartTimeStep, targetStartTimeStep, 0.15f);
+        timelineStartTimeStep = Mathf.Lerp(timelineStartTimeStep, targetStartTimeStep, 0.33f);
         //graphBoundsX = timelineStartTimeStep;
         //graphBoundsXEnd = simManager.simAgeTimeSteps;
                 
@@ -807,7 +803,7 @@ public class HistoryPanelUI : MonoBehaviour
             return new Vector2(0f, 1f);
             
         // Default
-        return new Vector2(-.2f, .2f);
+        return new Vector2(0.2f, -0.2f);
     }
     
     void PositionCreatureIcons()
@@ -824,7 +820,8 @@ public class HistoryPanelUI : MonoBehaviour
                             
             CandidateAgentData candidate = pool.candidateGenomesList[line];
 
-            float x = 1.1f;                
+            float x = 1f;
+            if (candidate.candidateID == selectionManager.currentSelection.candidate.candidateID) x = 1.1f;
             float y = 1f - (float)line / (float)numAgentsDisplayed;
             
             if (pool.isExtinct || candidate.performanceData.timeStepDied > 1) {
