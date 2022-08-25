@@ -151,7 +151,7 @@ public class CreaturePanelUI : MonoBehaviour
         //tooltipGenome.tooltipString = "Genome???";
         //tooltipAppearance.tooltipString = "GEN " + agent.candidateRef.candidateGenome.generationCount + ", Axons: " + (agent.candidateRef.candidateGenome.brainGenome.links.Count + ", IO: " + agent.candidateRef.candidateGenome.brainGenome.inOutNeurons.Count + ", H: " + agent.candidateRef.candidateGenome.brainGenome.hiddenNeurons.Count);//"APPEARANCE";
 
-        tooltipGenerationCount.tooltipString = "Generation " + agent.candidateRef.candidateGenome.generationCount.ToString();
+        tooltipGenerationCount.tooltipString = "Generation " + agent.candidateRef.candidateGenome.generationCount.ToString() + "(" + agent.candidateRef.parentID + ")";
         textGenerationCount.text = agent.candidateRef.candidateGenome.generationCount.ToString();
         
         float reqMass = SettingsManager.instance.agentSettings._BaseInitMass * SettingsManager.instance.agentSettings._MinPregnancyFactor;

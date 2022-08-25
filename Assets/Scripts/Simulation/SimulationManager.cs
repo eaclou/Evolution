@@ -87,7 +87,7 @@ public class SimulationManager : Singleton<SimulationManager>
     private int numAgentEvaluationsPerGenome = 1;
 
     public int simAgeTimeSteps = 0;
-    private int numStepsInSimYear = 2048;
+    private int numStepsInSimYear = 1024 * 512;
     private int simAgeYearCounter = 0;
     public int curSimYear = 0;
     
@@ -609,98 +609,26 @@ public class SimulationManager : Singleton<SimulationManager>
 
         if (simAgeTimeSteps % 30 == 0) {
             //uiManager.historyPanelUI.SortSpeciesIconList();
-            foreach(SpeciesGenomePool pool in masterGenomePool.completeSpeciesPoolsList) {
-                if(pool.isExtinct) {
-                    continue;
-                }
-                if(pool.minScoreValue < uiManager.historyPanelUI.minScoreValue) {
-                    uiManager.historyPanelUI.minScoreValue = pool.minScoreValue;
-                }
-                if(pool.maxScoreValue > uiManager.historyPanelUI.maxScoreValue) {
-                    uiManager.historyPanelUI.maxScoreValue = pool.maxScoreValue;
-                }
-            }
-            SpeciesGenomePool selectedPool = masterGenomePool.completeSpeciesPoolsList[selectionManager.currentSelection.candidate.speciesID];
-            if(uiManager.historyPanelUI.maxScoreValue - uiManager.historyPanelUI.minScoreValue > 250f) {
-                uiManager.historyPanelUI.minScoreValue += 32.5f;
-                uiManager.historyPanelUI.maxScoreValue -= 32.5f;
+            uiManager.historyPanelUI.UpdateTargetGraphBounds();
 
-
-                
-
-            }
-            float targetMinTimeline = 0f;
-            
-            //AllSpeciesView 
-            if(uiManager.historyPanelUI.isGraphMode) { // all species shown, but auto-zoom
-                targetMinTimeline = Mathf.Max(0f, simAgeTimeSteps - (uiManager.historyPanelUI.maxScoreValue - uiManager.historyPanelUI.minScoreValue) * 33f);
-            }
-            else {
-                uiManager.historyPanelUI.minScoreValue = 0f;
-                targetMinTimeline = 0f;
-            }
-            if(uiManager.historyPanelUI.isPopulationMode) {
-                targetMinTimeline = Mathf.Max(0f, selectedPool.candidateGenomesList[0].performanceData.timeStepHatched);// uiManager.historyPanelUI.maxScoreValue - uiManager.historyPanelUI.minScoreValue) * 33f);
-                uiManager.historyPanelUI.minScoreValue = selectedPool.minScoreValue;
-                uiManager.historyPanelUI.maxScoreValue = selectedPool.maxScoreValue;
-            }
-            if(uiManager.historyPanelUI.isTimelineMode) {
-                targetMinTimeline = Mathf.Max(0f, selectionManager.currentSelection.candidate.performanceData.timeStepHatched);// uiManager.historyPanelUI.maxScoreValue - uiManager.historyPanelUI.minScoreValue) * 33f);
-                uiManager.historyPanelUI.minScoreValue = selectedPool.minScoreValue - 50f;
-                uiManager.historyPanelUI.maxScoreValue = selectedPool.maxScoreValue + 50f;
-            }
-            //minTimelineTargetValue;// => 
-            uiManager.historyPanelUI.minTimelineValue = Mathf.Lerp(uiManager.historyPanelUI.minTimelineValue, targetMinTimeline, 0.44f);
-                
-            uiManager.historyPanelUI.maxTimelineValue = simAgeTimeSteps;
-            
-            
-            //uiManager.speciesGraphPanelUI.UpdateSpeciesTreeDataTextures(curSimYear); // needed?
-            //globalGraphData.AddNewEntry(simResourceManager, GetTotalAgentBiomass()); // needed?
-            
-            
-            //Species stats for history panel:
-            AddNewSpeciesDataEntry(simAgeTimeSteps);
-
-
-            var coordinates = uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.minTimelineValue, uiManager.historyPanelUI.minScoreValue);
-            theRenderKing.speciesLineDataMat.SetFloat("_GraphBoundsMinX", coordinates.x);
-            theRenderKing.speciesLineDataMat.SetFloat("_GraphBoundsMaxX", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.maxTimelineValue, uiManager.historyPanelUI.maxScoreValue).x);
-            theRenderKing.speciesLineDataMat.SetFloat("_GraphBoundsMinY", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.minTimelineValue, uiManager.historyPanelUI.minScoreValue).y);
-            theRenderKing.speciesLineDataMat.SetFloat("_GraphBoundsMaxY", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.minTimelineValue, uiManager.historyPanelUI.maxScoreValue).y);
-            theRenderKing.speciesLineDataMat.SetFloat("_GraphBufferLeft", uiManager.historyPanelUI.marginLeft);
-			theRenderKing.speciesLineDataMat.SetFloat("_GraphBufferRight", uiManager.historyPanelUI.marginRight);
-            theRenderKing.speciesLineDataMat.SetFloat("_GraphClockSize", uiManager.historyPanelUI.clockHeight);
-
-            theRenderKing.creatureLineDataMat.SetFloat("_GraphBoundsMinX", coordinates.x);
-            theRenderKing.creatureLineDataMat.SetFloat("_GraphBoundsMaxX", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.maxTimelineValue, uiManager.historyPanelUI.maxScoreValue).x);
-            theRenderKing.creatureLineDataMat.SetFloat("_GraphBoundsMinY", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.minTimelineValue, uiManager.historyPanelUI.minScoreValue).y);
-            theRenderKing.creatureLineDataMat.SetFloat("_GraphBoundsMaxY", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.minTimelineValue, uiManager.historyPanelUI.maxScoreValue).y);
-            theRenderKing.creatureLineDataMat.SetFloat("_GraphBufferLeft", uiManager.historyPanelUI.marginLeft);
-			theRenderKing.creatureLineDataMat.SetFloat("_GraphBufferRight", uiManager.historyPanelUI.marginRight);
-            theRenderKing.creatureLineDataMat.SetFloat("_GraphClockSize", uiManager.historyPanelUI.clockHeight);
-
-            theRenderKing.resourceLineDataMat.SetFloat("_GraphBufferLeft", uiManager.historyPanelUI.marginLeft);
-            theRenderKing.resourceLineDataMat.SetFloat("_GraphBufferRight", uiManager.historyPanelUI.marginRight);
-            theRenderKing.resourceLineDataMat.SetFloat("_GraphClockSize", uiManager.historyPanelUI.clockHeight);
-            theRenderKing.resourceLineDataMat.SetFloat("_GraphBoundsMinX", coordinates.x);
-            theRenderKing.resourceLineDataMat.SetFloat("_GraphBoundsMaxX", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.maxTimelineValue, uiManager.historyPanelUI.maxScoreValue).x);
-            //theRenderKing.resourceLineDataMat.SetFloat("_GraphBoundsMinY", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.minTimelineValue, uiManager.historyPanelUI.minScoreValue).y);
-
-            theRenderKing.gridLineDataMat.SetFloat("_GraphBufferLeft", uiManager.historyPanelUI.marginLeft);
-            theRenderKing.gridLineDataMat.SetFloat("_GraphBufferRight", uiManager.historyPanelUI.marginRight);
-            theRenderKing.gridLineDataMat.SetFloat("_GraphClockSize", uiManager.historyPanelUI.clockHeight);
-            theRenderKing.gridLineDataMat.SetFloat("_GraphBoundsMinX", coordinates.x);
-            theRenderKing.gridLineDataMat.SetFloat("_GraphBoundsMaxX", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.maxTimelineValue, uiManager.historyPanelUI.maxScoreValue).x);
-            theRenderKing.gridLineDataMat.SetFloat("_GraphBoundsMinY", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.minTimelineValue, uiManager.historyPanelUI.minScoreValue).y);
-            theRenderKing.gridLineDataMat.SetFloat("_GraphBoundsMaxY", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.minTimelineValue, uiManager.historyPanelUI.maxScoreValue).y);
-            //theRenderKing.worldTreeLineDataMat.SetFloat("_GraphBufferBottom", uiManager.historyPanelUI.marginBottom);
-			//theRenderKing.worldTreeLineDataMat.SetFloat("_GraphBufferTop", uiManager.historyPanelUI.marginTop);
-			
+            //Species/cands stats for history panel:
+            AddNewSpeciesDataEntry(simAgeTimeSteps); // all species and candidates
 
             uiManager.historyPanelUI.InitializeRenderBuffers();
 
             simResourceManager.AddNewResourcesAll(simAgeTimeSteps);
+            // update shader buffers with new data:
+            theRenderKing.gridLineDataMat.SetBuffer("quadVerticesCBuffer", theRenderKing.quadVerticesCBuffer);
+            theRenderKing.gridLineDataMat.SetBuffer("gridLineDataCBuffer", uiManager.historyPanelUI.gridLineDataCBuffer);
+
+            theRenderKing.resourceLineDataMat.SetBuffer("quadVerticesCBuffer", theRenderKing.quadVerticesCBuffer);
+            theRenderKing.resourceLineDataMat.SetBuffer("resourceLineDataCBuffer", uiManager.historyPanelUI.resourceLineDataCBuffer);
+   
+            theRenderKing.creatureLineDataMat.SetBuffer("quadVerticesCBuffer", theRenderKing.quadVerticesCBuffer);
+            theRenderKing.creatureLineDataMat.SetBuffer("worldTreeLineDataCBuffer", uiManager.historyPanelUI.creatureLineDataCBuffer);
+  
+            theRenderKing.speciesLineDataMat.SetBuffer("quadVerticesCBuffer", theRenderKing.quadVerticesCBuffer);
+            theRenderKing.speciesLineDataMat.SetBuffer("worldTreeLineDataCBuffer", uiManager.historyPanelUI.speciesLineDataCBuffer);
         }
 
         if (simAgeTimeSteps % 79 == 3) {
@@ -709,7 +637,7 @@ public class SimulationManager : Singleton<SimulationManager>
     }
     
     float GetTotalSpeciesBiomassBySpeciesIndex(int index) {
-        return GetTotalAgentBiomass(trophicLayersManager.animalSlots[index].linkedSpeciesID);
+        return GetTotalAgentBiomass(trophicLayersManager.animalSlots[index].linkedSpeciesID); // ***EAC obsolete!
     }
     
     /// Pass in linkedSpeciesID to get mass for one species only, otherwise gets entire population mass
@@ -987,7 +915,9 @@ public class SimulationManager : Singleton<SimulationManager>
         if (validEggIndices.Count > 0)
             SpawnAgentFromRandomEgg(validEggIndices, candidate, agentIndex);
         else 
-            SpawnAgentAtRandomPosition(candidate, agentIndex);       
+            SpawnAgentAtRandomPosition(candidate, agentIndex);
+
+        uiManager.speciesOverviewUI.RequestNewCandidateGenomeButton(candidate);
     }
     
     void SpawnAgentFromRandomEgg(List<int> validEggIndices, CandidateAgentData candidate, int agentIndex)
@@ -1124,14 +1054,13 @@ public class SimulationManager : Singleton<SimulationManager>
         SpeciesGenomePool sourceSpeciesPool = masterGenomePool.GetSmallestSpecies(); // masterGenomePool.SelectNewGenomeSourceSpecies(false, 0.33f); // select at random
                 
         // -- Select a ParentGenome from the leaderboardList and create a mutated copy (childGenome):  
-        AgentGenome newGenome = sourceSpeciesPool.GetGenomeFromFitnessLottery();
+        CandidateAgentData parentCandidate = sourceSpeciesPool.GetCandidateFromFitnessLottery();
 
-        newGenome = sourceSpeciesPool.Mutate(newGenome, true, true);
-        //newGenome.IncrementGenerationCount();
-
+        CandidateAgentData newMutatedCandidate = sourceSpeciesPool.Mutate(parentCandidate, true, true);
+        
         // -- Check which species this new childGenome should belong to (most likely its parent, but maybe it creates a new species or better fits in with a diff existing species)        
         //sourceSpeciesPool.AddNewCandidateGenome(newGenome);
-        masterGenomePool.AssignNewMutatedGenomeToSpecies(newGenome, sourceSpeciesPool.speciesID); // Checks which species this new genome should belong to and adds it to queue / does necessary processing   
+        masterGenomePool.AssignNewMutatedCandidateToSpecies(newMutatedCandidate, sourceSpeciesPool.speciesID); // Checks which species this new genome should belong to and adds it to queue / does necessary processing   
                 
         // -- Clear Agent object so that it's ready to be reused
             // i.e. Set curLifecycle to .AwaitingRespawn ^
@@ -1340,40 +1269,26 @@ public class SimulationManager : Singleton<SimulationManager>
     }*/
     
     // **********EC Move this to MasterGenomePool class?
-    public void AddNewSpecies(AgentGenome newGenome, int parentSpeciesID) {  
+    public void AddNewSpecies(CandidateAgentData foundingCandidate, int parentSpeciesID) {  
         int newSpeciesID = masterGenomePool.completeSpeciesPoolsList.Count;
         
         SpeciesGenomePool parentSpeciesPool = masterGenomePool.completeSpeciesPoolsList[parentSpeciesID];
         SpeciesGenomePool newSpecies = new SpeciesGenomePool(newSpeciesID, parentSpeciesID, curSimYear, simAgeTimeSteps, cachedVertebrateMutationSettings);
-        AgentGenome foundingGenome = newGenome; // newSpecies.Mutate(newGenome, true, true); //
+        AgentGenome foundingGenome = foundingCandidate.candidateGenome; // newSpecies.Mutate(newGenome, true, true); //
         
         
-        newSpecies.FirstTimeInitialize(new CandidateAgentData(foundingGenome, newSpeciesID), parentSpeciesPool.depthLevel + 1);
+        newSpecies.FirstTimeInitialize(new CandidateAgentData(foundingGenome, newSpeciesID, foundingCandidate), parentSpeciesPool.depthLevel + 1);
         masterGenomePool.currentlyActiveSpeciesIDList.Add(newSpeciesID);
         masterGenomePool.completeSpeciesPoolsList.Add(newSpecies);
         masterGenomePool.speciesCreatedOrDestroyedThisFrame = true;
-        
-        /*List<CandidateAgentData> avgParentYearData = parentSpeciesPool.avgCandidateDataYearList;
-
-        int lastIndex = Mathf.Max(0, avgParentYearData.Count - 1);
-        if(lastIndex > 0) {
-            newSpecies.avgCandidateData = avgParentYearData[lastIndex];    
-        }
-        //newSpecies.avgPerformanceDataYearList.Clear(); // handled inside FirstTimeInitialize()
-        // Inherit Parent Data Stats:  // *** Vestigial but harmless ***
-        
-        foreach (var yearData in avgParentYearData) {
-            newSpecies.avgCandidateDataYearList.Add(yearData);                
-        }*/
-        
+                
         if (newSpecies.depthLevel > masterGenomePool.currentHighestDepth) {
             masterGenomePool.currentHighestDepth = newSpecies.depthLevel;
         }
 
         uiManager.historyPanelUI.AddNewSpeciesToPanel(newSpecies);
-
         uiManager.historyPanelUI.TriggerNudgeMessage($"A NEW SPECIES [{newSpeciesID}] HAS EMERGED!");
-        uiManager.historyPanelUI.SetNudgeTooltip($"On timestep {simAgeTimeSteps}, Species {newSpeciesID} evolved from progenitor species {parentSpeciesID}\nFounding Creature: {newGenome.name}");
+        uiManager.historyPanelUI.SetNudgeTooltip($"On timestep {simAgeTimeSteps}, Species {newSpeciesID} evolved from progenitor species {parentSpeciesID}\nFounding Creature: {foundingCandidate.candidateGenome.name}");
     }
     
     private StartPositionGenome GetInitialAgentSpawnPosition() {

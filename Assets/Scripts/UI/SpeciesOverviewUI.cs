@@ -18,10 +18,8 @@ public class SpeciesOverviewUI : MonoBehaviour {
     
     public GameObject panelGenomeViewer;
     public Image genomeLeaderboard;
-    //public Image imageLineageA;
-    //public Image imageLineageB;
     
-    [SerializeField] int maxButtons = 24;
+    [SerializeField] int maxButtons = 32;
     [SerializeField] SelectionGroup defaultSelectionGroup = SelectionGroup.Founder;
     [SerializeField] SelectionGroupData[] selectionGroups;
     SelectionGroupData selectedButtonData;
@@ -33,9 +31,9 @@ public class SpeciesOverviewUI : MonoBehaviour {
     public bool isShowingLineage = false;
     
     private Texture2D speciesPoolGenomeTex; // speciesOverviewPanel
-    public Material speciesPoolGenomeMat;
+    //public Material speciesPoolGenomeMat;
     
-    public List<GenomeButton> buttons = new List<GenomeButton>();
+    public List<GenomeButton> candidateButtons = new List<GenomeButton>();
 
     public void ClickButtonToggleLineage() {
         isShowingLineage = !isShowingLineage;
@@ -43,21 +41,39 @@ public class SpeciesOverviewUI : MonoBehaviour {
     }
     
     public void SetButtonPosition(int id, Vector3 position) {
-        if (id < 0 || id >= buttons.Count) return;
-        buttons[id].gameObject.transform.localPosition = position;
+        if (id < 0 || id >= candidateButtons.Count) return;
+        candidateButtons[id].gameObject.transform.localPosition = position;
     }
         
     public void RebuildGenomeButtons() // ***EAC how is this diff from Update??
     {
         SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[selectionManager.currentSelection.candidate.speciesID]; 
-        
-        textSpeciesLineage.gameObject.SetActive(true);
-        textSpeciesLineage.text = GetLineageText(pool);
-
         RebuildGenomeButtonsCurrent(pool);
-
-
     }
+
+    public void RequestNewCandidateGenomeButton(CandidateAgentData cand) {
+        
+        if(candidateButtons.Count >= maxButtons) {
+            // start with oldest
+            int index = 0;
+            //find oldest non-living candidateButton
+            for(int i = 0; i < candidateButtons.Count; i++) {
+                //check if still alive:
+                if(candidateButtons[i].candidateRef.isBeingEvaluated) {
+                    continue;
+                }
+                //else:
+                index = i;
+                break;
+            }
+            GenomeButton candGenomeButton = candidateButtons[index]; // save ref to button
+            candidateButtons.RemoveAt(index);
+            //delete oldest non-recordholding creature
+            candGenomeButton.SetCandidate(cand);
+            candidateButtons.Add(candGenomeButton); // move to end of list -- temp
+        }
+    }
+
     
     // * Consider moving to static class if generally useful
     private Color ColorFloor(Vector3 hue, float min) {
@@ -96,7 +112,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
         for(int i = 0; i < maxButtons; i++) {
             GameObject buttonObj = Instantiate(genomeIcon, Vector3.zero, Quaternion.identity);
             buttonObj.transform.SetParent(genomeLeaderboard.transform, false);
-            buttons.Add(buttonObj.GetComponent<GenomeButton>());
+            candidateButtons.Add(buttonObj.GetComponent<GenomeButton>());
             buttonObj.gameObject.SetActive(false);
         }
         Debug.Log("GenerateButtonList Genome Buttons!");
@@ -106,7 +122,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
     private void RebuildGenomeButtonsCurrent(SpeciesGenomePool pool) {
         Vector3 hue = pool.foundingCandidate.primaryHue;            
         genomeLeaderboard.color = new Color(hue.x, hue.y, hue.z);
-        UpdateButtons(pool.candidateGenomesList, SelectionGroup.Candidates);
+        UpdateButtons();
     }
     
     // Hall of fame genomes (checkpoints .. every 50 years?)
@@ -114,44 +130,64 @@ public class SpeciesOverviewUI : MonoBehaviour {
     //    UpdateButtons(pool.hallOfFameGenomesList, SelectionGroup.HallOfFame);
     //}
     
-    private void UpdateButtons(List<CandidateAgentData> candidates, SelectionGroup groupId) {
-        for(int i = 0; i < buttons.Count; i++) {
-            var active = i < candidates.Count;
+    private void UpdateButtons() { //List<CandidateAgentData> candidates, SelectionGroup groupId
+        for(int i = 0; i < candidateButtons.Count; i++) {
+            //if (i >= candidates.Count) {
+            //    return;
+            //}
+
+            var active = false;
+            //if(!uiManager.historyPanelUI.isPopulationMode) {
+            //    active = false;
+            //}
+            if(candidateButtons[i].candidateRef == null) {
+                
+            }
+            else {
+                if (uiManager.historyPanelUI.isPopulationMode) {
+                    //active = false;
+                    if (candidateButtons[i].candidateRef.speciesID == SelectionManager.instance.currentSelection.candidate.speciesID) {
+                        active = true;
+                    }
+                    else {
+                        active = false;
+                    }
+                }
+                if(candidateButtons[i].candidateRef.candidateID == SelectionManager.instance.currentSelection.candidate.candidateID) {
+                    active = true;
+                }
+            }
             
-            buttons[i].gameObject.SetActive(active);
-            buttons[i].UpdateButtonPrefab(groupId, i);
+            candidateButtons[i].gameObject.SetActive(active);
+            //candidateButtons[i].UpdateButtonPrefab(groupId, i);
             
             if (active)
-                buttons[i].SetDisplay(candidates[i]);   
+                candidateButtons[i].SetDisplay();   
         } 
     }
 
-    public void ChangeSelectedGenome(SelectionGroup group, int index) {
-        SpeciesGenomePool pool = simulationManager.GetSelectedGenomePool();
+    public void ChangeSelectedGenome(SelectionGroup group, int index, GenomeButton button) {
+        //SpeciesGenomePool pool = simulationManager.GetSelectedGenomePool();
         //selectionManager.SetFocusedCandidateGenome(pool, group, index);
         selectedButtonData = GetSelectionGroupData(group);
 
-        uiManager.historyPanelUI.buttonSelCreatureEventsLink.gameObject.transform.localPosition = new Vector3(360f, 180f, 0f);
-
-        if (group == SelectionGroup.Candidates)
-            selectionManager.SetSelected(pool.candidateGenomesList[index]);
-
+        //uiManager.historyPanelUI.buttonSelCreatureEventsLink.gameObject.transform.localPosition = new Vector3(360f, 180f, 0f);
+        selectionManager.SetSelected(button.candidateRef);
+        //if (group == SelectionGroup.Candidates)
+        //    selectionManager.SetSelected(pool.candidateGenomesList[index]);
+        //
         if (selectedButtonData != null && selectedButtonData.image != null) {
             selectedButtonData.image.color = Color.white;
             // new Vector3(selectedButtonData.image.rectTransform.localPosition.x + 24f, selectedButtonData.image.rectTransform.localPosition.y, 0f);
         }
-        //panelGenomeViewer.SetActive(true);
-
-        //uiManager.historyPanelUI.buttonSelCreatureEventsLink.GetComponent<RectTransform>().localPosition = Vector3.one * 4.2f;
-        
     }
    
     public void CycleHallOfFame() {
-        ChangeSelectedGenome(SelectionGroup.HallOfFame, selectedHallOfFameIndex + 1); 
+        //ChangeSelectedGenome(SelectionGroup.HallOfFame, selectedHallOfFameIndex + 1); 
     }
     
     public void CycleCurrentGenome() {
-        ChangeSelectedGenome(SelectionGroup.Candidates, selectedCandidateGenomeIndex + 1); 
+        //ChangeSelectedGenome(SelectionGroup.Candidates, selectedCandidateGenomeIndex + 1); 
     }
 
     public void CreateSpeciesLeaderboardGenomeTexture() {
@@ -188,7 +224,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
         speciesPoolGenomeTex = new Texture2D(16, 16, TextureFormat.RGBA32, false);
         speciesPoolGenomeTex.filterMode = FilterMode.Point;
         speciesPoolGenomeTex.wrapMode = TextureWrapMode.Clamp;
-        speciesPoolGenomeMat.SetTexture("_MainTex", speciesPoolGenomeTex);
+        //speciesPoolGenomeMat.SetTexture("_MainTex", speciesPoolGenomeTex);
 	}
 	
 	SelectionGroupData GetSelectionGroupData(SelectionGroup id)

@@ -8,12 +8,12 @@
 	}
 	SubShader
 	{
-		//Tags { "RenderType"="Opaque" }
+		Tags { "RenderType"="Opaque" }
 		//LOD 100
-		Tags{ "RenderType" = "Transparent" }
+		//Tags{ "RenderType" = "Transparent" }
 		//ZWrite Off
 		//Cull Off
-		Blend SrcAlpha OneMinusSrcAlpha
+		//Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{
@@ -83,30 +83,33 @@
 				float3 quadData = quadVerticesCBuffer[id];
 				o.uv = quadData.xy + 0.5;
 				
-				float lineWidth = 0.018;
+				float lineWidth = 0.012;
 				
 				WorldTreeLineData dataPrev = worldTreeLineDataCBuffer[max(0, inst - 1)];
 				WorldTreeLineData data = worldTreeLineDataCBuffer[inst];
 				
 				float4 col = data.color;
+				
 				if (data.isSelected) {
-					lineWidth = 0.02;
-					col.rgb = lerp(col.rgb, 1, 0.68);
+					lineWidth = 0.03;
+					col.rgb = lerp(col.rgb, 1, 0.75);
 				}
 				else {
-					col.rgb *= 0.77;
+					col.rgb *= 0.8;
 				}
 				
 
 				float3 prevToThisVec = ScaleData(data.worldPos) - ScaleData(dataPrev.worldPos);
 				float3 right = normalize(float3(prevToThisVec.y, -prevToThisVec.x, 0));
 
-				float3 quadOffset = (quadData.x * right * lineWidth * (1.0 - o.uv.y * 0.67)) + (o.uv.y * prevToThisVec * 1.19125);
+				float3 quadOffset = (quadData.x * right * lineWidth * (1.0 - o.uv.y * 0.67)) + (o.uv.y * prevToThisVec * 1);
 				
-				if (!data.isAlive) {
-					col.rgb = lerp(col.rgb, float3(0.05, 0.05, 0.05), 0.255);
-					quadOffset *= 0;
+				if (data.isAlive < 0.5) {
+					col.rgb = col.rgb * 0.5;// lerp(col.rgb, float3(1.0, 0.05, 0.05), 0.8255);
+					quadOffset *= 0.5;
 				}
+
+				quadOffset *= data.color.a; // make degenerate triangles if inactive
 
 				float3 worldPosition = ScaleData(dataPrev.worldPos) + quadOffset;
 				float graphWidth = 1.0 - _GraphBufferLeft - _GraphBufferRight;
@@ -114,8 +117,10 @@
 				worldPosition.x = worldPosition.x * graphWidth + _GraphBufferLeft; //(outPos.x + _GraphBufferLeft) / (1 - _GraphBufferRight + _GraphBufferLeft);
 				//y = y * displayHeight + marginBottom;
 				worldPosition.y = worldPosition.y * graphHeight;// +_GraphClockSize; //(outPos.y - _GraphBufferBottom) / (_GraphBufferTop + _GraphClockSize - _GraphBufferBottom);
+				worldPosition.z = -1 * data.isSelected;
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
+				col.a = 1;
 				o.color = col; // tex2Dlod(_KeyTex, float4(0,((float)_SelectedWorldStatsID + 0.5) / 32.0,0,0));
 				
 

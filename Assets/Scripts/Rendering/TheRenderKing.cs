@@ -2456,26 +2456,61 @@ public class TheRenderKing : Singleton<TheRenderKing>
         
         clockPanelUI.RefreshMaterials();
 
+        var coordinatesMin = uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.graphBoundsMinX, uiManager.historyPanelUI.graphBoundsMinY);
+            var coordinatesMax = uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.graphBoundsMaxX, uiManager.historyPanelUI.graphBoundsMaxY);
+            
+
+            
+            //theRenderKing.creatureLineDataMat.SetBuffer("worldTreeLineDataCBuffer", uiManager.historyPanelUI.creatureLineDataCBuffer);
+
+            
+            //theRenderKing.resourceLineDataMat.SetFloat("_GraphBoundsMinY", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.minTimelineValue, uiManager.historyPanelUI.minScoreValue).y);
+
+            //theRenderKing.worldTreeLineDataMat.SetFloat("_GraphBufferBottom", uiManager.historyPanelUI.marginBottom);
+			//theRenderKing.worldTreeLineDataMat.SetFloat("_GraphBufferTop", uiManager.historyPanelUI.marginTop);
+			
+
+        gridLineDataMat.SetPass(0);
+        gridLineDataMat.SetFloat("_GraphBufferLeft", uiManager.historyPanelUI.marginLeft);
+        gridLineDataMat.SetFloat("_GraphBufferRight", uiManager.historyPanelUI.marginRight);
+        gridLineDataMat.SetFloat("_GraphClockSize", uiManager.historyPanelUI.clockHeight);
+        gridLineDataMat.SetFloat("_GraphBoundsMinX", coordinatesMin.x);
+        gridLineDataMat.SetFloat("_GraphBoundsMaxX", coordinatesMax.x);
+        gridLineDataMat.SetFloat("_GraphBoundsMinY", coordinatesMin.y);
+        gridLineDataMat.SetFloat("_GraphBoundsMaxY", coordinatesMax.y);
+        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, gridLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.historyPanelUI.gridLineDataCBuffer.count);
+
+        resourceLineDataMat.SetPass(0);
+        resourceLineDataMat.SetFloat("_GraphBufferLeft", uiManager.historyPanelUI.marginLeft);
+        resourceLineDataMat.SetFloat("_GraphBufferRight", uiManager.historyPanelUI.marginRight);
+        resourceLineDataMat.SetFloat("_GraphClockSize", uiManager.historyPanelUI.clockHeight);
+        resourceLineDataMat.SetFloat("_GraphBoundsMinX", coordinatesMin.x);
+        resourceLineDataMat.SetFloat("_GraphBoundsMaxX", coordinatesMax.x);
+        resourceLineDataMat.SetFloat("_GraphBoundsMinY", coordinatesMin.y);
+        resourceLineDataMat.SetFloat("_GraphBoundsMaxY", coordinatesMax.y);        
+        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, resourceLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.historyPanelUI.resourceLineDataCBuffer.count);
+
         speciesLineDataMat.SetPass(0);
-        speciesLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        speciesLineDataMat.SetBuffer("worldTreeLineDataCBuffer", uiManager.historyPanelUI.speciesLineDataCBuffer);
+        speciesLineDataMat.SetFloat("_GraphBoundsMinX", coordinatesMin.x);
+        speciesLineDataMat.SetFloat("_GraphBoundsMaxX", coordinatesMax.x);
+        speciesLineDataMat.SetFloat("_GraphBoundsMinY", coordinatesMin.y);
+        speciesLineDataMat.SetFloat("_GraphBoundsMaxY", coordinatesMax.y);
+        speciesLineDataMat.SetFloat("_GraphBufferLeft", uiManager.historyPanelUI.marginLeft);
+		speciesLineDataMat.SetFloat("_GraphBufferRight", uiManager.historyPanelUI.marginRight);
+        speciesLineDataMat.SetFloat("_GraphClockSize", uiManager.historyPanelUI.clockHeight);
         cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, speciesLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.historyPanelUI.speciesLineDataCBuffer.count);
 
         creatureLineDataMat.SetPass(0);
-        creatureLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        creatureLineDataMat.SetBuffer("worldTreeLineDataCBuffer", uiManager.historyPanelUI.creatureLineDataCBuffer);
+        creatureLineDataMat.SetFloat("_GraphBoundsMinX", coordinatesMin.x);
+        creatureLineDataMat.SetFloat("_GraphBoundsMaxX", coordinatesMax.x);
+        creatureLineDataMat.SetFloat("_GraphBoundsMinY", coordinatesMin.y);
+        creatureLineDataMat.SetFloat("_GraphBoundsMaxY", coordinatesMax.y);
+        creatureLineDataMat.SetFloat("_GraphBufferLeft", uiManager.historyPanelUI.marginLeft);
+		creatureLineDataMat.SetFloat("_GraphBufferRight", uiManager.historyPanelUI.marginRight);
+        creatureLineDataMat.SetFloat("_GraphClockSize", uiManager.historyPanelUI.clockHeight);
         cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, creatureLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.historyPanelUI.creatureLineDataCBuffer.count);
 
-        resourceLineDataMat.SetPass(0);
-        resourceLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        resourceLineDataMat.SetBuffer("resourceLineDataCBuffer", uiManager.historyPanelUI.resourceLineDataCBuffer);
-        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, resourceLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.historyPanelUI.resourceLineDataCBuffer.count);
-
-        gridLineDataMat.SetPass(0);
-        gridLineDataMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        gridLineDataMat.SetBuffer("gridLineDataCBuffer", uiManager.historyPanelUI.gridLineDataCBuffer);
-        cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, gridLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.historyPanelUI.gridLineDataCBuffer.count);
-
+        
         Graphics.ExecuteCommandBuffer(cmdBufferWorldTree);
         worldTreeRenderCamera.Render();
 

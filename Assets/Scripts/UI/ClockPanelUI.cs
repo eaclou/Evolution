@@ -100,7 +100,7 @@ public class ClockPanelUI : MonoBehaviour
         Winter,
         Spring
     }
-    public void UpdateResourceStats() {
+    public void UpdateResourceStatsText() {
         if(!uiManager.historyPanelUI.isResourceMode) {
             textDisplayStats.text = "";
             return; 
@@ -117,18 +117,21 @@ public class ClockPanelUI : MonoBehaviour
     }
     public void Tick() 
     {
+        // redundant? could store this higher up and share
         float cursorCoordsX = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().x) / 360f);
         float cursorCoordsY = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().y - 720f) / 360f);                
         float curTimeStep = simulation.simAgeTimeSteps;
         
-        cursorTimeStep = Mathf.RoundToInt((curTimeStep - uiManager.historyPanelUI.timelineStartTimeStep) * cursorCoordsX);
+        cursorTimeStep = Mathf.RoundToInt((curTimeStep - uiManager.historyPanelUI.graphBoundsMinX) * cursorCoordsX);
 
         float sunOrbitPhase = GetSunOrbitPhase(cursorTimeStep) + Mathf.PI * 0.5f;
 
-        int cursorYear = Mathf.FloorToInt(cursorTimeStep / (float)simulation.GetNumTimeStepsPerYear());
-        int seasonInt = Mathf.FloorToInt(cursorTimeStep / (float)simulation.GetNumTimeStepsPerYear() * 4f) % 4;
-        currentSeason = (Season)seasonInt;
-        textCurYear.text = (cursorYear + 1).ToString(); // + "\n" + currentSeason;
+        int cursorYear = Mathf.FloorToInt(curTimeStep / (float)simulation.GetNumTimeStepsPerYear());
+        //int seasonInt = Mathf.FloorToInt(cursorTimeStep / (float)simulation.GetNumTimeStepsPerYear() * 4f) % 4;
+        int monthInt = Mathf.FloorToInt(curTimeStep / (float)simulation.GetNumTimeStepsPerYear() * 12f) % 12;
+        int dayInt = Mathf.FloorToInt(curTimeStep / (float)simulation.GetNumTimeStepsPerYear() * 365f) % 365;
+        //currentSeason = (Season)seasonInt;
+        textCurYear.text = (cursorYear + 0).ToString() + "/ " + monthInt + "/ " + dayInt + "  (" + curTimeStep + ")";
         
 
         clockFaceGroup.transform.localPosition = new Vector3(Mathf.Max(36f,Mathf.Min(360f - 36f, theCursorCzar.GetCursorPixelCoords().x)), 324f, 0f);
@@ -226,12 +229,11 @@ public class ClockPanelUI : MonoBehaviour
     }
 
     public void UpdateEarthStampData() {
-        float timeRange = ((float)simulation.simAgeTimeSteps - uiManager.historyPanelUI.timelineStartTimeStep);
+        float timeRange = ((float)simulation.simAgeTimeSteps - uiManager.historyPanelUI.graphBoundsMinX);
         ClockStampData[] clockEarthStampDataArray = new ClockStampData[maxNumClockEarthStamps];
         
         int numStamps = Mathf.Min(Mathf.RoundToInt((float)simulation.simAgeTimeSteps / (float)numTicksPerEarthStamp), maxNumClockEarthStamps);
         float totalDistanceTraveled = timeRange * earthSpeed;
-        
         for (int i = 0; i < numStamps; i++) {
             ClockStampData data = new ClockStampData();
             
@@ -256,10 +258,11 @@ public class ClockPanelUI : MonoBehaviour
     }
 
     public void UpdateMoonStampData() {        
-        float timeRange = ((float)simulation.simAgeTimeSteps - uiManager.historyPanelUI.timelineStartTimeStep);
+        float timeRange = ((float)simulation.simAgeTimeSteps - uiManager.historyPanelUI.graphBoundsMinX);
         ClockStampData[] clockMoonStampDataArray = new ClockStampData[maxNumClockMoonStamps];
         
         int numStamps = Mathf.Min(Mathf.RoundToInt((float)simulation.simAgeTimeSteps / (float)numTicksPerMoonStamp), maxNumClockMoonStamps);
+        
         float totalDistanceTraveled = timeRange * earthSpeed;
         
         for (int i = 0; i < numStamps; i++) {
@@ -287,12 +290,12 @@ public class ClockPanelUI : MonoBehaviour
     }
 
     public void UpdateSunStampData() {  
-        float timeRange = ((float)simulation.simAgeTimeSteps - uiManager.historyPanelUI.timelineStartTimeStep);
+        float timeRange = ((float)simulation.simAgeTimeSteps - uiManager.historyPanelUI.graphBoundsMinX);
         ClockStampData[] clockSunStampDataArray = new ClockStampData[maxNumClockSunStamps];
         
         int numStamps = Mathf.Min(Mathf.RoundToInt((float)simulation.simAgeTimeSteps / (float)numTicksPerSunStamp), maxNumClockSunStamps);
         float totalDistanceTraveled = timeRange * earthSpeed;
-
+        
         for(int i = 0; i < numStamps; i++) {
             float lerp = (float)i / (float)(numStamps - 1);
             ClockStampData data = new ClockStampData();

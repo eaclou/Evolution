@@ -90,6 +90,7 @@ public class CandidateAgentData
 {
     public int candidateID;
     public int parentID;
+    public CandidateAgentData parentCandidate;
     public int speciesID;
     public AgentGenome candidateGenome;
     public int numCompletedEvaluations = 0;
@@ -132,12 +133,14 @@ public class CandidateAgentData
         isBeingEvaluated = false;
 
         parentID = candidate.parentID;
-
+        //parentCandidate = 
         candidateEventDataList = new List<CandidateEventData>();
         performanceData = new PerformanceData();
+        performanceData.minScoreValue = float.PositiveInfinity;
+        performanceData.maxScoreValue = -1f;
     }
     
-    public CandidateAgentData(AgentGenome genome, int speciesID) {
+    public CandidateAgentData(AgentGenome genome, int speciesID, CandidateAgentData parentCand) {
         //Debug.Log("NewCandidateData: " + MasterGenomePool.nextCandidateIndex.ToString());
         MasterGenomePool.nextCandidateIndex++;
         causeOfDeath = "Alive!";
@@ -145,14 +148,18 @@ public class CandidateAgentData
         this.speciesID = speciesID;
         candidateGenome = genome;
         numCompletedEvaluations = 0;
-        //evaluationScoresList = new List<float>();
         allEvaluationsComplete = false;  
         isBeingEvaluated = false;
-
-        parentID = 0; //????
-
+        if (parentCand != null) {
+            parentID = parentCand.candidateID;
+        }
+        else {
+            parentID = -1;
+        }
         candidateEventDataList = new List<CandidateEventData>();
         performanceData = new PerformanceData();
+        performanceData.minScoreValue = float.PositiveInfinity;
+        performanceData.maxScoreValue = -1f;
     }
 
     public void AddNewDataPoint(int timestep, float score) {
@@ -164,16 +171,23 @@ public class CandidateAgentData
             performanceData.creatureDataPointsList = new List<CreatureDataPoint>();
             performanceData.maxNumDataPointEntries = 32; // ***EAC BAD! move to simManager or smth
         }
+        if(score < performanceData.minScoreValue) {
+            performanceData.minScoreValue = score;
+        }
+        if(score > performanceData.maxScoreValue) {
+            performanceData.maxScoreValue = score;
+        }
         performanceData.creatureDataPointsList.Add(dataPoint);
         if (performanceData.creatureDataPointsList.Count > performanceData.maxNumDataPointEntries) {
             MergeDataPoints();
-            SmoothDataPoints(1);
+            //SmoothDataPoints(0.05f);
         }
-        for(int dP = 0; dP < performanceData.creatureDataPointsList.Count; dP++) {
-            int count = Mathf.Max(1, performanceData.creatureDataPointsList.Count - 1);
-            float frac = (float)dP / (float)count;
-            performanceData.creatureDataPointsList[dP].lifespan = Mathf.Lerp(performanceData.creatureDataPointsList[dP].lifespan, performanceData.creatureDataPointsList[performanceData.creatureDataPointsList.Count - 1].lifespan, frac);
-        }
+        //for(int dP = 0; dP < performanceData.creatureDataPointsList.Count; dP++) {
+            //int count = Mathf.Max(1, performanceData.creatureDataPointsList.Count - 1);
+            //float frac = (float)dP / (float)count;
+           // performanceData.creatureDataPointsList[dP] = score;
+            //performanceData.creatureDataPointsList[dP].lifespan = Mathf.Lerp(performanceData.creatureDataPointsList[dP].lifespan, performanceData.creatureDataPointsList[performanceData.creatureDataPointsList.Count - 1].lifespan, frac);
+       // }
         //float bufferWidth = 75f;
         //maxScoreValue = dataPoint.lifespan + bufferWidth;
         //minScoreValue = dataPoint.lifespan - bufferWidth;
@@ -188,7 +202,7 @@ public class CandidateAgentData
             float distFront = performanceData.creatureDataPointsList[i + 1].timestep - performanceData.creatureDataPointsList[i].timestep;
             float distBack = performanceData.creatureDataPointsList[i].timestep - performanceData.creatureDataPointsList[i - 1].timestep;
 
-            float multiplier = 2.5f;
+            float multiplier = 2f;
             float bonusDist = (multiplier - (float)i * multiplier / (float)(performanceData.creatureDataPointsList.Count - 1)) * 1f;
             float dist = (distFront + distBack) / bonusDist;
             if(dist < closestPairDistance) {
@@ -216,9 +230,15 @@ public class CandidateAgentData
                 CreatureDataPoint pointPrev = performanceData.creatureDataPointsList[indexPrev];
                 CreatureDataPoint pointCur = performanceData.creatureDataPointsList[i];
                 CreatureDataPoint pointNext = performanceData.creatureDataPointsList[indexNext];
-                pointCur.lifespan = (pointPrev.lifespan + pointCur.lifespan + pointNext.lifespan) / 3f;
+                if (i == 0) {
+                    
+                }
+                else {                
+                    pointCur.lifespan = (pointPrev.lifespan + pointCur.lifespan + pointNext.lifespan) / 3f;
+                }
                 swapDataPointsList.Add(pointCur);
             }
+            
             performanceData.creatureDataPointsList.Clear();
             for (int i = 0; i < swapDataPointsList.Count; i++) {
                 performanceData.creatureDataPointsList.Add(swapDataPointsList[i]);
@@ -226,7 +246,35 @@ public class CandidateAgentData
         }
         
         
+        
     }
+
+    public void SmoothDataPoints(float proportion) {
+        if (proportion > 1f) return;
+        if (proportion < 0f) return;
+        
+        List<CreatureDataPoint> swapDataPointsList = new List<CreatureDataPoint>();
+            for (int i = 0; i < performanceData.creatureDataPointsList.Count; i++) {
+                int indexPrev = Mathf.Max(1, i - 1);
+                int indexNext = Mathf.Min(i, performanceData.creatureDataPointsList.Count - 1);
+                CreatureDataPoint pointPrev = performanceData.creatureDataPointsList[indexPrev];
+                CreatureDataPoint pointCur = performanceData.creatureDataPointsList[i];
+                CreatureDataPoint pointNext = performanceData.creatureDataPointsList[indexNext];
+                
+                float gamble = UnityEngine.Random.Range(0f, 1f);            
+                if(gamble < proportion && i>1) {
+                    pointCur.lifespan = (pointPrev.lifespan + pointCur.lifespan + pointNext.lifespan) / 3f;
+                }                
+                swapDataPointsList.Add(pointCur);
+            }
+            
+            performanceData.creatureDataPointsList.Clear();
+            for (int i = 0; i < swapDataPointsList.Count; i++) {
+                performanceData.creatureDataPointsList.Add(swapDataPointsList[i]);
+            }
+        
+    }
+    
     private string GenerateTempCritterName() 
     {
         if (candidateID < 0)

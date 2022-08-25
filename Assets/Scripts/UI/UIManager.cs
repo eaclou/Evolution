@@ -21,14 +21,14 @@ public class UIManager : Singleton<UIManager>
     CameraManager cameraManager => CameraManager.instance;
     SelectionManager selectionManager => SelectionManager.instance;
     
-    public SpeciesOverviewUI speciesOverviewUI;  
-    public SpeciesGraphPanelUI speciesGraphPanelUI; 
-    public GenomeViewerUI genomeViewerUI;
+    public SpeciesOverviewUI speciesOverviewUI;  //move to historyPanelUI?
+    public SpeciesGraphPanelUI speciesGraphPanelUI;  //move to historyPanelUI?
+    public GenomeViewerUI genomeViewerUI; // should be in creaturePanel if still used?
     
     public CreaturePanelUI creaturePanelUI;
     public HistoryPanelUI historyPanelUI;
     public BigBangPanelUI bigBangPanelUI;
-    public ClockPanelUI clockPanelUI;
+    public ClockPanelUI clockPanelUI;  //move to historyPanelUI?
     public ObserverModeUI observerModeUI;
     public DebugPanelUI debugPanelUI;
     public WorldSpiritHubUI worldSpiritHubUI; // ***EAC remove after cannibalizing this! (tied into initialization atm)

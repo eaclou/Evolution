@@ -12,7 +12,8 @@ public class GenomeButton : MonoBehaviour
 
     public int index = -1;
     private SelectionGroup group;
-    
+
+    public CandidateAgentData candidateRef;
     public Button button;
     public Image backgroundImage;
     public TooltipUI tooltip;
@@ -24,7 +25,10 @@ public class GenomeButton : MonoBehaviour
     [SerializeField] BackgroundState[] lifeStageStates;
     [SerializeField] BackgroundState fossilState;
     [SerializeField] BackgroundState unbornState;
-    
+
+    public void SetCandidate(CandidateAgentData candidate) {
+       candidateRef = candidate;
+    }
     public void UpdateButtonPrefab(SelectionGroup grp, int slotIndex) {
         index = slotIndex;
         group = grp;
@@ -33,8 +37,8 @@ public class GenomeButton : MonoBehaviour
     /// Updates focusedCandidate in uiManager
     public void ClickedThisButton() 
     {
-        uiManager.speciesOverviewUI.ChangeSelectedGenome(group, index);  
-        
+        uiManager.speciesOverviewUI.ChangeSelectedGenome(group, index, this);
+        Debug.Log("uiManager.speciesOverviewUI.ChangeSelectedGenome(group, index);  ");
         // WPP: removed, function already called by above line
         //if (!selectionManager.currentSelection.candidate.isBeingEvaluated) return;
         //selectionManager.SetSelected(simulationManager.masterGenomePool.completeSpeciesPoolsList[selectionManager.currentSelection.historySelectedSpeciesID].candidateGenomesList[index]); // FindCorrespondingAgent();
@@ -45,21 +49,16 @@ public class GenomeButton : MonoBehaviour
     //}
     
     // * Consider Refactor: move life stage to candidate    
-    public void SetDisplay(CandidateAgentData candidate)
+    public void SetDisplay()
     {
         var iconSprite = lookup.GetAgentLifeStageIcon(AgentLifeStage.Dead, true);   // Fossil
         
-        // POSITION
-        //currentCoords = Vector2.Lerp(currentCoords, targetCoords, 0.75f);
-
-        //gameObject.transform.localPosition = new Vector3(currentCoords.x * 360f, currentCoords.y * 360f, 0f);
-
         string statusStr = "";
 
-        if (candidate.isBeingEvaluated) 
+        if (candidateRef.isBeingEvaluated) 
         {
-            Agent matchingAgent = simulationManager.GetAgent(candidate);
-            bool isFocus = selectionManager.IsSelected(candidate);
+            Agent matchingAgent = simulationManager.GetAgent(candidateRef);
+            bool isFocus = selectionManager.IsSelected(candidateRef);
             
             ColorBlock block = button.colors;
             block.colorMultiplier = isFocus ? 2f : 1f;
@@ -71,23 +70,25 @@ public class GenomeButton : MonoBehaviour
         }
         else 
         {
-            var background = candidate.allEvaluationsComplete ? fossilState : unbornState;
+            var background = candidateRef.allEvaluationsComplete ? fossilState : unbornState;
             statusStr = SetBackground(background);
 
-            if(!candidate.allEvaluationsComplete)
-                gameObject.SetActive(false);
+            //if(!candidateRef.allEvaluationsComplete)
+            //    gameObject.SetActive(false);
         }
 
         backgroundImage.sprite = iconSprite;
         //tooltip.genomeViewerUIRef = uiManagerRef.genomeViewerUI;
 
-        tooltip.tooltipString = "" + candidate.candidateGenome.name + "-" + candidate.candidateID + "\nAge " + candidate.performanceData.totalTicksAlive;// + ", " + statusStr;
+        tooltip.tooltipString = "" + candidateRef.candidateGenome.name + "-" + candidateRef.candidateID + "\nAge " + candidateRef.performanceData.totalTicksAlive;// + ", " + statusStr;
         //uiManagerRef.speciesOverviewUI.leaderboardGenomeButtonsList.Add(buttonScript);
     }
     
     string SetBackgroundByLifeStage(Agent agent)
     {
+        
         foreach (var state in lifeStageStates)
+            
             if (state.lifeStage == agent.curLifeStage)
                 return SetBackground(state);
         

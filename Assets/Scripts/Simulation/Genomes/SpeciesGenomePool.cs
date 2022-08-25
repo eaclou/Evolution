@@ -49,27 +49,25 @@ public class SpeciesGenomePool
     public int recordDasher = 0;
     public CandidateAgentData recordHolderDasher;
         
-    //public List<PerformanceData> avgPerformanceDataYearList;
-    //public PerformanceData avgPerformanceData;
-    //public List<CandidateAgentData> avgCandidateDataYearList; // ***EAC Phase this out!
     public CandidateAgentData avgCandidateData;
         
     [SerializeField]
     public List<SpeciesDataPoint> speciesDataPointsList;
-    public List<SpeciesDataPoint> creatureDataPointsList;
 
     public Material coatOfArmsMat;
 
-    //public float avgLifespan = 0f;
     public bool isFlaggedForExtinction = false;
     public bool isExtinct = false;
     public bool isStillEvaluating = true;
 
     public float avgLifespan;
+    public float curGraphBoundsMinX;
 
     private int maxNumDataPointEntries = 128;
-    public float minScoreValue;
-    public float maxScoreValue;
+    public float speciesAllTimeMinScore;
+    public float speciesAllTimeMaxScore;
+    public float speciesCurAliveMinScore;
+    public float speciesCurAliveMaxScore;
     
     public CritterModuleAppearanceGenome appearanceGenome => 
         foundingCandidate.candidateGenome.bodyGenome.appearanceGenome;
@@ -103,28 +101,28 @@ public class SpeciesGenomePool
     }
 
     
-    public void FirstTimeInitialize(CandidateAgentData foundingGenome, int depth) {
-        foundingCandidate = foundingGenome;        
-        longestLivedCandidate = foundingGenome;
-        mostEatenCandidate = foundingGenome;
+    public void FirstTimeInitialize(CandidateAgentData foundingCandidate, int depth) {
+        this.foundingCandidate = foundingCandidate;        
+        longestLivedCandidate = foundingCandidate;
+        mostEatenCandidate = foundingCandidate;
 
         InitShared();
         depthLevel = depth;
         Vector3 newHue = Random.insideUnitSphere;
         
-        foundingGenome.candidateGenome.name = MutateName(foundingGenome.candidateGenome.name);
-        foundingGenome.candidateGenome.bodyGenome.appearanceGenome.BlendHue(newHue, 0.35f);
+        foundingCandidate.candidateGenome.name = MutateName(foundingCandidate.candidateGenome.name);
+        foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.BlendHue(newHue, 0.35f);
         
         //string debugTxt = "";
         for (int i = 0; i < 32; i++) {            
-            AgentGenome agentGenome = Mutate(foundingGenome.candidateGenome, true, true);
-            CandidateAgentData candidate = new CandidateAgentData(agentGenome, speciesID);
-            candidateGenomesList.Add(candidate);
-            leaderboardGenomesList.Add(candidate);
+            CandidateAgentData childCandidate = Mutate(foundingCandidate, true, true);
+            //CandidateAgentData candidate = new CandidateAgentData(agentGenome, speciesID, foundingCandidate.candidateID);
+            candidateGenomesList.Insert(0,childCandidate);
+            leaderboardGenomesList.Add(childCandidate);
             //debugTxt += "" + candidate.candidateGenome.brainGenome.linkList[0].weight.ToString("F2") + "  ";
         }
         //Debug.Log("SPECIES CREATED! " + debugTxt);
-        representativeCandidate = foundingGenome;
+        representativeCandidate = foundingCandidate;
 
         if(this.speciesID != 0) {                
             avgLifespan = SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgLifespan; // starting value// avgCandidateData.performanceData.totalTicksAlive;
@@ -136,35 +134,14 @@ public class SpeciesGenomePool
         coatOfArmsMat.SetPass(0);
         coatOfArmsMat.SetTexture("_MainTex", TheRenderKing.instance.shapeTex);
         coatOfArmsMat.SetTexture("_PatternTex", TheRenderKing.instance.patternTex);
-        coatOfArmsMat.SetFloat("_PatternX", foundingGenome.bodyStrokeBrushTypeX);
-        coatOfArmsMat.SetFloat("_PatternX", foundingGenome.bodyStrokeBrushTypeY);
-        coatOfArmsMat.SetColor("_TintPri", foundingGenome.primaryColor);
-        coatOfArmsMat.SetColor("_TintSec", foundingGenome.secondaryColor);
+        coatOfArmsMat.SetFloat("_PatternX", foundingCandidate.bodyStrokeBrushTypeX);
+        coatOfArmsMat.SetFloat("_PatternX", foundingCandidate.bodyStrokeBrushTypeY);
+        coatOfArmsMat.SetColor("_TintPri", foundingCandidate.primaryColor);
+        coatOfArmsMat.SetColor("_TintSec", foundingCandidate.secondaryColor);
         coatOfArmsMat.SetFloat("_IsSelected", 0f);
         //coatOfArmsMat.SetFloat("_IsEndangered", isFlaggedForExtinction ? 1f : 0f);
     }
-    
-    string MutateName(string original)
-    {
-        var newName = "";
-
-        foreach (var letter in original) {
-            float randChance1 = Random.Range(0f, 1f);
-            if (randChance1 < 0.35) {
-                newName += RandomStatics.GetRandomLetter();  
-                
-                if (randChance1 < 0.05) {
-                    newName += RandomStatics.GetRandomLetter();          
-                }
-            }            
-            else if (randChance1 <= 0.95f) {
-                newName += letter; 
-            }
-        }
-        
-        return newName;
-    }
-        
+       
     public void ProcessExtinction(int curTimeStep) {
         isExtinct = true;
         timeStepExtinct = curTimeStep;
@@ -173,12 +150,34 @@ public class SpeciesGenomePool
     private void CreateNewAverageCandidate() {
         if(avgCandidateData == null) {
             AgentGenome blankGenome = new AgentGenome(0f, 0);
-            avgCandidateData = new CandidateAgentData(blankGenome, speciesID);
+            avgCandidateData = new CandidateAgentData(blankGenome, speciesID, null);
         }
         
         avgCandidateData.SetToAverage(leaderboardGenomesList);
     }
 
+    public CandidateAgentData UpdateOldestActiveCandidateAndGraphBounds() {
+        float earliestTimestepBorn = SimulationManager.instance.simAgeTimeSteps;
+        CandidateAgentData oldestLivingCandidate = null;
+       // float oldestTimestep = earliestTimestepBorn;
+        for(int i = 0; i < candidateGenomesList.Count; i++) {
+            if(candidateGenomesList[i].isBeingEvaluated && candidateGenomesList[i].performanceData.creatureDataPointsList != null) {
+                if(candidateGenomesList[i].performanceData.timeStepHatched < earliestTimestepBorn) {
+                    earliestTimestepBorn = candidateGenomesList[i].performanceData.timeStepHatched;
+                    oldestLivingCandidate = candidateGenomesList[i];
+                }                
+            }
+        }
+        if(oldestLivingCandidate == null) {
+            //curGraphBoundsMinX = 11;
+            Debug.LogError("no candidates found!");
+        }
+        else {
+            curGraphBoundsMinX = earliestTimestepBorn;
+        }
+        
+        return oldestLivingCandidate;
+    }
     public void AddNewDataPoint(int timestep) 
     {
         //ADD NEW SPECIES DATA POINT::::::
@@ -186,26 +185,45 @@ public class SpeciesGenomePool
         SpeciesDataPoint dataPoint = new SpeciesDataPoint();
         dataPoint.timestep = timestep;
         dataPoint.lifespan = avgLifespan; // avgCandidateData.performanceData.totalTicksAlive;
-        //if(this.isStillEvaluating && this.speciesID != 0) {
-        //    dataPoint.lifespan = SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[parentSpeciesID].avgLifespan;
-        //}        
+              
         speciesDataPointsList.Add(dataPoint);
         if(speciesDataPointsList.Count > maxNumDataPointEntries) {
             MergeDataPoints();
         }
-        float bufferWidth = 75f;
-        maxScoreValue = dataPoint.lifespan + bufferWidth;
-        minScoreValue = dataPoint.lifespan - bufferWidth;
-        if (this.speciesID == 0 && SimulationManager.instance.simAgeTimeSteps < 10000) {
-            minScoreValue = Mathf.Max(0f, speciesDataPointsList[0].lifespan - bufferWidth);
+        
+
+        // BELOW HERE REPLACE:::
+        if(dataPoint.lifespan < speciesAllTimeMinScore) {
+            speciesAllTimeMinScore = dataPoint.lifespan;
+        }
+        if(dataPoint.lifespan > speciesAllTimeMaxScore) {
+            speciesAllTimeMaxScore = dataPoint.lifespan;
         }
 
+
         //ADD NEW CREATURE DATAPOINTS:::::
-        foreach (var cand in candidateGenomesList) {
-            if(cand.isBeingEvaluated) {
-                cand.AddNewDataPoint(timestep, avgLifespan);
-            }
-            
+        if(candidateGenomesList.Count != 0) {
+            speciesCurAliveMinScore = float.PositiveInfinity;
+            speciesCurAliveMaxScore = 1;
+        }
+        
+        for(int i = 0; i < candidateGenomesList.Count; i++) {            
+            if(candidateGenomesList[i].isBeingEvaluated) {
+                PerformanceData perf = candidateGenomesList[i].performanceData;
+
+                float offset = (float)i / (float)Mathf.Max(1, candidateGenomesList.Count - 1) * 150f;
+                if(perf.creatureDataPointsList == null) {
+                    offset = 0f;
+                }
+                candidateGenomesList[i].AddNewDataPoint(timestep, avgLifespan + offset);
+
+                if(avgLifespan + offset < speciesCurAliveMinScore) {
+                    speciesCurAliveMinScore = avgLifespan + offset;
+                }
+                if(avgLifespan + offset > speciesCurAliveMaxScore) {
+                    speciesCurAliveMaxScore = avgLifespan + offset;
+                }
+            }            
         }
     }
     private void MergeDataPoints() {
@@ -235,7 +253,7 @@ public class SpeciesGenomePool
     }
     
     public void UpdateAvgData(CandidateAgentData candidateData) {
-        float numPoints = 256f;
+        float numPoints = 256f; // rolling avg over this many creatures
         avgLifespan = avgLifespan * ((numPoints - 1f) / numPoints) + candidateData.performanceData.totalTicksAlive * (1f / numPoints);
         if (numAgentsEvaluated >= numPoints && isStillEvaluating) {
             isStillEvaluating = false;
@@ -249,29 +267,10 @@ public class SpeciesGenomePool
                 }
             }
         }
-        SmoothDataPoints(0.05f);
+        //SmoothDataPoints(0.05f);
         
     }
 
-    public void SmoothDataPoints(int numIter) {
-        for(int j = 0; j < numIter; j++) {
-            List<SpeciesDataPoint> swapDataPointsList = new List<SpeciesDataPoint>();
-            for (int i = 0; i < speciesDataPointsList.Count; i++) {
-                int indexPrev = Mathf.Max(0, i - 1);
-                int indexNext = Mathf.Min(i, speciesDataPointsList.Count - 1);
-                SpeciesDataPoint pointPrev = speciesDataPointsList[indexPrev];
-                SpeciesDataPoint pointCur = speciesDataPointsList[i];
-                SpeciesDataPoint pointNext = speciesDataPointsList[indexNext];
-                pointCur.lifespan = (pointPrev.lifespan + pointCur.lifespan + pointNext.lifespan) / 3f;
-                swapDataPointsList.Add(pointCur);
-            }
-            speciesDataPointsList.Clear();
-            for (int i = 0; i < swapDataPointsList.Count; i++) {
-                speciesDataPointsList.Add(swapDataPointsList[i]);
-            }
-        }
-        
-    }
     public void SmoothDataPoints(float proportion) {
         if (proportion > 1f) return;
         if (proportion < 0f) return;
@@ -356,13 +355,13 @@ public class SpeciesGenomePool
         // *** NOTE! *** List.Remove() was unreliable - worked sometimes but not others? still unsure about it
     }
 
-    public void AddNewCandidateGenome(AgentGenome newGenome) {
+    public void AddNewCandidateGenome(CandidateAgentData newCand) {
         //Debug.Log("AddedNewCandidate! " + candidateGenomesList.Count.ToString());
-        CandidateAgentData newCandidateData = new CandidateAgentData(newGenome, speciesID);
-        candidateGenomesList.Add(newCandidateData);
+        //CandidateAgentData newCandidateData = new CandidateAgentData(newCand, speciesID); //???
+        candidateGenomesList.Insert(0, newCand);// newCandidateData);
     }
 
-    public AgentGenome GetGenomeFromFitnessLottery() {
+    public CandidateAgentData GetCandidateFromFitnessLottery() {
         int numCandidates = leaderboardGenomesList.Count;
         float[] rankedFitnessScoresArray = new float[numCandidates];
         int[] rankedIndicesList = new int[numCandidates];
@@ -417,16 +416,38 @@ public class SpeciesGenomePool
         }
         //return selectedIndex;
         // choose genome by lottery
-        AgentGenome parentGenome = leaderboardGenomesList[selectedIndex].candidateGenome;
+        CandidateAgentData parentCandidate = leaderboardGenomesList[selectedIndex];
 
-        return parentGenome;
+        return parentCandidate;
     }
 
     // Avoid use of local variables in Mutate() for efficiency
     MutationSettingsInstance tempMutationSettings;
-
-    public AgentGenome Mutate(AgentGenome parentGenome, bool bodySettings, bool brainSettings) 
+    
+    string MutateName(string original)
     {
+        var newName = "";
+
+        foreach (var letter in original) {
+            float randChance1 = Random.Range(0f, 1f);
+            if (randChance1 < 0.35) {
+                newName += RandomStatics.GetRandomLetter();  
+                
+                if (randChance1 < 0.05) {
+                    newName += RandomStatics.GetRandomLetter();          
+                }
+            }            
+            else if (randChance1 <= 0.95f) {
+                newName += letter; 
+            }
+        }
+        
+        return newName;
+    }
+     
+    public CandidateAgentData Mutate(CandidateAgentData parentCandidate, bool bodySettings, bool brainSettings) 
+    {
+        AgentGenome parentGenome = parentCandidate.candidateGenome;
         string newName = GetMutatedName(parentGenome.name);
 
         tempMutationSettings = bodySettings ? mutationSettings : cachedNoneMutationSettings;
@@ -435,7 +456,7 @@ public class SpeciesGenomePool
         tempMutationSettings = brainSettings ? mutationSettings : cachedNoneMutationSettings;
         BrainGenome newBrainGenome = new BrainGenome(parentGenome.brainGenome, newBodyGenome, tempMutationSettings);
         
-        return new AgentGenome(newBodyGenome, newBrainGenome, parentGenome.generationCount + 1, newName);
+        return new CandidateAgentData(new AgentGenome(newBodyGenome, newBrainGenome, parentGenome.generationCount + 1, newName), parentCandidate.speciesID, parentCandidate);
     }
     
     string GetMutatedName(string parentName)
@@ -499,7 +520,7 @@ public class SpeciesGenomePool
         return leaderboardGenomesList[index].candidateGenome;        
     }
     
-    public CandidateAgentData GetFocusedCandidate(SelectionGroup group, int index) {
+   /* public CandidateAgentData GetFocusedCandidate(SelectionGroup group, int index) {
         switch (group) {
             case SelectionGroup.Founder: return foundingCandidate;
             case SelectionGroup.Representative: return representativeCandidate;
@@ -510,7 +531,7 @@ public class SpeciesGenomePool
             case SelectionGroup.Candidates: return candidateGenomesList[index];
             default: Debug.LogError("Invalid selection group: " + group); return null;
         }
-    }
+    }*/
     
     public int GetNumberAgentsEvaluated()
     {

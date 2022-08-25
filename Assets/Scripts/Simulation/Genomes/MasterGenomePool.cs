@@ -61,7 +61,7 @@ public class MasterGenomePool
             SpeciesGenomePool newSpecies = new SpeciesGenomePool(i, -1, 0, 0, mutationSettings);
             AgentGenome seedGenome = new AgentGenome(mutationSettings.brainInitialConnectionChance, simulation.numInitialHiddenNeurons);
 
-            newSpecies.FirstTimeInitialize(new CandidateAgentData(seedGenome, i), 0);
+            newSpecies.FirstTimeInitialize(new CandidateAgentData(seedGenome, i, null), 0);
             currentlyActiveSpeciesIDList.Add(i);
             completeSpeciesPoolsList.Add(newSpecies);
         }
@@ -286,7 +286,7 @@ public class MasterGenomePool
     }
     
     // *** Gross code organization btw this and SimManager ***
-    public void AssignNewMutatedGenomeToSpecies(AgentGenome newGenome, int parentSpeciesID) {
+    public void AssignNewMutatedCandidateToSpecies(CandidateAgentData newCandidate, int parentSpeciesID) {
         int closestSpeciesID = -1;
         float closestDistance = 99999f;
         
@@ -295,7 +295,7 @@ public class MasterGenomePool
             if (completeSpeciesPoolsList[id].isFlaggedForExtinction) 
                 continue;
              
-            float similarityDistance = GetSimilarityScore(newGenome, completeSpeciesPoolsList[id].representativeCandidate.candidateGenome);
+            float similarityDistance = GetSimilarityScore(newCandidate.candidateGenome, completeSpeciesPoolsList[id].representativeCandidate.candidateGenome);
             if (similarityDistance >= closestDistance) 
                 continue;
             
@@ -313,39 +313,23 @@ public class MasterGenomePool
 
             int seedSpeciesID = closestSpeciesID; // simManagerRef.masterGenomePool.currentlyActiveSpeciesIDList[ UnityEngine.Random.Range(0, currentlyActiveSpeciesIDList.Count) ];
             //AgentGenome seedGenome =
-            simulation.AddNewSpecies(newGenome, seedSpeciesID);
+            simulation.AddNewSpecies(newCandidate, seedSpeciesID);
 
             speciesSimilarityDistanceThreshold += 70f;
 
-            Color color = newGenome.primaryColor;
-            panelPendingClickPrompt.Narrate("A new species has emerged! agentname: " + newGenome.name, color);
+            Color color = newCandidate.candidateGenome.primaryColor;
+            panelPendingClickPrompt.Narrate("A new species has emerged! agentname: " + newCandidate.candidateGenome.name, color);
         }
 
         if (!assignedToNewSpecies) 
-        {
-            // *** maybe something fishy here??
-            // **********************
-
-            // Allowing new creatures to be assigned to species other than its parent :
-            //    -- In theory should keep species closer to its Representative Genome?
-            //    -- causes issues with 0-candidate species....
-
-            // The alternative allows species to drift further away from the founding Representative genome???
-            // So far avg. fitness not improving at same rate as before????
-            // ****************
-            // could try going for a hybrid approach?
-
-
-            // NEW:::
-            completeSpeciesPoolsList[parentSpeciesID].AddNewCandidateGenome(newGenome);
-            // OLD:::
-            //completeSpeciesPoolsList[closestSpeciesID].AddNewCandidateGenome(newGenome);
+        {            
+            completeSpeciesPoolsList[parentSpeciesID].AddNewCandidateGenome(newCandidate);
         }
         else 
         {
             // *** ???
             Debug.Log($"assignedToNewSpecies closestDistanceSpeciesID: {closestSpeciesID}, score: {closestDistance}");
-            completeSpeciesPoolsList[closestSpeciesID].AddNewCandidateGenome(newGenome);
+            completeSpeciesPoolsList[closestSpeciesID].AddNewCandidateGenome(newCandidate);
         }
         
         if (currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies) {
