@@ -33,7 +33,6 @@ public class MasterGenomePool
     MutationSettingsInstance mutationSettings;
 
     public List<int> debugRecentlyDeletedCandidateIDsList;
-
     PanelNotificationsUI panelPendingClickPrompt => uiManager.panelNotificationsUI;
     public SpeciesGenomePool selectedPool => completeSpeciesPoolsList[selectionManager.currentSelection.historySelectedSpeciesID];
     public int speciesPoolCount => completeSpeciesPoolsList.Count;   

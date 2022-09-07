@@ -46,8 +46,6 @@ public class CreaturePanelUI : MonoBehaviour
 
     public bool isPanelOpen => openCloseButton.isOpen;
 
-    
-
     public Sprite spriteBrainButton;
 
     [SerializeField]
@@ -76,10 +74,10 @@ public class CreaturePanelUI : MonoBehaviour
         openCloseButton.SetHighlight(true);
     }
 
-    public void ClickParentGenome() {
-        CandidateAgentData cand = SelectionManager.instance.currentSelection.candidate;
+    //public void ClickParentGenome() {
+    //    CandidateAgentData cand = SelectionManager.instance.currentSelection.candidate;
         //cand.candidateID
-    }
+    //}
 
     public void UpdateAgentActionStateData(int candID, AgentActionState actionState) {
         if (selection.currentSelection.candidate.candidateID != candID) return;

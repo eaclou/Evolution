@@ -87,7 +87,7 @@ public class SimulationManager : Singleton<SimulationManager>
     private int numAgentEvaluationsPerGenome = 1;
 
     public int simAgeTimeSteps = 0;
-    private int numStepsInSimYear = 1024 * 512;
+    private int numStepsInSimYear = 1024 * 32;
     private int simAgeYearCounter = 0;
     public int curSimYear = 0;
     
@@ -607,7 +607,7 @@ public class SimulationManager : Singleton<SimulationManager>
             CheckForYearEvent();
         }
 
-        if (simAgeTimeSteps % 30 == 0) {
+        if (simAgeTimeSteps % 90 == 0) {
             //uiManager.historyPanelUI.SortSpeciesIconList();
             uiManager.historyPanelUI.UpdateTargetGraphBounds();
 

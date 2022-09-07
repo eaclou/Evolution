@@ -13,9 +13,6 @@ public class SpeciesOverviewUI : MonoBehaviour {
 
     Color CLEAR => Color.black;
 
-    private int selectedHallOfFameIndex = 0;
-    private int selectedCandidateGenomeIndex = 0;
-    
     public GameObject panelGenomeViewer;
     public Image genomeLeaderboard;
     
@@ -30,36 +27,40 @@ public class SpeciesOverviewUI : MonoBehaviour {
     
     public bool isShowingLineage = false;
     
-    private Texture2D speciesPoolGenomeTex; // speciesOverviewPanel
-    //public Material speciesPoolGenomeMat;
+    //private Texture2D speciesPoolGenomeTex; // speciesOverviewPanel
     
     public List<GenomeButton> candidateButtons = new List<GenomeButton>();
 
     public void ClickButtonToggleLineage() {
         isShowingLineage = !isShowingLineage;
-        RebuildGenomeButtons();
+        RefreshGenomeButtons();
     }
     
-    public void SetButtonPosition(int id, Vector3 position) {
+    public void SetButtonPosition(int id, Vector3 position) { // set by historyPanelUI atm
         if (id < 0 || id >= candidateButtons.Count) return;
         candidateButtons[id].gameObject.transform.localPosition = position;
     }
         
-    public void RebuildGenomeButtons() // ***EAC how is this diff from Update??
+    public void RefreshGenomeButtons() // ***EAC how is this diff from Update??
     {
         SpeciesGenomePool pool = simulationManager.masterGenomePool.completeSpeciesPoolsList[selectionManager.currentSelection.candidate.speciesID]; 
-        RebuildGenomeButtonsCurrent(pool);
+        RefreshGenomeButtonsCurrent(pool);
     }
 
     public void RequestNewCandidateGenomeButton(CandidateAgentData cand) {
         
         if(candidateButtons.Count >= maxButtons) {
-            // start with oldest
+            
             int index = 0;
             //find oldest non-living candidateButton
             for(int i = 0; i < candidateButtons.Count; i++) {
                 //check if still alive:
+                bool safeToRemove = true;
                 if(candidateButtons[i].candidateRef.isBeingEvaluated) {
+                    safeToRemove = false;
+                }
+                
+                if(!safeToRemove) {
                     continue;
                 }
                 //else:
@@ -119,16 +120,11 @@ public class SpeciesOverviewUI : MonoBehaviour {
     }
 
     // Current Genepool
-    private void RebuildGenomeButtonsCurrent(SpeciesGenomePool pool) {
+    private void RefreshGenomeButtonsCurrent(SpeciesGenomePool pool) {
         Vector3 hue = pool.foundingCandidate.primaryHue;            
         genomeLeaderboard.color = new Color(hue.x, hue.y, hue.z);
         UpdateButtons();
     }
-    
-    // Hall of fame genomes (checkpoints .. every 50 years?)
-    //private void RebuildGenomeButtonsLineage(SpeciesGenomePool pool) {
-    //    UpdateButtons(pool.hallOfFameGenomesList, SelectionGroup.HallOfFame);
-    //}
     
     private void UpdateButtons() { //List<CandidateAgentData> candidates, SelectionGroup groupId
         for(int i = 0; i < candidateButtons.Count; i++) {
@@ -167,64 +163,22 @@ public class SpeciesOverviewUI : MonoBehaviour {
     }
 
     public void ChangeSelectedGenome(SelectionGroup group, int index, GenomeButton button) {
-        //SpeciesGenomePool pool = simulationManager.GetSelectedGenomePool();
-        //selectionManager.SetFocusedCandidateGenome(pool, group, index);
+        
         selectedButtonData = GetSelectionGroupData(group);
-
-        //uiManager.historyPanelUI.buttonSelCreatureEventsLink.gameObject.transform.localPosition = new Vector3(360f, 180f, 0f);
         selectionManager.SetSelected(button.candidateRef);
-        //if (group == SelectionGroup.Candidates)
-        //    selectionManager.SetSelected(pool.candidateGenomesList[index]);
-        //
+        
         if (selectedButtonData != null && selectedButtonData.image != null) {
-            selectedButtonData.image.color = Color.white;
-            // new Vector3(selectedButtonData.image.rectTransform.localPosition.x + 24f, selectedButtonData.image.rectTransform.localPosition.y, 0f);
+            //selectedButtonData.image.color = Color.white;
         }
+        button.backgroundImage.color = Color.white;
     }
    
-    public void CycleHallOfFame() {
-        //ChangeSelectedGenome(SelectionGroup.HallOfFame, selectedHallOfFameIndex + 1); 
-    }
-    
-    public void CycleCurrentGenome() {
-        //ChangeSelectedGenome(SelectionGroup.Candidates, selectedCandidateGenomeIndex + 1); 
-    }
-
-    public void CreateSpeciesLeaderboardGenomeTexture() {
-        int width = 32;
-        int height = 96;
-        speciesPoolGenomeTex.Resize(width, height); 
-        SpeciesGenomePool pool = simulationManager.GetSelectedGenomePool();
-
-        for(int x = 0; x < width; x++) 
-        {
-            for(int y = 0; y < height; y++) 
-            {
-                Axon linkGenome = pool.GetLeaderboardLinkGenome(x, y);
-                Color testColor = linkGenome == null ? CLEAR : Color.Lerp(negativeColor, positiveColor, linkGenome.normalizedWeight);
-                speciesPoolGenomeTex.SetPixel(x, y, testColor);
-            }
-        }
-        
-        // Body Genome
-        //int xI = curLinearIndex % speciesPoolGenomeTex.width;
-        //int yI = Mathf.FloorToInt(curLinearIndex / speciesPoolGenomeTex.width);
-        
-        speciesPoolGenomeTex.Apply();
-    }
-
     [SerializeField] Color negativeColor = Color.black;
     [SerializeField] Color positiveColor = Color.white;
 
     void Start () {
-        GenerateButtonList();
-    
-        selectedButtonData = GetSelectionGroupData(defaultSelectionGroup);
-        
-        speciesPoolGenomeTex = new Texture2D(16, 16, TextureFormat.RGBA32, false);
-        speciesPoolGenomeTex.filterMode = FilterMode.Point;
-        speciesPoolGenomeTex.wrapMode = TextureWrapMode.Clamp;
-        //speciesPoolGenomeMat.SetTexture("_MainTex", speciesPoolGenomeTex);
+        GenerateButtonList();    
+        selectedButtonData = GetSelectionGroupData(defaultSelectionGroup);        
 	}
 	
 	SelectionGroupData GetSelectionGroupData(SelectionGroup id)

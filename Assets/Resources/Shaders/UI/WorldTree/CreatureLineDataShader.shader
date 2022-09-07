@@ -91,7 +91,7 @@
 				float4 col = data.color;
 				
 				if (data.isSelected) {
-					lineWidth = 0.03;
+					lineWidth = 0.031;
 					col.rgb = lerp(col.rgb, 1, 0.75);
 				}
 				else {
@@ -102,11 +102,11 @@
 				float3 prevToThisVec = ScaleData(data.worldPos) - ScaleData(dataPrev.worldPos);
 				float3 right = normalize(float3(prevToThisVec.y, -prevToThisVec.x, 0));
 
-				float3 quadOffset = (quadData.x * right * lineWidth * (1.0 - o.uv.y * 0.67)) + (o.uv.y * prevToThisVec * 1);
+				float3 quadOffset = (quadData.x * right * lineWidth * (1.0 - o.uv.y * 0.0067)) + (o.uv.y * prevToThisVec * 1);
 				
 				if (data.isAlive < 0.5) {
-					col.rgb = col.rgb * 0.5;// lerp(col.rgb, float3(1.0, 0.05, 0.05), 0.8255);
-					quadOffset *= 0.5;
+					col.rgb = col.rgb * 0.75;// lerp(col.rgb, float3(1.0, 0.05, 0.05), 0.8255);
+					quadOffset *= 0.75;
 				}
 
 				quadOffset *= data.color.a; // make degenerate triangles if inactive
@@ -115,7 +115,7 @@
 				float graphWidth = 1.0 - _GraphBufferLeft - _GraphBufferRight;
 				float graphHeight = 1.0 - _GraphClockSize;
 				worldPosition.x = worldPosition.x * graphWidth + _GraphBufferLeft; //(outPos.x + _GraphBufferLeft) / (1 - _GraphBufferRight + _GraphBufferLeft);
-				//y = y * displayHeight + marginBottom;
+				
 				worldPosition.y = worldPosition.y * graphHeight;// +_GraphClockSize; //(outPos.y - _GraphBufferBottom) / (_GraphBufferTop + _GraphClockSize - _GraphBufferBottom);
 				worldPosition.z = -1 * data.isSelected;
 

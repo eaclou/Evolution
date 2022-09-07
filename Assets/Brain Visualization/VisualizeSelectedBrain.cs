@@ -17,12 +17,19 @@ public class VisualizeSelectedBrain : MonoBehaviour
         if (UIManager.exists) ui.OnAgentSelected -= RefreshAgent;
     }
     
-    void RefreshAgent(Agent agent)
+    void RefreshAgent(Agent agent) // 
     {
-        this.agent = agent;
-        //Debug.Log($"Selected agent brain has {neurons.Count} neurons and {axons.Count} axons");
-        var sockets = CreateSockets();
-        visualization.Initialize(agent.brain, ref sockets);
+        if(agent == null) {
+            //agent = new Agent();
+            //agent.brain = new Brain(genome.brainGenome);
+        }
+        else {
+            this.agent = agent;
+            //Debug.Log($"Selected agent brain has {neurons.Count} neurons and {axons.Count} axons");
+            var sockets = CreateSockets();
+            visualization.Initialize(agent.brain, ref sockets);
+        }
+        
     }
     
     Agent agent;

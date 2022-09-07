@@ -131,7 +131,7 @@ public class ClockPanelUI : MonoBehaviour
         int monthInt = Mathf.FloorToInt(curTimeStep / (float)simulation.GetNumTimeStepsPerYear() * 12f) % 12;
         int dayInt = Mathf.FloorToInt(curTimeStep / (float)simulation.GetNumTimeStepsPerYear() * 365f) % 365;
         //currentSeason = (Season)seasonInt;
-        textCurYear.text = (cursorYear + 0).ToString() + "/ " + monthInt + "/ " + dayInt + "  (" + curTimeStep + ")";
+        textCurYear.text = dayInt + "/ " + monthInt + "/ " + (cursorYear + 0).ToString() + "  (" + curTimeStep + ")";
         
 
         clockFaceGroup.transform.localPosition = new Vector3(Mathf.Max(36f,Mathf.Min(360f - 36f, theCursorCzar.GetCursorPixelCoords().x)), 324f, 0f);

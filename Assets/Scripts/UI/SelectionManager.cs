@@ -18,8 +18,6 @@ public class SelectionManager : Singleton<SelectionManager>
         }
         currentSelection.candidate = candidate;
 
-        
-
         // Check if corresponding agent exists:
         bool hasAgent = false;
         foreach (var agent in simulation.agents) {
@@ -40,16 +38,15 @@ public class SelectionManager : Singleton<SelectionManager>
         
         currentSelection.isGenomeOnly = !hasAgent;
         currentSelection.historySelectedSpeciesID = currentSelection.candidate.speciesID;  
-        //SetHistorySelectedSpeciesUI(candidate.speciesID);
-        //uiManager.historyPanelUI.InitializePanel();
-        //uiManager.historyPanelUI.RefreshFocusedAgent(currentSelection.agent);
-        //uiManager.speciesOverviewUI.RebuildGenomeButtons();
         
 
         if (hasAgent) 
         {            
             unlockedTech = currentSelection.candidate.candidateGenome.bodyGenome.unlockedTech;
             //PrintTech();
+        }
+        else {
+            
         }
     }
     
@@ -89,8 +86,7 @@ public class SelectionManager : Singleton<SelectionManager>
                     cand = candidate;
                     break;
                 }
-            }
-            
+            }            
         }
         SetSelected(cand);
         //Debug.Log("Selected! " + speciesID + ",  " + cand.candidateID);
@@ -135,9 +131,3 @@ public class SelectionManager : Singleton<SelectionManager>
         public bool isGenomeOnly;
     }
 
-//public CandidateAgentData focusedCandidate; 
-/*public void SetFocusedCandidateGenome(SpeciesGenomePool selectedPool, SelectionGroup group, int index) {
-    var candidate = selectedPool.GetFocusedCandidate(group, index);
-    SetSelected(candidate);
-    UnityEngine.Debug.Log($"Selecting agent index {index}");
-}*/

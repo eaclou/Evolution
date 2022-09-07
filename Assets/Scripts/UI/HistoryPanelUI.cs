@@ -149,6 +149,8 @@ public class HistoryPanelUI : MonoBehaviour
     private float targetGraphBoundsMaxY;
     private float targetGraphBoundsMinX;
     private float targetGraphBoundsMaxX;
+
+    private float alltimeHighestScore = 0f;
     
     public void Start() {
         openCloseButton.SetHighlight(true);
@@ -161,11 +163,17 @@ public class HistoryPanelUI : MonoBehaviour
         SpeciesGenomePool selectedPool = masterGenomePool.completeSpeciesPoolsList[selectedCand.speciesID];
         
         targetGraphBoundsMaxX = simManager.simAgeTimeSteps;
+        foreach(var species in masterGenomePool.completeSpeciesPoolsList) {
+            if (species.speciesAllTimeMaxScore > alltimeHighestScore)
+                alltimeHighestScore = species.speciesAllTimeMaxScore;
+        }
+        
         // 
         //AllSpeciesView  // change how this is structured!:
         if(isEntireSimulationMode) {
             targetGraphBoundsMinY = 0f;
             targetGraphBoundsMinX = 0f;
+            targetGraphBoundsMaxY = alltimeHighestScore;
         }
         if(isActiveSpeciesMode) { // all species shown, but auto-zoom
             targetGraphBoundsMinY = 10000f; //pos infinity
@@ -185,11 +193,7 @@ public class HistoryPanelUI : MonoBehaviour
             targetGraphBoundsMinX = Mathf.Max(0f, simManager.simAgeTimeSteps - (targetGraphBoundsMaxY - targetGraphBoundsMinY) * 16f);
         }
         
-        if(isPopulationMode) {
-            //targetGraphMinX = Mathf.Max(0f, simManager.simAgeTimeSteps - (targetGraphMaxY - targetGraphMinY) * 33f);
-            // selectedPool.candidateGenomesList[0];// selectedPool.candidateGenomesList.Count - 1];
-            //targetGraphBoundsMinX = 111; // indicates dataPoints is null?? but why?
-
+        if(isPopulationMode) {            
             CandidateAgentData oldestLivingCand = selectedPool.UpdateOldestActiveCandidateAndGraphBounds();
             targetGraphBoundsMinX = selectedPool.curGraphBoundsMinX;
             targetGraphBoundsMinY = selectedPool.speciesCurAliveMinScore;
@@ -202,9 +206,6 @@ public class HistoryPanelUI : MonoBehaviour
             //graphBoundsMinY = selectedPool.minScoreValue - 33f;
             //graphBoundsMaxY = selectedPool.maxScoreValue + 33f;
         }
-               
-        
-          
     }
         
     public void SetNudgeTooltip(string str) {
@@ -526,33 +527,6 @@ public class HistoryPanelUI : MonoBehaviour
 
     }
     
-    /*Color GetCreatureLineColor(Vector3 hue, CandidateAgentData candidate, bool inXBounds)
-    {
-        Color color = new Color(hue.x, hue.y, hue.z);
-
-        if (!inXBounds) {
-            color.a = 0f;
-        }
-        else if (candidate.candidateID == currentSelection.candidate.candidateID) {
-            color.r = 1f;
-            color.g = 1f;
-            color.b = 1f;
-            color.a = 1f;
-        }
-        if (!candidate.isBeingEvaluated && candidate.numCompletedEvaluations == 0 ||
-            candidate.performanceData.timeStepHatched <= 1 ||
-            curPanelMode == HistoryPanelMode.AllSpecies) {
-            color.a = 0f;
-        }
-        if (candidate.performanceData.totalTicksAlive >= 1) {
-            color.r *= 0.35f;     
-            color.g *= 0.35f; 
-            color.b *= 0.35f; 
-        }
-
-        return color;
-    }*/
-
     private void CreateSpeciesIcon(SpeciesGenomePool pool) 
     {
         AgentGenome templateGenome = masterGenomePool.completeSpeciesPoolsList[pool.speciesID].foundingCandidate.candidateGenome; 
@@ -627,7 +601,7 @@ public class HistoryPanelUI : MonoBehaviour
         }
 
         selectionManager.SetSelectedFromSpeciesUI(iconUI.speciesID);
-        uiManagerRef.speciesOverviewUI.RebuildGenomeButtons();
+        uiManagerRef.speciesOverviewUI.RefreshGenomeButtons();
         uiManagerRef.ExitTooltipObject();
 
     }
@@ -658,22 +632,14 @@ public class HistoryPanelUI : MonoBehaviour
         }
         else if (curPanelMode == HistoryPanelMode.SelCreatureTimeline) {
             curPanelMode = HistoryPanelMode.SelSpeciesPopulation;
-        }
-        
-    }
-    
-    public void ClickButtonModeCycle() {
-        curPanelMode++;
-        if ((int)curPanelMode >= 4) {
-            curPanelMode = 0;
-        }
-    }
+        }        
+    }   
     
     public void Tick() 
     {
         if(isNudgeOn) {
             nudgeCounter++;
-            if(nudgeCounter >= 520) {
+            if(nudgeCounter >= 420) {
                 CloseNudgeMessage();                
             }
         }
@@ -702,15 +668,12 @@ public class HistoryPanelUI : MonoBehaviour
                 textPanelStateDebug.text = curPanelMode +
                                             ", SP# " + currentSelection.candidate.speciesID +
                                             ", C# " + currentSelection.candidate.candidateID +
-                                            ", maxY: " + "highest score?";
-                    //min: (" + graphBoundsMinX.ToString("F0") + ", " + graphBoundsMinY.ToString("F0") + "), max: (" + graphBoundsMaxX.ToString("F0") + ", " + graphBoundsMaxY.ToString("F0") +
-           
-        
+                                            ", maxY: " + targetGraphBoundsMaxY;
+                 
                 break;
             case HistoryPanelMode.ActiveSpecies:
                 buttonToggleGraphMode.gameObject.SetActive(true);                
                 UpdateSpeciesIconsLineageMode();
-                //targetStartTimeStep = simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[0]].timeStepCreated;
                 tempPanelGraph.SetActive(true);
                 textPanelStateDebug.text = curPanelMode +
                                             ", SP# " + currentSelection.candidate.speciesID +
@@ -755,11 +718,7 @@ public class HistoryPanelUI : MonoBehaviour
         }
 
         UpdateCreatureEventIcons(currentSelection.candidate);
-        
-        //timelineStartTimeStep = Mathf.Lerp(timelineStartTimeStep, targetStartTimeStep, 0.33f);
-        //graphBoundsX = timelineStartTimeStep;
-        //graphBoundsXEnd = simManager.simAgeTimeSteps;
-        
+                
         graphBoundsMinX = Mathf.Lerp(graphBoundsMinX, targetGraphBoundsMinX, 0.27f);
         graphBoundsMaxX = Mathf.Lerp(graphBoundsMaxX, targetGraphBoundsMaxX, 0.27f);
         graphBoundsMinY = Mathf.Lerp(graphBoundsMinY, targetGraphBoundsMinY, 0.27f);
@@ -769,7 +728,6 @@ public class HistoryPanelUI : MonoBehaviour
     public void AddNewSpeciesToPanel(SpeciesGenomePool pool) {
         //Debug.Log("AddNewSpeciesToPanelUI: " + pool.speciesID);
         CreateSpeciesIcon(pool);
-
         SortSpeciesIconList();
     }
     
@@ -796,41 +754,12 @@ public class HistoryPanelUI : MonoBehaviour
                 }
             }
 
-            //float test = y;
-            //test = test / maxScoreValue;
             y = Mathf.Clamp01((totalTicksAlive - this.graphBoundsMinY) / (this.graphBoundsMaxY - this.graphBoundsMinY));
 
             speciesIcons[s].SetTargetCoords(AnchorBottomLeft(x, y));
         }
     }
-    
-    private void UpdateSpeciesIconsGraphMode() {
-        if (speciesIcons[0].linkedPool.speciesDataPointsList.Count < 1) {
-            UpdateSpeciesIconsDefault();
-            return;
-        }
-
-        var bestScore = uiManagerRef.speciesGraphPanelUI.maxValuesStatArray[0]; // GetMostTicksAlive();
-        if (bestScore == 0f) bestScore = 1f;
-        //SortSpeciesIcons(bestScore);
-    }
-    
-    
-    void SortSpeciesIcons(float bestScore)
-    {
-        foreach (var icon in speciesIcons) 
-        {
-            SpeciesGenomePool pool = icon.linkedPool;
-            float totalTicksAlive = 0f;
-            if(pool.speciesDataPointsList.Count > 0) {
-                totalTicksAlive = pool.speciesDataPointsList[pool.speciesDataPointsList.Count - 1].lifespan;
-            }
-            float x = pool.isExtinct ? (float)pool.timeStepExtinct / Mathf.Max(1f, (float)simManager.simAgeTimeSteps) : 1f;
-            float y = Mathf.Clamp01(totalTicksAlive / bestScore);
-            icon.SetTargetCoords(AnchorBottomLeft(x, y));
-        }
-    }
-    
+        
     /// Simple list, evenly spaced 
     private void UpdateSpeciesIconsDefault() {
         for (int i = 0; i < speciesIcons.Count; i++) {      
@@ -856,12 +785,10 @@ public class HistoryPanelUI : MonoBehaviour
         if (nextSpeciesIndex >= masterGenomePool.completeSpeciesPoolsList.Count) nextSpeciesIndex = 0;    
     
         foreach (var icon in speciesIcons) 
-        {
-            
+        {            
             var coordinates = GetCoordinatesBySpeciesID(icon.linkedPool.speciesID, nextSpeciesIndex, prevSpeciesIndex);
             coordinates = AnchorBottomLeft(coordinates);
             icon.SetTargetCoords(coordinates);
-            //icon.SetTargetCoords(new Vector2(x, y));
         }        
     }
     
@@ -921,7 +848,7 @@ public class HistoryPanelUI : MonoBehaviour
                 x = timeSinceDeath / (float)(simManager.simAgeTimeSteps - graphBoundsMinX);
             }
             
-            position = AnchorBottomLeft(x, y) * panelSizePixels;
+            position = AnchorBottomLeft(x, Mathf.Clamp01(y)) * panelSizePixels;
 
             //***EAC FIX!
             uiManagerRef.speciesOverviewUI.SetButtonPosition(line, new Vector3(position.x, position.y, 0f));

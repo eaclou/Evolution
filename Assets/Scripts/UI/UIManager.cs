@@ -74,11 +74,11 @@ public class UIManager : Singleton<UIManager>
     public int framesPerAgentSpawn = 3;
 
     [SerializeField] MainMenuUI mainMenu;
-    [SerializeField] int timeStepsToRebuildGenomeButtons = 111;
+    //[SerializeField] int timeStepsToRebuildGenomeButtons = 111;
     SpeciesGenomePool pool;
     const string ANIM_FINISHED = "_AnimFinished";
     List<SpeciesGenomePool> speciesPools => genomePool.completeSpeciesPoolsList;
-    public bool isRebuildTimeStep => simulationManager.simAgeTimeSteps % timeStepsToRebuildGenomeButtons == 1;
+    //public bool isRebuildTimeStep => simulationManager.simAgeTimeSteps % timeStepsToRebuildGenomeButtons == 1;
 
     public Action<Agent> OnAgentSelected;
 
@@ -401,7 +401,7 @@ public class UIManager : Singleton<UIManager>
             //***EAC still needed? answer: yes :(
             // * WPP: expose magic numbers, create variable names describing purpose
             if(simulationManager.simAgeTimeSteps % 37 == 11) { 
-                speciesOverviewUI.RebuildGenomeButtons();  
+                speciesOverviewUI.RefreshGenomeButtons();  
             }
         }
 
