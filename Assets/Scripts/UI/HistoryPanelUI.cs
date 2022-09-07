@@ -59,8 +59,8 @@ public class HistoryPanelUI : MonoBehaviour
     [SerializeField]
     TooltipUI tooltipNudgeMessage;
 
-    private float displayWidth => 1f - marginLeft - marginRight;
-    private float displayHeight => 1f - marginTop - marginMiddle - marginBottom - clockHeight;
+    public float displayWidth => 1f - marginLeft - marginRight;
+    public float displayHeight => 1f - marginTop - marginMiddle - marginBottom - clockHeight;
 
     public enum HistoryPanelMode {
         EntireSimulation, // fully zoomed out
