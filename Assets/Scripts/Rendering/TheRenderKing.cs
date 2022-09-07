@@ -2457,7 +2457,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         clockPanelUI.RefreshMaterials();
 
         var coordinatesMin = uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.graphBoundsMinX, uiManager.historyPanelUI.graphBoundsMinY);
-            var coordinatesMax = uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.graphBoundsMaxX, uiManager.historyPanelUI.graphBoundsMaxY);
+        var coordinatesMax = uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.graphBoundsMaxX, uiManager.historyPanelUI.graphBoundsMaxY);
             
 
             

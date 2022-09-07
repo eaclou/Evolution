@@ -27,7 +27,7 @@ public class HistoryPanelUI : MonoBehaviour
     int historySelectedSpeciesID => currentSelection.historySelectedSpeciesID;
 
     //public float timelineStartTimeStep = 0f;
-    
+        
     public static int panelSizePixels => 360;
     
     [SerializeField]
@@ -151,6 +151,11 @@ public class HistoryPanelUI : MonoBehaviour
     private float targetGraphBoundsMaxX;
 
     private float alltimeHighestScore = 0f;
+
+    [ReadOnly]
+    public bool mouseWithinPanelBounds;
+    [ReadOnly]
+    public Vector2 mousePosPanelCoords;
     
     public void Start() {
         openCloseButton.SetHighlight(true);
@@ -646,6 +651,14 @@ public class HistoryPanelUI : MonoBehaviour
 
         var mouseInOpenCloseArea = Screen.height - Input.mousePosition.y < 64 && Input.mousePosition.x < 64;
         openCloseButton.SetMouseEnter(mouseInOpenCloseArea);
+
+        mouseWithinPanelBounds = Screen.height - Input.mousePosition.y < panelSizePixels && Input.mousePosition.x < panelSizePixels;
+        //mousePosPanelCoords = Vector2.zero;
+        
+        if(mouseWithinPanelBounds) {
+            mousePosPanelCoords.x = Input.mousePosition.x;
+            mousePosPanelCoords.y = Input.mousePosition.y - (Screen.height - panelSizePixels);
+        }
         tooltipOpenCloseButton.tooltipString = isPanelOpen ? "Hide Timeline Panel" : "Open Timeline Panel";
 
         buttonToggleExtinct.gameObject.SetActive(false);
@@ -665,7 +678,7 @@ public class HistoryPanelUI : MonoBehaviour
                 UpdateSpeciesIconsLineageMode();
                 //targetStartTimeStep = simManager.masterGenomePool.completeSpeciesPoolsList[simManager.masterGenomePool.currentlyActiveSpeciesIDList[0]].timeStepCreated;
                 tempPanelGraph.SetActive(true);
-                textPanelStateDebug.text = curPanelMode +
+                textPanelStateDebug.text = uiManagerRef.clockPanelUI.cursorTimeStep +
                                             ", SP# " + currentSelection.candidate.speciesID +
                                             ", C# " + currentSelection.candidate.candidateID +
                                             ", maxY: " + targetGraphBoundsMaxY;

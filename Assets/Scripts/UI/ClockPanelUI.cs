@@ -45,22 +45,22 @@ public class ClockPanelUI : MonoBehaviour
     public Material clockMoonStampMat;    
     public Material clockSunStampMat;
 
-    private float cursorTimeStep;
+    public float cursorTimeStep;
 
     public ComputeBuffer clockEarthStampDataCBuffer;    
     private int maxNumClockEarthStamps = 1024;
-    [SerializeField]
-    int numTicksPerEarthStamp = 60;
+    //[SerializeField]
+    //int numTicksPerEarthStamp = 60;
     [SerializeField]
     private float earthSpeed = 1f;
     public ComputeBuffer clockMoonStampDataCBuffer;    
     private int maxNumClockMoonStamps = 1024;
-    [SerializeField]
-    int numTicksPerMoonStamp = 120;
+    //[SerializeField]
+    //int numTicksPerMoonStamp = 120;
     public ComputeBuffer clockSunStampDataCBuffer;    
     private int maxNumClockSunStamps = 1024;
-    [SerializeField]
-    int numTicksPerSunStamp = 1024;
+    //[SerializeField]
+    //int numTicksPerSunStamp = 1024;
 
     [SerializeField]
     float clockRadiusEarth;
@@ -122,18 +122,26 @@ public class ClockPanelUI : MonoBehaviour
         //float cursorCoordsY = Mathf.Clamp01((theCursorCzar.GetCursorPixelCoords().y - 720f) / 360f);                
         //float curTimeStep = simulation.simAgeTimeSteps;
 
-        cursorTimeStep = curTimeStep;// Mathf.RoundToInt((curTimeStep - uiManager.historyPanelUI.graphBoundsMinX) * cursorCoordsX);
-
+        //cursorTimeStep = curTimeStep;// Mathf.RoundToInt((curTimeStep - uiManager.historyPanelUI.graphBoundsMinX) * cursorCoordsX);
+        float clockFacePosX = HistoryPanelUI.panelSizePixels;
+        if(uiManager.historyPanelUI.mouseWithinPanelBounds) {
+            cursorTimeStep = Mathf.RoundToInt(Mathf.Lerp(uiManager.historyPanelUI.graphBoundsMinX, uiManager.historyPanelUI.graphBoundsMaxX, uiManager.historyPanelUI.mousePosPanelCoords.x / HistoryPanelUI.panelSizePixels));
+            clockFacePosX = uiManager.historyPanelUI.mousePosPanelCoords.x;
+        }
+        else {
+            cursorTimeStep = curTimeStep;
+        }
         float sunOrbitPhase = GetSunOrbitPhase(cursorTimeStep) + Mathf.PI * 0.5f;
 
-        int cursorYear = Mathf.FloorToInt(curTimeStep / (float)simulation.GetNumTimeStepsPerYear());
-        int monthInt = Mathf.FloorToInt(curTimeStep / (float)simulation.GetNumTimeStepsPerYear() * 12f) % 12;
-        int dayInt = Mathf.FloorToInt(curTimeStep / (float)simulation.GetNumTimeStepsPerYear() * 365f) % 365;
-        textCurYear.text = dayInt + "/ " + monthInt + "/ " + (cursorYear + 0).ToString() + "  (" + curTimeStep + ")";
+        int cursorYear = Mathf.FloorToInt(cursorTimeStep / (float)simulation.GetNumTimeStepsPerYear());
+        int monthInt = Mathf.FloorToInt(cursorTimeStep / (float)simulation.GetNumTimeStepsPerYear() * 12f) % 12;
+        int dayInt = Mathf.FloorToInt(cursorTimeStep / (float)simulation.GetNumTimeStepsPerYear() * 365f) % 365;
+        textCurYear.text = dayInt.ToString();// + "/ " + monthInt + "/ " + (cursorYear + 0).ToString() + "\n(" + cursorTimeStep + ")";
         
-        clockFaceGroup.transform.localPosition = new Vector3(Mathf.Max(36f,Mathf.Min(360f - 36f, theCursorCzar.GetCursorPixelCoords().x)), 324f, 0f);
+        clockFaceGroup.transform.localPosition = new Vector3(Mathf.Max(0f,Mathf.Min(HistoryPanelUI.panelSizePixels, clockFacePosX)), 324f, 0f);
                 
         //**** PLANET!!!!!!
+        clockPlanetMatA.SetFloat("_CurFrame", (cursorTimeStep / simulation.GetNumTimeStepsPerYear() * 365f * 16f) % 16);
         if (imageClockPlanet) {            
             imageClockPlanet.rectTransform.localPosition = Vector3.zero;            
             imageClockPlanet.rectTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * sunOrbitPhase);
@@ -171,8 +179,8 @@ public class ClockPanelUI : MonoBehaviour
     }
     
     public Vector2 GetMoonDir(float timeStep) {        
-        float localPosX = Mathf.Cos(clockMoonRPM * timeStep + Mathf.PI * 0.5f);
-        float localPosY = Mathf.Sin(clockMoonRPM * timeStep + Mathf.PI * 0.5f);
+        float localPosX = Mathf.Cos(GetMoonOrbitPhase(timeStep) + Mathf.PI * 0.5f);
+        float localPosY = Mathf.Sin(GetMoonOrbitPhase(timeStep) + Mathf.PI * 0.5f);
         return new Vector2(localPosX, localPosY).normalized;
     }
     
@@ -246,8 +254,8 @@ public class ClockPanelUI : MonoBehaviour
             //float timeStep = xCoord * timeRange;
             
             data.pos = new Vector3(xCoord * uiManager.historyPanelUI.displayWidth + uiManager.historyPanelUI.marginLeft, yCoord + 0.9f, 0f);
-            data.radius = clockRadiusEarth / (timeRange * clockZoomSpeed); // zoom speed? right approach?
-            data.color = Color.white;
+            data.radius = clockRadiusEarth / timeRange; // zoom speed? right approach?
+            data.color = new Color(0.55f, 1f, 0.65f);
             data.animPhase = 0.25f;
             data.rotateZ =  GetSunOrbitPhase(stampTimeStep) + Mathf.PI / 2f;
             data.timeStep = stampTimeStep;
@@ -258,31 +266,35 @@ public class ClockPanelUI : MonoBehaviour
     }
 
     public void UpdateMoonStampData() {        
-        float timeRange = ((float)simulation.simAgeTimeSteps - uiManager.historyPanelUI.graphBoundsMinX);
+        float timeRange = (uiManager.historyPanelUI.graphBoundsMaxX - uiManager.historyPanelUI.graphBoundsMinX);
         ClockStampData[] clockMoonStampDataArray = new ClockStampData[maxNumClockMoonStamps];
         
-        int numStamps = Mathf.Min(Mathf.RoundToInt((float)simulation.simAgeTimeSteps / (float)numTicksPerMoonStamp), maxNumClockMoonStamps);
+        //int numStamps = Mathf.Min(Mathf.RoundToInt((float)simulation.simAgeTimeSteps / (float)numTicksPerMoonStamp), maxNumClockMoonStamps);
         
-        float totalDistanceTraveled = timeRange * earthSpeed;
+        //float totalDistanceTraveled = timeRange * earthSpeed;
         
-        for (int i = 0; i < numStamps; i++) {
+        for (int i = 0; i < maxNumClockMoonStamps; i++) {
             //float lerp = (float)i / (float)(numStamps - 1);
             ClockStampData data = new ClockStampData();
-            
-            float stampWorldPosX = (i * numTicksPerMoonStamp * earthSpeed) + Mathf.Cos(clockMoonRPM * (float)(i * numTicksPerMoonStamp) + Mathf.PI * 0.5f) * clockMoonOrbitRadius;
-            float stampWorldPosY = Mathf.Sin(clockMoonRPM * (float)(i * numTicksPerMoonStamp) + Mathf.PI * 0.5f) * clockMoonOrbitRadius;
-            
-            float xCoord = stampWorldPosX / totalDistanceTraveled;
-            float yCoord = stampWorldPosY / totalDistanceTraveled;
+            float stampTimeStep = i * simulation.GetNumTimeStepsPerYear() / 12f;
+            float stampWorldPosX = stampTimeStep + Mathf.Cos(clockMoonRPM * (float)(i * simulation.GetNumTimeStepsPerYear() / 12f) + Mathf.PI * 0.5f) * clockMoonOrbitRadius; // for now
+            float stampWorldPosY = Mathf.Sin(clockMoonRPM * (float)(i * simulation.GetNumTimeStepsPerYear() / 12f) + Mathf.PI * 0.5f) * clockMoonOrbitRadius;
+
+            float xCoord = (stampWorldPosX - uiManager.historyPanelUI.graphBoundsMinX) / timeRange;
+            float yCoord = stampWorldPosY / timeRange;
+           //float stampWorldPosX = (i * numTicksPerMoonStamp * earthSpeed) + Mathf.Cos(clockMoonRPM * (float)(i * numTicksPerMoonStamp) + Mathf.PI * 0.5f) * clockMoonOrbitRadius;
+            //float stampWorldPosY = Mathf.Sin(clockMoonRPM * (float)(i * numTicksPerMoonStamp) + Mathf.PI * 0.5f) * clockMoonOrbitRadius;
+            //float xCoord = stampWorldPosX / totalDistanceTraveled;
+            //float yCoord = stampWorldPosY / totalDistanceTraveled;
                         
             data.pos = new Vector3(xCoord, yCoord + 0.9f, 0f);
-            data.radius = clockRadiusMoon / (totalDistanceTraveled * clockZoomSpeed);
+            data.radius = clockRadiusMoon / timeRange;// clockRadiusMoon / (totalDistanceTraveled * clockZoomSpeed);
             data.color = Color.white;
             data.animPhase = 0.75f;
-            float timeStep = xCoord * timeRange;
-            float angle = GetSunOrbitPhase(timeStep);
+            
+            float angle = GetSunOrbitPhase(stampTimeStep);
             data.rotateZ = angle + Mathf.PI / 2f;
-            data.timeStep = timeStep;
+            data.timeStep = stampTimeStep;
 
             clockMoonStampDataArray[i] = data;
         }
@@ -293,16 +305,16 @@ public class ClockPanelUI : MonoBehaviour
         float timeRange = ((float)simulation.simAgeTimeSteps - uiManager.historyPanelUI.graphBoundsMinX);
         ClockStampData[] clockSunStampDataArray = new ClockStampData[maxNumClockSunStamps];
         
-        int numStamps = Mathf.Min(Mathf.RoundToInt((float)simulation.simAgeTimeSteps / (float)numTicksPerSunStamp), maxNumClockSunStamps);
+        int numStamps = Mathf.Min(Mathf.RoundToInt((float)simulation.simAgeTimeSteps / (float)simulation.GetNumTimeStepsPerYear()), maxNumClockSunStamps);
         float totalDistanceTraveled = timeRange * earthSpeed;
         
         for(int i = 0; i < numStamps; i++) {
             float lerp = (float)i / (float)(numStamps - 1);
             ClockStampData data = new ClockStampData();
             
-            float sunOrbitPhase = GetSunOrbitPhase((float)(i * numTicksPerSunStamp)) + Mathf.PI * 0.5f;
+            float sunOrbitPhase = GetSunOrbitPhase((float)(i * simulation.GetNumTimeStepsPerYear())) + Mathf.PI * 0.5f;
 
-            float stampWorldPosX = i * numTicksPerSunStamp * earthSpeed + Mathf.Cos(sunOrbitPhase) * clockSunOrbitRadius;
+            float stampWorldPosX = i * simulation.GetNumTimeStepsPerYear() * earthSpeed + Mathf.Cos(sunOrbitPhase) * clockSunOrbitRadius;
             float stampWorldPosY = Mathf.Sin(sunOrbitPhase) * clockSunOrbitRadius;
 
             float xCoord = stampWorldPosX / totalDistanceTraveled;
@@ -310,7 +322,7 @@ public class ClockPanelUI : MonoBehaviour
             
             data.pos = new Vector3(xCoord, yCoord + 0.9f, 0f);
             data.radius = clockRadiusSun / (totalDistanceTraveled * clockZoomSpeed);
-            data.color = Color.white;
+            data.color = Color.yellow;
             float timeStep = xCoord * (float)simulation.simAgeTimeSteps;            
             data.animPhase = 0f;
             data.rotateZ = 0f;
@@ -333,7 +345,7 @@ public class ClockPanelUI : MonoBehaviour
         material.SetPass(0);
         material.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
         material.SetBuffer("clockOrbitLineDataCBuffer", computeBuffer);        
-        material.SetFloat("_CurFrame", curTimeStep);
+        material.SetFloat("_CurFrame", cursorTimeStep * 1f % 16);
         material.SetFloat("_NumRows", 4f);
         material.SetFloat("_NumColumns", 4f);
         cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, 6, computeBuffer.count);
