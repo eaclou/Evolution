@@ -8,12 +8,12 @@
 	}
 	SubShader
 	{
-		//Tags { "RenderType"="Opaque" }
+		Tags { "RenderType"="Opaque" }
 		//LOD 100
-		Tags{ "RenderType" = "Transparent" }
+		//Tags{ "RenderType" = "Transparent" }
 		//ZWrite Off
 		//Cull Off
-		Blend SrcAlpha OneMinusSrcAlpha
+		//Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{
@@ -72,7 +72,7 @@
 				outPos.x = (outPos.x - _GraphBoundsMinX) / (_GraphBoundsMaxX - _GraphBoundsMinX);
 				outPos.y = (outPos.y - _GraphBoundsMinY) / (_GraphBoundsMaxY - _GraphBoundsMinY);
 				//should be [0-1]range now??
-				
+				// keeps Z value intact
 				return outPos;
 			}
 
@@ -105,7 +105,7 @@
 				
 				if (!data.isAlive) {
 					col.rgb = lerp(col.rgb, float3(0.05, 0.05, 0.05), 0.255);
-					quadOffset *= 0;
+					quadOffset *= 0.75;
 				}
 
 				float3 worldPosition = ScaleData(dataPrev.worldPos) + quadOffset;

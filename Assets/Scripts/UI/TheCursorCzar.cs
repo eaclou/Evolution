@@ -26,7 +26,7 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
 
     public Text textTooltip;
     public GameObject panelTooltip;
-    public Text textTooltipDescription;
+    //public Text textTooltipDescription;
     public Image imageTooltipIcon;
 
     public Vector2 smoothedMouseVel;

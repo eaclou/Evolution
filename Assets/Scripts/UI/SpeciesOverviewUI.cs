@@ -128,14 +128,9 @@ public class SpeciesOverviewUI : MonoBehaviour {
     
     private void UpdateButtons() { //List<CandidateAgentData> candidates, SelectionGroup groupId
         for(int i = 0; i < candidateButtons.Count; i++) {
-            //if (i >= candidates.Count) {
-            //    return;
-            //}
-
+            
             var active = false;
-            //if(!uiManager.historyPanelUI.isPopulationMode) {
-            //    active = false;
-            //}
+            
             if(candidateButtons[i].candidateRef == null) {
                 
             }
@@ -157,8 +152,8 @@ public class SpeciesOverviewUI : MonoBehaviour {
             candidateButtons[i].gameObject.SetActive(active);
             //candidateButtons[i].UpdateButtonPrefab(groupId, i);
             
-            if (active)
-                candidateButtons[i].SetDisplay();   
+            //if (active)
+            candidateButtons[i].SetDisplay();   
         } 
     }
 

@@ -637,7 +637,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         InitializeSpiritBrushQuadBuffer();
 
         //InitializeWorldTreeBuffers(); // move to history panel
-        uiManager.historyPanelUI.InitializeRenderBuffers();
+        uiManager.historyPanelUI.RebuildRenderBuffers();
         creaturePanelUI.InitializeRenderBuffers();
         clockPanelUI.InitializeClockBuffers();
         
@@ -2453,23 +2453,10 @@ public class TheRenderKing : Singleton<TheRenderKing>
         cmdBufferWorldTree.SetRenderTarget(worldTreeRenderCamera.targetTexture);
         cmdBufferWorldTree.ClearRenderTarget(true, true, new Color(0f, 0f, 0f, 0f), 1.0f);  // clear -- needed???
         cmdBufferWorldTree.SetViewProjectionMatrices(worldTreeRenderCamera.worldToCameraMatrix, worldTreeRenderCamera.projectionMatrix);
-        
-        clockPanelUI.RefreshMaterials();
-
+                
         var coordinatesMin = uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.graphBoundsMinX, uiManager.historyPanelUI.graphBoundsMinY);
         var coordinatesMax = uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.graphBoundsMaxX, uiManager.historyPanelUI.graphBoundsMaxY);
-            
-
-            
-            //theRenderKing.creatureLineDataMat.SetBuffer("worldTreeLineDataCBuffer", uiManager.historyPanelUI.creatureLineDataCBuffer);
-
-            
-            //theRenderKing.resourceLineDataMat.SetFloat("_GraphBoundsMinY", uiManager.historyPanelUI.AnchorBottomLeft(uiManager.historyPanelUI.minTimelineValue, uiManager.historyPanelUI.minScoreValue).y);
-
-            //theRenderKing.worldTreeLineDataMat.SetFloat("_GraphBufferBottom", uiManager.historyPanelUI.marginBottom);
-			//theRenderKing.worldTreeLineDataMat.SetFloat("_GraphBufferTop", uiManager.historyPanelUI.marginTop);
-			
-
+          
         gridLineDataMat.SetPass(0);
         gridLineDataMat.SetFloat("_GraphBufferLeft", uiManager.historyPanelUI.marginLeft);
         gridLineDataMat.SetFloat("_GraphBufferRight", uiManager.historyPanelUI.marginRight);
@@ -2509,6 +2496,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
 		creatureLineDataMat.SetFloat("_GraphBufferRight", uiManager.historyPanelUI.marginRight);
         creatureLineDataMat.SetFloat("_GraphClockSize", uiManager.historyPanelUI.clockHeight);
         cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, creatureLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.historyPanelUI.creatureLineDataCBuffer.count);
+
+        clockPanelUI.RefreshMaterials();
 
         
         Graphics.ExecuteCommandBuffer(cmdBufferWorldTree);

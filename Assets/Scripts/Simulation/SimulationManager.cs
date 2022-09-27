@@ -87,7 +87,7 @@ public class SimulationManager : Singleton<SimulationManager>
     private int numAgentEvaluationsPerGenome = 1;
 
     public int simAgeTimeSteps = 0;
-    private int numStepsInSimYear = 1024 * 128;    
+    private int numStepsInSimYear = 1024 * 256;    
     private int simAgeYearCounter = 0;
     public int curSimYear = 0;
     
@@ -607,14 +607,14 @@ public class SimulationManager : Singleton<SimulationManager>
             CheckForYearEvent();
         }
 
-        if (simAgeTimeSteps % 9 == 0) {
+        if (simAgeTimeSteps % 60 == 0) {
             //uiManager.historyPanelUI.SortSpeciesIconList();
             uiManager.historyPanelUI.UpdateTargetGraphBounds();
 
             //Species/cands stats for history panel:
             AddNewSpeciesDataEntry(simAgeTimeSteps); // all species and candidates
 
-            uiManager.historyPanelUI.InitializeRenderBuffers();
+            uiManager.historyPanelUI.RebuildRenderBuffers(); // rename!
 
             simResourceManager.AddNewResourcesAll(simAgeTimeSteps);
             // update shader buffers with new data:

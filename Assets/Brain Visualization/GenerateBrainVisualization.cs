@@ -10,6 +10,7 @@ public struct SocketInitData
 public class GenerateBrainVisualization : MonoBehaviour 
 {
     [ReadOnly] public Brain brain;
+    [ReadOnly] public Brain brainFromGenome;
     List<Neuron> neurons => brain.allNeurons;
     List<Axon> axons => brain.allAxons;
     int numNeurons => neurons.Count;

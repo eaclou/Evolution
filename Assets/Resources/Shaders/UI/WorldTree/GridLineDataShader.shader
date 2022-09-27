@@ -80,17 +80,16 @@
 				float3 quadData = quadVerticesCBuffer[id];
 				o.uv = quadData.xy + 0.5;
 				
-				float lineWidth = 0.006;
-				
 				GridLineData dataPrev = gridLineDataCBuffer[max(0, inst - 1)];
 				GridLineData data = gridLineDataCBuffer[inst];
-				
+
+				float lineWidth = data.scale;
 				float4 col = data.color;
 				
 				float3 prevToThisVec = ScaleData(data.worldPos) - ScaleData(dataPrev.worldPos);
 				float3 right = normalize(float3(prevToThisVec.y, -prevToThisVec.x, 0));
 
-				float3 quadOffset = (quadData.x * right * lineWidth * (1.0 - o.uv.y * 0.67)) + (o.uv.y * prevToThisVec * 1.19125);
+				float3 quadOffset = (quadData.x * right * lineWidth) + (o.uv.y * prevToThisVec * 1.0125);
 				
 				float3 worldPosition = ScaleData(dataPrev.worldPos) + quadOffset;
 				float graphWidth = 1.0 - _GraphBufferLeft - _GraphBufferRight;

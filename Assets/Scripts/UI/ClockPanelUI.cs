@@ -133,10 +133,10 @@ public class ClockPanelUI : MonoBehaviour
         }
         float sunOrbitPhase = GetSunOrbitPhase(cursorTimeStep) + Mathf.PI * 0.5f;
 
-        int cursorYear = Mathf.FloorToInt(cursorTimeStep / (float)simulation.GetNumTimeStepsPerYear());
-        int monthInt = Mathf.FloorToInt(cursorTimeStep / (float)simulation.GetNumTimeStepsPerYear() * 12f) % 12;
-        int dayInt = Mathf.FloorToInt(cursorTimeStep / (float)simulation.GetNumTimeStepsPerYear() * 365f) % 365;
-        textCurYear.text = dayInt.ToString();// + "/ " + monthInt + "/ " + (cursorYear + 0).ToString() + "\n(" + cursorTimeStep + ")";
+        //int cursorYear = Mathf.FloorToInt(cursorTimeStep / (float)simulation.GetNumTimeStepsPerYear());
+        //int monthInt = Mathf.FloorToInt(cursorTimeStep / (float)simulation.GetNumTimeStepsPerYear() * 12f) % 12;
+        //int dayInt = Mathf.FloorToInt(cursorTimeStep / (float)simulation.GetNumTimeStepsPerYear() * 365f) % 365;
+        textCurYear.text = ConvertFramesToTimeSpanString(cursorTimeStep);// dayInt.ToString();// + "/ " + monthInt + "/ " + (cursorYear + 0).ToString() + "\n(" + cursorTimeStep + ")";
         
         clockFaceGroup.transform.localPosition = new Vector3(Mathf.Max(0f,Mathf.Min(HistoryPanelUI.panelSizePixels, clockFacePosX)), 324f, 0f);
                 
@@ -257,7 +257,7 @@ public class ClockPanelUI : MonoBehaviour
             data.radius = clockRadiusEarth / timeRange; // zoom speed? right approach?
             data.color = new Color(0.55f, 1f, 0.65f);
             data.animPhase = 0.25f;
-            data.rotateZ =  GetSunOrbitPhase(stampTimeStep) + Mathf.PI / 2f;
+            data.rotateZ =  GetSunOrbitPhase(stampTimeStep);
             data.timeStep = stampTimeStep;
 
             clockEarthStampDataArray[i] = data;
@@ -293,7 +293,7 @@ public class ClockPanelUI : MonoBehaviour
             data.animPhase = 0.75f;
             
             float angle = GetSunOrbitPhase(stampTimeStep);
-            data.rotateZ = angle + Mathf.PI / 2f;
+            data.rotateZ = angle;
             data.timeStep = stampTimeStep;
 
             clockMoonStampDataArray[i] = data;
@@ -338,6 +338,72 @@ public class ClockPanelUI : MonoBehaviour
         RefreshMaterial(clockEarthStampMat, clockEarthStampDataCBuffer);
         RefreshMaterial(clockMoonStampMat, clockMoonStampDataCBuffer);
         RefreshMaterial(clockSunStampMat, clockSunStampDataCBuffer);
+    }
+
+    public string ConvertFramesToTimeSpanString(float numFrames) {
+        //float ageFrames = numFrames;
+        float ageDays = (numFrames / simulation.GetNumTimeStepsPerYear() * 365f) % 365f;
+        float ageMonths = (numFrames / simulation.GetNumTimeStepsPerYear() * 12f) % 12f;
+        float ageYears = numFrames / simulation.GetNumTimeStepsPerYear();
+        string ageString = "";
+        if(ageYears >= 1f) {
+            ageString += "YEAR " + (Mathf.FloorToInt(ageYears) + 1) + ", ";
+        }
+        if(ageMonths >= 1f) {
+            ageString += "MONTH " + (Mathf.FloorToInt(ageMonths) + 1) + ", ";
+        }
+        if(ageDays >= 1f) {            
+            ageString += "DAY " + (Mathf.FloorToInt(ageDays) + 1);
+            if(numFrames < simulation.GetNumTimeStepsPerYear() / 12f) { // first month
+                ageString += ", HOUR " + (Mathf.FloorToInt(((numFrames / simulation.GetNumTimeStepsPerYear() * 365f * 24f) % 24f)) + 1);
+            }
+        }
+        if(numFrames < simulation.GetNumTimeStepsPerYear() / 365f) {  // less than one day
+            ageString = "DAY 1, HOUR " + (Mathf.FloorToInt(numFrames / simulation.GetNumTimeStepsPerYear() * 365f * 24f) + 1);
+        }
+
+        return ageString;
+    }
+
+    public string ConvertFramesToAgeString(float numFrames) {
+        //float ageFrames = numFrames;
+        float ageDays = (numFrames / simulation.GetNumTimeStepsPerYear() * 365f) % 365f;
+        float ageMonths = (numFrames / simulation.GetNumTimeStepsPerYear() * 12f) % 12f;
+        float ageYears = numFrames / simulation.GetNumTimeStepsPerYear();
+        string ageString = "";
+        if(ageYears >= 1f) {
+            ageString += Mathf.FloorToInt(ageYears) + " Year";
+            if (ageYears >= 2f) {
+                ageString += "s";
+            }
+            ageString += ", ";
+        }
+        if(ageMonths >= 1f) {
+            ageString += Mathf.FloorToInt(ageMonths) + " Month";
+            if (ageMonths >= 2f) {
+                ageString += "s";
+            }
+            ageString += ", ";
+        }
+        if(ageDays >= 1f) {
+            ageString += Mathf.FloorToInt(ageDays) + " Day";
+            
+            if (ageDays >= 2f) {
+                ageString += "s";
+            }
+
+            if(numFrames < simulation.GetNumTimeStepsPerYear() / 12f) { // first month also include hours
+                ageString += ", " + ((numFrames / simulation.GetNumTimeStepsPerYear() * 365f * 24f) % 24f).ToString("F0") + " Hours";
+            }
+        }
+        else {
+
+        }
+        if(numFrames < simulation.GetNumTimeStepsPerYear() / 365f) {  // less than 1 day
+            ageString = (numFrames / simulation.GetNumTimeStepsPerYear() * 365f * 24f).ToString("F0") + " Hours";
+        }
+
+        return ageString;
     }
     
     void RefreshMaterial(Material material, ComputeBuffer computeBuffer)

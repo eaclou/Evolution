@@ -54,11 +54,10 @@ public class GenomeButton : MonoBehaviour
         var iconSprite = lookup.GetAgentLifeStageIcon(AgentLifeStage.Dead, true);   // Fossil
         
         string statusStr = "";
-
+        bool isFocus = selectionManager.IsSelected(candidateRef);
         if (candidateRef.isBeingEvaluated) 
         {
-            Agent matchingAgent = simulationManager.GetAgent(candidateRef);
-            bool isFocus = selectionManager.IsSelected(candidateRef);
+            Agent matchingAgent = simulationManager.GetAgent(candidateRef);            
             
             ColorBlock block = button.colors;
             block.colorMultiplier = isFocus ? 2f : 1f;
@@ -71,16 +70,14 @@ public class GenomeButton : MonoBehaviour
         else 
         {
             var background = candidateRef.allEvaluationsComplete ? fossilState : unbornState;
-            statusStr = SetBackground(background);
-
-            //if(!candidateRef.allEvaluationsComplete)
-            //    gameObject.SetActive(false);
+            statusStr = isFocus ? SetBackground(selectedState) : SetBackground(background);
         }
 
         backgroundImage.sprite = iconSprite;
         //tooltip.genomeViewerUIRef = uiManagerRef.genomeViewerUI;
-
-        tooltip.tooltipString = "" + candidateRef.candidateGenome.name + "-" + candidateRef.candidateID + "\nAge " + candidateRef.performanceData.totalTicksAlive;// + ", " + statusStr;
+        string ageString = uiManager.clockPanelUI.ConvertFramesToAgeString(candidateRef.performanceData.totalTicksAlive);
+        
+        tooltip.tooltipString = "" + candidateRef.candidateGenome.name + "-" + candidateRef.candidateID + "\nAge: " + ageString.ToString();// + ", " + statusStr;
         //uiManagerRef.speciesOverviewUI.leaderboardGenomeButtonsList.Add(buttonScript);
     }
     

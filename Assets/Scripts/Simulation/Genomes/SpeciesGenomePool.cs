@@ -117,7 +117,8 @@ public class SpeciesGenomePool
         for (int i = 0; i < 32; i++) {            
             CandidateAgentData childCandidate = Mutate(foundingCandidate, true, true);
             //CandidateAgentData candidate = new CandidateAgentData(agentGenome, speciesID, foundingCandidate.candidateID);
-            candidateGenomesList.Insert(0,childCandidate);
+            candidateGenomesList.Add(childCandidate);
+            //candidateGenomesList.Insert(0,childCandidate);
             leaderboardGenomesList.Add(childCandidate);
             //debugTxt += "" + candidate.candidateGenome.brainGenome.linkList[0].weight.ToString("F2") + "  ";
         }
@@ -358,7 +359,8 @@ public class SpeciesGenomePool
     public void AddNewCandidateGenome(CandidateAgentData newCand) {
         //Debug.Log("AddedNewCandidate! " + candidateGenomesList.Count.ToString());
         //CandidateAgentData newCandidateData = new CandidateAgentData(newCand, speciesID); //???
-        candidateGenomesList.Insert(0, newCand);// newCandidateData);
+        //candidateGenomesList.Insert(0, newCand);// newCandidateData);
+        candidateGenomesList.Add(newCand);
     }
 
     public CandidateAgentData GetCandidateFromFitnessLottery() {

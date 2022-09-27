@@ -46,8 +46,13 @@ public class SelectionManager : Singleton<SelectionManager>
             //PrintTech();
         }
         else {
-            
+            uiManager.brainVisualizationRef.RefreshCandidate(currentSelection.candidate);
+            Debug.Log("RefreshCandidate! " + currentSelection.candidate.candidateID);
+            CameraManager.instance.isFollowingAgent = false;
         }
+
+        //uiManager.historyPanelUI.UpdateTargetGraphBounds();
+        //uiManager.historyPanelUI.RebuildRenderBuffers();
     }
     
     [ReadOnly] public UnlockedTech unlockedTech;
@@ -64,8 +69,9 @@ public class SelectionManager : Singleton<SelectionManager>
 
     public void FollowedCreatureDied() {
         currentSelection.isGenomeOnly = true;
+        CameraManager.instance.isFollowingAgent = false;
         //next creature??
-        SetSelected(simulation.masterGenomePool.completeSpeciesPoolsList[currentSelection.candidate.speciesID].candidateGenomesList[0]);
+        //SetSelected(simulation.masterGenomePool.completeSpeciesPoolsList[currentSelection.candidate.speciesID].candidateGenomesList[0]);
         //SetSelectedFromSpeciesUI(currentSelection.candidate.speciesID);
     }
 

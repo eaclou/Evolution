@@ -40,7 +40,9 @@ public class UIManager : Singleton<UIManager>
     public MinimapPanel minimapUI;
     public PlaceNeuronsAtUI placeNeuronsAtUI;
         
-    public GameOptionsManager gameOptionsManager;    
+    public GameOptionsManager gameOptionsManager;
+    [SerializeField]
+    public VisualizeSelectedBrain brainVisualizationRef;
     
     Lookup lookup => Lookup.instance;
 
@@ -230,7 +232,7 @@ public class UIManager : Singleton<UIManager>
                     return curTooltip.tooltipString;
                 //}
             }
-            case TooltipId.Time: return "TIME: " + ((float)simulationManager.simAgeTimeSteps * cursorX / 360f).ToString("F0");
+            case TooltipId.Time: return "T";// IME: " + ((float)simulationManager.simAgeTimeSteps * cursorX / 360f).ToString("F0");
             case TooltipId.Agent: {
                 string critterString = "Critter " + cameraManager.mouseHoverAgentRef.candidateRef.candidateGenome.name + "-" + cameraManager.mouseHoverAgentRef.candidateRef.candidateID + "\nSize: " + (cameraManager.mouseHoverAgentRef.currentBiomass / cameraManager.mouseHoverAgentRef.fullsizeBiomass * 100f).ToString("F0") + "% Grown";
                 if(cameraManager.mouseHoverAgentRef.curLifeStage == AgentLifeStage.Dead) {
@@ -260,11 +262,11 @@ public class UIManager : Singleton<UIManager>
         switch (id)
         {
             case TooltipId.CanvasElement: return isTooltipHover;
-            case TooltipId.Time: return cursorInSpeciesHistoryPanel;
+            case TooltipId.Time: return false;// cursorInSpeciesHistoryPanel; //false
             case TooltipId.Agent: return cameraManager.isMouseHoverAgent;
             case TooltipId.Algae: return plantDistance < hitboxRadius && plantDistance < microbeDistance;
             case TooltipId.Microbe: return microbeDistance < hitboxRadius && microbeDistance < plantDistance;
-            case TooltipId.Sensor: return cursorInSpeciesHistoryPanel;    // ERROR: same as Year
+            case TooltipId.Sensor: return false;// cursorInSpeciesHistoryPanel;    // ERROR: same as Year
             case TooltipId.EggSack: return cameraManager.isMouseHoverEggSack;
             case TooltipId.Status: return isTooltipHover;
             default: return false;
@@ -400,9 +402,9 @@ public class UIManager : Singleton<UIManager>
 
             //***EAC still needed? answer: yes :(
             // * WPP: expose magic numbers, create variable names describing purpose
-            if(simulationManager.simAgeTimeSteps % 37 == 11) { 
-                speciesOverviewUI.RefreshGenomeButtons();  
-            }
+            //if(simulationManager.simAgeTimeSteps % 37 == 11) { 
+            speciesOverviewUI.RefreshGenomeButtons();  
+            //}
         }
 
         historyPanelUI.Tick();

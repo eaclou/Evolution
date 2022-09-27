@@ -22,18 +22,31 @@ public class VisualizeSelectedBrain : MonoBehaviour
         if(agent == null) {
             //agent = new Agent();
             //agent.brain = new Brain(genome.brainGenome);
+            
         }
         else {
             this.agent = agent;
+            this.curBrain = agent.brain;
+            Debug.Log("RefreshAgent " + agent.index);
             //Debug.Log($"Selected agent brain has {neurons.Count} neurons and {axons.Count} axons");
             var sockets = CreateSockets();
-            visualization.Initialize(agent.brain, ref sockets);
-        }
-        
+            visualization.Initialize(this.curBrain, ref sockets);
+        }        
+    }
+    public void RefreshCandidate(CandidateAgentData cand) // 
+    {
+        if (this.agent != null) {
+            curBrain = new Brain(cand.candidateGenome.brainGenome);
+
+            Debug.Log("RefreshCandidate new brain");
+            var sockets = CreateSockets();
+            visualization.Initialize(curBrain, ref sockets);
+        }      
     }
     
     Agent agent;
-    List<Neuron> neurons => agent.brain.allNeurons;
+    private Brain curBrain;
+    List<Neuron> neurons => curBrain.allNeurons;
 
     SocketInitData[] CreateSockets()
     {

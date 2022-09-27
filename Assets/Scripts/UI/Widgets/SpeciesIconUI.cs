@@ -32,7 +32,6 @@ public class SpeciesIconUI : MonoBehaviour
         linkedPool = pool;
         speciesID = pool.speciesID;
         targetCoords = Vector2.zero;
-        //Debug.Log("NEW BUTTON! " + index + ", " + pool.speciesID);
         
         transform.SetParent(anchor, false);
         transform.localPosition = Vector3.zero;
@@ -73,7 +72,7 @@ public class SpeciesIconUI : MonoBehaviour
         linkedPool.coatOfArmsMat.SetFloat("_IsSelected", isSelected ? 1f : 0f);
         linkedPool.coatOfArmsMat.SetFloat("_IsEndangered", linkedPool.isFlaggedForExtinction ? 1f : 0f);
 
-        toolString += linkedPool.isExtinct ? "\n(Extinct)" : "\nAvg Life: " + linkedPool.avgLifespan.ToString("F0");
+        toolString += linkedPool.isExtinct ? "\n(Extinct)" : "\nAvg Lifespan: " + uiManager.clockPanelUI.ConvertFramesToAgeString(linkedPool.avgLifespan);
         tooltip.tooltipString = toolString;
 
         var iconState = GetIconDisplayState(isSelected, linkedPool.isExtinct);

@@ -421,7 +421,7 @@ public class Agent : MonoBehaviour {
     // rather than polling in the update loop -> efficiency and natural flow
     // (would also eliminate conditional)
     private void CheckForLifeStageTransition() {
-        candidateRef.performanceData.totalTicksAlive = ageCounter;
+        
 
         switch (curLifeStage) {
             case AgentLifeStage.AwaitingRespawn:
@@ -442,6 +442,7 @@ public class Agent : MonoBehaviour {
                 CheckForDeathDivineJudgment();
                 colliderBody.enabled = true;
                 CheckForMaturity();
+                candidateRef.performanceData.totalTicksAlive = ageCounter;
                 break;
             case AgentLifeStage.Dead:
                 if(currentBiomass <= 0f) { //// || lifeStageTransitionTimeStepCounter >= decayDurationTimeSteps) {  // Fully decayed
