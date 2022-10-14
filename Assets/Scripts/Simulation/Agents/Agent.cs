@@ -92,7 +92,7 @@ public class Agent : MonoBehaviour {
     public int gestationDurationTimeSteps = 90;
     //public int _GestationDurationTimeSteps => gestationDurationTimeSteps;
     
-    public int maxAgeTimeSteps = 100000;
+    public int maxAgeTimeSteps = 1000000;
     
     private int growthScalingSkipFrames = 32;
 
@@ -415,6 +415,8 @@ public class Agent : MonoBehaviour {
         mouthRef.Disable();
         
         audioManager.PlayCritterDeath(ownPos);
+
+        candidateRef.performanceData.p0x = candidateRef.performanceData.timeStepDied;//
     }
     
     // *** WPP: trigger state changes & processes when conditions met
@@ -429,10 +431,12 @@ public class Agent : MonoBehaviour {
             case AgentLifeStage.Egg:
                 if (lifeStageTransitionTimeStepCounter >= gestationDurationTimeSteps) {
                     BeginHatching();
+                    
                 }
                 else {
                     CheckForDeathHealth();
                 }
+                //candidateRef.performanceData.p0y = SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[speciesIndex].avgLifespan;
                 break;
             case AgentLifeStage.Mature:
                 // Check for Death:
@@ -443,6 +447,7 @@ public class Agent : MonoBehaviour {
                 colliderBody.enabled = true;
                 CheckForMaturity();
                 candidateRef.performanceData.totalTicksAlive = ageCounter;
+                //candidateRef.performanceData.max
                 break;
             case AgentLifeStage.Dead:
                 if(currentBiomass <= 0f) { //// || lifeStageTransitionTimeStepCounter >= decayDurationTimeSteps) {  // Fully decayed
@@ -549,10 +554,10 @@ public class Agent : MonoBehaviour {
     
     public void EatFoodMeat(float amount) {
         //totalFoodEatenZoop += amount; 
-        
+        amount *= 15f;
         amount = Mathf.Min(amount, coreModule.stomachSpace);
                 
-        //amount *= coreModule.foodEfficiencyMeat;
+        
         //coreModule.stomachContentsTotal01 += (amount / coreModule.stomachCapacity);
         
         if (coreModule.stomachContentsPercent > 1f) {
@@ -735,9 +740,9 @@ public class Agent : MonoBehaviour {
     }
     
     private void BeginHatching() {
-        this.candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX = SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[this.speciesIndex].foundingCandidate.bodyStrokeBrushTypeX;
-        this.candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY = SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[this.speciesIndex].foundingCandidate.bodyStrokeBrushTypeY;
-        this.candidateRef.candidateGenome.bodyGenome.appearanceGenome.BlendHue(SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[this.speciesIndex].foundingCandidate.primaryHue, 0.5f);
+        //this.candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX = SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[this.speciesIndex].foundingCandidate.bodyStrokeBrushTypeX;
+        //this.candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY = SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[this.speciesIndex].foundingCandidate.bodyStrokeBrushTypeY;
+        //this.candidateRef.candidateGenome.bodyGenome.appearanceGenome.BlendHue(SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[this.speciesIndex].foundingCandidate.primaryHue, 0.5f);
         //this.candidateRef.candidateGenome.bodyGenome.appearanceGenome.hueSecondary = SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[this.speciesIndex].foundingCandidate.secondaryHue;
                 
         springJoint.connectedBody = null;
@@ -765,12 +770,23 @@ public class Agent : MonoBehaviour {
         candidateRef.performanceData.timeStepHatched = simManager.simAgeTimeSteps;
 
         audioManager.PlayCritterSpawn(ownPos);
+
+        //candidateRef.performanceData.minScoreValue = candidateRef.performanceData.timeStepHatched;//SetCurvePointStart(UIManager.instance.historyPanelUI.graphBoundsMinX, UIManager.instance.historyPanelUI.graphBoundsMinY);
+        candidateRef.performanceData.p0x = candidateRef.performanceData.timeStepHatched;
+        candidateRef.performanceData.p0y = simManager.masterGenomePool.completeSpeciesPoolsList[speciesIndex].avgLifespan;
+        //candidateRef.SetCurvePointEnd(UIManager.instance.historyPanelUI.graphBoundsMaxX, UIManager.instance.historyPanelUI.graphBoundsMaxY);
+        //Debug.Log(candidateRef.performanceData.bezierCurve.points[0]);
     }
     
     private void TickMature() {
         mouthRef.isFeeding = isFeeding;
         mouthRef.isAttacking = isAttacking;
         //ProcessSwallowing();
+        
+        // *************************************************************************************
+        candidateRef.performanceData.timeStepDied = SimulationManager.instance.simAgeTimeSteps;
+        candidateRef.performanceData.p1x = candidateRef.performanceData.timeStepDied;
+
 
         if (isSwallowingPrey) {
             //Debug.Log("Holy SH!T a creature was eaten! " + index.ToString() + " --> " + preyAgentRef.index.ToString());
@@ -992,7 +1008,7 @@ public class Agent : MonoBehaviour {
 
         //ENERGY:
         float energyCostMult = settingsRef.agentSettings._BaseEnergyCost; // Mathf.Lerp(settingsRef.agentSettings._BaseEnergyCost, settingsRef.agentSettings._BaseEnergyCost * 0.25f, sizePercentage);
-        float restingEnergyCost = Mathf.Sqrt(currentBiomass) * energyCostMult * restingBonus; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
+        float restingEnergyCost = currentBiomass * energyCostMult * restingBonus; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
         //float throttleMag = smoothedThrottle.magnitude;
         
         // ENERGY DRAIN::::        

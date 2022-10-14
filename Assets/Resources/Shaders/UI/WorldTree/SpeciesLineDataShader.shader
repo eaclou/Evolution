@@ -11,7 +11,7 @@
 		Tags { "RenderType"="Opaque" }
 		//LOD 100
 		//Tags{ "RenderType" = "Transparent" }
-		//ZWrite Off
+		ZWrite On
 		//Cull Off
 		//Blend SrcAlpha OneMinusSrcAlpha
 
@@ -83,26 +83,28 @@
 				float3 quadData = quadVerticesCBuffer[id];
 				o.uv = quadData.xy + 0.5;
 				
-				float lineWidth = 0.03;
+				float lineWidth = 0.02;
 				
 				WorldTreeLineData dataPrev = worldTreeLineDataCBuffer[max(0, inst - 1)];
 				WorldTreeLineData data = worldTreeLineDataCBuffer[inst];
 				
 				float4 col = data.color;
+				
 				if (data.isSelected) {
 					lineWidth = lineWidth * 1.43;
-					col.rgb = lerp(col.rgb, 1, 0.28);
+					col.rgb += 0.28;
 				}
 				else {
-					col.rgb *= 0.77;
+					col.rgb *= 0.57;
 				}
 				
-
 				float3 prevToThisVec = ScaleData(data.worldPos) - ScaleData(dataPrev.worldPos);
 				float3 right = normalize(float3(prevToThisVec.y, -prevToThisVec.x, 0));
 
-				float3 quadOffset = (quadData.x * right * lineWidth * (1.0 - o.uv.y * 0.67)) + (o.uv.y * prevToThisVec * 1.19125);
-				
+				float3 quadOffset = (quadData.x * right * lineWidth * (1.0 - o.uv.y * 0.357)) + (o.uv.y * prevToThisVec * 1.2179125);
+				if (data.color.a < 0.1) {
+					quadOffset *= 0;
+				}
 				if (!data.isAlive) {
 					col.rgb = lerp(col.rgb, float3(0.05, 0.05, 0.05), 0.255);
 					quadOffset *= 0.75;
@@ -114,7 +116,9 @@
 				worldPosition.x = worldPosition.x * graphWidth + _GraphBufferLeft; //(outPos.x + _GraphBufferLeft) / (1 - _GraphBufferRight + _GraphBufferLeft);
 				//y = y * displayHeight + marginBottom;
 				worldPosition.y = worldPosition.y * graphHeight;// +_GraphClockSize; //(outPos.y - _GraphBufferBottom) / (_GraphBufferTop + _GraphClockSize - _GraphBufferBottom);
-
+				if (worldPosition.y > 0.8) {
+					col.xyz *= 0.284;
+				}
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.color = col; // tex2Dlod(_KeyTex, float4(0,((float)_SelectedWorldStatsID + 0.5) / 32.0,0,0));
 				

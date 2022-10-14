@@ -135,7 +135,7 @@ public class SimulationManager : Singleton<SimulationManager>
         // Turn off menu music
         audioManager.TurnOffMenuAudioGroup();
         // otherwise it's null and a giant mess
-        selectionManager.SetSelected(agents[0].candidateRef);
+        selectionManager.SetSelected(masterGenomePool.completeSpeciesPoolsList[0].candidateGenomesList[0]); // ;
     }
     
     public void BeginLoadingNewSimulation() { StartCoroutine(LoadingNewSimulation()); }
@@ -607,7 +607,7 @@ public class SimulationManager : Singleton<SimulationManager>
             CheckForYearEvent();
         }
 
-        if (simAgeTimeSteps % 60 == 0) {
+        if (simAgeTimeSteps % 30 == 0) {
             //uiManager.historyPanelUI.SortSpeciesIconList();
             uiManager.historyPanelUI.UpdateTargetGraphBounds();
 
@@ -792,7 +792,7 @@ public class SimulationManager : Singleton<SimulationManager>
         } 
     }
     
-    const int respawnThreshold = 3;
+    const int respawnThreshold = 47;
     
     // AUTO-SPAWN  *** revisit 
     private void CheckForReadyToSpawnAgents() 
@@ -847,7 +847,7 @@ public class SimulationManager : Singleton<SimulationManager>
 
         var speciesPool = masterGenomePool.completeSpeciesPoolsList[speciesIndex];
         CandidateAgentData candidateData = speciesPool.GetNextAvailableCandidate();
-        candidateData.candidateGenome = speciesPool.representativeCandidate.candidateGenome;
+        candidateData.candidateGenome = speciesPool.foundingCandidate.candidateGenome;
         
         //Debug.Log("AttemptToBrushSpawnAgent(" + a.ToString() + ") species: " + speciesIndex.ToString() + ", " + candidateData.ToString());
         //float isBrushingLerp = 0f;
@@ -910,7 +910,10 @@ public class SimulationManager : Singleton<SimulationManager>
         }
     
         List<int> validEggIndices = GetValidEggIndices(speciesIndex);
-        
+        //***EAC TEMPORARY!!!!! TESTING!!!!::::
+        //candidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary = masterGenomePool.completeSpeciesPoolsList[speciesIndex].foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+        //candidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary = masterGenomePool.completeSpeciesPoolsList[speciesIndex].foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
+
         // Spawn from an egg if one from the right species is ready, otherwise use a random position
         if (validEggIndices.Count > 0)
             SpawnAgentFromRandomEgg(validEggIndices, candidate, agentIndex);

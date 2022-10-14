@@ -92,9 +92,5 @@ public class CreaturePaperDollUI : MonoBehaviour
                 panelStatusBars.SetActive(true);
             }
         }
-
-        
-                
-        
     }
 }

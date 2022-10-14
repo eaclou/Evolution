@@ -100,9 +100,9 @@ public class SpeciesGraphPanelUI : MonoBehaviour
             if(pool.parentSpeciesID != -1) 
             {
                 parentPool = masterGenomePool.completeSpeciesPoolsList[pool.parentSpeciesID];
-                parentHue = parentPool.representativeCandidate.primaryHue;
+                parentHue = parentPool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
             }
-            Vector3 huePrimary = pool.representativeCandidate.primaryHue;
+            Vector3 huePrimary = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
             
             statsSpeciesColorKey?.SetPixel(i, 1, new Color(huePrimary.x, huePrimary.y, huePrimary.z)); 
                        
@@ -123,9 +123,9 @@ public class SpeciesGraphPanelUI : MonoBehaviour
             SpeciesGenomePool parentPool = pool.parentSpeciesID == -1 ? 
                 pool : masterGenomePool.completeSpeciesPoolsList[pool.parentSpeciesID];
 
-            Vector3 huePrimary = pool.representativeCandidate.primaryHue;
-            Vector3 hueSecondary = pool.representativeCandidate.secondaryHue;
-            Vector3 parentHue = parentPool.representativeCandidate.primaryHue;
+            Vector3 huePrimary = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+            Vector3 hueSecondary = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
+            Vector3 parentHue = parentPool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
             
             if(masterGenomePool.completeSpeciesPoolsList[i].isExtinct) {
                 huePrimary = Vector3.zero;

@@ -90,6 +90,7 @@ public class HistoryPanelUI : MonoBehaviour
         public int candidateID;
         public int isAlive; // wasteful, bools dont work
         public int isSelected; // wasteful, bools dont work
+        public int isVisible;
     }
     public struct ResourceLineData {
         public Vector3 worldPos; // timestep. value. depth
@@ -125,7 +126,7 @@ public class HistoryPanelUI : MonoBehaviour
     private int gridLineBufferCount => worldTreeNumGridLines * worldTreeNumPointsPerGridLine;
     private int resourceLineBufferCount => worldTreeNumResourceLines * worldTreeNumPointsPerResourceLine;
     private int sizeOfSpeciesLineDataStruct => sizeof(float) * 7 + sizeof(int) * 4;
-    private int sizeOfCreatureLineDataStruct => sizeof(float) * 7 + sizeof(int) * 4;
+    private int sizeOfCreatureLineDataStruct => sizeof(float) * 7 + sizeof(int) * 5;
     private int sizeOfResourceLineDataStruct => sizeof(float) * 7;
     private int sizeOfGridLineDataStruct => sizeof(float) * 8;
     public bool isEntireSimulationMode => curPanelMode == HistoryPanelMode.EntireSimulation;
@@ -205,21 +206,20 @@ public class HistoryPanelUI : MonoBehaviour
             targetGraphBoundsMinX = Mathf.Max(0f, simManager.simAgeTimeSteps - (targetGraphBoundsMaxY - targetGraphBoundsMinY) * 16f);
             targetGraphBoundsMaxX = simManager.simAgeTimeSteps;
         }
-        
+        CandidateAgentData oldestActiveCand = null;
+        if (uiManagerRef.speciesOverviewUI.candidateButtons.Count > 0) {
+            oldestActiveCand = uiManagerRef.speciesOverviewUI.candidateButtons[0].candidateRef;
+        }
         if(isPopulationMode) {
             //CandidateAgentData oldestLivingCand = selectedPool.UpdateOldestActiveCandidateAndGraphBounds();
-            CandidateAgentData oldestActiveCand = null;
-            if (uiManagerRef.speciesOverviewUI.candidateButtons.Count > 0) {
-                oldestActiveCand = uiManagerRef.speciesOverviewUI.candidateButtons[0].candidateRef;
-            }
+            
             //targetGraphBoundsMinX = selectedPool.curGraphBoundsMinX;
             
             targetGraphBoundsMaxX = simManager.simAgeTimeSteps;
             if(oldestActiveCand != null) {
-                if (oldestActiveCand.performanceData.creatureDataPointsList != null) {
-                    targetGraphBoundsMinX = oldestActiveCand.performanceData.creatureDataPointsList[0].timestep;
-                    targetGraphBoundsMinY = oldestActiveCand.performanceData.creatureDataPointsList[0].lifespan;                
-                }
+                targetGraphBoundsMinX = oldestActiveCand.performanceData.timeStepHatched; // simManager.masterGenomePool.completeSpeciesPoolsList[oldestActiveCand.speciesID].speciesAllTimeMinScore;// performanceData.creatureDataPointsList[0].timestep;
+                targetGraphBoundsMinY = 0f; // simManager.masterGenomePool.completeSpeciesPoolsList[oldestActiveCand.speciesID].speciesCurAliveMinScore;                
+                
             }            
             targetGraphBoundsMaxY = selectedPool.speciesCurAliveMaxScore;
             // Mathf.Max(0f, oldestCand.performanceData.timeStepHatched);// uiManager.historyPanelUI.maxScoreValue - uiManager.historyPanelUI.minScoreValue) * 33f);
@@ -227,8 +227,8 @@ public class HistoryPanelUI : MonoBehaviour
         }
         if(isTimelineMode) {
             targetGraphBoundsMinX = Mathf.Max(0f, selectionManager.currentSelection.candidate.performanceData.timeStepHatched);// uiManager.historyPanelUI.maxScoreValue - uiManager.historyPanelUI.minScoreValue) * 33f);
-            targetGraphBoundsMinY = selectedCand.performanceData.creatureDataPointsList[0].lifespan;
-            targetGraphBoundsMaxY = selectedCand.performanceData.creatureDataPointsList[selectedCand.performanceData.creatureDataPointsList.Count - 1].lifespan;
+            targetGraphBoundsMinY = simManager.masterGenomePool.completeSpeciesPoolsList[oldestActiveCand.speciesID].speciesCurAliveMinScore;
+            targetGraphBoundsMaxY = simManager.masterGenomePool.completeSpeciesPoolsList[oldestActiveCand.speciesID].speciesCurAliveMaxScore;// selectedCand.performanceData.creatureDataPointsList[selectedCand.performanceData.creatureDataPointsList.Count - 1].lifespan;
             //graphBoundsMinY = selectedPool.minScoreValue - 33f;
             //graphBoundsMaxY = selectedPool.maxScoreValue + 33f;
         }
@@ -363,7 +363,7 @@ public class HistoryPanelUI : MonoBehaviour
             if (line >= uiManagerRef.speciesOverviewUI.candidateButtons.Count) continue;
             CandidateAgentData cand = uiManagerRef.speciesOverviewUI.candidateButtons[line].candidateRef;
             if(cand != null) {
-                for (int i = 0; i < worldTreeNumPointsPerCreatureLine; i++) {              
+                for (int i = 0; i < worldTreeNumPointsPerCreatureLine; i++) {     // this number replaces maxnumdataentries           
                     CreateCreatureLine(line, i, mousePosPanelCoords, creatureLines, cand);
                 }
             }
@@ -374,7 +374,7 @@ public class HistoryPanelUI : MonoBehaviour
             for (int i = 0; i < worldTreeNumPointsPerGridLine; i++) {
                 int lineIndex = line;
                 float val = line * 100f;
-                float size = 0.02f;
+                float size = 0.005f;
                 CreateHorizontalGridLine(new Color(0.35f, 0.35f, 0.35f, 0.65f), val, size, lineIndex, i, mousePosPanelCoords, gridLines);
             }
         }
@@ -383,7 +383,7 @@ public class HistoryPanelUI : MonoBehaviour
             for (int i = 0; i < worldTreeNumPointsPerGridLine; i++) {
                 int lineIndex = line + worldTreeNumGridLines100;
                 float val = line * 1000f;
-                float size = 0.0245f;
+                float size = 0.0045f;
                 CreateHorizontalGridLine(new Color(0.5f, 0.5f, 0.5f, 0.8f), val, size, lineIndex, i, mousePosPanelCoords, gridLines);
             }
         }
@@ -392,7 +392,7 @@ public class HistoryPanelUI : MonoBehaviour
             for (int i = 0; i < worldTreeNumPointsPerGridLine; i++) {
                 int lineIndex = line + worldTreeNumGridLines100 + worldTreeNumGridLines1000;
                 float val = line * simManager.GetNumTimeStepsPerYear() / 365f;
-                float size = 0.014f;
+                float size = 0.0014f;
                 CreateVerticalGridLine(new Color(0.15f, 0.33f, 0.15f, 0.65f), val, size, lineIndex, i, mousePosPanelCoords, gridLines);
             }
         }
@@ -401,7 +401,7 @@ public class HistoryPanelUI : MonoBehaviour
             for (int i = 0; i < worldTreeNumPointsPerGridLine; i++) {
                 int lineIndex = line + worldTreeNumGridLines100 + worldTreeNumGridLines1000 + worldTreeNumGridLinesDays;
                 float val = (line + 1f) * simManager.GetNumTimeStepsPerYear() / 12f;
-                float size = 0.025f;
+                float size = 0.005f;
                 CreateVerticalGridLine(new Color(0.35f, 0.35f, 0.25f, 0.75f), val, size, lineIndex, i, mousePosPanelCoords, gridLines);
             }
         }
@@ -410,7 +410,7 @@ public class HistoryPanelUI : MonoBehaviour
             for (int i = 0; i < worldTreeNumPointsPerGridLine; i++) {
                 int lineIndex = line + worldTreeNumGridLines100 + worldTreeNumGridLines1000 + worldTreeNumGridLinesDays + worldTreeNumGridLinesMonths;
                 float val = (line + 1f) * simManager.GetNumTimeStepsPerYear();
-                float size = 0.025f;
+                float size = 0.0025f;
                 CreateVerticalGridLine(new Color(0.55f, 0.55f, 0.55f, 0.8f), val, size, lineIndex, i, mousePosPanelCoords, gridLines);
             }
         }
@@ -430,6 +430,18 @@ public class HistoryPanelUI : MonoBehaviour
         creatureLineDataCBuffer.SetData(creatureLines);
 
         uiManagerRef.clockPanelUI.UpdateResourceStatsText();
+
+        TheRenderKing.instance.gridLineDataMat.SetBuffer("quadVerticesCBuffer", TheRenderKing.instance.quadVerticesCBuffer);
+        TheRenderKing.instance.gridLineDataMat.SetBuffer("gridLineDataCBuffer", gridLineDataCBuffer);
+
+        TheRenderKing.instance.resourceLineDataMat.SetBuffer("quadVerticesCBuffer", TheRenderKing.instance.quadVerticesCBuffer);
+        TheRenderKing.instance.resourceLineDataMat.SetBuffer("resourceLineDataCBuffer", resourceLineDataCBuffer);
+   
+        TheRenderKing.instance.creatureLineDataMat.SetBuffer("quadVerticesCBuffer", TheRenderKing.instance.quadVerticesCBuffer);
+        TheRenderKing.instance.creatureLineDataMat.SetBuffer("worldTreeLineDataCBuffer", creatureLineDataCBuffer);
+  
+        TheRenderKing.instance.speciesLineDataMat.SetBuffer("quadVerticesCBuffer", TheRenderKing.instance.quadVerticesCBuffer);
+        TheRenderKing.instance.speciesLineDataMat.SetBuffer("worldTreeLineDataCBuffer", speciesLineDataCBuffer);
     }
     void CreateVerticalGridLine(Color color, float timeStepCoord, float lineSize, int line, int pIndex, Vector2 cursorCoords, GridLineData[] gridLines) {
          int index = (line) * worldTreeNumPointsPerGridLine + pIndex;
@@ -517,31 +529,33 @@ public class HistoryPanelUI : MonoBehaviour
         float y = pool.speciesDataPointsList[point].lifespan; // Mathf.Lerp(valStart, valEnd, frac); // Mathf.Sin(xCoord / orbitalPeriod * (simManager.simAgeTimeSteps) * animTimeScale) * 0.075f * (float)lineID + 0.5f;
         float z = 0f;
             
-        Vector3 hue = pool.foundingCandidate.primaryHue;
-        hue.x = Mathf.Clamp01(hue.x + 0.35f);
-        hue.y = Mathf.Clamp01(hue.y + 0.35f);
-        hue.z = Mathf.Clamp01(hue.z + 0.35f);
+        Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+        //hue.x = Mathf.Clamp01(hue.x + 0.4f);
+        //hue.y = Mathf.Clamp01(hue.y + 0.4f);
+        //hue.z = Mathf.Clamp01(hue.z + 0.4f);
         float alpha = 1f;
         //int timeStepStart = Mathf.RoundToInt(timelineStartTimeStep);
          
         data.isSelected = 0;
         if (pool.speciesID == historySelectedSpeciesID) {
             //hue = Vector3.one;
-            //z = -0.1f;
+            z = -1.25f;
             data.isSelected = 1;
         }
         data.isAlive = 1;
         if (pool.isExtinct || point == 0) {
             data.isAlive = 0;
+            z = 0.1f;
             alpha = 0f;
         }
       
         var coordinates = AnchorBottomLeft(x, y); // new Vector2(x, y); // 
-        z = -0.1f * data.isAlive;
+        //z = -1.1f * data.isAlive;
         data.worldPos = new Vector3(coordinates.x, coordinates.y, z);
         data.color = new Color(hue.x, hue.y, hue.z, alpha);// Color.HSVToRGB(lerp, 1f - lerp, 1f); // Color.Lerp(Color.white, Color.black, lineID * 0.11215f);
         if(isResourceMode) {
             data.color *= 0.25f;
+            z = 0.2f;
         }
         speciesLines[index] = data;
        
@@ -549,56 +563,120 @@ public class HistoryPanelUI : MonoBehaviour
     
     void CreateCreatureLine(int line, int point, Vector2 cursorCoords, CreatureLineData[] creatureLines, CandidateAgentData cand)
     {
-        int index = (worldTreeNumCreatureLines - 1 - line) * worldTreeNumPointsPerCreatureLine + point;
-       
+        int index = (worldTreeNumCreatureLines - 1 - line) * worldTreeNumPointsPerCreatureLine + point;        
         CreatureLineData data = new CreatureLineData();
 
-        if (cand == null || cand.performanceData.creatureDataPointsList == null || point >= cand.performanceData.creatureDataPointsList.Count) {
+        // OLD::: 
+        /*if (cand == null || cand.performanceData.creatureDataPointsList == null || point >= cand.performanceData.creatureDataPointsList.Count) {
             data.worldPos = new Vector3(graphBoundsMaxX, graphBoundsMaxY, 0f);//.zero;
             data.color = Vector4.zero;
             creatureLines[index] = data;
             return;
+        }*/
+        data.isVisible = 1;
+
+        if (cand == null) {
+            data.worldPos = Vector3.zero;// new Vector3(graphBoundsMaxX, graphBoundsMaxY, 0f);//.zero;
+            data.color = Vector4.zero;
+            creatureLines[index] = data;
+            data.isVisible = 0;
+            return;
         }
-        SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[cand.speciesID];
-    
-        float y = cand.performanceData.creatureDataPointsList[point].lifespan;        
-        float x = cand.performanceData.creatureDataPointsList[point].timestep; // (float)pool.speciesDataPointsList[point].timestep / (float)simManager.simAgeTimeSteps;
+        
+        float x = 0f;// pointWorldPos.x;// cand.performanceData.creatureDataPointsList[point].lifespan;        
+        float y = 0f;// pointWorldPos.y; // cand.performanceData.creatureDataPointsList[point].timestep; // (float)pool.speciesDataPointsList[point].timestep / (float)simManager.simAgeTimeSteps;
         float z = 0f;
+
+        if(cand.performanceData.bezierCurve != null) {
+            float frac = (float)point / (float)(worldTreeNumPointsPerCreatureLine-1);
+            if(SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList.Count < 1) {
+                    //cand.performanceData.scoreStart = 0f;
+            }
+            else {
+                float y01 = (float)line / (float)worldTreeNumCreatureLines;
+                //cand.SetCurveData(cand.performanceData.timeStepHatched, cand.performanceData.timeStepDied, graphBoundsMinY, Mathf.Lerp(graphBoundsMinY, graphBoundsMaxY, y01));
+                cand.performanceData.p0x = cand.performanceData.timeStepHatched;
+                cand.performanceData.p1x = cand.performanceData.timeStepDied;
+                //cand.performanceData.scoreStart = graphBoundsMinY; // need avgLifespan of species at time of this creature's birth
+                cand.performanceData.p1y = Mathf.Lerp(graphBoundsMinY, graphBoundsMaxY, y01); // SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[cand.speciesID].avgLifespan;
+                cand.UpdateDisplayCurve();
+            }
+            
+            Vector3 pointWorldPos = cand.performanceData.bezierCurve.GetPoint(frac);
+            x = pointWorldPos.x;
+            y = pointWorldPos.y; 
+        }
+        //Debug.Log(x + ", " + y);
         
-        Vector3 hue = pool.foundingCandidate.primaryHue;
-        hue.x = Mathf.Clamp01(hue.x + 0.45f);
-        hue.y = Mathf.Clamp01(hue.y + 0.45f);
-        hue.z = Mathf.Clamp01(hue.z + 0.45f);
+        SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[cand.speciesID];
+        Vector3 hue = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+        //hue.x = Mathf.Clamp01(hue.x + 0.4f);
+        //hue.y = Mathf.Clamp01(hue.y + 0.4f);
+        //hue.z = Mathf.Clamp01(hue.z + 0.4f);
         
-        
+         // fog, placement
         data.isAlive = 1;
         data.color = new Color(hue.x, hue.y, hue.z);
-        if(isResourceMode || cand.speciesID != selectionManager.currentSelection.candidate.speciesID) {
-            hue *= 0.5f;
-            data.color.w = 1f;
-            z = 0.1f;
+        data.color.w = 0;
+        
+        if(cand.speciesID != selectionManager.currentSelection.candidate.speciesID) {
+            ///hue *= 0.5f;
+            //data.color *= 0.275f;//.w = 1f;
+            data.color.w = 0.75f; // fog, placement
+            data.color.x *= 0.46f;
+            data.color.y *= 0.46f;
+            data.color.z *= 0.46f;
+            z = 0f;
         }
         if (cand.performanceData.timeStepHatched <= 1 || point < 1) {
             data.isAlive = 0;
             data.color = Vector3.zero;
+            data.color.w = 1.0f; // fog, placement
+            data.isVisible = 0;
+            z = 0.2f;
         }
         if(!cand.isBeingEvaluated) {
-            data.isAlive = 0;
+            //data.isAlive = 0;
+            // dead!
+            data.color.x = Mathf.Lerp(data.color.x, 0.378f, 0.655f) * 0.8f;
+            data.color.y = Mathf.Lerp(data.color.y, 0.378f, 0.655f) * 0.8f;
+            data.color.z = Mathf.Lerp(data.color.z, 0.378f, 0.655f) * 0.8f;
             z = 0.1f;
+            data.color.w = 0.255f; // fog, placement
         }
-        if(curPanelMode != HistoryPanelMode.SelSpeciesPopulation) {
-            z = 0.1f;
+        else {
+            z -= 0.3f;
+        }
+        if(cand.speciesID == selectionManager.currentSelection.candidate.speciesID) {
+            z -= 0.71f;
+            data.color.w = 0;
+        }
+        else {
+            z -= 0.1f;
+            data.color.w = 0.637f; // fog, placement
         }
         if (cand.candidateID == selectionManager.currentSelection.candidate.candidateID) {
             data.isSelected = 1;
-            z = -0.1f;
+            z = -1.21f;
+            data.color.w = 0;
             //data.color = Vector4.one;
         }
-        
+        else {
+            //data.color.w = 0; // fog, placement
+        }
+        if(isResourceMode) {
+            ///hue *= 0.5f;
+            //data.color *= 0.275f;//.w = 1f;
+            data.color.w = 1f; // fog, placement
+            z = 1f;
+        }
+
         var coordinates = AnchorBottomLeft(x, y);
         data.worldPos = new Vector3(coordinates.x, coordinates.y, z);   
         
         data.speciesID = cand.speciesID;
+
+        data.color.w = 0; // fog, placement
         creatureLines[index] = data;
         // Mouse hover highlight                 
         //if ((coordinates - cursorCoords).magnitude < 0.05f) { 
@@ -929,14 +1007,15 @@ public class HistoryPanelUI : MonoBehaviour
             if(candidate == null) {
                 continue;
             }
-            if(candidate.performanceData.creatureDataPointsList == null) {
-                continue;
-            }
-
+            
             float x = 1f;
             if (candidate.candidateID == selectionManager.currentSelection.candidate.candidateID) x = 1.05f;
-            float y = 1f - (float)line / (float)numAgentsDisplayed;
-            y = (candidate.performanceData.creatureDataPointsList[candidate.performanceData.creatureDataPointsList.Count - 1].lifespan - graphBoundsMinY) / Mathf.Max(1,(graphBoundsMaxY - graphBoundsMinY));
+            
+            float frac = 0f;
+            if (candidate.performanceData.bezierCurve != null) {
+                frac = candidate.performanceData.bezierCurve.points[2].y;// (float)line / (float)numAgentsDisplayed;
+            }
+            float y = (frac - graphBoundsMinY) / (graphBoundsMaxY - graphBoundsMinY);// (candidate.performanceData.creatureDataPointsList[candidate.performanceData.creatureDataPointsList.Count - 1].lifespan - graphBoundsMinY) / Mathf.Max(1,(graphBoundsMaxY - graphBoundsMinY));
             
             if (pool.isExtinct || candidate.performanceData.timeStepDied > 1) {
                 float timeSinceDeath = candidate.performanceData.timeStepDied - graphBoundsMinX;

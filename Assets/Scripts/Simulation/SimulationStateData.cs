@@ -211,6 +211,7 @@ public class SimulationStateData {
             //Debug.Log("Error isInert FALSE: " + i.ToString());
             // INITDATA ::==========================================================================================================================================================================
             AgentGenome genome = simManager.agents[i].candidateRef.candidateGenome;
+            //AgentGenome foundingGenome = simManager.masterGenomePool.completeSpeciesPoolsList[simManager.agents[i].candidateRef.speciesID].foundingCandidate.candidateGenome;
             critterInitDataArray[i].boundingBoxSize = simManager.agents[i].fullSizeBoundingBox; //genome.bodyGenome.GetFullsizeBoundingBox(); // simManager.agentsArray[i].fullSizeBoundingBox;
             critterInitDataArray[i].spawnSizePercentage = simManager.agents[i].spawnStartingScale;
             critterInitDataArray[i].maxEnergy = Mathf.Min(simManager.agents[i].fullSizeBoundingBox.x * simManager.agents[i].fullSizeBoundingBox.y, 0.5f);
@@ -244,8 +245,8 @@ public class SimulationStateData {
 	        critterInitDataArray[i].headCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength) / critterFullsizeLength;
             critterInitDataArray[i].mouthCoord = (genome.bodyGenome.coreGenome.tailLength + genome.bodyGenome.coreGenome.bodyLength + genome.bodyGenome.coreGenome.headLength) / critterFullsizeLength;
             critterInitDataArray[i].bendiness = flexibilityScore;
-            critterInitDataArray[i].bodyPatternX = simManager.agents[i].candidateRef.bodyStrokeBrushTypeX;
-            critterInitDataArray[i].bodyPatternY = simManager.agents[i].candidateRef.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
+            critterInitDataArray[i].bodyPatternX = simManager.agents[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
+            critterInitDataArray[i].bodyPatternY = simManager.agents[i].candidateRef.candidateGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  // what grid cell of texture sheet to use
             critterInitDataArray[i].speciesID = simManager.agents[i].speciesIndex;
             
             // SIMDATA ::===========================================================================================================================================================================
@@ -459,14 +460,17 @@ public struct CritterInitData
     public int bodyPatternY;  // what grid cell of texture sheet to use
     public int speciesID;
     
-    public CritterInitData(BodyGenome bodyGenome)
+    public CritterInitData(AgentGenome agentGenome)
     {
-        boundingBoxSize = bodyGenome.GetFullsizeBoundingBox(); 
+        if(agentGenome.bodyGenome == null) {
+            Debug.LogError("WTF???");
+        }
+        boundingBoxSize = agentGenome.bodyGenome.GetFullsizeBoundingBox(); 
         spawnSizePercentage = 0.1f;
         maxEnergy = Mathf.Min(boundingBoxSize.x * boundingBoxSize.y, 0.5f);
         maxStomachCapacity = 1f;
-        primaryHue = bodyGenome.primaryHue;
-        secondaryHue = bodyGenome.secondaryHue;
+        primaryHue = agentGenome.primaryHue;
+        secondaryHue = agentGenome.secondaryHue;
         biteConsumeRadius = 1f;
         biteTriggerRadius = 1f;
         biteTriggerLength = 1f;
@@ -475,7 +479,7 @@ public struct CritterInitData
         eatEfficiencyMeat = 1f;
 
         // 0 = longest, 1 = shortest
-        float swimLerp = Mathf.Clamp01((bodyGenome.coreGenome.creatureAspectRatio - 0.175f) / 0.35f); 
+        float swimLerp = Mathf.Clamp01((agentGenome.bodyGenome.coreGenome.creatureAspectRatio - 0.175f) / 0.35f); 
 
         // Mag range: 2 --> 0.5
         // freq range: 1 --> 2
@@ -483,15 +487,15 @@ public struct CritterInitData
         swimFrequency = Mathf.Lerp(1.05f, 0.4f, swimLerp);   
         swimAnimSpeed = 6f;
 
-        bodyCoord = bodyGenome.coreGenome.bodyCoord;
-        headCoord = bodyGenome.coreGenome.headCoord;
-        mouthCoord = bodyGenome.coreGenome.mouthCoord;
+        bodyCoord = agentGenome.bodyGenome.coreGenome.bodyCoord;
+        headCoord = agentGenome.bodyGenome.coreGenome.headCoord;
+        mouthCoord = agentGenome.bodyGenome.coreGenome.mouthCoord;
         bendiness = 0.75f; 
         speciesID = 0; 
         
         // what grid cell of texture sheet to use
-        bodyPatternX = bodyGenome.bodyStrokeBrushTypeX;
-        bodyPatternY = bodyGenome.bodyStrokeBrushTypeY;  
+        bodyPatternX = agentGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
+        bodyPatternY = agentGenome.bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;  
     }
 }
 

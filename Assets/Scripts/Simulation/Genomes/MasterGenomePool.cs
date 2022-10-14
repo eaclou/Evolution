@@ -294,7 +294,7 @@ public class MasterGenomePool
             if (completeSpeciesPoolsList[id].isFlaggedForExtinction) 
                 continue;
              
-            float similarityDistance = GetSimilarityScore(newCandidate.candidateGenome, completeSpeciesPoolsList[id].representativeCandidate.candidateGenome);
+            float similarityDistance = GetSimilarityScore(newCandidate.candidateGenome, completeSpeciesPoolsList[id].foundingCandidate.candidateGenome);
             if (similarityDistance >= closestDistance) 
                 continue;
             
@@ -312,12 +312,14 @@ public class MasterGenomePool
 
             int seedSpeciesID = closestSpeciesID; // simManagerRef.masterGenomePool.currentlyActiveSpeciesIDList[ UnityEngine.Random.Range(0, currentlyActiveSpeciesIDList.Count) ];
             //AgentGenome seedGenome =
+            panelPendingClickPrompt.Narrate(seedSpeciesID + " A new species has emerged! agentname: " + newCandidate.candidateGenome.name, Color.white);
             simulation.AddNewSpecies(newCandidate, seedSpeciesID);
-
+            //SpeciesGenomePool poolRef = simulation.masterGenomePool.completeSpeciesPoolsList[simulation.masterGenomePool.completeSpeciesPoolsList.Count - 1];
+            //poolRef.foundingCandidate.
             speciesSimilarityDistanceThreshold += 70f;
 
-            Color color = newCandidate.candidateGenome.primaryColor;
-            panelPendingClickPrompt.Narrate("A new species has emerged! agentname: " + newCandidate.candidateGenome.name, color);
+            //Color color = new Color(newCandidate.candidateGenome.primaryHue.x, newCandidate.candidateGenome.primaryHue.y, newCandidate.candidateGenome.primaryHue.z);
+            
         }
 
         if (!assignedToNewSpecies) 

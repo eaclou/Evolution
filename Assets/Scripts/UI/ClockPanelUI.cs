@@ -141,7 +141,7 @@ public class ClockPanelUI : MonoBehaviour
         clockFaceGroup.transform.localPosition = new Vector3(Mathf.Max(0f,Mathf.Min(HistoryPanelUI.panelSizePixels, clockFacePosX)), 324f, 0f);
                 
         //**** PLANET!!!!!!
-        clockPlanetMatA.SetFloat("_CurFrame", (cursorTimeStep / simulation.GetNumTimeStepsPerYear() * 365f * 16f) % 16);
+        clockPlanetMatA.SetFloat("_CurFrame", (cursorTimeStep / simulation.GetNumTimeStepsPerYear() * 365f * 16f + 4) % 16);
         if (imageClockPlanet) {            
             imageClockPlanet.rectTransform.localPosition = Vector3.zero;            
             imageClockPlanet.rectTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * sunOrbitPhase);
@@ -159,10 +159,11 @@ public class ClockPanelUI : MonoBehaviour
             Vector2 sunDir = GetSunDir(cursorTimeStep);
             imageClockSun.rectTransform.localPosition = new Vector3(sunDir.x * 16f, sunDir.y * 16f, 0f);
             imageClockHandC.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * GetSunOrbitPhase(cursorTimeStep));
-        }
-        UpdateEarthStampData();
-        UpdateMoonStampData();
+        }        
+        
         UpdateSunStampData();
+        UpdateMoonStampData();
+        UpdateEarthStampData();
 
     }
 
@@ -238,25 +239,29 @@ public class ClockPanelUI : MonoBehaviour
     public void UpdateEarthStampData() {
         float timeRange = (uiManager.historyPanelUI.graphBoundsMaxX - uiManager.historyPanelUI.graphBoundsMinX);
         ClockStampData[] clockEarthStampDataArray = new ClockStampData[maxNumClockEarthStamps];
+        float timeStepsPerStamp = simulation.GetNumTimeStepsPerYear() / 365f;
+        float stampsTotalLength = maxNumClockEarthStamps * timeStepsPerStamp;
+        int simAgeStampCount = Mathf.FloorToInt(simulation.simAgeTimeSteps / timeStepsPerStamp);
+        int stampOffsetNum = 0;// 1 - maxNumClockEarthStamps; //simulation.simAgeTimeSteps
         
-        //int numStamps = Mathf.Min(Mathf.RoundToInt((float)simulation.simAgeTimeSteps / (float)numTicksPerEarthStamp), maxNumClockEarthStamps);
-        //float totalDistanceTraveled = curTimeStep * earthSpeed;
+        if(simAgeStampCount > maxNumClockEarthStamps) {
+            stampOffsetNum = Mathf.Max(0, simAgeStampCount - maxNumClockEarthStamps);
+        }
+        
+        float offsetDistanceTime = stampOffsetNum * timeStepsPerStamp;//simulation.simAgeTimeSteps - stampsTotalLength;
+
         for (int i = 0; i < maxNumClockEarthStamps; i++) {
             ClockStampData data = new ClockStampData();
             
-            float stampTimeStep = i * simulation.GetNumTimeStepsPerYear() / 365f;
-            float stampWorldPosX = stampTimeStep; // for now
-            float stampWorldPosY = 0f;
-
-            float xCoord = (stampWorldPosX - uiManager.historyPanelUI.graphBoundsMinX) / timeRange;
-            float yCoord = 0f;// stampWorldPosY / totalDistanceTraveled;
+            float stampTimeStep = offsetDistanceTime + i * timeStepsPerStamp;
             
-            //float timeStep = xCoord * timeRange;
+            float xCoord = (stampTimeStep - uiManager.historyPanelUI.graphBoundsMinX) / timeRange;
+            float yCoord = 0f;// stampWorldPosY / totalDistanceTraveled;
             
             data.pos = new Vector3(xCoord * uiManager.historyPanelUI.displayWidth + uiManager.historyPanelUI.marginLeft, yCoord + 0.9f, 0f);
             data.radius = clockRadiusEarth / timeRange; // zoom speed? right approach?
             data.color = new Color(0.55f, 1f, 0.65f);
-            data.animPhase = 0.25f;
+            data.animPhase = 0.75f;
             data.rotateZ =  GetSunOrbitPhase(stampTimeStep);
             data.timeStep = stampTimeStep;
 
@@ -268,25 +273,24 @@ public class ClockPanelUI : MonoBehaviour
     public void UpdateMoonStampData() {        
         float timeRange = (uiManager.historyPanelUI.graphBoundsMaxX - uiManager.historyPanelUI.graphBoundsMinX);
         ClockStampData[] clockMoonStampDataArray = new ClockStampData[maxNumClockMoonStamps];
-        
-        //int numStamps = Mathf.Min(Mathf.RoundToInt((float)simulation.simAgeTimeSteps / (float)numTicksPerMoonStamp), maxNumClockMoonStamps);
-        
-        //float totalDistanceTraveled = timeRange * earthSpeed;
+        float timeStepsPerStamp = simulation.GetNumTimeStepsPerYear() / 12f;
+        int simAgeStampCount = Mathf.FloorToInt(simulation.simAgeTimeSteps / timeStepsPerStamp);
+        int stampOffsetNum = 0;
+        if(simAgeStampCount > maxNumClockSunStamps) {
+            stampOffsetNum = Mathf.Max(0, simAgeStampCount - maxNumClockSunStamps);
+        }
+        float offsetDistanceTime = stampOffsetNum * timeStepsPerStamp;
         
         for (int i = 0; i < maxNumClockMoonStamps; i++) {
             //float lerp = (float)i / (float)(numStamps - 1);
             ClockStampData data = new ClockStampData();
-            float stampTimeStep = i * simulation.GetNumTimeStepsPerYear() / 12f;
-            float stampWorldPosX = stampTimeStep + Mathf.Cos(clockMoonRPM * (float)(i * simulation.GetNumTimeStepsPerYear() / 12f) + Mathf.PI * 0.5f) * clockMoonOrbitRadius; // for now
-            float stampWorldPosY = Mathf.Sin(clockMoonRPM * (float)(i * simulation.GetNumTimeStepsPerYear() / 12f) + Mathf.PI * 0.5f) * clockMoonOrbitRadius;
+            float stampTimeStep = offsetDistanceTime + i * timeStepsPerStamp;
+            float stampWorldPosX = stampTimeStep + Mathf.Cos(clockMoonRPM * (float)(i * timeStepsPerStamp) + Mathf.PI * 0.5f) * clockMoonOrbitRadius; // for now
+            float stampWorldPosY = Mathf.Sin(clockMoonRPM * (float)(i * timeStepsPerStamp) + Mathf.PI * 0.5f) * clockMoonOrbitRadius;
 
             float xCoord = (stampWorldPosX - uiManager.historyPanelUI.graphBoundsMinX) / timeRange;
             float yCoord = stampWorldPosY / timeRange;
-           //float stampWorldPosX = (i * numTicksPerMoonStamp * earthSpeed) + Mathf.Cos(clockMoonRPM * (float)(i * numTicksPerMoonStamp) + Mathf.PI * 0.5f) * clockMoonOrbitRadius;
-            //float stampWorldPosY = Mathf.Sin(clockMoonRPM * (float)(i * numTicksPerMoonStamp) + Mathf.PI * 0.5f) * clockMoonOrbitRadius;
-            //float xCoord = stampWorldPosX / totalDistanceTraveled;
-            //float yCoord = stampWorldPosY / totalDistanceTraveled;
-                        
+                     
             data.pos = new Vector3(xCoord, yCoord + 0.9f, 0f);
             data.radius = clockRadiusMoon / timeRange;// clockRadiusMoon / (totalDistanceTraveled * clockZoomSpeed);
             data.color = Color.white;
@@ -302,33 +306,38 @@ public class ClockPanelUI : MonoBehaviour
     }
 
     public void UpdateSunStampData() {  
-        float timeRange = ((float)simulation.simAgeTimeSteps - uiManager.historyPanelUI.graphBoundsMinX);
+        float timeRange = (uiManager.historyPanelUI.graphBoundsMaxX - uiManager.historyPanelUI.graphBoundsMinX);
         ClockStampData[] clockSunStampDataArray = new ClockStampData[maxNumClockSunStamps];
+        float timeStepsPerStamp = simulation.GetNumTimeStepsPerYear();
+        int simAgeStampCount = Mathf.FloorToInt(simulation.simAgeTimeSteps / timeStepsPerStamp);
+        int stampOffsetNum = 0;// 1 - maxNumClockEarthStamps; //simulation.simAgeTimeSteps
+        if(simAgeStampCount > maxNumClockSunStamps) {
+            stampOffsetNum = Mathf.Max(0, simAgeStampCount - maxNumClockSunStamps);
+        }
+        float offsetDistanceTime = stampOffsetNum * timeStepsPerStamp;
         
-        int numStamps = Mathf.Min(Mathf.RoundToInt((float)simulation.simAgeTimeSteps / (float)simulation.GetNumTimeStepsPerYear()), maxNumClockSunStamps);
-        float totalDistanceTraveled = timeRange * earthSpeed;
-        
-        for(int i = 0; i < numStamps; i++) {
-            float lerp = (float)i / (float)(numStamps - 1);
+        for (int i = 0; i < maxNumClockSunStamps; i++) {
+        //for(int i = 0; i < numStamps; i++) {
             ClockStampData data = new ClockStampData();
-            
-            float sunOrbitPhase = GetSunOrbitPhase((float)(i * simulation.GetNumTimeStepsPerYear())) + Mathf.PI * 0.5f;
+            float stampTimeStep = offsetDistanceTime + i * timeStepsPerStamp;
+            //float stampTimeStep = i * simulation.GetNumTimeStepsPerYear();
+            float stampWorldPosX = stampTimeStep + Mathf.Cos(clockSunRPM * (float)(i * simulation.GetNumTimeStepsPerYear()) + Mathf.PI * 0.5f) * clockSunOrbitRadius; // for now
+            float stampWorldPosY = Mathf.Sin(clockSunRPM * (float)(i * simulation.GetNumTimeStepsPerYear()) + Mathf.PI * 0.5f) * clockSunOrbitRadius;
 
-            float stampWorldPosX = i * simulation.GetNumTimeStepsPerYear() * earthSpeed + Mathf.Cos(sunOrbitPhase) * clockSunOrbitRadius;
-            float stampWorldPosY = Mathf.Sin(sunOrbitPhase) * clockSunOrbitRadius;
-
-            float xCoord = stampWorldPosX / totalDistanceTraveled;
-            float yCoord = stampWorldPosY / totalDistanceTraveled;
-            
+            float xCoord = (stampWorldPosX - uiManager.historyPanelUI.graphBoundsMinX) / timeRange;
+            float yCoord = stampWorldPosY / timeRange;
+                     
             data.pos = new Vector3(xCoord, yCoord + 0.9f, 0f);
-            data.radius = clockRadiusSun / (totalDistanceTraveled * clockZoomSpeed);
-            data.color = Color.yellow;
-            float timeStep = xCoord * (float)simulation.simAgeTimeSteps;            
-            data.animPhase = 0f;
-            data.rotateZ = 0f;
-            data.timeStep = timeStep;
+            data.radius = clockRadiusSun / timeRange;
+            data.color = Color.white;
+            data.animPhase = 1f;
+            
+            //float angle = GetSunOrbitPhase(stampTimeStep);
+            //data.rotateZ = angle;
+            data.timeStep = stampTimeStep;
 
             clockSunStampDataArray[i] = data;
+            
         }
         clockSunStampDataCBuffer.SetData(clockSunStampDataArray);
     }
@@ -347,13 +356,13 @@ public class ClockPanelUI : MonoBehaviour
         float ageYears = numFrames / simulation.GetNumTimeStepsPerYear();
         string ageString = "";
         if(ageYears >= 1f) {
-            ageString += "YEAR " + (Mathf.FloorToInt(ageYears) + 1) + ", ";
+            ageString += "YEAR " + (Mathf.FloorToInt(ageYears) + 1) + ", \n";
         }
         if(ageMonths >= 1f) {
-            ageString += "MONTH " + (Mathf.FloorToInt(ageMonths) + 1) + ", ";
+            ageString += "MONTH " + (Mathf.FloorToInt(ageMonths) + 1) + ", \n";
         }
         if(ageDays >= 1f) {            
-            ageString += "DAY " + (Mathf.FloorToInt(ageDays) + 1);
+            ageString += "DAY " + (Mathf.FloorToInt(ageDays) % 31);
             if(numFrames < simulation.GetNumTimeStepsPerYear() / 12f) { // first month
                 ageString += ", HOUR " + (Mathf.FloorToInt(((numFrames / simulation.GetNumTimeStepsPerYear() * 365f * 24f) % 24f)) + 1);
             }
@@ -386,7 +395,7 @@ public class ClockPanelUI : MonoBehaviour
             ageString += ", ";
         }
         if(ageDays >= 1f) {
-            ageString += Mathf.FloorToInt(ageDays) + " Day";
+            ageString += Mathf.FloorToInt(ageDays) % 31 + " Day";
             
             if (ageDays >= 2f) {
                 ageString += "s";

@@ -29,8 +29,8 @@ public class BrainGenomeImage : MonoBehaviour
         for (int x = 0; x < width; x++) 
         {                              
             Color testColor;
-            Vector3 huePri = selection.currentSelection.candidate.primaryHue;
-            Vector3 hueSec = selection.currentSelection.candidate.secondaryHue;
+            Vector3 huePri = selection.currentSelection.candidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
+            Vector3 hueSec = selection.currentSelection.candidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
             //image.color = value ?  : new Color(hueSec.x, hueSec.y, hueSec.z);
 
             if (brain.axonCount > x) 

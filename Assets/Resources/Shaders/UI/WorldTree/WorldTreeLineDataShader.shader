@@ -31,7 +31,8 @@
 				int speciesID;
 				int candidateID;
 				int isAlive;
-				int isSelected;				
+				int isSelected;	
+
 			};
 			StructuredBuffer<float3> quadVerticesCBuffer;
 			StructuredBuffer<WorldTreeLineData> worldTreeLineDataCBuffer;
@@ -116,6 +117,9 @@
 				worldPosition.y = worldPosition.y * graphHeight;// +_GraphClockSize; //(outPos.y - _GraphBufferBottom) / (_GraphBufferTop + _GraphClockSize - _GraphBufferBottom);
 
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
+
+				float4 fogColor = float4(0,0,0,1);
+				col = lerp(col, fogColor, data.color.a);
 				o.color = col; // tex2Dlod(_KeyTex, float4(0,((float)_SelectedWorldStatsID + 0.5) / 32.0,0,0));
 				
 

@@ -204,8 +204,8 @@ public class CritterMouthComponent : MonoBehaviour
     
     public void BiteCorpse(Agent corpseAgent)
     {  
-        float biteSize = ownBiteArea * 10f * agent.coreModule.digestEfficiencyDecay;        
-        float foodEaten = Mathf.Min(corpseAgent.currentBiomass, biteSize) * 100f;
+        float biteSize = ownBiteArea * 0.5f;        
+        float foodEaten = Mathf.Min(corpseAgent.currentBiomass, biteSize) * 10f;
         
         agent.EatCorpse(foodEaten, biteSize);
         corpseAgent.ProcessBeingEaten(foodEaten);

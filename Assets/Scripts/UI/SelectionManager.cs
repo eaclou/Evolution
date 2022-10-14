@@ -13,6 +13,7 @@ public class SelectionManager : Singleton<SelectionManager>
     public void ResetCurrentFocusedCandidateGenome() { SetSelected(currentSelection.candidate); }
 
     public void SetSelected(CandidateAgentData candidate) {
+        
         if (currentSelection == null) {
             currentSelection = new SelectionData();
         }
@@ -52,7 +53,7 @@ public class SelectionManager : Singleton<SelectionManager>
         }
 
         //uiManager.historyPanelUI.UpdateTargetGraphBounds();
-        //uiManager.historyPanelUI.RebuildRenderBuffers();
+        uiManager.historyPanelUI.RebuildRenderBuffers();
     }
     
     [ReadOnly] public UnlockedTech unlockedTech;
@@ -68,11 +69,12 @@ public class SelectionManager : Singleton<SelectionManager>
     }
 
     public void FollowedCreatureDied() {
-        currentSelection.isGenomeOnly = true;
-        CameraManager.instance.isFollowingAgent = false;
+        //currentSelection.isGenomeOnly = true;
+        //CameraManager.instance.isFollowingAgent = false;
         //next creature??
-        //SetSelected(simulation.masterGenomePool.completeSpeciesPoolsList[currentSelection.candidate.speciesID].candidateGenomesList[0]);
+        SetSelected(simulation.masterGenomePool.completeSpeciesPoolsList[currentSelection.candidate.speciesID].candidateGenomesList[1]);
         //SetSelectedFromSpeciesUI(currentSelection.candidate.speciesID);
+        //CameraManager.instance.isFollowingAgent = true;
     }
 
     public bool IsSelected(CandidateAgentData candidate) { return candidate.candidateID == currentSelection.candidate.candidateID; }

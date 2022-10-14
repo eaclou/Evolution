@@ -4,10 +4,17 @@ using Playcraft;
 
 /// Stats
 public struct PerformanceData {
-    public List<CreatureDataPoint> creatureDataPointsList;
+    //public List<CreatureDataPoint> creatureDataPointsList; // won't even need this eventually with bezier curve approach
     public int maxNumDataPointEntries;
+    //old:
     public float minScoreValue;
     public float maxScoreValue;
+    //NEW:
+    public BezierCurve bezierCurve;
+    public float p0y;
+    public float p0x;
+    public float p1y;
+    public float p1x;
 
     public float totalFoodEatenPlant;
     public float totalFoodEatenZoop;
@@ -31,8 +38,7 @@ public struct PerformanceData {
     public float eggEatenPercent => totalFoodEatenEgg / (totalEaten + .01f);
     public float creatureEatenPercent => totalFoodEatenCreature / (totalEaten + .01f);
     public float plantEatenPercent => totalFoodEatenPlant / (totalEaten + .01f);
-    public float zooplanktonEatenPercent => totalFoodEatenZoop / (totalEaten + .01f);
-        
+    public float zooplanktonEatenPercent => totalFoodEatenZoop / (totalEaten + .01f);        
     public float timesActed => totalTimesAttacked + totalTimesDefended + totalTimesDashed;
     public float attackActionPercent => totalTimesAttacked / (timesActed + .01f);
     public float defendActionPercent => totalTimesDefended / (timesActed + .01f);
@@ -160,8 +166,40 @@ public class CandidateAgentData
         performanceData = new PerformanceData();
         performanceData.minScoreValue = float.PositiveInfinity;
         performanceData.maxScoreValue = -1f;
-    }
 
+        //SetCurvePointStart(UIManager.instance.historyPanelUI.graphBoundsMinX, UIManager.instance.historyPanelUI.graphBoundsMinY);
+        //SetCurvePointEnd(UIManager.instance.historyPanelUI.graphBoundsMaxX, UIManager.instance.historyPanelUI.graphBoundsMaxY);
+        //performanceData.scoreStart = 0f;
+        
+        /*if(SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList.Count < 1) {
+            performanceData.scoreStart = 0f;
+        }
+        else {
+            if (speciesID < 0) {
+
+            }
+            else {
+                performanceData.scoreStart = SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[speciesID].avgLifespan;
+            }
+        }*/
+        //performanceData.timeStart = SimulationManager.instance.simAgeTimeSteps; // ??? ***EAC  set this at hatching time?
+    }
+    
+    
+
+    public void UpdateDisplayCurve() {
+        if(performanceData.bezierCurve == null) {
+            performanceData.bezierCurve = new BezierCurve();
+            //performanceData.timeStart = SimulationManager.instance.simAgeTimeSteps;
+            //performanceData.scoreStart = SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[speciesID].avgLifespan;
+        }
+        //performanceData.timeStart = performanceData.timeStepHatched;
+        performanceData.bezierCurve.SetPoints(new Vector3(performanceData.p0x, performanceData.p0y, 0f), 
+                                            new Vector3(performanceData.p0x, performanceData.p1y, 0f), 
+                                            new Vector3(performanceData.p1x, performanceData.p1y, 0f));
+        
+    }
+    /*
     public void AddNewDataPoint(int timestep, float score) {
 
         CreatureDataPoint dataPoint = new CreatureDataPoint();
@@ -170,6 +208,10 @@ public class CandidateAgentData
         if(performanceData.creatureDataPointsList == null) {
             performanceData.creatureDataPointsList = new List<CreatureDataPoint>();
             performanceData.maxNumDataPointEntries = 32; // ***EAC BAD! move to simManager or smth
+            for(int i = 0; i < performanceData.maxNumDataPointEntries; i++) {
+                performanceData.creatureDataPointsList.Add(new CreatureDataPoint()); // not needed?
+            }
+             
         }
         if(score < performanceData.minScoreValue) {
             performanceData.minScoreValue = score;
@@ -178,10 +220,11 @@ public class CandidateAgentData
             performanceData.maxScoreValue = score;
         }
         performanceData.creatureDataPointsList.Add(dataPoint);
+        SlideDataPoints(score);
         if (performanceData.creatureDataPointsList.Count > performanceData.maxNumDataPointEntries) {
-            MergeDataPoints();
-            //SmoothDataPoints(0.05f);
+            MergeDataPoints();            
         }
+        
         //for(int dP = 0; dP < performanceData.creatureDataPointsList.Count; dP++) {
             //int count = Mathf.Max(1, performanceData.creatureDataPointsList.Count - 1);
             //float frac = (float)dP / (float)count;
@@ -220,6 +263,14 @@ public class CandidateAgentData
         
     }
 
+    private void SlideDataPoints(float targetScore) {
+        if (performanceData.creatureDataPointsList.Count < 2)
+            return;
+
+        for (int i = 1; i < performanceData.creatureDataPointsList.Count-1; i++) {           
+            performanceData.creatureDataPointsList[i].lifespan = Mathf.Lerp(performanceData.creatureDataPointsList[i].lifespan, targetScore, 0.4f * (float)i / (float)(performanceData.creatureDataPointsList.Count-1)); ;
+        }
+    }
     public void SmoothDataPoints(int numIter) {
         
         for(int j = 0; j < numIter; j++) {
@@ -254,27 +305,27 @@ public class CandidateAgentData
         if (proportion < 0f) return;
         
         List<CreatureDataPoint> swapDataPointsList = new List<CreatureDataPoint>();
-            for (int i = 0; i < performanceData.creatureDataPointsList.Count; i++) {
-                int indexPrev = Mathf.Max(1, i - 1);
-                int indexNext = Mathf.Min(i, performanceData.creatureDataPointsList.Count - 1);
-                CreatureDataPoint pointPrev = performanceData.creatureDataPointsList[indexPrev];
-                CreatureDataPoint pointCur = performanceData.creatureDataPointsList[i];
-                CreatureDataPoint pointNext = performanceData.creatureDataPointsList[indexNext];
+        for (int i = 0; i < performanceData.creatureDataPointsList.Count; i++) {
+            int indexPrev = Mathf.Max(1, i - 1);
+            int indexNext = Mathf.Min(i, performanceData.creatureDataPointsList.Count - 1);
+            CreatureDataPoint pointPrev = performanceData.creatureDataPointsList[indexPrev];
+            CreatureDataPoint pointCur = performanceData.creatureDataPointsList[i];
+            CreatureDataPoint pointNext = performanceData.creatureDataPointsList[indexNext];
                 
-                float gamble = UnityEngine.Random.Range(0f, 1f);            
-                if(gamble < proportion && i>1) {
-                    pointCur.lifespan = (pointPrev.lifespan + pointCur.lifespan + pointNext.lifespan) / 3f;
-                }                
-                swapDataPointsList.Add(pointCur);
-            }
+            float gamble = UnityEngine.Random.Range(0f, 1f);            
+            if(gamble < proportion && i>1) {
+                pointCur.lifespan = (pointPrev.lifespan + pointCur.lifespan + pointNext.lifespan) / 3f;
+            }                
+            swapDataPointsList.Add(pointCur);
+        }
             
-            performanceData.creatureDataPointsList.Clear();
-            for (int i = 0; i < swapDataPointsList.Count; i++) {
-                performanceData.creatureDataPointsList.Add(swapDataPointsList[i]);
-            }
+        performanceData.creatureDataPointsList.Clear();
+        for (int i = 0; i < swapDataPointsList.Count; i++) {
+            performanceData.creatureDataPointsList.Add(swapDataPointsList[i]);
+        }
         
     }
-    
+    */
     private string GenerateTempCritterName() 
     {
         if (candidateID < 0)
@@ -321,12 +372,6 @@ public class CandidateAgentData
         //SetPerformanceDataToAverage(leaderboard, inverseCount);
     }
     
-    public Vector3 primaryHue => candidateGenome.primaryHue;
-    public Vector3 secondaryHue => candidateGenome.secondaryHue;
-    public Color primaryColor => StaticHelpers.VectorToColor(primaryHue);
-    public Color secondaryColor => StaticHelpers.VectorToColor(secondaryHue);
-    public int bodyStrokeBrushTypeX => candidateGenome.bodyStrokeBrushTypeX;
-    public int bodyStrokeBrushTypeY => candidateGenome.bodyStrokeBrushTypeY;
 }
 
 #region Dead Code - consider deletion

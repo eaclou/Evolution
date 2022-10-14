@@ -27,10 +27,16 @@ public class VisualizeSelectedBrain : MonoBehaviour
         else {
             this.agent = agent;
             this.curBrain = agent.brain;
-            Debug.Log("RefreshAgent " + agent.index);
-            //Debug.Log($"Selected agent brain has {neurons.Count} neurons and {axons.Count} axons");
-            var sockets = CreateSockets();
-            visualization.Initialize(this.curBrain, ref sockets);
+            if(neurons.Count == 0) {
+                Debug.LogError("NO NEURONS! RefreshAgent " + agent.index + ", #N: " + neurons.Count + ", " + agent.candidateRef.candidateID + ", " + agent.candidateRef.candidateGenome.brainGenome.neurons.allCount);
+            
+            }
+            else {
+                //Debug.Log($"Selected agent brain has {neurons.Count} neurons and {axons.Count} axons");
+                var sockets = CreateSockets();
+                visualization.Initialize(this.curBrain, ref sockets);
+            }
+            
         }        
     }
     public void RefreshCandidate(CandidateAgentData cand) // 

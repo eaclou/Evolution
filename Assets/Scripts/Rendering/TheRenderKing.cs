@@ -2065,8 +2065,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
     
     private void SetToolbarPortraitCritterInitData(AgentGenome genome) 
     {
-        var body = genome.bodyGenome;
-        var appearance = body.appearanceGenome; 
+        //var body = genome.bodyGenome;
+        //var appearance = body.appearanceGenome; 
         
         // simManager.masterGenomePool.completeSpeciesPoolsList[simManager.uiManager.globalResourcesUI.selectedSpeciesIndex].representativeGenome;
         //AgentGenome genome1 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][simManager.uiManager.mutationUI.selectedToolbarMutationID].representativeGenome;
@@ -2076,11 +2076,11 @@ public class TheRenderKing : Singleton<TheRenderKing>
         //AgentGenome genome5 = simManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][3].representativeGenome;
 
         // NOT the best place for this:::: ***        
-        treeOfLifeBackdropPortraitBorderMat.SetColor("_TintPri", appearance.primaryColor);
-        treeOfLifeBackdropPortraitBorderMat.SetColor("_TintSec", appearance.secondaryColor);
+        //treeOfLifeBackdropPortraitBorderMat.SetColor("_TintPri", new Color(genome.primaryHue.x, genome.primaryHue.y, genome.primaryHue.z));
+        //treeOfLifeBackdropPortraitBorderMat.SetColor("_TintSec", new Color(genome.secondaryHue.x, genome.secondaryHue.y, genome.secondaryHue.z));
         
         CritterInitData[] toolbarPortraitCritterInitDataArray = new CritterInitData[6];
-        CritterInitData initData = new CritterInitData(body);
+        CritterInitData initData = new CritterInitData(genome);
 
         toolbarPortraitCritterInitDataArray[0] = initData;
         
@@ -3215,7 +3215,7 @@ public struct TreeOfLifeSpeciesKeyData
         timeCreated = pool.timeStepCreated;  // Use TimeSteps instead of Years???
         timeExtinct = pool.timeStepExtinct;
         
-        var appearance = pool.representativeCandidate.candidateGenome.bodyGenome.appearanceGenome;
+        var appearance = pool.foundingCandidate.candidateGenome.bodyGenome.appearanceGenome;
         huePrimary = appearance.huePrimary;
         hueSecondary = appearance.hueSecondary;
         this.parentHue = parentHue;

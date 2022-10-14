@@ -44,12 +44,12 @@ public class AgentGenome
         bodyGenome.GenerateInitialRandomBodyGenome();        
     }
     
-    public Vector3 primaryHue => bodyGenome.primaryHue;
-    public Vector3 secondaryHue => bodyGenome.secondaryHue;
-    public Color primaryColor => StaticHelpers.VectorToColor(primaryHue);
-    public Color secondaryColor => StaticHelpers.VectorToColor(secondaryHue);
-    public int bodyStrokeBrushTypeX => bodyGenome.bodyStrokeBrushTypeX;
-    public int bodyStrokeBrushTypeY => bodyGenome.bodyStrokeBrushTypeY;
+    public Vector3 primaryHue => bodyGenome.appearanceGenome.huePrimary;
+    public Vector3 secondaryHue => bodyGenome.appearanceGenome.hueSecondary;
+    //public Color primaryColor => StaticHelpers.VectorToColor(primaryHue);
+    //public Color secondaryColor => StaticHelpers.VectorToColor(secondaryHue);
+    public int bodyStrokeBrushTypeX => bodyGenome.appearanceGenome.bodyStrokeBrushTypeX;
+    public int bodyStrokeBrushTypeY => bodyGenome.appearanceGenome.bodyStrokeBrushTypeY;
 
     /*public void PrintBrainGenome() {
         string neuronText = "";

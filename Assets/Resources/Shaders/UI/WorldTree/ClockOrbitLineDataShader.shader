@@ -87,8 +87,8 @@
 				newUV.y += row * (1.0 / rows);
 				
 				float ballRadius = data.radius;
-				float3 worldPosition = data.worldPos + float3(rotatedPoint.x, rotatedPoint.y, 0) * ballRadius;
-
+				float3 worldPosition = data.worldPos + float3(rotatedPoint.x, rotatedPoint.y, 0) * min(ballRadius, 0.11);
+				worldPosition.z = -1.5;
 				o.uv = newUV;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.color = data.color;
@@ -104,7 +104,7 @@
 			{
 				float4 col = tex2D(_BrushTex, i.uv);
 				col.rgb *= i.color.rgb;
-				col.a *= 0.67f * i.color.a;
+				col.a *= 1.0 * i.color.a;
 				
 				return col;
 
