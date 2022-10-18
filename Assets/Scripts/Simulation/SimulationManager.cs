@@ -913,7 +913,7 @@ public class SimulationManager : Singleton<SimulationManager>
         //***EAC TEMPORARY!!!!! TESTING!!!!::::
         //candidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary = masterGenomePool.completeSpeciesPoolsList[speciesIndex].foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.huePrimary;
         //candidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary = masterGenomePool.completeSpeciesPoolsList[speciesIndex].foundingCandidate.candidateGenome.bodyGenome.appearanceGenome.hueSecondary;
-
+        
         // Spawn from an egg if one from the right species is ready, otherwise use a random position
         if (validEggIndices.Count > 0)
             SpawnAgentFromRandomEgg(validEggIndices, candidate, agentIndex);

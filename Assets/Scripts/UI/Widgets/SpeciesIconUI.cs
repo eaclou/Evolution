@@ -66,7 +66,7 @@ public class SpeciesIconUI : MonoBehaviour
         textDropShadow.text = speciesIDText;
         
         // Move icon to desired position on graph
-        currentCoords = Vector2.Lerp(currentCoords, targetCoords, 0.67f);
+        currentCoords = Vector2.Lerp(currentCoords, targetCoords, 0.57f);
         transform.localPosition = new Vector3(currentCoords.x * panelPixelSize, currentCoords.y * panelPixelSize, 0f);
         
         linkedPool.coatOfArmsMat.SetFloat("_IsSelected", isSelected ? 1f : 0f);

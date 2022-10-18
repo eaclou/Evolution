@@ -32,6 +32,8 @@ public struct PerformanceData {
 
     public float timeStepHatched;
     public float timeStepDied;
+
+    //public float speciesAvgLifespanAtTimeOfBirth;// use curve.p0y
         
     public float totalEaten => totalFoodEatenCorpse + totalFoodEatenEgg + totalFoodEatenCreature + totalFoodEatenPlant + totalFoodEatenZoop;
     public float corpseEatenPercent => totalFoodEatenCorpse / (totalEaten + .01f);

@@ -88,13 +88,13 @@
 				
 				float ballRadius = data.radius;
 				float3 worldPosition = data.worldPos + float3(rotatedPoint.x, rotatedPoint.y, 0) * min(ballRadius, 0.11);
-				worldPosition.z = -1.5;
+				worldPosition.z = -2.5;
 				o.uv = newUV;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));
 				o.color = data.color;
-				if(worldPosition.y < 0.75) {
-					o.color.a = 0;
-				}
+				//if(worldPosition.y < 0.75) {
+				//	o.color.a = 0;
+				//}
 				
 								
 				return o;

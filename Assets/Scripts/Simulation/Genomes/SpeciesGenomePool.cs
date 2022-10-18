@@ -61,7 +61,10 @@ public class SpeciesGenomePool
     public bool isStillEvaluating = true;
 
     public float avgLifespan;
-    public float curGraphBoundsMinX;
+    public float curActiveGraphBoundsMinX;
+    public float curActiveGraphBoundsMinY;
+    public float curActiveGraphBoundsMaxX;
+    public float curActiveGraphBoundsMaxY;
 
     private int maxNumDataPointEntries = 128;
     public float speciesAllTimeMinScore;
@@ -132,7 +135,7 @@ public class SpeciesGenomePool
                 
         }
         else {
-            avgLifespan = 1500;
+            avgLifespan = 2100;
         }
         // create species CoatOfArms:
         coatOfArmsMat = new Material(TheRenderKing.instance.coatOfArmsShader);
@@ -165,13 +168,67 @@ public class SpeciesGenomePool
     public CandidateAgentData UpdateOldestActiveCandidateAndGraphBounds() {
         float earliestTimestepBorn = SimulationManager.instance.simAgeTimeSteps;
         CandidateAgentData oldestLivingCandidate = null;
+        float minX = SimulationManager.instance.simAgeTimeSteps;
+        float minY = float.PositiveInfinity;
+        float maxX = 0f;
+        float maxY = 0f;
+        bool nonZeroX = false;
+        bool nonZeroY = false;
        // float oldestTimestep = earliestTimestepBorn;
         for(int i = 0; i < candidateGenomesList.Count; i++) {
             if(candidateGenomesList[i].isBeingEvaluated) {
                 if(candidateGenomesList[i].performanceData.timeStepHatched < earliestTimestepBorn) {
-                    earliestTimestepBorn = candidateGenomesList[i].performanceData.timeStepHatched;
+                    earliestTimestepBorn = candidateGenomesList[i].performanceData.p0x;
                     oldestLivingCandidate = candidateGenomesList[i];
-                }                
+                }
+                //MINIMUMS
+                if(candidateGenomesList[i].performanceData.p0x < minX) {
+                    if(candidateGenomesList[i].performanceData.p0x <= 0.001f) {
+
+                    }
+                    else {
+                        nonZeroX = true;
+                        minX = candidateGenomesList[i].performanceData.p0x;
+                    }
+                    
+                }
+                //if(candidateGenomesList[i].performanceData.p1x < minX) {
+                //    minX = candidateGenomesList[i].performanceData.p1x;
+                //}
+                if(candidateGenomesList[i].performanceData.p0y < minY) {    
+                    if(candidateGenomesList[i].performanceData.p0y <= 0.001f) {
+
+                    }
+                    else {
+                        nonZeroY = true;
+                        minY = candidateGenomesList[i].performanceData.p0y;
+                    }
+                }
+                //else {
+                    //Debug.Log("candidateGenomesList[i].performanceData.p0y < minY " + candidateGenomesList[i].performanceData.p0y);
+                //}
+                //if(candidateGenomesList[i].performanceData.p1y < minY) {
+                //    minY = candidateGenomesList[i].performanceData.p1y;
+                //}
+                //MAXIMUMS:
+                //if(candidateGenomesList[i].performanceData.p0x > maxX) {
+                //    maxX = candidateGenomesList[i].performanceData.p0x;
+                //}
+                if(candidateGenomesList[i].performanceData.p1x > maxX) {
+                    maxX = candidateGenomesList[i].performanceData.p1x;
+                }
+                if(candidateGenomesList[i].performanceData.p0y > maxY) {
+                    maxY = candidateGenomesList[i].performanceData.p0y;
+                }
+                if(candidateGenomesList[i].performanceData.p1y > maxY) {
+                    maxY = candidateGenomesList[i].performanceData.p1y;
+                }
+                if(!nonZeroX) {
+                    minX = maxX;
+                }
+                if(!nonZeroY) {
+                    minY = maxY;
+                }
             }
         }
         if(oldestLivingCandidate == null) {
@@ -179,8 +236,12 @@ public class SpeciesGenomePool
             Debug.LogError("no candidates found!");
         }
         else {
-            curGraphBoundsMinX = earliestTimestepBorn;
+            curActiveGraphBoundsMinX = minX;
+            curActiveGraphBoundsMinY = minY;
+            curActiveGraphBoundsMaxX = maxX;
+            curActiveGraphBoundsMaxY = maxY;
         }
+        //Debug.Log("minX " + minX + "\nMinY " + minY + "\nMaxX " + maxX + "\nMaxY " + maxY);
         
         return oldestLivingCandidate;
     }

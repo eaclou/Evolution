@@ -29,7 +29,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
     
     //private Texture2D speciesPoolGenomeTex; // speciesOverviewPanel
     
-    public List<GenomeButton> candidateButtons = new List<GenomeButton>();
+    public List<GenomeButton> candidateGenomeButtons = new List<GenomeButton>();
 
     public void ClickButtonToggleLineage() {
         isShowingLineage = !isShowingLineage;
@@ -37,8 +37,8 @@ public class SpeciesOverviewUI : MonoBehaviour {
     }
     
     public void SetButtonPosition(int id, Vector3 position) { // set by historyPanelUI atm
-        if (id < 0 || id >= candidateButtons.Count) return;
-        candidateButtons[id].gameObject.transform.localPosition = position;
+        if (id < 0 || id >= candidateGenomeButtons.Count) return;
+        candidateGenomeButtons[id].gameObject.transform.localPosition = position;
     }
         
     public void RefreshGenomeButtons() // ***EAC how is this diff from Update??
@@ -49,15 +49,21 @@ public class SpeciesOverviewUI : MonoBehaviour {
 
     public void RequestNewCandidateGenomeButton(CandidateAgentData cand) {
         
-        if(candidateButtons.Count >= maxButtons) {
+        if(candidateGenomeButtons.Count >= maxButtons) {
             
             int index = 0;
             //find oldest non-living candidateButton
-            for(int i = 0; i < candidateButtons.Count; i++) {
+            for(int i = 0; i < candidateGenomeButtons.Count; i++) {
                 //check if still alive:
                 bool safeToRemove = true;
-                if(candidateButtons[i].candidateRef.isBeingEvaluated) {
-                    safeToRemove = false;
+                if(candidateGenomeButtons[i].candidateRef.isBeingEvaluated) {
+                    if(candidateGenomeButtons[i].candidateRef.candidateID == SelectionManager.instance.currentSelection.candidate.candidateID) {
+                        safeToRemove = false;
+                    }
+                    else {
+                        
+                    }
+                    
                 }
                 
                 if(!safeToRemove) {
@@ -67,11 +73,11 @@ public class SpeciesOverviewUI : MonoBehaviour {
                 index = i;
                 break;
             }
-            GenomeButton candGenomeButton = candidateButtons[index]; // save ref to button
-            candidateButtons.RemoveAt(index);
+            GenomeButton candGenomeButton = candidateGenomeButtons[index]; // save ref to button
+            candidateGenomeButtons.RemoveAt(index);
             //delete oldest non-recordholding creature
             candGenomeButton.SetCandidate(cand);
-            candidateButtons.Add(candGenomeButton); // move to end of list -- temp
+            candidateGenomeButtons.Add(candGenomeButton); // move to end of list -- temp
         }
     }
 
@@ -113,7 +119,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
         for(int i = 0; i < maxButtons; i++) {
             GameObject buttonObj = Instantiate(genomeIcon, Vector3.zero, Quaternion.identity);
             buttonObj.transform.SetParent(genomeLeaderboard.transform, false);
-            candidateButtons.Add(buttonObj.GetComponent<GenomeButton>());
+            candidateGenomeButtons.Add(buttonObj.GetComponent<GenomeButton>());
             buttonObj.gameObject.SetActive(false);
         }
         Debug.Log("GenerateButtonList Genome Buttons!");
@@ -127,33 +133,33 @@ public class SpeciesOverviewUI : MonoBehaviour {
     }
     
     private void UpdateButtons() { //List<CandidateAgentData> candidates, SelectionGroup groupId
-        for(int i = 0; i < candidateButtons.Count; i++) {
+        for(int i = 0; i < candidateGenomeButtons.Count; i++) {
             
             var active = false;
             
-            if(candidateButtons[i].candidateRef == null) {
+            if(candidateGenomeButtons[i].candidateRef == null) {
                 
             }
             else {
                 if (uiManager.historyPanelUI.isPopulationMode) {
                     //active = false;
-                    if (candidateButtons[i].candidateRef.speciesID == SelectionManager.instance.currentSelection.candidate.speciesID) {
+                    if (candidateGenomeButtons[i].candidateRef.speciesID == SelectionManager.instance.currentSelection.candidate.speciesID) {
                         active = true;
                     }
                     else {
                         active = false;
                     }
                 }
-                if(candidateButtons[i].candidateRef.candidateID == SelectionManager.instance.currentSelection.candidate.candidateID) {
+                if(candidateGenomeButtons[i].candidateRef.candidateID == SelectionManager.instance.currentSelection.candidate.candidateID) {
                     active = true;
                 }
             }
             
-            candidateButtons[i].gameObject.SetActive(active);
+            candidateGenomeButtons[i].gameObject.SetActive(active);
             //candidateButtons[i].UpdateButtonPrefab(groupId, i);
             
             //if (active)
-            candidateButtons[i].SetDisplay();   
+            candidateGenomeButtons[i].SetDisplay();   
         } 
     }
 

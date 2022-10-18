@@ -91,11 +91,11 @@
 				float4 col = data.color;
 				
 				if (data.isSelected) {
-					lineWidth = lineWidth * 1.43;
-					col.rgb += 0.28;
+					lineWidth = lineWidth * 3.13;
+					col.rgb += 0.028;
 				}
 				else {
-					col.rgb *= 0.57;
+					col.rgb *= 0.67;
 				}
 				
 				float3 prevToThisVec = ScaleData(data.worldPos) - ScaleData(dataPrev.worldPos);
