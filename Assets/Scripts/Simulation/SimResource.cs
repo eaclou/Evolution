@@ -30,6 +30,33 @@ public class SimResource
         displayColor = col;
     }
 
+    public ResourceDataPoint GetDataPointAtTime(float t) {
+        //int indexBestGuess = resourceDataPointList.Count / 2;
+        //resourceDataPointList
+        bool swapDetected = false;
+        float timeOfDataPoint;
+        float scoreOfDataPoint;
+        ResourceDataPoint closestDataPoint;
+        for (int i = 0; i < resourceDataPointList.Count; i++) {
+            ResourceDataPoint dataPoint = resourceDataPointList[i];
+            timeOfDataPoint = dataPoint.timestep;
+            //***EAC naive approach!
+            if(timeOfDataPoint < t) {
+                //if dataPointTime lower than target, must be higher index
+                
+            }
+            else {
+                //if dataPointTime is higher than target, then this must be the step where that fiurst happened since we exit the loop
+                swapDetected = true;
+                scoreOfDataPoint = dataPoint.value;
+                closestDataPoint = dataPoint;
+                return closestDataPoint;
+            }
+        }
+         
+        return resourceDataPointList[resourceDataPointList.Count-1];
+    }
+
     public void AddNewResourceDataEntry(int timestep, float val) {
         
         ResourceDataPoint point = new ResourceDataPoint();

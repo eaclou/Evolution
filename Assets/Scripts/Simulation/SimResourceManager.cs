@@ -71,6 +71,13 @@ public class SimResourceManager {
         
     }
 
+    public ResourceDataPoint GetResourceDataAtTime(SimResource resource, float t) {
+        //SimResource[] resourceValuesArray = new SimResource[simResourcesArray.Length];
+        ResourceDataPoint data = resource.GetDataPointAtTime(t); // ANIMALS=6
+
+        return data;
+    }
+
     
     public void AddNewResourcesAll(int timestep) {
         simResourcesArray[0].AddNewResourceDataEntry(timestep, curGlobalNutrients);

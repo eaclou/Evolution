@@ -903,13 +903,28 @@ public class HistoryPanelUI : MonoBehaviour
         }
 
         if(isResourceMode) {
-            textPanelStateDebug.text = "RESOURCES:\n" +
-                                            "Animals: " + simManager.simResourceManager.curGlobalAgentBiomass +
-                                            "\nMicrobes: " + simManager.simResourceManager.curGlobalAnimalParticles +
-                                            "\nPlants: " + simManager.simResourceManager.curGlobalPlantParticles +
-                                            "\nAlgae: " + simManager.simResourceManager.curGlobalAlgaeReservoir +
-                                            "\nDecomposers: " + simManager.simResourceManager.curGlobalDecomposers +
-                                            "\nWaste: " + simManager.simResourceManager.curGlobalDetritus;
+            //***EAC update this to be based on cursor timeline position (specific date)
+            ResourceDataPoint animalData = simManager.simResourceManager.GetResourceDataAtTime(simManager.simResourceManager.simResourcesArray[6], uiManagerRef.clockPanelUI.cursorTimeStep);
+            ResourceDataPoint microbeData = simManager.simResourceManager.GetResourceDataAtTime(simManager.simResourceManager.simResourcesArray[5], uiManagerRef.clockPanelUI.cursorTimeStep);
+            ResourceDataPoint plantData = simManager.simResourceManager.GetResourceDataAtTime(simManager.simResourceManager.simResourcesArray[4], uiManagerRef.clockPanelUI.cursorTimeStep);
+            ResourceDataPoint wasteData = simManager.simResourceManager.GetResourceDataAtTime(simManager.simResourceManager.simResourcesArray[3], uiManagerRef.clockPanelUI.cursorTimeStep);
+            ResourceDataPoint decomposerData = simManager.simResourceManager.GetResourceDataAtTime(simManager.simResourceManager.simResourcesArray[2], uiManagerRef.clockPanelUI.cursorTimeStep);
+            ResourceDataPoint algaeData = simManager.simResourceManager.GetResourceDataAtTime(simManager.simResourceManager.simResourcesArray[1], uiManagerRef.clockPanelUI.cursorTimeStep);
+            ResourceDataPoint nutrientData = simManager.simResourceManager.GetResourceDataAtTime(simManager.simResourceManager.simResourcesArray[0], uiManagerRef.clockPanelUI.cursorTimeStep);
+            if (animalData != null) {
+                textPanelStateDebug.text = animalData.timestep + "RESOURCES @t" + uiManagerRef.clockPanelUI.cursorTimeStep + ":\n" +
+                                            "Animals: " + animalData.value +
+                                            "\nMicrobes: " + microbeData.value +
+                                            "\nPlants: " + plantData.value +
+                                            "\nAlgae: " + algaeData.value +
+                                            "\nDecomposers: " + decomposerData.value +
+                                            "\nWaste: " + wasteData.value +
+                                            "\nNutrients: " + nutrientData.value;
+            }
+            else {
+                textPanelStateDebug.text = "RESOURCES @t:\n";
+            }
+            
         }
         
         ClearDeadSpeciesIcons();
