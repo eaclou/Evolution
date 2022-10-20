@@ -1009,7 +1009,7 @@ public class Agent : MonoBehaviour {
 
         //ENERGY:
         float energyCostMult = settingsRef.agentSettings._BaseEnergyCost; // Mathf.Lerp(settingsRef.agentSettings._BaseEnergyCost, settingsRef.agentSettings._BaseEnergyCost * 0.25f, sizePercentage);
-        float restingEnergyCost = currentBiomass * energyCostMult * restingBonus; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
+        float restingEnergyCost = Mathf.Pow(currentBiomass, 1.0f) * energyCostMult * restingBonus; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
         //float throttleMag = smoothedThrottle.magnitude;
         
         // ENERGY DRAIN::::        

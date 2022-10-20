@@ -135,7 +135,7 @@ public class SpeciesGenomePool
                 
         }
         else {
-            avgLifespan = 2100;
+            avgLifespan = 1900;
         }
         // create species CoatOfArms:
         coatOfArmsMat = new Material(TheRenderKing.instance.coatOfArmsShader);

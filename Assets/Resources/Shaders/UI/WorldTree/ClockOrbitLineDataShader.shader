@@ -87,7 +87,7 @@
 				newUV.y += row * (1.0 / rows);
 				
 				float ballRadius = data.radius;
-				float3 worldPosition = data.worldPos + float3(rotatedPoint.x, rotatedPoint.y, 0) * min(ballRadius, 0.11);
+				float3 worldPosition = data.worldPos + float3(rotatedPoint.x, rotatedPoint.y, 0) * min(ballRadius, 0.09511);
 				worldPosition.z = -2.5;
 				o.uv = newUV;
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));

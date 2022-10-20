@@ -84,7 +84,7 @@
 				float3 quadData = quadVerticesCBuffer[id];
 				o.uv = quadData.xy + 0.5;
 				
-				float lineWidth = 0.0082;
+				float lineWidth = 0.0182;
 				
 				WorldTreeLineData dataPrev = worldTreeLineDataCBuffer[max(0, inst - 1)];
 				WorldTreeLineData data = worldTreeLineDataCBuffer[inst];

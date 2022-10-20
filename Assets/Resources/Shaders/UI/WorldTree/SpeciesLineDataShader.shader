@@ -91,7 +91,7 @@
 				float4 col = data.color;
 				
 				if (data.isSelected) {
-					lineWidth = lineWidth * 3.13;
+					lineWidth = lineWidth * 1.33;
 					col.rgb += 0.028;
 				}
 				else {

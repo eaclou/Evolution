@@ -57,6 +57,7 @@ public class SpeciesOverviewUI : MonoBehaviour {
                 //check if still alive:
                 bool safeToRemove = true;
                 if(candidateGenomeButtons[i].candidateRef.isBeingEvaluated) {
+                    safeToRemove = false;
                     if(candidateGenomeButtons[i].candidateRef.candidateID == SelectionManager.instance.currentSelection.candidate.candidateID) {
                         safeToRemove = false;
                     }

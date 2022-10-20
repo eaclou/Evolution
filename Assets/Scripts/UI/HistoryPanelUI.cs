@@ -618,7 +618,26 @@ public class HistoryPanelUI : MonoBehaviour
                     posMin -= 8f;
                     posMax += 8f;
                 }
-                cand.performanceData.p1y = Mathf.Lerp(cand.performanceData.p0y, Mathf.Lerp(posMin, posMax, y01), 0.1f); 
+                //cand.performanceData.p1y = Mathf.Lerp(cand.performanceData.p0y, Mathf.Lerp(posMin, posMax, y01), 0.1f); 
+                cand.performanceData.p1y = Mathf.Lerp(cand.performanceData.p1y, cand.performanceData.p0y, 0.2f);
+                //collision??
+                //COLLISION!!!!!!!!!!:: 
+                // this isn't going to work, need a different approach
+                float collisionSize = 0.06f;
+                float collisionForce = 1f;
+                for(int j = 0; j < uiManagerRef.speciesOverviewUI.candidateGenomeButtons.Count; j++) {
+                    Vector2 vecToIcon = uiManagerRef.speciesOverviewUI.candidateGenomeButtons[j].targetCoords -
+                                        uiManagerRef.speciesOverviewUI.candidateGenomeButtons[line].targetCoords;
+                    float iconDistanceSquared = vecToIcon.sqrMagnitude;
+                    if(iconDistanceSquared < collisionSize) {
+                        //x -= vecToIcon.x * collisionForce;
+                        //y -= vecToIcon.y * collisionForce;
+                        cand.performanceData.p1y -= vecToIcon.y * collisionForce;
+                    }
+                    else {
+                        
+                    }
+                }
                 //}
                 
                 cand.UpdateDisplayCurve();
@@ -1056,7 +1075,7 @@ public class HistoryPanelUI : MonoBehaviour
             }
             
             float x = 1f;
-            if (candidate.candidateID == selectionManager.currentSelection.candidate.candidateID) x = 1.05f;
+            if (candidate.candidateID == selectionManager.currentSelection.candidate.candidateID) x = 1.1f;
             
             float frac = 0f;
             if (candidate.performanceData.bezierCurve != null) {
@@ -1068,6 +1087,7 @@ public class HistoryPanelUI : MonoBehaviour
                 float timeSinceDeath = candidate.performanceData.timeStepDied - graphBoundsMinX;
                 x = timeSinceDeath / (float)(simManager.simAgeTimeSteps - graphBoundsMinX);
             }
+            
             
             position = AnchorBottomLeft(x, Mathf.Clamp01(y)) * panelSizePixels;
 
