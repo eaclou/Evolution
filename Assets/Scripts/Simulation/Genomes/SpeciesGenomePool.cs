@@ -57,6 +57,8 @@ public class SpeciesGenomePool
     public Material coatOfArmsMat;
 
     public bool isFlaggedForExtinction = false;
+    public bool isFlaggedForEndangered = false;
+    public int timestepsEndangeredCounter = 0;
     public bool isExtinct = false;
     public bool isStillEvaluating = true;
 
@@ -66,7 +68,7 @@ public class SpeciesGenomePool
     public float curActiveGraphBoundsMaxX;
     public float curActiveGraphBoundsMaxY;
 
-    private int maxNumDataPointEntries = 128;
+    private int maxNumDataPointEntries = 64;
     public float speciesAllTimeMinScore;
     public float speciesAllTimeMaxScore;
     public float speciesCurAliveMinScore;
@@ -135,7 +137,7 @@ public class SpeciesGenomePool
                 
         }
         else {
-            avgLifespan = 1900;
+            avgLifespan = 1500f;
         }
         // create species CoatOfArms:
         coatOfArmsMat = new Material(TheRenderKing.instance.coatOfArmsShader);
@@ -256,6 +258,7 @@ public class SpeciesGenomePool
         speciesDataPointsList.Add(dataPoint);
         if(speciesDataPointsList.Count > maxNumDataPointEntries) {
             MergeDataPoints();
+            
         }
         
 
@@ -340,7 +343,7 @@ public class SpeciesGenomePool
     }
     
     public void UpdateAvgData(CandidateAgentData candidateData) {
-        float numPoints = 256f; // rolling avg over this many creatures
+        float numPoints = 512f; // rolling avg over this many creatures
         avgLifespan = avgLifespan * ((numPoints - 1f) / numPoints) + candidateData.performanceData.totalTicksAlive * (1f / numPoints);
         if (numAgentsEvaluated >= numPoints && isStillEvaluating) {
             isStillEvaluating = false;
@@ -366,7 +369,7 @@ public class SpeciesGenomePool
         //int startIndex = 1; // Mathf.Min(1, speciesDataPointsList.Count);
         //if (speciesDataPointsList.Count < 2) return;
         for (int i = 0; i < speciesDataPointsList.Count; i++) {
-            int indexPrev = Mathf.Max(0, i - 1);
+            int indexPrev = Mathf.Max(1, i - 1);
             int indexNext = Mathf.Min(i, speciesDataPointsList.Count - 1);
             SpeciesDataPoint pointPrev = speciesDataPointsList[indexPrev];
             SpeciesDataPoint pointCur = speciesDataPointsList[i];

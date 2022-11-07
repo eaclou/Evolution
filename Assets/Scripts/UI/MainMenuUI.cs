@@ -23,40 +23,32 @@ public class MainMenuUI : MonoBehaviour
     //bool controlsMenuOn;
     
     // * Replace with persistent profile saving
-    void Start()
+    void Awake()
     {
-        firstTimeStartup = true;
+        //firstTimeStartup = true;
+        //firstTimeStartup = true;
     }
 
     void OnEnable()
     {
+        
+
         Cursor.visible = true;
-        //canvasMain.renderMode = RenderMode.ScreenSpaceOverlay;
-        
-        //quickStartText.text = firstTimeStartup ? "QUICK START" : "RESUME";
-        
+        //canvasMain.renderMode = RenderMode.ScreenSpaceOverlay;        
+        //quickStartText.text = firstTimeStartup ? "QUICK START" : "RESUME";        
         // *** For now, 1 sim at a time ***
-        if (!firstTimeStartup) 
+        if (firstTimeStartup) 
         {
             //buttonNewSimulation.gameObject.SetActive(false); 
             //textMouseOverInfo.gameObject.SetActive(false);
+            AudioManager.instance.PlayMainMenuMusic();
         }
         
-        firstTimeStartup = false; 
-        Initialize();
+        //firstTimeStartup = false; 
+        //Initialize();
     }
     
-    void OnDisable()
-    {
-        Initialize();
-    }
     
-    void Initialize()
-    {
-        //optionsMenuOn = false;
-        //controlsMenuOn = false;
-        //Refresh();        
-    }
    
     private void ClearAnimatorParameters() {
         mainMenuAnimator.SetBool("CreditsON", false);

@@ -14,6 +14,10 @@ public class BrainGenomeImage : MonoBehaviour
 
     void Start() 
     {
+        //InitTexture();
+    }
+
+    private void InitTexture() {
         texture = new Texture2D(16, 16, TextureFormat.RGBA32, false);
         texture.filterMode = FilterMode.Point;
         texture.wrapMode = TextureWrapMode.Clamp;
@@ -23,6 +27,9 @@ public class BrainGenomeImage : MonoBehaviour
     // * WPP: expose values in editor
     public void SetTexture(BrainGenome brain) 
     {
+        if(texture == null) {
+            InitTexture();
+        }
         int width = Mathf.Min(WIDTH, brain.axonCount);
         texture.Resize(width, 1);
 

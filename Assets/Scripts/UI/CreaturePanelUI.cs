@@ -100,6 +100,8 @@ public class CreaturePanelUI : MonoBehaviour
     public void Tick() 
     {
         if (!curPanelMode) return;
+
+        CandidateAgentData cand = selection.currentSelection.candidate;
     
         var mouseInOpenCloseArea = Screen.height - Input.mousePosition.y < 64 && Math.Abs((Screen.width / 2) - Input.mousePosition.x) < 128;
         openCloseButton.SetMouseEnter(mouseInOpenCloseArea);
@@ -128,58 +130,78 @@ public class CreaturePanelUI : MonoBehaviour
         foreach (var panelMode in panelModes)
             panelMode.SetActive(curPanelMode);
 
-        if (!agent) return;
-        imageCurAction.gameObject.SetActive(true);
-        if (agent.curLifeStage == AgentLifeStage.Dead || agent.candidateRef.candidateID != selection.currentSelection.candidate.candidateID) {
-            imageCurAction.gameObject.SetActive(false);
+        if (agent == null) {
+            //return;
         }
+        else {
+            imageCurAction.gameObject.SetActive(true);
+            if (agent.curLifeStage == AgentLifeStage.Dead || agent.candidateRef.candidateID != selection.currentSelection.candidate.candidateID) {
+                imageCurAction.gameObject.SetActive(false);
+            }
+            float reqMass = SettingsManager.instance.agentSettings._BaseInitMass * SettingsManager.instance.agentSettings._MinPregnancyFactor;
+            float agentMass = agent.currentBiomass * SettingsManager.instance.agentSettings._MaxPregnancyProportion;
+            debugText.text = "Agent# " + agent.index + "\nCandidateID: " + agent.candidateRef.candidateID + "\nreqMass: " + reqMass + ", agentMass: " + agentMass.ToString("F2") + "\nSpecies#cands: " + simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].candidateGenomesList.Count;
 
+            TooltipUI pregnantTooltip = imagePregnancy.GetComponent<TooltipUI>();
+            pregnantTooltip.tooltipString = "PREGNANT: " + (Mathf.Clamp01(agentMass / reqMass) * 100f).ToString("F0") + " %";
+            if (agent.isPregnantAndCarryingEggs) {
+                imagePregnancy.color = Color.white;
+                imagePregnancy.gameObject.transform.localScale = Vector3.one;
+                pregnantTooltip.tooltipString = "PREGNANT";
+            }
+            else {
+                imagePregnancy.gameObject.transform.localScale = Vector3.zero;
+                //imagePregnancy.gameObject.transform.localScale = Vector3.one * Mathf.Clamp01(agentMass / reqMass);
+                imagePregnancy.color = Color.gray;
+            }
+
+            if (agent.curLifeStage != AgentLifeStage.Mature) {
+                imagePregnancy.gameObject.transform.localScale = Vector3.zero;
+                imagePregnancy.color = Color.black;
+                pregnantTooltip.tooltipString = "";
+            }
+        }
+        
         tooltipOpenCloseButton.tooltipString = isPanelOpen ? "Hide Creature Panel" : "Open Creature Panel";
 
-        speciesIconUI.GetComponent<Image>().material = simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].coatOfArmsMat;
-        speciesIconUI.tooltip.tooltipString = "Species " + agent.speciesIndex;
-        speciesIconUI.text.text = agent.speciesIndex.ToString();
-        speciesIconUI.textDropShadow.text = agent.speciesIndex.ToString();
+        speciesIconUI.GetComponent<Image>().material = simulationManager.masterGenomePool.completeSpeciesPoolsList[cand.speciesID].coatOfArmsMat;
+        speciesIconUI.tooltip.tooltipString = "Species " + cand.speciesID;
+        speciesIconUI.text.text = cand.speciesID.ToString();
+        speciesIconUI.textDropShadow.text = cand.speciesID.ToString();
         
         tooltipBrain.tooltipString = "BRAIN:\n" + 
-            (agent.candidateRef.candidateGenome.brainGenome.neurons.hiddenCount + 
-            agent.candidateRef.candidateGenome.brainGenome.neurons.inOutCount) + " Neurons, " + 
-            agent.candidateRef.candidateGenome.brainGenome.axonCount + " Axons\n" + "Action: " + 
+            (cand.candidateGenome.brainGenome.neurons.hiddenCount + 
+            cand.candidateGenome.brainGenome.neurons.inOutCount) + " Neurons, " + 
+            cand.candidateGenome.brainGenome.axonCount + " Axons\n" + "Action: " + 
             mostRecentActionState.id;
         //tooltipGenome.tooltipString = "Genome???";
         //tooltipAppearance.tooltipString = "GEN " + agent.candidateRef.candidateGenome.generationCount + ", Axons: " + (agent.candidateRef.candidateGenome.brainGenome.links.Count + ", IO: " + agent.candidateRef.candidateGenome.brainGenome.inOutNeurons.Count + ", H: " + agent.candidateRef.candidateGenome.brainGenome.hiddenNeurons.Count);//"APPEARANCE";
 
-        tooltipGenerationCount.tooltipString = "Generation " + agent.candidateRef.candidateGenome.generationCount.ToString() + "(" + agent.candidateRef.parentID + ")";
-        textGenerationCount.text = agent.candidateRef.candidateGenome.generationCount.ToString();
+        tooltipGenerationCount.tooltipString = "Generation " + cand.candidateGenome.generationCount.ToString() + "\nParent: " + cand.parentID;
+        textGenerationCount.text = cand.candidateGenome.generationCount.ToString();
         
-        float reqMass = SettingsManager.instance.agentSettings._BaseInitMass * SettingsManager.instance.agentSettings._MinPregnancyFactor;
-        float agentMass = agent.currentBiomass * SettingsManager.instance.agentSettings._MaxPregnancyProportion;
-        debugText.text = "Agent# " + agent.index + "\nCandidateID: " + agent.candidateRef.candidateID + "\nreqMass: " + reqMass + ", agentMass: " + agentMass.ToString("F2") + "\nSpecies#cands: " + simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].candidateGenomesList.Count;
-
-        TooltipUI pregnantTooltip = imagePregnancy.GetComponent<TooltipUI>();
-        pregnantTooltip.tooltipString = "PREGNANT: " + (Mathf.Clamp01(agentMass / reqMass) * 100f).ToString("F0") + " %";
-        if (agent.isPregnantAndCarryingEggs) {
-            imagePregnancy.color = Color.white;
-            imagePregnancy.gameObject.transform.localScale = Vector3.one;
-            pregnantTooltip.tooltipString = "PREGNANT";
-        }
-        else {
-            imagePregnancy.gameObject.transform.localScale = Vector3.zero;
-            //imagePregnancy.gameObject.transform.localScale = Vector3.one * Mathf.Clamp01(agentMass / reqMass);
-            imagePregnancy.color = Color.gray;
-        }
-
-        if (agent.curLifeStage != AgentLifeStage.Mature) {
-            imagePregnancy.gameObject.transform.localScale = Vector3.zero;
-            imagePregnancy.color = Color.black;
-            pregnantTooltip.tooltipString = "";
-        }
+        
+        
     }
     
     public void SetPanelMode(StringSO mode) {
         curPanelMode = mode;
     }
 
+    public void ClickLinkToParentGenome() {
+        
+        //int selectedCandidateID = SelectionManager.instance.currentSelection.candidate.candidateID;
+        //int selCreatureParentID = SelectionManager.instance.currentSelection.candidate.parentID;
+        CandidateAgentData parentCandidate = SelectionManager.instance.currentSelection.candidate.parentCandidate;
+        if(parentCandidate == null) {
+            Debug.LogError("NO PARENT FOUND!");
+        }
+        else {
+            Debug.Log("GOTO: Parent");
+            SelectionManager.instance.SetSelected(parentCandidate);
+        }
+        
+    }
     private void OnDisable() {
         critterPortraitStrokesCBuffer?.Release();
         portraitCritterInitDataCBuffer?.Release();

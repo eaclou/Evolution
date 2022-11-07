@@ -307,7 +307,7 @@ public class UIManager : Singleton<UIManager>
         InitializeTrophicSlot(KnowledgeMapId.Microbes);
         InitializeTrophicSlot(KnowledgeMapId.Animals);
 
-        theRenderKing.InitializeCreaturePortrait(speciesPools[0].foundingCandidate.candidateGenome); //, gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][mutationUI.selectedToolbarMutationID].representativeGenome);
+        //theRenderKing.InitializeCreaturePortrait(speciesPools[0].foundingCandidate.candidateGenome); //, gameManager.simulationManager.masterGenomePool.vertebrateSlotsGenomesMutationsArray[0][mutationUI.selectedToolbarMutationID].representativeGenome);
         
         trophicLayersManager.SetSlotStatus(KnowledgeMapId.Nutrients, TrophicSlotStatus.On);
         trophicLayersManager.SetSlotStatus(KnowledgeMapId.Pebbles, TrophicSlotStatus.On);
@@ -315,6 +315,8 @@ public class UIManager : Singleton<UIManager>
         trophicLayersManager.SetSlotStatus(KnowledgeMapId.Wind, TrophicSlotStatus.On);
         
         isUnlockCooldown = true;
+        
+        selectionManager.SetSelected(simulationManager.masterGenomePool.completeSpeciesPoolsList[0].candidateGenomesList[0]);
         
         // SPAWNS!!!! 
         simulationManager.AttemptToBrushSpawnAgent(brushesUI.selectedEssenceSlot.linkedSpeciesID);
@@ -332,30 +334,34 @@ public class UIManager : Singleton<UIManager>
     }
     
     /// Reset to true to reset simulation, including Big Bang on start game
-    bool firstTimeStartup = true;
+    //bool firstTimeStartup = true;
     
     public void TransitionToNewGameState(GameState gameState) {
         mainMenu.gameObject.SetActive(gameState == GameState.MainMenu);
     
         switch (gameState) {
-            case GameState.MainMenu: break;
+            case GameState.MainMenu:
+                //EnterMainMenuUI();
+                break;
             case GameState.Loading:
                 EnterLoadingUI();
                 break;
             case GameState.Playing:
                 //canvasMain.renderMode = RenderMode.ScreenSpaceCamera;
-                EnterPlayingUI(firstTimeStartup);
-                firstTimeStartup = false;
+                EnterPlayingUI(GameManager.instance.firstTimeStartup);
+                GameManager.instance.firstTimeStartup = false;
+                //firstTimeStartup = false;
                 break;
             default:
                 Debug.LogError("No Enum Type Found! (" + gameState + ")");
                 break;
         }
     }
+
         
     private void EnterLoadingUI() {
         panelLoading.SetActive(true);
-        panelPlaying.SetActive(false);
+        //panelPlaying.SetActive(false);
     }
     
     private void EnterPlayingUI(bool newGame) {   
@@ -364,6 +370,7 @@ public class UIManager : Singleton<UIManager>
 
         if (newGame)
         {
+            Debug.Log("ERRORRORO");
             //simulationManager._BigBangOn = true;
             bigBangPanelUI.Begin();
             simulationManager.AddHistoryEvent(new SimEventData("New Simulation Start!", 0));
@@ -385,6 +392,7 @@ public class UIManager : Singleton<UIManager>
         if (!simulationManager.loadingComplete) return;
         //if (bigBangPanelUI.Tick()) return;  // WPP: moved to coroutine
         if (bigBangPanelUI.isRunning) return;
+        //if (mainMenu.enabled) return;
 
         
         brushesUI.UpdateBrushesUI(); 

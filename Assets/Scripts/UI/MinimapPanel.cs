@@ -54,17 +54,18 @@ public class MinimapPanel : MonoBehaviour
 
         Color toggleButtonColor = new Color(0.75f, 0.35f, 0.2f);
         TooltipUI tooltip = buttonToggleFollow.GetComponent<TooltipUI>();
-        tooltip.tooltipString = "Follow Creature";
-        if(cameraManager.isFollowingAgent) {
+        tooltip.tooltipString = "Turn Autofollow ON";
+        if(cameraManager.GetIsAutoFollowModeON()) {
             toggleButtonColor = new Color(0.2f, 0.75f, 0.5f);
-            tooltip.tooltipString = "Stop Following";
+            tooltip.tooltipString = "Turn Autofollow OFF";
         }
         buttonToggleFollow.GetComponent<Image>().color = toggleButtonColor;
 
     }
 
     public void ClickToggleFollow() {
-        cameraManager.ToggleFollow();
+        cameraManager.ToggleAutoFollow();
+        Debug.Log("Autofollow is ON = " + cameraManager.GetIsAutoFollowModeON());
     }
         
     void SetKnowledgeMapViewer(TrophicLayerSO data) { SetKnowledgeMapViewer(data, GetRenderTexture(data.id)); }

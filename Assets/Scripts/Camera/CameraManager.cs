@@ -29,6 +29,8 @@ public class CameraManager : Singleton<CameraManager>
     public bool isFollowingAnimalParticle = false;
     public Vector2 targetZooplanktonWorldPos;
 
+    private bool isAutoFollowModeON = true;
+
     [SerializeField]
     float camMinAltitude = 5f;
     [SerializeField]
@@ -56,6 +58,10 @@ public class CameraManager : Singleton<CameraManager>
         //targetCamPos = new Vector3(128f, 128f, -64f);
     }
 
+    public bool GetIsAutoFollowModeON() {
+        return isAutoFollowModeON;
+    }
+
     private void InitializeCamera() {
         cameraRef = GetComponent<Camera>();
         curCameraFocusPivotPos = new Vector3(128f, 128f, 1f);
@@ -67,6 +73,9 @@ public class CameraManager : Singleton<CameraManager>
 
     public void ToggleFollow() {
         isFollowingAgent = !isFollowingAgent;
+    }
+    public void ToggleAutoFollow() {
+        isAutoFollowModeON = !isAutoFollowModeON;
     }
 
     private void UpdateCam() 

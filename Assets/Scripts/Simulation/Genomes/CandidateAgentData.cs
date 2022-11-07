@@ -159,6 +159,7 @@ public class CandidateAgentData
         allEvaluationsComplete = false;  
         isBeingEvaluated = false;
         if (parentCand != null) {
+            parentCandidate = parentCand;
             parentID = parentCand.candidateID;
         }
         else {

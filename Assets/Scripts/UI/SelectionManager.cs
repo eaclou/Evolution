@@ -22,7 +22,7 @@ public class SelectionManager : Singleton<SelectionManager>
         // Check if corresponding agent exists:
         bool hasAgent = false;
         foreach (var agent in simulation.agents) {
-            if (currentSelection.candidate.candidateID != agent.candidateRef.candidateID) 
+            if (candidate.candidateID != agent.candidateRef.candidateID) 
                 continue;
             
             hasAgent = true;
@@ -34,6 +34,7 @@ public class SelectionManager : Singleton<SelectionManager>
             CameraManager.instance.targetAgentTransform = agent.bodyGO.transform;
             CameraManager.instance.targetAgentIndex = agent.index;
             CameraManager.instance.SetFollowing(KnowledgeMapId.Animals);
+            //Debug.Log("Corresponding Agent[" + agent.index + "] CandID: " + candidate.candidateID);
             break;
         }
         
@@ -48,6 +49,8 @@ public class SelectionManager : Singleton<SelectionManager>
         }
         else {
             uiManager.brainVisualizationRef.RefreshCandidate(currentSelection.candidate);
+            theRenderKing.InitializeCreaturePortrait(currentSelection.candidate.candidateGenome);
+            uiManager.genomeViewerUI.brainGenomeImage.SetTexture(currentSelection.candidate.candidateGenome.brainGenome);
             Debug.Log("RefreshCandidate! " + currentSelection.candidate.candidateID);
             CameraManager.instance.isFollowingAgent = false;
         }
@@ -69,12 +72,14 @@ public class SelectionManager : Singleton<SelectionManager>
     }
 
     public void FollowedCreatureDied() {
-        //currentSelection.isGenomeOnly = true;
-        //CameraManager.instance.isFollowingAgent = false;
-        //next creature??
-        SetSelected(simulation.masterGenomePool.completeSpeciesPoolsList[currentSelection.candidate.speciesID].candidateGenomesList[1]);
-        //SetSelectedFromSpeciesUI(currentSelection.candidate.speciesID);
-        //CameraManager.instance.isFollowingAgent = true;
+        if(CameraManager.instance.GetIsAutoFollowModeON()) {
+            if(currentSelection.isGenomeOnly) {
+
+            }
+            else {
+                SetSelected(simulation.masterGenomePool.completeSpeciesPoolsList[currentSelection.candidate.speciesID].candidateGenomesList[1]);
+            }
+        }
     }
 
     public bool IsSelected(CandidateAgentData candidate) { return candidate.candidateID == currentSelection.candidate.candidateID; }

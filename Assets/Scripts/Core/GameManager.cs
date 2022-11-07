@@ -23,6 +23,8 @@ public class GameManager : Singleton<GameManager> {
         //distortionCommandBuffer = new CommandBuffer();
         //distortionCommandBuffer.name = "distortionCommandBuffer";
         //mainCam.AddCommandBuffer(CameraEvent.AfterEverything, distortionCommandBuffer);
+
+        firstTimeStartup = true;
     }
 
     void Start () {

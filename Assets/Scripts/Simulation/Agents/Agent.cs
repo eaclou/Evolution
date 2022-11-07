@@ -606,7 +606,7 @@ public class Agent : MonoBehaviour {
     }
     
     public void ProcessBiteDamageReceived(float damage, Agent predatorAgentRef) {
-        damage /= coreModule.healthBonus;
+        //damage /= coreModule.healthBonus;
 
         float defendBonus = 1f;
         if (isDefending && defendFrameCounter < defendDuration) {
@@ -929,7 +929,7 @@ public class Agent : MonoBehaviour {
     
     float energyToHealth => baseEnergyToHealth * coreModule.healthBonus;
     
-    [SerializeField] [Range(0,1)] float restingBonusWhenResting = 0.65f;
+    [SerializeField] [Range(0,1)] float restingBonusWhenResting = 0.75f;
     float restingBonus => isResting ? restingBonusWhenResting : 1f;
 
     public void TickActions() {
@@ -1009,7 +1009,7 @@ public class Agent : MonoBehaviour {
 
         //ENERGY:
         float energyCostMult = settingsRef.agentSettings._BaseEnergyCost; // Mathf.Lerp(settingsRef.agentSettings._BaseEnergyCost, settingsRef.agentSettings._BaseEnergyCost * 0.25f, sizePercentage);
-        float restingEnergyCost = Mathf.Pow(currentBiomass, 1.0f) * energyCostMult * restingBonus; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
+        float restingEnergyCost = Mathf.Pow(currentBiomass, 1.1f) * energyCostMult * restingBonus; // * SimulationManager.energyDifficultyMultiplier; // / coreModule.energyBonus;
         //float throttleMag = smoothedThrottle.magnitude;
         
         // ENERGY DRAIN::::        

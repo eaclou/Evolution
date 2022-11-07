@@ -135,7 +135,7 @@ public class SimulationManager : Singleton<SimulationManager>
         // Turn off menu music
         audioManager.TurnOffMenuAudioGroup();
         // otherwise it's null and a giant mess
-        selectionManager.SetSelected(masterGenomePool.completeSpeciesPoolsList[0].candidateGenomesList[0]); // ;
+         // ;
     }
     
     public void BeginLoadingNewSimulation() { StartCoroutine(LoadingNewSimulation()); }
@@ -259,6 +259,8 @@ public class SimulationManager : Singleton<SimulationManager>
         loadingPanel.BeginWarmUp();
                 
         Logger.Log("LOADING COMPLETE - Starting WarmUp!", debugLogStartup);
+        selectionManager.SetSelected(masterGenomePool.completeSpeciesPoolsList[0].candidateGenomesList[0]);
+        
     }
     
     public void LogFeat(FeatSO value)
@@ -613,7 +615,7 @@ public class SimulationManager : Singleton<SimulationManager>
 
             //Species/cands stats for history panel:
             AddNewSpeciesDataEntry(simAgeTimeSteps); // all species and candidates
-
+            
             uiManager.historyPanelUI.RebuildRenderBuffers(); // rename!
 
             simResourceManager.AddNewResourcesAll(simAgeTimeSteps);

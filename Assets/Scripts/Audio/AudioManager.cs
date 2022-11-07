@@ -25,10 +25,10 @@ public class AudioManager : Singleton<AudioManager>
     public AudioSource audioSourceCritterDamage01;
 
     [SerializeField]
-    public AudioSource[] soundtrackSources;
+    public AudioSource[] soundtrackSources; // <--
     
     private int frameCounter = 8600;
-    private int framesPerTrack = 9000;
+    private int framesPerTrack = 20000;
     private float distSqrFalloff = 110f;
 
     private float GetSFXVolumeFromPos(Vector2 position) {
@@ -66,7 +66,13 @@ public class AudioManager : Singleton<AudioManager>
         sound.Play();
     }
 
+    public void PlayMainMenuMusic() {
+        Debug.Log("PlayMainMenuMusic()");
+        soundtrackSources[5].Play();
+    }
+
     public void Tick() {
+        
         //Check prograss of play:
         if(frameCounter > framesPerTrack) {
             PlayNextSong();

@@ -65,7 +65,7 @@ public class MasterGenomePool
             completeSpeciesPoolsList.Add(newSpecies);
         }
 
-        selectionManager.SetSelected(completeSpeciesPoolsList[0].candidateGenomesList[0]);
+        //selectionManager.SetSelected(completeSpeciesPoolsList[0].candidateGenomesList[0]);
     }
 
     public void AddNewSpeciesDataPoint(int timestep) {
@@ -94,7 +94,7 @@ public class MasterGenomePool
         
         int leastFitSpeciesID = -1;
         float worstFitness = Mathf.Infinity;
-        bool noCurrentlyFlaggedSpecies = true;
+        bool noCurrentlyFlaggedSpecies = true; // oldFlagExtinct
         
         foreach (var idList in currentlyActiveSpeciesIDList) {
             //Debug.Log(idList + ", " + currentlyActiveSpeciesIDList[idList] + ", " + completeSpeciesPoolsList.Count);
@@ -102,19 +102,23 @@ public class MasterGenomePool
             float fitness = pool.avgCandidateData.performanceData.totalTicksAlive;
             if (fitness < worstFitness) {
                 worstFitness = fitness;
-                leastFitSpeciesID = idList;
-                
+                leastFitSpeciesID = idList;                
             }
             if (pool.isFlaggedForExtinction) {
-                noCurrentlyFlaggedSpecies = false;
-                
+                noCurrentlyFlaggedSpecies = false;                
             }
+        }
+
+        if (completeSpeciesPoolsList[leastFitSpeciesID].numAgentsEvaluated > minNumGuaranteedEvalsForNewSpecies) {
+            completeSpeciesPoolsList[leastFitSpeciesID].timestepsEndangeredCounter++;
         }
         
         if (noCurrentlyFlaggedSpecies) {
             if (completeSpeciesPoolsList[leastFitSpeciesID].numAgentsEvaluated > minNumGuaranteedEvalsForNewSpecies) {
                 // OK to KILL!!!
                 FlagSpeciesExtinct(leastFitSpeciesID);
+                //ExtinctifySpecies(leastFitSpeciesID);
+
                 string readout = "FLAG\n";
                 foreach(int id in currentlyActiveSpeciesIDList) {
                     if(id == leastFitSpeciesID) {
@@ -136,6 +140,10 @@ public class MasterGenomePool
                         Debug.Log("Species " + pool.speciesID + "Back from the brink! " + fitness + " / " + worstFitness);
                     }
                     else {
+                        if(pool.timestepsEndangeredCounter > 1000) {
+                            Debug.Log("timestepsEndangeredCounter " + pool.timestepsEndangeredCounter);
+                            ExtinctifySpecies(idList);
+                        }
                         if (pool.candidateGenomesList.Count < 1) {
                             ExtinctifySpecies(idList);
 
@@ -159,6 +167,12 @@ public class MasterGenomePool
     }
 
     public void FlagSpeciesExtinct(int speciesID) {
+        completeSpeciesPoolsList[speciesID].isFlaggedForExtinction = true;
+
+        uiManager.historyPanelUI.TriggerNudgeMessage("SPECIES " + speciesID + " IS ENDANGERED!");
+        //Debug.Log("FLAG EXTINCT: " + speciesID);
+    }
+    public void FlagSpeciesEndangered(int speciesID) {
         completeSpeciesPoolsList[speciesID].isFlaggedForExtinction = true;
 
         uiManager.historyPanelUI.TriggerNudgeMessage("SPECIES " + speciesID + " IS ENDANGERED!");

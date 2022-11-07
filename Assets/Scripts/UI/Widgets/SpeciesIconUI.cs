@@ -73,7 +73,7 @@ public class SpeciesIconUI : MonoBehaviour
         linkedPool.coatOfArmsMat.SetFloat("_IsEndangered", linkedPool.isFlaggedForExtinction ? 1f : 0f);
 
         toolString += linkedPool.isExtinct ? "\n(Extinct)" : "\nAvg Lifespan: " + uiManager.clockPanelUI.ConvertFramesToAgeString(linkedPool.avgLifespan);
-        tooltip.tooltipString = toolString;
+        tooltip.tooltipString = toolString + "\n" + linkedPool.timestepsEndangeredCounter;
 
         var iconState = GetIconDisplayState(isSelected, linkedPool.isExtinct);
         transform.localScale = iconState.scaleFactor * Vector3.one;

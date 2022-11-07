@@ -106,9 +106,9 @@ public class HistoryPanelUI : MonoBehaviour
     public ComputeBuffer creatureLineDataCBuffer;
     public ComputeBuffer resourceLineDataCBuffer;
     public ComputeBuffer gridLineDataCBuffer;
-    private int worldTreeNumPointsPerSpeciesLine = 128;    
+    private int worldTreeNumPointsPerSpeciesLine = 64;    
     private int worldTreeNumSpeciesLines = 32;
-    private int worldTreeNumCreatureLines = 128; // should be same size as GenomeButtonUI collection
+    private int worldTreeNumCreatureLines = 256; // should be same size as GenomeButtonUI collection
     private int worldTreeNumPointsPerCreatureLine = 32;
 
     private int worldTreeNumGridLines100 = 16;
@@ -184,7 +184,7 @@ public class HistoryPanelUI : MonoBehaviour
         // 
         //AllSpeciesView  // change how this is structured!:
         if(isEntireSimulationMode) {
-            targetGraphBoundsMinY = 2200f;
+            targetGraphBoundsMinY = 1500f;
             targetGraphBoundsMinX = 0f;
             targetGraphBoundsMaxY = alltimeHighestScore + 256;
         }
@@ -372,8 +372,7 @@ public class HistoryPanelUI : MonoBehaviour
                 for (int i = 0; i < worldTreeNumPointsPerCreatureLine; i++) {     // this number replaces maxnumdataentries           
                     CreateCreatureLine(line, i, mousePosPanelCoords, creatureLines, cand);
                 }
-            }
-            
+            }            
         }
         // Create Horizontal Gridlines Small (100f span):
         for (int line = 0; line < worldTreeNumGridLines100; line++) {
@@ -549,10 +548,14 @@ public class HistoryPanelUI : MonoBehaviour
             data.isSelected = 1;
         }
         data.isAlive = 1;
-        if (pool.isExtinct || point == 0) {
-            data.isAlive = 0;
+        if (point == 0) {
+            //data.isAlive = 0;
             z = 0.1f;
             alpha = 0f;
+        }
+        if(pool.isExtinct) {
+            //data.isAlive = 0;
+            hue *= 0.8f;
         }
       
         var coordinates = AnchorBottomLeft(x, y); // new Vector2(x, y); // 
@@ -698,7 +701,7 @@ public class HistoryPanelUI : MonoBehaviour
         }
         if (cand.candidateID == selectionManager.currentSelection.candidate.candidateID) {
             data.isSelected = 1;
-            z = -1.91f;
+            z = -2.91f;
             data.color.w = 0;
             //data.color = Vector4.one;
         }

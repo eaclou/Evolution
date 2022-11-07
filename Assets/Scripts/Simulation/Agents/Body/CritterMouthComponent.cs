@@ -169,7 +169,7 @@ public class CritterMouthComponent : MonoBehaviour
     void BiteAnimal(Agent preyAgent, float targetArea) 
     {
         //Debug.Log("BiteAnimal");
-        float baseDamage = 3.14f;
+        float baseDamage = 0.14f;
         float sizeRatio = ownBiteArea / targetArea; // for now clamped to 10x
         float damage = baseDamage * sizeRatio * agent.coreModule.damageBonus;
         damage = Mathf.Clamp01(damage);
