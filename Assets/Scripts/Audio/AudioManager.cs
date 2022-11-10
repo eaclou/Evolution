@@ -26,10 +26,18 @@ public class AudioManager : Singleton<AudioManager>
 
     [SerializeField]
     public AudioSource[] soundtrackSources; // <--
+
+    public AudioSource curTrackPlaying;
     
-    private int frameCounter = 8600;
-    private int framesPerTrack = 20000;
+    public int frameCounter = 10;
+    private int framesPerTrack = 1024 * 256 / 12; //MONTHLY 12//SimulationManager.instance.GetNumTimeStepsPerYear();
     private float distSqrFalloff = 110f;
+
+    private int curTrackID = 0;
+
+    public int GetFramesPerTrack() {
+        return framesPerTrack;
+    }
 
     private float GetSFXVolumeFromPos(Vector2 position) {
         float distSqr = (position - cameraFocus2D).sqrMagnitude;
@@ -67,15 +75,32 @@ public class AudioManager : Singleton<AudioManager>
     }
 
     public void PlayMainMenuMusic() {
-        Debug.Log("PlayMainMenuMusic()");
-        soundtrackSources[5].Play();
+
+        //PlayNextSong(); // randomly picked
+        int trackIndex = 7;
+        curTrackPlaying = soundtrackSources[trackIndex]; 
+        curTrackPlaying.Play();
+        
+        Debug.Log(trackIndex + " PlayMainMenuMusic() " + curTrackPlaying.name);
     }
 
     public void Tick() {
         
+        if(curTrackPlaying != null) {
+            if(curTrackPlaying.isPlaying) {
+
+            }
+            else {
+                Debug.Log("PlayNextSONG");
+                PlayNextSong();
+            }
+        }
+        else {
+
+        }
         //Check prograss of play:
         if(frameCounter > framesPerTrack) {
-            PlayNextSong();
+            //PlayNextSong();
             frameCounter = 0;
         }
 
@@ -83,7 +108,24 @@ public class AudioManager : Singleton<AudioManager>
     }
     
     private void PlayNextSong() {
-        GetRandomSong().Play();
+        curTrackPlaying = GetNextSong(); // GetRandomSong();
+        curTrackPlaying.Play();
+        curTrackID++;
+        if(curTrackID >= soundtrackSources.Length) {
+            curTrackID = 0;
+        }
+    }
+
+    private AudioSource GetNextSong() {
+        if(soundtrackSources.Length == 0) {
+            return null;
+        }
+
+        Debug.Log("AudioManager Play Song #" + (curTrackID));// + " of " + numTracks);
+
+        
+        return soundtrackSources[curTrackID];
+
     }
     
     private AudioSource GetRandomSong() {

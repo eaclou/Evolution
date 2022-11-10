@@ -882,7 +882,9 @@ public class HistoryPanelUI : MonoBehaviour
                                             "\nminX: " + graphBoundsMinX +
                                             "\nmaxX: " + graphBoundsMaxX +
                                             "\nminY: " + graphBoundsMinY +
-                                            "\nmaxY: " + graphBoundsMaxY;
+                                            "\nmaxY: " + graphBoundsMaxY +
+                                            //"\nmusicCounter: " + AudioManager.instance.frameCounter + " / " + AudioManager.instance.GetFramesPerTrack() +
+                                            "\nnow playing: " + AudioManager.instance.curTrackPlaying.name;
                  
                 break;
             case HistoryPanelMode.ActiveSpecies:
@@ -895,7 +897,9 @@ public class HistoryPanelUI : MonoBehaviour
                                             "\nminX: " + graphBoundsMinX +
                                             "\nmaxX: " + graphBoundsMaxX +
                                             "\nminY: " + graphBoundsMinY +
-                                            "\nmaxY: " + graphBoundsMaxY;
+                                            "\nmaxY: " + graphBoundsMaxY +
+                                            //"\nmusicCounter: " + AudioManager.instance.frameCounter + " / " + AudioManager.instance.GetFramesPerTrack() +
+                                            "\nnow playing: " + AudioManager.instance.curTrackPlaying.name;
                 break;
             case HistoryPanelMode.SelSpeciesPopulation:
                 tempPanelSpeciesPop.SetActive(true);
@@ -910,7 +914,9 @@ public class HistoryPanelUI : MonoBehaviour
                                             "\nminX: " + graphBoundsMinX +
                                             "\nmaxX: " + graphBoundsMaxX +
                                             "\nminY: " + graphBoundsMinY +
-                                            "\nmaxY: " + graphBoundsMaxY;
+                                            "\nmaxY: " + graphBoundsMaxY +
+                                            //"\nmusicCounter: " + AudioManager.instance.frameCounter + " / " + AudioManager.instance.GetFramesPerTrack() +
+                                            "\nnow playing: " + AudioManager.instance.curTrackPlaying.name;
                 
                 break;
             case HistoryPanelMode.SelCreatureTimeline:

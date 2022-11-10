@@ -464,7 +464,7 @@ public class SimulationManager : Singleton<SimulationManager>
         eggSackRespawnCounter++;
         agentRespawnCounter++;
         masterGenomePool.Tick(); 
-        audioManager.Tick();
+        audioManager.Tick(); //***EAC move outside of this so can handle main menu music as well
 
         vegetationManager.MeasureTotalResourceGridAmount();
         vegetationManager.MeasureTotalPlantParticlesAmount();
