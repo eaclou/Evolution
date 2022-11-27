@@ -161,6 +161,7 @@ public class CritterModuleCore : IBrainModule
     
         health += healEnergyUsageRate * energyToHealth;
         energy -= healEnergyUsageRate;
+        stamina[0] = Mathf.Clamp01(stamina[0] + healEnergyUsageRate * energyToHealth);
     }
 
 	public CritterModuleCore(CritterModuleCoreGenome genome) {

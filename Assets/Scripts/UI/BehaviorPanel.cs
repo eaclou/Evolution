@@ -17,6 +17,6 @@ public class BehaviorPanel : MonoBehaviour
         defend.RefreshDisplay(data.totalTimesDefended, data.defendActionPercent);
         dash.RefreshDisplay(data.totalTimesDashed, data.dashActionPercent);
         rest.RefreshDisplay(data.totalTicksRested * .01f, Mathf.Clamp01(data.totalTicksRested/600f));
-        feed.RefreshDisplay(data.totalTimesPregnant, data.totalTimesPregnant/4f);
+        feed.RefreshDisplay(data.totalTimesPregnant, data.totalTimesPregnant/4f); //***EAC UH...... change this!!!!
     }
 }

@@ -22,6 +22,6 @@ public class StatUI
         if(percent) {
             percent.text = useDecimal ? numericValue.ToString("F2") : numericValue.ToString("F0");
         }
-        tip.tooltipString = category + "\n" + this.name + ": " + numericValue.ToString("F0");
+        tip.tooltipString = category + "\n" + this.name + ": " + percent.text;
     }
 }

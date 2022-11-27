@@ -167,6 +167,11 @@ public class SpeciesOverviewUI : MonoBehaviour {
     public void ChangeSelectedGenome(SelectionGroup group, int index, GenomeButton button) {
         
         selectedButtonData = GetSelectionGroupData(group);
+
+        if(SelectionManager.instance.currentSelection.candidate.candidateID == button.candidateRef.candidateID) {
+            Debug.Log("cand" + button.candidateRef.candidateID + " is already selected! go to events if in pop mode");
+            uiManager.historyPanelUI.SetCurPanelMode(HistoryPanelUI.HistoryPanelMode.SelCreatureTimeline);
+        }
         selectionManager.SetSelected(button.candidateRef);
         
         if (selectedButtonData != null && selectedButtonData.image != null) {

@@ -24,7 +24,7 @@ public class Dash : IAgentAbility
             
         coreModule.stamina[0] -= 0.1f;
         candidate.performanceData.totalTimesDashed++;
-            
+        this.agent.RegisterAgentEvent(SimulationManager.instance.simAgeTimeSteps, "DASHED!", 1f, 8);   
         process.Begin();
     }
     

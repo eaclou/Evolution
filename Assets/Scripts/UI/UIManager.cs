@@ -370,7 +370,7 @@ public class UIManager : Singleton<UIManager>
 
         if (newGame)
         {
-            Debug.Log("ERRORRORO");
+            //Debug.Log("ERRORRORO");
             //simulationManager._BigBangOn = true;
             bigBangPanelUI.Begin();
             simulationManager.AddHistoryEvent(new SimEventData("New Simulation Start!", 0));

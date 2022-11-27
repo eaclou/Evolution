@@ -37,6 +37,8 @@ public class GenomeButton : MonoBehaviour
     /// Updates focusedCandidate in uiManager
     public void ClickedThisButton() 
     {
+        // is this candidate already selected?
+        
         uiManager.speciesOverviewUI.ChangeSelectedGenome(group, index, this);
         Debug.Log("uiManager.speciesOverviewUI.ChangeSelectedGenome(group, index);  ");
         // WPP: removed, function already called by above line

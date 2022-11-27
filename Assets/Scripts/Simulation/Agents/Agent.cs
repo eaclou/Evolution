@@ -486,7 +486,7 @@ public class Agent : MonoBehaviour {
         {
             case AgentActionState.Attacking: RegisterAgentEvent(simManager.simAgeTimeSteps, "Attacked!", 1f, 6); break;
             case AgentActionState.Defending: RegisterAgentEvent(simManager.simAgeTimeSteps, "Defended!", 1f, 7); break;
-            case AgentActionState.Dashing: RegisterAgentEvent(simManager.simAgeTimeSteps, "Dashed!", 1f, 8); break;
+            //case AgentActionState.Dashing: RegisterAgentEvent(simManager.simAgeTimeSteps, "Dashed!", 1f, 8); break;//handled elsewhere?
         }
     }
     
@@ -517,8 +517,11 @@ public class Agent : MonoBehaviour {
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.digestEfficiencyPlant * 1f);     
 
         //Debug.Log("EatFoodPlant " + amount.ToString());
-        RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Plant! (+" + (amount * 1000f).ToString("F0") + " food)", 1f, 0);
+        if(this.feedingFrameCounter == this.feedAnimDuration / 2) {
+            RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Plant! (+" + (amount * 1000f).ToString("F0") + " food)", 1f, 0);
 
+        }
+        
         audioManager.PlayCritterBite(ownPos);
     }
     
@@ -572,7 +575,7 @@ public class Agent : MonoBehaviour {
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.digestEfficiencyMeat * 1f); // Exp for appropriate food
         
         RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Microbe! (" + (amount * 1000f).ToString("F0") + ")", 1f, 1);
-
+                
         audioManager.PlayCritterBite(ownPos);
     }
     
@@ -773,7 +776,7 @@ public class Agent : MonoBehaviour {
 
         //candidateRef.performanceData.minScoreValue = candidateRef.performanceData.timeStepHatched;//SetCurvePointStart(UIManager.instance.historyPanelUI.graphBoundsMinX, UIManager.instance.historyPanelUI.graphBoundsMinY);
         candidateRef.performanceData.p0x = candidateRef.performanceData.timeStepHatched;
-        candidateRef.performanceData.p0y = simManager.masterGenomePool.completeSpeciesPoolsList[speciesIndex].avgLifespan;// + (candidateRef.candidateID % 47);
+        candidateRef.performanceData.p0y = simManager.masterGenomePool.completeSpeciesPoolsList[speciesIndex].avgLifespan;// + ((candidateRef.candidateID % 47) / 47) * 0.5f;
         //candidateRef.SetCurvePointEnd(UIManager.instance.historyPanelUI.graphBoundsMaxX, UIManager.instance.historyPanelUI.graphBoundsMaxY);
         //Debug.Log(candidateRef.performanceData.bezierCurve.points[0]);
         //candidateRef.performanceData.speciesAvgLifespanAtTimeOfBirth = simManager.masterGenomePool.completeSpeciesPoolsList[speciesIndex].avgLifespan;
@@ -1013,15 +1016,15 @@ public class Agent : MonoBehaviour {
         //float throttleMag = smoothedThrottle.magnitude;
         
         // ENERGY DRAIN::::        
-        coreModule.energy -= restingEnergyCost;
+        coreModule.energy -= restingEnergyCost;        
         
-        /*
         // STAMINA:
         float staminaRefillRate = 0.00025f;
         float energyToStaminaConversionRate = 5f * coreModule.healthBonus;
-        coreModule.stamina[0] += staminaRefillRate * energyToStaminaConversionRate;
-        coreModule.energy -= staminaRefillRate; // / energyToStaminaConversionRate;
-
+        coreModule.stamina[0] += staminaRefillRate;// * energyToStaminaConversionRate;
+        coreModule.stamina[0] = Mathf.Clamp01(coreModule.stamina[0]);
+        //coreModule.energy -= staminaRefillRate; // / energyToStaminaConversionRate;
+        /*
         if(coreModule.stamina[0] < 0.1f) {
             staminaRefillRate *= 0.5f;
         }
@@ -1030,15 +1033,15 @@ public class Agent : MonoBehaviour {
         }
         if(isResting) {
             staminaRefillRate *= 5f;
-        }
-        if(coreModule.stamina[0] < 1f) {
+        }*/
+        /*if(coreModule.stamina[0] < 1f) {
             coreModule.stamina[0] += staminaRefillRate;
             coreModule.energy -= staminaRefillRate / energyToStaminaConversionRate;
         }
         else {
             coreModule.stamina[0] = 1f;
-        }
-        */
+        }*/
+        
     }
     
     public AgentActionState curActionState;
@@ -1053,6 +1056,7 @@ public class Agent : MonoBehaviour {
         
         curActionState = GetCurrentActionState();
         UseAbility(curActionState);
+        
         creaturePanel.UpdateAgentActionStateData(candidateRef.candidateID, curActionState);
     }
 
@@ -1100,14 +1104,17 @@ public class Agent : MonoBehaviour {
         }
 
         var ability = GetAbilityFromActionState(actionState);
-        if (ability != null) UseAbility(ability);
+        if (ability != null) {
+            audioManager.PlayCritterAction(ownPos, actionState);
+            RegisterAgentEvent(actionState);
+            UseAbility(ability);
+        }
         
         if (actionState == AgentActionState.Feeding) {
             return;
         }
 
-        audioManager.PlayCritterAction(ownPos, actionState);
-        RegisterAgentEvent(actionState);
+        
     }
     
     private IAgentAbility GetAbilityFromActionState(AgentActionState actionState)

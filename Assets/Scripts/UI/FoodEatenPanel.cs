@@ -13,6 +13,7 @@ public class FoodEatenPanel : MonoBehaviour
 
     public void Refresh()
     {
+        //Debug.Log("REFRECH");
         plants.RefreshDisplay(data.totalFoodEatenPlant, data.plantEatenPercent, true);
         microbes.RefreshDisplay(data.totalFoodEatenZoop, data.zooplanktonEatenPercent, true);
         animals.RefreshDisplay(data.totalFoodEatenCreature, data.creatureEatenPercent, true);

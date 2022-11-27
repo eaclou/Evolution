@@ -457,12 +457,14 @@ public class SimulationManager : Singleton<SimulationManager>
 
     // * WPP: break into sections -> comments (minimum) or functions (better)
     public void TickSimulation() {
+        //Increment Counters
         simAgeTimeSteps++;
         simAgeYearCounter++;
-        TickSparseEvents();       
-        //simEventsManager.Tick();  // WPP: replaced with timer              
         eggSackRespawnCounter++;
         agentRespawnCounter++;
+
+        TickSparseEvents();
+        
         masterGenomePool.Tick(); 
         audioManager.Tick(); //***EAC move outside of this so can handle main menu music as well
 
@@ -609,7 +611,7 @@ public class SimulationManager : Singleton<SimulationManager>
             CheckForYearEvent();
         }
 
-        if (simAgeTimeSteps % 30 == 0) {
+        if (simAgeTimeSteps % 11 == 0) {
             //uiManager.historyPanelUI.SortSpeciesIconList();
             uiManager.historyPanelUI.UpdateTargetGraphBounds();
 
