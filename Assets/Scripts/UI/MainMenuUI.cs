@@ -9,7 +9,7 @@ public class MainMenuUI : MonoBehaviour
     //[SerializeField] Text quickStartText;
     //[SerializeField] GameObject panelGameOptions;
     [SerializeField] Animator mainMenuAnimator;
-    
+    [SerializeField] ToysManager panelToysTemp;
     GameManager gameManager => GameManager.instance;
     //Profile profile => gameManager.activeProfile;
         
@@ -57,6 +57,16 @@ public class MainMenuUI : MonoBehaviour
         mainMenuAnimator.SetBool("NewON", false);
         mainMenuAnimator.SetBool("SaveON", false);
         mainMenuAnimator.SetBool("LoadON", false);
+    }
+
+    public void OpenTempToysPanel() {
+        panelToysTemp.gameObject.SetActive(true);
+        panelToysTemp.OpenToysMenu();
+    }
+    public void CloseTempToysPanel() {
+        panelToysTemp.gameObject.SetActive(false);
+        //panelToysTemp.RefreshUI();
+        //panelToysTemp.Init();
     }
 
     public void ClickCreditsButton()

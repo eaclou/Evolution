@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DiffusionReactionScript : MonoBehaviour {
+public class DiffusionReactionScript : MonoBehaviour { // have to be MonoBehavior?
 
     public Shader blitShader;
     private Material blitMat;
     public Shader brushClickShader;
     //private Material brushClickMat;
+    //convert to ComputeShader??
 
     public Material displayMat;
     public float refreshDelay = 1.0f;

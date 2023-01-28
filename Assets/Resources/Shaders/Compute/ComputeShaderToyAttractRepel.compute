@@ -1,0 +1,104 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+
+#pragma kernel CSInit
+#pragma kernel CSAttractRepelTick
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+Texture2D<float4> SourceRT;
+RWTexture2D<float4> TargetRT;
+
+// Parameters:
+float _Resolution;
+float _DiffusionRateA;
+float _DiffusionRateB;
+float _KillRate;
+float _FeedRate;
+float _IsPainting;
+float _MouseCoordX;
+float _MouseCoordY;
+
+float _BrushRadiusA;
+
+uniform float _Time; // needed?
+
+SamplerState _LinearClamp;
+SamplerState _LinearRepeat;
+SamplerState _PointClamp;
+SamplerState _PointRepeat;
+
+[numthreads(32, 32, 1)]
+void CSInit(uint3 id : SV_DispatchThreadID)
+{
+	
+	float xCoord = ((float)id.x + 0.5) / _Resolution;
+	float yCoord = ((float)id.y + 0.5) / _Resolution;
+	float2 uvOrigin = float2(xCoord, yCoord);
+	float distToCenter = length(float2(0.5, 0.5) - uvOrigin);
+
+	float val = 0;
+	if (distToCenter < 0.015) {
+		val = 1;
+	}
+
+	TargetRT[id.xy] = float4(1, val, 0, 1);
+}
+
+[numthreads(32,32,1)]
+void CSAttractRepelTick(uint3 id : SV_DispatchThreadID)
+{
+	float s = 1.0 / _Resolution;
+	float deltaTime = 1.0;
+
+	// SAMPLE SOURCE TEXTURE:::
+	// Neighbour cells
+	float xCoord = ((float)id.x + 0.5) / _Resolution;
+	float yCoord = ((float)id.y + 0.5) / _Resolution;
+	float2 uvOrigin = float2(xCoord, yCoord);	
+	
+	//*** do I have to try this with indices vs sampling? -- no, that wasn't problem
+	float4 bl = SourceRT.SampleLevel(_PointClamp, uvOrigin + float2(-s, +s), 0);	// F[x-1, y+1]: Bottom Left
+	float4 cl = SourceRT.SampleLevel(_PointClamp, uvOrigin + float2(-s, 0), 0);	// F[x-1, y  ]: Centre Left
+	float4 tl = SourceRT.SampleLevel(_PointClamp, uvOrigin + float2(-s, -s), 0); // F[x-1, y-1]: Top Left
+	float4 tc = SourceRT.SampleLevel(_PointClamp, uvOrigin + float2(0, -s), 0);	// F[x,   y-1]: Top Centre
+	float4 tr = SourceRT.SampleLevel(_PointClamp, uvOrigin + float2(+s, -s), 0);	// F[x,   y-1]: Top Right
+	float4 cc = SourceRT.SampleLevel(_PointClamp, uvOrigin + float2(0, 0), 0);	// F[x,   y  ]: Centre Centre
+	float4 br = SourceRT.SampleLevel(_PointClamp, uvOrigin + float2(+s, +s), 0);	// F[x+1, y+1]: Bottom Right
+	float4 bc = SourceRT.SampleLevel(_PointClamp, uvOrigin + float2(0, +s), 0);	// F[x,   y+1]: Bottom Centre
+	float4 cr = SourceRT.SampleLevel(_PointClamp, uvOrigin + float2(+s, 0), 0);	// F[x+1, y  ]: Centre Right
+	
+	float coCenter = -1;
+	float coAdjacent = 0.2;
+	float coDiagonal = 0.05;
+
+	float laplaceA = cc.x * coCenter +
+		(cl.x + tc.x + cr.x + bc.x) * coAdjacent +
+		(bl.x + tl.x + tr.x + br.x) * coDiagonal;
+	float laplaceB = cc.y * coCenter +
+		(cl.y + tc.y + cr.y + bc.y) * coAdjacent +
+		(bl.y + tl.y + tr.y + br.y) * coDiagonal;
+
+	float abb = cc.x * cc.y * cc.y;
+
+	float valA = cc.x + (_DiffusionRateA * laplaceA - abb + _FeedRate * (1 - cc.x)) * deltaTime;
+	float valB = cc.y + (_DiffusionRateB * laplaceB + abb - (_KillRate + _FeedRate) * cc.y) * deltaTime;
+
+	float2 mouseCoords = float2(_MouseCoordX, _MouseCoordY);
+
+	float2 pixToMouse = uvOrigin - mouseCoords;
+	float distToMouse = length(pixToMouse);
+
+	//if (distToMouse < _BrushRadiusB * _PaintB) {
+	//	col.x = 1.0;// _PaintB;
+	//}
+
+	float4 col = float4(saturate(valA), saturate(valB), 0, 1); //tex2D(_MainTex, i.uv);
+		
+	if (distToMouse < _BrushRadiusA * _IsPainting) {
+		//col.x = 0.5;
+		col.y = 1;// _PaintA;
+	}
+    // TODO: insert actual code here!
+
+	TargetRT[id.xy] = col;
+}
