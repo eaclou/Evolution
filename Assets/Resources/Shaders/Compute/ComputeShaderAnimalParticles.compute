@@ -96,6 +96,8 @@ uniform float _ShoreCollisionDistSlope; // = 3.5;
 
 uniform float _AgingMult;
 
+uniform float _NumAgents;
+
 SamplerState _LinearClamp;
 SamplerState _LinearRepeat;
 SamplerState _PointClamp;
@@ -108,8 +110,7 @@ float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
 
 [numthreads(32,1,1)]
 void CSNewMeasureDistancesInit (uint3 id : SV_DispatchThreadID)
-{	
-	
+{		
 	int critterIndex = id.y;
 	CritterInitData critterInitData = critterInitDataCBuffer[critterIndex];
 	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
@@ -117,6 +118,7 @@ void CSNewMeasureDistancesInit (uint3 id : SV_DispatchThreadID)
 	float closestParticleIndex = 0;
 	float minSquaredDistance = 100000;
 	
+	//int numAliveCount = 0;
 	for(int i = 0; i < 32; i++) {
 		int particleIndex = id.x * 32 + i;
 		AnimalParticleData particleData = animalParticlesRead[particleIndex];
@@ -128,6 +130,7 @@ void CSNewMeasureDistancesInit (uint3 id : SV_DispatchThreadID)
 
 		float distanceSquared = particleToCritter.x * particleToCritter.x + particleToCritter.y * particleToCritter.y;
 		if(particleData.isActive > 0.5) {
+			//numAliveCount++;
 			if(distanceSquared < minSquaredDistance) {
 			
 				minSquaredDistance = distanceSquared;
@@ -165,9 +168,9 @@ void CSNewMeasureDistancesMainA (uint3 id : SV_DispatchThreadID)
 	}
 		
 	AnimalParticleData closestAnimalData = animalParticlesRead[closestParticleIndex];	
-	
+	//uint critterExpandedIndex = id.y * id.x + i;
 	closestParticlesDataCBuffer[critterIndex] = closestAnimalData;
-	_ClosestZooplanktonCBuffer[id.y] = float4(closestParticleIndex, minSquaredDistance, closestAnimalData.worldPos.xy);
+	_ClosestZooplanktonCBuffer[id.x * (_NumAgents / 1024) + id.y] = float4(closestParticleIndex, minSquaredDistance, closestAnimalData.worldPos.xy);
 }
 
 

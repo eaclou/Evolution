@@ -309,7 +309,7 @@ public class DebugPanelUI : MonoBehaviour
         debugTextureViewerArray[8] = vegetationManager.critterNearestPlants32;
         debugTextureViewerArray[8].name = "critterNearestPlants32";        
         
-        debugTextureViewerArray[9] = zooplanktonManager.critterNearestZooplankton32;
+        debugTextureViewerArray[9] = zooplanktonManager.critterNearestZooplanktonRT;
         debugTextureViewerArray[9].name = "critterNearestZooplankton32";
 
         debugTextureViewerArray[10] = vegetationManager.resourceGridRT1;
