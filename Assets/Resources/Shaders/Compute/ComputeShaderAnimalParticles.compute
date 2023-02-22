@@ -153,12 +153,12 @@ void CSNewMeasureDistancesMainA (uint3 id : SV_DispatchThreadID)
 		
 	for(int i = 0; i < 32; i++) {
 		
-		int particleIndex = id.x * 32 + i;
-		
-		float4 sourceData = _CritterToZooplanktonDistancesTexRead[int2(i, critterIndex)];
-		
-		AnimalParticleData particleData = animalParticlesRead[particleIndex];
+		int texIndex = id.x * 32 + i;
+		AnimalParticleData particleData = animalParticlesRead[texIndex];
 
+		//RT is 256x64
+		float4 sourceData = _CritterToZooplanktonDistancesTexRead[int2(texIndex, critterIndex)];
+		
 		if(sourceData.y < minSquaredDistance) {
 			if(particleData.isActive > 0.5) {
 				minSquaredDistance = sourceData.y;
@@ -168,9 +168,11 @@ void CSNewMeasureDistancesMainA (uint3 id : SV_DispatchThreadID)
 	}
 		
 	AnimalParticleData closestAnimalData = animalParticlesRead[closestParticleIndex];	
-	//uint critterExpandedIndex = id.y * id.x + i;
-	closestParticlesDataCBuffer[critterIndex] = closestAnimalData;
-	_ClosestZooplanktonCBuffer[id.x * (_NumAgents / 1024) + id.y] = float4(closestParticleIndex, minSquaredDistance, closestAnimalData.worldPos.xy);
+	
+	const int _NumAgents = 64;
+	int sequentialIndex = id.x * _NumAgents + id.y;
+	closestParticlesDataCBuffer[sequentialIndex] = closestAnimalData;
+	_ClosestZooplanktonCBuffer[sequentialIndex] = float4(closestParticleIndex, minSquaredDistance, closestAnimalData.worldPos.xy);
 }
 
 
@@ -205,11 +207,10 @@ void CSFetchParticleByID (uint3 id : SV_DispatchThreadID)
 void CSEatSelectedAnimalParticles (uint3 id : SV_DispatchThreadID)
 {	
 	// Check distance to nearest particle
-	int critterIndex = id.x;
+	int critterIndex = id.y;
 	
-	float4 data = _ClosestZooplanktonCBuffer[critterIndex];
-	//float4 data = _CritterToZooplanktonDistancesRead[critterIndex];
-
+	float4 data = _ClosestZooplanktonCBuffer[critterIndex]; // THIS ONLY CHECKS 1/8 of them!!!!
+	
 	int particleIndex = (int)data.x;
 
 	AnimalParticleData particleData = animalParticlesRead[particleIndex];
@@ -228,7 +229,7 @@ void CSEatSelectedAnimalParticles (uint3 id : SV_DispatchThreadID)
 	float particleRadius = particleData.radius;
 	float combinedRadius = (mouthRadius + particleRadius * 0.5) * isAlive01 * critterSimData.consumeOn;
 			
-	if(distanceSquared < combinedRadius * combinedRadius) {	
+	if(distanceSquared < combinedRadius*combinedRadius) {	
 		
 		if(critterSimData.consumeOn > 0.5) {   // revisit
 			eatenAmount = particleData.biomass; // * critterInitData.eatEfficiencyMeat + 10; //mouthRadius * mouthRadius * critterInitData.eatEfficiencyMeat * 0.167f; //particleData.nutrientContent;
