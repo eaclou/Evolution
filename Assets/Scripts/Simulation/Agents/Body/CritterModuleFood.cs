@@ -177,10 +177,10 @@ public class CritterModuleFood : IBrainModule
 
 
         //ANIMAL ZOOPLANKTON:
-        nearestAnimalParticleIndex = microbes.finalCritterClosestMicrobesArray[agent.index].index;
-        nearestAnimalParticlePos = microbes.finalCritterClosestMicrobesArray[agent.index].worldPos - simulation.agents[agent.index].bodyRigidbody.transform.position;
+        nearestAnimalParticleIndex = microbes.agentsClosestMicrobeDataArray[agent.index].index;
+        nearestAnimalParticlePos = microbes.agentsClosestMicrobeDataArray[agent.index].worldPos - simulation.agents[agent.index].bodyRigidbody.transform.position;
 
-        nearestAnimalParticleAmount = microbes.finalCritterClosestMicrobesArray[agent.index].biomass;
+        nearestAnimalParticleAmount = microbes.agentsClosestMicrobeDataArray[agent.index].biomass;
         Vector2 critterToAnimalParticle = new Vector2(nearestAnimalParticlePos.x, nearestAnimalParticlePos.y); // - agent.ownPos;
         float distToNearestAnimalParticle = critterToAnimalParticle.magnitude;
         Vector2 animalParticleDir = critterToAnimalParticle.normalized;

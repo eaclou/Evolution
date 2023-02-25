@@ -20,9 +20,9 @@ public class ZooplanktonManager {
     //private RenderTexture animalParticlesNearestCritters1024;
     //private RenderTexture animalParticlesNearestCritters32;
     //private RenderTexture animalParticlesNearestCritters1;
-    private ComputeBuffer closestMicrobesToCrittersCBuffer;
-    public AnimalParticleData[] closestMicrobesToCrittersArray; // Vessel for Getting CBufffer data, may need processing
-    public AnimalParticleData[] finalCritterClosestMicrobesArray; // processed information, length = numAgents
+    private ComputeBuffer agentsClosestMicrobeDataCBuffer;
+    //public AnimalParticleData[] closestMicrobesToCrittersArray; // Vessel for Getting CBufffer data, may need processing
+    public AnimalParticleData[] agentsClosestMicrobeDataArray; // processed information, length = numAgents
     //may have to do similar trick with eatBuffers v v v
     private ComputeBuffer animalParticlesEatAmountsCBuffer;
     public float[] animalParticlesEatAmountsArray;
@@ -30,26 +30,26 @@ public class ZooplanktonManager {
     private ComputeBuffer animalParticlesMeasure1;
     private AnimalParticleData[] animalParticleMeasurementTotalsData;
 
-    private ComputeBuffer cursorClosestParticleDataCBuffer;
+    private ComputeBuffer cursorClosestMicrobeDataCBuffer;
     public AnimalParticleData[] cursorParticleDataArray;
     private ComputeBuffer cursorDistances;
     public AnimalParticleData selectedAnimalParticleData;
-    public AnimalParticleData closestAnimalParticleData;
+    public AnimalParticleData cursorClosestAnimalParticleData;
     public bool isAnimalParticleSelected = false;
     public int selectedAnimalParticleIndex = 0;
     public int closestZooplanktonToCursorIndex = 0;
 
-    public RenderTexture critterNearestZooplanktonRT;
-    private ComputeBuffer closestMicrobeDistanceCBuffer;
-    public Vector4[] closestMicrobeDistanceArray;  // counterpart to CBuffer
-    public Vector4[] finalMicrobeDistancesArray; // final data to use in simulation
+    public RenderTexture agentsClosestMicrobeDistanceRT;
+    public RenderTexture agentsClosestMicrobeDistanceReducedRT;
+    private ComputeBuffer agentsClosestMicrobeDistanceCBuffer;
+    public Vector4[] agentsClosestMicrobeDistanceArray; // final data to use in simulation
 
     private ComputeBuffer zooplanktonRepresentativeGenomeCBuffer;
 
     public WorldLayerZooplanktonGenome zooplanktonSlotGenomeCurrent;  // algae particles!  -- likely to be converted into plants eventually ***
     public WorldLayerZooplanktonGenome[] zooplanktonSlotGenomeMutations;
     
-    public Vector2 closestAnimalParticlePosition2D => closestAnimalParticleData.worldPos2D;
+   // public Vector2 closestAnimalParticlePosition2D => closestAnimalParticleData.worldPos2D;
     
     public struct AnimalParticleData {
         public int index;
@@ -131,23 +131,29 @@ public class ZooplanktonManager {
         animalParticlesMeasure1 = new ComputeBuffer(maxNumMicrobes / 1024, GetAnimalParticleDataSize());
         //Debug.Log("End: " + (Time.realtimeSinceStartup - startTime).ToString());
         
-        critterNearestZooplanktonRT = new RenderTexture(maxNumMicrobes / 32, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-        critterNearestZooplanktonRT.wrapMode = TextureWrapMode.Clamp;
-        critterNearestZooplanktonRT.filterMode = FilterMode.Point;
-        critterNearestZooplanktonRT.enableRandomWrite = true;        
-        critterNearestZooplanktonRT.Create(); 
+        agentsClosestMicrobeDistanceRT = new RenderTexture(maxNumMicrobes / 32, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        agentsClosestMicrobeDistanceRT.wrapMode = TextureWrapMode.Clamp;
+        agentsClosestMicrobeDistanceRT.filterMode = FilterMode.Point;
+        agentsClosestMicrobeDistanceRT.enableRandomWrite = true;        
+        agentsClosestMicrobeDistanceRT.Create(); 
+
+        agentsClosestMicrobeDistanceReducedRT = new RenderTexture(maxNumMicrobes / 256, numAgents, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+        agentsClosestMicrobeDistanceReducedRT.wrapMode = TextureWrapMode.Clamp;
+        agentsClosestMicrobeDistanceReducedRT.filterMode = FilterMode.Point;
+        agentsClosestMicrobeDistanceReducedRT.enableRandomWrite = true;        
+        agentsClosestMicrobeDistanceReducedRT.Create();
  ///***EAC  TRY:::: Formally splitting buffers into extended and condensed form
  ///    OR:: LEAVE OVERFILL in and just ignore it, use only first Entries per critter
  ///    avoids need for double buffers and extra copying
         //Debug.Log("Pre Buffer Creation: " + (Time.realtimeSinceStartup - startTime).ToString());
-        finalCritterClosestMicrobesArray = new AnimalParticleData[numAgents];
-        closestMicrobesToCrittersCBuffer = new ComputeBuffer(numAgents*(maxNumMicrobes/1024), GetAnimalParticleDataSize());
-        closestMicrobesToCrittersArray = new AnimalParticleData[closestMicrobesToCrittersCBuffer.count];
         
-        finalMicrobeDistancesArray = new Vector4[numAgents];
-        closestMicrobeDistanceCBuffer = new ComputeBuffer(numAgents*(maxNumMicrobes/1024), sizeof(float) * 4);
-        closestMicrobeDistanceArray = new Vector4[closestMicrobeDistanceCBuffer.count];
-        cursorClosestParticleDataCBuffer = new ComputeBuffer(2, GetAnimalParticleDataSize());  // 0 = selected, 1 = closest to cursor
+        agentsClosestMicrobeDataCBuffer = new ComputeBuffer(numAgents, GetAnimalParticleDataSize());
+        agentsClosestMicrobeDataArray = new AnimalParticleData[agentsClosestMicrobeDataCBuffer.count];
+        
+        agentsClosestMicrobeDistanceCBuffer = new ComputeBuffer(numAgents, sizeof(float) * 4);
+        agentsClosestMicrobeDistanceArray = new Vector4[agentsClosestMicrobeDistanceCBuffer.count];
+
+        cursorClosestMicrobeDataCBuffer = new ComputeBuffer(2, GetAnimalParticleDataSize());  // 0 = selected, 1 = closest to cursor
         cursorParticleDataArray = new AnimalParticleData[2];
         cursorDistances = new ComputeBuffer(maxNumMicrobes, sizeof(float) * 4);
         
@@ -301,22 +307,34 @@ public class ZooplanktonManager {
         // run through all animalParticles, check against each critter position, then measure min value with recursive reduction:
         // Need to update CritterSim&InitData structs to have more mouth/bite info
         // Record how much animal successfully eaten per Critter
+        
+        animalParticlesEatAmountsCBuffer.Release();
+        animalParticlesEatAmountsCBuffer = new ComputeBuffer(simManager.maxAgents, sizeof(float));
+        animalParticlesEatAmountsArray = new float[animalParticlesEatAmountsCBuffer.count];
+        //animalParticlesEatAmountsCBuffer.SetData(animalParticlesEatAmountsArray);
+
         int kernelCSEatSelectedAnimalParticles = computeShaderAnimalParticles.FindKernel("CSEatSelectedAnimalParticles");
         computeShaderAnimalParticles.SetBuffer(kernelCSEatSelectedAnimalParticles, "critterInitDataCBuffer", simStateDataRef.critterInitDataCBuffer);
         computeShaderAnimalParticles.SetBuffer(kernelCSEatSelectedAnimalParticles, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
         computeShaderAnimalParticles.SetBuffer(kernelCSEatSelectedAnimalParticles, "animalParticlesRead", animalParticlesCBuffer);
         computeShaderAnimalParticles.SetBuffer(kernelCSEatSelectedAnimalParticles, "animalParticlesWrite", animalParticlesCBufferSwap);
         computeShaderAnimalParticles.SetBuffer(kernelCSEatSelectedAnimalParticles, "animalParticlesEatAmountsCBuffer", animalParticlesEatAmountsCBuffer);        
-        computeShaderAnimalParticles.SetBuffer(kernelCSEatSelectedAnimalParticles, "closestParticlesDataCBuffer", closestMicrobesToCrittersCBuffer);  
-        computeShaderAnimalParticles.SetBuffer(kernelCSEatSelectedAnimalParticles, "_ClosestZooplanktonCBuffer", closestMicrobeDistanceCBuffer);
+        computeShaderAnimalParticles.SetBuffer(kernelCSEatSelectedAnimalParticles, "closestParticlesDataCBuffer", agentsClosestMicrobeDataCBuffer);  
+        computeShaderAnimalParticles.SetBuffer(kernelCSEatSelectedAnimalParticles, "_ClosestZooplanktonCBuffer", agentsClosestMicrobeDistanceCBuffer);
         computeShaderAnimalParticles.Dispatch(kernelCSEatSelectedAnimalParticles, 1, simStateDataRef.critterSimDataCBuffer.count, 1);
 
         animalParticlesEatAmountsCBuffer.GetData(animalParticlesEatAmountsArray);
 
         float totalAnimalEaten = 0f;
-        for(int i = 0; i < animalParticlesEatAmountsCBuffer.count; i++) {
+        /*string detxt = "";
+        for(int i = 0; i < animalParticlesEatAmountsArray.Length; i++) {
             totalAnimalEaten += animalParticlesEatAmountsArray[i];
+            detxt += i + ": " + animalParticlesEatAmountsArray[i] + "\n";
         }
+        if(totalAnimalEaten > 0f) {
+            Debug.Log("amount eqaten: " + totalAnimalEaten + "\n" + detxt);
+        }*/
+        
         // Copy/Swap Animal PArticle Buffer:
         int kernelCSCopyAnimalParticlesBuffer = computeShaderAnimalParticles.FindKernel("CSCopyAnimalParticlesBuffer");
         computeShaderAnimalParticles.SetBuffer(kernelCSCopyAnimalParticlesBuffer, "animalParticlesRead", animalParticlesCBufferSwap);
@@ -326,57 +344,43 @@ public class ZooplanktonManager {
 
     // need to send info on closest particle pos/dir/amt back to CPU also
     public void FindClosestAnimalParticleToCritters(SimulationStateData simStateDataRef) {
-        int kernelCSNewMeasureDistancesInit = computeShaderAnimalParticles.FindKernel("CSNewMeasureDistancesInit");
-        int kernelCSNewMeasureDistancesMainA = computeShaderAnimalParticles.FindKernel("CSNewMeasureDistancesMainA");
-
-        computeShaderAnimalParticles.SetBuffer(kernelCSNewMeasureDistancesInit, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
-        computeShaderAnimalParticles.SetBuffer(kernelCSNewMeasureDistancesInit, "critterInitDataCBuffer", simStateDataRef.critterInitDataCBuffer);
-        computeShaderAnimalParticles.SetBuffer(kernelCSNewMeasureDistancesInit, "animalParticlesRead", animalParticlesCBuffer);
-        //computeShaderAnimalParticles.SetFloat("_NumAgents", SimulationManager.instance.maxAgents);
-        computeShaderAnimalParticles.SetTexture(kernelCSNewMeasureDistancesInit, "_CritterToZooplanktonDistancesTexWrite", critterNearestZooplanktonRT); // INIT
-        computeShaderAnimalParticles.SetTexture(kernelCSNewMeasureDistancesMainA, "_CritterToZooplanktonDistancesTexRead", critterNearestZooplanktonRT); /// MAINA
-        computeShaderAnimalParticles.Dispatch(kernelCSNewMeasureDistancesInit, maxNumMicrobes / 32, simStateDataRef.critterSimDataCBuffer.count, 1);
-
-        computeShaderAnimalParticles.SetBuffer(kernelCSNewMeasureDistancesMainA, "animalParticlesRead", animalParticlesCBuffer);
-        computeShaderAnimalParticles.SetBuffer(kernelCSNewMeasureDistancesMainA, "_ClosestZooplanktonCBuffer", closestMicrobeDistanceCBuffer);
-        computeShaderAnimalParticles.SetBuffer(kernelCSNewMeasureDistancesMainA, "closestParticlesDataCBuffer", closestMicrobesToCrittersCBuffer);
-        computeShaderAnimalParticles.Dispatch(kernelCSNewMeasureDistancesMainA, maxNumMicrobes / 1024, simStateDataRef.critterSimDataCBuffer.count, 1);
-
-        AnimalParticleData[] microbeDataArray = new AnimalParticleData[closestMicrobesToCrittersCBuffer.count];
-        closestMicrobesToCrittersCBuffer.GetData(microbeDataArray);// finalCritterClosestMicrobesArray); //ParticleData // condense to 1D buffer and interpret/process that output here?
-
-        Vector4[] unpackedDistances = new Vector4[closestMicrobeDistanceCBuffer.count];
-        closestMicrobeDistanceCBuffer.GetData(unpackedDistances); // DISTANCES VECTOR4
+        //LOGIC:
+        // Function 3: Finish processing RT into 2 buffers: one vector4 of closest single microbe to each Critter
         
-        //if (simManager.simAgeTimeSteps % 500 == 288) {
-        //unpack if needed here:
-        //string txt = "";
-        for(int j=0; j< unpackedDistances.Length;j++) {
+        //int kernelCSNewMeasureDistancesInit = computeShaderAnimalParticles.FindKernel("CSNewMeasureDistancesInit");
+        //int kernelCSNewMeasureDistancesMainA = computeShaderAnimalParticles.FindKernel("CSNewMeasureDistancesMainA");
 
-            //txt += unpackedDistances[j] + "\n";
-        }
+        
+        int kernelCSGenerateCritterNearestMicrobesRT = computeShaderAnimalParticles.FindKernel("CSGenerateCritterNearestMicrobesRT");
+        int kernelCSCollapseDistancesRTBy32x = computeShaderAnimalParticles.FindKernel("CSCollapseDistancesRTBy32x");
+        int kernelCSCollapseDistancesRTBy8x = computeShaderAnimalParticles.FindKernel("CSCollapseDistancesRTBy8x");
+        int kernelCSCreateCritterNearestMicrobeBuffers = computeShaderAnimalParticles.FindKernel("CSCreateCritterNearestMicrobeBuffers");
+        // Function 1:  Takes list of all microbes + critterData and generates a rendertexture with baked distances from each critter to every 32nd microbe
+        
+        computeShaderAnimalParticles.SetBuffer(kernelCSGenerateCritterNearestMicrobesRT, "critterSimDataCBuffer", simStateDataRef.critterSimDataCBuffer);
+        computeShaderAnimalParticles.SetBuffer(kernelCSGenerateCritterNearestMicrobesRT, "critterInitDataCBuffer", simStateDataRef.critterInitDataCBuffer);
+        computeShaderAnimalParticles.SetBuffer(kernelCSGenerateCritterNearestMicrobesRT, "animalParticlesRead", animalParticlesCBuffer);
+        computeShaderAnimalParticles.SetTexture(kernelCSGenerateCritterNearestMicrobesRT, "_CritterToZooplanktonDistancesTexWrite", agentsClosestMicrobeDistanceRT); // INIT
+        computeShaderAnimalParticles.SetTexture(kernelCSCollapseDistancesRTBy8x, "_CritterToZooplanktonDistancesTexRead", agentsClosestMicrobeDistanceRT); /// MAINA
+        computeShaderAnimalParticles.Dispatch(kernelCSGenerateCritterNearestMicrobesRT, maxNumMicrobes / 32, simStateDataRef.critterSimDataCBuffer.count, 1);
+        // Function 2: REDUCE RenderTexture size by factor 2^n   Loop this step as needed? or hard code different amounts?
+        computeShaderAnimalParticles.SetTexture(kernelCSCollapseDistancesRTBy8x, "_CritterToZooplanktonDistancesTexWrite", agentsClosestMicrobeDistanceReducedRT);
+        computeShaderAnimalParticles.SetTexture(kernelCSCreateCritterNearestMicrobeBuffers, "_CritterToZooplanktonDistancesTexRead", agentsClosestMicrobeDistanceReducedRT);
+        computeShaderAnimalParticles.Dispatch(kernelCSCollapseDistancesRTBy8x, maxNumMicrobes / 32 / 8, simStateDataRef.critterSimDataCBuffer.count, 1);
 
-        for(int a = 0; a < simManager.maxAgents; a++) { //64?
-            int closestMicrobeIndex = 0;
-            float closestDistanceSqr = 100000f;
-            AnimalParticleData data = new AnimalParticleData();
-            for(int p = 0; p < (maxNumMicrobes / 1024); p++) { // 8
-                int particleIndex = p * simManager.maxAgents + a;
-                if(unpackedDistances[particleIndex].y < closestDistanceSqr) {
-                    closestMicrobeIndex = (int)unpackedDistances[particleIndex].x;
-                    closestDistanceSqr = unpackedDistances[particleIndex].y;
-                    data = microbeDataArray[particleIndex];
-                    //txt += particleIndex + "\n";
-                }
-            }
-            finalCritterClosestMicrobesArray[a] = data;
-            finalMicrobeDistancesArray[a].x = closestMicrobeIndex;
-            finalMicrobeDistancesArray[a].y = closestDistanceSqr;
-            //txt += a + ", ---- " + closestMicrobeIndex + ":  " + closestDistanceSqr + "\n";
-                
-        }
-            //Debug.Log(txt + finalCritterClosestMicrobesArray[0].worldPos);
-        //}
+        // Function 3: Finish processing length-32 RT into 2 sorted buffers: one vector4 of closest single microbe to each Critter
+        
+        computeShaderAnimalParticles.SetBuffer(kernelCSCreateCritterNearestMicrobeBuffers, "animalParticlesRead", animalParticlesCBuffer);
+        computeShaderAnimalParticles.SetBuffer(kernelCSCreateCritterNearestMicrobeBuffers, "_ClosestZooplanktonCBuffer", agentsClosestMicrobeDistanceCBuffer);
+        computeShaderAnimalParticles.SetBuffer(kernelCSCreateCritterNearestMicrobeBuffers, "closestParticlesDataCBuffer", agentsClosestMicrobeDataCBuffer);
+        //
+        computeShaderAnimalParticles.Dispatch(kernelCSCreateCritterNearestMicrobeBuffers, 1, simStateDataRef.critterSimDataCBuffer.count, 1);
+
+        //Third Stage needed???
+        //AnimalParticleData[] microbeDataArray = new AnimalParticleData[agentsClosestMicrobeDataCBuffer.count]; // FULL ~8k length
+        agentsClosestMicrobeDataCBuffer.GetData(agentsClosestMicrobeDataArray);
+        agentsClosestMicrobeDistanceCBuffer.GetData(agentsClosestMicrobeDistanceArray); // DISTANCES VECTOR4
+        
     }
     
     private Vector4[] ReduceDistancesArray(Vector4[] inBuffer) {
@@ -423,18 +427,18 @@ public class ZooplanktonManager {
         
         // Now Fetch the actual particleData:::::
         int kernelCSFetchParticleByID = computeShaderAnimalParticles.FindKernel("CSFetchParticleByID");
-        computeShaderAnimalParticles.SetBuffer(kernelCSFetchParticleByID, "selectedAnimalParticleDataCBuffer", cursorClosestParticleDataCBuffer);      
+        computeShaderAnimalParticles.SetBuffer(kernelCSFetchParticleByID, "selectedAnimalParticleDataCBuffer", cursorClosestMicrobeDataCBuffer);      
         
         computeShaderAnimalParticles.SetInt("_SelectedParticleID", selectedAnimalParticleIndex);   
         computeShaderAnimalParticles.SetInt("_ClosestParticleID", Mathf.RoundToInt(swapBuffer[0].x)); 
         computeShaderAnimalParticles.SetBuffer(kernelCSFetchParticleByID, "animalParticlesRead", animalParticlesCBuffer);        
         computeShaderAnimalParticles.Dispatch(kernelCSFetchParticleByID, 1, 1, 1);
 
-        cursorClosestParticleDataCBuffer.GetData(cursorParticleDataArray);
+        cursorClosestMicrobeDataCBuffer.GetData(cursorParticleDataArray);
 
         //string txt = "nearestIndex = " + cursorParticleDataArray[0].index + " (" + cursorParticleDataArray[0].age +  ")   " + (cursorParticleDataArray[0].biomass * 1000f).ToString("F0"); // "lngth: " + swapBuffer.Length.ToString() + ",  " + swapBuffer[0].ToString() + "   " + swapBuffer[1].ToString() + "   " + swapBuffer[swapBuffer.Length - 2].ToString() + "   " + swapBuffer[swapBuffer.Length - 1].ToString();
         //Debug.Log(cursorParticleDataArray[1].index);
-        closestAnimalParticleData = cursorParticleDataArray[1];
+        cursorClosestAnimalParticleData = cursorParticleDataArray[1];
         selectedAnimalParticleData = cursorParticleDataArray[0];
     }
     
@@ -454,7 +458,7 @@ public class ZooplanktonManager {
         float curOxygenUsed = 0f;
         float curWasteProduced = 0f;
         float curAlgaeConsumed = 0;
-        int curAliveCount = 0;
+        //int curAliveCount = 0;
         for(int i = 0; i < animalParticleMeasurementTotalsData.Length; i++) {
             curBiomass += animalParticleMeasurementTotalsData[i].biomass;
             curOxygenUsed += animalParticleMeasurementTotalsData[i].oxygenUsed;
@@ -484,19 +488,23 @@ public class ZooplanktonManager {
         } */       
         animalParticlesCBuffer?.Release();
         animalParticlesCBufferSwap?.Release();
-        closestMicrobesToCrittersCBuffer?.Release();
+
+        agentsClosestMicrobeDataCBuffer?.Release();
         animalParticlesEatAmountsCBuffer?.Release();
         animalParticlesMeasure32?.Release();
         animalParticlesMeasure1?.Release();
         zooplanktonRepresentativeGenomeCBuffer?.Release();
 
-        if(critterNearestZooplanktonRT != null) {
-            critterNearestZooplanktonRT.Release();
+        if(agentsClosestMicrobeDistanceRT != null) {
+            agentsClosestMicrobeDistanceRT.Release();
+        }
+        if(agentsClosestMicrobeDistanceReducedRT != null) {
+            agentsClosestMicrobeDistanceReducedRT.Release();
         }
         
-        closestMicrobeDistanceCBuffer?.Release();
-        closestMicrobesToCrittersCBuffer?.Release();
+        agentsClosestMicrobeDistanceCBuffer?.Release();
+        agentsClosestMicrobeDataCBuffer?.Release();
         cursorDistances?.Release();
-        cursorClosestParticleDataCBuffer?.Release();
+        cursorClosestMicrobeDataCBuffer?.Release();
     }
 }

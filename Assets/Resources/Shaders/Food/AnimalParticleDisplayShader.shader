@@ -155,10 +155,10 @@
 				o.altitudeUV = worldPosition.xy / _MapSize;
 				o.color = particleData.color;
 				float oldAgeMask = saturate((particleData.age - 1.0) * 1000);
-				o.color.a = saturate(particleData.age * 0.5); //  1.0 - oldAgeMask; // particleData.isDecaying;
+				//o.color.a = saturate(particleData.age * 0.5); //  1.0 - oldAgeMask; // particleData.isDecaying;
 				o.highlight = float2(hoverMask, selectedMask);
 				float blah = (1.0 - (particleData.biomass / particleData.extra0)) * particleData.isDecaying;
-				o.status = float2(particleData.isDecaying, blah);
+				o.status = float2(particleData.isDecaying, particleData.isActive);
 
 				return o;
 			}			
@@ -169,8 +169,19 @@
 				if(i.highlight.x >= 0.5) {
 					col = float4(1,1,1,1);
 				}
+				if (i.status.y >= 0.5) {
+					col = float4(0, 1, 0, 1);
+
+					if (i.status.x >= 0.5) {
+						col = float4(1, 0, 0, 1);
+					}
+				}
+				else {
+					col = float4(0, 0, 1, 1);
+				}
 				
-				return col;
+				
+				return i.color;
 
 				float4 texColor = float4(1,1,1,1); // *********************************************************** tex2D(_MainTex, i.uv);
 				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV) * 0.5 + 0.5;

@@ -537,7 +537,7 @@ public struct CritterSimData
         energy = 1f; // agents[i].coreModule.energyRaw / agents[i].coreModule.maxEnergyStorage;
         health = 1f; // agents[i].coreModule.healthHead;
         stamina = 1f; // agents[i].coreModule.stamina[0];
-        consumeOn = isDead ? 0f : Mathf.Sin(angle * 3.19f) * 0.5f + 0.5f;
+        consumeOn = 0f;// isDead ? 0f : Mathf.Sin(angle * 3.19f) * 0.5f + 0.5f;
         moveAnimCycle = isDead ? 0f : Time.realtimeSinceStartup * 0.6f % 1f;
         turnAmount = isDead ? 0f : Mathf.Sin(Time.realtimeSinceStartup * 0.654321f) * 0.65f + 0.25f;
         accel = isDead ? 0f : (Mathf.Sin(Time.realtimeSinceStartup * 0.79f) * 0.5f + 0.5f) * 0.081f; // Mathf.Clamp01(agents[i].curAccel) * 1f; // ** RE-FACTOR!!!!

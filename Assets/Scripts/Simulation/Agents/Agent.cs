@@ -56,7 +56,7 @@ public class Agent : MonoBehaviour {
     public bool isAttacking => attack.inProcess;
     
     // Flag for intention to eat gpu food particle (plant-type) 
-    public bool isFreeToEat => isFeeding && !isCooldown; // && feedingFrameCounter <= 4;
+    public bool isFreeToEat => isFeeding && !isCooldown && feedingFrameCounter == 4; //***EAC HACKY
     
     //***EC eventually move these into creature genome, make variable
     public int feedAnimDuration { get => data.feedAnimDuration; set => data.feedAnimDuration = value; }
@@ -557,7 +557,7 @@ public class Agent : MonoBehaviour {
     
     public void EatFoodMeat(float amount) {
         //totalFoodEatenZoop += amount; 
-        amount *= 15f;
+        amount *= 1f;
         amount = Mathf.Min(amount, coreModule.stomachSpace);
                 
         
@@ -574,7 +574,7 @@ public class Agent : MonoBehaviour {
         
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.digestEfficiencyMeat * 1f); // Exp for appropriate food
         
-        RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Microbe! (" + (amount * 1000f).ToString("F0") + ")", 1f, 1);
+        RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Microbe! (" + simManager.zooplanktonManager.agentsClosestMicrobeDataArray[this.index].index + ")", 1f, 1);
                 
         audioManager.PlayCritterBite(ownPos);
     }
@@ -951,9 +951,9 @@ public class Agent : MonoBehaviour {
             // Food calc before energy/healing/etc? **************
             //float sizeValue = BodyGenome.GetBodySizeScore01(candidateRef.candidateGenome.bodyGenome);
             // FOOD PARTICLES: Either mouth type for now:
-            float foodParticleEatAmount = simManager.vegetationManager.plantParticlesEatAmountsArray[index] * coreModule.digestEfficiencyPlant * 32f; // **************** PLANT BONUS!! HACKY
-            float animalParticleEatAmount = simManager.zooplanktonManager.animalParticlesEatAmountsArray[index] * coreModule.digestEfficiencyMeat;
-            
+            float foodParticleEatAmount = simManager.vegetationManager.plantParticlesEatAmountsArray[index]; // **************** PLANT BONUS!! HACKY
+            float animalParticleEatAmount = simManager.zooplanktonManager.animalParticlesEatAmountsArray[index];
+            //Debug.Log(index + ", " + animalParticleEatAmount);
             bool isEatingPlant = foodParticleEatAmount > 0f;
             bool isEatingAnimal = animalParticleEatAmount > 0f;
             
@@ -1191,8 +1191,8 @@ public class Agent : MonoBehaviour {
         // get size in 0-1 range from minSize to maxSize: // **** NOT ACCURATE!!!!
         //float sizeValue = Mathf.Clamp01(coreModule.speedBonus * (candidateRef.candidateGenome.bodyGenome.coreGenome.creatureBaseLength - 0.2f) / 2f);  // Mathf.Clamp01((fullSizeBoundingBox.x - 0.1f) / 2.5f); // ** Hardcoded assuming size ranges from 0.1 --> 2.5 !!! ********
 
-        float swimSpeed = 24f;// * coreModule.speedBonus; // Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
-        float turnRate = 12f;// * coreModule.speedBonus; //10 // Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
+        float swimSpeed = 12f;// * coreModule.speedBonus; // Mathf.Lerp(movementModule.smallestCreatureBaseSpeed, movementModule.largestCreatureBaseSpeed, 0.5f); // sizeValue);
+        float turnRate = 7f;// * coreModule.speedBonus; //10 // Mathf.Lerp(movementModule.smallestCreatureBaseTurnRate, movementModule.largestCreatureBaseTurnRate, 0.5f) * 0.1f; // sizeValue);
         
         /*float dashBonus = 1f;
         if(isDashing) {                

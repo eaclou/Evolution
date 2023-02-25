@@ -140,7 +140,13 @@ public class CreaturePanelUI : MonoBehaviour
             }
             float reqMass = SettingsManager.instance.agentSettings._BaseInitMass * SettingsManager.instance.agentSettings._MinPregnancyFactor;
             float agentMass = agent.currentBiomass * SettingsManager.instance.agentSettings._MaxPregnancyProportion;
-            debugText.text = "Agent# " + agent.index + "\nCandidateID: " + agent.candidateRef.candidateID + "\nreqMass: " + reqMass + ", agentMass: " + agentMass.ToString("F2") + "\nSpecies#cands: " + simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].candidateGenomesList.Count;
+            debugText.text = "Agent# " + agent.index + "\nCandidateID: " + agent.candidateRef.candidateID + 
+                "\nreqMass: " + reqMass + ", agentMass: " + agentMass.ToString("F2") + 
+                "\nSpecies#cands: " + simulationManager.masterGenomePool.completeSpeciesPoolsList[agent.speciesIndex].candidateGenomesList.Count +
+                "\n" + simulationManager.zooplanktonManager.agentsClosestMicrobeDistanceArray[agent.index].x + ", " + simulationManager.zooplanktonManager.agentsClosestMicrobeDistanceArray[agent.index].y +
+                "\n" + (simulationManager.zooplanktonManager.agentsClosestMicrobeDistanceArray[agent.index].z-agent.ownPos.x) + ", "  + (simulationManager.zooplanktonManager.agentsClosestMicrobeDistanceArray[agent.index].w-agent.ownPos.y) +
+                "\n" + simulationManager.zooplanktonManager.animalParticlesEatAmountsArray[agent.index] +
+                "\n" + agent.feedingFrameCounter;
 
             TooltipUI pregnantTooltip = imagePregnancy.GetComponent<TooltipUI>();
             pregnantTooltip.tooltipString = "PREGNANT: " + (Mathf.Clamp01(agentMass / reqMass) * 100f).ToString("F0") + " %";

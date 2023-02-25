@@ -160,7 +160,7 @@ public class UIManager : Singleton<UIManager>
         
         microbeDistance = 1f;
         if (simulationManager.zooplanktonManager != null) {
-            microbeDistance = (simulationManager.zooplanktonManager.closestAnimalParticlePosition2D - mousePositionOnWater).magnitude;
+            microbeDistance = (new Vector2(simulationManager.zooplanktonManager.cursorClosestAnimalParticleData.worldPos.x, simulationManager.zooplanktonManager.cursorClosestAnimalParticleData.worldPos.y) - mousePositionOnWater).magnitude;
         }  
                           
         tooltipActive = false;
@@ -247,8 +247,8 @@ public class UIManager : Singleton<UIManager>
                 return "Algae #" + simulationManager.vegetationManager.closestPlantParticleData.index + "\n" + plantStatusString +"Size: " + simulationManager.vegetationManager.closestPlantParticleData.biomass.ToString("F2");
             }
             case TooltipId.Microbe: {
-                string microbeStatusString = simulationManager.zooplanktonManager.closestAnimalParticleData.isDecaying > 0.5f ? "[DEAD] " : "[ALIVE] ";
-                return "Microbe #" + simulationManager.zooplanktonManager.closestAnimalParticleData.index + "\n" + microbeStatusString + "Size: " + simulationManager.zooplanktonManager.closestAnimalParticleData.biomass.ToString("F2");
+                string microbeStatusString = simulationManager.zooplanktonManager.cursorClosestAnimalParticleData.isDecaying > 0.5f ? "[DEAD] " : "[ALIVE] ";
+                return "Microbe #" + simulationManager.zooplanktonManager.cursorClosestAnimalParticleData.index + "\n" + microbeStatusString + "Size: " + simulationManager.zooplanktonManager.cursorClosestAnimalParticleData.biomass.ToString("F2");
             }
             case TooltipId.Sensor: return "Sensor #" + (simulationManager.simAgeTimeSteps * cursorX / 360f).ToString("F0");
             case TooltipId.EggSack: return "EggSack " + cameraManager.mouseHoverEggSackRef.index + "\nSpecies: " + cameraManager.mouseHoverEggSackRef.speciesIndex + ", Size: " + cameraManager.mouseHoverEggSackRef.currentBiomass.ToString("F2"); //***EAC EGGSACK???

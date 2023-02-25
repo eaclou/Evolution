@@ -1,13 +1,19 @@
 ﻿//#pragma kernel CSMeasureInitCritterDistances
 //#pragma kernel CSReduceCritterDistances32
-#pragma kernel CSNewMeasureDistancesInit
-#pragma kernel CSNewMeasureDistancesMainA
+//#pragma kernel CSNewMeasureDistancesInit
+//#pragma kernel CSNewMeasureDistancesMainA
 #pragma kernel CSMeasureInitCursorDistances
 #pragma kernel CSFetchParticleByID
 #pragma kernel CSEatSelectedAnimalParticles
 #pragma kernel CSCopyAnimalParticlesBuffer
 #pragma kernel CSMeasureTotalAnimalParticlesAmount
 #pragma kernel CSSimulateAnimalParticles
+
+#pragma kernel CSGenerateCritterNearestMicrobesRT
+#pragma kernel CSCollapseDistancesRTBy32x
+#pragma kernel CSCollapseDistancesRTBy8x
+#pragma kernel CSCollapseDistancesRTBy2x
+#pragma kernel CSCreateCritterNearestMicrobeBuffers
 
 #include "Assets/Resources/Shaders/Inc/StructsCritterData.cginc"
 #include "Assets/Resources/Shaders/Inc/StructsAnimalParticles.cginc"
@@ -17,12 +23,11 @@ StructuredBuffer<CritterSimData> critterSimDataCBuffer;
 
 StructuredBuffer<AnimalParticleData> animalParticlesRead;
 RWStructuredBuffer<AnimalParticleData> animalParticlesWrite;
-RWTexture2D<float4> animalParticlesNearestCrittersRT;
+RWTexture2D<float4> animalParticlesNearestCrittersRead;
+RWTexture2D<float4> animalParticlesNearestCrittersWrite;
 
 RWStructuredBuffer<AnimalParticleData> closestParticlesDataCBuffer;
-
 RWStructuredBuffer<float4> _ClosestZooplanktonCBuffer;
-//StructuredBuffer<float4> _CritterToZooplanktonDistancesRead;
 
 RWStructuredBuffer<AnimalParticleData> selectedAnimalParticleDataCBuffer;
 StructuredBuffer<float4> cursorDistancesRead; // used to reduce foodParticlesNearestCrittersRT down to minimum distances
@@ -107,79 +112,117 @@ float rand(float2 co){   // OUTPUT is in [0,1] RANGE!!!
 	return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
 }
 
-
-[numthreads(32,1,1)]
-void CSNewMeasureDistancesInit (uint3 id : SV_DispatchThreadID)
-{		
+[numthreads(32, 1, 1)]
+void CSGenerateCritterNearestMicrobesRT(uint3 id : SV_DispatchThreadID)
+{
 	int critterIndex = id.y;
 	CritterInitData critterInitData = critterInitDataCBuffer[critterIndex];
 	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
 
 	float closestParticleIndex = 0;
 	float minSquaredDistance = 100000;
-	
-	//int numAliveCount = 0;
-	for(int i = 0; i < 32; i++) {
+
+	for (int i = 0; i < 32; i++) {
 		int particleIndex = id.x * 32 + i;
 		AnimalParticleData particleData = animalParticlesRead[particleIndex];
-	
+
 		float mouthRadius = critterInitData.boundingBoxSize.x * critterSimData.growthPercentage; // **** REMEMBER TO *0.5 EVENTUALLY FOR ACCURATE SIZE
 		float2 mouthCenterPos = critterSimData.heading * critterInitData.boundingBoxSize.y * 0.5 * critterSimData.growthPercentage;
 
 		float2 particleToCritter = critterSimData.worldPos.xy + mouthCenterPos * 1.0 - particleData.worldPos.xy;
 
 		float distanceSquared = particleToCritter.x * particleToCritter.x + particleToCritter.y * particleToCritter.y;
-		if(particleData.isActive > 0.5) {
+		if (particleData.isActive > 0.5) { // Think About This one
 			//numAliveCount++;
-			if(distanceSquared < minSquaredDistance) {
-			
+			if (distanceSquared < minSquaredDistance) {
 				minSquaredDistance = distanceSquared;
 				closestParticleIndex = particleIndex;
-			}				
+			}
 		}
-	}	
-
+	}
 	_CritterToZooplanktonDistancesTexWrite[int2(id.x, critterIndex)] = float4(closestParticleIndex, minSquaredDistance, animalParticlesRead[closestParticleIndex].worldPos.xy);
 }
 
-[numthreads(1,1,1)]
-void CSNewMeasureDistancesMainA (uint3 id : SV_DispatchThreadID)
-{	
-	int critterIndex = id.y;
-	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
-			
+[numthreads(1, 1, 1)]
+void CSCollapseDistancesRTBy32x(uint3 id : SV_DispatchThreadID)
+{
 	float closestParticleIndex = 0;
 	float minSquaredDistance = 100000;
-		
-	for(int i = 0; i < 32; i++) {
-		
+	for (int i = 0; i < 32; i++) {
+		int texIndex = id.x * 32 + i;
+		//AnimalParticleData particleData = animalParticlesRead[texIndex];
+		float4 sourceData = _CritterToZooplanktonDistancesTexRead[int2(texIndex, id.y)];
+		if (sourceData.y < minSquaredDistance) {
+			minSquaredDistance = sourceData.y;
+			closestParticleIndex = sourceData.x;			
+		}
+	}
+	AnimalParticleData closestAnimalData = animalParticlesRead[closestParticleIndex];
+	_CritterToZooplanktonDistancesTexWrite[id.xy] = float4(closestParticleIndex, minSquaredDistance, closestAnimalData.worldPos.xy);
+	
+}
+[numthreads(1, 1, 1)]
+void CSCollapseDistancesRTBy8x(uint3 id : SV_DispatchThreadID)
+{
+	float closestParticleIndex = 0;
+	float minSquaredDistance = 100000;
+	float xPos = -1;
+	float yPos = -1;
+	for (int i = 0; i < 8; i++) {
+		int texIndex = id.x * 8 + i;		
+		float4 sourceData = _CritterToZooplanktonDistancesTexRead[int2(texIndex, id.y)];
+		if (sourceData.y < minSquaredDistance) {			
+			minSquaredDistance = sourceData.y;
+			closestParticleIndex = sourceData.x;	
+			xPos = sourceData.z;
+			yPos = sourceData.w;
+		}
+	}
+	
+	_CritterToZooplanktonDistancesTexWrite[id.xy] = float4(closestParticleIndex, minSquaredDistance, xPos, yPos);
+}
+[numthreads(1, 1, 1)]
+void CSCollapseDistancesRTBy2x(uint3 id : SV_DispatchThreadID)
+{
+
+}
+[numthreads(1, 1, 1)]
+void CSCreateCritterNearestMicrobeBuffers(uint3 id : SV_DispatchThreadID)
+{
+	int critterIndex = id.y;
+	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
+
+	float closestParticleIndex = 0;
+	float minSquaredDistance = 100000;
+
+	for (int i = 0; i < 32; i++) {
+
 		int texIndex = id.x * 32 + i;
 		AnimalParticleData particleData = animalParticlesRead[texIndex];
 
 		//RT is 256x64
 		float4 sourceData = _CritterToZooplanktonDistancesTexRead[int2(texIndex, critterIndex)];
-		
-		if(sourceData.y < minSquaredDistance) {
-			if(particleData.isActive > 0.5) {
+
+		if (sourceData.y < minSquaredDistance) {
+			if (particleData.isActive > 0.5) {
 				minSquaredDistance = sourceData.y;
 				closestParticleIndex = sourceData.x;
-			}				
+			}
 		}
 	}
-		
-	AnimalParticleData closestAnimalData = animalParticlesRead[closestParticleIndex];	
-	
+
+	AnimalParticleData closestAnimalData = animalParticlesRead[closestParticleIndex];
+
 	const int _NumAgents = 64;
 	int sequentialIndex = id.x * _NumAgents + id.y;
-	closestParticlesDataCBuffer[sequentialIndex] = closestAnimalData;
+	closestParticlesDataCBuffer[sequentialIndex] = closestAnimalData; // needed????
 	_ClosestZooplanktonCBuffer[sequentialIndex] = float4(closestParticleIndex, minSquaredDistance, closestAnimalData.worldPos.xy);
 }
 
 
 [numthreads(32,1,1)]
 void CSMeasureInitCursorDistances (uint3 id : SV_DispatchThreadID)
-{
-	
+{	
 	int particleIndex = id.x;	
 
 	AnimalParticleData particleData = animalParticlesRead[particleIndex];
@@ -209,18 +252,19 @@ void CSEatSelectedAnimalParticles (uint3 id : SV_DispatchThreadID)
 	// Check distance to nearest particle
 	int critterIndex = id.y;
 	
-	float4 data = _ClosestZooplanktonCBuffer[critterIndex]; // THIS ONLY CHECKS 1/8 of them!!!!
+	float4 data = _ClosestZooplanktonCBuffer[critterIndex]; 
 	
-	int particleIndex = (int)data.x;
+	//int particleIndex = (int)data.x;
 
-	AnimalParticleData particleData = animalParticlesRead[particleIndex];
+	AnimalParticleData particleData = closestParticlesDataCBuffer[critterIndex];
 	
-	animalParticlesWrite[particleIndex] = particleData;
+	animalParticlesWrite[particleData.index] = particleData; //make copy
 
 	CritterInitData critterInitData = critterInitDataCBuffer[critterIndex];
 	CritterSimData critterSimData = critterSimDataCBuffer[critterIndex];
 
 	float eatenAmount = 0.0;
+	//animalParticlesEatAmountsCBuffer[id.x] = 0.0;
 
 	float isAlive01 = saturate((critterSimData.embryoPercentage - 0.99) * 10000) * saturate(((1.0 - critterSimData.decayPercentage) - 0.99) * 10000);
 
@@ -229,20 +273,19 @@ void CSEatSelectedAnimalParticles (uint3 id : SV_DispatchThreadID)
 	float particleRadius = particleData.radius;
 	float combinedRadius = (mouthRadius + particleRadius * 0.5) * isAlive01 * critterSimData.consumeOn;
 			
-	if(distanceSquared < combinedRadius*combinedRadius) {	
-		
+	if(distanceSquared < combinedRadius*combinedRadius) {			
 		if(critterSimData.consumeOn > 0.5) {   // revisit
 			eatenAmount = particleData.biomass; // * critterInitData.eatEfficiencyMeat + 10; //mouthRadius * mouthRadius * critterInitData.eatEfficiencyMeat * 0.167f; //particleData.nutrientContent;
-			animalParticlesWrite[particleIndex].isActive = 0;
-			animalParticlesWrite[particleIndex].isSwallowed = 1.0;
-			animalParticlesWrite[particleIndex].critterIndex = critterIndex;		
-			animalParticlesWrite[particleIndex].biomass = 0.0; // ?????   *****
+			animalParticlesWrite[particleData.index].isActive = 0.0;
+			animalParticlesWrite[particleData.index].isSwallowed = 1.0;
+			animalParticlesWrite[particleData.index].critterIndex = critterIndex;
+			animalParticlesWrite[particleData.index].biomass = 0.0; // ?????   *****
+			//animalParticlesWrite[particleIndex].//other things need to be zeroed??
+			// EATEN!!!!
+		}
+	}	
 
-		}	
-	}
-	
-
-	animalParticlesEatAmountsCBuffer[id.x] = eatenAmount;
+	animalParticlesEatAmountsCBuffer[id.y] = eatenAmount;
 }
 
 [numthreads(1024,1,1)]
@@ -322,6 +365,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 				animalParticlesWrite[id.x].isActive = 0.0;
 				animalParticlesWrite[id.x].isDecaying = 0.0;
 				bodyMass = 0;
+				animalParticle.biomass = 0.0;
 			}
 		}
 		else {   // ***** ALIVE !!! *****
@@ -541,9 +585,9 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 				float randRadius = rand(float2(randX * 10, randY * -3.37)) * (_MaxParticleSize - _MinParticleSize) + _MinParticleSize;					
 			
 				// StartSize?
-				float startingMass = 0.01;
+				float startingMass = 0.1;
 				float startingRadius = sqrt(startingMass);
-				animalParticlesWrite[id.x].radius = startingRadius;  // Obsolete? 
+				animalParticlesWrite[id.x].radius = 1;// startingRadius;  // Obsolete? 
 				animalParticlesWrite[id.x].biomass = startingMass;         //randRadius * randRadius * 3.141592 * _ParticleNutrientDensity;
 				animalParticlesWrite[id.x].energy = 0.5;
 				animalParticlesWrite[id.x].isActive = 1.0;
