@@ -112,7 +112,7 @@
 				if(type < 0.5) {
 					// Rooted fully, grows separately on ground in circle? Grassy
 
-					float radius = saturate(particleData.biomass * 0.21 + 0.04) * leafIndexNormalized * 4.2;
+					float radius = saturate(particleData.biomass * 0.21 + 0.04) * leafIndexNormalized * 0.82;
 					float2 spawnOffset = float2(cos(particleData.angleInc * leafIndex * 2.5) * radius, sin(particleData.angleInc * leafIndex * 2.5) * radius);
 					
 					worldPosition.xy += spawnOffset;
@@ -142,7 +142,7 @@
 				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward, 0);  // Rotate localRotation by AgentRotation
 
 				
-				float leafScale = (saturate(particleData.biomass * 3 + 0.1) * 0.185 * particleData.isActive + hoverMask * 0.03);// 0.165 * (saturate(particleData.biomass * 3 + 0.1) * 0.35 * particleData.isActive + hoverMask * 0.03);
+				float leafScale = (saturate(particleData.biomass * 3 + 0.1) * 0.15 * particleData.isActive + hoverMask * 0.03);// 0.165 * (saturate(particleData.biomass * 3 + 0.1) * 0.35 * particleData.isActive + hoverMask * 0.03);
 				o.worldPos = float4(worldPosition, 0);
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition + rotatedPoint * leafScale, 1.0)));
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
@@ -202,7 +202,7 @@
 				float4 altitudeTex = tex2D(_AltitudeTex, i.altitudeUV); //i.worldPos.z / 10; // [-1,1] range
 				float depth = saturate((_GlobalWaterLevel - altitudeTex.x) * 1);
 				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV);
-				float4 finalColor = float4(0,0,0,0.75);
+				float4 finalColor = float4(0,0,0,0.5);
 				finalColor.rgb = lerp(finalColor.rgb, terrainColorTex.rgb * 0.75, depth);
 				return finalColor;
 			}

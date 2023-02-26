@@ -165,19 +165,21 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				float4 col = lerp(float4(0.5473, 0.22, 0.735, 0.7), float4(0.91,0.56,1,1), 1 - i.status.x);				
+				float4 col = i.color;				
+				col.rgb = col.rgb / length(col.rgb) * 2.1; // normalize vector3
+
 				if(i.highlight.x >= 0.5) {
 					col = float4(1,1,1,1);
 				}
 				if (i.status.y >= 0.5) {
-					col = float4(0, 1, 0, 1);
+					//col = float4(0, 1, 0, 1);
 
 					if (i.status.x >= 0.5) {
-						col = float4(1, 0, 0, 1);
+						col.rgb *= 0.5;
 					}
 				}
 				else {
-					col = float4(0, 0, 1, 1);
+					col = float4(1, 0, 0, 0);
 				}
 				
 				
