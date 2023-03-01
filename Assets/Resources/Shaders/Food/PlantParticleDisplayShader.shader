@@ -82,7 +82,7 @@
 				float t = uv.y; // + 0.5;
 				uv.y = 1.0 - uv.y;
 								
-				int particleIndex = floor((float)inst / 32.0);
+				int particleIndex = floor((float)inst / 32.0); // 32 = number of quads, hardcoded
 				PlantParticleData particleData = plantParticleDataCBuffer[particleIndex];
 
 				float selectedMask = (1.0 - saturate(abs(_SelectedParticleIndex - particleIndex))) * _IsSelected;
@@ -95,11 +95,6 @@
 
 				float3 worldPosition = float3(particleData.worldPos, zPos);    //float3(rawData.worldPos, -random2);				
 				//float3 localQuadPos = quadPoint;
-
-				float rand0 = rand(float2(inst, inst) * 10);
-				float rand1 = rand(float2(rand0, rand0) * 10);
-				float rand2 = rand(float2(rand1, rand1) * 10);	
-				float rand3 = rand(float2(rand2, rand2) * 10);	
 
 				float leafIndex = (float)(inst % 32);
 				float leafIndexNormalized = leafIndex / 32.0;
@@ -128,16 +123,16 @@
 				float spatialFreq = 0.06125285;
 				float timeMult = 0.08;
 				float4 noiseSample = Value3D(worldPosition * spatialFreq + _Time.y * timeMult + inst * 11.11, masterFreq); //float3(0, 0, _Time * timeMult) + 
-				float noiseMag = 0.025;
+				float noiseMag = 0.05;
 				float3 noiseOffset = noiseSample.yzw * noiseMag;
 
 				worldPosition.xyz += noiseOffset;
 
-				float2 forward = float2(cos(rand3 * 10), sin(rand3 * 10));
+				float2 forward = float2(0, 1);
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
 				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward, 0);  // Rotate localRotation by AgentRotation
 
-				float leafScale = (saturate(particleData.biomass * 3 + 0.1) * 0.15 * particleData.isActive + hoverMask * 0.03);
+				float leafScale = (saturate(particleData.biomass * 3 + 0.1) * 0.1 * particleData.isActive + hoverMask * 0.03);
 				o.worldPos = float4(worldPosition, 0);
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition + rotatedPoint * leafScale, 1.0)));
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				

@@ -495,7 +495,7 @@ public class Agent : MonoBehaviour {
     }
     
     public void EatFoodPlant(float amount) {           
-        amount = Mathf.Min(amount, coreModule.stomachSpace * 0.2f);
+        amount = Mathf.Min(amount * 100f, coreModule.stomachSpace);
         
         //amount *= coreModule.foodEfficiencyPlant;
         //coreModule.stomachContentsTotal01 += (amount / coreModule.stomachCapacity);
@@ -518,7 +518,7 @@ public class Agent : MonoBehaviour {
 
         //Debug.Log("EatFoodPlant " + amount.ToString());
         if(this.feedingFrameCounter == this.feedAnimDuration / 2) {
-            RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Plant! (+" + (amount * 1000f).ToString("F0") + " food)", 1f, 0);
+            RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Plant! (+" + (amount).ToString("F2") + " food)", 1f, 0);
 
         }
         
@@ -530,7 +530,7 @@ public class Agent : MonoBehaviour {
     {
         candidateRef.performanceData.totalFoodEatenEgg += amount;
         EatFoodMeat(amount); // assumes all foodAmounts are equal
-        RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Egg Bit! (" + (amount * 1000f).ToString("F0") + ")", 1f, 3);
+        RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Egg Bit! (" + (amount).ToString("F2") + ")", 1f, 3);
 
         audioManager.PlayCritterBite(ownPos);
     }
@@ -539,7 +539,7 @@ public class Agent : MonoBehaviour {
     {
         candidateRef.performanceData.totalFoodEatenEgg += amount;
         EatFoodDecay(amount);
-        RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Egg! (" + (amount * 1000f).ToString("F0") + ")", 1f, 3);
+        RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Egg! (" + (amount).ToString("F2") + ")", 1f, 3);
 
         audioManager.PlayCritterBite(ownPos);
     }
@@ -548,7 +548,7 @@ public class Agent : MonoBehaviour {
     {
         candidateRef.performanceData.totalFoodEatenCorpse += biteSize;
         EatFoodDecay(amount); // assumes all foodAmounts are equal !! *****
-        RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Carrion! (" + (amount * 100f).ToString("F0") + ")", 1f, 4);
+        RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Carrion! (" + (amount).ToString("F2") + ")", 1f, 4);
         //if(coreModule.foodEfficiencyMeat > 0.5f) { // ** // damage bonus -- provided has the required specialization level:::::
         //    GainExperience((flowR / coreModule.stomachCapacity) * 0.5f);  
         //}  
@@ -574,7 +574,7 @@ public class Agent : MonoBehaviour {
         
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.digestEfficiencyMeat * 1f); // Exp for appropriate food
         
-        RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Microbe! (" + simManager.zooplanktonManager.agentsClosestMicrobeDataArray[this.index].index + ")", 1f, 1);
+        RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Microbe! (" + amount.ToString("F2") + ")", 1f, 1);
                 
         audioManager.PlayCritterBite(ownPos);
     }
@@ -595,7 +595,7 @@ public class Agent : MonoBehaviour {
 
         GainExperience((amount / coreModule.stomachCapacity) * coreModule.digestEfficiencyDecay * 1f); // Exp for appropriate food
 
-        RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Corpse! (" + (amount * 100f).ToString("F0") + ")", 1f, 4);
+        RegisterAgentEvent(simManager.simAgeTimeSteps, "Ate Corpse! (" + (amount).ToString("F2") + ")", 1f, 4);
 
         audioManager.PlayCritterBite(ownPos);
     }

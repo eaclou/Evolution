@@ -166,7 +166,7 @@
 			fixed4 frag(v2f i) : SV_Target
 			{
 				float4 col = i.color;				
-				col.rgb = col.rgb / length(col.rgb) * 2.1; // normalize vector3
+				col.rgb = col.rgb / length(col.rgb) * 1.11; // normalize vector3
 
 				if(i.highlight.x >= 0.5) {
 					col = float4(1,1,1,1);
@@ -183,7 +183,7 @@
 				}
 				
 				
-				return i.color;
+				return col;
 
 				float4 texColor = float4(1,1,1,1); // *********************************************************** tex2D(_MainTex, i.uv);
 				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV) * 0.5 + 0.5;
