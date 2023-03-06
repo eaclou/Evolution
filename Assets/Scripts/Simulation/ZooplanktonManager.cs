@@ -16,7 +16,9 @@ public class ZooplanktonManager {
     
     private const int maxNumMicrobes = 1024 * 8;  // *** 
     public ComputeBuffer animalParticlesCBuffer;
-    private ComputeBuffer animalParticlesCBufferSwap;    
+    private ComputeBuffer animalParticlesCBufferSwap;
+
+    public ComputeBuffer animalParticleInternalBitsCBuffer;
     //private RenderTexture animalParticlesNearestCritters1024;
     //private RenderTexture animalParticlesNearestCritters32;
     //private RenderTexture animalParticlesNearestCritters1;
@@ -80,6 +82,11 @@ public class ZooplanktonManager {
         
         public Vector2 worldPos2D => new Vector2(worldPos.x, worldPos.y);
     }
+
+    public struct AnimalParticleInternalBitData {
+        public Vector4 localPos;
+        public Vector4 color;
+    }
    
     private int GetAnimalParticleDataSize() {
         int bitSize = sizeof(float) * 26 + sizeof(int) * 3;
@@ -99,6 +106,8 @@ public class ZooplanktonManager {
         animalParticlesCBufferSwap = new ComputeBuffer(maxNumMicrobes, GetAnimalParticleDataSize());
         AnimalParticleData[] animalParticlesArray = new AnimalParticleData[maxNumMicrobes];
 
+        animalParticleInternalBitsCBuffer = new ComputeBuffer(maxNumMicrobes * 32, sizeof(float) * 8);
+        AnimalParticleInternalBitData[] animalParticleInternalBitsArray = new AnimalParticleInternalBitData[animalParticleInternalBitsCBuffer.count];
         float minParticleSize = 1f; // settingsRef.avgAnimalParticleRadius / settingsRef.animalParticleRadiusVariance;
         float maxParticleSize = 2f; // settingsRef.avgAnimalParticleRadius * settingsRef.animalParticleRadiusVariance;
 
@@ -117,9 +126,17 @@ public class ZooplanktonManager {
             data.extra0 = 0f;
             data.energy = 0f;
             animalParticlesArray[i] = data;
+
+            for(int j = 0; j < 32; j++) {
+                AnimalParticleInternalBitData bitData = new AnimalParticleInternalBitData();
+                Vector3 randPos = UnityEngine.Random.insideUnitSphere;
+                bitData.localPos = new Vector4(randPos.x, randPos.y, randPos.z, 0f);
+                bitData.color = UnityEngine.Random.ColorHSV();
+                animalParticleInternalBitsArray[i * 32 + j] = bitData;
+            }
         }
         //Debug.Log("Fill Initial Particle Array Data CPU: " + (Time.realtimeSinceStartup - startTime).ToString());
-
+        animalParticleInternalBitsCBuffer.SetData(animalParticleInternalBitsArray);
         animalParticlesCBuffer.SetData(animalParticlesArray);
         animalParticlesCBufferSwap.SetData(animalParticlesArray);
        
@@ -294,6 +311,8 @@ public class ZooplanktonManager {
         computeShaderAnimalParticles.SetBuffer(kernelCSCopyAnimalParticlesBuffer, "animalParticlesRead", animalParticlesCBufferSwap);
         computeShaderAnimalParticles.SetBuffer(kernelCSCopyAnimalParticlesBuffer, "animalParticlesWrite", animalParticlesCBuffer);        
         computeShaderAnimalParticles.Dispatch(kernelCSCopyAnimalParticlesBuffer, Mathf.CeilToInt(maxNumMicrobes / 1024), 1, 1); // 1024x
+
+        //animalParticleInternalBitsCBuffer.SetData(animalParticleInternalBitsArray);
     }
     
     public void ProcessSlotMutation() {
@@ -488,6 +507,7 @@ public class ZooplanktonManager {
         } */       
         animalParticlesCBuffer?.Release();
         animalParticlesCBufferSwap?.Release();
+        animalParticleInternalBitsCBuffer?.Release();
 
         agentsClosestMicrobeDataCBuffer?.Release();
         animalParticlesEatAmountsCBuffer?.Release();

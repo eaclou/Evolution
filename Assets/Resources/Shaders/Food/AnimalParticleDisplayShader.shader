@@ -100,6 +100,7 @@
 				int brushType = (particleData.genomeVector.x * 16 + inst + _Time.y * 13) % (_NumColumns * _NumRows);
 				float2 uv = quadPoint.xy;// + 0.5;
 				uv.x += 0.5;
+				uv.y -= 0.5;
 				float t = uv.y; // + 0.5;
 				//uv.y = 1.0 - uv.y;
 				
@@ -139,7 +140,7 @@
 				//vertexOffset.xy *= 4;
 
 				//*** TEMP::::: ****
-				float spriteScale = (sqrt(particleData.biomass) * 0.08 + 0.04 + (0.04 * hoverMask + 0.02 * selectedMask)) * 1;
+				float spriteScale = (sqrt(particleData.biomass) * 0.08 + 0.04 + (0.04 * hoverMask + 0.02 * selectedMask)) * 0.1;
 				//spriteScale = 0.1;
 				vertexOffset.xy = quadPoint.xy * spriteScale; // scales w/ camera a bit
 
@@ -182,7 +183,7 @@
 					col = float4(1, 0, 0, 0);
 				}
 				
-				
+				col.a *= 0.1;
 				return col;
 
 				float4 texColor = float4(1,1,1,1); // *********************************************************** tex2D(_MainTex, i.uv);

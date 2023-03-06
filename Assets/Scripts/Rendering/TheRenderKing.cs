@@ -113,6 +113,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
     public Material plantParticleDisplayMat;
     public Material plantParticleShadowDisplayMat;
     public Material animalParticleDisplayMat;
+    public Material animalParticleInternalBitsDisplayMat;
+
     public Material animalParticleShadowDisplayMat;
 
     public Material eggCoverDisplayMat;
@@ -1003,6 +1005,9 @@ public class TheRenderKing : Singleton<TheRenderKing>
 
         animalParticleDisplayMat.SetPass(0);
         animalParticleDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+
+        animalParticleInternalBitsDisplayMat.SetPass(0);
+        animalParticleInternalBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
 
         animalParticleShadowDisplayMat.SetPass(0);
         animalParticleShadowDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
@@ -2691,7 +2696,6 @@ public class TheRenderKing : Singleton<TheRenderKing>
         DisplayFloatyBits();
 
         float isHighlight = 0f;
-
         
         //if (simManager.trophicLayersManager.GetAgentsOnOff()) {
         critterUberStrokeShadowMat.SetPass(0);
@@ -2708,7 +2712,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
         critterUberStrokeShadowMat.SetFloat("_Turbidity", simManager.fogAmount);     
         critterUberStrokeShadowMat.SetFloat("_MinFog", minimumFogDensity);  
         critterUberStrokeShadowMat.SetFloat("_Density", Mathf.Lerp(0.15f, 1f, Mathf.Clamp01(simManager.simResourceManager.curGlobalDecomposers / 100f)));  
-        critterUberStrokeShadowMat.SetVector("_FogColor", simManager.fogColor);  
+        critterUberStrokeShadowMat.SetVector("_FogColor", simManager.fogColor);
         critterUberStrokeShadowMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel); 
         //cmdBufferMain.SetGlobalTexture("_RenderedSceneRT", renderedSceneID);
         cmdBufferMain.DrawProcedural(Matrix4x4.identity, critterUberStrokeShadowMat, 0, MeshTopology.Triangles, 6, mainCritterStrokesCBuffer.count);
@@ -3021,7 +3025,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
     {
         //float isSelectedMicrobes = 0f; //***EC -- revisit        
         //plantDistance < hitboxRadius && plantDistance < microbeDistance;
-
+        
         animalParticleDisplayMat.SetPass(0);
         animalParticleDisplayMat.SetBuffer("animalParticleDataCBuffer", zooplanktonManager.animalParticlesCBuffer);
         animalParticleDisplayMat.SetBuffer("quadVerticesCBuffer", curveRibbonVerticesCBuffer);
@@ -3038,6 +3042,25 @@ public class TheRenderKing : Singleton<TheRenderKing>
         animalParticleDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
         animalParticleDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized); 
         cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleDisplayMat, 0, MeshTopology.Triangles, 6 * numCurveRibbonQuads, zooplanktonManager.animalParticlesCBuffer.count);
+
+        animalParticleInternalBitsDisplayMat.SetPass(0);
+        animalParticleInternalBitsDisplayMat.SetBuffer("animalParticleDataCBuffer", zooplanktonManager.animalParticlesCBuffer);
+        animalParticleInternalBitsDisplayMat.SetBuffer("animalParticleInternalBitDataCBuffer", zooplanktonManager.animalParticleInternalBitsCBuffer);
+        animalParticleInternalBitsDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+        animalParticleInternalBitsDisplayMat.SetTexture("_WaterSurfaceTex", baronVonWater.waterSurfaceDataRT1);
+        animalParticleInternalBitsDisplayMat.SetTexture("_AltitudeTex", baronVonTerrain.terrainHeightDataRT);
+        animalParticleInternalBitsDisplayMat.SetTexture("_TerrainColorTex", baronVonTerrain.terrainColorRT0);
+        animalParticleInternalBitsDisplayMat.SetFloat("_MaxAltitude", SimulationManager._MaxAltitude);
+        animalParticleInternalBitsDisplayMat.SetInt("_SelectedParticleIndex", Mathf.RoundToInt(zooplanktonManager.selectedAnimalParticleIndex));
+        animalParticleInternalBitsDisplayMat.SetInt("_ClosestParticleID", Mathf.RoundToInt(zooplanktonManager.closestZooplanktonToCursorIndex));
+        animalParticleInternalBitsDisplayMat.SetFloat("_IsSelected", 0f);
+        animalParticleInternalBitsDisplayMat.SetFloat("_IsHover", UIManager.instance.GetIsHighlightMicrobes());
+        animalParticleInternalBitsDisplayMat.SetFloat("_IsHighlight", UIManager.instance.GetIsHighlightMicrobes()); 
+        animalParticleInternalBitsDisplayMat.SetFloat("_MapSize", SimulationManager._MapSize);
+        animalParticleInternalBitsDisplayMat.SetFloat("_GlobalWaterLevel", SimulationManager._GlobalWaterLevel);
+        animalParticleInternalBitsDisplayMat.SetFloat("_CamDistNormalized", baronVonWater.camDistNormalized); 
+        cmdBufferMain.DrawProcedural(Matrix4x4.identity, animalParticleInternalBitsDisplayMat, 0, MeshTopology.Triangles, 6, zooplanktonManager.animalParticleInternalBitsCBuffer.count);
+
     }
     
     void DisplayEggStrokes()
