@@ -77,6 +77,24 @@
 			float rand(float2 co) {   // OUTPUT is in [0,1] RANGE!!!
 				return frac(sin(dot(co.xy ,float2(12.9898,78.233))) * 43758.5453);
 			}
+
+			// Rotation with angle (in radians) and axis
+			float3x3 AngleAxis3x3(float angle, float3 axis)
+			{
+				float c, s;
+				sincos(angle, s, c);
+
+				float t = 1 - c;
+				float x = axis.x;
+				float y = axis.y;
+				float z = axis.z;
+
+				return float3x3(
+					t * x * x + c,      t * x * y - s * z,  t * x * z + s * y,
+					t * x * y + s * z,  t * y * y + c,      t * y * z - s * x,
+					t * x * z - s * y,  t * y * z + s * x,  t * z * z + c
+				);
+			}
 			
 
 			v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
@@ -89,7 +107,7 @@
 				//float t = uv.y; // + 0.5;
 				//uv.y = 1.0 - uv.y;
 								
-				int particleIndex = floor((float)inst / 32.0); // 32 = number of quads, hardcoded
+				int particleIndex = floor((float)inst / 64.0); // 32 = number of quads, hardcoded
 				AnimalParticleData particleData = animalParticleDataCBuffer[particleIndex];
 
 				//float selectedMask = (1.0 - saturate(abs(_SelectedParticleIndex - particleIndex))) * _IsSelected;
@@ -104,8 +122,8 @@
 				worldPosition.z = zPos;
 				//float3 localQuadPos = quadPoint;
 
-				float quadIndex = (float)(inst % 32);
-				float quadIndexNormalized = quadIndex / 32.0;
+				float quadIndex = (float)(inst % 64);
+				float quadIndexNormalized = quadIndex / 64.0;
 				
 				float2 forward = float2(0,1); // add heading? & twist 2.5D
 				if(particleData.velocity.x != 0 || particleData.velocity.y != 0) {
@@ -117,38 +135,54 @@
 				//(saturate(particleData.biomass * 0.25 + 0.05));// * lerp(0.8, 3.6, _CamDistNormalized);
 				
 				float3 spawnOffset = animalParticleInternalBitDataCBuffer[inst].localPos.xyz * radius;
-				spawnOffset = float3(spawnOffset.x * right + spawnOffset.y * forward, spawnOffset.z*0.25);	
-				
+				spawnOffset = float3(spawnOffset.x * right + spawnOffset.y * forward, spawnOffset.z);	
+				float distToCenter = length(spawnOffset);
 				// REFRACTION:
 				float3 surfaceNormal = tex2Dlod(_WaterSurfaceTex, float4(worldPosition.xy / _MapSize, 0, 0)).yzw;				
 				float refractionStrength = 0.5;
-					
+				
+				spawnOffset = mul(animalParticleInternalBitDataCBuffer[inst].localPos.zyx, AngleAxis3x3(_Time.y*6.421* (1-particleData.isDecaying), normalize(spawnOffset)));
+				spawnOffset *= radius;
+				
 				//worldPosition.xy += -surfaceNormal.xy * refractionStrength;
 				spawnOffset.xy += -surfaceNormal.xy * refractionStrength;
 
-				//float masterFreq = 1;
+				float masterFreq = 17;
 				//float spatialFreq = 0.06125285;
-				//float timeMult = 0.08;
+				float timeMult = 0.03123;
 				//float4 noiseSample = Value3D(worldPosition * spatialFreq + _Time.y * timeMult + inst * 11.11, masterFreq); //float3(0, 0, _Time * timeMult) + 
 				//float noiseMag = 0.0015;
 				//float3 noiseOffset = noiseSample.yzw * noiseMag;
+				float3 randomDir = float3(1,0,0);
+				float4 noiseSample = Value3D(_Time.y * timeMult + spawnOffset*0.27, masterFreq); 
+				float theta = noiseSample.z;
+				float phi = noiseSample.y;
+				noiseSample *= radius;
+				randomDir.x = clamp(noiseSample.y, -1 * radius, radius); //cos(theta)*sin(phi);
+				randomDir.y = clamp(noiseSample.z, -1 * radius, radius);//cos(phi);
+				randomDir.z = clamp(noiseSample.w, -1 * radius, radius); //sin(theta)*sin(phi);
+				//randomDir *= radius;//distToCenter;
+
+				//float3 direction;  // points in the direction of the new Y axis
+				//float3 vec;        // This is a randomly generated point that we will
+                 // eventually transform using our base-change matrix
 				
 				worldPosition.xyz += spawnOffset;
-														
 				
-
 				//worldPosition.xyz += noiseOffset;
 
-				
 				float3 rotatedPoint = float3(quadPoint.x * right + quadPoint.y * forward, 0);  // Rotate localRotation by AgentRotation
 
-				float quadScale = (saturate(particleData.biomass * 3 + 0.25) * 0.0225 * particleData.isActive);
+				float quadScale = (saturate(particleData.biomass * 3 + 0.25) * 0.05247 * particleData.isActive);
 				o.worldPos = float4(worldPosition, 0);
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition + rotatedPoint * quadScale, 1.0)));
 				//o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));				
 				o.uv = uv;	
+				float isAlive = 1-particleData.isDecaying;
+				o.color = lerp(particleData.color, animalParticleInternalBitDataCBuffer[inst].color, 0.35);// float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), 0, 0);
+				o.color = lerp(o.color, particleData.color + float4(1,1,1,0)*(1-particleData.isDecaying)*0.3, (1-particleData.isDecaying));
+				o.color *= isAlive * 0.5 + 0.5;
 				
-				o.color = lerp(particleData.color, animalParticleInternalBitDataCBuffer[inst].color, 0.5);// float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), 0, 0);
 				o.hue = particleData.color;
 				return o;
 
@@ -157,7 +191,7 @@
 			fixed4 frag(v2f i) : SV_Target
 			{
 				float4 texColor = tex2D(_MainTex, i.uv);
-				return lerp(i.color, float4(1,1,1,1), 0.5);
+				return i.color;
 				fixed4 col = texColor;
 				col.rgb = lerp(float3(0.4, 0.97, 0.3), i.hue.rgb, 0.325);
 				col.a = 1;

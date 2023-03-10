@@ -50,7 +50,8 @@ public class ZooplanktonManager {
 
     public WorldLayerZooplanktonGenome zooplanktonSlotGenomeCurrent;  // algae particles!  -- likely to be converted into plants eventually ***
     public WorldLayerZooplanktonGenome[] zooplanktonSlotGenomeMutations;
-    
+
+    private int numAnimalBits = 64;
    // public Vector2 closestAnimalParticlePosition2D => closestAnimalParticleData.worldPos2D;
     
     public struct AnimalParticleData {
@@ -106,7 +107,7 @@ public class ZooplanktonManager {
         animalParticlesCBufferSwap = new ComputeBuffer(maxNumMicrobes, GetAnimalParticleDataSize());
         AnimalParticleData[] animalParticlesArray = new AnimalParticleData[maxNumMicrobes];
 
-        animalParticleInternalBitsCBuffer = new ComputeBuffer(maxNumMicrobes * 32, sizeof(float) * 8);
+        animalParticleInternalBitsCBuffer = new ComputeBuffer(maxNumMicrobes * numAnimalBits, sizeof(float) * 8);
         AnimalParticleInternalBitData[] animalParticleInternalBitsArray = new AnimalParticleInternalBitData[animalParticleInternalBitsCBuffer.count];
         float minParticleSize = 1f; // settingsRef.avgAnimalParticleRadius / settingsRef.animalParticleRadiusVariance;
         float maxParticleSize = 2f; // settingsRef.avgAnimalParticleRadius * settingsRef.animalParticleRadiusVariance;
@@ -127,12 +128,12 @@ public class ZooplanktonManager {
             data.energy = 0f;
             animalParticlesArray[i] = data;
 
-            for(int j = 0; j < 32; j++) {
+            for(int j = 0; j < numAnimalBits; j++) {
                 AnimalParticleInternalBitData bitData = new AnimalParticleInternalBitData();
                 Vector3 randPos = UnityEngine.Random.insideUnitSphere;
                 bitData.localPos = new Vector4(randPos.x, randPos.y, randPos.z, 0f);
                 bitData.color = UnityEngine.Random.ColorHSV();
-                animalParticleInternalBitsArray[i * 32 + j] = bitData;
+                animalParticleInternalBitsArray[i * numAnimalBits + j] = bitData;
             }
         }
         //Debug.Log("Fill Initial Particle Array Data CPU: " + (Time.realtimeSinceStartup - startTime).ToString());

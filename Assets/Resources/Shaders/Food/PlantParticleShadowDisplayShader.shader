@@ -112,7 +112,7 @@
 				if(type < 0.5) {
 					// Rooted fully, grows separately on ground in circle? Grassy
 
-					float radius = saturate(particleData.biomass * 0.21 + 0.04) * leafIndexNormalized * 0.82;
+					float radius = saturate(particleData.biomass * 0.21 + 0.04) * leafIndexNormalized * 0.42;
 					float2 spawnOffset = float2(cos(particleData.angleInc * leafIndex * 2.5) * radius, sin(particleData.angleInc * leafIndex * 2.5) * radius);
 					
 					worldPosition.xy += spawnOffset;
@@ -128,14 +128,14 @@
 				
 				}
 
-				float masterFreq = 5;
-				float spatialFreq = 0.06125285;
-				float timeMult = 0.08;
-				float4 noiseSample = Value3D(worldPosition * spatialFreq + _Time.y * timeMult + inst * 11.11, masterFreq); //float3(0, 0, _Time * timeMult) + 
-				float noiseMag = 0.025;
-				float3 noiseOffset = noiseSample.yzw * noiseMag;
+				//float masterFreq = 5;
+				//float spatialFreq = 0.06125285;
+				//float timeMult = 0.08;
+				//float4 noiseSample = Value3D(worldPosition * spatialFreq + _Time.y * timeMult + inst * 11.11, masterFreq); //float3(0, 0, _Time * timeMult) + 
+				//float noiseMag = 0.025;
+				//float3 noiseOffset = noiseSample.yzw * noiseMag;
 
-				worldPosition.xyz += noiseOffset;
+				//worldPosition.xyz += noiseOffset;
 
 				float2 forward = float2(cos(rand3 * 10), sin(rand3 * 10));
 				float2 right = float2(forward.y, -forward.x); // perpendicular to forward vector
