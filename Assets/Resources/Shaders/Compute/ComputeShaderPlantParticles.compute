@@ -312,9 +312,9 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 		float nutrientsUsed = 0;
 
 		float2 vel = velocityRead.SampleLevel(_LinearClamp, uv, 0).xy;
-		float speedMult = 0.0167; // * (1.0 - foodParticle.rootedness);				
+		float speedMult = 0.0167 * (1.0 - foodParticle.rootedness);				
 		
-		posOffset += vel * speedMult * _MapSize;
+		//posOffset += vel * speedMult * _MapSize;
 
 		if(foodParticle.isDecaying < 0.5) {  // ALIVE !!!!!
 		
@@ -459,7 +459,7 @@ void CSSimulateAlgaeParticles (uint3 id : SV_DispatchThreadID)
 				foodParticlesWrite[id.x].isSwallowed = 0.0;
 				foodParticlesWrite[id.x].digestedAmount = 0.0;
 				foodParticlesWrite[id.x].age = rand(float2(rand01 * 70.158, randX * 13.37)) * 1;
-				float mutationSize = 0.1;
+				float mutationSize = 0.0825;
 				foodParticlesWrite[id.x].colorA = lerp(parentParticle.colorA, float3(saturate(1.0 - randZ), frac(rand01 + randX), saturate(randY)), mutationSize);
 				foodParticlesWrite[id.x].colorB = lerp(parentParticle.colorB, float3(saturate(1.0 - randY), frac(rand01 + randZ), saturate(randX)), mutationSize); //parentParticle.colorB; 
 				foodParticlesWrite[id.x].health = 1.0;

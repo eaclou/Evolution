@@ -97,7 +97,7 @@
 				float zPos = -altitudeRaw * _MaxAltitude;
 				
 				//*** TEMP::::: ****
-				float spriteScale = (sqrt(particleData.biomass) * 0.1 + 0.04 + (0.06 * hoverMask + 0.02 * selectedMask)) * 1;
+				float spriteScale = 0.1;// (sqrt(particleData.biomass) * 0.1 + 0.04 + (0.06 * hoverMask + 0.02 * selectedMask)) * 1;
 				//spriteScale = 0.1;
 				float2 vertexOffset = quadPoint.xy * spriteScale;
 				float2 forward = normalize(particleData.velocity);
@@ -129,7 +129,7 @@
 				float4 finalColor = float4(0,0,0,0.5);
 				finalColor.rgb = lerp(finalColor.rgb, terrainColorTex.rgb * 0.75, depth); //GetGroundColor(i.worldPos, frameBufferColor, altitudeTex, waterSurfaceTex, float4(0,0,0,0));
 				
-
+				
 				return finalColor;
 				
 

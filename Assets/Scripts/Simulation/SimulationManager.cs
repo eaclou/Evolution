@@ -1213,8 +1213,8 @@ public class SimulationManager : Singleton<SimulationManager>
     // * Agent argument not used -> consider renaming method since it does nothing with the agent
     private void ProcessAgentScores(Agent agent) {
         numAgentsProcessed++;      
-        float weightedAvgLerpVal = 1f / 64f;
-        weightedAvgLerpVal = Mathf.Max(weightedAvgLerpVal, 1f / (float)(numAgentsProcessed + 1));
+        float weightedAvgLerpVal = 1f / 64f; // ***EAC not doing anything??
+        //weightedAvgLerpVal = Mathf.Max(weightedAvgLerpVal, 1f / (float)(numAgentsProcessed + 1));
         // Expand this to handle more complex Fitness Functions with more components:
         
         float totalEggSackVolume = GetTotalEggSackVolume();

@@ -13,10 +13,10 @@ public class MasterGenomePool
 
     public static int nextCandidateIndex = 0;
 
-    public int maxNumActiveSpecies = 5;
-    private int targetNumSpecies = 3;
-    public float speciesSimilarityDistanceThreshold = 16f;
-    private int minNumGuaranteedEvalsForNewSpecies = 256;
+    public int maxNumActiveSpecies = 3;
+    private int targetNumSpecies = 2;
+    public float speciesSimilarityDistanceThreshold = 160f;
+    private int minNumGuaranteedEvalsForNewSpecies = 512;
     int numInitSpecies = 1;
 
     [SerializeField] float oldestSpeciesRerollChance = 0.33f;
@@ -319,7 +319,7 @@ public class MasterGenomePool
         // CHECK IF NEW SPECIES CREATED:
         bool assignedToNewSpecies = false;
             
-        if (closestDistance > speciesSimilarityDistanceThreshold && !speciesCreatedOrDestroyedThisFrame && currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies) 
+        if (closestDistance > speciesSimilarityDistanceThreshold && !speciesCreatedOrDestroyedThisFrame && currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies && simulation.simAgeTimeSteps > 210000) 
         {
             // Create new species!::::     
             assignedToNewSpecies = true;
@@ -330,7 +330,7 @@ public class MasterGenomePool
             simulation.AddNewSpecies(newCandidate, seedSpeciesID);
             //SpeciesGenomePool poolRef = simulation.masterGenomePool.completeSpeciesPoolsList[simulation.masterGenomePool.completeSpeciesPoolsList.Count - 1];
             //poolRef.foundingCandidate.
-            speciesSimilarityDistanceThreshold += 70f;
+            speciesSimilarityDistanceThreshold += 700f;
 
             //Color color = new Color(newCandidate.candidateGenome.primaryHue.x, newCandidate.candidateGenome.primaryHue.y, newCandidate.candidateGenome.primaryHue.z);
             
@@ -348,7 +348,7 @@ public class MasterGenomePool
         }
         
         if (currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies) {
-            speciesSimilarityDistanceThreshold *= 0.984f;  // lower while creating treeOfLifeUI
+            speciesSimilarityDistanceThreshold *= 0.9994f;  // lower while creating treeOfLifeUI
         }
         else {
             speciesSimilarityDistanceThreshold *= 1.05f;

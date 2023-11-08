@@ -39,7 +39,7 @@ public class VegetationManager {
     
     private ComputeBuffer resourceGridAgentSamplesCBuffer;
 
-    private const int maxNumPlantParticles = 1024 * 8;  // *** 
+    private const int maxNumPlantParticles = 1024 * 1;  // *** 
     public ComputeBuffer plantParticlesCBuffer;
     private ComputeBuffer plantParticlesRepresentativeGenomeCBuffer;
     private ComputeBuffer plantParticlesCBufferSwap;    

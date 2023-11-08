@@ -87,17 +87,19 @@
 
 				float selectedMask = (1.0 - saturate(abs(_SelectedParticleIndex - particleIndex))) * _IsSelected;
 				float hoverMask = (1.0 - saturate(abs(_HoverParticleIndex - particleIndex))) * _IsHover;
+								
+				float leafIndex = (float)(inst % 32);
+				float leafIndexNormalized = leafIndex / 32.0;
 
 				float2 altUV = particleData.worldPos.xy / _MapSize;	
 				o.altitudeUV = altUV;
 				float altitudeRaw = tex2Dlod(_AltitudeTex, float4(altUV.xy, 0, 0)).x;
-				float zPos = -max(_GlobalWaterLevel, altitudeRaw) * _MaxAltitude;
+				float zPos = -(lerp(_GlobalWaterLevel, altitudeRaw, 1.0-leafIndexNormalized)) * _MaxAltitude;
+				//float zPos = -max(_GlobalWaterLevel, lerp(0, altitudeRaw, 1.0-leafIndexNormalized)) * _MaxAltitude;
 
 				float3 worldPosition = float3(particleData.worldPos, zPos);    //float3(rawData.worldPos, -random2);				
 				//float3 localQuadPos = quadPoint;
 
-				float leafIndex = (float)(inst % 32);
-				float leafIndexNormalized = leafIndex / 32.0;
 				//Type:
 				float type = particleData.typeID;
 				if(type < 0.5) {
@@ -149,15 +151,16 @@
 				float4 texColor = tex2D(_MainTex, i.uv);
 				
 				fixed4 col = texColor;
-				col.rgb = lerp(float3(0.4, 0.97, 0.3), i.hue.rgb, 0.325);
+				col.rgb = lerp(float3(0.4, 0.97, 0.3), i.hue.rgb, 1); // i.hue is genetic color
 				col.a = 1;
 				//col.rgb = lerp(col, float3(0.61, 0.79, 0.65) * 0.1, i.color.x * 0.);
-				col.rgb = lerp(col.rgb, float3(0.651, 0.8379, 0.55) * 0.4, i.color.x * 0.75);
-				if(i.color.a > 0.5) {
+				//col.rgb = lerp(col.rgb, float3(0.651, 0.8379, 0.55) * 0.4, i.color.x * 0.75);
+				if(i.color.a > 0.5) { // ??
 					col.rgb = float3(1,1,1);
 				}
 				return col;
 				
+				//===========================================================================================
 				//Diffuse
 				float pixelOffset = 1.0 / 256;  // resolution  // **** THIS CAN"T BE HARDCODED AS FINAL ****"
 				// ************  PRE COMPUTE THIS IN A TEXTURE!!!!!! ************************

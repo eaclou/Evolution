@@ -271,7 +271,7 @@ void CSEatSelectedAnimalParticles (uint3 id : SV_DispatchThreadID)
 	float distanceSquared = data.y;
 	float mouthRadius = 1; // critterInitData.boundingBoxSize.x * critterSimData.growthPercentage;  // **** REMEMBER TO *0.5 EVENTUALLY FOR ACCURATE SIZE
 	float particleRadius = particleData.radius;
-	float combinedRadius = (mouthRadius + particleRadius * 0.5) * isAlive01 * critterSimData.consumeOn;
+	float combinedRadius = (mouthRadius + particleRadius * 0.5) * isAlive01 * critterSimData.consumeOn * particleData.isActive;
 			
 	if(distanceSquared < combinedRadius*combinedRadius) {			
 		if(critterSimData.consumeOn > 0.5) {   // revisit
@@ -565,12 +565,12 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 			float randY = rand(float2(randX * 62.39 + _Time, (float)id.x));
 			float randZ = rand(float2((float)id.x, randY * -62.39 - _Time));	
 			
-			int parentIndex = (id.x + round(_Time * 0.25) + 256) % 1024;
+			int parentIndex = (id.x + round(_Time * 2.25) + 256) % 1024;
 			AnimalParticleData parentParticle = animalParticlesRead[parentIndex];
 			
 			
 			float aliveMask = (1.0 - parentParticle.isDecaying) * parentParticle.isActive;
-			float fertilityMask = saturate((parentParticle.energy - 1.0) * 3) * aliveMask;
+			float fertilityMask = saturate((parentParticle.energy - 0.1) * 3) * aliveMask;
 			
 			float2 parentPos = parentParticle.worldPos.xy;
 
@@ -578,7 +578,7 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 			float4 spawnAltitudeSample = altitudeRead.SampleLevel(_LinearClamp, spawnUV, 0);
 			float activeGridCellMask = saturate((spawnAltitudeSample.w - 0.04) * 100);
 							
-			if(spawnAltitudeSample.x < _GlobalWaterLevel * fertilityMask * activeGridCellMask && rand01 > 0.9) {  // in water only? // for now...
+			if(spawnAltitudeSample.x < _GlobalWaterLevel * fertilityMask * activeGridCellMask && rand01 > 0.996) {  // in water only? // for now...
 				float2 worldPos = float2(spawnUV.x * _MapSize, spawnUV.y * _MapSize);
 				animalParticlesWrite[id.x].worldPos.xy = worldPos;
 				

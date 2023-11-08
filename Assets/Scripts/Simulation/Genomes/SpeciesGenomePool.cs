@@ -343,7 +343,7 @@ public class SpeciesGenomePool
     }
     
     public void UpdateAvgData(CandidateAgentData candidateData) {
-        float numPoints = 512f; // rolling avg over this many creatures
+        float numPoints = 32f; // rolling avg over this many creatures
         avgLifespan = avgLifespan * ((numPoints - 1f) / numPoints) + candidateData.performanceData.totalTicksAlive * (1f / numPoints);
         if (numAgentsEvaluated >= numPoints && isStillEvaluating) {
             isStillEvaluating = false;

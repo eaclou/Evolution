@@ -183,9 +183,10 @@
 					col = float4(1, 0, 0, 0);
 				}
 				
-				col.a *= 0.1;
+				col.a = 1;
 				return col;
 
+				//===========================================================================================
 				float4 texColor = float4(1,1,1,1); // *********************************************************** tex2D(_MainTex, i.uv);
 				float4 terrainColorTex = tex2D(_TerrainColorTex, i.altitudeUV) * 0.5 + 0.5;
 
