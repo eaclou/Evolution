@@ -363,9 +363,9 @@ void CSSimulateAnimalParticles (uint3 id : SV_DispatchThreadID)
 			
 			if(bodyMass <= 0.0) {  // fully decayed:
 				animalParticlesWrite[id.x].isActive = 0.0;
-				animalParticlesWrite[id.x].isDecaying = 0.0;
+				animalParticlesWrite[id.x].isDecaying = 1.0;
 				bodyMass = 0;
-				animalParticle.biomass = 0.0;
+				animalParticlesWrite[id.x].biomass = 0.0;
 			}
 		}
 		else {   // ***** ALIVE !!! *****
