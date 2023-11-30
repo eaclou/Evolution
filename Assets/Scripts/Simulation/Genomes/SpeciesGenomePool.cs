@@ -257,8 +257,7 @@ public class SpeciesGenomePool
               
         speciesDataPointsList.Add(dataPoint);
         if(speciesDataPointsList.Count > maxNumDataPointEntries) {
-            MergeDataPoints();
-            
+            MergeDataPoints();            
         }
         
 
@@ -278,42 +277,21 @@ public class SpeciesGenomePool
         }
         
         for(int i = 0; i < candidateGenomesList.Count; i++) {
-            //if(candidateGenomesList[i].isBeingEvaluated) {
+            
             float frac = (float)i / (float)Mathf.Max(1, candidateGenomesList.Count - 1);
-            //float offset = (float)i / (float)Mathf.Max(1, candidateGenomesList.Count - 1) * 15f;
             PerformanceData perf = candidateGenomesList[i].performanceData;
             perf.p1x = perf.timeStepDied;
-            //if (candidateGenomesList[i].performanceData.is) {
-            perf.p1y = Mathf.Lerp(UIManager.instance.historyPanelUI.graphBoundsMinY, UIManager.instance.historyPanelUI.graphBoundsMaxY, frac);
-            //SetStartPoint
-            //}
-            //perf.scoreStart = avgLifespan;
-            //perf.timeStart = perf.timeStepHatched;
+            
+            //perf.p1y = Mathf.Lerp(UIManager.instance.historyPanelUI.graphBoundsMinY, UIManager.instance.historyPanelUI.graphBoundsMaxY, lineFrac);
+            
             candidateGenomesList[i].UpdateDisplayCurve();
             
-            
-            //float frac = (float)i / (float)Mathf.Max(1, candidateGenomesList.Count - 1);
             if(avgLifespan < speciesCurAliveMinScore) {
                 speciesCurAliveMinScore = avgLifespan;
             }
             if(avgLifespan > speciesCurAliveMaxScore) {
                 speciesCurAliveMaxScore = avgLifespan;
-            }
-                
-            // OLD BELOW:
-            //float offset = (float)i / (float)Mathf.Max(1, candidateGenomesList.Count - 1) * 150f;
-            /*if(perf.creatureDataPointsList == null) {
-                offset = 0f;
-            }
-            candidateGenomesList[i].AddNewDataPoint(timestep, avgLifespan + offset);
-
-            if(avgLifespan + offset < speciesCurAliveMinScore) {
-                speciesCurAliveMinScore = avgLifespan + offset;
-            }
-            if(avgLifespan + offset > speciesCurAliveMaxScore) {
-                speciesCurAliveMaxScore = avgLifespan + offset;
-            }*/
-            //}            
+            }                      
         }
     }
     private void MergeDataPoints() {

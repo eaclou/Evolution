@@ -12,7 +12,7 @@
 		//LOD 100
 		//Tags{ "RenderType" = "Transparent" }
 		ZWrite On
-		//Cull Off
+		Cull Off
 		//Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
@@ -71,7 +71,7 @@
 			float3 ScaleData(float3 inPos) {
 				float3 outPos = inPos;
 				outPos.x = (outPos.x - _GraphBoundsMinX) / (_GraphBoundsMaxX - _GraphBoundsMinX);
-				outPos.y = (outPos.y - _GraphBoundsMinY) / (_GraphBoundsMaxY - _GraphBoundsMinY);
+				//outPos.y = (outPos.y - _GraphBoundsMinY) / (_GraphBoundsMaxY - _GraphBoundsMinY);
 				//should be [0-1]range now??
 				
 				return outPos;
@@ -84,7 +84,7 @@
 				float3 quadData = quadVerticesCBuffer[id];
 				o.uv = quadData.xy + 0.5;
 				
-				float lineWidth = 0.0182;
+				float lineWidth = 0.0052;
 				
 				WorldTreeLineData dataPrev = worldTreeLineDataCBuffer[max(0, inst - 1)];
 				WorldTreeLineData data = worldTreeLineDataCBuffer[inst];
@@ -100,21 +100,23 @@
 				}
 				if (data.isAlive < 0.5) { // isOFF
 					col.rgb = 0;// lerp(col.rgb, float3(1.0, 0.05, 0.05), 0.8255);
-					lineWidth *= 0.37;
+					lineWidth *= 0.45;
 					//quadData *= 0;
 					//worldPosition.z = 1.0; // handled on cpu side for now
 				}
 				if (data.isVisible < 0.5) {
-					quadData *= 0;;
+					quadData *= 0;
 				}
 
-				float3 prevToThisVec = ScaleData(data.worldPos) - ScaleData(dataPrev.worldPos);
+				float3 prevToThisVec = ScaleData(data.worldPos) - ScaleData(dataPrev.worldPos); // OLD
+				//float3 prevToThisVec = data.worldPos - dataPrev.worldPos; // NEW!
 				float3 right = normalize(float3(prevToThisVec.y, -prevToThisVec.x, 0));
 				float tilt01 = abs(prevToThisVec.y);
 				//float tilt01 = prevToThisVec.y * prevToThisVec.y;
 				float3 quadOffset = (quadData.x * right * lineWidth * (1.0 - o.uv.y * 0.0067)) + (o.uv.y * prevToThisVec * 1);
 				
-				float3 worldPosition = ScaleData(dataPrev.worldPos) + quadOffset;
+				float3 worldPosition = ScaleData(dataPrev.worldPos) + quadOffset; // OLD
+				//float3 worldPosition = dataPrev.worldPos + quadOffset; // NEW!
 				
 				float graphWidth = 1.0 - _GraphBufferLeft - _GraphBufferRight;
 				float graphHeight = 1.0 - _GraphClockSize;
@@ -137,8 +139,9 @@
 				return o;
 			}
 			
-			fixed4 frag (v2f i) : SV_Target
+			fixed4 frag(v2f i) : SV_Target
 			{
+				//return float4(1,1,1,1);
 				return i.color;
 
 				//old:

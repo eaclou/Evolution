@@ -235,7 +235,7 @@ public class HistoryPanelUI : MonoBehaviour
             
             targetGraphBoundsMaxX = selectedCand.performanceData.timeStepDied + 80;
                       
-            targetGraphBoundsMaxY = maxA;// simManager.masterGenomePool.completeSpeciesPoolsList[oldestActiveCand.speciesID].avgLifespan + 128f;//.speciesCurAliveMaxScore + 1290;// selectedCand.performanceData.creatureDataPointsList[selectedCand.performanceData.creatureDataPointsList.Count - 1].lifespan;
+            targetGraphBoundsMaxY = maxA;        // simManager.masterGenomePool.completeSpeciesPoolsList[oldestActiveCand.speciesID].avgLifespan + 128f;//.speciesCurAliveMaxScore + 1290;// selectedCand.performanceData.creatureDataPointsList[selectedCand.performanceData.creatureDataPointsList.Count - 1].lifespan;
             //graphBoundsMinY = selectedPool.minScoreValue - 33f;
             //graphBoundsMaxY = selectedPool.maxScoreValue + 33f;
         }
@@ -594,6 +594,7 @@ public class HistoryPanelUI : MonoBehaviour
     
     void CreateCreatureLine(int line, int point, Vector2 cursorCoords, CreatureLineData[] creatureLines, CandidateAgentData cand)
     {
+        float lineFrac = (float)line / worldTreeNumCreatureLines;
         int index = (worldTreeNumCreatureLines - 1 - line) * worldTreeNumPointsPerCreatureLine + point;        
         CreatureLineData data = new CreatureLineData();
 
@@ -620,50 +621,18 @@ public class HistoryPanelUI : MonoBehaviour
 
         if(cand.performanceData.bezierCurve != null) {
             float frac = (float)point / (float)(worldTreeNumPointsPerCreatureLine-1); // along length of bezier curve
-            //float y01 = 1f - (float)line / (float)worldTreeNumCreatureLines;
-
+            
             if(SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList.Count < 1) {
                     //cand.performanceData.scoreStart = 0f;
             }
             else {
-                
-                //float y01 = line % 24;
-                //cand.SetCurveData(cand.performanceData.timeStepHatched, cand.performanceData.timeStepDied, graphBoundsMinY, Mathf.Lerp(graphBoundsMinY, graphBoundsMaxY, y01));
                 cand.performanceData.p0x = cand.performanceData.timeStepHatched;
                 cand.performanceData.p1x = cand.performanceData.timeStepDied;
+                
+                cand.performanceData.p0y = lineFrac;
+                cand.performanceData.p1y = lineFrac;
+
                 SpeciesGenomePool poolRef = SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[cand.speciesID];
-                //if(cand.isBeingEvaluated) { // stop updating line positions after creature death
-                    //cand.performanceData.scoreStart = graphBoundsMinY; // need avgLifespan of species at time of this creature's birth
-                    //y01 = y01 * 228f - 146f + SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[cand.speciesID].avgLifespan;
-               // float y01 = Mathf.Clamp01((cand.candidateID % 47) / 46f);
-                //cand.performanceData.p1y = SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[cand.speciesID].avgLifespan + (cand.candidateID % 47);// Mathf.Clamp01((y01 - graphBoundsMinY) / (graphBoundsMaxY - graphBoundsMinY)); //SS  // SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[cand.speciesID].avgLifespan;
-                float posMin = poolRef.curActiveGraphBoundsMinY;
-                float posMax = poolRef.curActiveGraphBoundsMaxY;
-                if(posMax - posMin < 16f) {
-                    posMin -= 8f;
-                    posMax += 8f;
-                }
-                //cand.performanceData.p1y = Mathf.Lerp(cand.performanceData.p0y, Mathf.Lerp(posMin, posMax, y01), 0.1f); 
-                cand.performanceData.p1y = Mathf.Lerp(cand.performanceData.p1y, cand.performanceData.p0y + (12f - (cand.candidateID % 47)) * 0.27f, 0.25f);
-                //collision??
-                //COLLISION!!!!!!!!!!:: 
-                // this isn't going to work, need a different approach
-                /*float collisionSize = 0.06f;
-                float collisionForce = 1f;
-                for(int j = 0; j < uiManagerRef.speciesOverviewUI.candidateGenomeButtons.Count; j++) {
-                    Vector2 vecToIcon = uiManagerRef.speciesOverviewUI.candidateGenomeButtons[j].targetCoords -
-                                        uiManagerRef.speciesOverviewUI.candidateGenomeButtons[line].targetCoords;
-                    float iconDistanceSquared = vecToIcon.sqrMagnitude;
-                    if(iconDistanceSquared < collisionSize) {
-                        //x -= vecToIcon.x * collisionForce;
-                        //y -= vecToIcon.y * collisionForce;
-                        cand.performanceData.p1y -= vecToIcon.y * collisionForce;
-                    }
-                    else {
-                        
-                    }
-                }*/
-                //}
                 
                 cand.UpdateDisplayCurve();
             }
@@ -1206,6 +1175,7 @@ public class HistoryPanelUI : MonoBehaviour
         
         for (int line = 0; line < worldTreeNumCreatureLines; line++) 
         {
+            float lineFrac = (float)line / worldTreeNumCreatureLines;
             var position = Vector2.zero;
             if (line >= uiManagerRef.speciesOverviewUI.candidateGenomeButtons.Count) // pool.candidateGenomesList.Count) 
                 continue;
@@ -1216,11 +1186,7 @@ public class HistoryPanelUI : MonoBehaviour
             }
             
             float x = 1f;
-            float frac = 0f;
-            if (candidate.performanceData.bezierCurve != null) {
-                frac = candidate.performanceData.bezierCurve.points[2].y;//EndPoint yPos of curve (float)line / (float)numAgentsDisplayed;
-            }
-            float y = (frac - graphBoundsMinY) / (graphBoundsMaxY - graphBoundsMinY);// (candidate.performanceData.creatureDataPointsList[candidate.performanceData.creatureDataPointsList.Count - 1].lifespan - graphBoundsMinY) / Mathf.Max(1,(graphBoundsMaxY - graphBoundsMinY));
+            float y = lineFrac; // (lineFrac - graphBoundsMinY) / (graphBoundsMaxY - graphBoundsMinY);// (candidate.performanceData.creatureDataPointsList[candidate.performanceData.creatureDataPointsList.Count - 1].lifespan - graphBoundsMinY) / Mathf.Max(1,(graphBoundsMaxY - graphBoundsMinY));
             
             if (pool.isExtinct || candidate.performanceData.timeStepDied > 1) {
                 float timeSinceDeath = candidate.performanceData.timeStepDied - graphBoundsMinX;

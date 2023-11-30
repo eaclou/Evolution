@@ -415,8 +415,8 @@ public class Agent : MonoBehaviour {
         mouthRef.Disable();
         
         audioManager.PlayCritterDeath(ownPos);
-
-        candidateRef.performanceData.p0x = candidateRef.performanceData.timeStepDied;//
+        //Debug.Log("wtf?" + candidateRef.performanceData.p0x);
+        //candidateRef.performanceData.p0x = candidateRef.performanceData.timeStepDied;//
     }
     
     // *** WPP: trigger state changes & processes when conditions met
@@ -776,7 +776,7 @@ public class Agent : MonoBehaviour {
 
         //candidateRef.performanceData.minScoreValue = candidateRef.performanceData.timeStepHatched;//SetCurvePointStart(UIManager.instance.historyPanelUI.graphBoundsMinX, UIManager.instance.historyPanelUI.graphBoundsMinY);
         candidateRef.performanceData.p0x = candidateRef.performanceData.timeStepHatched;
-        candidateRef.performanceData.p0y = simManager.masterGenomePool.completeSpeciesPoolsList[speciesIndex].avgLifespan;// + ((candidateRef.candidateID % 47) / 47) * 0.5f;
+        //candidateRef.performanceData.p0y = simManager.masterGenomePool.completeSpeciesPoolsList[speciesIndex].avgLifespan;// + ((candidateRef.candidateID % 47) / 47) * 0.5f;
         //candidateRef.SetCurvePointEnd(UIManager.instance.historyPanelUI.graphBoundsMaxX, UIManager.instance.historyPanelUI.graphBoundsMaxY);
         //Debug.Log(candidateRef.performanceData.bezierCurve.points[0]);
         //candidateRef.performanceData.speciesAvgLifespanAtTimeOfBirth = simManager.masterGenomePool.completeSpeciesPoolsList[speciesIndex].avgLifespan;
