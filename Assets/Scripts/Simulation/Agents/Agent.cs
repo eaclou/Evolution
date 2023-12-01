@@ -775,7 +775,7 @@ public class Agent : MonoBehaviour {
         audioManager.PlayCritterSpawn(ownPos);
 
         //candidateRef.performanceData.minScoreValue = candidateRef.performanceData.timeStepHatched;//SetCurvePointStart(UIManager.instance.historyPanelUI.graphBoundsMinX, UIManager.instance.historyPanelUI.graphBoundsMinY);
-        candidateRef.performanceData.p0x = candidateRef.performanceData.timeStepHatched;
+        //candidateRef.performanceData.p0x = candidateRef.performanceData.timeStepHatched;
         //candidateRef.performanceData.p0y = simManager.masterGenomePool.completeSpeciesPoolsList[speciesIndex].avgLifespan;// + ((candidateRef.candidateID % 47) / 47) * 0.5f;
         //candidateRef.SetCurvePointEnd(UIManager.instance.historyPanelUI.graphBoundsMaxX, UIManager.instance.historyPanelUI.graphBoundsMaxY);
         //Debug.Log(candidateRef.performanceData.bezierCurve.points[0]);
@@ -789,7 +789,7 @@ public class Agent : MonoBehaviour {
         
         // *************************************************************************************
         candidateRef.performanceData.timeStepDied = SimulationManager.instance.simAgeTimeSteps;
-        candidateRef.performanceData.p1x = candidateRef.performanceData.timeStepDied;
+        //candidateRef.performanceData.p1x = candidateRef.performanceData.timeStepDied;
 
 
         if (isSwallowingPrey) {

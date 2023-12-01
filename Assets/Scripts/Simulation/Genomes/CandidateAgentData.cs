@@ -5,16 +5,16 @@ using Playcraft;
 /// Stats
 public struct PerformanceData {
     //public List<CreatureDataPoint> creatureDataPointsList; // won't even need this eventually with bezier curve approach
-    public int maxNumDataPointEntries;
+    //public int maxNumDataPointEntries;
     //old:
     public float minScoreValue;
     public float maxScoreValue;
     //NEW:
-    public BezierCurve bezierCurve;
-    public float p0y;
-    public float p0x;
-    public float p1y;
-    public float p1x;
+    //public BezierCurve bezierCurve;
+    //public float p0y;
+    //public float p0x;
+    //public float p1y;
+    //public float p1x;
 
     public float totalFoodEatenPlant;
     public float totalFoodEatenZoop;
@@ -190,18 +190,7 @@ public class CandidateAgentData
     
     
 
-    public void UpdateDisplayCurve() {
-        if(performanceData.bezierCurve == null) {
-            performanceData.bezierCurve = new BezierCurve();
-            //performanceData.timeStart = SimulationManager.instance.simAgeTimeSteps;
-            //performanceData.scoreStart = SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[speciesID].avgLifespan;
-        }
-        //performanceData.timeStart = performanceData.timeStepHatched;
-        performanceData.bezierCurve.SetPoints(new Vector3(performanceData.p0x, performanceData.p0y, 0f), 
-                                            new Vector3(performanceData.p0x, performanceData.p1y, 0f), 
-                                            new Vector3(performanceData.p1x, performanceData.p1y, 0f));
-        
-    }
+    
     /*
     public void AddNewDataPoint(int timestep, float score) {
 

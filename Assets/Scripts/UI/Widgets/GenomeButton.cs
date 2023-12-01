@@ -18,6 +18,8 @@ public class GenomeButton : MonoBehaviour
     public Image backgroundImage;
     public TooltipUI tooltip;
 
+    public BezierCurve bezierCurve; //CreatureButton history panel Line
+
     public Vector2 targetCoords; // UI canvas
     private Vector2 currentCoords;
     

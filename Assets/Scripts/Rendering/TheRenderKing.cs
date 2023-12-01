@@ -2475,6 +2475,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
         resourceLineDataMat.SetPass(0);
         resourceLineDataMat.SetFloat("_GraphBufferLeft", uiManager.historyPanelUI.marginLeft);
         resourceLineDataMat.SetFloat("_GraphBufferRight", uiManager.historyPanelUI.marginRight);
+        resourceLineDataMat.SetFloat("_GraphBufferBottom", uiManager.historyPanelUI.marginBottom);
+		resourceLineDataMat.SetFloat("_GraphBufferTop", uiManager.historyPanelUI.marginTop);
         resourceLineDataMat.SetFloat("_GraphClockSize", uiManager.historyPanelUI.clockHeight);
         resourceLineDataMat.SetFloat("_GraphBoundsMinX", coordinatesMin.x);
         resourceLineDataMat.SetFloat("_GraphBoundsMaxX", coordinatesMax.x);
@@ -2489,6 +2491,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
         speciesLineDataMat.SetFloat("_GraphBoundsMaxY", coordinatesMax.y);
         speciesLineDataMat.SetFloat("_GraphBufferLeft", uiManager.historyPanelUI.marginLeft);
 		speciesLineDataMat.SetFloat("_GraphBufferRight", uiManager.historyPanelUI.marginRight);
+        speciesLineDataMat.SetFloat("_GraphBufferBottom", uiManager.historyPanelUI.marginBottom);
+		speciesLineDataMat.SetFloat("_GraphBufferTop", uiManager.historyPanelUI.marginTop);
         speciesLineDataMat.SetFloat("_GraphClockSize", uiManager.historyPanelUI.clockHeight);
         cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, speciesLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.historyPanelUI.speciesLineDataCBuffer.count);
 
@@ -2499,6 +2503,8 @@ public class TheRenderKing : Singleton<TheRenderKing>
         creatureLineDataMat.SetFloat("_GraphBoundsMaxY", coordinatesMax.y);
         creatureLineDataMat.SetFloat("_GraphBufferLeft", uiManager.historyPanelUI.marginLeft);
 		creatureLineDataMat.SetFloat("_GraphBufferRight", uiManager.historyPanelUI.marginRight);
+        creatureLineDataMat.SetFloat("_GraphBufferBottom", uiManager.historyPanelUI.marginBottom);
+		creatureLineDataMat.SetFloat("_GraphBufferTop", uiManager.historyPanelUI.marginTop);
         creatureLineDataMat.SetFloat("_GraphClockSize", uiManager.historyPanelUI.clockHeight);
         cmdBufferWorldTree.DrawProcedural(Matrix4x4.identity, creatureLineDataMat, 0, MeshTopology.Triangles, 6, uiManager.historyPanelUI.creatureLineDataCBuffer.count);
 

@@ -167,7 +167,7 @@ public class SpeciesGenomePool
         avgCandidateData.SetToAverage(leaderboardGenomesList);
     }
 
-    public CandidateAgentData UpdateOldestActiveCandidateAndGraphBounds() {
+    public CandidateAgentData UpdateOldestActiveCandidateAndGraphBounds() { // ***EAC use time alive directly, deprecate p0y
         float earliestTimestepBorn = SimulationManager.instance.simAgeTimeSteps;
         CandidateAgentData oldestLivingCandidate = null;
         float minX = SimulationManager.instance.simAgeTimeSteps;
@@ -180,51 +180,25 @@ public class SpeciesGenomePool
         for(int i = 0; i < candidateGenomesList.Count; i++) {
             if(candidateGenomesList[i].isBeingEvaluated) {
                 if(candidateGenomesList[i].performanceData.timeStepHatched < earliestTimestepBorn) {
-                    earliestTimestepBorn = candidateGenomesList[i].performanceData.p0x;
+                    earliestTimestepBorn = candidateGenomesList[i].performanceData.timeStepHatched;
                     oldestLivingCandidate = candidateGenomesList[i];
                 }
                 //MINIMUMS
-                if(candidateGenomesList[i].performanceData.p0x < minX) {
-                    if(candidateGenomesList[i].performanceData.p0x <= 0.001f) {
+                if(candidateGenomesList[i].performanceData.timeStepHatched < minX) {
+                    if(candidateGenomesList[i].performanceData.timeStepHatched <= 0.001f) {
 
                     }
                     else {
                         nonZeroX = true;
-                        minX = candidateGenomesList[i].performanceData.p0x;
+                        minX = candidateGenomesList[i].performanceData.timeStepHatched;
                     }
                     
                 }
-                //if(candidateGenomesList[i].performanceData.p1x < minX) {
-                //    minX = candidateGenomesList[i].performanceData.p1x;
-                //}
-                if(candidateGenomesList[i].performanceData.p0y < minY) {    
-                    if(candidateGenomesList[i].performanceData.p0y <= 0.001f) {
-
-                    }
-                    else {
-                        nonZeroY = true;
-                        minY = candidateGenomesList[i].performanceData.p0y;
-                    }
+                
+                if(candidateGenomesList[i].performanceData.timeStepDied > maxX) {
+                    maxX = candidateGenomesList[i].performanceData.timeStepDied;
                 }
-                //else {
-                    //Debug.Log("candidateGenomesList[i].performanceData.p0y < minY " + candidateGenomesList[i].performanceData.p0y);
-                //}
-                //if(candidateGenomesList[i].performanceData.p1y < minY) {
-                //    minY = candidateGenomesList[i].performanceData.p1y;
-                //}
-                //MAXIMUMS:
-                //if(candidateGenomesList[i].performanceData.p0x > maxX) {
-                //    maxX = candidateGenomesList[i].performanceData.p0x;
-                //}
-                if(candidateGenomesList[i].performanceData.p1x > maxX) {
-                    maxX = candidateGenomesList[i].performanceData.p1x;
-                }
-                if(candidateGenomesList[i].performanceData.p0y > maxY) {
-                    maxY = candidateGenomesList[i].performanceData.p0y;
-                }
-                if(candidateGenomesList[i].performanceData.p1y > maxY) {
-                    maxY = candidateGenomesList[i].performanceData.p1y;
-                }
+                
                 if(!nonZeroX) {
                     minX = maxX;
                 }
@@ -275,7 +249,7 @@ public class SpeciesGenomePool
             speciesCurAliveMinScore = float.PositiveInfinity;
             speciesCurAliveMaxScore = 1;
         }
-        
+        /*
         for(int i = 0; i < candidateGenomesList.Count; i++) {
             
             float frac = (float)i / (float)Mathf.Max(1, candidateGenomesList.Count - 1);
@@ -292,7 +266,7 @@ public class SpeciesGenomePool
             if(avgLifespan > speciesCurAliveMaxScore) {
                 speciesCurAliveMaxScore = avgLifespan;
             }                      
-        }
+        }*/
     }
     private void MergeDataPoints() {
         float closestPairDistance = float.PositiveInfinity;

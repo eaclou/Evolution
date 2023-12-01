@@ -227,7 +227,7 @@ public class HistoryPanelUI : MonoBehaviour
             targetGraphBoundsMaxY = selectedPool.curActiveGraphBoundsMaxY + 8;
              
         }
-        if(isTimelineMode) {
+        /*if(isTimelineMode) {
             float minA = Mathf.Min(selectedCand.performanceData.p0y, selectedCand.performanceData.p1y) - 4;
             float maxA = Mathf.Max(selectedCand.performanceData.p0y, selectedCand.performanceData.p1y) + 4;
             targetGraphBoundsMinX = selectedCand.performanceData.timeStepHatched - 80;// Mathf.Max(0f, selectionManager.currentSelection.candidate.performanceData.timeStepHatched);// uiManager.historyPanelUI.maxScoreValue - uiManager.historyPanelUI.minScoreValue) * 33f);
@@ -238,7 +238,7 @@ public class HistoryPanelUI : MonoBehaviour
             targetGraphBoundsMaxY = maxA;        // simManager.masterGenomePool.completeSpeciesPoolsList[oldestActiveCand.speciesID].avgLifespan + 128f;//.speciesCurAliveMaxScore + 1290;// selectedCand.performanceData.creatureDataPointsList[selectedCand.performanceData.creatureDataPointsList.Count - 1].lifespan;
             //graphBoundsMinY = selectedPool.minScoreValue - 33f;
             //graphBoundsMaxY = selectedPool.maxScoreValue + 33f;
-        }
+        }*/
     }
         
     public void SetNudgeTooltip(string str) {
@@ -301,7 +301,7 @@ public class HistoryPanelUI : MonoBehaviour
             if (creatureLifespan == 0) creatureLifespan = 1;
             float normalizedTime01 = Mathf.Clamp01((float)(candidate.candidateEventDataList[i].eventFrame - graphBoundsMinX) / (graphBoundsMaxX - graphBoundsMinX));        
 ;
-            float a01 = candidate.performanceData.bezierCurve.GetPoint(normalizedTime01).y;// candidate.performanceData.p1y;
+            float a01 = 0.5f;// candidate.performanceData.bezierCurve.GetPoint(normalizedTime01).y;// candidate.performanceData.p1y;
             
             if(curPanelMode == HistoryPanelMode.SelCreatureTimeline) {
                 a01 += 0.44f * ((float)-candidate.candidateEventDataList[i].type + 6);
@@ -594,7 +594,9 @@ public class HistoryPanelUI : MonoBehaviour
     
     void CreateCreatureLine(int line, int point, Vector2 cursorCoords, CreatureLineData[] creatureLines, CandidateAgentData cand)
     {
-        float lineFrac = (float)line / worldTreeNumCreatureLines;
+        // ***EAC creature lines are now treated differently, dynamic positioning based on HistoryPanel, rather than fixed world-position
+        // Uses a bezier curve to define pos rather than each line segment
+        float lineFrac = 1f - (8f * (float)line / worldTreeNumCreatureLines) % 1.0f;
         int index = (worldTreeNumCreatureLines - 1 - line) * worldTreeNumPointsPerCreatureLine + point;        
         CreatureLineData data = new CreatureLineData();
 
@@ -618,29 +620,26 @@ public class HistoryPanelUI : MonoBehaviour
         float x = 0f;// pointWorldPos.x;// cand.performanceData.creatureDataPointsList[point].lifespan;        
         float y = 0f;// pointWorldPos.y; // cand.performanceData.creatureDataPointsList[point].timestep; // (float)pool.speciesDataPointsList[point].timestep / (float)simManager.simAgeTimeSteps;
         float z = 0f;
-
-        if(cand.performanceData.bezierCurve != null) {
-            float frac = (float)point / (float)(worldTreeNumPointsPerCreatureLine-1); // along length of bezier curve
-            
-            if(SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList.Count < 1) {
-                    //cand.performanceData.scoreStart = 0f;
-            }
-            else {
-                cand.performanceData.p0x = cand.performanceData.timeStepHatched;
-                cand.performanceData.p1x = cand.performanceData.timeStepDied;
-                
-                cand.performanceData.p0y = lineFrac;
-                cand.performanceData.p1y = lineFrac;
-
-                SpeciesGenomePool poolRef = SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[cand.speciesID];
-                
-                cand.UpdateDisplayCurve();
-            }
-            
-            Vector3 pointWorldPos = cand.performanceData.bezierCurve.GetPoint(frac);
-            x = pointWorldPos.x;
-            y = pointWorldPos.y; 
+ 
+        if(SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList.Count < 1) {
+                //cand.performanceData.scoreStart = 0f;
         }
+        else {
+            //cand.performanceData.p0x = cand.performanceData.timeStepHatched;
+            // cand.performanceData.p1x = cand.performanceData.timeStepDied;
+                
+            //cand.performanceData.p0y = lineFrac;
+            //cand.performanceData.p1y = lineFrac;
+
+            SpeciesGenomePool poolRef = SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[cand.speciesID];
+                
+            //cand.UpdateDisplayCurve();
+        }
+            
+            //Vector3 pointWorldPos = uiManagerRef.speciesOverviewUI.candidateGenomeButtons[line].GetPoint(frac);
+            //x = pointWorldPos.x;
+            //y = pointWorldPos.y; 
+        //}
         //Debug.Log(x + ", " + y);
         
         SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[cand.speciesID];
@@ -1167,15 +1166,26 @@ public class HistoryPanelUI : MonoBehaviour
         // Default
         return new Vector2(-0.2f, -0.2f);
     }
-    
-    void PositionCreatureIcons()
+    /*public void UpdateDisplayCurve() {
+        if(performanceData.bezierCurve == null) {
+            performanceData.bezierCurve = new BezierCurve();
+            //performanceData.timeStart = SimulationManager.instance.simAgeTimeSteps;
+            //performanceData.scoreStart = SimulationManager.instance.masterGenomePool.completeSpeciesPoolsList[speciesID].avgLifespan;
+        }
+        //performanceData.timeStart = performanceData.timeStepHatched;
+        performanceData.bezierCurve.SetPoints(new Vector3(performanceData.p0x, performanceData.p0y, 0f), 
+                                            new Vector3(performanceData.p0x, performanceData.p1y, 0f), 
+                                            new Vector3(performanceData.p1x, performanceData.p1y, 0f));
+        
+    }*/
+    void PositionCreatureIcons()  // These should determine Creature Line End-Points? start point based on birth-time and Parent Line pos
     {
         SpeciesGenomePool pool = simManager.masterGenomePool.completeSpeciesPoolsList[currentSelection.candidate.speciesID];
         
         
         for (int line = 0; line < worldTreeNumCreatureLines; line++) 
         {
-            float lineFrac = (float)line / worldTreeNumCreatureLines;
+            float lineFrac = 1f-(8f * (float)line / worldTreeNumCreatureLines) % 1.0f;
             var position = Vector2.zero;
             if (line >= uiManagerRef.speciesOverviewUI.candidateGenomeButtons.Count) // pool.candidateGenomesList.Count) 
                 continue;
@@ -1193,12 +1203,12 @@ public class HistoryPanelUI : MonoBehaviour
                 x = timeSinceDeath / (float)(simManager.simAgeTimeSteps - graphBoundsMinX);
             }
             if (candidate.candidateID == selectionManager.currentSelection.candidate.candidateID) x = 1.075f;
-            
-            position = AnchorBottomLeft(x, Mathf.Clamp01(y)) * panelSizePixels;
-            //Check for Collision:
-            
-            //***EAC FIX!
+
+            position = AnchorBottomLeft(x, Mathf.Clamp01(y));            
+            position *= panelSizePixels;
             uiManagerRef.speciesOverviewUI.SetButtonPosition(line, new Vector3(position.x, position.y, 0f));
+            
+            
         }        
     }
     
