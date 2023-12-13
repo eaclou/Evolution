@@ -143,8 +143,20 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
 	public void Tick() {
         SetCursorTexture();
         RefreshMouseInput();
-        
-        if (!EventSystem.current.IsPointerOverGameObject()) {
+
+        // Check UI click:
+        if(uiManagerRef.cursorInMinimapPanel && uiManagerRef.minimapUI.isOpen) {
+            if(leftClickThisFrame && !uiManagerRef.minimapUI.isOverOpenCloseButton) {
+                cameraManager.isFollowingAgent = false;
+                cameraManager.isFollowingAnimalParticle = false;
+                cameraManager.isFollowingPlantParticle = false;
+                //mousePosPanelCoords
+                cameraManager.curCameraFocusPivotPos.x = (uiManagerRef.minimapUI.mousePosPanelCoords.x / (float)MinimapPanel.panelSizePixels) * mapSize;
+                cameraManager.curCameraFocusPivotPos.y = (uiManagerRef.minimapUI.mousePosPanelCoords.y / (float)MinimapPanel.panelSizePixels) * mapSize;
+            }
+        }
+        else {
+            if (!EventSystem.current.IsPointerOverGameObject()) {
             MouseRaycastCheckAgents(leftClickThisFrame);
         }
         
@@ -156,6 +168,9 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
         if(theRenderKing.gizmoCursorPosCBuffer != null) {
             theRenderKing.gizmoCursorPosCBuffer.SetData(dataArray);
         }
+        }
+        
+        
         
 
         stirGizmoVisible = false;

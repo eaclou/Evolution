@@ -4,6 +4,7 @@ using UnityEngine.UI;
 public class MinimapPanel : MonoBehaviour
 {
     SimulationManager simulationManager => SimulationManager.instance;
+    UIManager uiManagerRef => UIManager.instance;
     CameraManager cameraManager => CameraManager.instance;
     TrophicLayersManager trophicLayers => simulationManager.trophicLayersManager;
     TheRenderKing theRenderKing => TheRenderKing.instance;
@@ -21,16 +22,38 @@ public class MinimapPanel : MonoBehaviour
     [SerializeField]
     TooltipUI tooltipOpenCloseButton;
 
+    [ReadOnly]
+    public bool mouseWithinPanelBounds;
+    [ReadOnly]
+    public Vector2 mousePosPanelCoords;
+
+    public static int panelSizePixels => 360; // better way to do this, use build-in UI stuff to set a flag(s)
+
     TrophicSlot selectedTrophicSlot => trophicLayers.selectedSlot;
-    bool isOpen => openCloseButton.isOpen;
+    public bool isOpen => openCloseButton.isOpen;
+    public bool isOverOpenCloseButton = false;
 
     public void Start() {
         openCloseButton.SetHighlight(true);
     }
     public void Tick() {
+        
         var mouseInOpenCloseArea = Screen.height - Input.mousePosition.y < 64 && Screen.width - Input.mousePosition.x < 64;
+        isOverOpenCloseButton = mouseInOpenCloseArea;
         openCloseButton.SetMouseEnter(mouseInOpenCloseArea);
         tooltipOpenCloseButton.tooltipString = isOpen ? "Hide Minimap Panel" : "Open Minimap Panel";
+        
+        mouseWithinPanelBounds = Screen.height - Input.mousePosition.y < panelSizePixels && Screen.width - Input.mousePosition.x < panelSizePixels;
+        //mousePosPanelCoords = Vector2.zero;
+        uiManagerRef.SetCursorInMinimapPanel(mouseWithinPanelBounds);
+        
+        if(mouseWithinPanelBounds) {
+            mousePosPanelCoords.x = Input.mousePosition.x - (Screen.width - panelSizePixels);
+            mousePosPanelCoords.y = Input.mousePosition.y - (Screen.height - panelSizePixels);
+        }
+        
+
+
 
         uiKnowledgeMapViewerMat.SetTexture("_AltitudeTex", theRenderKing.baronVonTerrain.terrainHeightDataRT);
         uiKnowledgeMapViewerMat.SetTexture("_ResourceGridTex", simulationManager.vegetationManager.resourceGridRT1);

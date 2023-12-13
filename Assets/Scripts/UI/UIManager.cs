@@ -106,6 +106,8 @@ public class UIManager : Singleton<UIManager>
     
     public bool cursorInSpeciesHistoryPanel;
     public void SetCursorInSpeciesHistoryPanel(bool value) { cursorInSpeciesHistoryPanel = value; }
+    public bool cursorInMinimapPanel;
+    public void SetCursorInMinimapPanel(bool value) { cursorInMinimapPanel = value; }
 
     [SerializeField] float hitboxRadius = 1f;
 
