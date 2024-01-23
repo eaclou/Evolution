@@ -63,7 +63,7 @@
 				AnimalParticleData particleData = animalParticleDataCBuffer[particleIndex];
 
 				float3 worldPosition = float3(particleData.worldPos);    //float3(rawData.worldPos, -random2);
-				float radius = 2; //(0.1 + saturate(particleData.biomass * 2.2) + rand2 * 0.4) * particleData.isActive * 2.8;
+				float radius = 1.1; //(0.1 + saturate(particleData.biomass * 2.2) + rand2 * 0.4) * particleData.isActive * 2.8;
 				worldPosition.xy += quadPoint.xy * radius;
 				
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0)));			
@@ -81,7 +81,7 @@
 			{
 				
 				//float4 texColor = tex2D(_MainTex, i.uv);
-				
+				//return float4(1,1,1,1);
 				return i.hue;
 			}
 		ENDCG

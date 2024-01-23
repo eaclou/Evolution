@@ -635,7 +635,7 @@ public class SimulationManager : Singleton<SimulationManager>
             theRenderKing.speciesLineDataMat.SetBuffer("worldTreeLineDataCBuffer", uiManager.historyPanelUI.speciesLineDataCBuffer);
         }
 
-        if (simAgeTimeSteps % 79 == 3) {
+        if (simAgeTimeSteps % 179 == 3) {
             UpdateSimulationClimate();
         }
     }

@@ -144,6 +144,8 @@ public class CameraManager : Singleton<CameraManager>
         worldSpaceCameraRightDir = new Vector4(camRight.x, camRight.y, camRight.z, 0f);
         Vector3 camUp = gameObject.transform.up;
         worldSpaceCameraUpDir = new Vector4(camUp.x, camUp.y, camUp.z, 0f);
+
+
     }
 
     public void MoveCamera(Vector2 dir) 

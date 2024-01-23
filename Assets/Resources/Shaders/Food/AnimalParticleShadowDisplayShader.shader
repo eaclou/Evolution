@@ -109,8 +109,14 @@
 				/////////////////////////////////////////////////////
 				
 				o.color = float4(0,0,0,0);
-				float oldAgeMask = saturate((particleData.age - 1.0) * 1000);
-				o.color.a = 1.0 - oldAgeMask; 
+				//float oldAgeMask = saturate((particleData.age - 1.0) * 1000);
+				//o.color.a = saturate(1.0 - oldAgeMask); 
+				if(particleData.isActive) {
+					o.color.a = 1.0;
+				}
+				else {
+					o.color.a = 0;
+				}
 				//o.color = float4(saturate(particleData.isDecaying), saturate(particleData.biomass * 5), saturate(particleData.age * 0.5), 1);
 								
 				return o;

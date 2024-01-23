@@ -1,9 +1,9 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
-//#pragma kernel RefreshColor
+#pragma kernel RefreshColor
 //#pragma kernel InitializeVelocity
 #pragma kernel Advection
 #pragma kernel ViscousDiffusion
-//#pragma kernel VelocityInjectionPoints
+#pragma kernel VelocityInjectionPoints
 #pragma kernel VelocityInjectionPointsVortex
 #pragma kernel VelocityDivergence
 #pragma kernel PressureJacobi
@@ -90,8 +90,8 @@ RWTexture2D<float4> VelocityWrite;
 
 //Texture2D<float4> PressureRead;
 //RWTexture2D<float4> PressureWrite;
-//Texture2D<float4> DensityRead;
-//RWTexture2D<float4> DensityWrite;
+Texture2D<float4> DensityRead;
+RWTexture2D<float4> DensityWrite;
 //Texture2D<float4> DivergenceRead;
 //RWTexture2D<float4> DivergenceWrite;
 Texture2D<float4> ObstaclesRead;
@@ -392,7 +392,7 @@ void GetObjectVelocities (uint3 id : SV_DispatchThreadID)
 
 
 
-/*[numthreads(16,16,1)]
+[numthreads(16,16,1)]
 void RefreshColor (uint3 id : SV_DispatchThreadID)
 {	
 	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
@@ -409,7 +409,7 @@ void RefreshColor (uint3 id : SV_DispatchThreadID)
 	float4 currentColor = lerp(amountCenter, (amountCenter + amountRight + amountLeft + amountUp + amountDown) / 5, diffusionAmount);
 
 	//float4 reactionDiffusionSample = _AlgaeDecomposerMapRead.SampleLevel(_LinearClamp, uvOrigin, 0);
-	float4 nutrientGridSample = _NutrientGridRead.SampleLevel(_LinearClamp, uvOrigin, 0);
+	//float4 nutrientGridSample = _NutrientGridRead.SampleLevel(_LinearClamp, uvOrigin, 0);
 	
 	float4 sourceColorDynamic = colorInjectionRenderTex.SampleLevel(_LinearRepeat, uvOrigin, 0);
 	float4 newColor = lerp(currentColor, float4(0,0,0,0), _ColorRefreshAmount);
@@ -417,7 +417,7 @@ void RefreshColor (uint3 id : SV_DispatchThreadID)
 	newColor.rgb = lerp(newColor.rgb, sourceColorDynamic.rgb, stampAlpha); //saturate(_ColorRefreshDynamicMultiplier * sourceColorDynamic.a));
 	newColor.a = lerp(newColor.a, 1, stampAlpha);
 	
-	newColor.a = saturate(nutrientGridSample.w * 1 + nutrientGridSample.x * 1);
+	//newColor.a = saturate(nutrientGridSample.w * 1 + nutrientGridSample.x * 1);
 
 	float3 nutrientsHue = _NutrientsColor.rgb * 1.5;
 	float3 algaeHue = lerp(_AlgaeColor.rgb, float3(0.275,0.8,0.175), 0.95) * 1.0;
@@ -425,15 +425,15 @@ void RefreshColor (uint3 id : SV_DispatchThreadID)
 	int checkerMask02 = 1 - checkerMask01; // ((id.x + id.y + 1)) % 2;
 	float mask01 = (float)(checkerMask01 * 0.25 + 0.75);
 	float mask02 = (float)(checkerMask02 * 0.25 + 0.75);
-	newColor.rgb = lerp(newColor.rgb, nutrientsHue, nutrientGridSample.x); // * mask01);
-	newColor.rgb = lerp(newColor.rgb, algaeHue, saturate(nutrientGridSample.w)); // * mask02));
-	newColor.a = max(nutrientGridSample.x, nutrientGridSample.w) * 4;
+	//newColor.rgb = lerp(newColor.rgb, nutrientsHue, nutrientGridSample.x); // * mask01);
+	//newColor.rgb = lerp(newColor.rgb, algaeHue, saturate(nutrientGridSample.w)); // * mask02));
+	//newColor.a = max(nutrientGridSample.x, nutrientGridSample.w) * 4;
 	//newColor.a = ((float)mask01 * nutrientGridSample.x + (float)mask02 * nutrientGridSample.w) * 2;
 	
 	
 	DensityWrite[id.xy] = saturate(newColor); //float4(newColor, 1); //lerp(currentColor, sourceColorDynamic, _ColorRefreshAmount);
 
-}*/
+}
 
 
 /*
@@ -447,7 +447,7 @@ void InitializeVelocity (uint3 id : SV_DispatchThreadID)
 	VelocityWrite[id.xy] = float4(sin(20 * uvOrigin.y) * uvOrigin.x,sin(13.79 * uvOrigin.x) * uvOrigin.y,0,0) * 0.2; // 
 }*/
 
-/*
+
 [numthreads(32,32,1)]
 void VelocityInjectionPoints (uint3 id : SV_DispatchThreadID)
 {	
@@ -496,7 +496,7 @@ void VelocityInjectionPoints (uint3 id : SV_DispatchThreadID)
 
 	VelocityWrite[id.xy] = float4(newForce, 0, 0) * (1.0 - damping);
 }
-*/
+
 
 [numthreads(32,32,1)]
 void VelocityInjectionPointsVortex (uint3 id : SV_DispatchThreadID)

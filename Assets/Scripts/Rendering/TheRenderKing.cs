@@ -190,7 +190,7 @@ public class TheRenderKing : Singleton<TheRenderKing>
     private int numStrokesPerCritterSkinDetail = 128;
     private ComputeBuffer mainCritterStrokesCBuffer;    
 
-    private int numFloatyBits = maxShaderThreads * 32;
+    private int numFloatyBits = maxShaderThreads * 64;
     private ComputeBuffer floatyBitsCBuffer;
 
     private BasicStrokeData[] obstacleStrokeDataArray;
@@ -2253,33 +2253,42 @@ public class TheRenderKing : Singleton<TheRenderKing>
         //if(simManager.uiManager.knowledgeUI.isOpen) {
 
         cmdBufferFluidColor.Clear(); // needed since camera clear flag is set to none
-        cmdBufferFluidColor.SetRenderTarget(fluidManager._SourceColorRT);
+        cmdBufferFluidColor.SetRenderTarget(fluidManager._PlantsMicrobesAnimalsColorRT);
         cmdBufferFluidColor.ClearRenderTarget(true, true, new Color(0f, 0f, 0f, 0f), 1.0f);  // clear -- needed???
         cmdBufferFluidColor.SetViewProjectionMatrices(fluidColorRenderCamera.worldToCameraMatrix, fluidColorRenderCamera.projectionMatrix);
 
         //cmdBufferFluidColor.Blit(fluidManager.initialDensityTex, fluidManager._SourceColorRT);
         //cmdBufferFluidColor.DrawMesh(fluidRenderMesh, Matrix4x4.identity, fluidBackgroundColorMat); // Simple unlit Texture shader -- wysiwyg
        
-        switch (selectedWorldSpiritSlot.id)
+        /*switch (uiManager.minimapUI.)
         {
-            case KnowledgeMapId.Plants: 
+            case MinimapPanel.MapOverlayModes.Plants: 
                 RenderParticleMaterial(algaeParticleColorInjectMat, "foodParticleDataCBuffer", vegetationManager.plantParticlesCBuffer);
                 break;
-            case KnowledgeMapId.Algae:
+            case MinimapPanel.MapOverlayModes.Microbes: 
                 RenderParticleMaterial(zooplanktonParticleColorInjectMat, "animalParticleDataCBuffer", zooplanktonManager.animalParticlesCBuffer);
                 break;
+        }*/
+
+        if(simManager.trophicLayersManager.selectedSlot.data.id == KnowledgeMapId.Plants) {
+            RenderParticleMaterial(algaeParticleColorInjectMat, "foodParticleDataCBuffer", vegetationManager.plantParticlesCBuffer);
         }
+        if (simManager.trophicLayersManager.selectedSlot.data.id == KnowledgeMapId.Microbes) {
+            RenderParticleMaterial(zooplanktonParticleColorInjectMat, "animalParticleDataCBuffer", zooplanktonManager.animalParticlesCBuffer);
+        }
+        if(simManager.trophicLayersManager.selectedSlot.data.id == KnowledgeMapId.Animals) {
+            PopulateColorInjectionBuffer(); // update data for colorInjection objects before rendering                    
+            // Creatures + EggSacks:
+            basicStrokeDisplayMat.SetPass(0);
+            basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
+            basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", colorInjectionStrokesCBuffer);
+            cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, colorInjectionStrokesCBuffer.count);
+            //why are they always rendering white??
+            // Render Agent/Food/Pred colors here!!!
+            // just use their display renders?
 
-        PopulateColorInjectionBuffer(); // update data for colorInjection objects before rendering                    
-        // Creatures + EggSacks:
-        basicStrokeDisplayMat.SetPass(0);
-        basicStrokeDisplayMat.SetBuffer("quadVerticesCBuffer", quadVerticesCBuffer);
-        basicStrokeDisplayMat.SetBuffer("basicStrokesCBuffer", colorInjectionStrokesCBuffer);
-        cmdBufferFluidColor.DrawProcedural(Matrix4x4.identity, basicStrokeDisplayMat, 0, MeshTopology.Triangles, 6, colorInjectionStrokesCBuffer.count);
-        //why are they always rendering white??
-        // Render Agent/Food/Pred colors here!!!
-        // just use their display renders?
-
+        }
+        
         Graphics.ExecuteCommandBuffer(cmdBufferFluidColor);
         fluidColorRenderCamera.Render();
         //simManager.environmentFluidManager.densityA.GenerateMips();
@@ -2692,9 +2701,11 @@ public class TheRenderKing : Singleton<TheRenderKing>
         terrainMeshOpaqueMat.SetPass(0);
         terrainMeshOpaqueMat.SetTexture("_MainTex", baronVonTerrain.terrainColorRT0);
 
+               
+        
         baronVonTerrain.SetGroundStrokes(KnowledgeMapId.Stone);
         baronVonTerrain.SetGroundStrokes(KnowledgeMapId.Pebbles);
-        baronVonTerrain.SetGroundStrokes(KnowledgeMapId.Sand);
+        baronVonTerrain.SetGroundStrokes(KnowledgeMapId.Sand); 
 
         baronVonTerrain.SetWasteMaterialProperties();
         baronVonTerrain.SetDecomposerMaterialProperties();

@@ -32,9 +32,10 @@ public class MinimapPanel : MonoBehaviour
     TrophicSlot selectedTrophicSlot => trophicLayers.selectedSlot;
     public bool isOpen => openCloseButton.isOpen;
     public bool isOverOpenCloseButton = false;
-
+    
     public void Start() {
         openCloseButton.SetHighlight(true);
+        //curOverlayMode = MapOverlayModes.Microbes;
     }
     public void Tick() {
         
@@ -51,12 +52,11 @@ public class MinimapPanel : MonoBehaviour
             mousePosPanelCoords.x = Input.mousePosition.x - (Screen.width - panelSizePixels);
             mousePosPanelCoords.y = Input.mousePosition.y - (Screen.height - panelSizePixels);
         }
-        
-
-
 
         uiKnowledgeMapViewerMat.SetTexture("_AltitudeTex", theRenderKing.baronVonTerrain.terrainHeightDataRT);
         uiKnowledgeMapViewerMat.SetTexture("_ResourceGridTex", simulationManager.vegetationManager.resourceGridRT1);
+        uiKnowledgeMapViewerMat.SetTexture("_VelocityTex", fluidManager._VelocityPressureDivergenceMain);
+        uiKnowledgeMapViewerMat.SetTexture("_FluidColorTex", fluidManager.initialDensityTex);
         uiKnowledgeMapViewerMat.SetFloat("_WaterLevel", SimulationManager._GlobalWaterLevel);
         
         SetKnowledgeMapViewer(selectedTrophicSlot.data);
@@ -84,13 +84,16 @@ public class MinimapPanel : MonoBehaviour
         }
         buttonToggleFollow.GetComponent<Image>().color = toggleButtonColor;
 
+
+
     }
+    
 
     public void ClickToggleFollow() {
         cameraManager.ToggleAutoFollow();
         Debug.Log("Autofollow is ON = " + cameraManager.GetIsAutoFollowModeON());
     }
-        
+            
     void SetKnowledgeMapViewer(TrophicLayerSO data) { SetKnowledgeMapViewer(data, GetRenderTexture(data.id)); }
     
     // * WPP: if possible, store RenderTextures in KnowledgeMapData fields
@@ -100,15 +103,15 @@ public class MinimapPanel : MonoBehaviour
         {
             case KnowledgeMapId.Decomposers: return simulationManager.vegetationManager.resourceGridRT1;
             case KnowledgeMapId.Algae: return simulationManager.vegetationManager.resourceGridRT1;
-            case KnowledgeMapId.Plants: return fluidManager._SourceColorRT;
-            case KnowledgeMapId.Microbes: return fluidManager._SourceColorRT;
-            case KnowledgeMapId.Animals: return fluidManager._SourceColorRT;
+            case KnowledgeMapId.Plants: return fluidManager._PlantsMicrobesAnimalsColorRT;
+            case KnowledgeMapId.Microbes: return fluidManager._PlantsMicrobesAnimalsColorRT;
+            case KnowledgeMapId.Animals: return fluidManager._PlantsMicrobesAnimalsColorRT;
             case KnowledgeMapId.World: return theRenderKing.baronVonTerrain.terrainHeightDataRT;
             case KnowledgeMapId.Stone: return theRenderKing.baronVonTerrain.terrainHeightDataRT;
             case KnowledgeMapId.Pebbles: return theRenderKing.baronVonTerrain.terrainHeightDataRT;
             case KnowledgeMapId.Sand: return theRenderKing.baronVonTerrain.terrainHeightDataRT;
             case KnowledgeMapId.Nutrients: return simulationManager.vegetationManager.resourceGridRT1;
-            case KnowledgeMapId.Water: return theRenderKing.baronVonWater.waterSurfaceDataRT0;
+            case KnowledgeMapId.Water: return fluidManager._VelocityPressureDivergenceMain;
             case KnowledgeMapId.Wind: return theRenderKing.baronVonWater.waterSurfaceDataRT0;
             case KnowledgeMapId.Detritus: return simulationManager.vegetationManager.resourceGridRT1;
             default: return null;
@@ -117,7 +120,7 @@ public class MinimapPanel : MonoBehaviour
     
     void SetKnowledgeMapViewer(TrophicLayerSO data, RenderTexture renderTexture)
     {
-        textTitle.text = "WORLD MAP"; // data.title;      
+        textTitle.text = data.title;// "WORLD MAP"; // data.title;      
         imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
         uiKnowledgeMapViewerMat.SetTexture("_MainTex", renderTexture);
         uiKnowledgeMapViewerMat.SetVector("_Zoom", Vector4.one);
@@ -125,8 +128,15 @@ public class MinimapPanel : MonoBehaviour
         uiKnowledgeMapViewerMat.SetVector("_ChannelMask", Vector4.one); 
         uiKnowledgeMapViewerMat.SetInt("_ChannelSoloIndex", data.channelSoloIndex);
         uiKnowledgeMapViewerMat.SetFloat("_IsChannelSolo", data.isChannelSolo);
-        uiKnowledgeMapViewerMat.SetFloat("_Gamma", data.gamma);         
+        uiKnowledgeMapViewerMat.SetFloat("_Gamma", data.gamma);
+        uiKnowledgeMapViewerMat.SetFloat("_Offset", data.offset);
+        uiKnowledgeMapViewerMat.SetPass(0);
     }
     
-    public void SelectTrophicSlot(TrophicLayerSO data) { trophicLayers.SetSlot(data); }
+    public void SelectTrophicSlot(TrophicLayerSO data) {
+        imageKnowledgeMapTextureViewer.gameObject.SetActive(false);
+        trophicLayers.SetSlot(data);
+        SetKnowledgeMapViewer(data);
+        imageKnowledgeMapTextureViewer.gameObject.SetActive(true);
+    }
 }

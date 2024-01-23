@@ -77,7 +77,7 @@
 
 				float randomAspect = lerp(0.85, 1.216, random1);
 				float randomValue = rand(float2(inst, randomAspect * random3));
-				float randomScale = lerp(0.0385, 0.045, random2);
+				float randomScale = lerp(0.0785, 0.265, random2) * 0.69;
 				
 				float2 dir = normalize(velocity);
 				float2 scale = float2(randomAspect, (1.0 / randomAspect)) * randomScale; //float2(randomAspect * randomScale, (1.0 / randomAspect) * randomScale * (length(velocity) * 25 + 1.61));
@@ -118,6 +118,7 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
+				return float4(0.1,0.1,0.1,0.11);
 				return float4(float3(0.32,0.6,0.8) * 0.75,0.7);
 				//return float4(0.21,0.71,0.91,0.1);
 

@@ -87,7 +87,11 @@ void CSInitResourceGrid (uint3 id : SV_DispatchThreadID)
 	float4 resources = float4(u, v, b, a) * distFromCenterNormalized;;
 	*/
 	
-	float4 resources = float4(1,1,1,1);
+	float xCoord = ((float)id.x + 0.5)  / _TextureResolution;
+	float4 resources = 0.1; // float4(1,1,0.4,0.4);
+	if(xCoord > 0.5) {
+		resources = 0.0;
+	}
 	_ResourceGridWrite[id.xy] = resources; 
 
 }

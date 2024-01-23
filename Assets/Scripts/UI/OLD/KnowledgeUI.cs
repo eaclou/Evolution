@@ -193,13 +193,13 @@ public class KnowledgeUI : MonoBehaviour {
             textDecomposersPage2.text = decompInfoString;
         }
         else if (slotRef.id == KnowledgeMapId.Plants) {
-            UpdateKnowledgeViewer(fluidManager._SourceColorRT, 1f, 0, false, panelKnowledgeInfoPlants);
+            UpdateKnowledgeViewer(fluidManager._PlantsMicrobesAnimalsColorRT, 1f, 0, false, panelKnowledgeInfoPlants);
         }
         else if (slotRef.id == KnowledgeMapId.Microbes) {
-            UpdateKnowledgeViewer(fluidManager._SourceColorRT, 1f, 0, false, panelKnowledgeInfoZooplankton); 
+            UpdateKnowledgeViewer(fluidManager._PlantsMicrobesAnimalsColorRT, 1f, 0, false, panelKnowledgeInfoZooplankton); 
         }
         else if (slotRef.id == KnowledgeMapId.Animals) {
-            UpdateKnowledgeViewer(fluidManager._SourceColorRT, 1f, 3, true, panelKnowledgeInfoVertebrates);
+            UpdateKnowledgeViewer(fluidManager._PlantsMicrobesAnimalsColorRT, 1f, 3, true, panelKnowledgeInfoVertebrates);
         }
         else if (slotRef.kingdomID == KingdomId.Terrain) {
             //panelKnowledgeInfoWorld.SetActive(true);

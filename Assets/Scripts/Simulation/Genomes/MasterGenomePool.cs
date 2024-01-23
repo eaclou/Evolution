@@ -13,10 +13,10 @@ public class MasterGenomePool
 
     public static int nextCandidateIndex = 0;
 
-    public int maxNumActiveSpecies = 3;
-    private int targetNumSpecies = 2;
-    public float speciesSimilarityDistanceThreshold = 160f;
-    private int minNumGuaranteedEvalsForNewSpecies = 512;
+    public int maxNumActiveSpecies = 4;
+    private int targetNumSpecies = 3;
+    public float speciesSimilarityDistanceThreshold = 70f;
+    private int minNumGuaranteedEvalsForNewSpecies = 256;
     int numInitSpecies = 1;
 
     [SerializeField] float oldestSpeciesRerollChance = 0.33f;
@@ -319,7 +319,7 @@ public class MasterGenomePool
         // CHECK IF NEW SPECIES CREATED:
         bool assignedToNewSpecies = false;
             
-        if (closestDistance > speciesSimilarityDistanceThreshold && !speciesCreatedOrDestroyedThisFrame && currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies && simulation.simAgeTimeSteps > 210000) 
+        if (closestDistance > speciesSimilarityDistanceThreshold && !speciesCreatedOrDestroyedThisFrame && currentlyActiveSpeciesIDList.Count < maxNumActiveSpecies && simulation.simAgeTimeSteps > 45000) 
         {
             // Create new species!::::     
             assignedToNewSpecies = true;

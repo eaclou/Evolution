@@ -31,7 +31,7 @@ public class EnvironmentFluidManager : Singleton<EnvironmentFluidManager>
     public RenderTexture _ObstaclesRT => obstaclesRT;
 
     private RenderTexture sourceColorRT; // Rendered by renderKing.fluidColorRenderCamera;
-    public RenderTexture _SourceColorRT => sourceColorRT;
+    public RenderTexture _PlantsMicrobesAnimalsColorRT => sourceColorRT;
     
     //private Material displayMat; // shader for display Mesh
     //public Material debugMat;
@@ -103,7 +103,7 @@ public class EnvironmentFluidManager : Singleton<EnvironmentFluidManager>
     
     public void RerollForcePoints() {
         //Debug.Log("Reroll force points");
-        CreateForcePoints(0.0125f, 64f, 256f);
+        CreateForcePoints(0.001f * forceMultiplier, 64f, 256f);
     }
     
     public void Tick(VegetationManager vegetationManagerRef) {
@@ -161,7 +161,9 @@ public class EnvironmentFluidManager : Singleton<EnvironmentFluidManager>
     }
 
     public void UpdateSimulationClimate() {
+
         SetCurrentsByTier();
+        RerollForcePoints();
         /*
         //SetClimateStormy();
         //SetClimateInitial();

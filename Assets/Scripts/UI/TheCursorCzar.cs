@@ -34,6 +34,11 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
     public Vector2 curMousePixelPos;
     private Vector2 prevMousePixelPos;
 
+    public Vector3 topLeftMapCorner;
+    public Vector3 topRightMapCorner;
+    public Vector3 botLeftMapCorner;
+    public Vector3 botRightMapCorner;
+
     public bool stirGizmoVisible = false;
 
     public bool leftClickThisFrame = false;
@@ -92,7 +97,28 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
         else {
             Debug.Log("NULL: " + cursorRay);
         }
-    }    
+    }  
+    
+    /// Get position of mouse on water plane:
+    private Vector3 ScreenRaycastWaterPlane(Vector3 screenPos) {
+        Vector3 outPos = Vector3.zero;
+        mouseRaycastWaterPlane.SetActive(true);        
+        Vector3 targetPosition = new Vector3(halfMapSize, halfMapSize, -waterLevel * maxAltitude);
+        mouseRaycastWaterPlane.gameObject.transform.position = targetPosition;
+        
+        cursorRay = cam.ScreenPointToRay(screenPos);
+        int layerMask = 1 << 12;  // UtilityRaycast???
+        Physics.Raycast(cursorRay, out RaycastHit hit, layerMask);
+
+        if (hit.collider) {
+            outPos = hit.point;            
+            //Debug.Log("curMousePositionOnWaterPlane:" + curMousePositionOnWaterPlane.ToString() + ", " + screenPos.ToString() + ", hit: " + hit.point.ToString());
+        }
+        else {
+            Debug.Log("NULL: " + cursorRay);
+        }
+        return outPos;
+    }  
     
     /// Check for player clicking on an animal in the world
     private void MouseRaycastCheckAgents(bool clicked) {
@@ -169,9 +195,6 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
             theRenderKing.gizmoCursorPosCBuffer.SetData(dataArray);
         }
         }
-        
-        
-        
 
         stirGizmoVisible = false;
 
@@ -183,6 +206,9 @@ public class TheCursorCzar : Singleton<TheCursorCzar>
 
         Vector3 newTooltipPosition = new Vector3(mouseXScreenNormal, mouseYScreenNormal, 0f);
         panelTooltip.transform.position = newTooltipPosition;
+
+        //minimap bounds:
+        topLeftMapCorner = ScreenRaycastWaterPlane(Vector3.zero);
 	}
 	
 	void RefreshMouseInput()

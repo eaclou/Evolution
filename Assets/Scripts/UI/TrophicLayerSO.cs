@@ -22,10 +22,11 @@ public class TrophicLayerSO : ScriptableObject
 
     [Header("Knowledge map")]
     public string title;
-    [Range(0, 1)] public float amplitude;
+    [Range(0, 1000)] public float amplitude;
     public int channelSoloIndex;
     [Range(0, 1)] public float isChannelSolo;
-    [Range(0, 1)] public float gamma;
+    [Range(0, 10)] public float gamma;
+    [Range(0, 1)] public float offset;
     
     public Material knowledgeGraph;
     

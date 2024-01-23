@@ -5,6 +5,8 @@
 		_MainTex ("Texture", 2D) = "white" {}		
 		_AltitudeTex ("Texture", 2D) = "gray" {}	
 		_ResourceGridTex ("Texture", 2D) = "black" {}	
+		_VelocityTex ("Texture", 2D) = "black" {}	
+		_FluidColorTex("Texture", 2D) = "white" {}
 	}
 	SubShader
 	{
@@ -37,6 +39,8 @@
 			float4 _MainTex_ST;
 			sampler2D _AltitudeTex;
 			sampler2D _ResourceGridTex;
+			sampler2D _VelocityTex;
+			sampler2D _FluidColorTex;
 			
 			uniform float4 _Zoom;
 			uniform float _Amplitude;
@@ -44,6 +48,7 @@
 			uniform int _ChannelSoloIndex;
 			uniform float _IsChannelSolo;
 			uniform float _Gamma;
+			uniform float _Offset;
 			uniform float _WaterLevel;
 			
 			v2f vert (appdata v)
@@ -62,17 +67,19 @@
 				if(terrainHeightTex.x < _WaterLevel) {
 					bgColor = float4(58.0 / 255, 67 / 255.0, 75 / 255.0, 1);
 					bgColor.rgb *= 0.018;
+					bgColor.a = 1;
 					//col.rgb = lerp(col.rgb, float3(0.3,0.3,1), 0.1);
 				}
 				else {
 					bgColor = float4(62.0 / 255.0, 55.0 / 255, 48.0 / 255, 0);
-					
+					bgColor.a = 0;
 					//col.rgb = lerp(col.rgb, float3(1,0.8,0.3), 0.1);
 				}
-				bgColor.rgb *= 0.8;
+				bgColor.rgb = 0.0;
+				bgColor.a = 1;
 				// sample the texture
 				fixed4 col = tex2D(_MainTex, i.uv * _Zoom.xy);
-								
+				
 				float xChannelSolo = 1.0 - saturate(abs((float)_ChannelSoloIndex));
 				float yChannelSolo = 1.0 - saturate(abs((float)_ChannelSoloIndex - 1.0));
 				float zChannelSolo = 1.0 - saturate(abs((float)_ChannelSoloIndex - 2.0));
@@ -85,20 +92,32 @@
 				soloChannelCol = lerp(soloChannelCol, col.w, wChannelSolo);
 
 				float4 soloChannelColor = bgColor + float4(soloChannelCol, soloChannelCol, soloChannelCol, 1);
-				col = lerp(bgColor, col, col.a);
+				//col = lerp(bgColor, col, col.a);
 				//soloChannelColor = lerp(bgColor, soloChannelColor, 0.3);
-
+				//float4 resourceTex = tex2D(_ResourceGridTex, i.uv * _Zoom.xy);
 				
 				float4 finalColor = lerp(col, soloChannelColor, _IsChannelSolo);
-
-				//finalColor.rgb *= _Amplitude;
+				//float4 finalColor = resourceTex.w*2.6 + col;
+				//float4 finalColor = float4(0,0,0,1);// resourceTex.z*5.6 + col;
+				//finalColor.b += terrainHeightTex.x;
+				finalColor.rgb = finalColor.rgb * _Amplitude + _Offset;
 				//finalColor.rgb = pow(finalColor.rgb, _Gamma);
-
+				//finalColor.rgb += _Offset;
+				//finalColor += col;
 				
-				finalColor.a *= terrainHeightTex.a;
+				//float4 fluidSample = tex2D(_VelocityTex, i.uv * _Zoom.xy);
 				
+				//finalColor.r += fluidSample.x * 20;
+				//finalColor.g += fluidSample.y * 20;
+				//finalColor.r += 0.5 + ddx(fluidSample.z) * 4000;
+				//finalColor.g += 0.5 + ddy(fluidSample.z) * 4000;
+				//finalColor.rgb += fluidSample.z * 1000;
+				//finalColor.b += resourceTex.b*1.5;
 
-				//return float4(0.5, 1, 0, 1);
+				//finalColor.a *= terrainHeightTex.a;
+				
+				//return tex2D(_FluidColorTex, i.uv * _Zoom.xy); // NOT USED?? OR same as MAIN?
+				
 				return finalColor;
 				
 				//return col;
