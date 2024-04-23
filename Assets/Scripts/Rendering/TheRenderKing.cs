@@ -2696,16 +2696,16 @@ public class TheRenderKing : Singleton<TheRenderKing>
         
         // TERRAIN MESH:
         //rockMat.SetPass(0);        
-        Matrix4x4 canvasQuadTRS = Matrix4x4.TRS(new Vector3(SimulationManager._MapSize * 0.5f, SimulationManager._MapSize * 0.5f, 10f), Quaternion.identity, Vector3.one * 4096f);
+        Matrix4x4 canvasQuadTRS = Matrix4x4.TRS(new Vector3(SimulationManager._MapSize * 0.5f, SimulationManager._MapSize * 0.5f, 1f), Quaternion.identity, Vector3.one * 256f);
+        backgroundMat.SetPass(0);
+        backgroundMat.SetTexture("_MainTex", baronVonTerrain.terrainHeightRT0);
         cmdBufferMain.DrawMesh(baronVonTerrain.quadMesh, canvasQuadTRS, backgroundMat);
-        terrainMeshOpaqueMat.SetPass(0);
-        terrainMeshOpaqueMat.SetTexture("_MainTex", baronVonTerrain.terrainColorRT0);
 
                
         
         baronVonTerrain.SetGroundStrokes(KnowledgeMapId.Stone);
-        baronVonTerrain.SetGroundStrokes(KnowledgeMapId.Pebbles);
-        baronVonTerrain.SetGroundStrokes(KnowledgeMapId.Sand); 
+        //baronVonTerrain.SetGroundStrokes(KnowledgeMapId.Pebbles);
+        //baronVonTerrain.SetGroundStrokes(KnowledgeMapId.Sand); 
 
         baronVonTerrain.SetWasteMaterialProperties();
         baronVonTerrain.SetDecomposerMaterialProperties();
