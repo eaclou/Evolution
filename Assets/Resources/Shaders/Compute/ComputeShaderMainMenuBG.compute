@@ -1,0 +1,58 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+
+#pragma kernel CSInit
+#pragma kernel CSTick
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+Texture2D<float4> SourceRT;
+RWTexture2D<float4> TargetRT;
+
+uniform StructuredBuffer<float2> VoronoiBuffer;
+
+// Parameters:
+float _ResolutionX;
+float _ResolutionY;
+
+float _MouseCoordX;
+float _MouseCoordY;
+
+uniform float _Time; 
+
+SamplerState _LinearClamp;
+SamplerState _LinearRepeat;
+SamplerState _PointClamp;
+SamplerState _PointRepeat;
+
+[numthreads(32, 32, 1)]
+void CSInit(uint3 id : SV_DispatchThreadID)
+{
+	TargetRT[id.xy] = float4(0.6, 0.6, 0.8, 1.0);
+}
+
+[numthreads(32,32,1)]
+void CSTick(uint3 id : SV_DispatchThreadID)
+{
+	float2 pixelPos;
+	pixelPos.x = (float)id.x;
+	pixelPos.y = (float)id.y;
+
+	int closestRegionID = 0;
+	float closestDistance = 99999;
+	for(int i = 0; i < 8; i++) {
+		//float per = (float)i;
+		
+		float2 cellCenterPos = VoronoiBuffer[i];		
+		float dist = length(pixelPos - cellCenterPos);
+
+		if(dist < closestDistance) {
+			closestDistance = dist;
+			closestRegionID = i;
+		}
+	}	
+	
+	float testDist = (float)closestRegionID / 8.0;
+	TargetRT[id.xy] = float4(testDist, testDist, closestDistance*0.01, 0.25);
+	
+	//TargetRT[id.xy] = float4(id.x * 0.001, 0.8, sin(_Time * 0.617) *0.5 + 0.5, 1.0);
+}
