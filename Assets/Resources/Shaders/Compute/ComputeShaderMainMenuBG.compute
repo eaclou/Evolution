@@ -39,7 +39,7 @@ void CSTick(uint3 id : SV_DispatchThreadID)
 
 	int closestRegionID = 0;
 	float closestDistance = 99999;
-	for(int i = 0; i < 8; i++) {
+	for(int i = 0; i < 32; i++) {
 		//float per = (float)i;
 		
 		float2 cellCenterPos = VoronoiBuffer[i];		
@@ -51,8 +51,8 @@ void CSTick(uint3 id : SV_DispatchThreadID)
 		}
 	}	
 	
-	float testDist = (float)closestRegionID / 8.0;
-	TargetRT[id.xy] = float4(testDist, testDist, closestDistance*0.01, 0.25);
+	float testDist = (float)closestRegionID / 32.0 + closestDistance * 0.001;
+	TargetRT[id.xy] = float4(testDist, testDist, testDist, 0.215);
 	
 	//TargetRT[id.xy] = float4(id.x * 0.001, 0.8, sin(_Time * 0.617) *0.5 + 0.5, 1.0);
 }

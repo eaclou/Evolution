@@ -12,9 +12,13 @@ public class MainMenuBackgroundGenerator : MonoBehaviour
     [SerializeField]
     public List<VoronoiRegion> voronoiRegionsList;
     private Vector2[] voronoiArray;
-    private ComputeBuffer voronoiComputeBuffer;
+    private ComputeBuffer voronoiComputeBuffer; // use voronoi as basis for caustics?
     //[ReadOnly]
     //public Vector3 res;
+    [SerializeField]
+    public float wiggleRadius = 256f;
+    [SerializeField]
+    public float wiggleSpeed = 0.75235f;
 
     // computeShader;
     // DisplayRenderTexture;
@@ -104,17 +108,21 @@ public class MainMenuBackgroundGenerator : MonoBehaviour
 
     public void TickComputeShader() {
         
-        voronoiArray = new Vector2[8];
+        voronoiArray = new Vector2[32];
         for(int i = 0; i < voronoiArray.Length; i++) {
             voronoiArray[i] = new Vector2(0f, 0f);
             if (i < voronoiRegionsList.Count) {
+                //float wiggleRadius = 256f;
+                //float wiggleSpeed = 0.75235f;
                 //Vector3 GameObjectPosition = voronoiRegionsList[i].GO.transform.position;
                 //RectTransform rect = voronoiRegionsList[i].GetComponent<RectTransform>();
                 //var centerPoint= rectTransform.TransformPoint(rectTransform.rect.center);
-                Vector3 GameObjectPosition = voronoiRegionsList[i].GO.GetComponent<RectTransform>().position;
-                voronoiRegionsList[i].rootPixelPos = GameObjectPosition;
+                Vector3 gameObjectPosition = voronoiRegionsList[i].GO.GetComponent<RectTransform>().position;
+                //gameObjectPosition.x 
+                voronoiRegionsList[i].rootPixelPos.x = gameObjectPosition.x + wiggleRadius * Mathf.Sin((float)i*1.793f + Time.realtimeSinceStartup*0.7351f*wiggleSpeed);
+                voronoiRegionsList[i].rootPixelPos.y = gameObjectPosition.y + wiggleRadius * Mathf.Cos((float)i*-2.1289f + Time.realtimeSinceStartup*0.97f*wiggleSpeed);
                 //rect.anchoredPosition;// new Vector3(i * 40, 500, 0);// Camera.main.WorldToScreenPoint(rect.position);
-                voronoiArray[i] = new Vector2(GameObjectPosition.x, GameObjectPosition.y);
+                voronoiArray[i] = new Vector2(voronoiRegionsList[i].rootPixelPos.x, voronoiRegionsList[i].rootPixelPos.y);
             }
             
         }
@@ -154,11 +162,12 @@ public class MainMenuBackgroundGenerator : MonoBehaviour
     public int FindNearestRegion(Vector3 PixelPosition) {  // for mouseclick determine which region/button is pressed
         int closestID = -1;
         float closestDistance = float.PositiveInfinity;
-        foreach(var region in voronoiRegionsList) {
+        for(int i = 0; i < voronoiRegionsList.Count; i++) {// var region in voronoiRegionsList) {
+            VoronoiRegion region = voronoiRegionsList[i];
             float sqDistanceToPixel = (region.rootPixelPos - PixelPosition).sqrMagnitude;
             if(sqDistanceToPixel < closestDistance) {
                 closestDistance = sqDistanceToPixel;
-                closestID = region.ID;
+                closestID = i;
             }
         }
         if(closestID == -1) {
